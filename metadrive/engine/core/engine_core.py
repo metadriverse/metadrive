@@ -474,7 +474,3 @@ class EngineCore(ShowBase.ShowBase):
         if self.render_pipeline is not None:
             self.render_pipeline.reload_shaders()
 
-
-if __name__ == "__main__":
-    world = EngineCore({"debug": True})
-    world.run()

@@ -75,7 +75,7 @@ class BaseEngine(EngineCore, Randomizable):
         # curriculum reset
         self._max_level = self.global_config.get("curriculum_level", 1)
         self._current_level = 0
-        self._num_scenarios_per_level = int(self.global_config["num_scenarios"] / self._max_level)
+        self._num_scenarios_per_level = int(self.global_config.get("num_scenarios", 0) / self._max_level)
 
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         policy = policy_class(*args, **kwargs)
@@ -681,3 +681,21 @@ class BaseEngine(EngineCore, Randomizable):
             warm_up_light = None
             barrier = None
             cone = None
+
+
+if __name__ == "__main__":
+    from metadrive.envs.base_env import BASE_DEFAULT_CONFIG
+
+    BASE_DEFAULT_CONFIG["use_render"] = True
+    BASE_DEFAULT_CONFIG["show_interface"] = False
+    BASE_DEFAULT_CONFIG["render_pipeline"] = True
+    world = BaseEngine(BASE_DEFAULT_CONFIG)
+
+    from metadrive.engine.asset_loader import AssetLoader
+
+    car_model = world.loader.loadModel(AssetLoader.file_path("models", "vehicle", "lada", "vehicle.gltf"))
+    car_model.reparentTo(world.render)
+    car_model.set_pos(0, 0, 190)
+    # world.render_pipeline.prepare_scene(env.engine.render)
+
+    world.run()
