@@ -133,8 +133,10 @@ class ScenarioMapManager(BaseManager):
             if m is not None:
                 m.detach_from_world()
                 m.destroy()
-        self._stored_maps = {i: None for i in range(self.start_scenario_index, self.start_scenario_index + self.map_num)
-                             }
+        self._stored_maps = {
+            i: None
+            for i in range(self.start_scenario_index, self.start_scenario_index + self.map_num)
+        }
 
     @property
     def num_stored_maps(self):

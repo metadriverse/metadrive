@@ -7,6 +7,7 @@ from metadrive.component.vehicle.base_vehicle import BaseVehicle
 def convert_path(pth):
     return Filename.from_os_specific(pth).get_fullpath()
 
+
 class DefaultVehicle(BaseVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.DEFAULT_VEHICLE)
     # LENGTH = 4.51
@@ -148,9 +149,7 @@ class SVehicle(BaseVehicle):
         if self.use_render_pipeline:
             # vfs = VirtualFileSystem.get_global_ptr()
             # vfs.mount(convert_path(AssetLoader.file_path("models", "beetle")), "/$$beetle_model", 0)
-            return [
-                'beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77), (-90, -90, 0)
-            ]
+            return ['beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77), (-90, -90, 0)]
         else:
             factor = 1
             return ['beetle/vehicle.gltf', (factor, factor, factor), (0, -0.2, 0.03), (0, 0, 0)]
@@ -311,7 +310,7 @@ def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
             return SVehicle
         elif length <= 5.5:
             type_count[1] += 1
-            vs = [LVehicle, MVehicle,  SVehicle]
+            vs = [LVehicle, MVehicle, SVehicle]
             if need_default_vehicle:
                 vs.append(TrafficDefaultVehicle)
             return vs[type_count[1] % len(vs)]

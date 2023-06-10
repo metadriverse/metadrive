@@ -20,13 +20,13 @@ history_object = namedtuple("history_object", "name position heading_theta WIDTH
 
 
 def draw_top_down_map(
-        map,
-        resolution: Iterable = (512, 512),
-        draw_drivable_area=True,
-        return_surface=False,
-        film_size=None,
-        reverse_color=False,
-        road_color=color_white,
+    map,
+    resolution: Iterable = (512, 512),
+    draw_drivable_area=True,
+    return_surface=False,
+    film_size=None,
+    reverse_color=False,
+    road_color=color_white,
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
@@ -58,7 +58,7 @@ def draw_top_down_map(
                     for i in range(num_seg):
                         # 10 points
                         end = min((i + 1) * 10, len(data[ScenarioDescription.POLYLINE]))
-                        waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][i * 10: end]))
+                        waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][i * 10:end]))
                         LaneGraphics.display_scenario(waymo_line, type, surface)
                 else:
                     waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE]))
@@ -91,7 +91,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -150,19 +150,19 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-            self,
-            film_size=(1000, 1000),
-            screen_size=(1000, 1000),
-            light_background=True,
-            num_stack=15,
-            history_smooth=0,
-            road_color=(80, 80, 80),
-            show_agent_name=False,
-            camera_position=None,
-            track_target_vehicle=False,
-            draw_target_vehicle_trajectory=False,
-            **kwargs
-            # current_track_vehicle=None
+        self,
+        film_size=(1000, 1000),
+        screen_size=(1000, 1000),
+        light_background=True,
+        num_stack=15,
+        history_smooth=0,
+        road_color=(80, 80, 80),
+        show_agent_name=False,
+        camera_position=None,
+        track_target_vehicle=False,
+        draw_target_vehicle_trajectory=False,
+        **kwargs
+        # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
@@ -201,7 +201,7 @@ class TopDownRenderer:
         )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2 ** 32 - 1
+            pixels ^= 2**32 - 1
             del pixels
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
@@ -310,7 +310,7 @@ class TopDownRenderer:
         self._light_background = self._light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2 ** 32 - 1
+            pixels ^= 2**32 - 1
             del pixels
 
         # Reset several useful variables.

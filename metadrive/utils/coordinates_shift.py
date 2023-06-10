@@ -3,7 +3,6 @@ from panda3d.core import Vec3
 from metadrive.utils.math import Vector
 from metadrive.utils.math import wrap_to_pi
 
-
 #
 # Now all coordinates are the same and are all in right-handed
 # MetaDrive (right handed):

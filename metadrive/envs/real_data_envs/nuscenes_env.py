@@ -85,20 +85,22 @@ if __name__ == "__main__":
             assert env.observation_space.contains(o)
             s += 1
             if env.config["use_render"]:
-                env.render(text={"seed": env.current_seed,
-                                 "num_map": info["num_stored_maps"],
-                                 "data_coverage": info["data_coverage"],
-                                 "reward": r,
-                                 "heading_r": info["step_reward_heading"],
-                                 "lateral_r": info["step_reward_lateral"],
-                                 "smooth_action_r": info["step_reward_action_smooth"]},
-                           # mode="topdown"
-                           )
+                env.render(
+                    text={
+                        "seed": env.current_seed,
+                        "num_map": info["num_stored_maps"],
+                        "data_coverage": info["data_coverage"],
+                        "reward": r,
+                        "heading_r": info["step_reward_heading"],
+                        "lateral_r": info["step_reward_lateral"],
+                        "smooth_action_r": info["step_reward_action_smooth"]
+                    },
+                    # mode="topdown"
+                )
             if d:
                 print(
                     "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
-                        time.time() - start, s / (time.time() - start - reset_used_time),
-                        reset_used_time / reset_num
+                        time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num
                     )
                 )
                 print("seed:{}, success".format(env.engine.global_random_seed))

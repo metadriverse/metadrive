@@ -307,7 +307,7 @@ class IDMPolicy(BasePolicy):
         if front_obj and (not self.disable_idm_deceleration):
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
-            acceleration -= self.ACC_FACTOR * (speed_diff ** 2)
+            acceleration -= self.ACC_FACTOR * (speed_diff**2)
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
@@ -404,7 +404,6 @@ class IDMPolicy(BasePolicy):
 
 class ManualControllableIDMPolicy(IDMPolicy):
     """If human is not taking over, then use IDM policy."""
-
     def __init__(self, *args, **kwargs):
         super(ManualControllableIDMPolicy, self).__init__(*args, **kwargs)
         self.manual_control_policy = ManualControlPolicy(*args, **kwargs)
@@ -445,8 +444,9 @@ class TrajectoryIDMPOlicy(IDMPolicy):
 
     @property
     def arrive_destination(self):
-        return norm(self.control_object.position[0] - self.destination[0],
-                    self.control_object.position[1] - self.destination[1]) < self.DEST_REGION_RADIUS
+        return norm(
+            self.control_object.position[0] - self.destination[0], self.control_object.position[1] - self.destination[1]
+        ) < self.DEST_REGION_RADIUS
 
     def steering_control(self, target_lane) -> float:
         # heading control following a lateral distance control

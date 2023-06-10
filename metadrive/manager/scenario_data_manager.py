@@ -170,9 +170,9 @@ class ScenarioDataManager(BaseManager):
 
         start = self.start_scenario_index
         end = self.start_scenario_index + self.num_scenarios
-        id_scores = [(s_id, _score(s_id)) for s_id in self.summary_lookup[start: end]]
+        id_scores = [(s_id, _score(s_id)) for s_id in self.summary_lookup[start:end]]
         id_scores = sorted(id_scores, key=lambda scenario: scenario[-1])
-        self.summary_lookup[start: end] = [id_score[0] for id_score in id_scores]
+        self.summary_lookup[start:end] = [id_score[0] for id_score in id_scores]
         self.scenario_difficulty = {id_score[0]: id_score[1] for id_score in id_scores}
 
     def clear_stored_scenarios(self):
@@ -180,8 +180,8 @@ class ScenarioDataManager(BaseManager):
 
     @property
     def current_scenario_difficulty(self):
-        return self.scenario_difficulty[
-            self.summary_lookup[self.engine.global_random_seed]] if self.scenario_difficulty is not None else 0
+        return self.scenario_difficulty[self.summary_lookup[self.engine.global_random_seed]
+                                        ] if self.scenario_difficulty is not None else 0
 
     @property
     def current_scenario_id(self):

@@ -192,15 +192,20 @@ class ScenarioEnv(BaseEnv):
         vehicle = self.vehicles[vehicle_id]
         done = False
         done_info = dict(
-            crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
+            crash_vehicle=False,
+            crash_object=False,
+            crash_building=False,
+            out_of_road=False,
+            arrive_dest=False,
             max_step=False,
         )
 
         route_completion = vehicle.navigation.route_completion
 
         def msg(reason):
-            return "Scenario {}: {} ended! Reason: {}.".format(self.current_seed,
-                                                               self.engine.data_manager.current_scenario_id, reason)
+            return "Scenario {}: {} ended! Reason: {}.".format(
+                self.current_seed, self.engine.data_manager.current_scenario_id, reason
+            )
 
         if self._is_arrive_destination(vehicle):
             done = True
@@ -244,8 +249,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
 
         # log data to curriculum manager
@@ -255,10 +260,7 @@ class ScenarioEnv(BaseEnv):
 
     def cost_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
-        step_info = dict(num_crash_object=0,
-                         num_crash_human=0,
-                         num_crash_vehicle=0,
-                         num_on_line=0)
+        step_info = dict(num_crash_object=0, num_crash_human=0, num_crash_vehicle=0, num_on_line=0)
         step_info["cost"] = 0
         if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
             # step_info["cost"] += self.config["out_of_road_cost"]

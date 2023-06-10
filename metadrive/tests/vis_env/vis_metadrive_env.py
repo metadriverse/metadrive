@@ -21,7 +21,7 @@ if __name__ == "__main__":
             # "image_observation": True,
             # "controller": "joystick",
             # "show_coordinates": True,
-            "random_agent_model":False,
+            "random_agent_model": False,
             "manual_control": True,
             "use_render": True,
             "accident_prob": 1,

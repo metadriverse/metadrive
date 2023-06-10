@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+
 class MetaDriveType:
     """
     Following waymo style, this class defines a set of strings used to denote different types of objects.

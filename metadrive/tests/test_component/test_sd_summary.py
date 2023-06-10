@@ -33,8 +33,7 @@ def test_read_data_and_create_summary():
 
 def test_repeated_key_check():
     def _check_dict_variable(d):
-        attributes = {key: value for key, value in d.__dict__.items() if
-                      not key.startswith('__') and not callable(key)}
+        attributes = {key: value for key, value in d.__dict__.items() if not key.startswith('__') and not callable(key)}
         keys = set()
         values = set()
         for k, v in attributes.items():

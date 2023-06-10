@@ -24,14 +24,14 @@ class TrajectoryNavigation(BaseNavigation):
     NAVI_POINT_DIST = 30  # m, used to clip value, should be greater than DISCRETE_LEN * MAX_NUM_WAY_POINT
 
     def __init__(
-            self,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False,
-            panda_color=None,
-            name=None,
-            vehicle_config=None
+        self,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False,
+        panda_color=None,
+        name=None,
+        vehicle_config=None
     ):
         if show_dest_mark or show_line_to_dest:
             logging.warning("show_dest_mark and show_line_to_dest are not supported in TrajectoryNavigation")
@@ -125,15 +125,16 @@ class TrajectoryNavigation(BaseNavigation):
         for k, ckpt in enumerate(ckpts):
             start = k * self.CHECK_POINT_INFO_DIM
             end = (k + 1) * self.CHECK_POINT_INFO_DIM
-            self._navi_info[start: end], lanes_heading = self._get_info_for_checkpoint(ckpt, ego_vehicle)
+            self._navi_info[start:end], lanes_heading = self._get_info_for_checkpoint(ckpt, ego_vehicle)
             if self._show_navi_info and self._ckpt_vis_models is not None:
                 pos_of_goal = ckpt
                 self._ckpt_vis_models[k].setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], 1.8))
                 self._ckpt_vis_models[k].setH(self._goal_node_path.getH() + 3)
 
         self._navi_info[end] = clip((lat / self.engine.global_config["max_lateral_dist"] + 1) / 2, 0.0, 1.0)
-        self._navi_info[end + 1] = clip((wrap_to_pi(heading_theta_at_long - ego_vehicle.heading_theta) / np.pi + 1) / 2,
-                                        0.0, 1.0)
+        self._navi_info[end + 1] = clip(
+            (wrap_to_pi(heading_theta_at_long - ego_vehicle.heading_theta) / np.pi + 1) / 2, 0.0, 1.0
+        )
 
         # Use RC as the only criterion to determine arrival in Scenario env.
         self._route_completion = long / self.reference_trajectory.length

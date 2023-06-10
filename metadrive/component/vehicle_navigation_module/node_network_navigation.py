@@ -15,14 +15,14 @@ from metadrive.utils.pg.utils import ray_localization
 
 class NodeNetworkNavigation(BaseNavigation):
     def __init__(
-            self,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False,
-            panda_color=None,
-            name=None,
-            vehicle_config=None
+        self,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False,
+        panda_color=None,
+        name=None,
+        vehicle_config=None
     ):
         """
         This class define a helper for localizing vehicles and retrieving navigation information.
@@ -52,8 +52,8 @@ class NodeNetworkNavigation(BaseNavigation):
             from metadrive.utils.error_class import NavigationError
             raise NavigationError("Can't find valid lane for navigation.")
 
-        if vehicle.config["spawn_lane_index"] is not None and vehicle.config[
-            "spawn_lane_index"] in possible_lane_indexes:
+        if vehicle.config["spawn_lane_index"] is not None and vehicle.config["spawn_lane_index"
+                                                                             ] in possible_lane_indexes:
             idx = possible_lane_indexes.index(vehicle.config["spawn_lane_index"])
             lane, new_l_index = possible_lanes[idx][:-1]
         else:
@@ -122,7 +122,7 @@ class NodeNetworkNavigation(BaseNavigation):
             assert l.index is not None, self.current_ref_lanes
 
         self.next_ref_lanes = self.map.road_network.graph[self.checkpoints[1]][self.checkpoints[2]
-        ] if len(self.checkpoints) > 2 else None
+                                                                               ] if len(self.checkpoints) > 2 else None
         self.current_road = Road(target_road_1_start, target_road_1_end)
         self.next_road = Road(self.checkpoints[1], self.checkpoints[2]) if len(self.checkpoints) > 2 else None
         if self._dest_node_path is not None:
@@ -276,8 +276,8 @@ class NodeNetworkNavigation(BaseNavigation):
         angle = 0.0
         if isinstance(ref_lane, CircularLane):
             bendradius = ref_lane.radius / (
-                    BlockParameterSpace.CURVE[Parameter.radius].max +
-                    self.get_current_lane_num() * self.get_current_lane_width()
+                BlockParameterSpace.CURVE[Parameter.radius].max +
+                self.get_current_lane_num() * self.get_current_lane_width()
             )
             dir = -ref_lane.direction
             angle = ref_lane.angle

@@ -39,7 +39,7 @@ def get_vertical_vector(vector: np.array):
 
 
 def norm(x, y):
-    return math.sqrt(x ** 2 + y ** 2)
+    return math.sqrt(x**2 + y**2)
 
 
 def clip(a, low, high):
@@ -56,7 +56,7 @@ def panda_vector(position_x, position_y, z=0.0):
 
 def distance_greater(vec1, vec2, length):
     """Return whether the distance between two vectors is greater than the given length."""
-    return ((vec1[0] - vec2[0]) ** 2 + (vec1[1] - vec2[1]) ** 2) > length ** 2
+    return ((vec1[0] - vec2[0])**2 + (vec1[1] - vec2[1])**2) > length**2
 
 
 def mph_to_kmh(speed_in_mph: float):
@@ -188,7 +188,6 @@ class Vector(tuple):
     """
     Avoid using this data structure!
     """
-
     def __sub__(self, other):
         return Vector((self[0] - other[0], self[1] - other[1]))
 

@@ -17,7 +17,6 @@ if __name__ == "__main__":
             rgb_cam.save_image(env.vehicle, "rgb_{}.jpg".format(h))
         # env.engine.screenshot()
 
-
     env = SafeMetaDriveEnv(
         {
             "num_scenarios": 1,
@@ -30,9 +29,7 @@ if __name__ == "__main__":
             "image_observation": True,
             "rgb_clip": True,
             "interface_panel": [DepthCamera, VehiclePanel],
-            "vehicle_config": dict(depth_camera=(800, 600, True),
-                                   rgb_camera=(800, 600),
-                                   image_source="depth_camera"),
+            "vehicle_config": dict(depth_camera=(800, 600, True), rgb_camera=(800, 600), image_source="depth_camera"),
             # "map_config": {
             #     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
             #     BaseMap.GENERATE_CONFIG: 12,

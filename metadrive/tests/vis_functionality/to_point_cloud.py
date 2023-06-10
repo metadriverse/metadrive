@@ -12,26 +12,22 @@ if __name__ == '__main__':
     raw_depth *= 255
     raw_depth = raw_depth.astype(np.uint16)
     raw_depth = o3d.geometry.Image(raw_depth)
-    extrinsic = np.array([[np.cos(h), -np.sin(h), 0, 0],
-                          [np.sin(h), np.cos(h), 0, 0],
-                          [0, 0, 1, 0],
-                          [0, 0, 0, 1]])
+    extrinsic = np.array([[np.cos(h), -np.sin(h), 0, 0], [np.sin(h), np.cos(h), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     # extrinsic = np.array([[1, 0, 0, 0],
     #                       [0, np.cos(h), -np.sin(h), 0],
     #                       [0, np.sin(h), np.cos(h), 1.5],
     #                       [0, 0, 0, 1]])
-    intrinsic = o3d.camera.PinholeCameraIntrinsic(
-        o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
+    intrinsic = o3d.camera.PinholeCameraIntrinsic(o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
     intrinsic.set_intrinsics(1600, 900, 0.866, 0.866, 800, 450)
-    pcd = o3d.geometry.PointCloud.create_from_depth_image(depth=raw_depth,
-                                                          intrinsic=intrinsic
-                                                          ,
-                                                          extrinsic=extrinsic,
-                                                          project_valid_depth_only=False,
-                                                          stride=4
-                                                          # depth_scale=1000.0,
-                                                          # depth_trunc=1000.0
-                                                          )
+    pcd = o3d.geometry.PointCloud.create_from_depth_image(
+        depth=raw_depth,
+        intrinsic=intrinsic,
+        extrinsic=extrinsic,
+        project_valid_depth_only=False,
+        stride=4
+        # depth_scale=1000.0,
+        # depth_trunc=1000.0
+    )
     # pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
     r = pcd.get_rotation_matrix_from_xyz((0, 0, np.pi))
     pcd = pcd.rotate(r, center=(0, 0, 0))

@@ -14,16 +14,15 @@ class EdgeNetworkNavigation(BaseNavigation):
    This class define a helper for localizing vehicles and retrieving navigation information.
    It now only support EdgeRoadNetwork
    """
-
     def __init__(
-            self,
-            show_navi_mark: bool = False,
-            random_navi_mark_color=False,
-            show_dest_mark=False,
-            show_line_to_dest=False,
-            panda_color=None,
-            name=None,
-            vehicle_config=None
+        self,
+        show_navi_mark: bool = False,
+        random_navi_mark_color=False,
+        show_dest_mark=False,
+        show_line_to_dest=False,
+        panda_color=None,
+        name=None,
+        vehicle_config=None
     ):
         super(EdgeNetworkNavigation, self).__init__(
             show_navi_mark=show_navi_mark,
@@ -36,16 +35,15 @@ class EdgeNetworkNavigation(BaseNavigation):
         )
 
     def reset(self, vehicle):
-        possible_lanes = ray_localization(vehicle.heading, vehicle.spawn_place, self.engine,
-                                          use_heading_filter=False)
+        possible_lanes = ray_localization(vehicle.heading, vehicle.spawn_place, self.engine, use_heading_filter=False)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
 
         if len(possible_lanes) == 0 and vehicle.config["spawn_lane_index"] is None:
             from metadrive.utils.error_class import NavigationError
             raise NavigationError("Can't find valid lane for navigation.")
 
-        if vehicle.config["spawn_lane_index"] is not None and vehicle.config[
-            "spawn_lane_index"] in possible_lane_indexes:
+        if vehicle.config["spawn_lane_index"] is not None and vehicle.config["spawn_lane_index"
+                                                                             ] in possible_lane_indexes:
             idx = possible_lane_indexes.index(vehicle.config["spawn_lane_index"])
             lane, new_l_index = possible_lanes[idx][:-1]
         else:
@@ -212,8 +210,8 @@ class EdgeNetworkNavigation(BaseNavigation):
         angle = 0.0
         if isinstance(ref_lane, CircularLane):
             bendradius = ref_lane.radius / (
-                    BlockParameterSpace.CURVE[Parameter.radius].max +
-                    self.get_current_lane_num() * self.get_current_lane_width()
+                BlockParameterSpace.CURVE[Parameter.radius].max +
+                self.get_current_lane_num() * self.get_current_lane_width()
             )
             dir = -ref_lane.direction
             angle = ref_lane.angle

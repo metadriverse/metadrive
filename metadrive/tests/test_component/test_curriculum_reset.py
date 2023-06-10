@@ -30,7 +30,7 @@ def _test_level(level=1, render=False):
                     break
 
             scenario_id.add(env.engine.data_manager.current_scenario_summary["id"])
-        assert len(scenario_id) == (env.engine.current_level+1) * int(10 / level)
+        assert len(scenario_id) == (env.engine.current_level + 1) * int(10 / level)
     finally:
         env.close()
 
@@ -135,7 +135,9 @@ def _worker_env(render, worker_index, level_up=False):
                 o, r, d, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
             print(env.current_seed)
-        all_scenario = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup[:8]]
+        all_scenario = [
+            env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup[:8]
+        ]
         assert len(set(scenario_id)) == 2
         assert env.engine.data_manager.data_coverage == 0.6 if level_up else 0.4
     finally:

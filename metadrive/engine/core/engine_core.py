@@ -473,4 +473,3 @@ class EngineCore(ShowBase.ShowBase):
     def reload_shader(self):
         if self.render_pipeline is not None:
             self.render_pipeline.reload_shaders()
-

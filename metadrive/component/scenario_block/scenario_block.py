@@ -91,8 +91,7 @@ class ScenarioBlock(BaseBlock):
         for segment in range(segment_num):
             start = line.get_point(DrivableAreaProperty.STRIPE_LENGTH * segment)
             # trick for optimizing
-            dist = norm(start[0] - self.sdc_start_point[0],
-                        start[1] - self.sdc_start_point[1])
+            dist = norm(start[0] - self.sdc_start_point[0], start[1] - self.sdc_start_point[1])
             if dist > self.LINE_CULL_DIST:
                 continue
 
@@ -109,8 +108,7 @@ class ScenarioBlock(BaseBlock):
         for segment in range(segment_num):
             start = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2)
             # trick for optimizing
-            dist = norm(start[0] - self.sdc_start_point[0],
-                        start[1] - self.sdc_start_point[1])
+            dist = norm(start[0] - self.sdc_start_point[0], start[1] - self.sdc_start_point[1])
             if dist > self.LINE_CULL_DIST:
                 continue
             end = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)

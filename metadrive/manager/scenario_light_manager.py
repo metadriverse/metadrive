@@ -35,8 +35,10 @@ class ScenarioLightManager(BaseManager):
                 if self.skip_missing_light:
                     continue
                 else:
-                    raise ValueError("Can not find lane for this traffic light. "
-                                     "Set skip_missing_light=True for skipping missing light!")
+                    raise ValueError(
+                        "Can not find lane for this traffic light. "
+                        "Set skip_missing_light=True for skipping missing light!"
+                    )
             lane_info = self.engine.current_map.road_network.graph[str(scenario_lane_id)]
             position = self._get_light_position(light_info)
             name = scenario_lane_id if self.engine.global_config["force_reuse_object_name"] else None
