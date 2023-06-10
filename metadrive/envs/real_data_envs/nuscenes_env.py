@@ -28,7 +28,7 @@ if __name__ == "__main__":
             # "debug": True,
             # "no_static_vehicles": True,
             # "pstats": True,
-            "render_pipeline": False,
+            "render_pipeline": True,
             # "daytime": "22:01",
             # "no_traffic": True,
             # "no_light": False,

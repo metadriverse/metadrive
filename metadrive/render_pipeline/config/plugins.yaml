@@ -14,7 +14,7 @@ enabled:
     # - dof
     # - env_probes
     - forward_shading
-    # - fxaa
+    - fxaa
     # - motion_blur
     # - skin_shading
     - sky_ao
