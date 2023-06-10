@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 class MetaDriveType:
     """
     Following waymo style, this class defines a set of strings used to denote different types of objects.
@@ -189,4 +192,5 @@ class MetaDriveType:
         elif status in [cls.LANE_STATE_ARROW_GO, cls.LANE_STATE_GO, cls.LIGHT_GREEN]:
             return cls.LIGHT_GREEN
         else:
-            raise ValueError("Status: {} is not MetaDriveType".format(status))
+            logger.warning("TrafficLightStatus: {} is not MetaDriveType".format(status))
+            return cls.LIGHT_UNKNOWN
