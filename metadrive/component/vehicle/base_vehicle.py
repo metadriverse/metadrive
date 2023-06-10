@@ -1119,9 +1119,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         height = self.HEIGHT + 0.2
         self.coordinates_debug_np = NodePath("debug coordinate")
         # 90 degrees offset
-        x = self.engine.add_line([0, 0, height], [0, 2, height], [1, 1, 1, 1], 2)
-        y = self.engine.add_line([0, 0, height], [-1, 0, height], [1, 1, 1, 1], 2)
-        z = self.engine.add_line([0, 0, height], [0, 0, height + 0.5], [1, 1, 1, 1], 2)
+        x = self.engine.draw_line_3d([0, 0, height], [0, 2, height], [1, 1, 1, 1], 2)
+        y = self.engine.draw_line_3d([0, 0, height], [-1, 0, height], [1, 1, 1, 1], 2)
+        z = self.engine.draw_line_3d([0, 0, height], [0, 0, height + 0.5], [1, 1, 1, 1], 2)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)
