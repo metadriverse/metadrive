@@ -21,6 +21,7 @@ class TerminationState:
     MAX_STEP = "max_step"
     CRASH = "crash"
     CRASH_VEHICLE = "crash_vehicle"
+    CRASH_HUMAN = "crash_human"
     CRASH_OBJECT = "crash_object"
     CRASH_BUILDING = "crash_building"
     CURRENT_BLOCK = "current_block"

@@ -38,7 +38,7 @@ def test_base_vehicle():
         v.add_navigation()
         v.add_navigation()
         v.navigation.set_force_calculate_lane_index(True)
-        v.update_map_info(map)
+        v.reset_navigation()
 
         for heading in [-1.0, 0.0, 1.0]:
             for pos in [[0., 0.], [-100., -100.], [100., 100.]]:

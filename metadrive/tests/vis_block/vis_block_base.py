@@ -106,7 +106,7 @@ class TestBlock(ShowBase.ShowBase):
     def re_add(self):
         self.map.load_map(self)
 
-    def add_line(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+    def draw_line_3d(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
         line_seg = LineSegs("interface")
         line_seg.setColor(*color)
         line_seg.moveTo(start_p)
@@ -121,7 +121,7 @@ class TestBlock(ShowBase.ShowBase):
         points = [(x, y) for x in bound_box[:2] for y in bound_box[2:]]
         for k, p in enumerate(points[:-1]):
             for p_ in points[k + 1:]:
-                self.add_line((*p, 2), (*p_, 2), (1, 0., 0., 1), 2)
+                self.draw_line_3d((*p, 2), (*p_, 2), (1, 0., 0., 1), 2)
 
 
 if __name__ == "__main__":

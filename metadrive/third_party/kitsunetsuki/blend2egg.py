@@ -15,10 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import json
-import struct
-
-from . import bl_info
 
 
 def parse_args():
@@ -29,7 +25,7 @@ def parse_args():
         '-b', '--background', action='store_true', required=False, help="Blender's argument placeholder."
     )
     parser.add_argument('-P', '--python', type=str, required=False, help="Blender's argument placeholder.")
-    parser.add_argument('-o', '--output', type=str, required=False, help='Output .gltf file path.')
+    parser.add_argument('-o', '--output', type=str, required=False, help='Output .egg file path.')
     parser.add_argument(
         '-e', '--export', type=str, required=False, default='scene', help='Export type: scene/animation/collision/all'
     )
@@ -53,45 +49,24 @@ def parse_args():
     parser.add_argument(
         '-sorg', '--set-origin', action='store_true', help="Set origin to center of bounds for collisions."
     )
-    parser.add_argument('-nw', '--normalize-weights', action='store_true', help="Normalize vertex weights.")
 
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-
-    from metadrive.libs.kitsunetsuki.exporter.vrm import VRMExporter
-
-    e = VRMExporter(args)
-    out, buf = e.convert()
+    from panda3d.egg import EggData
+    from metadrive.third_party.kitsunetsuki.exporter.egg import EggExporter
+    e = EggExporter(args)
+    out = e.convert()
 
     if args.output:
-        e.write(out, args.output, is_binary=True)
-
+        if isinstance(out, EggData):
+            out.write_egg(args.output)
+        else:
+            out.write(args.output)
     else:
-        buf.export(out)
-        print(json.dumps(out, indent=4))
-
-
-def register(init_version):
-    import bpy
-
-    version = bl_info['version']
-    if init_version != version:
-        raise Exception(f"Version mismatch: {init_version} != {version}")
-
-    from metadrive.libs.kitsunetsuki.exporter.vrm import VRMExporterOperator, export
-    bpy.utils.register_class(VRMExporterOperator)
-    bpy.types.TOPBAR_MT_file_export.append(export)
-
-
-def unregister():
-    import bpy
-
-    from metadrive.libs.kitsunetsuki.exporter.vrm import VRMExporterOperator, export
-    bpy.types.TOPBAR_MT_file_export.remove(export)
-    bpy.utils.unregister_class(VRMExporterOperator)
+        print(out)
 
 
 if __name__ == '__main__':

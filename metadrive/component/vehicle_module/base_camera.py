@@ -39,7 +39,7 @@ class BaseCamera(ImageBuffer):
     def __init__(self, setup_pbr=False, need_cuda=False):
         if not self.initialized():
             super(BaseCamera, self).__init__(
-                self.BUFFER_W, self.BUFFER_H, Vec3(0.8, 0., 1.5), self.BKG_COLOR, setup_pbr=setup_pbr
+                self.BUFFER_W, self.BUFFER_H, Vec3(0., 0.8, 1.5), self.BKG_COLOR, setup_pbr=setup_pbr
             )
             type(self)._singleton = self
             self.init_num = 1
@@ -145,10 +145,9 @@ class BaseCamera(ImageBuffer):
     def get_lens(self):
         return type(self)._singleton.lens
 
-    # following functions are for onscreen render
-    def add_display_region(self, display_region):
-        self.track(self.attached_object)
-        super(BaseCamera, self).add_display_region(display_region)
+    # # following functions are for onscreen render
+    # def add_display_region(self, display_region):
+    #     super(BaseCamera, self).add_display_region(display_region)
 
     def remove_display_region(self):
         super(BaseCamera, self).remove_display_region()

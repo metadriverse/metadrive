@@ -185,6 +185,9 @@ def get_boxes_bounding_box(boxes):
 
 
 class Vector(tuple):
+    """
+    Avoid using this data structure!
+    """
     def __sub__(self, other):
         return Vector((self[0] - other[0], self[1] - other[1]))
 

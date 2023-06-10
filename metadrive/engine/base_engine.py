@@ -72,6 +72,11 @@ class BaseEngine(EngineCore, Randomizable):
         self.graphicsEngine.renderFrame()
         self.graphicsEngine.renderFrame()
 
+        # curriculum reset
+        self._max_level = self.global_config.get("curriculum_level", 1)
+        self._current_level = 0
+        self._num_scenarios_per_level = int(self.global_config.get("num_scenarios", 0) / self._max_level)
+
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         policy = policy_class(*args, **kwargs)
         self._object_policies[object_id] = policy
@@ -318,7 +323,7 @@ class BaseEngine(EngineCore, Randomizable):
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
 
         # reset terrain
-        center_p = self.current_map.get_center_point()
+        center_p = self.current_map.get_center_point() if self.current_map else [0, 0]
         self.terrain.reset(center_p)
         if self.sky_box is not None:
             self.sky_box.set_position(center_p)
@@ -468,10 +473,41 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
     def seed(self, random_seed):
+        start_seed = self.gets_start_index()
+        random_seed = ((random_seed - start_seed) % self._num_scenarios_per_level) + start_seed
+        random_seed += self._current_level * self._num_scenarios_per_level
         self.global_random_seed = random_seed
         super(BaseEngine, self).seed(random_seed)
         for mgr in self._managers.values():
             mgr.seed(random_seed)
+
+    def gets_start_index(self):
+        start_seed = self.global_config.get("start_seed", None)
+        start_scenario_index = self.global_config.get("start_scenario_index", None)
+        if start_seed is None:
+            assert start_scenario_index is not None
+            return start_scenario_index
+        else:
+            assert start_seed is not None
+            return start_seed
+
+    @property
+    def max_level(self):
+        return self._max_level
+
+    @property
+    def current_level(self):
+        return self._current_level
+
+    def level_up(self):
+        old_level = self._current_level
+        self._current_level = min(self._current_level + 1, self._max_level - 1)
+        if old_level != self._current_level:
+            self.seed(self.current_seed + self._num_scenarios_per_level)
+
+    @property
+    def num_scenarios_per_level(self):
+        return self._num_scenarios_per_level
 
     @property
     def current_map(self):
@@ -481,7 +517,7 @@ class BaseEngine(EngineCore, Randomizable):
             if hasattr(self, "map_manager"):
                 return self.map_manager.current_map
             else:
-                return None
+                raise ValueError("No mapmanager in {}".format(self.managers))
 
     @property
     def current_track_vehicle(self):
@@ -612,8 +648,8 @@ class BaseEngine(EngineCore, Randomizable):
             lateral_end = lane.position(0, 2)
 
             long_end = long_start + lane.heading_at(0) * 4
-            np_y = self.add_line(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
-            np_x = self.add_line(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=2)
+            np_y = self.draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
+            np_x = self.draw_line_3d(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=2)
             np_x.reparentTo(self.lane_coordinates_debug_node)
             np_y.reparentTo(self.lane_coordinates_debug_node)
         self.lane_coordinates_debug_node.reparentTo(self.worldNP)
@@ -646,3 +682,21 @@ class BaseEngine(EngineCore, Randomizable):
             warm_up_light = None
             barrier = None
             cone = None
+
+
+if __name__ == "__main__":
+    from metadrive.envs.base_env import BASE_DEFAULT_CONFIG
+
+    BASE_DEFAULT_CONFIG["use_render"] = True
+    BASE_DEFAULT_CONFIG["show_interface"] = False
+    BASE_DEFAULT_CONFIG["render_pipeline"] = True
+    world = BaseEngine(BASE_DEFAULT_CONFIG)
+
+    from metadrive.engine.asset_loader import AssetLoader
+
+    car_model = world.loader.loadModel(AssetLoader.file_path("models", "vehicle", "lada", "vehicle.gltf"))
+    car_model.reparentTo(world.render)
+    car_model.set_pos(0, 0, 190)
+    # world.render_pipeline.prepare_scene(env.engine.render)
+
+    world.run()

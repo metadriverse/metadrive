@@ -14,6 +14,7 @@ class ScenarioMapManager(BaseManager):
         super(ScenarioMapManager, self).__init__()
         self.store_map = self.engine.global_config.get("store_map", False)
         self.current_map = None
+        self._no_map = self.engine.global_config["no_map"]
         self.map_num = self.engine.global_config["num_scenarios"]
         self.start_scenario_index = self.engine.global_config["start_scenario_index"]
         self._stored_maps = {
@@ -22,25 +23,26 @@ class ScenarioMapManager(BaseManager):
         }
 
         # we put the route searching function here
-        self.sdc_start = None
+        self.sdc_start_point = None
         self.sdc_destinations = []
         self.sdc_dest_point = None
         self.current_sdc_route = None
 
     def reset(self):
-        seed = self.engine.global_random_seed
-        assert self.start_scenario_index <= seed < self.start_scenario_index + self.map_num
+        if not self._no_map:
+            seed = self.engine.global_random_seed
+            assert self.start_scenario_index <= seed < self.start_scenario_index + self.map_num
 
-        self.current_sdc_route = None
-        self.sdc_dest_point = None
+            self.current_sdc_route = None
+            self.sdc_dest_point = None
 
-        if self._stored_maps[seed] is None:
-            new_map = ScenarioMap(map_index=seed)
-            if self.store_map:
-                self._stored_maps[seed] = new_map
-        else:
-            new_map = self._stored_maps[seed]
-        self.load_map(new_map)
+            if self._stored_maps[seed] is None:
+                new_map = ScenarioMap(map_index=seed)
+                if self.store_map:
+                    self._stored_maps[seed] = new_map
+            else:
+                new_map = self._stored_maps[seed]
+            self.load_map(new_map)
         self.update_route()
 
     def update_route(self):
@@ -58,7 +60,7 @@ class ScenarioMapManager(BaseManager):
         last_yaw = last_state["heading"]
 
         self.current_sdc_route = get_idm_route(sdc_traj)
-
+        self.sdc_start_point = copy.deepcopy(init_position)
         self.sdc_dest_point = copy.deepcopy(last_position)
 
         self.engine.global_config.update(
@@ -102,7 +104,7 @@ class ScenarioMapManager(BaseManager):
         self.maps = None
         self.current_map = None
 
-        self.sdc_start = None
+        self.sdc_start_point = None
         self.sdc_destinations = []
         self.sdc_dest_point = None
         self.current_sdc_route = None
@@ -114,7 +116,7 @@ class ScenarioMapManager(BaseManager):
         if self.current_map is not None:
             self.unload_map(self.current_map)
 
-        self.sdc_start = None
+        self.sdc_start_point = None
         self.sdc_destinations = []
         self.sdc_dest_point = None
         self.current_sdc_route = None
@@ -125,3 +127,17 @@ class ScenarioMapManager(BaseManager):
         As Map instance should not be recycled, we will forcefully destroy useless map instances.
         """
         return super(ScenarioMapManager, self).clear_objects(force_destroy=True, *args, **kwargs)
+
+    def clear_stored_maps(self):
+        for m in self._stored_maps.values():
+            if m is not None:
+                m.detach_from_world()
+                m.destroy()
+        self._stored_maps = {
+            i: None
+            for i in range(self.start_scenario_index, self.start_scenario_index + self.map_num)
+        }
+
+    @property
+    def num_stored_maps(self):
+        return sum([1 if m is not None else 0 for m in self.engine.map_manager._stored_maps.values()])

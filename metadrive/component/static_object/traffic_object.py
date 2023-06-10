@@ -41,9 +41,9 @@ class TrafficObject(BaseStaticObject):
 class TrafficCone(TrafficObject):
     """Placed near the construction section to indicate that traffic is prohibited"""
 
-    RADIUS = 0.25
-    HEIGHT = 1.2
-    MASS = 1
+    RADIUS = 0.2
+    HEIGHT = 2
+    MASS = 2
     CLASS_NAME = MetaDriveType.TRAFFIC_CONE
 
     def __init__(self, position, heading_theta, lane=None, static: bool = False, random_seed=None, name=None):
@@ -137,6 +137,8 @@ class TrafficBarrier(TrafficObject):
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
             model.setH(-90)
+            model.setPos(0, 0, -0.93)
+            model.setScale(0.7)
             model.reparentTo(self.origin)
 
     @property
@@ -164,7 +166,7 @@ class TrafficBarrier(TrafficObject):
     @property
     def top_down_length(self):
         # reverse the direction
-        return self.WIDTH
+        return self.WIDTH * 2
 
     @property
     def top_down_width(self):

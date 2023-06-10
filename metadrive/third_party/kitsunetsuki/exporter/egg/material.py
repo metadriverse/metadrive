@@ -15,7 +15,7 @@
 
 from panda3d.egg import EggMaterial
 
-from metadrive.libs.kitsunetsuki.base.material import get_root_node, get_from_node
+from metadrive.third_party.kitsunetsuki.base.material import get_root_node, get_from_node
 
 SHADING_MODEL_DEFAULT = 0
 SHADING_MODEL_EMISSIVE = 1
