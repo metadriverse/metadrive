@@ -227,7 +227,7 @@ class BaseObject(BaseRunnable):
         """
         It is not fully remove, it will be left in memory. if this element is useless in the future, call Func delete()
         """
-        if self.origin is not None:
+        if self.origin is not None and self.origin.hasParent():
             self.origin.detachNode()
         self.dynamic_nodes.detach_from_physics_world(physics_world.dynamic_world)
         self.static_nodes.detach_from_physics_world(physics_world.static_world)

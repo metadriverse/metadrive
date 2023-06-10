@@ -49,12 +49,20 @@ def draw_top_down_map(
             for lane_info in map.road_network.graph.values():
                 LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
         else:
-            for data in map.blocks[-1].map_data.values():
+            for id, data in map.blocks[-1].map_data.items():
                 if ScenarioDescription.POLYLINE not in data:
                     continue
                 type = data.get("type", None)
-                waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE]))
-                LaneGraphics.display_waymo(waymo_line, type, surface)
+                if "boundary" in id:
+                    num_seg = int(len(data[ScenarioDescription.POLYLINE]) / 10)
+                    for i in range(num_seg):
+                        # 10 points
+                        end = min((i + 1) * 10, len(data[ScenarioDescription.POLYLINE]))
+                        waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][i * 10:end]))
+                        LaneGraphics.display_scenario(waymo_line, type, surface)
+                else:
+                    waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE]))
+                    LaneGraphics.display_scenario(waymo_line, type, surface)
 
     elif isinstance(map, NuPlanMap):
         if draw_drivable_area:

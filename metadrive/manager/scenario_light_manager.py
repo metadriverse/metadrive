@@ -5,6 +5,9 @@ from metadrive.component.traffic_light.scenario_traffic_light import ScenarioTra
 from metadrive.type import MetaDriveType
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.manager.base_manager import BaseManager
+import logging
+
+logger = logging.getLogger(__file__)
 
 
 class ScenarioLightManager(BaseManager):
@@ -15,6 +18,7 @@ class ScenarioLightManager(BaseManager):
         self._scenario_id_to_obj_id = {}
         self._obj_id_to_scenario_id = {}
         self._lane_index_to_obj = {}
+        self.skip_missing_light = self.engine.global_config["skip_missing_light"]
         self._episode_light_data = None
 
     def before_reset(self):
@@ -26,6 +30,15 @@ class ScenarioLightManager(BaseManager):
 
     def after_reset(self):
         for scenario_lane_id, light_info in self._episode_light_data.items():
+            if str(scenario_lane_id) not in self.engine.current_map.road_network.graph:
+                logger.warning("Can not find lane for this traffic light. Skip!")
+                if self.skip_missing_light:
+                    continue
+                else:
+                    raise ValueError(
+                        "Can not find lane for this traffic light. "
+                        "Set skip_missing_light=True for skipping missing light!"
+                    )
             lane_info = self.engine.current_map.road_network.graph[str(scenario_lane_id)]
             position = self._get_light_position(light_info)
             name = scenario_lane_id if self.engine.global_config["force_reuse_object_name"] else None

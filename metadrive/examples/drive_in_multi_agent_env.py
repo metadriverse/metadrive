@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", type=str, default="roundabout", choices=list(envs.keys()))
-    parser.add_argument("--pygame_render", action="store_true")
+    parser.add_argument("--top_down", action="store_true")
     args = parser.parse_args()
     env_cls_name = args.env
     extra_args = dict(mode="top_down", film_size=(800, 800)) if args.top_down else {}

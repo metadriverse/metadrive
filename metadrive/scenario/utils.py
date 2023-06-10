@@ -331,7 +331,7 @@ def read_scenario_data(file_path):
     return data
 
 
-def read_dataset_summary(file_folder):
+def read_dataset_summary(file_folder, check_file_existence=True):
     """
     We now support two methods to load pickle files.
 
@@ -356,7 +356,7 @@ def read_dataset_summary(file_folder):
         except ValueError:
             files = sorted(files, key=lambda file_name: file_name.replace(".pkl", ""))
         files = [p for p in files]
-        summary_dict = {f: {} for f in files}
+        summary_dict = {f: read_scenario_data(os.path.join(file_folder, f))["metadata"] for f in files}
 
     if os.path.exists(mapping_file):
         with open(mapping_file, "rb") as f:
@@ -365,11 +365,12 @@ def read_dataset_summary(file_folder):
         # Create a fake one
         mapping = {k: "" for k in summary_dict}
 
-    for file in summary_dict:
-        assert file in mapping, "FileName in mapping mismatch with summary"
-        assert SD.is_scenario_file(file), "File:{} is not sd scenario file".format(file)
-        file_path = os.path.join(file_folder, mapping[file], file)
-        assert os.path.exists(file_path), "Can not find file: {}".format(file_path)
+    if check_file_existence:
+        for file in summary_dict:
+            assert file in mapping, "FileName in mapping mismatch with summary"
+            assert SD.is_scenario_file(file), "File:{} is not sd scenario file".format(file)
+            file_path = os.path.join(file_folder, mapping[file], file)
+            assert os.path.exists(file_path), "Can not find file: {}".format(file_path)
 
     return summary_dict, list(summary_dict.keys()), mapping
 
@@ -379,12 +380,12 @@ def get_number_of_scenarios(dataset_path):
     return len(files)
 
 
-def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False):
+def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, check_self_type=True):
     # ===== These two set of data should align =====
     assert set(scenarios1.keys()) == set(scenarios2.keys())
     for scenario_id in scenarios1.keys():
-        SD.sanity_check(scenarios1[scenario_id], check_self_type=True)
-        SD.sanity_check(scenarios2[scenario_id], check_self_type=True)
+        SD.sanity_check(scenarios1[scenario_id], check_self_type=check_self_type)
+        SD.sanity_check(scenarios2[scenario_id], check_self_type=check_self_type)
         old_scene = SD(scenarios1[scenario_id])
         new_scene = SD(scenarios2[scenario_id])
         SD.sanity_check(old_scene)

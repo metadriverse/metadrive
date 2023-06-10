@@ -12,12 +12,17 @@ class StateObservation(ObservationBase):
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
     def __init__(self, config):
+        if config["navigation_module"]:
+            navi_dim = config["navigation_module"].get_navigation_info_dim()
+        else:
+            navi_dim = NodeNetworkNavigation.get_navigation_info_dim()
+        self.navi_dim = navi_dim
         super(StateObservation, self).__init__(config)
 
     @property
     def observation_space(self):
         # Navi info + Other states
-        shape = self.ego_state_obs_dim + NodeNetworkNavigation.navigation_info_dim + self.get_line_detector_dim()
+        shape = self.ego_state_obs_dim + self.navi_dim + self.get_line_detector_dim()
         if self.config["random_agent_model"]:
             shape += 2
         return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
@@ -63,7 +68,6 @@ class StateObservation(ObservationBase):
         # update out of road
         info = []
         if self.config["random_agent_model"]:
-
             # The length of the target vehicle
             info.append(clip(vehicle.LENGTH / vehicle.MAX_LENGTH, 0.0, 1.0))
 
@@ -79,7 +83,10 @@ class StateObservation(ObservationBase):
 
             # If the side detector is turn off, then add the distance to left and right road borders as state.
             lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
-            total_width = float((vehicle.navigation.map.MAX_LANE_NUM + 1) * vehicle.navigation.map.MAX_LANE_WIDTH)
+            if vehicle.navigation.map:
+                total_width = float((vehicle.navigation.map.MAX_LANE_NUM + 1) * vehicle.navigation.map.MAX_LANE_WIDTH)
+            else:
+                total_width = 100
             lateral_to_left /= total_width
             lateral_to_right /= total_width
             info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
@@ -101,8 +108,8 @@ class StateObservation(ObservationBase):
                 clip((vehicle.steering / vehicle.MAX_STEERING + 1) / 2, 0.0, 1.0),
 
                 # The normalized actions at last steps
-                clip((vehicle.last_current_action[0][0] + 1) / 2, 0.0, 1.0),
-                clip((vehicle.last_current_action[0][1] + 1) / 2, 0.0, 1.0)
+                clip((vehicle.last_current_action[1][0] + 1) / 2, 0.0, 1.0),
+                clip((vehicle.last_current_action[1][1] + 1) / 2, 0.0, 1.0)
             ]
 
         # Current angular acceleration (yaw rate)
@@ -125,7 +132,8 @@ class StateObservation(ObservationBase):
             # against the central of current lane to the state. If vehicle is centered in the lane, then the offset
             # is 0 and vice versa.
             _, lateral = vehicle.lane.local_coordinates(vehicle.position)
-            info.append(clip((lateral * 2 / vehicle.navigation.map.MAX_LANE_WIDTH + 1.0) / 2.0, 0.0, 1.0))
+            max_lane_width = vehicle.navigation.map.MAX_LANE_WIDTH if vehicle.navigation.map else 10
+            info.append(clip((lateral * 2 / max_lane_width + 1.0) / 2.0, 0.0, 1.0))
 
         return info
 

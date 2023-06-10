@@ -194,7 +194,7 @@ class Debugger(RPObject):
     def init_keybindings(self):
         """ Inits the debugger keybindings """
         Globals.base.accept("v", self.buffer_viewer.toggle)
-        Globals.base.accept("c", self.pipe_viewer.toggle)
+        # Globals.base.accept("c", self.pipe_viewer.toggle)
         Globals.base.accept("z", self.rm_selector.toggle)
         Globals.base.accept("f5", self.toggle_gui_visible)
         Globals.base.accept("f6", self.toggle_keybindings_visible)

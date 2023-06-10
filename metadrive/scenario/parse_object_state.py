@@ -1,8 +1,8 @@
 import copy
 
-import numpy as np
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.utils.math import compute_angular_velocity
+from metadrive.utils.math import norm
 
 
 def get_max_valid_indicis(track, current_index):
@@ -34,7 +34,7 @@ def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_i
         for current_idx in range(time_idx):
             p_1 = states["position"][current_idx][:2]
             p_2 = states["position"][current_idx + 1][:2]
-            if np.linalg.norm(p_1 - p_2) > 100:
+            if norm(p_1[0] - p_2[0], p_1[1] - p_2[1]) > 100:
                 time_idx = current_idx
                 break
 
@@ -81,7 +81,7 @@ def parse_full_trajectory(object_dict):
     for current_idx in range(len(positions) - 1):
         p_1 = positions[current_idx][:2]
         p_2 = positions[current_idx + 1][:2]
-        if np.linalg.norm(p_1 - p_2) > 100:
+        if norm(p_1[0] - p_2[0], p_1[1] - p_2[1]) > 100:
             index = current_idx
             break
     positions = positions[:index]

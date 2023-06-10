@@ -13,12 +13,12 @@ enabled:
     # - bloom
     # - dof
     # - env_probes
-#    - forward_shading
-    # - fxaa
+    - forward_shading
+    - fxaa
     # - motion_blur
     # - skin_shading
-    # - sky_ao
-    # - ssr
+    - sky_ao
+    - ssr
     # - volumetrics
     # - vxgi
 

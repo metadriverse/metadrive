@@ -22,6 +22,7 @@ def test_map_get_semantic_map(dir="waymo", render=False, show=False):
         size, res = 512, 2
         engine.data_manager = ScenarioDataManager()
         for idx in range(default_config["num_scenarios"]):
+            engine.seed(idx)
             map = ScenarioMap(map_index=idx)
             heightfield = map.get_semantic_map(size, res)
             assert heightfield.shape[0] == heightfield.shape[1] == int(size * res)
@@ -46,6 +47,7 @@ def test_map_get_elevation_map(dir="waymo", render=False, show=False):
         size, res = 1024, 1
         engine.data_manager = ScenarioDataManager()
         for idx in range(default_config["num_scenarios"]):
+            engine.seed(idx)
             map = ScenarioMap(map_index=idx)
             heightfield = map.get_height_map(size, res, extension=4)
             assert heightfield.shape[0] == heightfield.shape[1] == int(size * res)
