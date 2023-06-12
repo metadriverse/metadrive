@@ -1,15 +1,12 @@
 import logging
-import geopandas as gpd
 import math
 
 import cv2
 import numpy as np
-from shapely import affinity
-from shapely.geometry import Polygon
-
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, DrivableAreaProperty
 from metadrive.engine.engine_utils import get_global_config
+from shapely.geometry import Polygon
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +94,11 @@ class BaseMap(BaseRunnable):
     def destroy(self):
         self.detach_from_world()
         if self._semantic_map is not None:
-            np.delete(self._semantic_map)
+            del self._semantic_map
+            self._semantic_map = None
+        if self._height_map is not None:
+            del self._height_map
+            self._height_map = None
 
         for block in self.blocks:
             block.destroy()
@@ -140,13 +141,13 @@ class BaseMap(BaseRunnable):
 
     # @time_me
     def get_semantic_map(
-        self,
-        size=512,
-        pixels_per_meter=8,
-        color_setting=MapTerrainSemanticColor,
-        line_sample_interval=2,
-        polyline_thickness=1,
-        layer=("lane_line", "lane")
+            self,
+            size=512,
+            pixels_per_meter=8,
+            color_setting=MapTerrainSemanticColor,
+            line_sample_interval=2,
+            polyline_thickness=1,
+            layer=("lane_line", "lane")
     ):
         """
         Get semantics of the map
@@ -207,11 +208,11 @@ class BaseMap(BaseRunnable):
         return self._semantic_map
 
     def get_height_map(
-        self,
-        size=2048,
-        pixels_per_meter=1,
-        extension=2,
-        height=1,
+            self,
+            size=2048,
+            pixels_per_meter=1,
+            extension=2,
+            height=1,
     ):
         """
         Get semantics of the map

@@ -65,12 +65,12 @@ class TrafficObjectManager(BaseManager):
                 on_left = True if self.np_random.rand() > 0.5 or (accident_road is road_2 and is_ramp) else False
                 accident_lane_idx = 0 if on_left else -1
                 lane = accident_road.get_lanes(engine.current_map.road_network)[accident_lane_idx]
-                longitude = lane.length - self.ACCIDENT_AREA_LEN
+                longitude = lane.length - self.ACCIDENT_AREA_LEN - 5
 
                 lateral_len = engine.current_map.config[engine.current_map.LANE_WIDTH]
 
                 lane = engine.current_map.road_network.get_lane(accident_road.lane_index(accident_lane_idx))
-                self.accident_lanes += accident_road.get_lanes(engine.current_map.road_network)
+                self.accident_lanes.append(accident_road.get_lanes(engine.current_map.road_network)[accident_lane_idx])
                 self.prohibit_scene(lane, longitude, lateral_len, on_left)
             else:
                 accident_road = self.np_random.choice([road_1, road_2])
@@ -80,6 +80,7 @@ class TrafficObjectManager(BaseManager):
                 lanes = accident_road.get_lanes(engine.current_map.road_network)
                 accident_lane_idx = self.np_random.randint(0, len(lanes) - 1) if on_left else -1
                 lane = lanes[accident_lane_idx]
+                self.accident_lanes.append(accident_road.get_lanes(engine.current_map.road_network)[accident_lane_idx])
                 longitude = self.np_random.rand() * lane.length / 2 + lane.length / 2
                 if self.np_random.rand() > 0.5:
                     self.break_down_scene(lane, longitude)
@@ -98,6 +99,7 @@ class TrafficObjectManager(BaseManager):
             TrafficWarning,
             lane=lane,
             position=lane.position(longitude, lateral),
+            static=self.engine.global_config["static_traffic_object"],
             heading_theta=lane.heading_theta_at(longitude)
         )
 
@@ -108,6 +110,7 @@ class TrafficObjectManager(BaseManager):
             TrafficBarrier,
             lane=lane,
             position=lane.position(longitude, lateral),
+            static=self.engine.global_config["static_traffic_object"],
             heading_theta=lane.heading_theta_at(longitude)
         )
 
@@ -136,7 +139,8 @@ class TrafficObjectManager(BaseManager):
             p_ = (p[0] + longitude_position, left * p[1])
             position = lane.position(p_[0], p_[1])
             heading_theta = lane.heading_theta_at(p_[0])
-            self.spawn_object(TrafficCone, lane=lane, position=position, heading_theta=heading_theta)
+            self.spawn_object(TrafficCone, lane=lane, position=position, heading_theta=heading_theta,
+                              static=self.engine.global_config["static_traffic_object"])
 
     def set_state(self, state: dict, old_name_to_current=None):
         """
@@ -151,7 +155,7 @@ class TrafficObjectManager(BaseManager):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-                                                         ].class_name == class_name, "Can not restore mappings!"
+            ].class_name == class_name, "Can not restore mappings!"
             # Restore some internal states
             name_obj[current_name].lane = self.engine.current_map.road_network.get_lane(
                 name_obj[current_name].lane.index
