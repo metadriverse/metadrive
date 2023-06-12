@@ -1,4 +1,5 @@
 from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import Config
 
@@ -37,11 +38,13 @@ class SafeMetaDriveEnv(MetaDriveEnv):
 if __name__ == "__main__":
     env = SafeMetaDriveEnv(
         {
-            # "accident_prob": 1.0,
-            "manual_control": True,
+            "accident_prob": 0.5,
+            "traffic_density": 0.15,
+            # "manual_control": True,
+            "agent_policy": IDMPolicy,
             "use_render": True,
             # "debug": True,
-            'num_scenarios': 10,
+            'num_scenarios': 100,
             "start_seed": 129,
             # "traffic_density": 0.2,
             # "num_scenarios": 1,
