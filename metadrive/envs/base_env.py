@@ -210,6 +210,7 @@ class BaseEnv(gym.Env):
 
     # ===== Intialization =====
     def __init__(self, config: dict = None):
+        self.logger = logging.getLogger(self.logger_name)
         if config is None:
             config = {}
         merged_config = self._merge_extra_config(config)
@@ -218,7 +219,6 @@ class BaseEnv(gym.Env):
 
         self.config = global_config
         initialize_global_config(self.config)
-        self.logger = logging.getLogger(self.logger_name)
 
         # agent check
         self.num_agents = self.config["num_agents"]
