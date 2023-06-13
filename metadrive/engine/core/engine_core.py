@@ -400,7 +400,7 @@ class EngineCore(ShowBase.ShowBase):
         if self.on_screen_message:
             self.on_screen_message.toggle_help_message()
 
-    def draw_line(self, start_p, end_p, color, thickness: float):
+    def draw_line_2d(self, start_p, end_p, color, thickness: float):
         """
         Draw line use LineSegs coordinates system. Since a resolution problem is solved, the point on screen should be
         described by [horizontal ratio, vertical ratio], each of them are ranged in [-1, 1]
@@ -428,7 +428,7 @@ class EngineCore(ShowBase.ShowBase):
             self._loading_logo.setColor((1, 1, 1, new_alpha))
             return task.cont
 
-    def add_line(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+    def draw_line_3d(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
         assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
         start_p = [*start_p]
         end_p = [*end_p]
@@ -447,10 +447,10 @@ class EngineCore(ShowBase.ShowBase):
         if len(self.coordinate_line) > 0:
             return
         # x direction = red
-        np_x = self.add_line(Vec3(0, 0, 0.1), Vec3(100, 0, 0.1), color=[1, 0, 0, 1], thickness=2)
+        np_x = self.draw_line_3d(Vec3(0, 0, 0.1), Vec3(100, 0, 0.1), color=[1, 0, 0, 1], thickness=2)
         np_x.reparentTo(self.render)
         # y direction = blue
-        np_y = self.add_line(Vec3(0, 0, 0.1), Vec3(0, 50, 0.1), color=[0, 1, 0, 1], thickness=2)
+        np_y = self.draw_line_3d(Vec3(0, 0, 0.1), Vec3(0, 50, 0.1), color=[0, 1, 0, 1], thickness=2)
         np_y.reparentTo(self.render)
         self.coordinate_line.append(np_x)
         self.coordinate_line.append(np_y)
@@ -473,8 +473,3 @@ class EngineCore(ShowBase.ShowBase):
     def reload_shader(self):
         if self.render_pipeline is not None:
             self.render_pipeline.reload_shaders()
-
-
-if __name__ == "__main__":
-    world = EngineCore({"debug": True})
-    world.run()

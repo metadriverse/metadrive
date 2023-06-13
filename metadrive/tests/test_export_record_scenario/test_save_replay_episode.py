@@ -83,7 +83,7 @@ def test_save_episode(vis=False):
 def test_save_episode_marl(vis=False):
     """
     1. Set record_episode=True to record each episode
-    2. dump_episode when done[__all__] == True
+    2. dump_episode when terminated[__all__] == True
     3. You can keep recent episodes
     4. Input episode data to reset() function can replay the episode !
     """
@@ -98,7 +98,7 @@ def test_save_episode_marl(vis=False):
     )
     try:
         # Test Record
-        o, _ = env.reset(force_seed=1)
+        o, _ = env.reset(force_seed=0)
         epi_info = None
         # for tt in range(10, 100):
         tt = 13

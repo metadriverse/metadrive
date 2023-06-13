@@ -493,8 +493,9 @@ class BaseEnv(gym.Env):
             self._capture_img = PNMImage()
         self.engine.win.getScreenshot(self._capture_img)
         if file_name is None:
-            file_name = "main_{}.png".format(time.time())
+            file_name = "main_index_{}_step_{}_{}.png".format(self.current_seed, self.engine.episode_step, time.time())
         self._capture_img.write(file_name)
+        self.logger.info("Image is saved at: {}".format(file_name))
 
     def for_each_vehicle(self, func, *args, **kwargs):
         return self.agent_manager.for_each_active_agents(func, *args, **kwargs)
@@ -582,7 +583,7 @@ class BaseEnv(gym.Env):
         Engine setting after launching
         """
         self.engine.accept("r", self.reset)
-        # self.engine.accept("c", self.capture)
+        self.engine.accept("c", self.capture)
         self.engine.register_manager("agent_manager", self.agent_manager)
         self.engine.register_manager("record_manager", RecordManager())
         self.engine.register_manager("replay_manager", ReplayManager())

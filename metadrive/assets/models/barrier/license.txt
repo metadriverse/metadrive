@@ -1,0 +1,11 @@
+Model Information:
+* title:	Road Barrier
+* source:	https://sketchfab.com/3d-models/road-barrier-fac380925f6a4bb094137219406bda6d
+* author:	TheMiniFrench (https://sketchfab.com/TheMiniFrench)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Road Barrier" (https://sketchfab.com/3d-models/road-barrier-fac380925f6a4bb094137219406bda6d) by TheMiniFrench (https://sketchfab.com/TheMiniFrench) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

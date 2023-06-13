@@ -6,12 +6,12 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 1,
-            "traffic_density": 0.0,
+            "traffic_density": 0.15,
             "traffic_mode": "hybrid",
-            "start_seed": 71,
+            "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            # "debug": True,
+            "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
             "show_interface": False,
@@ -20,8 +20,8 @@ if __name__ == "__main__":
             "random_lane_width": False,
             # "image_observation": True,
             # "controller": "joystick",
-            "show_coordinates": True,
-            # "random_agent_model": True,
+            # "show_coordinates": True,
+            "random_agent_model": False,
             "manual_control": True,
             "use_render": True,
             "accident_prob": 1,
@@ -29,19 +29,19 @@ if __name__ == "__main__":
             "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "S",
+            "map": "CX",
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
-            "random_agent_model": True,
             "driving_reward": 1.0,
             # "pstats": True,
             "force_destroy": False,
             # "show_skybox": False,
-            # "render_pipeline": True,
+            "show_fps": False,
+            "render_pipeline": True,
             # "camera_dist": 8,
-            # "window_size": (1600, 900),
-            # "camera_dist": -1,
+            "window_size": (1600, 900),
+            "camera_dist": 9,
             # "camera_pitch": 30,
             # "camera_height": 1,
             # "camera_smooth": False,
@@ -119,15 +119,15 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        env.render(
-            text={
-                # "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-                # "lane_width": env.vehicle.lane.width,
-                # "lane_index": env.vehicle.lane_index,
-                # "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
-                "current_seed": env.current_seed
-            }
-        )
+        # env.render(
+        #     text={
+        #         # "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
+        #         # "lane_width": env.vehicle.lane.width,
+        #         # "lane_index": env.vehicle.lane_index,
+        #         # "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
+        #         "current_seed": env.current_seed
+        #     }
+        # )
         # if tm or tc:
         #     env.reset()
         # # assert env.observation_space.contains(o)

@@ -159,10 +159,10 @@ class ImageBuffer:
         bottom = display_region[2] * 2 - 1
         top = display_region[3] * 2 - 1
 
-        self.line_borders.append(engine.draw_line([left, bottom], [left, top], self.LINE_FRAME_COLOR, 1.5))
-        self.line_borders.append(engine.draw_line([left, top], [right, top], self.LINE_FRAME_COLOR, 1.5))
-        self.line_borders.append(engine.draw_line([right, top], [right, bottom], self.LINE_FRAME_COLOR, 1.5))
-        self.line_borders.append(engine.draw_line([right, bottom], [left, bottom], self.LINE_FRAME_COLOR, 1.5))
+        self.line_borders.append(engine.draw_line_2d([left, bottom], [left, top], self.LINE_FRAME_COLOR, 1.5))
+        self.line_borders.append(engine.draw_line_2d([left, top], [right, top], self.LINE_FRAME_COLOR, 1.5))
+        self.line_borders.append(engine.draw_line_2d([right, top], [right, bottom], self.LINE_FRAME_COLOR, 1.5))
+        self.line_borders.append(engine.draw_line_2d([right, bottom], [left, bottom], self.LINE_FRAME_COLOR, 1.5))
 
     def remove_display_region(self):
         engine = self.engine

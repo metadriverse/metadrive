@@ -4,7 +4,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.vehicle_module.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
-from metadrive.utils.math import not_zero, wrap_to_pi
+from metadrive.utils.math import not_zero, wrap_to_pi, norm
 
 
 class FrontBackObjects:
@@ -154,7 +154,8 @@ class FrontBackObjects:
             if lane is None:
                 continue
             for obj in objs:
-                if np.linalg.norm(obj.position - position) > max_distance:
+                _d = obj.position - position
+                if norm(_d[0], _d[1]) > max_distance:
                     continue
                 if hasattr(obj, "bounding_box") and all([not lane.point_on_lane(p) for p in obj.bounding_box]):
                     continue
@@ -357,7 +358,7 @@ class IDMPolicy(BasePolicy):
                         # it is time to change lane!
                         self.target_speed = self.NORMAL_SPEED
                         return surrounding_objects.left_front_object(), surrounding_objects.left_front_min_distance(), \
-                               current_lanes[self.routing_target_lane.index[-1] - 1]
+                            current_lanes[self.routing_target_lane.index[-1] - 1]
                 else:
                     # change to right
                     if surrounding_objects.right_back_min_distance(
@@ -370,7 +371,7 @@ class IDMPolicy(BasePolicy):
                         # change lane
                         self.target_speed = self.NORMAL_SPEED
                         return surrounding_objects.right_front_object(), surrounding_objects.right_front_min_distance(), \
-                               current_lanes[self.routing_target_lane.index[-1] + 1]
+                            current_lanes[self.routing_target_lane.index[-1] + 1]
 
         # lane follow or active change lane/overtake for high driving speed
         if abs(self.control_object.speed_km_h - self.NORMAL_SPEED) > 3 and surrounding_objects.has_front_object(
@@ -388,12 +389,12 @@ class IDMPolicy(BasePolicy):
                 expect_lane_idx = current_lanes.index(self.routing_target_lane) - 1
                 if expect_lane_idx in self.available_routing_index_range:
                     return surrounding_objects.left_front_object(), surrounding_objects.left_front_min_distance(), \
-                           current_lanes[expect_lane_idx]
+                        current_lanes[expect_lane_idx]
             if right_front_speed is not None and right_front_speed - front_speed > self.LANE_CHANGE_SPEED_INCREASE:
                 expect_lane_idx = current_lanes.index(self.routing_target_lane) + 1
                 if expect_lane_idx in self.available_routing_index_range:
                     return surrounding_objects.right_front_object(), surrounding_objects.right_front_min_distance(), \
-                           current_lanes[expect_lane_idx]
+                        current_lanes[expect_lane_idx]
 
         # fall back to lane follow
         self.target_speed = self.NORMAL_SPEED
@@ -443,7 +444,9 @@ class TrajectoryIDMPOlicy(IDMPolicy):
 
     @property
     def arrive_destination(self):
-        return np.linalg.norm(np.asarray(self.control_object.position) - self.destination) < self.DEST_REGION_RADIUS
+        return norm(
+            self.control_object.position[0] - self.destination[0], self.control_object.position[1] - self.destination[1]
+        ) < self.DEST_REGION_RADIUS
 
     def steering_control(self, target_lane) -> float:
         # heading control following a lateral distance control

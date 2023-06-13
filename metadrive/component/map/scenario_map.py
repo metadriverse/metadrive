@@ -11,9 +11,9 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 
 
 class ScenarioMap(BaseMap):
-    def __init__(self, map_index, random_seed=None, need_lane_localization=True):
+    def __init__(self, map_index, random_seed=None):
         self.map_index = map_index
-        self.need_lane_localization = need_lane_localization
+        self.need_lane_localization = self.engine.global_config["need_lane_localization"]
         super(ScenarioMap, self).__init__(dict(id=self.map_index), random_seed=random_seed)
 
     def show_coordinates(self):

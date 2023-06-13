@@ -339,6 +339,8 @@ class MetaDriveEnv(BaseEnv):
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else \
             get_np_random(self._DEBUG_RANDOM_SEED).randint(self.start_seed, self.start_seed + self.env_num)
+        assert self.start_seed <= current_seed < self.start_seed + self.env_num, \
+            "scenario_index (seed) should be in [{}:{})".format(self.start_seed, self.start_seed + self.env_num)
         self.seed(current_seed)
 
 

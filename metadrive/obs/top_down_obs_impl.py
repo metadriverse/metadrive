@@ -289,7 +289,7 @@ class LaneGraphics:
                 raise ValueError("I don't know how to draw this line type: {}".format(lane.line_types[side]))
 
     @classmethod
-    def display_waymo(cls, waymo_poly_line, type, surface) -> None:
+    def display_scenario(cls, waymo_poly_line, type, surface) -> None:
         """
         Display a lane on a surface.
 
@@ -305,8 +305,8 @@ class LaneGraphics:
         else:
             color = (80, 80, 80)
         if MetaDriveType.is_road_line(type) or MetaDriveType.is_road_edge(type):
-            if len(waymo_poly_line.segment_property) <= 1:
-                return
+            # if len(waymo_poly_line.segment_property) < 1:
+            #     return
             stripes_count = int(
                 2 * (surface.get_height() + surface.get_width()) / (cls.STRIPE_SPACING * surface.scaling)
             )

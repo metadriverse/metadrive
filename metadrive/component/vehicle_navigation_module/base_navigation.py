@@ -3,7 +3,6 @@ import logging
 import numpy as np
 from panda3d.core import TransparencyAttrib, LineSegs, NodePath
 
-from metadrive.component.map.base_map import BaseMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.constants import RENDER_MODE_ONSCREEN, CamMask
 from metadrive.engine.asset_loader import AssetLoader
@@ -16,7 +15,8 @@ class BaseNavigation:
     Implement all NotImplemented method for customizing a new navigation module.
     This module interact with the map for finding lanes or expected positions
     """
-    navigation_info_dim = 10
+    NUM_WAY_POINT = 2
+    CHECK_POINT_INFO_DIM = 5
     NAVI_POINT_DIST = 50
     PRE_NOTIFY_DIST = 40
     MIN_ALPHA = 0.15
@@ -41,7 +41,6 @@ class BaseNavigation:
         self.name = name
 
         # Make sure these variables are filled when making new subclass
-        # self.map = None
         # self.checkpoints = None
         # self.current_ref_lanes = None
         # self.next_ref_lanes = None
@@ -51,9 +50,9 @@ class BaseNavigation:
         self.vehicle_config = vehicle_config
 
         self._target_checkpoints_index = None
-        self._navi_info = np.zeros((self.navigation_info_dim, ), dtype=np.float32)  # navi information res
+        self._navi_info = np.zeros((self.get_navigation_info_dim(), ), dtype=np.float32)  # navi information res
 
-        # Vis
+        # Vis TODO make it beautiful!
         self._show_navi_info = (
             self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
         )
@@ -126,11 +125,14 @@ class BaseNavigation:
             self._dest_node_path.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
-    def reset(self, map: BaseMap, current_lane, vehicle_config=None):
-        self.map = map
+    def reset(self, current_lane, vehicle_config=None):
         self._current_lane = current_lane
         if vehicle_config is not None:
             self.vehicle_config = vehicle_config
+
+    @property
+    def map(self):
+        return self.engine.current_map
 
     @property
     def current_lane(self):
@@ -258,3 +260,7 @@ class BaseNavigation:
 
     def get_state(self):
         return {}
+
+    @classmethod
+    def get_navigation_info_dim(cls):
+        return cls.NUM_WAY_POINT * cls.CHECK_POINT_INFO_DIM

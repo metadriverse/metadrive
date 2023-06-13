@@ -6,19 +6,25 @@ from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.scenario_lane import ScenarioLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
-from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.engine_utils import get_engine
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.type import MetaDriveType
 from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.interpolating_line import InterpolatingLine
+from metadrive.utils.math import norm
 
 
 class ScenarioBlock(BaseBlock):
+    LINE_CULL_DIST = 500
+
     def __init__(self, block_index: int, global_network, random_seed, map_index, need_lane_localization):
         # self.map_data = map_data
         self.need_lane_localization = need_lane_localization
         self.map_index = map_index
+        data = self.engine.data_manager.current_scenario
+        sdc_track = data.get_sdc_track()
+        self.sdc_start_point = sdc_track["state"]["position"][0]
         super(ScenarioBlock, self).__init__(block_index, global_network, random_seed)
 
     @property
@@ -75,14 +81,20 @@ class ScenarioBlock(BaseBlock):
             #     )
             # else:
             #     raise ValueError("Can not build lane line type: {}".format(type))
+            # TODO LQY: DO we need sidewalk?
             elif MetaDriveType.is_road_edge(type):
-                self.construct_sidewalk(np.asarray(data[ScenarioDescription.POLYLINE]))
+                self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
         segment_num = int(line.length / DrivableAreaProperty.STRIPE_LENGTH)
         for segment in range(segment_num):
             start = line.get_point(DrivableAreaProperty.STRIPE_LENGTH * segment)
+            # trick for optimizing
+            dist = norm(start[0] - self.sdc_start_point[0], start[1] - self.sdc_start_point[1])
+            if dist > self.LINE_CULL_DIST:
+                continue
+
             if segment == segment_num - 1:
                 end = line.get_point(line.length)
             else:
@@ -95,6 +107,10 @@ class ScenarioBlock(BaseBlock):
         segment_num = int(line.length / (2 * DrivableAreaProperty.STRIPE_LENGTH))
         for segment in range(segment_num):
             start = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2)
+            # trick for optimizing
+            dist = norm(start[0] - self.sdc_start_point[0], start[1] - self.sdc_start_point[1])
+            if dist > self.LINE_CULL_DIST:
+                continue
             end = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)
             if segment == segment_num - 1:
                 end = line.get_point(line.length - DrivableAreaProperty.STRIPE_LENGTH)

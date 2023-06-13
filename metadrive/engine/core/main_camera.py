@@ -52,7 +52,7 @@ class MainCamera:
                                                                                           ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
-        self.world_light = self.engine.world_light  # light chases the chase camera, when not using global light
+        self.world_light = engine.world_light  # light chases the chase camera, when not using global light
         self.inputs = InputState()
         self.current_track_vehicle = None
 
@@ -73,34 +73,35 @@ class MainCamera:
         self.inputs.watchWithModifiers('right', 'd')
         self.inputs.watchWithModifiers('left_rotate', '[')
         self.inputs.watchWithModifiers('right_rotate', ']')
+        self.engine = engine
 
-        self.engine.accept("wheel_up", self._wheel_up_height)
-        self.engine.accept("wheel_down", self._wheel_down_height)
-        self.engine.accept("mouse1", self._move_to_pointer)
+        engine.accept("wheel_up", self._wheel_up_height)
+        engine.accept("wheel_down", self._wheel_down_height)
+        engine.accept("mouse1", self._move_to_pointer)
 
         # default top-down
-        self.top_down_camera_height = self.engine.global_config["top_down_camera_initial_z"]
-        self.camera_x = self.engine.global_config["top_down_camera_initial_x"]
-        self.camera_y = self.engine.global_config["top_down_camera_initial_y"]
+        self.top_down_camera_height = engine.global_config["top_down_camera_initial_z"]
+        self.camera_x = engine.global_config["top_down_camera_initial_x"]
+        self.camera_y = engine.global_config["top_down_camera_initial_y"]
         self.camera_rotate = 0
-        self.engine.interface.stop_track()
-        self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
+        engine.interface.stop_track()
+        engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
         # TPP rotate
-        if not self.engine.global_config["show_mouse"]:
+        if not engine.global_config["show_mouse"]:
             props = WindowProperties()
             props.setCursorHidden(True)
             props.setMouseMode(WindowProperties.MConfined)
-            self.engine.win.requestProperties(props)
+            engine.win.requestProperties(props)
         self.mouse_rotate = 0
-        self.last_mouse_pos = self.engine.mouseWatcherNode.getMouseX() if self.has_mouse else 0
+        self.last_mouse_pos = engine.mouseWatcherNode.getMouseX() if self.has_mouse else 0
         self.static_timer = 0
         self.move_into_window_timer = 0
         self._in_recover = False
         self._last_frame_has_mouse = False
 
-        need_cuda = self.engine.global_config["vehicle_config"]["image_source"] == "main_camera"
-        self.enable_cuda = self.engine.global_config["image_on_cuda"] and need_cuda
+        need_cuda = engine.global_config["vehicle_config"]["image_source"] == "main_camera"
+        self.enable_cuda = engine.global_config["image_on_cuda"] and need_cuda
 
         self.cuda_graphics_resource = None
         if self.enable_cuda:
@@ -108,7 +109,7 @@ class MainCamera:
 
             # returned tensor property
             self.cuda_dtype = np.uint8
-            self.cuda_shape = self.engine.global_config["window_size"]
+            self.cuda_shape = engine.global_config["window_size"]
             self.cuda_strides = None
             self.cuda_order = "C"
 
@@ -116,7 +117,7 @@ class MainCamera:
 
             # make texture
             self.cuda_texture = Texture()
-            self.engine.win.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMCopyTexture)
+            engine.win.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMCopyTexture)
 
             def _callback_func(cbdata: DisplayRegionDrawCallbackData):
                 # print("DRAW CALLBACK!!!!!!!!!!!!!!!11")
@@ -128,10 +129,10 @@ class MainCamera:
                         self.cuda_rendered_result = array
 
             # Fill the buffer due to multi-thread
-            self.engine.graphicsEngine.renderFrame()
-            self.engine.graphicsEngine.renderFrame()
-            self.engine.graphicsEngine.renderFrame()
-            self.camera.node().getDisplayRegion(0).setDrawCallback(_callback_func)
+            engine.graphicsEngine.renderFrame()
+            engine.graphicsEngine.renderFrame()
+            engine.graphicsEngine.renderFrame()
+            engine.cam.node().getDisplayRegion(0).setDrawCallback(_callback_func)
 
             self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
             self.texture_context_future = self.cuda_texture.prepare(self.gsg.prepared_objects)
@@ -226,6 +227,9 @@ class MainCamera:
 
         if self.world_light is not None:
             self.world_light.step(current_pos)
+        # self.camera.reparentTo(vehicle.origin)
+        # self.camera.setPost(0., 0.8, 1.5)
+        # self.camera.lookAt(0, 2.4, 1.3)
         return task.cont
 
     @staticmethod
@@ -401,11 +405,6 @@ class MainCamera:
     @property
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
-
-    @property
-    def engine(self):
-        from metadrive.engine.engine_utils import get_engine
-        return get_engine()
 
     def get_pixels_array(self, vehicle, clip):
         engine = get_engine()

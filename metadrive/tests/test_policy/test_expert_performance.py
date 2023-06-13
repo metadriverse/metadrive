@@ -122,6 +122,9 @@ def test_expert_in_intersection(render=False):
 
 
 if __name__ == '__main__':
+    """
+    LQY: I fixed a action bug in StateObservation, which may harm expert performance!
+    """
     # test_expert_in_intersection(True)
     test_expert_without_traffic(True)
     # test_expert_with_traffic(use_render=True)

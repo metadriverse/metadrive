@@ -111,7 +111,7 @@ Example:
         }
     }
 """
-
+import math
 import os
 from collections import defaultdict
 
@@ -174,15 +174,18 @@ class ScenarioDescription(dict):
         CONTINUOUS_VALID_LENGTH = "continuous_valid_length"
 
         # for number summary:
+        OBJECT_TYPES = "object_types"
         NUM_OBJECTS = "num_objects"
-        NUM_OBJECT_TYPES = "num_object_types"
+        NUM_MOVING_OBJECTS = "num_moving_objects"
         NUM_OBJECTS_EACH_TYPE = "num_objects_each_type"
+        NUM_MOVING_OBJECTS_EACH_TYPE = "num_moving_objects_each_type"
 
         NUM_TRAFFIC_LIGHTS = "num_traffic_lights"
         NUM_TRAFFIC_LIGHT_TYPES = "num_traffic_light_types"
         NUM_TRAFFIC_LIGHTS_EACH_STEP = "num_traffic_light_each_step"
 
         NUM_MAP_FEATURES = "num_map_features"
+        MAP_HEIGHT_DIFF = "map_height_diff"
 
     class DATASET:
         SUMMARY_FILE = "dataset_summary.pkl"  # dataset summary file name
@@ -279,7 +282,9 @@ class ScenarioDescription(dict):
         return self[self.TRACKS][sdc_id]
 
     @staticmethod
-    def get_object_summary(state_dict, id, type):
+    def get_object_summary(state_dict, id):
+        type = state_dict["type"]
+        state_dict = state_dict["state"]
         track = state_dict["position"]
         valid_track = track[np.where(state_dict["valid"].astype(int))][..., :2]
         distance = float(
@@ -315,16 +320,33 @@ class ScenarioDescription(dict):
         return os.path.basename(file_name)[:3] == "sd_" or all(char.isdigit() for char in file_name)
 
     @staticmethod
+    def _calculate_num_moving_objects(scenario):
+        # moving object
+        number_summary_dict = {
+            ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS: 0,
+            ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE: defaultdict(int)
+        }
+        for v in scenario[ScenarioDescription.METADATA][ScenarioDescription.SUMMARY.OBJECT_SUMMARY].values():
+            if v[ScenarioDescription.SUMMARY.MOVING_DIST] > 1:
+                number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS] += 1
+                number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE][v["type"]] += 1
+        return number_summary_dict
+
+    @staticmethod
     def get_number_summary(scenario):
         number_summary_dict = {}
+
         # object
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS] = len(scenario[ScenarioDescription.TRACKS])
-        number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECT_TYPES
+        number_summary_dict[ScenarioDescription.SUMMARY.OBJECT_TYPES
                             ] = set(v["type"] for v in scenario[ScenarioDescription.TRACKS].values())
         object_types_counter = defaultdict(int)
         for v in scenario[ScenarioDescription.TRACKS].values():
             object_types_counter[v["type"]] += 1
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS_EACH_TYPE] = dict(object_types_counter)
+
+        # moving object
+        number_summary_dict.update(ScenarioDescription._calculate_num_moving_objects(scenario))
 
         # Number of different dynamic object states
         dynamic_object_states_types = set()
@@ -344,7 +366,60 @@ class ScenarioDescription(dict):
         # map
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_MAP_FEATURES
                             ] = len(scenario[ScenarioDescription.MAP_FEATURES])
+        number_summary_dict[ScenarioDescription.SUMMARY.MAP_HEIGHT_DIFF
+                            ] = ScenarioDescription.map_height_diff(scenario[ScenarioDescription.MAP_FEATURES])
         return number_summary_dict
+
+    @staticmethod
+    def sdc_moving_dist(scenario):
+        SD = ScenarioDescription
+        metadata = scenario[SD.METADATA]
+        sdc_info = metadata[SD.SUMMARY.OBJECT_SUMMARY][metadata[SD.SDC_ID]]
+        moving_dist = sdc_info[SD.SUMMARY.MOVING_DIST]
+        return moving_dist
+
+    @staticmethod
+    def num_object(scenario, object_type=None):
+        SD = ScenarioDescription
+        metadata = scenario[SD.METADATA]
+        if object_type is None:
+            return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_OBJECTS]
+        else:
+            return metadata[SD.SUMMARY.NUMBER_SUMMARY][SD.SUMMARY.NUM_OBJECTS_EACH_TYPE].get(object_type, 0)
+
+    @staticmethod
+    def num_moving_object(scenario, object_type=None):
+        SD = ScenarioDescription
+        metadata = scenario[SD.METADATA]
+        if SD.SUMMARY.NUM_MOVING_OBJECTS not in metadata[SD.SUMMARY.NUMBER_SUMMARY]:
+            num_summary = SD._calculate_num_moving_objects(scenario)
+        else:
+            num_summary = metadata[SD.SUMMARY.NUMBER_SUMMARY]
+
+        if object_type is None:
+            return num_summary[SD.SUMMARY.NUM_MOVING_OBJECTS]
+        else:
+            return num_summary[SD.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE].get(object_type, 0)
+
+    @staticmethod
+    def map_height_diff(map_features, target=10):
+        max = -math.inf
+        min = math.inf
+        for feature in map_features.values():
+            if not MetaDriveType.is_road_line(feature[ScenarioDescription.TYPE]):
+                continue
+            polyline = feature[ScenarioDescription.POLYLINE]
+            if len(polyline[0]) == 3:
+                z = np.asarray(polyline)[..., -1]
+                z_max = np.max(z)
+                if z_max > max:
+                    max = z_max
+                z_min = np.min(z)
+                if z_min < min:
+                    min = z_min
+            if max - min > target:
+                break
+        return max - min
 
 
 def _recursive_check_type(obj, allow_types, depth=0):

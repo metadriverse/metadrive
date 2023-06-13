@@ -11,7 +11,7 @@ def assert_equal_pos(data_1, data_2):
     assert len(data_1) == len(data_2)
     for i in range(len(data_1)):
         difference = data_1[i] - data_2[i]
-        diff = norm(difference[0], difference[1])
+        diff = norm(data_1[i][0] - data_2[i][0], data_1[i][1] - data_2[i][1])
         assert diff < 0.00001, "pos mismatch for vehicle: {}, distance: {}".format(i, diff)
 
 
