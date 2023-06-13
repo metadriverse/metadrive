@@ -215,7 +215,7 @@ class BaseMap(BaseRunnable):
             height=1,
     ):
         """
-        Get semantics of the map
+        Get height of the map
         :param size: [m] length and width
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param extension: If > 1, the returned height map's drivable region will be enlarged.
