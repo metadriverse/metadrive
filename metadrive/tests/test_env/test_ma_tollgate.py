@@ -88,10 +88,10 @@ def test_ma_toll_env():
             assert env.observation_space.contains(obs)
             for step in range(100):
                 act = {k: [1, 1] for k in env.vehicles.keys()}
-                o, r, te, tr, i = _act(env, act)
+                o, r, tm, tc, i = _act(env, act)
                 if step == 0:
-                    assert not any(te.values())
-                    assert not any(tr.values())
+                    assert not any(tm.values())
+                    assert not any(tc.values())
 
         finally:
             env.close()
@@ -122,32 +122,32 @@ def test_ma_toll_horizon():
             last_keys = set(env.vehicles.keys())
             for step in range(1, 1000):
                 act = {k: [1, 1] for k in env.vehicles.keys()}
-                o, r, te, tr, i = _act(env, act)
+                o, r, tm, tc, i = _act(env, act)
                 new_keys = set(env.vehicles.keys())
                 if step == 0:
-                    assert not any(te.values())
-                if any(te.values()):
+                    assert not any(tm.values())
+                if any(tm.values()):
                     assert len(last_keys) <= 4  # num of agents
                     assert len(new_keys) <= 4  # num of agents
                     for k in new_keys.difference(last_keys):
                         assert k in o
-                        assert k in te
+                        assert k in tm
                     # print("Step {}, Done: {}".format(step, d))
 
                 for kkk, rrr in r.items():
                     if rrr == -777:
-                        assert te[kkk]
+                        assert tm[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
 
                 for kkk, iii in i.items():
                     if "out_of_road" in iii and (iii["out_of_road"] or iii["cost"] == 778):
-                        assert te[kkk]
+                        assert tm[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
                         #assert r[kkk] == -777
 
-                if te["__all__"]:
+                if tm["__all__"]:
                     break
                 last_keys = new_keys
         finally:
@@ -163,11 +163,11 @@ def test_ma_toll_reset():
         assert env.observation_space.contains(obs)
         for step in range(1000):
             act = {k: [1, 1] for k in env.vehicles.keys()}
-            o, r, te, tr, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
             if step == 0:
-                assert not any(te.values())
-                assert not any(tr.values())
-            if te["__all__"]:
+                assert not any(tm.values())
+                assert not any(tc.values())
+            if tm["__all__"]:
                 obs, _ = env.reset()
                 assert env.observation_space.contains(obs)
 
@@ -195,7 +195,7 @@ def test_ma_toll_reset():
 
                 # for _ in range(2):
                 #     act = {k: [1, 1] for k in env.vehicles.keys()}
-                #     o, r, te, tr, i = _act(env, act)
+                #     o, r, tm, tc, i = _act(env, act)
 
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
@@ -217,7 +217,7 @@ def test_ma_toll_reset():
                     assert env._is_arrive_destination(v)
 
                 act = {k: [0, 0] for k in env.vehicles.keys()}
-                o, r, te, tr, i = _act(env, act)
+                o, r, tm, tc, i = _act(env, act)
 
                 for v in env.vehicles.values():
                     assert len(v.navigation.checkpoints) > 2
@@ -227,16 +227,16 @@ def test_ma_toll_reset():
                         # # print("{} success!".format(kkk))
                         success_count += 1
 
-                for kkk, ddd in te.items():
+                for kkk, ddd in tm.items():
                     if ddd and kkk != "__all__":
                         assert i[kkk]["arrive_dest"]
                         agent_count += 1
 
                 for kkk, rrr in r.items():
-                    if te[kkk]:
+                    if tm[kkk]:
                         assert rrr == 777
 
-                if te["__all__"]:
+                if tm["__all__"]:
                     # print("Finish {} agents. Success {} agents.".format(agent_count, success_count))
                     o, _ = env.reset()
                     assert env.observation_space.contains(o)
@@ -273,8 +273,8 @@ def test_ma_toll_close_spawn():
             obs, _ = env.reset()
             _check_spaces_after_reset(env)
             for _ in range(10):
-                o, r, te, tr, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
-                assert not any(te.values())
+                o, r, tm, tc, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
+                assert not any(tm.values())
             _no_close_spawn(env.vehicles)
             # print('Finish {} resets.'.format(num_r))
     finally:
@@ -397,7 +397,7 @@ def test_ma_toll_reward_done_alignment_2():
         _check_spaces_after_reset(env, obs)
         for step in range(1):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, te, tr, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
 
         for v_id, v in env.vehicles.items():
             if v_id != "agent0":
@@ -405,13 +405,13 @@ def test_ma_toll_reward_done_alignment_2():
 
         for step in range(5000):
             act = {k: [0, 1] for k in env.vehicles.keys()}
-            o, r, te, tr, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
             for kkk, iii in i.items():
                 if iii["crash_vehicle"]:
                     assert iii["crash"]
                     # #assert r[kkk] == -1.7777
-            for kkk, ddd in te.items():
-                if ddd and kkk != "__all__" and not te["__all__"]:
+            for kkk, ddd in tm.items():
+                if ddd and kkk != "__all__" and not tm["__all__"]:
                     assert i[kkk]["out_of_road"] or i[kkk]["arrive_dest"] or i[kkk]["crash_building"]
                     # # print('{} done passed!'.format(kkk))
             for kkk, rrr in r.items():
@@ -420,9 +420,9 @@ def test_ma_toll_reward_done_alignment_2():
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
                     # # print('{} reward passed!'.format(kkk))
-            if te["agent0"]:
+            if tm["agent0"]:
                 break
-            if te["__all__"]:
+            if tm["__all__"]:
                 break
     finally:
         env.close()
@@ -445,18 +445,18 @@ def test_ma_toll_reward_done_alignment_2():
         assert env.observation_space.contains(obs)
         for step in range(5000):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, te, tr, i = _act(env, act)
-            if te["__all__"]:
+            o, r, tm, tc, i = _act(env, act)
+            if tm["__all__"]:
                 break
             kkk = "agent0"
             #assert r[kkk] == 999
             assert i[kkk]["arrive_dest"]
-            assert te[kkk]
+            assert tm[kkk]
 
             kkk = "agent1"
             #assert r[kkk] != 999
             assert not i[kkk]["arrive_dest"]
-            assert not te[kkk]
+            assert not tm[kkk]
             break
     finally:
         env.close()
@@ -486,16 +486,16 @@ def test_ma_toll_reward_sign():
         ep_reward = 0.0
         for step in range(1000):
             act = {k: [0, 1] for k in env.vehicles.keys()}
-            o, r, te, tr, i = env.step(act)
+            o, r, tm, tc, i = env.step(act)
             ep_reward += next(iter(r.values()))
-            if any(te.values()):
+            if any(tm.values()):
                 # print("Finish respawn count: {}, reward {}".format(env._respawn_count, ep_reward))
                 env._respawn_count += 1
                 assert ep_reward > 10, ep_reward
                 ep_reward = 0
             if env._respawn_count >= len(env._safe_places):
                 break
-            if te["__all__"]:
+            if tm["__all__"]:
                 break
     finally:
         env.close()
@@ -596,25 +596,25 @@ def test_ma_toll_horizon_termination(vis=False):
                     else:
                         if v_id in env.vehicles:
                             env.vehicles[v_id].set_static(True)
-                obs, r, te, tr, i = _act(env, act)
+                obs, r, tm, tc, i = _act(env, act)
 
                 if vis:
                     env.render("topdown")
 
                 if step == 0 or step == 1:
-                    assert not any(te.values())
-                    assert not any(tr.values())
+                    assert not any(tm.values())
+                    assert not any(tc.values())
 
                 if should_respawn:
                     for kkk in should_respawn:
                         assert kkk not in obs, "It seems the max_step agents is not respawn!"
                         assert kkk not in r
-                        assert kkk not in te
-                        assert kkk not in tr
+                        assert kkk not in tm
+                        assert kkk not in tc
                         assert kkk not in i
                     should_respawn.clear()
 
-                for kkk, ddd in te.items():
+                for kkk, ddd in tm.items():
                     if ddd and kkk == "__all__":
                         # print("Current: ", step)
                         continue
@@ -625,7 +625,7 @@ def test_ma_toll_horizon_termination(vis=False):
                         assert not i[kkk]["crash_vehicle"]
                         should_respawn.add(kkk)
 
-                if te["__all__"]:
+                if tm["__all__"]:
                     obs, _ = env.reset()
                     should_respawn.clear()
                     break
@@ -688,9 +688,9 @@ def test_ma_no_reset_error():
         assert env.observation_space.contains(obs)
         for step in range(50):
             check_pos(list(env.vehicles.values()))
-            o, r, te, tr, i = env.step({k: [0, 1] for k in env.vehicles.keys()})
+            o, r, tm, tc, i = env.step({k: [0, 1] for k in env.vehicles.keys()})
             env.reset()
-            if te["__all__"]:
+            if tm["__all__"]:
                 break
     finally:
         env.close()
@@ -704,7 +704,7 @@ def test_randomize_spawn_place():
         for step in range(100):
             act = {k: [1, 1] for k in env.vehicles.keys()}
             last_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
-            o, r, te, tr, i = env.step(act)
+            o, r, tm, tc, i = env.step(act)
             obs, _ = env.reset()
             new_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
             for kkk, new_p in new_pos.items():

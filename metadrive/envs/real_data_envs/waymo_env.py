@@ -62,7 +62,7 @@ if __name__ == "__main__":
             env.reset(force_seed=i)
             while True:
                 step_start = time.time()
-                o, r, te, tr, info = env.step([0, 0])
+                o, r, tm, tc, info = env.step([0, 0])
                 assert env.observation_space.contains(o)
                 # c_lane = env.vehicle.lane
                 # long, lat, = c_lane.local_coordinates(env.vehicle.position)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
                     # mode="topdown"
                 )
 
-                if te or tr:
+                if tm or tc:
                     if info["arrive_dest"]:
                         print("seed:{}, success".format(env.engine.global_random_seed))
                     break

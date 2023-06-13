@@ -367,13 +367,13 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         return self.agent_manager.filter_RL_agents(org)
 
     def step(self, actions):
-        o, r, te, tr, i = super(MultiAgentTinyInter, self).step(actions)
+        o, r, tm, tc, i = super(MultiAgentTinyInter, self).step(actions)
 
         # if self.num_RL_agents == self.num_agents:
-        #     return o, r, te, tr, i
+        #     return o, r, tm, tc, i
 
-        original_done_dict = copy.deepcopy(te)
-        d = self.agent_manager.filter_RL_agents(te, original_done_dict=original_done_dict)
+        original_done_dict = copy.deepcopy(tm)
+        d = self.agent_manager.filter_RL_agents(tm, original_done_dict=original_done_dict)
         if "__all__" in d:
             d.pop("__all__")
         # assert len(d) == self.agent_manager.num_RL_agents, d
@@ -382,7 +382,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
             self.agent_manager.filter_RL_agents(o, original_done_dict=original_done_dict),
             self.agent_manager.filter_RL_agents(r, original_done_dict=original_done_dict),
             d,
-            self.agent_manager.filter_RL_agents(tr, original_done_dict=original_done_dict),
+            self.agent_manager.filter_RL_agents(tc, original_done_dict=original_done_dict),
             self.agent_manager.filter_RL_agents(i, original_done_dict=original_done_dict),
         )
 
@@ -445,11 +445,11 @@ if __name__ == '__main__':
     ep_reward_sum = 0.0
     ep_success_reward_sum = 0.0
     for i in range(1, 100000):
-        o, r, te, tr, info = env.step({k: [0.0, 1.0] for k in env.action_space.sample().keys()})
+        o, r, tm, tc, info = env.step({k: [0.0, 1.0] for k in env.action_space.sample().keys()})
         # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
         vehicles = env.vehicles
 
-        for k, v in te.items():
+        for k, v in tm.items():
             if v and k in info:
                 ep_success += int(info[k]["arrive_dest"])
                 ep_reward_sum += int(info[k]["episode_reward"])
@@ -461,10 +461,10 @@ if __name__ == '__main__':
         #     assert sum(
         #         [env.engine.get_policy(v.name).__class__.__name__ == "EnvInputPolicy" for k, v in vehicles.items()]
         #     ) == env.config["num_RL_agents"]
-        if any(te.values()):
-            print("Somebody dead.", te, info)
+        if any(tm.values()):
+            print("Somebody dead.", tm, info)
             # print("Step {}. Policies: {}".format(i, {k: v['policy'] for k, v in info.items()}))
-        if te["__all__"]:
+        if tm["__all__"]:
             # assert i >= 1000
             print("Reset. ", i, info)
             # break
