@@ -133,6 +133,8 @@ class EngineCore(ShowBase.ShowBase):
         if self.use_render_pipeline:
             self.render_pipeline = RenderPipeline()
             self.render_pipeline.pre_showbase_init()
+            # disable it, as some model errors happen!
+            loadPrcFileData("", "gl-immutable-texture-storage 0")
         else:
             self.render_pipeline = None
 
