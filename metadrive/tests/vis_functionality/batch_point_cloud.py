@@ -52,8 +52,15 @@ if __name__ == '__main__':
         # ctr.set_up([0, -1, 0])
         # ctr.set_front([0, 0, -1])
         # ctr.set_lookat([1, 0, 0])
-        ctr.set_zoom(0.2)
-        ctr.camera_local_translate(0,0,5)
+        ctr.set_zoom(0.3)
+        #
+        # camera_parameters = ctr.convert_to_pinhole_camera_parameters()
+        # ex = np.array(camera_parameters.extrinsic)
+        # ex[2][3]+=10
+        # camera_parameters.extrinsic = ex
+        # ctr.convert_from_pinhole_camera_parameters(camera_parameters)
+
+
         # vis.update_geometry(pcd)
         vis.poll_events()
         vis.update_renderer()
