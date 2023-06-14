@@ -69,6 +69,11 @@ class Terrain(BaseObject):
         self.ts_normal = TextureStage("normal")
         self.ts_normal.setMode(TextureStage.M_normal)
 
+        # basic height_field
+        heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
+        heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
+        self.heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
+
         # grass
         self.grass_tex = self.loader.loadTexture(
             AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
@@ -147,14 +152,14 @@ class Terrain(BaseObject):
 
     # @time_me
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        height_scale=100,
-        height_offset=0.,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            height_scale=100,
+            height_offset=0.,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -264,14 +269,11 @@ class Terrain(BaseObject):
             semantic_tex.setRamImage(semantics)
 
             # we will downsmaple the precision after this
-            heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
-            heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
-            heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
             drivable_region = self.engine.current_map.get_height_map(
                 self._terrain_size, self._downsample_rate, self._drivable_region_extension
             )
-            drivable_region_height = np.mean(heightfield_img[np.where(drivable_region)]).astype(np.uint16)
-            heightfield_img = np.where(drivable_region, drivable_region_height, heightfield_img)
+            drivable_region_height = np.mean(self.heightfield_img[np.where(drivable_region)]).astype(np.uint16)
+            heightfield_img = np.where(drivable_region, drivable_region_height, self.heightfield_img)
 
             # set to zero height
             heightfield_img -= drivable_region_height
@@ -389,7 +391,6 @@ class Terrain(BaseObject):
         heightfield[-length:, :length] = array_3
         heightfield[:length, -length:] = array_3
         heightfield[-length:, -length:] = array_3
-
 
 # Some useful threads
 # GeoMipTerrain:

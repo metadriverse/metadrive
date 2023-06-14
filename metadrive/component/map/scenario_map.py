@@ -8,6 +8,7 @@ from metadrive.component.scenario_block.scenario_block import ScenarioBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.type import MetaDriveType
 from metadrive.scenario.scenario_description import ScenarioDescription
+from metadrive.utils.math import resample_polyline
 
 
 class ScenarioMap(BaseMap):
@@ -63,17 +64,17 @@ class ScenarioMap(BaseMap):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
-                        "polyline": np.asarray(data[ScenarioDescription.POLYLINE])
+                        "polyline": resample_polyline(np.asarray(data[ScenarioDescription.POLYLINE])[...,:2], interval)
                     }
                 else:
                     ret[map_feat_id] = {
-                        "polyline": np.asarray(data[ScenarioDescription.POLYLINE]),
+                        "polyline": resample_polyline(np.asarray(data[ScenarioDescription.POLYLINE])[...,:2], interval),
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
             elif MetaDriveType.is_road_edge(type):
                 ret[map_feat_id] = {
-                    "polyline": np.asarray(data[ScenarioDescription.POLYLINE]),
+                    "polyline": resample_polyline(np.asarray(data[ScenarioDescription.POLYLINE])[...,:2], interval),
                     "type": MetaDriveType.BOUNDARY_LINE
                 }
             elif type == MetaDriveType.LANE_SURFACE_STREET:
@@ -83,47 +84,47 @@ class ScenarioMap(BaseMap):
             #     raise ValueError
         return ret
 
-    def get_map_features(self, interval=2):
-        """
-        TODO LQY: Consider removing it as I prefer a resampled one
-        """
-        map_features = super(ScenarioMap, self).get_map_features(interval=interval)
-
-        # Adding the information stored in original data to here
-        original_map_features = self.engine.data_manager.get_scenario(self.map_index)["map_features"]
-
-        for map_feat_key, old_map_feat in original_map_features.items():
-
-            if map_feat_key not in map_features:
-                # Discard the data for those map features that are not reconstructed by MetaDrive.
-                pass
-
-                # old_map_feat = copy.deepcopy(old_map_feat)
-                # old_map_feat["valid"] = False
-                #
-                # map_features[map_feat_key] = old_map_feat
-                #
-                # if "polyline" in old_map_feat:
-                #     map_features[map_feat_key]["polyline"] = convert_polyline_to_metadrive(
-                #         old_map_feat["polyline"], coordinate_transform=self.coordinate_transform
-                #     )
-                #
-                # if "position" in old_map_feat:
-                #     if self.coordinate_transform:
-                #         map_features[map_feat_key]["position"] = waymo_to_metadrive_vector(old_map_feat["position"])
-                #     else:
-                #         map_features[map_feat_key]["position"] = old_map_feat["position"]
-
-            else:
-                # This map features are in both original data and current data.
-                # We will check if in original data this map features contains some useful metadata.
-                # If so, copied it to the new data.
-                if "speed_limit_kmh" in old_map_feat:
-                    map_features[map_feat_key]["speed_limit_kmh"] = old_map_feat["speed_limit_kmh"]
-                if "speed_limit_mph" in old_map_feat:
-                    map_features[map_feat_key]["speed_limit_mph"] = old_map_feat["speed_limit_mph"]
-
-        return map_features
+    # def get_map_features(self, interval=2):
+    #     """
+    #
+    #     """
+    #     map_features = super(ScenarioMap, self).get_map_features(interval=interval)
+    #
+    #     # Adding the information stored in original data to here
+    #     original_map_features = self.engine.data_manager.get_scenario(self.map_index)["map_features"]
+    #
+    #     for map_feat_key, old_map_feat in original_map_features.items():
+    #
+    #         if map_feat_key not in map_features:
+    #             # Discard the data for those map features that are not reconstructed by MetaDrive.
+    #             pass
+    #
+    #             # old_map_feat = copy.deepcopy(old_map_feat)
+    #             # old_map_feat["valid"] = False
+    #             #
+    #             # map_features[map_feat_key] = old_map_feat
+    #             #
+    #             # if "polyline" in old_map_feat:
+    #             #     map_features[map_feat_key]["polyline"] = convert_polyline_to_metadrive(
+    #             #         old_map_feat["polyline"], coordinate_transform=self.coordinate_transform
+    #             #     )
+    #             #
+    #             # if "position" in old_map_feat:
+    #             #     if self.coordinate_transform:
+    #             #         map_features[map_feat_key]["position"] = waymo_to_metadrive_vector(old_map_feat["position"])
+    #             #     else:
+    #             #         map_features[map_feat_key]["position"] = old_map_feat["position"]
+    #
+    #         else:
+    #             # This map features are in both original data and current data.
+    #             # We will check if in original data this map features contains some useful metadata.
+    #             # If so, copied it to the new data.
+    #             if "speed_limit_kmh" in old_map_feat:
+    #                 map_features[map_feat_key]["speed_limit_kmh"] = old_map_feat["speed_limit_kmh"]
+    #             if "speed_limit_mph" in old_map_feat:
+    #                 map_features[map_feat_key]["speed_limit_mph"] = old_map_feat["speed_limit_mph"]
+    #
+    #     return map_features
 
 
 if __name__ == "__main__":
