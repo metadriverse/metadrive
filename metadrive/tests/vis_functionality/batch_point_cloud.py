@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # for h in range(-180, 180, 20):
     h = 0
     dir = "C:\\Users\\x1\\Desktop\\neurips_2023\\sensor_video\\depth"
-    files = os.listdir("C:\\Users\\x1\\Desktop\\neurips_2023\\sensor_video\\depth")
+    files = os.listdir(dir)
     if "output.mp4" in files:
         files.remove("output.mp4")
     s = sorted(files, key=lambda x: int(x[6:-4]))
@@ -33,7 +33,7 @@ if __name__ == '__main__':
                               [0, np.sin(h), np.cos(h), 0],
                               [0, 0, 0, 1]])
         intrinsic = o3d.camera.PinholeCameraIntrinsic(o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
-        intrinsic.set_intrinsics(1600, 900, 1.866, 2.066, 800, 200)
+        intrinsic.set_intrinsics(1600, 900, 1.866, 2.066, 800, 450)
         pcd = o3d.geometry.PointCloud.create_from_depth_image(
             depth=raw_depth,
             intrinsic=intrinsic,
