@@ -29,9 +29,10 @@ class DepthCamera(BaseCamera):
         lens = self.get_lens()
 
         cam.lookAt(0, 2.4, 1.3)
+        # cam.lookAt(0, 10.4, 1.3)
 
         lens.setFov(60)
-        lens.setAspectRatio(2.0)
+        # lens.setAspectRatio(2.0)
         if get_engine().mode == RENDER_MODE_NONE or not AssetLoader.initialized() or type(self)._singleton.init_num > 1:
             return
         # add shader for it

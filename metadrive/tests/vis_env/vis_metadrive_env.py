@@ -26,6 +26,7 @@ if __name__ == "__main__":
             "use_render": True,
             "accident_prob": 1,
             "decision_repeat": 5,
+            "daytime": "19:00",
             "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
