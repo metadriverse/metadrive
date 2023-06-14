@@ -80,6 +80,10 @@ cuda_requirement = [
     "glfw",
 ]
 
+gym_requirement = [
+    "gym>=0.20.0, <=0.26.0"
+]
+
 setup(
     name="metadrive-simulator",
     python_requires='>=3.6, <3.12',  # do version check with assert
@@ -94,6 +98,7 @@ setup(
         "cuda": cuda_requirement,
         "nuplan": nuplan_requirement,
         "waymo": waymo_requirement,
+        "gym": gym_requirement,
         "all": nuplan_requirement + cuda_requirement
     },
     include_package_data=True,
