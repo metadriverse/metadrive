@@ -87,7 +87,7 @@ if __name__ == '__main__':
         img_interface = env.render("rgb_array")
         img_bev = env.render(
             "topdown",
-            track_target_vehicle=False,
+            target_vehicle_heading_up=False,
             draw_target_vehicle_trajectory=True,
             film_size=(3000, 3000),
             screen_size=(3000, 3000),

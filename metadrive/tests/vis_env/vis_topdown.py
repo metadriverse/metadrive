@@ -64,4 +64,4 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        env.render(mode="top_down", track_target_vehicle=True)
+        env.render(mode="top_down", target_vehicle_heading_up=True)
