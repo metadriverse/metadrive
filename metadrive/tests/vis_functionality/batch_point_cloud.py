@@ -1,48 +1,66 @@
+import os
+
 import open3d as o3d
 import matplotlib.pyplot as plt
 import numpy as np
 
 if __name__ == '__main__':
+    vis = o3d.visualization.Visualizer()
+    vis.create_window(width=1600, height=900, visible=True)
+
+
     # 8bit 1channel or 8bit 3channel, and depth image is: 16bit 1channel image
     pcds = []
     # for h in range(-180, 180, 20):
     h = 0
-    raw_depth = o3d.io.read_image("C:\\Users\\x1\\Desktop\\neurips_2023\\new_teaser\\new_teaser\\6_camera_100.jpg")
-    raw_depth = np.array(raw_depth)[..., 0]
-    raw_depth *= 255
-    raw_depth = raw_depth.astype(np.uint16)
-    raw_depth = o3d.geometry.Image(raw_depth)
-    extrinsic = np.array([[np.cos(h), -np.sin(h), 0, 0], [np.sin(h), np.cos(h), 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-    # extrinsic = np.array([[1, 0, 0, 0],
-    #                       [0, np.cos(h), -np.sin(h), 0],
-    #                       [0, np.sin(h), np.cos(h), 1.5],
-    #                       [0, 0, 0, 1]])
-    intrinsic = o3d.camera.PinholeCameraIntrinsic(o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
-    intrinsic.set_intrinsics(1600, 900, 0.866, 0.866, 800, 450)
-    pcd = o3d.geometry.PointCloud.create_from_depth_image(
-        depth=raw_depth,
-        intrinsic=intrinsic,
-        extrinsic=extrinsic,
-        project_valid_depth_only=False,
-        stride=4
-        # depth_scale=1000.0,
-        # depth_trunc=1000.0
-    )
-    # pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-    r = pcd.get_rotation_matrix_from_xyz((0, 0, np.pi))
-    pcd = pcd.rotate(r, center=(0, 0, 0))
-    pcds.append(pcd)
+    dir = "C:\\Users\\x1\\Desktop\\neurips_2023\\sensor_video\\depth"
+    s = sorted(os.listdir("C:\\Users\\x1\\Desktop\\neurips_2023\\sensor_video\\depth"), key=lambda x: int(x[6:-4]))
+    for k, file in enumerate(s):
+        raw_depth = o3d.io.read_image(os.path.join(dir, file))
+        raw_depth = np.array(raw_depth)[..., 0]
+        raw_depth *= 255
+        raw_depth = raw_depth.astype(np.uint16)
+        raw_depth = o3d.geometry.Image(raw_depth)
+        extrinsic = np.array([[np.cos(h), -np.sin(h), 0, 0],
+                              [np.sin(h), np.cos(h), 0, 0],
+                              [0, 0, 1, 0],
+                              [0, 0, 0, 1]])
+        # extrinsic = np.array([[1, 0, 0, 0],
+        #                       [0, np.cos(h), -np.sin(h), 0],
+        #                       [0, np.sin(h), np.cos(h), 1.5],
+        #                       [0, 0, 0, 1]])
+        intrinsic = o3d.camera.PinholeCameraIntrinsic(o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
+        intrinsic.set_intrinsics(1600, 900, 0.866, 0.866, 800, 450)
+        pcd = o3d.geometry.PointCloud.create_from_depth_image(
+            depth=raw_depth,
+            intrinsic=intrinsic,
+            extrinsic=extrinsic,
+            project_valid_depth_only=False,
+            stride=5
+            # depth_scale=1000.0,
+            # depth_trunc=1000.0
+        )
+        # pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
+        r = pcd.get_rotation_matrix_from_xyz((0, 0, np.pi))
+        pcd = pcd.rotate(r, center=(0, 0, 0))
+        # pcd = pcd.scale(10, center=(0, 0, 0))
+        # pcd = pcd.scale(10, center=(0, 0, 0))
+        # pcd.translate(np.array([0,0,-100]))
+        vis.add_geometry(pcd)
+        ctr = vis.get_view_control()
+        assert id(ctr) == id(vis.get_view_control())  # assertion error.
+        # ctr.set_up([0, -1, 0])
+        # ctr.set_front([0, 0, -1])
+        # ctr.set_lookat([1, 0, 0])
+        ctr.set_zoom(0.2)
+        ctr.camera_local_translate(0,0,5)
+        # vis.update_geometry(pcd)
+        vis.poll_events()
+        vis.update_renderer()
 
-    vis = o3d.visualization.Visualizer()
-    vis.create_window()
-    vis.add_geometry(pcd)
-    vis.update_geometry(pcd)
-    vis.poll_events()
-    vis.update_renderer()
-    view_control = vis.get_view_control()
-    view_control.set_zoom(10)
-    vis.update_renderer()
-    vis.capture_screen_image("img.png")
+        vis.capture_screen_image("img_{}.png".format(k))
+        vis.remove_geometry(pcd)
+
     vis.destroy_window()
 
     # CX_DEPTH=0
