@@ -286,7 +286,7 @@ def test_ma_parking_lot_reward_done_alignment():
     env = MultiAgentParkingLotEnv({"horizon": 200, "num_agents": 11, "out_of_road_penalty": 777, "crash_done": False})
     try:
         _check_spaces_before_reset(env)
-        obs, _ = env.reset(force_seed=0)
+        obs, _ = env.reset(seed=0)
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         out_num = 0
@@ -307,7 +307,7 @@ def test_ma_parking_lot_reward_done_alignment():
                         assert i[kkk]["out_of_road"]
                         # # print('{} reward passed!'.format(kkk))
                 if tm["__all__"]:
-                    env.reset(force_seed=0)
+                    env.reset(seed=0)
                     break
         assert out_num > 10
     finally:
@@ -395,7 +395,7 @@ def test_ma_parking_lot_reward_done_alignment():
         _check_spaces_before_reset(env)
         obs, _ = env.reset()
         env.engine.spawn_manager.np_random = np.random.RandomState(0)
-        obs, _ = env.reset(force_seed=0)
+        obs, _ = env.reset(seed=0)
         _check_spaces_after_reset(env, obs)
         for step in range(1):
             act = {k: [0, 0] for k in env.vehicles.keys()}

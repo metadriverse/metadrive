@@ -383,15 +383,15 @@ class BaseEnv(gym.Env):
         # logging.warning("You do not set 'image_observation' or 'image_observation' to True, so no image will be returned!")
         return None
 
-    def reset(self, force_seed: Union[None, int] = None):
+    def reset(self, seed: Union[None, int] = None):
         """
         Reset the env, scene can be restored and replayed by giving episode_data
         Reset the environment or load an episode from episode data to recover is
-        :param force_seed: The seed to set the env.
+        :param seed: The seed to set the env.
         :return: None
         """
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
-        self._reset_global_seed(force_seed)
+        self._reset_global_seed(seed)
         if self.engine is None:
             raise ValueError(
                 "Current MetaDrive instance is broken. Please make sure there is only one active MetaDrive "
@@ -653,7 +653,7 @@ class BaseEnv(gym.Env):
         self.config["record_episode"] = True
         done_info = {}
         for index in scenario_index:
-            obs = self.reset(force_seed=index)
+            obs = self.reset(seed=index)
             done = False
             count = 0
             info = None

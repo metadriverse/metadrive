@@ -8,7 +8,7 @@ def test_varying_dynamics_env():
     try:
         dys = []
         for seed in range(10):
-            env.reset(force_seed=seed)
+            env.reset(seed=seed)
             for _ in range(10):
                 env.step(env.action_space.sample())
             dy = env.vehicle.get_dynamics_parameters()

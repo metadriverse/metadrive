@@ -11,7 +11,7 @@ def test_seeding():
         env.seed(999)
         # assert env.engine is None
         assert env.current_seed == 999
-        env.reset(force_seed=992)
+        env.reset(seed=992)
         assert env.current_seed == 992
         # assert env.engine is not None
     finally:
@@ -58,7 +58,7 @@ def test_map_random_seeding():
         try:
             env.reset()
             env.reset()
-            env.reset(force_seed=5)
+            env.reset(seed=5)
             map_configs.append(env.current_map.get_meta_data())
             lane_num.append(len(env.current_map.road_network.graph[FirstPGBlock.NODE_1][FirstPGBlock.NODE_2]))
             lane_width.append(
@@ -109,7 +109,7 @@ def test_random_traffic():
     try:
         last_pos = None
         for i in range(10):
-            obs, _ = env.reset(force_seed=5)
+            obs, _ = env.reset(seed=5)
             assert env.engine.traffic_manager.random_traffic
             new_pos = [v.position for v in env.engine.traffic_manager.traffic_vehicles]
             if len(new_pos) > 0:
@@ -135,15 +135,15 @@ def test_random_lane_width():
         }
     )
     try:
-        o, _ = env.reset(force_seed=12)
+        o, _ = env.reset(seed=12)
         old_config_1 = env.vehicle.lane.width
-        env.reset(force_seed=15)
+        env.reset(seed=15)
         old_config_2 = env.vehicle.lane.width
-        env.reset(force_seed=13)
-        env.reset(force_seed=12)
+        env.reset(seed=13)
+        env.reset(seed=12)
         new_config = env.vehicle.lane.width
         assert old_config_1 == new_config
-        env.reset(force_seed=15)
+        env.reset(seed=15)
         new_config = env.vehicle.lane.width
         assert old_config_2 == new_config
         assert old_config_1 != old_config_2
@@ -162,21 +162,21 @@ def test_random_lane_num():
         }
     )
     try:
-        o, _ = env.reset(force_seed=12)
+        o, _ = env.reset(seed=12)
         old_config_1 = env.vehicle.navigation.get_current_lane_num()
-        env.reset(force_seed=15)
+        env.reset(seed=15)
         old_config_2 = env.vehicle.navigation.get_current_lane_num()
-        env.reset(force_seed=13)
-        env.reset(force_seed=12)
+        env.reset(seed=13)
+        env.reset(seed=12)
         new_config = env.vehicle.navigation.get_current_lane_num()
         assert old_config_1 == new_config
-        env.reset(force_seed=15)
+        env.reset(seed=15)
         new_config = env.vehicle.navigation.get_current_lane_num()
         assert old_config_2 == new_config
         env.close()
-        env.reset(force_seed=12)
+        env.reset(seed=12)
         assert old_config_1 == env.vehicle.navigation.get_current_lane_num()
-        env.reset(force_seed=15)
+        env.reset(seed=15)
         assert old_config_2 == env.vehicle.navigation.get_current_lane_num()
     finally:
         env.close()
@@ -193,15 +193,15 @@ def test_random_vehicle_parameter():
         }
     )
     try:
-        o, _ = env.reset(force_seed=12)
+        o, _ = env.reset(seed=12)
         old_config_1 = env.vehicle.get_config(True)
-        env.reset(force_seed=15)
+        env.reset(seed=15)
         old_config_2 = env.vehicle.get_config(True)
-        env.reset(force_seed=13)
-        env.reset(force_seed=12)
+        env.reset(seed=13)
+        env.reset(seed=12)
         new_config = env.vehicle.get_config(True)
         assert recursive_equal(old_config_1, new_config)
-        env.reset(force_seed=15)
+        env.reset(seed=15)
         new_config = env.vehicle.get_config(True)
         assert recursive_equal(old_config_2, new_config)
     finally:

@@ -98,7 +98,7 @@ def test_save_episode_marl(vis=False):
     )
     try:
         # Test Record
-        o, _ = env.reset(force_seed=0)
+        o, _ = env.reset(seed=0)
         epi_info = None
         # for tt in range(10, 100):
         tt = 13

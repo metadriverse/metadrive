@@ -59,7 +59,7 @@ if __name__ == "__main__":
     success = []
     while True:
         for i in range(3):
-            env.reset(force_seed=i)
+            env.reset(seed=i)
             while True:
                 step_start = time.time()
                 o, r, tm, tc, info = env.step([0, 0])

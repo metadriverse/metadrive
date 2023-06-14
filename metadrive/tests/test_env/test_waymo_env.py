@@ -23,7 +23,7 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
             }
         )
         for seed in range(0, num_scenarios):
-            env.reset(force_seed=seed)
+            env.reset(seed=seed)
             for i in range(1000):
                 o, r, tm, tc, info = env.step([1.0, 0.])
                 if tm or tc:
@@ -58,7 +58,7 @@ def test_store_map_memory_leakage(render=False):
         for _ in range(10):
             # test twp times for testing loading stored map
             for seed in range(3):
-                env.reset(force_seed=seed)
+                env.reset(seed=seed)
                 for i in range(1000):
                     o, r, tm, tc, info = env.step([1.0, 0.])
                     if tm or tc:

@@ -10,12 +10,12 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 
 
 class DemoWaymoEnv(WaymoEnv):
-    def reset(self, force_seed=None):
+    def reset(self, seed=None):
         if self.engine is not None:
             seeds = [i for i in range(self.config["num_scenarios"])]
             seeds.remove(self.current_seed)
-            force_seed = random.choice(seeds)
-        return super(DemoWaymoEnv, self).reset(force_seed=force_seed)
+            seed = random.choice(seeds)
+        return super(DemoWaymoEnv, self).reset(seed=seed)
 
 
 if __name__ == "__main__":

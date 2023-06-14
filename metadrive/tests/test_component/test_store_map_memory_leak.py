@@ -33,7 +33,7 @@ def test_pgdrive_env_memory_leak():
     try:
         for j in tqdm.tqdm(range(out_loop_num)):
             for i in range(num):
-                obs, _ = env.reset(force_seed=i)
+                obs, _ = env.reset(seed=i)
                 if j == 0 and i == 0:
                     start_memory = process_memory()
         end_memory = process_memory()

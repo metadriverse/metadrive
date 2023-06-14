@@ -63,7 +63,7 @@ if __name__ == "__main__":
         try:
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(10)
-            env.reset(force_seed=i)
+            env.reset(seed=i)
             while True:
                 o, r, tm, tc, info = env.step([0, 0])
                 if tm or tc or env.episode_step > max_step:

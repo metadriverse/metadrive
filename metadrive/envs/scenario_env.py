@@ -484,9 +484,9 @@ if __name__ == "__main__":
         }
     )
     success = []
-    env.reset(force_seed=0)
+    env.reset(seed=0)
     while True:
-        env.reset(force_seed=env.current_seed + 1)
+        env.reset(seed=env.current_seed + 1)
         for t in range(10000):
             o, r, tm, tc, info = env.step([0, 0])
             assert env.observation_space.contains(o)

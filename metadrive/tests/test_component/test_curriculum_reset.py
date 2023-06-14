@@ -23,7 +23,7 @@ def _test_level(level=1, render=False):
     try:
         scenario_id = set()
         for i in tqdm(range(10), desc=str(level)):
-            env.reset(force_seed=i)
+            env.reset(seed=i)
             for i in range(10):
                 o, r, d, _ = env.step([0, 0])
                 if d:
@@ -61,7 +61,7 @@ def test_curriculum_up_1_level(render=False, level=5):
     try:
         scenario_id = []
         for i in tqdm(range(10), desc=str(level)):
-            env.reset(force_seed=i)
+            env.reset(seed=i)
             for i in range(10):
                 o, r, d, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
