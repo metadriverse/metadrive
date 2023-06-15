@@ -6,7 +6,7 @@ import numpy as np
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, DrivableAreaProperty
 from metadrive.engine.engine_utils import get_global_config
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, MultiPolygon
 
 logger = logging.getLogger(__name__)
 
@@ -239,16 +239,21 @@ class BaseMap(BaseRunnable):
             for polygon in polygons:
                 if need_scale:
                     scaled_polygon = Polygon(polygon).buffer(extension, join_style=2)
-                    points = [
-                        [
-                            int(
-                                (scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter +
+                    if isinstance(scaled_polygon, MultiPolygon):
+                        scaled_polygons = scaled_polygon.geoms
+                    else:
+                        scaled_polygons = [scaled_polygon]
+                    for scaled_polygon in scaled_polygons:
+                        points = [
+                            [
+                                int(
+                                    (scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter +
+                                    size / 2
+                                ),
+                                int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) +
                                 size / 2
-                            ),
-                            int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) +
-                            size / 2
-                        ] for index in range(len(scaled_polygon.exterior.coords.xy[0]))
-                    ]
+                            ] for index in range(len(scaled_polygon.exterior.coords.xy[0]))
+                        ]
                 else:
                     points = [
                         [
