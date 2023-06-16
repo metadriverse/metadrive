@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Point3, PNMImage, NodePath
+from panda3d.core import Vec3, Point3, PNMImage
 from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup
@@ -49,7 +49,7 @@ class MainCamera:
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                                          ] is not None else None
+                                                                     ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
         self.world_light = engine.world_light  # light chases the chase camera, when not using global light
@@ -227,9 +227,12 @@ class MainCamera:
 
         if self.world_light is not None:
             self.world_light.step(current_pos)
-        # self.camera.reparentTo(vehicle.origin)
-        # self.camera.setPos(0., 0.8, 1.5)
-        # self.camera.lookAt(0, 10.4, 1.6)
+
+        # Don't use reparentTo()
+        # pos = vehicle.convert_to_world_coordinates([0.8, 0.], vehicle.position)
+        # look_at = vehicle.convert_to_world_coordinates([10.4, 0.], vehicle.position)
+        # self.camera.setPos(pos[0], pos[1], 1.5 + vehicle.origin.getZ())
+        # self.camera.lookAt(look_at[0], look_at[1], 1.6 + vehicle.origin.getZ())
         return task.cont
 
     @staticmethod
