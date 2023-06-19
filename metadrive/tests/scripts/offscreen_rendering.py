@@ -29,7 +29,7 @@ if __name__ == '__main__':
     env.reset()
     frames = []
     for num_frames in range(100):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         frame = o['image']
         frame = frame[..., 0]  # Original return frame is [1200, 1920, 3, 1] (float), so remove last dim.
         # frame = 1 - frame

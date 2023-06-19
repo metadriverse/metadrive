@@ -3,8 +3,8 @@ Reward, Cost, Termination and Step Information
 ###############################################
 
 Following the standard OpenAI Gym API, after each step of the environment :code:`env.step(...)`, the environment will return
-a tuple containing four items: :code:`(obs, reward, done, info)`. In this page, we discuss the design of reward function :code:`reward`, cost function :code:`info["cost"]`,
-termination criterion :code:`done` in various settings and the details of step information :code:`info`.
+a tuple containing five items: :code:`(obs, reward, terminated, truncated, info)`. In this page, we discuss the design of reward function :code:`reward`, cost function :code:`info["cost"]`,
+termination criterion :code:`terminated` in various settings, truncation information :code:`truncated`, and the details of step information :code:`info`.
 
 Reward Function
 #################
@@ -80,6 +80,11 @@ To limit the length of *environmental episode*, we also introduce a config :code
 The environmental episode has a **minimal length** of :code:`horizon` steps and the environment will stop spawning new target vehicles if this horizon is exceeded.
 If you wish to disable the respawning mechanism in MARL, set the config :code:`allow_respawn = False`. In this case, the environmental episode will terminate if no active vehicles are in the scene.
 
+
+
+Truncation Information
+#######################
+Currently, this is always set to `False` for each vehicle. 
 
 Step Information
 #######################

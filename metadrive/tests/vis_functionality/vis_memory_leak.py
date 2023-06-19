@@ -26,8 +26,8 @@ if __name__ == "__main__":
     env = TestMemoryLeakEnv()
     env.reset()
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         # env.render("Test: {}".format(i))
-        if d:
+        if tm or tc:
             env.reset()
     env.close()

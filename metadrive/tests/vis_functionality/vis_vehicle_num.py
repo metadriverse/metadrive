@@ -9,7 +9,7 @@ if __name__ == "__main__":
     env.reset()
     count = []
     for i in range(1, 101):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         env.reset()
         # print(
         #     "Current map {}, vehicle number {}.".format(env.current_seed, env.engine.traffic_manager.get_vehicle_num())

@@ -26,7 +26,7 @@ def test_coordinates_shift():
         pos = [(x, y) for x in [-10, 0, 10] for y in [-20, 0, 20]] * 10
         p = pos.pop()
         for s in range(1, 100000):
-            o, r, d, info = env.step([1, 0.3])
+            o, r, tm, tc, info = env.step([1, 0.3])
             if s % 10 == 0:
                 if len(pos) == 0:
                     break

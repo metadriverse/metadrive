@@ -484,11 +484,11 @@ if __name__ == "__main__":
         }
     )
     success = []
-    env.reset(force_seed=0)
+    env.reset(seed=0)
     while True:
-        env.reset(force_seed=env.current_seed + 1)
+        env.reset(seed=env.current_seed + 1)
         for t in range(10000):
-            o, r, d, info = env.step([0, 0])
+            o, r, tm, tc, info = env.step([0, 0])
             assert env.observation_space.contains(o)
             c_lane = env.vehicle.lane
             long, lat, = c_lane.local_coordinates(env.vehicle.position)
@@ -502,6 +502,6 @@ if __name__ == "__main__":
                 # mode="topdown"
             )
 
-            if d and info["arrive_dest"]:
+            if (tm or tc) and info["arrive_dest"]:
                 print("seed:{}, success".format(env.engine.global_random_seed))
                 break

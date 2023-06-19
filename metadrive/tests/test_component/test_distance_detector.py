@@ -42,13 +42,13 @@ def test_original_lidar(render=False):
         detect_traffic_vehicle = False
         detect_base_vehicle = False
         for i in range(1, 1000):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
             if len(env.vehicle.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
                 detect_traffic_vehicle = True
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 if isinstance(hit, BaseVehicle):
                     detect_base_vehicle = True
-            if d:
+            if tm or tc:
                 break
         # if not (detect_traffic_vehicle and detect_base_vehicle):
         #     print("Lidar detection failed")
@@ -94,13 +94,13 @@ def test_lidar_with_mask(render=False):
         detect_traffic_vehicle = False
         detect_base_vehicle = False
         for i in range(1, 1000):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
             if len(env.vehicle.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
                 detect_traffic_vehicle = True
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 if isinstance(hit, BaseVehicle):
                     detect_base_vehicle = True
-            if d:
+            if tm or tc:
                 break
         # if not (detect_traffic_vehicle and detect_base_vehicle):
         #     print("Lidar detection failed")

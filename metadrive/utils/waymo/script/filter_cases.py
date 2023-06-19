@@ -63,10 +63,10 @@ if __name__ == "__main__":
         try:
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(10)
-            env.reset(force_seed=i)
+            env.reset(seed=i)
             while True:
-                o, r, d, info = env.step([0, 0])
-                if d or env.episode_step > max_step:
+                o, r, tm, tc, info = env.step([0, 0])
+                if tm or tc or env.episode_step > max_step:
                     if info["arrive_dest"] and env.episode_step > min_step:
                         os.rename(
                             os.path.join(scenario_data_path, "{}.pkl".format(i + start * 1000)),

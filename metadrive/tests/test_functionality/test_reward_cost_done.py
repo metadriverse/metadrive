@@ -22,8 +22,8 @@ def test_reward_cost_done():
     #     env = MetaDriveEnv(config=config)
     #     env.reset()
     #     for _ in range(1000):
-    #         o, r, d, i = env.step([0, 1])
-    #         if d:
+    #         o, r, tm, tc, i = env.step([0, 1])
+    #         if tm or tc:
     #             break
     #     assert i[TerminationState.SUCCESS]
     #     assert i["cost"] == 0
@@ -40,8 +40,8 @@ def test_reward_cost_done():
     #     env = MetaDriveEnv(config=config)
     #     env.reset()
     #     for _ in range(1000):
-    #         o, r, d, i = env.step([1, 1])
-    #         if d:
+    #         o, r, tm, tc, i = env.step([1, 1])
+    #         if tm or tc:
     #             break
     #     assert i[TerminationState.OUT_OF_ROAD]
     #     assert i["cost"] == rewards["out_of_road_cost"]
@@ -59,10 +59,10 @@ def test_reward_cost_done():
         env.reset()
         epr = 0
         for _ in range(1000):
-            o, r, d, i = env.step([0, 1])
+            o, r, tm, tc, i = env.step([0, 1])
             epr += r
             # print("R: {}, Accu R: {}".format(r, epr))
-            if d:
+            if tm or tc:
                 epr = 0
                 break
         assert i[TerminationState.CRASH]
@@ -84,8 +84,8 @@ def test_reward_cost_done():
     #     env = MetaDriveEnv(config=config)
     #     env.reset()
     #     for _ in range(1000):
-    #         o, r, d, i = env.step([0, 1])
-    #         if d:
+    #         o, r, tm, tc, i = env.step([0, 1])
+    #         if tm or tc:
     #             break
     #     assert i[TerminationState.CRASH]
     #     assert i[TerminationState.CRASH_OBJECT]

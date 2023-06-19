@@ -38,12 +38,12 @@ def benchmark_fps():
     total_time = 0
     total_steps = 0
     for seed in range(300, 400):
-        env.reset(force_seed=seed)
+        env.reset(seed=seed)
         start = time.time()
         for i in range(env.engine.data_manager.current_scenario_length * 10):
-            o, r, d, info = env.step([0, 0])
+            o, r, tm, tc, info = env.step([0, 0])
             total_steps += 1
-            if d:
+            if tm or tc:
                 break
         total_time += time.time() - start
         if (seed + 300) % 20 == 0:
@@ -76,7 +76,7 @@ def benchmark_reset_5_map_1000_times(load_city_map=True):
     load_time = time.time() - start_time
     # print("After first reset process Memory: {}".format(process_memory()))
     for seed in tqdm.tqdm(range(300, 1300)):
-        env.reset(force_seed=(seed % 5) + 300)
+        env.reset(seed=(seed % 5) + 300)
         # if seed % 500 == 0:
         # print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
     # print(
@@ -112,7 +112,7 @@ def benchmark_reset_1000(load_city_map=True):
     # print("After first reset process Memory: {}".format(process_memory()))
     for seed in tqdm.tqdm(range(300, 1300)):
         thisscenario = time.time()
-        env.reset(force_seed=seed)
+        env.reset(seed=seed)
         # print("Seed: {}, Time: {}".format(seed, time.time() - thisscenario))
     #     if seed % 500 == 0:
     #         print("reset: {}, Time: {}, Process Memory: {}".format(seed, time.time() - start_time, process_memory()))
