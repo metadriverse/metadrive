@@ -63,7 +63,7 @@ def test_curriculum_up_1_level(render=False, level=5):
         for i in tqdm(range(10), desc=str(level)):
             env.reset(seed=i)
             for i in range(10):
-                o, r, d,_, _ = env.step([0, 0])
+                o, r, d, _, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
         assert len(set(scenario_id)) == 4
         ids = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup]

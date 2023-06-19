@@ -14,7 +14,7 @@ try:
             inner_class = config["inner_class"]
             inner_config = config["inner_config"]
             assert isinstance(inner_class, type)
-            assert isinstance(inner_config, dict)        
+            assert isinstance(inner_config, dict)
             self._inner = inner_class(config=inner_config)
 
         def step(self, actions):
@@ -28,7 +28,7 @@ try:
         def reset(self, *, seed=None, options=None):
             # pass non-none parameters to the reset (which may not support options or seed)
             params = {"seed": seed, "options": options}
-            not_none_params = {k:v for k, v in params.items() if v is not None}
+            not_none_params = {k: v for k, v in params.items() if v is not None}
             obs, _ = self._inner.reset(**not_none_params)
             return obs
 
@@ -61,11 +61,10 @@ try:
         def __getattr__(self, __name: str) -> Any:
             return self._inner[__name]
 
-
     if __name__ == '__main__':
         from metadrive.envs.scenario_env import ScenarioEnv
 
-        env = GymEnvWrapper(config={"inner_class": ScenarioEnv, "inner_config":{"manual_control": True}})
+        env = GymEnvWrapper(config={"inner_class": ScenarioEnv, "inner_config": {"manual_control": True}})
         o, i = env.reset()
         assert isinstance(env.observation_space, gymnasium.Space)
         assert isinstance(env.action_space, gymnasium.Space)
