@@ -19,11 +19,11 @@ def _test_rgb_camera_as_obs(render=False):
             show_fps=False,
         )
     )
-    obs = env.reset()
+    obs, _ = env.reset()
     action = [0.0, 0.1]
     start = time.time()
-    for i in range(20000):
-        o, r, d, _ = env.step(action)
+    for s in range(20000):
+        o, r, tm, tc, i = env.step(action)
         # engine = env.engine
         # if engine.episode_step <= 1:
         #     engine.graphicsEngine.renderFrame()

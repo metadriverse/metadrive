@@ -92,14 +92,14 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
 class MetaDriveEnv(BaseEnv):
     @classmethod
-    def default_config(cls) -> "Config":
+    def default_config(cls) -> Config:
         config = super(MetaDriveEnv, cls).default_config()
         config.update(METADRIVE_DEFAULT_CONFIG)
         config.register_type("map", str, int)
         config["map_config"].register_type("config", None)
         return config
 
-    def __init__(self, config: dict = None):
+    def __init__(self, config: Union[dict, None] = None):
         self.default_config_copy = Config(self.default_config(), unchangeable=True)
         super(MetaDriveEnv, self).__init__(config)
 
@@ -108,7 +108,7 @@ class MetaDriveEnv(BaseEnv):
         self.env_num = self.config["num_scenarios"]
         self.in_stop = False
 
-    def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
+    def _merge_extra_config(self, config: Union[dict, Config]) -> Config:
         config = self.default_config().update(config, allow_add_new_key=False)
         if config["vehicle_config"]["lidar"]["distance"] > 50:
             config["max_distance"] = config["vehicle_config"]["lidar"]["distance"]
@@ -353,7 +353,7 @@ if __name__ == '__main__':
 
     def _act(env, action):
         assert env.action_space.contains(action)
-        obs, reward, done, info = env.step(action)
+        obs, reward, terminated, truncated, info = env.step(action)
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
@@ -361,7 +361,7 @@ if __name__ == '__main__':
 
     env = MetaDriveEnv()
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         assert env.observation_space.contains(obs)
         _act(env, env.action_space.sample())
         for x in [-1, 0, 1]:

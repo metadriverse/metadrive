@@ -39,7 +39,7 @@ if __name__ == "__main__":
     import time
 
     start = time.time()
-    o = env.reset()
+    o, _ = env.reset()
 
     def get_v_path():
         return BaseVehicle.model_collection[env.vehicle.path[0]]
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     env.engine.accept("l", decrease_y)
 
     for s in range(1, 10000):
-        o, r, d, info = env.step([0, 0])
+        o, r, tm, tc, i = env.step([0, 0])
         env.render(
             text={
                 "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),

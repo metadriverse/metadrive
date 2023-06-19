@@ -37,7 +37,7 @@ def test_gen_map_read():
 
             recursive_equal(m, origin, need_assert=True)
         for seed in tqdm.tqdm(range(env_num), desc="Test Scenario"):
-            env.reset(force_seed=seed)
+            env.reset(seed=seed)
             for i in range(10):
                 env.step(env.action_space.sample())
         # print("Finish!")

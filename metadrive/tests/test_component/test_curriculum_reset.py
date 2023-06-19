@@ -23,9 +23,9 @@ def _test_level(level=1, render=False):
     try:
         scenario_id = set()
         for i in tqdm(range(10), desc=str(level)):
-            env.reset(force_seed=i)
+            env.reset(seed=i)
             for i in range(10):
-                o, r, d, _ = env.step([0, 0])
+                o, r, d, _, _ = env.step([0, 0])
                 if d:
                     break
 
@@ -61,9 +61,9 @@ def test_curriculum_up_1_level(render=False, level=5):
     try:
         scenario_id = []
         for i in tqdm(range(10), desc=str(level)):
-            env.reset(force_seed=i)
+            env.reset(seed=i)
             for i in range(10):
-                o, r, d, _ = env.step([0, 0])
+                o, r, d, _, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
         assert len(set(scenario_id)) == 4
         ids = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup]
@@ -94,7 +94,7 @@ def test_curriculum_level_up(render=False):
         for i in tqdm(range(20), desc=str(2)):
             env.reset()
             for i in range(250):
-                o, r, d, _ = env.step([0, 0])
+                o, r, d, _, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
         assert len(set(scenario_id)) == 10
         ids = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup]
@@ -132,7 +132,7 @@ def _worker_env(render, worker_index, level_up=False):
         for i in range(20):
             env.reset()
             for i in range(10):
-                o, r, d, _ = env.step([0, 0])
+                o, r, d, _, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
             print(env.current_seed)
         all_scenario = [
@@ -187,7 +187,7 @@ def level_up_worker(render, worker_index):
         for i in tqdm(range(20), desc=str(2)):
             env.reset()
             for i in range(250):
-                o, r, d, _ = env.step([0, 0])
+                o, r, d, _, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
         assert len(set(scenario_id)) == 4
         ids = [env.engine.data_manager.summary_dict[f]["id"] for f in env.engine.data_manager.summary_lookup[:8]]
@@ -228,7 +228,7 @@ def test_start_seed_not_0(render=False, worker_index=0):
         for i in tqdm(range(20), desc=str(2)):
             env.reset()
             for i in range(250):
-                o, r, d, _ = env.step([0, 0])
+                o, r, d, _, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
         all_scenarios = sorted(list(env.engine.data_manager.summary_dict.keys()))[2:]
         summary_lookup = env.engine.data_manager.summary_lookup[2:]
@@ -266,7 +266,7 @@ def test_start_seed_1_9(render=False, worker_index=0):
         for i in tqdm(range(20), desc=str(2)):
             env.reset()
             for i in range(250):
-                o, r, d, _ = env.step([0, 0])
+                o, r, d, _, _ = env.step([0, 0])
             scenario_id.append(env.engine.data_manager.current_scenario_summary["id"])
         all_scenarios = sorted(list(env.engine.data_manager.summary_dict.keys()))[1:9]
         summary_lookup = env.engine.data_manager.summary_lookup[1:9]

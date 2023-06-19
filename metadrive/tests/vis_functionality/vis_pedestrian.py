@@ -61,7 +61,7 @@ if __name__ == "__main__":
     import time
 
     start = time.time()
-    o = env.reset()
+    o, _ = env.reset()
     obj_1 = env.engine.spawn_object(Pedestrian, position=[30, 0], heading_theta=0, random_seed=1)
     obj_2 = env.engine.spawn_object(Pedestrian, position=[30, 6], heading_theta=0, random_seed=1)
     c_1 = env.engine.spawn_object(Cyclist, position=[30, 8], heading_theta=0, random_seed=1)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     env.vehicle.set_velocity([10, 0], in_local_frame=False)
     for s in range(1, 10000):
         # print(c_1.heading_theta)
-        o, r, d, info = env.step(env.action_space.sample())
+        o, r, tm, tc, info = env.step(env.action_space.sample())
         # obj_1.set_velocity([1, 0], 2, in_local_frame=True)
         # obj_2.set_velocity([1, 0], 0.8, in_local_frame=True)
         if s == 300:

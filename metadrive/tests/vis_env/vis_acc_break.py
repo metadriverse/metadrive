@@ -21,10 +21,10 @@ if __name__ == "__main__":
     import time
 
     start = time.time()
-    o = env.reset()
+    o, _ = env.reset()
     a = [.0, 1.]
     for s in range(1, 100000):
-        o, r, d, info = env.step(a)
+        o, r, tm, tc, info = env.step(a)
         if env.vehicle.speed_km_h > 100:
             a = [0, -1]
             # print("0-100 km/h acc use time:{}".format(s * 0.1))

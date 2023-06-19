@@ -37,7 +37,7 @@ if __name__ == "__main__":
     parser.add_argument("--top_down", action="store_true")
     args = parser.parse_args()
     env_cls_name = args.env
-    extra_args = dict(mode="top_down", film_size=(800, 800)) if args.top_down else {}
+    extra_args = dict(film_size=(800, 800)) if args.top_down else {}
     assert env_cls_name in envs.keys(), "No environment named {}, argument accepted: \n" \
                                         "(1) roundabout\n" \
                                         "(2) intersection\n" \
@@ -49,6 +49,7 @@ if __name__ == "__main__":
     env = envs[env_cls_name](
         {
             "use_render": True if not args.top_down else False,
+            "render_mode": "top_down" if args.top_down else None,
             "manual_control": False,
             "crash_done": False,
             "agent_policy": ManualControllableIDMPolicy
@@ -61,7 +62,7 @@ if __name__ == "__main__":
         print(HELP_MESSAGE)
         env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
         for i in range(1, 10000000000):
-            o, r, d, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
+            o, r, tm, tc, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
             env.render(
                 **extra_args,
                 text={
@@ -70,7 +71,7 @@ if __name__ == "__main__":
                     "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
                 } if not args.top_down else {}
             )
-            if d["__all__"]:
+            if tm["__all__"]:
                 env.reset()
                 if env.current_track_vehicle:
                     env.current_track_vehicle.expert_takeover = True

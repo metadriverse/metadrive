@@ -262,7 +262,7 @@ def test_detector_mask_in_lidar():
         )
         ep_count = 0
         for tt in range(3000):
-            o, r, d, i = env.step([0, 1])
+            o, r, tm, tc, i = env.step([0, 1])
 
             # print("We have: {} vehicles!".format(env.engine.traffic_manager.get_vehicle_num()))
 
@@ -303,7 +303,7 @@ def test_detector_mask_in_lidar():
             new_cloud_points = np.array(copy.deepcopy(c_p))
             np.testing.assert_almost_equal(old_cloud_points, new_cloud_points)
 
-            if d:
+            if tm or tc:
                 env.reset()
                 ep_count += 1
                 if ep_count == 3:

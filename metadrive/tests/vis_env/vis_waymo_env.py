@@ -10,12 +10,12 @@ from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
 
 
 class DemoWaymoEnv(WaymoEnv):
-    def reset(self, force_seed=None):
-        if self.engine is not None and force_seed is None:
+    def reset(self, seed=None):
+        if self.engine is not None and seed is None:
             seeds = [i for i in range(self.config["num_scenarios"])]
             seeds.remove(self.current_seed)
-            force_seed = random.choice(seeds)
-        super(DemoWaymoEnv, self).reset(force_seed=force_seed)
+            seed = random.choice(seeds)
+        return super(DemoWaymoEnv, self).reset(seed=seed)
 
 
 if __name__ == "__main__":
@@ -37,13 +37,13 @@ if __name__ == "__main__":
             }
         }
     )
-    o = env.reset(force_seed=0)
+    o, _ = env.reset(seed=0)
 
     for i in range(1, 100000):
-        o, r, d, info = env.step([1.0, 0.])
+        o, r, tm, tc, info = env.step([1.0, 0.])
         # print(env.vehicle.height)
         env.render(text={"seed": env.current_seed, "reward": r})
-        if d:
+        if tm or tc:
             # print(info["arrive_dest"])
             env.reset()
     env.close()

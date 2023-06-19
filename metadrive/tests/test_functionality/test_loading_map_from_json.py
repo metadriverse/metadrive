@@ -30,7 +30,7 @@ def _test_loaded_map_alignment():
         e.close()
 
         e = MetaDriveEnv({"start_seed": seed, "num_scenarios": 10})
-        e.reset(force_seed=seed)
+        e.reset(seed=seed)
         map_data_realtime_generate_in_multiple_maps = e.current_map.get_meta_data()
         e.close()
 

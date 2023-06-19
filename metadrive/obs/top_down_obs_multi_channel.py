@@ -1,6 +1,6 @@
 from collections import deque
 
-import gym
+import gymnasium as gym
 import math
 import numpy as np
 

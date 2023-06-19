@@ -14,15 +14,15 @@ if __name__ == '__main__':
     print("Start to profile the efficiency of MetaDrive Multi-agent Roundabout environment!")
     setup_logger(debug=False)
     env = MultiAgentRoundaboutEnv(dict(start_seed=1010))
-    obs = env.reset()
+    obs, _ = env.reset()
     start = time.time()
     reset_used_time = 0
     action = [0.0, 1.]
     total_steps = args.num_steps
     vehicle_num = [len(env.vehicles)]
     for s in range(total_steps):
-        o, r, d, i = env.step({k: action for k in env.vehicles})
-        if d["__all__"]:
+        o, r, tm, tc, i = env.step({k: action for k in env.vehicles})
+        if tm["__all__"]:
             start_reset = time.time()
             env.reset()
             vehicle_num.append(len(env.vehicles))

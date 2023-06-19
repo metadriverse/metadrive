@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o = env.reset()
+    o, _ = env.reset()
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
         env.engine.accept("7", acc_speed)
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     print(time.time()-start)
     for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
-        o, r, d, info = env.step([0, 0])
-        if d:
+        o, r, tm, tc, info = env.step([0, 0])
+        if tm:
             s = time.time()
             env.reset()
             print(time.time()-s)
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         #         "current_seed": env.current_seed
         #     }
         # )
-        # if d:
+        # if tm or tc:
         #     env.reset()
         # # assert env.observation_space.contains(o)
         # if (s + 1) % 100 == 0:
@@ -144,7 +144,7 @@ if __name__ == "__main__":
         #             time.time() - start, (s + 1) / (time.time() - start)
         #         )
         #     )
-        # if d:
+        # if tm or tc:
         # #     # env.close()
         # #     # print(len(env.engine._spawned_objects))
         # env.reset()

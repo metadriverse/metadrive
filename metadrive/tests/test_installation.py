@@ -28,7 +28,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
     try:
         env.reset()
         for i in range(10):
-            o, r, d, i = env.step([0, 1])
+            o, r, tm, tc, i = env.step([0, 1])
         assert isinstance(o, dict)
         # print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
         o = o["image"][..., -1] * 255 if not cuda else o["image"].get()[..., -1] * 255
@@ -68,7 +68,7 @@ def verify_installation(cuda=False, camera="main"):
     try:
         env.reset()
         for i in range(1, 100):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
     except:
         print("Error happens in Bullet physics world !")
         sys.exit()

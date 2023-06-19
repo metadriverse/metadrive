@@ -1,18 +1,18 @@
-import gym
+import gymnasium as gym
 
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 
 
 def _a(env, action):
     assert env.action_space.contains(action)
-    obs, reward, done, info = env.step(action)
+    obs, reward, terminated, truncated, info = env.step(action)
     assert env.observation_space.contains(obs)
     assert isinstance(info, dict)
 
 
 def _step(env):
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         assert env.observation_space.contains(obs)
         for _ in range(5):
             _a(env, env.action_space.sample())
@@ -38,13 +38,13 @@ def test_naive_multi_agent_metadrive():
     )
     try:
         assert isinstance(env.action_space, gym.spaces.Dict)
-        obs = env.reset()
+        obs, _ = env.reset()
         assert isinstance(obs, dict)
         env.action_space.seed(0)
         for step in range(100):
             a = env.action_space.sample()
             assert isinstance(a, dict)
-            o, r, d, i = env.step(a)
+            o, r, tm, tc, i = env.step(a)
 
             pos_z_list = [v.chassis.getNode(0).transform.pos[2] for v in env.vehicles.values()]
             for p in pos_z_list:
@@ -52,9 +52,10 @@ def test_naive_multi_agent_metadrive():
 
             assert isinstance(o, dict)
             assert isinstance(r, dict)
-            assert isinstance(d, dict)
+            assert isinstance(tm, dict)
+            assert isinstance(tc, dict)
             assert isinstance(i, dict)
-            if d["__all__"]:
+            if tm["__all__"]:
                 break
 
         _step(env)

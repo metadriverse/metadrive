@@ -2,7 +2,7 @@
 This file provide a RemoteMetaDrive environment which can be easily ran in single process!
 """
 
-import gym
+import gymnasium as gym
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
 

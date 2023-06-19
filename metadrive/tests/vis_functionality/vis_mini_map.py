@@ -17,14 +17,14 @@ if __name__ == "__main__":
     env.engine.accept("m", env.vehicle.get_camera([env.config["image_source"]]).save_image)
 
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         assert env.observation_space.contains(o)
         if env.config["use_render"]:
             # from metadrive.envs.observation_type import ObservationType, ImageObservation
             # for i in range(ImageObservation.STACK_SIZE):
             #     ObservationType.show_gray_scale_array(o["image"][:, :, i])
             env.render(text={"can you see me": i})
-        if d:
+        if tm or tc:
             # print("Reset")
             env.reset()
     env.close()

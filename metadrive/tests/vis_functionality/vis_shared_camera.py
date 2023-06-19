@@ -21,7 +21,7 @@ def vis_ma_parking_lot_env():
         }
     )
     env.reset()
-    o, r, d, i = env.step(env.action_space.sample())
+    o, r, tm, tc, i = env.step(env.action_space.sample())
     for i in range(4):
         cv2.imshow('img', o["agent{}".format(i)]["image"][..., -1])
         cv2.waitKey(0)

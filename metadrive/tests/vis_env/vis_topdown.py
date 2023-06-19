@@ -19,6 +19,7 @@ if __name__ == "__main__":
             # "controller": "joystick",
             # "manual_control": True,
             "use_render": False,
+            "render_mode": "top_down",
             "decision_repeat": 5,
             "need_inverse_traffic": True,
             "rgb_clip": True,
@@ -49,12 +50,12 @@ if __name__ == "__main__":
     import time
     # [9.95036221 0.99503618]
     start = time.time()
-    o = env.reset()
+    o, _ = env.reset()
     env.vehicle.set_velocity([1, 0.1], 10)
     # print(env.vehicle.speed)
 
     for s in range(1, 10000):
-        o, r, d, info = env.step([1, 0.5])
+        o, r, tm, tc, info = env.step([1, 0.5])
         # print("heading: {} forward_direction: {}".format(env.vehicle.heading, env.vehicle.velocity_direction))
 
         # env.vehicle.set_velocity([1, 10], 10)
@@ -64,4 +65,4 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        env.render(mode="top_down", target_vehicle_heading_up=True)
+        env.render(track_target_vehicle=True)

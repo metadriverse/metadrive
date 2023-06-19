@@ -2,7 +2,7 @@ import time
 from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
 MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 import numpy as np
-from gym.spaces import Box, Dict
+from gymnasium.spaces import Box, Dict
 
 from metadrive.envs.marl_envs.marl_parking_lot import MultiAgentParkingLotEnv
 from metadrive.utils import distance_greater, norm
@@ -57,17 +57,19 @@ def _check_space(env):
 
 def _act(env, action):
     assert env.action_space.contains(action)
-    obs, reward, done, info = env.step(action)
+    obs, reward, terminated, truncated, info = env.step(action)
     _check_shape(env)
-    if not done["__all__"]:
+    if not terminated["__all__"]:
         assert len(env.vehicles) > 0
     if not (set(obs.keys()) == set(reward.keys()) == set(env.observation_space.spaces.keys())):
         raise ValueError
     assert env.observation_space.contains(obs)
     assert isinstance(reward, dict)
     assert isinstance(info, dict)
-    assert isinstance(done, dict)
-    return obs, reward, done, info
+    assert isinstance(terminated, dict)
+    assert isinstance(truncated, dict)
+
+    return obs, reward, terminated, truncated, info
 
 
 def test_ma_parking_lot_env():
@@ -83,14 +85,16 @@ def test_ma_parking_lot_env():
                                          "vehicle_config": {"lidar": {"num_others": 0}}})]:
         try:
             _check_spaces_before_reset(env)
-            obs = env.reset()
+            obs, _ = env.reset()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             for step in range(100):
                 act = {k: [1, 1] for k in env.vehicles.keys()}
-                o, r, d, i = _act(env, act)
+                o, r, tm, tc, i = _act(env, act)
                 if step == 0:
-                    assert not any(d.values())
+                    assert not any(tm.values())
+                    assert not any(tc.values())
+
         finally:
             env.close()
 
@@ -114,38 +118,39 @@ def test_ma_parking_lot_horizon():
         )
         try:
             _check_spaces_before_reset(env)
-            obs = env.reset()
+            obs, _ = env.reset()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             last_keys = set(env.vehicles.keys())
             for step in range(1, 1000):
                 act = {k: [1, 1] for k in env.vehicles.keys()}
-                o, r, d, i = _act(env, act)
+                o, r, tm, tc, i = _act(env, act)
                 new_keys = set(env.vehicles.keys())
                 if step == 0:
-                    assert not any(d.values())
-                if any(d.values()):
+                    assert not any(tm.values())
+                    assert not any(tc.values())
+                if any(tm.values()):
                     assert len(last_keys) <= 4  # num of agents
                     assert len(new_keys) <= 4  # num of agents
                     for k in new_keys.difference(last_keys):
                         assert k in o
-                        assert k in d
+                        assert k in tm
                     # print("Step {}, Done: {}".format(step, d))
 
                 for kkk, rrr in r.items():
                     if rrr == -777:
-                        assert d[kkk]
+                        assert tm[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
 
                 for kkk, iii in i.items():
                     if "out_of_road" in iii and (iii["out_of_road"] or iii["cost"] == 778):
-                        assert d[kkk]
+                        assert tm[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
                         #assert r[kkk] == -777
 
-                if d["__all__"]:
+                if tm["__all__"]:
                     break
                 last_keys = new_keys
         finally:
@@ -156,16 +161,17 @@ def test_ma_parking_lot_reset():
     env = MultiAgentParkingLotEnv({"horizon": 50, "num_agents": 11})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         for step in range(1000):
             act = {k: [1, 1] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
             if step == 0:
-                assert not any(d.values())
-            if d["__all__"]:
-                obs = env.reset()
+                assert not any(tm.values())
+                assert not any(tc.values())
+            if tm["__all__"]:
+                obs, _ = env.reset()
                 assert env.observation_space.contains(obs)
 
                 _check_spaces_after_reset(env, obs)
@@ -183,7 +189,7 @@ def test_ma_parking_lot_reset():
         _check_spaces_before_reset(env)
         success_count = 0
         agent_count = 0
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
 
@@ -192,7 +198,7 @@ def test_ma_parking_lot_reset():
 
                 # for _ in range(2):
                 #     act = {k: [1, 1] for k in env.vehicles.keys()}
-                #     o, r, d, i = _act(env, act)
+                #     o, r, tm, tc, i = _act(env, act)
 
                 # Force vehicle to success!
                 for v_id, v in env.vehicles.items():
@@ -214,7 +220,7 @@ def test_ma_parking_lot_reset():
                     assert env._is_arrive_destination(v)
 
                 act = {k: [0, 0] for k in env.vehicles.keys()}
-                o, r, d, i = _act(env, act)
+                o, r, tm, tc, i = _act(env, act)
 
                 for v in env.vehicles.values():
                     assert len(v.navigation.checkpoints) > 2
@@ -224,18 +230,18 @@ def test_ma_parking_lot_reset():
                         # # print("{} success!".format(kkk))
                         success_count += 1
 
-                for kkk, ddd in d.items():
+                for kkk, ddd in tm.items():
                     if ddd and kkk != "__all__":
                         assert i[kkk]["arrive_dest"]
                         agent_count += 1
 
                 for kkk, rrr in r.items():
-                    if d[kkk]:
+                    if tm[kkk]:
                         assert rrr == 777
 
-                if d["__all__"]:
+                if tm["__all__"]:
                     # print("Finish {} agents. Success {} agents.".format(agent_count, success_count))
-                    o = env.reset()
+                    o, _ = env.reset()
                     assert env.observation_space.contains(o)
                     _check_spaces_after_reset(env, o)
                     break
@@ -262,11 +268,12 @@ def test_ma_parking_lot_close_spawn():
     try:
         _check_spaces_before_reset(env)
         for num_r in range(10):
-            obs = env.reset()
+            obs, _ = env.reset()
             _check_spaces_after_reset(env)
             for _ in range(10):
-                o, r, d, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
-                assert not any(d.values())
+                o, r, tm, tc, i = env.step({k: [0, 0] for k in env.vehicles.keys()})
+                assert not any(tm.values())
+                assert not any(tc.values())
             _no_close_spawn(env.vehicles)
             # print('Finish {} resets.'.format(num_r))
     finally:
@@ -279,15 +286,15 @@ def test_ma_parking_lot_reward_done_alignment():
     env = MultiAgentParkingLotEnv({"horizon": 200, "num_agents": 11, "out_of_road_penalty": 777, "crash_done": False})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset(force_seed=0)
+        obs, _ = env.reset(seed=0)
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         out_num = 0
         for action in [-1, 1]:
             for step in range(5000):
                 act = {k: [action, 1] for k in env.vehicles.keys()}
-                o, r, d, i = _act(env, act)
-                for kkk, ddd in d.items():
+                o, r, tm, tc, i = _act(env, act)
+                for kkk, ddd in tm.items():
                     if ddd and kkk != "__all__":
                         #assert r[kkk] == -777
                         assert i[kkk]["out_of_road"] or i[kkk]["max_step"]
@@ -296,11 +303,11 @@ def test_ma_parking_lot_reward_done_alignment():
                         # # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
                     if rrr == -777:
-                        assert d[kkk]
+                        assert tm[kkk]
                         assert i[kkk]["out_of_road"]
                         # # print('{} reward passed!'.format(kkk))
-                if d["__all__"]:
-                    env.reset(force_seed=0)
+                if tm["__all__"]:
+                    env.reset(seed=0)
                     break
         assert out_num > 10
     finally:
@@ -325,17 +332,17 @@ def test_ma_parking_lot_reward_done_alignment():
     env._DEBUG_RANDOM_SEED = 1
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         for step in range(5):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
         env.vehicles["agent0"].set_position(env.vehicles["agent1"].position, height=1.2)
         for step in range(5000):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
 
-            if not any(d.values()):
+            if not any(tm.values()):
                 continue
 
             # assert sum(d.values()) == 2
@@ -346,7 +353,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 assert iii["crash"]
                 #assert r[kkk] == -1.7777
                 # for kkk, ddd in d.items():
-                ddd = d[kkk]
+                ddd = tm[kkk]
                 if ddd and kkk != "__all__":
                     #assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
@@ -355,7 +362,7 @@ def test_ma_parking_lot_reward_done_alignment():
                 # for kkk, rrr in r.items():
                 rrr = r[kkk]
                 if rrr == -1.7777:
-                    assert d[kkk]
+                    assert tm[kkk]
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
                     # # print('{} reward passed!'.format(kkk))
@@ -386,13 +393,13 @@ def test_ma_parking_lot_reward_done_alignment():
     )
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         env.engine.spawn_manager.np_random = np.random.RandomState(0)
-        obs = env.reset(force_seed=0)
+        obs, _ = env.reset(seed=0)
         _check_spaces_after_reset(env, obs)
         for step in range(1):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
 
         for v_id, v in env.vehicles.items():
             if v_id != "agent0":
@@ -400,14 +407,14 @@ def test_ma_parking_lot_reward_done_alignment():
         out_num = 0
         for step in range(5000):
             act = {k: [0, 1] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
             for kkk, iii in i.items():
                 if iii["crash"]:
                     assert iii["crash_vehicle"]
                 if iii["crash_vehicle"]:
                     assert iii["crash"]
                     # #assert r[kkk] == -1.7777
-            for kkk, ddd in d.items():
+            for kkk, ddd in tm.items():
                 if ddd and kkk != "__all__":
                     assert i[kkk]["out_of_road"] or i[kkk]["max_step"]
                     if i[kkk]["out_of_road"]:
@@ -419,9 +426,9 @@ def test_ma_parking_lot_reward_done_alignment():
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
                     # # print('{} reward passed!'.format(kkk))
-            if d["agent0"]:
+            if tm["agent0"]:
                 break
-            if d["__all__"]:
+            if tm["__all__"]:
                 break
         assert out_num > 0
     finally:
@@ -439,24 +446,24 @@ def test_ma_parking_lot_reward_done_alignment():
     )
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env)
         env.vehicles["agent0"].set_position(env.vehicles["agent0"].navigation.final_lane.end)
         assert env.observation_space.contains(obs)
         for step in range(5000):
             act = {k: [0, 0] for k in env.vehicles.keys()}
-            o, r, d, i = _act(env, act)
-            if d["__all__"]:
+            o, r, tm, tc, i = _act(env, act)
+            if tm["__all__"]:
                 break
             kkk = "agent0"
             #assert r[kkk] == 999
             assert i[kkk]["arrive_dest"]
-            assert d[kkk]
+            assert tm[kkk]
 
             kkk = "agent1"
             #assert r[kkk] != 999
             assert not i[kkk]["arrive_dest"]
-            assert not d[kkk]
+            assert not tm[kkk]
             break
     finally:
         env.close()
@@ -502,26 +509,26 @@ def test_ma_parking_lot_no_short_episode():
     })
     try:
         _check_spaces_before_reset(env)
-        o = env.reset()
+        o, _ = env.reset()
         _check_spaces_after_reset(env, o)
         actions = [[0, 1], [1, 1], [-1, 1]]
         start = time.time()
-        d_count = 0
-        d = {"__all__": False}
+        tm_count = 0
+        tm = {"__all__": False}
         for step in range(2000):
             # act = {k: actions[np.random.choice(len(actions))] for k in o.keys()}
             act = {k: actions[np.random.choice(len(actions))] for k in env.vehicles.keys()}
             o_keys = set(o.keys()).union({"__all__"})
-            a_keys = set(env.action_space.spaces.keys()).union(set(d.keys()))
+            a_keys = set(env.action_space.spaces.keys()).union(set(tm.keys()))
             assert o_keys == a_keys
-            o, r, d, i = _act(env, act)
+            o, r, tm, tc, i = _act(env, act)
             for kkk, iii in i.items():
-                if d[kkk]:
+                if tm[kkk]:
                     assert iii["episode_length"] >= 1
-                    d_count += 1
-            if d["__all__"]:
-                o = env.reset()
-                d = {"__all__": False}
+                    tm_count += 1
+            if tm["__all__"]:
+                o, _ = env.reset()
+                tm = {"__all__": False}
             # if (step + 1) % 100 == 0:
             #     # print(
             #         "Finish {}/2000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
@@ -529,7 +536,7 @@ def test_ma_parking_lot_no_short_episode():
             #             time.time() - start, (step + 1) / (time.time() - start)
             #         )
             #     )
-            if d_count > 200:
+            if tm_count > 200:
                 break
     finally:
         env.close()
@@ -541,7 +548,7 @@ def test_ma_parking_lot_horizon_termination():
     try:
         for _ in range(3):  # This function is really easy to break, repeat multiple times!
             _check_spaces_before_reset(env)
-            obs = env.reset()
+            obs, _ = env.reset()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             should_respawn = set()
@@ -549,20 +556,22 @@ def test_ma_parking_lot_horizon_termination():
                 act = {k: [0, 0] for k in env.vehicles.keys()}
                 for v_id in act.keys():
                     env.vehicles[v_id].set_static(True)
-                obs, r, d, i = _act(env, act)
+                obs, r, tm, tc, i = _act(env, act)
                 # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
                 if step == 0 or step == 1:
-                    assert not any(d.values())
+                    assert not any(tm.values())
+                    assert not any(tc.values())
 
                 if should_respawn:
                     for kkk in should_respawn:
                         assert kkk not in obs, "It seems the max_step agents is not respawn!"
                         assert kkk not in r
-                        assert kkk not in d
+                        assert kkk not in tm
+                        assert kkk not in tc
                         assert kkk not in i
                     should_respawn.clear()
 
-                for kkk, ddd in d.items():
+                for kkk, ddd in tm.items():
                     if ddd and kkk == "__all__":
                         # print("Current: ", step)
                         continue
@@ -573,8 +582,8 @@ def test_ma_parking_lot_horizon_termination():
                         assert not i[kkk]["crash_vehicle"]
                         should_respawn.add(kkk)
 
-                if d["__all__"]:
-                    obs = env.reset()
+                if tm["__all__"]:
+                    obs, _ = env.reset()
                     should_respawn.clear()
                     break
     finally:
@@ -597,7 +606,7 @@ def test_ma_parking_lot_40_agent_reset_after_respawn():
     env = MultiAgentParkingLotEnv({"horizon": 50, "num_agents": 32, "parking_space_num": 32, "use_render": False})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         for step in range(50):
@@ -631,14 +640,14 @@ def test_ma_no_reset_error():
     env = MultiAgentParkingLotEnv({"horizon": 300, "num_agents": 11, "delay_done": 0, "use_render": False})
     try:
         _check_spaces_before_reset(env)
-        obs = env.reset()
+        obs, _ = env.reset()
         _check_spaces_after_reset(env, obs)
         assert env.observation_space.contains(obs)
         for step in range(50):
             check_pos(list(env.vehicles.values()))
-            o, r, d, i = env.step({k: [0, 1] for k in env.vehicles.keys()})
+            o, r, tm, tc, i = env.step({k: [0, 1] for k in env.vehicles.keys()})
             env.reset()
-            if d["__all__"]:
+            if tm["__all__"]:
                 break
     finally:
         env.close()
@@ -648,12 +657,12 @@ def test_randomize_spawn_place():
     last_pos = {}
     env = MultiAgentParkingLotEnv({"num_agents": 4, "use_render": False, "force_seed_spawn_manager": False})
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         for step in range(100):
             act = {k: [1, 1] for k in env.vehicles.keys()}
             last_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
-            o, r, d, i = env.step(act)
-            obs = env.reset()
+            o, r, tm, tc, i = env.step(act)
+            obs, _ = env.reset()
             new_pos = {kkk: v.position for kkk, v in env.vehicles.items()}
             for kkk, new_p in new_pos.items():
                 assert not np.all(new_p == last_pos[kkk]), (new_p, last_pos[kkk], kkk)

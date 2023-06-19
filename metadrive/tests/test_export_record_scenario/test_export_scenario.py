@@ -33,10 +33,11 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
             )
         )
         for index in range(num_scenarios):
-            env.reset(force_seed=index)
+            env.reset(seed=index)
             done = False
             while not done:
-                o, r, done, i = env.step([0, 0])
+                o, r, tm, tc, i = env.step([0, 0])
+                done = tm or tc
     finally:
         env.close()
         if dir is not None:
@@ -76,12 +77,13 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
         )
         for index in range(num_scenarios):
             print("Start replaying scenario {}".format(index))
-            env.reset(force_seed=index)
+            env.reset(seed=index)
             done = False
             count = 0
             while not done:
-                o, r, done, i = env.step([0, 0])
+                o, r, tm, tc, i = env.step([0, 0])
                 count += 1
+                done = tm or tc
             print("Finish replaying scenario {} with step {}".format(index, count))
     finally:
         env.close()
