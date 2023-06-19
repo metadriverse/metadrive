@@ -24,7 +24,7 @@ if __name__ == "__main__":
     brake = [-1, -np.nan]
     env.reset()
     for i in range(1, 100000):
-        o, r, d, info = env.step(acc)
+        o, r, tm, tc, info = env.step(acc)
         # print(
         #     "new:{}, old:{}, diff:{}".format(
         #         env.vehicle.speed_km_h, env.vehicle.system.get_current_speed_km_hour(),

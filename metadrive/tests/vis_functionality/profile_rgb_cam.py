@@ -26,11 +26,11 @@ if __name__ == "__main__":
     )
     start = time.time()
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 0])
+        o, r, tm, tc, info = env.step([0, 0])
         assert env.observation_space.contains(o)
         # if i % 1000 == 0:
         # print("FPS: {}".format(i / (time.time() - start)))
-        if d:
+        if tm or tc:
             # print("Reset")
             env.reset()
     env.close()

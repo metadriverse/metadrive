@@ -39,27 +39,27 @@ def test_save_recreate_scenario(vis=False):
     env = SafeMetaDriveEnv(cfg)
     try:
         positions_1 = []
-        o = env.reset()
+        o, _ = env.reset()
         epi_info = env.engine.record_manager.get_episode_metadata()
         for i in range(1, 100000 if vis else 2000):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
             positions_1.append({v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()})
-            if d:
+            if tm or tc:
                 break
         env.close()
         env = SafeMetaDriveEnv(cfg)
         env.config["replay_episode"] = epi_info
         env.config["record_episode"] = False
         env.config["only_reset_when_replay"] = True
-        o = env.reset()
+        o, _ = env.reset()
         positions_1.reverse()
         for i in range(0, 100000 if vis else 2000):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
             position = positions_1.pop()
             position = {env.engine.replay_manager.record_name_to_current_name[key]: v for key, v in position.items()}
             current_position = {v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()}
             assert_equal_pos(position, current_position)
-            if d:
+            if tm or tc:
                 break
     finally:
         env.close()

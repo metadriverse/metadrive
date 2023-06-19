@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 from metadrive.engine.engine_utils import get_global_config
 import numpy as np
 

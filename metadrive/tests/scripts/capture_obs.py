@@ -45,7 +45,7 @@ if __name__ == "__main__":
             }
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
 
     depth_camera = env.config["vehicle_config"]["depth_camera"]
     depth_camera = DepthCamera(*depth_camera, chassis_np=env.vehicle.chassis, engine=env.engine)
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     env.vehicle.chassis.setPos(244, 0, 1.5)
     for i in range(1, 100000):
-        o, r, d, info = env.step([0, 1])
+        o, r, tm, tc, info = env.step([0, 1])
         env.render(
             # text={
             #     "vehicle_num": len(env.engine.traffic_manager.traffic_vehicles),
@@ -68,6 +68,6 @@ if __name__ == "__main__":
             #     "dist_to_right:": env.vehicle.dist_to_right,
             # }
         )
-        if d:
+        if tm or tc:
             env.reset()
     env.close()

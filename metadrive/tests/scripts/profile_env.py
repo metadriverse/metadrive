@@ -11,8 +11,8 @@ if __name__ == "__main__":
         }
     )
 
-    o = env.reset()
+    o, _ = env.reset()
     for i in range(1, 10000):
         # print(i)
-        o, r, d, info = env.step([0, 0])
+        o, r, tm, tc, info = env.step([0, 0])
     env.close()

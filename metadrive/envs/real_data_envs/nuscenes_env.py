@@ -76,12 +76,12 @@ if __name__ == "__main__":
     while True:
         # for i in range(10):
         start_reset = time.time()
-        env.reset(force_seed=0)
+        env.reset(seed=0)
 
         reset_used_time += time.time() - start_reset
         reset_num += 1
         for t in range(10000):
-            o, r, d, info = env.step([1, 0.88])
+            o, r, tm, tc, info = env.step([1, 0.88])
             assert env.observation_space.contains(o)
             s += 1
             if env.config["use_render"]:
@@ -97,7 +97,7 @@ if __name__ == "__main__":
                     },
                     # mode="topdown"
                 )
-            if d:
+            if tm or tc:
                 print(
                     "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
                         time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num

@@ -212,7 +212,7 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
             ret.append(Road(ParkingLot.node(1, i, 5), ParkingLot.node(1, i, 6)))
         return ret
 
-    def _merge_extra_config(self, config) -> "Config":
+    def _merge_extra_config(self, config) -> Config:
         ret_config = super(MultiAgentParkingLotEnv, self)._merge_extra_config(config)
         # add extra assert
         parking_space_num = ret_config["parking_space_num"]
@@ -286,7 +286,7 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
 
 def _draw():
     env = MultiAgentParkingLotEnv()
-    o = env.reset()
+    o, _ = env.reset()
     from metadrive.utils.draw_top_down_map import draw_top_down_map
     import matplotlib.pyplot as plt
 
@@ -315,17 +315,17 @@ def _expert():
             "num_agents": 3,
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, d, info = env.step(env.action_space.sample())
+        o, r, tm, tc, info = env.step(env.action_space.sample())
         for r_ in r.values():
             total_r += r_
         ep_s += 1
-        d.update({"total_r": total_r, "episode length": ep_s})
+        tm.update({"total_r": total_r, "episode length": ep_s})
         # env.render(text=d)
-        if d["__all__"]:
+        if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -358,12 +358,12 @@ def _vis_debug_respawn():
             "num_agents": 11,
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
         action = {k: [0.0, .0] for k in env.vehicles.keys()}
-        o, r, d, info = env.step(action)
+        o, r, tm, tc, info = env.step(action)
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -376,7 +376,7 @@ def _vis_debug_respawn():
             "cam_z": env.main_camera.top_down_camera_height
         }
         env.render(text=render_text)
-        if d["__all__"]:
+        if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -414,14 +414,14 @@ def _vis():
             # "parking_space_num": 4
         }
     )
-    o = env.reset()
+    o, _ = env.reset()
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
         actions = {k: [1.0, .0] for k in env.vehicles.keys()}
         if len(env.vehicles) == 1:
             actions = {k: [-1.0, .0] for k in env.vehicles.keys()}
-        o, r, d, info = env.step(actions)
+        o, r, tm, tc, info = env.step(actions)
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -463,7 +463,7 @@ def _vis():
                         }
                     )
                 )
-        if d["__all__"]:
+        if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
                     i, total_r, total_r / env.agent_manager.next_agent_count
@@ -481,15 +481,15 @@ def _vis():
 def _profile():
     import time
     env = MultiAgentParkingLotEnv({"num_agents": 10})
-    obs = env.reset()
+    obs, _ = env.reset()
     start = time.time()
     for s in range(10000):
-        o, r, d, i = env.step(env.action_space.sample())
+        o, r, tm, tc, i = env.step(env.action_space.sample())
 
         # mask_ratio = env.engine.detector_mask.get_mask_ratio()
         # print("Mask ratio: ", mask_ratio)
 
-        if all(d.values()):
+        if all(tm.values()):
             env.reset()
         if (s + 1) % 100 == 0:
             print(
@@ -523,17 +523,17 @@ def _long_run():
         }
     )
     try:
-        obs = env.reset()
+        obs, _ = env.reset()
         assert env.observation_space.contains(obs)
         for step in range(10000):
             act = env.action_space.sample()
-            o, r, d, i = env.step(act)
+            o, r, tm, tc, i = env.step(act)
             if step == 0:
                 assert not any(d.values())
 
-            if any(d.values()):
+            if any(tm.values()):
                 print("Current Done: {}\nReward: {}".format(d, r))
-                for kkk, ddd in d.items():
+                for kkk, ddd in tm.items():
                     if ddd and kkk != "__all__":
                         print("Info {}: {}\n".format(kkk, i[kkk]))
                 print("\n")
@@ -550,7 +550,7 @@ def _long_run():
                          for k, oo in o.items()}, r, d, i
                     )
                 )
-            if d["__all__"]:
+            if tm["__all__"]:
                 print('Current step: ', step)
                 break
     finally:

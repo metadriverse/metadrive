@@ -29,20 +29,20 @@ def test_save_recreate_scenario_respawn_traffic(vis=False):
     env = SafeMetaDriveEnv(cfg)
     try:
         positions_1 = []
-        o = env.reset()
+        o, _ = env.reset()
 
         for i in range(1, 1000):
-            o, r, d, info = env.step([0, 0])
+            o, r, tm, tc, info = env.step([0, 0])
             positions_1.append({v.name: v.position for v in env.engine.traffic_manager.spawned_objects.values()})
         epi_info = env.engine.record_manager.get_episode_metadata()
         env.close()
         env = SafeMetaDriveEnv(cfg)
         env.config["replay_episode"] = epi_info
         env.config["record_episode"] = False
-        o = env.reset()
+        o, _ = env.reset()
         positions_1.reverse()
         for i in range(0, 1000):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
             position = positions_1.pop()
             position = {env.engine.replay_manager.record_name_to_current_name[key]: v for key, v in position.items()}
             current_position = {v.name: v.position for v in env.engine.replay_manager.spawned_objects.values()}

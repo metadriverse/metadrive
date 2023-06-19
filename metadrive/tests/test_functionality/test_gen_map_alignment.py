@@ -20,7 +20,7 @@ def test_gen_map_alignment():
 
         env = MetaDriveEnv(generate_config)
         for i in range(env_num):
-            env.reset(force_seed=i)
+            env.reset(seed=i)
         data_2 = env.engine.map_manager.dump_all_maps(file_name="test_10maps.pickle")
         recursive_equal(data_1.copy(), data_2.copy(), need_assert=True)
 

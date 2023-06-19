@@ -3,7 +3,8 @@ import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
 
-import gym
+import gymnasium as gym
+
 import numpy as np
 from panda3d.core import PNMImage
 
@@ -50,7 +51,8 @@ BASE_DEFAULT_CONFIG = dict(
     action_check=False,
 
     # ===== Rendering =====
-    use_render=False,  # pop a window to render or not
+    use_render=False,  # if true pop a window to render
+    render_mode=None,  # if "human", then use_render must be true, if "rgb", return numpy array, if None, do neither
     debug=False,
     disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
@@ -201,15 +203,15 @@ BASE_DEFAULT_CONFIG = dict(
 
 class BaseEnv(gym.Env):
     # Force to use this seed if necessary. Note that the recipient of the forced seed should be explicitly implemented.
-    _DEBUG_RANDOM_SEED = None
+    _DEBUG_RANDOM_SEED: Union[int, None] = None
     DEFAULT_AGENT = DEFAULT_AGENT
 
     @classmethod
-    def default_config(cls) -> "Config":
+    def default_config(cls) -> Config:
         return Config(BASE_DEFAULT_CONFIG)
 
     # ===== Intialization =====
-    def __init__(self, config: dict = None):
+    def __init__(self, config: Union[dict, None] = None):
         if config is None:
             config = {}
         merged_config = self._merge_extra_config(config)
@@ -236,11 +238,10 @@ class BaseEnv(gym.Env):
         # self.engine: Optional[BaseEngine] = None
 
         # In MARL envs with respawn mechanism, varying episode lengths might happen.
-        self.dones = None
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
-    def _merge_extra_config(self, config: Union[dict, "Config"]) -> "Config":
+    def _merge_extra_config(self, config: Union[dict, Config]) -> Config:
         """Check, update, sync and overwrite some config."""
         return config
 
@@ -294,8 +295,7 @@ class BaseEnv(gym.Env):
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]):
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
-        o, r, d, i = self._get_step_return(actions, engine_info=engine_info)
-        return o, r, d, i
+        return self._get_step_return(actions, engine_info=engine_info)
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]) \
             -> Union[np.ndarray, Dict[AnyStr, np.ndarray], int]:
@@ -343,17 +343,18 @@ class BaseEnv(gym.Env):
         raise NotImplementedError()
 
     def render(self,
-               mode='human',
                text: Optional[Union[dict, str]] = None,
                return_bytes=False,
                *args,
                **kwargs) -> Optional[np.ndarray]:
         """
         This is a pseudo-render function, only used to update onscreen message when using panda3d backend
-        :param mode: 'rgb'/'human'
         :param text:text to show
         :return: when mode is 'rgb', image array is returned
         """
+
+        mode = self.config["render_mode"]
+
         if mode in ["top_down", "topdown", "bev", "birdview"]:
             ret = self._render_topdown(text=text, *args, **kwargs)
             return ret
@@ -382,15 +383,15 @@ class BaseEnv(gym.Env):
         # logging.warning("You do not set 'image_observation' or 'image_observation' to True, so no image will be returned!")
         return None
 
-    def reset(self, force_seed: Union[None, int] = None):
+    def reset(self, seed: Union[None, int] = None):
         """
         Reset the env, scene can be restored and replayed by giving episode_data
         Reset the environment or load an episode from episode data to recover is
-        :param force_seed: The seed to set the env.
+        :param seed: The seed to set the env.
         :return: None
         """
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
-        self._reset_global_seed(force_seed)
+        self._reset_global_seed(seed)
         if self.engine is None:
             raise ValueError(
                 "Current MetaDrive instance is broken. Please make sure there is only one active MetaDrive "
@@ -411,12 +412,30 @@ class BaseEnv(gym.Env):
         return self._get_reset_return()
 
     def _get_reset_return(self):
-        ret = {}
-        self.engine.after_step()
+        # TODO: figure out how to get the information of the before step
+        scene_manager_before_step_infos = {}
+        scene_manager_after_step_infos = self.engine.after_step()
+
+        obses = {}
+        done_infos = {}
+        cost_infos = {}
+        reward_infos = {}
+        engine_info = merge_dicts(
+            scene_manager_after_step_infos, scene_manager_before_step_infos, allow_new_keys=True, without_copy=True
+        )
         for v_id, v in self.vehicles.items():
             self.observations[v_id].reset(self, v)
-            ret[v_id] = self.observations[v_id].observe(v)
-        return ret if self.is_multi_agent else self._wrap_as_single_agent(ret)
+            obses[v_id] = self.observations[v_id].observe(v)
+            _, reward_infos[v_id] = self.reward_function(v_id)
+            _, done_infos[v_id] = self.done_function(v_id)
+            _, cost_infos[v_id] = self.cost_function(v_id)
+
+        step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
+
+        if self.is_multi_agent:
+            return (obses, step_infos)
+        else:
+            return (self._wrap_as_single_agent(obses), self._wrap_as_single_agent(step_infos))
 
     def _get_step_return(self, actions, engine_info):
         # update obs, dones, rewards, costs, calculate done at first !
@@ -444,7 +463,9 @@ class BaseEnv(gym.Env):
             for k in self.dones:
                 self.dones[k] = True
 
-        dones = {k: self.dones[k] for k in self.vehicles.keys()}
+        terminateds = {k: self.dones[k] for k in self.vehicles.keys()}
+        truncateds = {k: False for k in self.vehicles.keys()}
+
         for v_id, r in rewards.items():
             self.episode_rewards[v_id] += r
             step_infos[v_id]["episode_reward"] = self.episode_rewards[v_id]
@@ -453,9 +474,9 @@ class BaseEnv(gym.Env):
 
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
-                   self._wrap_as_single_agent(dones), self._wrap_as_single_agent(step_infos)
+                   self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(truncateds), self._wrap_as_single_agent(step_infos)
         else:
-            return obses, rewards, dones, step_infos
+            return obses, rewards, terminateds, truncateds, step_infos
 
     def close(self):
         if self.engine is not None:
@@ -632,12 +653,13 @@ class BaseEnv(gym.Env):
         self.config["record_episode"] = True
         done_info = {}
         for index in scenario_index:
-            obs = self.reset(force_seed=index)
+            obs = self.reset(seed=index)
             done = False
             count = 0
             info = None
             while not done:
-                obs, reward, done, info = self.step(_act(obs))
+                obs, reward, terminated, truncated, info = self.step(_act(obs))
+                done = terminated or truncated
                 count += 1
                 if max_episode_length is not None and count > max_episode_length:
                     done = True

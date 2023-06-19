@@ -47,9 +47,9 @@ if __name__ == "__main__":
         }
     )
 
-    o = env.reset()
+    o, _ = env.reset()
     for i in range(1, 100000):
-        o, r, d, info = env.step([1.0, 0.])
+        o, r, tm, tc, info = env.step([1.0, 0.])
         info = {}
         info["lane_index"] = env.vehicle.lane_index
         info["heading_diff"] = env.vehicle.heading_diff(env.vehicle.lane)

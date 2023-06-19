@@ -18,15 +18,15 @@ if __name__ == '__main__':
         start_seed=1010,
         traffic_density=0.05,
     ))
-    obs = env.reset()
+    obs, _ = env.reset()
     start = time.time()
     reset_used_time = 0
     action = [0.0, 1.]
     total_steps = args.num_steps
     vehicle_num = [len(env.engine.traffic_manager.vehicles)]
     for s in range(total_steps):
-        o, r, d, i = env.step(action)
-        if d:
+        o, r, tm, tc, i = env.step(action)
+        if tm or tc:
             start_reset = time.time()
             env.reset()
             vehicle_num.append(len(env.engine.traffic_manager.vehicles))

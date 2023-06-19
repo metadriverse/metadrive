@@ -139,11 +139,11 @@ class MixWaymoPGEnv(WaymoEnv):
         )
         self.config["target_vehicle_configs"]["default_agent"]["destination"] = None
 
-    def reset(self, force_seed: Union[None, int] = None):
+    def reset(self, seed: Union[None, int] = None):
         self.change_suite()
         # ===== same as BaseEnv =====
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
-        self._reset_global_seed(force_seed)
+        self._reset_global_seed(seed)
         if self.engine is None:
             raise ValueError(
                 "Current MetaDrive instance is broken. Please make sure there is only one active MetaDrive "
@@ -231,7 +231,7 @@ if __name__ == "__main__":
     )
     env.reset()
     while True:
-        o, r, d, i = env.step(env.action_space.sample())
+        o, r, tm, tc, i = env.step(env.action_space.sample())
         env.render(text={"ts": env.episode_step})
-        if d:
+        if tm or tc:
             env.reset()

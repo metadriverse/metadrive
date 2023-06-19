@@ -19,12 +19,12 @@ def _test_main_camera_as_obs(render):
                 show_fps=False,
             )
         )
-        obs = env.reset()
+        obs, _ = env.reset()
         action = [0.0, 1.]
         for _ in range(3):
             env.reset()
             for s in range(20):
-                o, r, d, i = env.step(action)
+                o, r, tm, tc, i = env.step(action)
                 # engine = env.engine
                 # if engine.episode_step <= 1:
                 #     engine.graphicsEngine.renderFrame()
@@ -59,12 +59,12 @@ def _test_rgb_camera_as_obs():
                 show_fps=False,
             )
         )
-        obs = env.reset()
+        obs, _ = env.reset()
         action = [0.0, 1.]
         for _ in range(3):
             env.reset()
             for s in range(20):
-                o, r, d, i = env.step(action)
+                o, r, tm, tc, i = env.step(action)
                 # engine = env.engine
                 # if engine.episode_step <= 1:
                 #     engine.graphicsEngine.renderFrame()

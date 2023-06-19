@@ -21,7 +21,7 @@ def test_respawn():
         assert set(env.config["target_vehicle_configs"].keys()) == {"agent0", "agent1"}
         assert set(env.vehicles.keys()) == set()  # Not initialized yet!
 
-        o = env.reset()
+        o, _ = env.reset()
 
         assert set(env.observations.keys()) == {"agent0", "agent1"}
 
@@ -37,31 +37,31 @@ def test_respawn():
         tracks = []
         done_count = 0
         for i in range(1, 1000):
-            o, r, d, info = env.step({v_id_0: [-1, 1], v_id_1: [1, 1]})
+            o, r, tm, tc, info = env.step({v_id_0: [-1, 1], v_id_1: [1, 1]})
             assert set(o.keys()) == set(r.keys()) == set(info.keys())
-            assert set(o.keys()).union({"__all__"}) == set(d.keys())
-            tracks.append(d)
-            if d[v_id_0]:
+            assert set(o.keys()).union({"__all__"}) == set(tm.keys())
+            tracks.append(tm)
+            if tm[v_id_0]:
                 assert info[v_id_0][TerminationState.OUT_OF_ROAD]
                 assert info[v_id_0]["cost"] == out_of_road_cost
                 assert r[v_id_0] == -out_of_road_penalty
                 v_id_0 = "agent{}".format(count)
                 count += 1
                 done_count += 1
-            if d[v_id_1]:
+            if tm[v_id_1]:
                 assert info[v_id_1][TerminationState.OUT_OF_ROAD]
                 assert info[v_id_1]["cost"] == out_of_road_cost
                 assert r[v_id_1] == -out_of_road_penalty
                 v_id_1 = "agent{}".format(count)
                 count += 1
                 done_count += 1
-            if all(d.values()):
+            if all(tm.values()):
                 raise ValueError()
             if i % 100 == 0:  # Horizon
                 v_id_0 = "agent0"
                 v_id_1 = "agent1"
                 count = 2
-                o = env.reset()
+                o, _ = env.reset()
                 assert set(o.keys()) == {"agent0", "agent1"}
                 assert set(env.observations.keys()) == {"agent0", "agent1"}
                 assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
@@ -102,25 +102,26 @@ def test_delay_done(render=False):
     try:
         agent0_done = False
         agent1_already_hit = False
-        o = env.reset()
+        o, _ = env.reset()
         for i in range(1, 300):
             actions = {"agent0": [1, 1], "agent1": [1, 1]}
             if "agent0" not in env.vehicles:
                 actions.pop("agent0")
             if "agent1" not in env.vehicles:
                 actions.pop("agent1")
-            o, r, d, info = env.step(actions)
+            o, r, tm, tc, info = env.step(actions)
             if agent0_done:
                 assert "agent0" not in o
                 assert "agent0" not in info
-                assert "agent0" not in d
-            if d.get("agent0"):
+                assert "agent0" not in tm
+                assert "agent0" not in tc
+            if tm.get("agent0") or tc.get("agent0"):
                 agent0_done = True
             if agent0_done:
                 if info["agent1"][TerminationState.CRASH_VEHICLE]:
                     agent1_already_hit = True
                     # print("Hit!")
-            if d["__all__"]:
+            if tm["__all__"]:
                 assert agent1_already_hit
                 agent0_done = False
                 agent1_already_hit = False
@@ -133,15 +134,15 @@ def test_delay_done(render=False):
         env.reset()
         dead = set()
         for _ in range(300):
-            o, r, d, i = env.step({k: [1, 1] for k in env.vehicles.keys()})
+            o, r, tm, tc, i = env.step({k: [1, 1] for k in env.vehicles.keys()})
             for dead_name in dead:
                 assert dead_name not in o
             # print("{} there!".format(env.vehicles.keys()))
             # print("{} dead!".format([kkk for kkk, ddd in d.items() if ddd]))
-            for kkk, ddd in d.items():
+            for kkk, ddd in tm.items():
                 if ddd and kkk != "__all__":
                     dead.add(kkk)
-            if d["__all__"]:
+            if tm["__all__"]:
                 env.reset()
                 dead.clear()
     finally:

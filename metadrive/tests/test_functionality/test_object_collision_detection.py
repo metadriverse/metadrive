@@ -193,7 +193,7 @@ def test_object_collision_detection(render=False):
         }
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         lane_index = (">>", ">>>", 0)
         lane = env.current_map.road_network.get_lane(lane_index)
         longitude = 22
@@ -218,7 +218,7 @@ def test_object_collision_detection(render=False):
         crash_obj = False
         detect_obj = False
         for i in range(1, 100000 if render else 2000):
-            o, r, d, info = env.step([0, 1])
+            o, r, tm, tc, info = env.step([0, 1])
             for obj in env.observations[DEFAULT_AGENT].detected_objects:
                 if isinstance(obj, TrafficCone):
                     detect_obj = True

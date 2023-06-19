@@ -17,7 +17,7 @@ if __name__ == '__main__':
             env = ScenarioEnv(dict(start_scenario_index=0, num_scenarios=3))
         for j in range(3):
             count += 1
-            env.reset(force_seed=j)
+            env.reset(seed=j)
             m = draw_top_down_map(env.current_map)
             # m = env.get_map()
             ax = axs[i][j]

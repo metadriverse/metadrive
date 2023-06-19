@@ -15,7 +15,7 @@ def test_top_down_rendering():
     ]:
         try:
             for _ in range(5):
-                o = env.reset()
+                o, _ = env.reset()
                 assert np.mean(o) > 0.0
                 for _ in range(10):
                     o, *_ = env.step([0, 1])
@@ -30,24 +30,24 @@ def test_top_down_rendering():
 def _vis_top_down_with_panda_render():
     env = TopDownMetaDrive(dict(use_render=True))
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for i in range(1000):
-            o, r, d, i = env.step([0, 1])
-            if d:
+            o, r, tm, tc, i = env.step([0, 1])
+            if tm or tc:
                 break
     finally:
         env.close()
 
 
 def _vis_top_down_with_panda_render_and_top_down_visualization():
-    env = TopDownMetaDrive(dict(use_render=True))
+    env = TopDownMetaDrive({"use_render": True, "render_mode": "top_down"})
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for i in range(2000):
-            o, r, d, i = env.step([0, 1])
-            if d:
+            o, r, tm, tc, i = env.step([0, 1])
+            if tm or tc:
                 break
-            env.render(mode="topdown")
+            env.render()
     finally:
         env.close()
 

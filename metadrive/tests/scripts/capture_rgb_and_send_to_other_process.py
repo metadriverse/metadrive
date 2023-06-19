@@ -33,7 +33,7 @@ def main_thread():
     )
     env = MetaDriveEnv(config)
     try:
-        o = env.reset()
+        o, _ = env.reset()
         # print(HELP_MESSAGE)
         env.vehicle.expert_takeover = False
         context = zmq.Context()

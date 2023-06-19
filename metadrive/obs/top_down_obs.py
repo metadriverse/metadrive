@@ -6,7 +6,7 @@ import os
 import sys
 from typing import Tuple
 
-import gym
+import gymnasium as gym
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle

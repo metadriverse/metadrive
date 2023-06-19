@@ -20,7 +20,7 @@ def merge_config(old_dict, new_dict, new_keys_allowed=False):
     return Config(merged)
 
 
-def _check_keys(new_config, old_config, prefix=""):
+def _check_keys(new_config: Union[dict, "Config"], old_config: Union[dict, "Config"], prefix=""):
     if isinstance(new_config, Config):
         new_config = new_config.get_dict()
     if isinstance(old_config, Config):
@@ -75,7 +75,7 @@ class Config:
     For these <key, value> items, use Config["your key"] = None to init your PgConfig, then it will not implement
     type check at the first time. key "config" in map.py and key "force_fps" in world.py are good examples.
     """
-    def __init__(self, config: Union[dict, "Config"], unchangeable=False):
+    def __init__(self, config: Union["Config", dict], unchangeable=False):
         self._unchangeable = False
         if isinstance(config, Config):
             config = config.get_dict()

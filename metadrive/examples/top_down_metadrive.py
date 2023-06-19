@@ -65,17 +65,18 @@ if __name__ == "__main__":
             # with keyboard in the main window.
             # manual_control=True,
             map="SSSS",
+            render_mode="top_down",
             traffic_density=0.1,
             num_scenarios=100,
             start_seed=random.randint(0, 1000),
         )
     )
     try:
-        o = env.reset()
+        o, _ = env.reset()
         for i in range(1, 100000):
-            o, r, d, info = env.step(expert(env.vehicle))
-            env.render(mode="top_down", film_size=(800, 800))
-            if d:
+            o, r, tm, tc, info = env.step(expert(env.vehicle))
+            env.render(film_size=(800, 800))
+            if tm or tc:
                 env.reset()
             if i % 50 == 0:
                 draw_multi_channels_top_down_observation(o, show_time=5)  # show time 4s

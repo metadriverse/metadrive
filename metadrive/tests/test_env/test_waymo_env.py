@@ -23,10 +23,10 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
             }
         )
         for seed in range(0, num_scenarios):
-            env.reset(force_seed=seed)
+            env.reset(seed=seed)
             for i in range(1000):
-                o, r, d, info = env.step([1.0, 0.])
-                if d:
+                o, r, tm, tc, info = env.step([1.0, 0.])
+                if tm or tc:
                     assert info["arrive_dest"], "Can not arrive dest"
                     print("{} track_length: ".format(env.engine.global_seed), info["track_length"])
                     # assert info["arrive_dest"], "Can not arrive dest"
@@ -58,10 +58,10 @@ def test_store_map_memory_leakage(render=False):
         for _ in range(10):
             # test twp times for testing loading stored map
             for seed in range(3):
-                env.reset(force_seed=seed)
+                env.reset(seed=seed)
                 for i in range(1000):
-                    o, r, d, info = env.step([1.0, 0.])
-                    if d:
+                    o, r, tm, tc, info = env.step([1.0, 0.])
+                    if tm or tc:
                         assert info["arrive_dest"], "Can not arrive dest"
                         assert env.episode_step > 60
                         break
