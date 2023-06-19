@@ -257,17 +257,7 @@ class NuPlanEnv(BaseEnv):
 
     def _reset_global_seed(self, force_seed=None):
         if force_seed is not None:
-
-
-class DemoWaymoEnv(WaymoEnv):
-    def reset(self, seed=None):
-        if self.engine is not None:
-            seeds = [i for i in range(self.config["num_scenarios"])]
-            seeds.remove(self.current_seed)
-            seed = random.choice(seeds)
-        return super(DemoWaymoEnv, self).reset(seed=seed)
-
-            current_seed = seed
+            current_seed = force_seed
         elif self.config["sequential_seed"]:
             current_seed = self.engine.global_seed
             if current_seed is None:
