@@ -17,6 +17,18 @@ try:
         else:
             raise ValueError("unsupported space")
 
+    def gymToGymnasium(space: gym.spaces.Space) -> gymnasium.spaces.Space:
+        if isinstance(space, gym.spaces.Box):
+            return gymnasium.spaces.Box(low=space.low, high=space.high, shape=space.shape)
+        elif isinstance(space, gym.spaces.Discrete):
+            return gymnasium.spaces.Discrete(n=int(space.n), start=int(space.start))
+        elif isinstance(space, gym.spaces.Tuple):
+            return gymnasium.spaces.Tuple([gymToGymnasium(subspace) for subspace in space.spaces])
+        elif isinstance(space, gym.spaces.Dict):
+            return gymnasium.spaces.Dict({key: gymToGymnasium(subspace) for key, subspace in space.spaces.items()})
+        else:
+            raise ValueError("unsupported space")
+
     def defined_in_this_file(a):
         return inspect.getfile(a) == inspect.getfile(createGymWrapper)
 
@@ -45,8 +57,6 @@ try:
                     class OverridenDefaultConfigWrapper(inner_class):
                         @classmethod
                         def default_config(cls):
-                            print(current_wrapper_default_config)
-                            print(GymEnvWrapper.default_config)
                             return current_wrapper_default_config()
                     # init now has access to the new default_config
                     self._inner = OverridenDefaultConfigWrapper(config=config)
@@ -99,7 +109,7 @@ try:
     if __name__ == '__main__':
         from metadrive.envs.scenario_env import ScenarioEnv
 
-        env = GymEnvWrapper(config={"inner_class": ScenarioEnv, "inner_config": {"manual_control": True}})
+        env = createGymWrapper(ScenarioEnv)(config={"manual_control": True})
         o, i = env.reset()
         assert isinstance(env.observation_space, gymnasium.spaces.Space)
         assert isinstance(env.action_space, gymnasium.spaces.Space)
