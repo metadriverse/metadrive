@@ -1,6 +1,5 @@
 import logging
 
-
 import numpy as np
 
 from metadrive.component.map.base_map import BaseMap
@@ -63,7 +62,7 @@ class ScenarioMap(BaseMap):
                     continue
                 line = np.asarray(data[ScenarioDescription.POLYLINE])[..., :2]
                 length = get_polyline_length(line)
-                resampled = resample_polyline(line, interval) if length > interval*2 else line
+                resampled = resample_polyline(line, interval) if length > interval * 2 else line
                 if MetaDriveType.is_broken_line(type):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
@@ -79,11 +78,8 @@ class ScenarioMap(BaseMap):
             elif MetaDriveType.is_road_edge(type):
                 line = np.asarray(data[ScenarioDescription.POLYLINE])[..., :2]
                 length = get_polyline_length(line)
-                resampled = resample_polyline(line, interval) if length > interval*2 else line
-                ret[map_feat_id] = {
-                    "polyline": resampled,
-                    "type": MetaDriveType.BOUNDARY_LINE
-                }
+                resampled = resample_polyline(line, interval) if length > interval * 2 else line
+                ret[map_feat_id] = {"polyline": resampled, "type": MetaDriveType.BOUNDARY_LINE}
             elif type == MetaDriveType.LANE_SURFACE_STREET:
                 continue
             # else:

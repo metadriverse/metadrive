@@ -253,10 +253,11 @@ def compute_angular_velocity(initial_heading, final_heading, dt):
 
 def get_polyline_length(points_array):
     diff = np.diff(points_array, axis=0)
-    squared_diff = diff ** 2
+    squared_diff = diff**2
     squared_diff_sum = np.sum(squared_diff, axis=1)
     distances = np.sqrt(squared_diff_sum)
     return np.sum(distances)
+
 
 def resample_polyline(points, target_distance):
     # Calculate the cumulative distance along the original polyline
