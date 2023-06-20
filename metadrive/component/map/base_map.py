@@ -1,15 +1,12 @@
 import logging
-import geopandas as gpd
 import math
 
 import cv2
 import numpy as np
-from shapely import affinity
-from shapely.geometry import Polygon
-
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, DrivableAreaProperty
 from metadrive.engine.engine_utils import get_global_config
+from shapely.geometry import Polygon, MultiPolygon
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +94,11 @@ class BaseMap(BaseRunnable):
     def destroy(self):
         self.detach_from_world()
         if self._semantic_map is not None:
-            np.delete(self._semantic_map)
+            del self._semantic_map
+            self._semantic_map = None
+        if self._height_map is not None:
+            del self._height_map
+            self._height_map = None
 
         for block in self.blocks:
             block.destroy()
@@ -214,7 +215,7 @@ class BaseMap(BaseRunnable):
         height=1,
     ):
         """
-        Get semantics of the map
+        Get height of the map
         :param size: [m] length and width
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param extension: If > 1, the returned height map's drivable region will be enlarged.
@@ -238,16 +239,21 @@ class BaseMap(BaseRunnable):
             for polygon in polygons:
                 if need_scale:
                     scaled_polygon = Polygon(polygon).buffer(extension, join_style=2)
-                    points = [
-                        [
-                            int(
-                                (scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter +
+                    if isinstance(scaled_polygon, MultiPolygon):
+                        scaled_polygons = scaled_polygon.geoms
+                    else:
+                        scaled_polygons = [scaled_polygon]
+                    for scaled_polygon in scaled_polygons:
+                        points = [
+                            [
+                                int(
+                                    (scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter +
+                                    size / 2
+                                ),
+                                int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) +
                                 size / 2
-                            ),
-                            int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) +
-                            size / 2
-                        ] for index in range(len(scaled_polygon.exterior.coords.xy[0]))
-                    ]
+                            ] for index in range(len(scaled_polygon.exterior.coords.xy[0]))
+                        ]
                 else:
                     points = [
                         [

@@ -2,6 +2,7 @@ import math
 from typing import Tuple
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 number_pos_inf = float("inf")
 number_neg_inf = float("-inf")
@@ -248,3 +249,25 @@ def compute_angular_velocity(initial_heading, final_heading, dt):
     angular_vel = delta_heading / dt
 
     return angular_vel
+
+
+def get_polyline_length(points_array):
+    diff = np.diff(points_array, axis=0)
+    squared_diff = diff**2
+    squared_diff_sum = np.sum(squared_diff, axis=1)
+    distances = np.sqrt(squared_diff_sum)
+    return np.sum(distances)
+
+
+def resample_polyline(points, target_distance):
+    # Calculate the cumulative distance along the original polyline
+    distances = np.cumsum(np.sqrt(np.sum(np.diff(points, axis=0)**2, axis=1)))
+    distances = np.insert(distances, 0, 0., axis=0)
+
+    # Create a linearly spaced array of distances for the resampled polyline
+    resampled_distances = np.arange(0, distances[-1], target_distance)
+
+    # Interpolate the points along the resampled distances
+    resampled_points = interp1d(distances, points, axis=0)(resampled_distances)
+
+    return resampled_points

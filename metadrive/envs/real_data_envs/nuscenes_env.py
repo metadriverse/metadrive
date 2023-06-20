@@ -26,7 +26,7 @@ if __name__ == "__main__":
             "curriculum_level": 1,
             "show_fps": False,
             # "debug": True,
-            # "no_static_vehicles": True,
+            "no_static_vehicles": False,
             # "pstats": True,
             "render_pipeline": True,
             # "daytime": "22:01",
@@ -46,7 +46,7 @@ if __name__ == "__main__":
             # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
-            "no_static_vehicles": True,
+            # "no_static_vehicles": True,
             # "show_policy_mark": True,
             # "show_coordinates": True,
             # "force_destroy": True,
@@ -62,7 +62,7 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=0, distance=50),
                 side_detector=dict(num_lasers=12, distance=50)
             ),
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": "/home/shady/data/scenarionet/dataset/nuscenes"
         }
     )
 
