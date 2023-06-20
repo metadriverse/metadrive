@@ -1,5 +1,5 @@
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.constants import TerminationState
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import Config
 
@@ -12,14 +12,9 @@ class SafeMetaDriveEnv(MetaDriveEnv):
                 "num_scenarios": 100,
                 "accident_prob": 0.8,
                 "traffic_density": 0.05,
-                "safe_rl_env": True,  # Should always be True. But we just leave it here for historical reason.
+                "crash_vehicle_done": False,
+                "crash_object_done": False,
                 "cost_to_reward": False,
-
-                # ===== cost scheme =====
-                "crash_vehicle_cost": 1,
-                "crash_object_cost": 1,
-                "out_of_road_cost": 1.,  # only give penalty for out_of_road
-                "use_lateral_reward": False
             },
             allow_add_new_key=True
         )
@@ -39,37 +34,17 @@ class SafeMetaDriveEnv(MetaDriveEnv):
         step_info["total_cost"] = self.episode_cost
         return cost, step_info
 
-    def _post_process_config(self, config):
-        config = super(SafeMetaDriveEnv, self)._post_process_config(config)
-        if config["cost_to_reward"]:
-            config["crash_vehicle_penalty"] += config["crash_vehicle_cost"]
-            config["crash_object_penalty"] += config["crash_object_cost"]
-            config["out_of_road_penalty"] += config["out_of_road_cost"]
-        return config
-
-    def done_function(self, vehicle_id: str):
-        done, done_info = super(SafeMetaDriveEnv, self).done_function(vehicle_id)
-        if self.config["safe_rl_env"]:
-            if done_info[TerminationState.CRASH_VEHICLE]:
-                done = False
-            elif done_info[TerminationState.CRASH_OBJECT]:
-                done = False
-        return done, done_info
-
-    def setup_engine(self):
-        super(SafeMetaDriveEnv, self).setup_engine()
-        from metadrive.manager.object_manager import TrafficObjectManager
-        self.engine.register_manager("object_manager", TrafficObjectManager())
-
 
 if __name__ == "__main__":
     env = SafeMetaDriveEnv(
         {
-            # "accident_prob": 1.0,
-            "manual_control": True,
+            "accident_prob": 0.5,
+            "traffic_density": 0.15,
+            # "manual_control": True,
+            "agent_policy": IDMPolicy,
             "use_render": True,
             # "debug": True,
-            'num_scenarios': 10,
+            'num_scenarios': 100,
             "start_seed": 129,
             # "traffic_density": 0.2,
             # "num_scenarios": 1,
