@@ -117,7 +117,7 @@ BASE_DEFAULT_CONFIG = dict(
         show_lidar=False,
         mini_map=(84, 84, 250),  # buffer length, width
         rgb_camera=(84, 84),  # buffer length, width
-        depth_camera=(84, 84, False),  # buffer length, width, view_ground
+        depth_camera=(84, 84, True),  # buffer length, width, view_ground
         main_camera=None,  # buffer length, width
         show_side_detector=False,
         show_lane_line_detector=False,
@@ -211,7 +211,8 @@ class BaseEnv(gym.Env):
         return Config(BASE_DEFAULT_CONFIG)
 
     # ===== Intialization =====
-    def __init__(self, config: Union[dict, None] = None):
+    def __init__(self, config: dict = None):
+        self.logger = logging.getLogger(self.logger_name)
         if config is None:
             config = {}
         merged_config = self._merge_extra_config(config)
@@ -220,7 +221,6 @@ class BaseEnv(gym.Env):
 
         self.config = global_config
         initialize_global_config(self.config)
-        self.logger = logging.getLogger(self.logger_name)
 
         # agent check
         self.num_agents = self.config["num_agents"]

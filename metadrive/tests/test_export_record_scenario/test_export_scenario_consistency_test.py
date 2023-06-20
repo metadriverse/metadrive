@@ -12,6 +12,7 @@ from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.scenario.utils import NP_ARRAY_DECIMAL
 from metadrive.scenario.utils import assert_scenario_equal
+from metadrive.scenario.utils import read_dataset_summary
 from metadrive.type import MetaDriveType
 from metadrive.utils.math import wrap_to_pi
 
@@ -267,9 +268,10 @@ def test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, rend
 
 
 def compare_exported_scenario_with_origin(scenarios, data_manager, data_dir="waymo"):
+    _, _, mapping = read_dataset_summary(AssetLoader.file_path(data_dir, return_raw_style=False))
     for index, scenario in scenarios.items():
         file_name = data_manager.summary_lookup[index]
-        file_path = AssetLoader.file_path(data_dir, file_name, return_raw_style=False)
+        file_path = AssetLoader.file_path(data_dir, mapping[file_name], file_name, return_raw_style=False)
         with open(file_path, "rb+") as file:
             origin_data = pickle.load(file)
         export_data = scenario

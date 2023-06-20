@@ -7,7 +7,7 @@ if __name__ == '__main__':
     pcds = []
     # for h in range(-180, 180, 20):
     h = 0
-    raw_depth = o3d.io.read_image("C:\\Users\\x1\\Desktop\\neurips_2023\\new_teaser\\new_teaser\\6_camera_100.jpg")
+    raw_depth = o3d.io.read_image("C:\\Users\\x1\\Desktop\\neurips_2023\\sensor_video\\depth\\depth_36.jpg")
     raw_depth = np.array(raw_depth)[..., 0]
     raw_depth *= 255
     raw_depth = raw_depth.astype(np.uint16)

@@ -7,8 +7,8 @@ import numpy as np
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.constants import Decoration, TARGET_VEHICLES
-from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
 from metadrive.utils.utils import is_map_related_instance
@@ -59,6 +59,11 @@ def draw_top_down_map(
                         # 10 points
                         end = min((i + 1) * 10, len(data[ScenarioDescription.POLYLINE]))
                         waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][i * 10:end]))
+                        LaneGraphics.display_scenario(waymo_line, type, surface)
+
+                    if (i + 1) * 10 < len(data[ScenarioDescription.POLYLINE]):
+                        end = len(data[ScenarioDescription.POLYLINE])
+                        waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][(i + 1) * 10:end]))
                         LaneGraphics.display_scenario(waymo_line, type, surface)
                 else:
                     waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE]))
@@ -159,14 +164,14 @@ class TopDownRenderer:
         road_color=(80, 80, 80),
         show_agent_name=False,
         camera_position=None,
-        track_target_vehicle=False,
+        target_vehicle_heading_up=False,
         draw_target_vehicle_trajectory=False,
         **kwargs
         # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
-        self.track_target_vehicle = track_target_vehicle
+        self.target_vehicle_heading_up = target_vehicle_heading_up
         self.show_agent_name = show_agent_name
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
 
@@ -182,7 +187,7 @@ class TopDownRenderer:
         self.history_target_vehicle = []
         self.history_smooth = history_smooth
         # self.current_track_vehicle = current_track_vehicle
-        if self.track_target_vehicle:
+        if self.target_vehicle_heading_up:
             assert self.current_track_vehicle is not None, "Specify which vehicle to track"
         self.road_color = road_color
         self._light_background = light_background
@@ -206,6 +211,12 @@ class TopDownRenderer:
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
         self._runtime_canvas = self._background_canvas.copy()
+
+        # (3) it is only used for track vehicle
+        self.receptive_field_double = (
+            int(self._runtime_canvas.pix(100 * np.sqrt(2))) * 2, int(self._runtime_canvas.pix(100 * np.sqrt(2))) * 2
+        )
+        self.canvas_rotate = pygame.Surface(self.receptive_field_double)
         # self._runtime_output = self._background_canvas.copy()  # TODO(pzh) what is this?
 
         # Setup some runtime variables
@@ -318,6 +329,8 @@ class TopDownRenderer:
         # Maybe we can optimize here! We don't need to copy but just blit new background on it.
 
         self._runtime_canvas = self._background_canvas.copy()
+        self.canvas_rotate = pygame.Surface(self.receptive_field_double)
+
         # self._runtime_output = self._background_canvas.copy()
         self._background_size = tuple(self._background_canvas.get_size())
 
@@ -432,15 +445,37 @@ class TopDownRenderer:
         v = self.current_track_vehicle
         canvas = self._runtime_canvas
         field = self._render_canvas.get_size()
-        if self.position is not None or self.track_target_vehicle:
-            cam_pos = v.position if self.track_target_vehicle else self.position
+        if not self.target_vehicle_heading_up:
+            cam_pos = v.position if self.position is None else self.position
             position = self._runtime_canvas.pos2pix(*cam_pos)
+            off = (position[0] - field[0] / 2, position[1] - field[1] / 2)
+            self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field[0], field[1]))
         else:
-            position = (field[0] / 2, field[1] / 2)
-        off = (position[0] - field[0] / 2, position[1] - field[1] / 2)
-        self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field[0], field[1]))
+            position = self._runtime_canvas.pos2pix(*v.position)
+            self.canvas_rotate.blit(
+                canvas, (0, 0), (
+                    position[0] - self.receptive_field_double[0] / 2, position[1] - self.receptive_field_double[1] / 2,
+                    self.receptive_field_double[0], self.receptive_field_double[1]
+                )
+            )
+
+            rotation = np.rad2deg(v.heading_theta) + 90
+            new_canvas = pygame.transform.rotozoom(self.canvas_rotate, rotation, 1)
+
+            size = self._render_canvas.get_size()
+            self._render_canvas.blit(
+                new_canvas,
+                (0, 0),
+                (
+                    new_canvas.get_size()[0] / 2 - size[0] / 2,  # Left
+                    new_canvas.get_size()[1] / 2 - size[1] / 2,  # Top
+                    size[0],  # Width
+                    size[1]  # Height
+                )
+            )
 
         if "traffic_light_msg" in kwargs:
+            raise ValueError("This function is broken")
             if kwargs["traffic_light_msg"] < 0.5:
                 traffic_light_color = (0, 255, 0)
             else:
@@ -453,7 +488,7 @@ class TopDownRenderer:
             )
 
         if self.show_agent_name:
-            raise ValueError()
+            raise ValueError("This function is broken")
             # FIXME check this later
             if self.pygame_font is None:
                 self.pygame_font = pygame.font.SysFont("Arial.ttf", 30)

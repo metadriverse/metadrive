@@ -177,7 +177,7 @@ class ComplexEnv(SafeMetaDriveEnv):
 
     def setup_engine(self):
         super(ComplexEnv, self).setup_engine()
-        self.engine.update_manager("object_manager", ComplexObjectManager())
+        self.engine.register_manager("object_manager", ComplexObjectManager())
 
 
 def test_object_collision_detection(render=False):
@@ -186,6 +186,8 @@ def test_object_collision_detection(render=False):
             # "manual_control": True,
             "traffic_density": 0.0,
             "use_render": render,
+            "crash_object_cost": 100,
+            "crash_object_done": True,
             "debug": False,
             "vehicle_config": {
                 "show_lidar": True
@@ -224,7 +226,7 @@ def test_object_collision_detection(render=False):
                     detect_obj = True
             if render:
                 env.render()
-            if info[TerminationState.CRASH_OBJECT]:
+            if info["cost"] == 100 and info[TerminationState.CRASH_OBJECT]:
                 crash_obj = True
                 break
         assert crash_obj and detect_obj, "Can not crash with object!"

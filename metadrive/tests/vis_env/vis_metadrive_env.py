@@ -5,13 +5,13 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 1,
+            "num_scenarios": 10,
             "traffic_density": 0.15,
             "traffic_mode": "hybrid",
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": True,
+            # "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
             "show_interface": False,
@@ -26,6 +26,7 @@ if __name__ == "__main__":
             "use_render": True,
             "accident_prob": 1,
             "decision_repeat": 5,
+            "daytime": "19:00",
             "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
@@ -108,9 +109,14 @@ if __name__ == "__main__":
     # for line in env.engine.coordinate_line:
     #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
+    print(time.time() - start)
     for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
+        if tm:
+            s = time.time()
+            env.reset()
+            print(time.time() - s)
 
         # env.vehicle.set_pitch(-np.pi/4)
         # [0.09231533, 0.491018, 0.47076905, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.48037243, 0.8904728, 0.81229943, 0.7317231, 1.0, 0.85320455, 0.9747932, 0.65675277, 0.0, 0.5, 0.5]

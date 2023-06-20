@@ -50,6 +50,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Object =====
     accident_prob=0.,  # accident may happen on each block with this probability, except multi-exits block
+    static_traffic_object=True,  # object won't react to any collisions
 
     # ===== Others =====
     use_AI_protector=False,
@@ -84,7 +85,8 @@ METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Termination Scheme =====
     out_of_route_done=False,
     on_continuous_line_done=True,
-    crash_vehicle_done=True
+    crash_vehicle_done=True,
+    crash_object_done=True,
 )
 
 
@@ -168,36 +170,36 @@ class MetaDriveEnv(BaseEnv):
         }
         if self._is_arrive_destination(vehicle):
             done = True
-            self.logger.info("Episode ended! Reason: arrive_dest.")
+            self.logger.info("Episode ended! Index: {} Reason: arrive_dest.".format(self.current_seed))
             done_info[TerminationState.SUCCESS] = True
         if self._is_out_of_road(vehicle):
             done = True
-            self.logger.info("Episode ended! Reason: out_of_road.")
+            self.logger.info("Episode ended! Index: {} Reason: out_of_road.".format(self.current_seed))
             done_info[TerminationState.OUT_OF_ROAD] = True
         if vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
-            self.logger.info("Episode ended! Reason: crash vehicle ")
+            self.logger.info("Episode ended! Index: {} Reason: crash vehicle ".format(self.current_seed))
             done_info[TerminationState.CRASH_VEHICLE] = True
-        if vehicle.crash_object:
+        if vehicle.crash_object and self.config["crash_object_done"]:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
-            self.logger.info("Episode ended! Reason: crash object ")
+            self.logger.info("Episode ended! Index: {} Reason: crash object ".format(self.current_seed))
         if vehicle.crash_building:
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
-            self.logger.info("Episode ended! Reason: crash building ")
+            self.logger.info("Episode ended! Index: {} Reason: crash building ".format(self.current_seed))
         if self.config["max_step_per_agent"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["max_step_per_agent"]:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            self.logger.info("Episode ended! Reason: max step ")
+            self.logger.info("Episode ended! Index: {} Reason: max step ".format(self.current_seed))
 
         if self.config["horizon"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
             # single agent horizon has the same meaning as max_step_per_agent
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            self.logger.info("Episode ended! Reason: max step ")
+            self.logger.info("Episode ended! Index: {} Reason: max step ".format(self.current_seed))
 
         # for compatibility
         # crash almost equals to crashing with vehicles
@@ -333,8 +335,11 @@ class MetaDriveEnv(BaseEnv):
         self.engine.accept("p", self.stop)
         from metadrive.manager.traffic_manager import PGTrafficManager
         from metadrive.manager.pg_map_manager import PGMapManager
+        from metadrive.manager.object_manager import TrafficObjectManager
         self.engine.register_manager("map_manager", PGMapManager())
         self.engine.register_manager("traffic_manager", PGTrafficManager())
+        if abs(self.config["accident_prob"] - 0) > 1e-2:
+            self.engine.register_manager("object_manager", TrafficObjectManager())
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else \

@@ -100,7 +100,7 @@ class TrafficWarning(TrafficObject):
             model = self.loader.loadModel(AssetLoader.file_path("models", "warning", "warning.gltf"))
             model.setScale(0.02)
             model.setH(-90)
-            model.setPos(0, 0, -self.HEIGHT / 2)
+            model.setPos(0, 0, -self.HEIGHT / 2 - 0.1)
             model.reparentTo(self.origin)
 
     @property

@@ -10,8 +10,8 @@ from metadrive.scenario.utils import read_scenario_data, read_dataset_summary
 def test_read_data_and_create_summary():
     # waymo = AssetLoader.file_path("waymo", return_raw_style=False)
     nuscenes = AssetLoader.file_path("nuscenes", return_raw_style=False)
-    summary, scenarios, _ = read_dataset_summary(nuscenes)
-    sd_scenario = read_scenario_data(os.path.join(nuscenes, scenarios[2]))
+    summary, scenarios, mapping = read_dataset_summary(nuscenes)
+    sd_scenario = read_scenario_data(os.path.join(nuscenes, mapping[scenarios[2]], scenarios[2]))
 
     summary_dict = {}
     for track_id, track in sd_scenario[SD.TRACKS].items():
