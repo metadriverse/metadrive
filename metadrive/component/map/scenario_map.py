@@ -1,5 +1,6 @@
 import logging
 
+
 import numpy as np
 
 from metadrive.component.map.base_map import BaseMap
@@ -8,7 +9,7 @@ from metadrive.component.scenario_block.scenario_block import ScenarioBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.type import MetaDriveType
 from metadrive.scenario.scenario_description import ScenarioDescription
-from metadrive.utils.math import resample_polyline
+from metadrive.utils.math import resample_polyline, get_polyline_length
 
 
 class ScenarioMap(BaseMap):
@@ -60,21 +61,27 @@ class ScenarioMap(BaseMap):
             if MetaDriveType.is_road_line(type):
                 if len(data[ScenarioDescription.POLYLINE]) <= 1:
                     continue
+                line = np.asarray(data[ScenarioDescription.POLYLINE])[..., :2]
+                length = get_polyline_length(line)
+                resampled = resample_polyline(line, interval) if length > interval*2 else line
                 if MetaDriveType.is_broken_line(type):
                     ret[map_feat_id] = {
                         "type": MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_BROKEN_SINGLE_WHITE,
-                        "polyline": resample_polyline(np.asarray(data[ScenarioDescription.POLYLINE])[...,:2], interval)
+                        "polyline": resampled
                     }
                 else:
                     ret[map_feat_id] = {
-                        "polyline": resample_polyline(np.asarray(data[ScenarioDescription.POLYLINE])[...,:2], interval),
+                        "polyline": resampled,
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
             elif MetaDriveType.is_road_edge(type):
+                line = np.asarray(data[ScenarioDescription.POLYLINE])[..., :2]
+                length = get_polyline_length(line)
+                resampled = resample_polyline(line, interval) if length > interval*2 else line
                 ret[map_feat_id] = {
-                    "polyline": resample_polyline(np.asarray(data[ScenarioDescription.POLYLINE])[...,:2], interval),
+                    "polyline": resampled,
                     "type": MetaDriveType.BOUNDARY_LINE
                 }
             elif type == MetaDriveType.LANE_SURFACE_STREET:

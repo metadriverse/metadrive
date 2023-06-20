@@ -8,7 +8,6 @@ if __name__ == '__main__':
     vis = o3d.visualization.Visualizer()
     vis.create_window(width=1600, height=900, visible=True)
 
-
     # 8bit 1channel or 8bit 3channel, and depth image is: 16bit 1channel image
     pcds = []
     # for h in range(-180, 180, 20):
@@ -28,10 +27,7 @@ if __name__ == '__main__':
         #                       [np.sin(h), np.cos(h), 0, 0],
         #                       [0, 0, 1, 0],
         #                       [0, 0, 0, 1]])
-        extrinsic = np.array([[1, 0, 0, 0],
-                              [0, np.cos(h), -np.sin(h), 0],
-                              [0, np.sin(h), np.cos(h), 0],
-                              [0, 0, 0, 1]])
+        extrinsic = np.array([[1, 0, 0, 0], [0, np.cos(h), -np.sin(h), 0], [0, np.sin(h), np.cos(h), 0], [0, 0, 0, 1]])
         intrinsic = o3d.camera.PinholeCameraIntrinsic(o3d.camera.PinholeCameraIntrinsicParameters.PrimeSenseDefault)
         intrinsic.set_intrinsics(1600, 900, 1.866, 2.066, 800, 450)
         pcd = o3d.geometry.PointCloud.create_from_depth_image(
@@ -62,7 +58,6 @@ if __name__ == '__main__':
         # ex[2][3]+=10
         # camera_parameters.extrinsic = ex
         # ctr.convert_from_pinhole_camera_parameters(camera_parameters)
-
 
         # vis.update_geometry(pcd)
         vis.poll_events()

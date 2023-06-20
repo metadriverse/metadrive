@@ -177,7 +177,7 @@ class ComplexEnv(SafeMetaDriveEnv):
 
     def setup_engine(self):
         super(ComplexEnv, self).setup_engine()
-        self.engine.update_manager("object_manager", ComplexObjectManager())
+        self.engine.register_manager("object_manager", ComplexObjectManager())
 
 
 def test_object_collision_detection(render=False):

@@ -488,7 +488,7 @@ class BaseObject(BaseRunnable):
         In a word, for calculating **points transformation** in different coordinates, origin is required. This is
         because vectors have no origin but origin is required to define a point.
         """
-        assert len(vector)==2 or len(vector)==3, "the vector should be in shape (2,) or (3,)"
+        assert len(vector) == 2 or len(vector) == 3, "the vector should be in shape (2,) or (3,)"
         vector = vector[:2]
         vector = LVector3(*vector, 0.)
         vector = self.engine.origin.getRelativeVector(self.origin, vector)

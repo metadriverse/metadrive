@@ -54,9 +54,9 @@ class ScenarioBlock(BaseBlock):
         # draw
         for lane_id, data in self.map_data.items():
             type = data.get("type", None)
+            if ScenarioDescription.POLYLINE in data and len(data[ScenarioDescription.POLYLINE]) <= 1:
+                continue
             if MetaDriveType.is_road_line(type):
-                if len(data[ScenarioDescription.POLYLINE]) <= 1:
-                    continue
                 if MetaDriveType.is_broken_line(type):
                     self.construct_broken_line(
                         np.asarray(data[ScenarioDescription.POLYLINE]),

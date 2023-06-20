@@ -139,8 +139,13 @@ class TrafficObjectManager(BaseManager):
             p_ = (p[0] + longitude_position, left * p[1])
             position = lane.position(p_[0], p_[1])
             heading_theta = lane.heading_theta_at(p_[0])
-            self.spawn_object(TrafficCone, lane=lane, position=position, heading_theta=heading_theta,
-                              static=self.engine.global_config["static_traffic_object"])
+            self.spawn_object(
+                TrafficCone,
+                lane=lane,
+                position=position,
+                heading_theta=heading_theta,
+                static=self.engine.global_config["static_traffic_object"]
+            )
 
     def set_state(self, state: dict, old_name_to_current=None):
         """
@@ -155,7 +160,7 @@ class TrafficObjectManager(BaseManager):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-            ].class_name == class_name, "Can not restore mappings!"
+                                                         ].class_name == class_name, "Can not restore mappings!"
             # Restore some internal states
             name_obj[current_name].lane = self.engine.current_map.road_network.get_lane(
                 name_obj[current_name].lane.index
