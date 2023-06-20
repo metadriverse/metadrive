@@ -5,7 +5,7 @@ try:
     import gym
     import gym.spaces
 
-    def gymnasiumToGym(space:gymnasium.spaces.Space) -> gym.spaces.Space:
+    def gymnasiumToGym(space: gymnasium.spaces.Space) -> gym.spaces.Space:
         if isinstance(space, gymnasium.spaces.Box):
             return gym.spaces.Box(low=space.low, high=space.high, shape=space.shape)
         elif isinstance(space, gymnasium.spaces.Discrete):
@@ -37,7 +37,6 @@ try:
         "inner_class": A gymnasium based Metadrive environment class
         """
         class GymEnvWrapper(gym.Env):
-
             @classmethod
             def default_config(cls):
                 """
@@ -53,11 +52,13 @@ try:
                 # TODO: this is a hack, but i'm not sure how to make it more robust
                 if not defined_in_this_file(type(self).default_config):
                     current_wrapper_default_config = type(self).default_config
+
                     # at this point, if there was an override, we need to provide the overriden method to the inner class.
                     class OverridenDefaultConfigWrapper(inner_class):
                         @classmethod
                         def default_config(cls):
                             return current_wrapper_default_config()
+
                     # init now has access to the new default_config
                     self._inner = OverridenDefaultConfigWrapper(config=config)
                 else:
@@ -75,7 +76,7 @@ try:
             def reset(self, *, seed=None, options=None):
                 # pass non-none parameters to the reset (which may not support options or seed)
                 params = {"seed": seed, "options": options}
-                not_none_params = {k:v for k, v in params.items() if v is not None}
+                not_none_params = {k: v for k, v in params.items() if v is not None}
                 obs, _ = self._inner.reset(**not_none_params)
                 return obs
 
@@ -103,8 +104,8 @@ try:
 
             def __getattr__(self, __name: str) -> Any:
                 return getattr(self._inner, __name)
-        return GymEnvWrapper
 
+        return GymEnvWrapper
 
     if __name__ == '__main__':
         from metadrive.envs.scenario_env import ScenarioEnv
