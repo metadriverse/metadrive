@@ -8,7 +8,7 @@ pipeline:
     # it will also disable the hotkeys, and give a small performance boost.
     # Most likely you also don't want to show it in your own game, so set
     # it to false in that case.
-    display_debugger: true
+    display_debugger: false
 
     # Affects which debugging information is displayed. If this is set to false,
     # only frame time is displayed, otherwise much more information is visible.

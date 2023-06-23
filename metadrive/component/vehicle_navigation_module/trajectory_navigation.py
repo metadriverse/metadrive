@@ -2,7 +2,7 @@ import logging
 from collections import deque
 
 import numpy as np
-from panda3d.core import NodePath
+from panda3d.core import NodePath, Material
 
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 from metadrive.engine.asset_loader import AssetLoader
@@ -58,6 +58,13 @@ class TrajectoryNavigation(BaseNavigation):
             for model in self._ckpt_vis_models:
                 if self._navi_point_model is None:
                     self._navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+                    self._navi_point_model.setScale(0.5)
+                    if self.engine.use_render_pipeline:
+                        material = Material()
+                        material.setBaseColor((1, 1, 1, 1))
+                        material.setShininess(128)
+                        material.setEmission((1, 1, 1, 1))
+                        self._navi_point_model.setMaterial(material, True)
                 self._navi_point_model.instanceTo(model)
                 model.reparentTo(self.origin)
 
@@ -86,7 +93,7 @@ class TrajectoryNavigation(BaseNavigation):
         self.next_ref_lanes = None
         if self._dest_node_path is not None:
             check_point = self.reference_trajectory.end
-            self._dest_node_path.setPos(panda_vector(check_point[0], check_point[1], 1.8))
+            self._dest_node_path.setPos(panda_vector(check_point[0], check_point[1], 1))
 
     def discretize_reference_trajectory(self):
         ret = []
