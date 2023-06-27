@@ -35,7 +35,7 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True):
         )
     )
     for i in range(20000):
-        o, r, d, _ = env.step(action)
+        o, r, d, _, _ = env.step(action)
         if image_on_cuda:
             torch_tensor = from_dlpack(o["image"].toDlpack())
         else:
