@@ -146,7 +146,7 @@ driver-generate-mipmaps #t
 
 # Use immutable texture storage, it is *supposed* to be faster, but might not be
 # XXX: Seems to produce an GL_INVALID_VALUE when disabled
-gl-immutable-texture-storage #t
+gl-immutable-texture-storage #f
 
 # Default window settings
 # depth-bits 0
