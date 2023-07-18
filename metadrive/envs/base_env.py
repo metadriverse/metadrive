@@ -366,7 +366,7 @@ class BaseEnv(gym.Env):
 
         if mode != "human" and self.config["image_observation"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
-            return self.vehicle.observations.img_obs.get_image()
+            return self.observations[DEFAULT_AGENT].img_obs.get_image()
 
         if mode == "rgb_array":
             assert self.config["use_render"], "You should create a Panda3d window before rendering images!"
