@@ -1,6 +1,6 @@
 try:
     import inspect
-    from typing import Any, Dict
+    from typing import Any, Dict, Callable
     import gymnasium
     import gym
     import gym.spaces
@@ -29,8 +29,24 @@ try:
         else:
             raise ValueError("unsupported space")
 
-    def defined_in_this_file(a):
-        return inspect.getfile(a) == inspect.getfile(createGymWrapper)
+    def was_overriden(a):
+        # we know that the function is overriden if the function was not defined in this file
+        # because this is a dynamic class, equality checks will always return false
+        # TODO: this is a hack, but i'm not sure how to make it more robust
+        return inspect.getfile(a) != inspect.getfile(createGymWrapper)
+
+    def createOverridenDefaultConfigWrapper(base: type, new_default_config: Callable) -> type:
+        """
+        Returns a class derived from the `base` class. It overrides the `default_config` classmethod, which is set to new_default_config
+        """
+
+        # at this point, if there was an override, we need to provide the overriden method to the inner class.
+        class OverridenDefaultConfigWrapper(base):
+            @classmethod
+            def default_config(cls):
+                return new_default_config()
+
+        return OverridenDefaultConfigWrapper
 
     def createGymWrapper(inner_class: type):
         """
@@ -47,23 +63,15 @@ try:
             def __init__(self, config: Dict[str, Any]):
                 # We can only tell if someone has overriden the default config method at init time.
 
-                # we know that the function is overriden if the function was not defined in this file
-                # because this is a dynamic class, equality checks will always return false
-                # TODO: this is a hack, but i'm not sure how to make it more robust
-                if not defined_in_this_file(type(self).default_config):
-                    current_wrapper_default_config = type(self).default_config
-
-                    # at this point, if there was an override, we need to provide the overriden method to the inner class.
-                    class OverridenDefaultConfigWrapper(inner_class):
-                        @classmethod
-                        def default_config(cls):
-                            return current_wrapper_default_config()
-
-                    # init now has access to the new default_config
-                    self._inner = OverridenDefaultConfigWrapper(config=config)
+                if was_overriden(type(self).default_config):
+                    # when inner_class's init is called, it now has access to the new default_config
+                    actual_inner_class = createOverridenDefaultConfigWrapper(inner_class, type(self).default_config)
                 else:
-                    # if no override, directly initialize
-                    self._inner = inner_class(config=config)
+                    # otherwise, don't make a wrapper
+                    actual_inner_class = inner_class
+
+                # initialize
+                super().__setattr__("_inner", actual_inner_class(config=config))
 
             def step(self, actions):
                 o, r, tm, tc, i = self._inner.step(actions)
@@ -110,7 +118,6 @@ try:
                     setattr(self._inner, name, value)
                 else:
                     super().__setattr__(name, value)
-
 
         return GymEnvWrapper
 
