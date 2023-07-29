@@ -419,7 +419,7 @@ class ScenarioDescription(dict):
                     min = z_min
             if max - min > target:
                 break
-        return max - min
+        return float(max - min)
 
 
 def _recursive_check_type(obj, allow_types, depth=0):

@@ -345,6 +345,7 @@ class BaseEnv(gym.Env):
     def render(self,
                text: Optional[Union[dict, str]] = None,
                return_bytes=False,
+               mode=None,
                *args,
                **kwargs) -> Optional[np.ndarray]:
         """
@@ -353,7 +354,7 @@ class BaseEnv(gym.Env):
         :return: when mode is 'rgb', image array is returned
         """
 
-        mode = self.config["render_mode"]
+        mode = mode or self.config["render_mode"]  # for compatibility
 
         if mode in ["top_down", "topdown", "bev", "birdview"]:
             ret = self._render_topdown(text=text, *args, **kwargs)
@@ -365,7 +366,7 @@ class BaseEnv(gym.Env):
 
         if mode != "human" and self.config["image_observation"]:
             # fetch img from img stack to be make this func compatible with other render func in RL setting
-            return self.vehicle.observations.img_obs.get_image()
+            return self.observations[DEFAULT_AGENT].img_obs.get_image()
 
         if mode == "rgb_array":
             assert self.config["use_render"], "You should create a Panda3d window before rendering images!"

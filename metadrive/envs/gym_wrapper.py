@@ -105,6 +105,13 @@ try:
             def __getattr__(self, __name: str) -> Any:
                 return getattr(self._inner, __name)
 
+            def __setattr__(self, name, value):
+                if hasattr(self._inner, name):
+                    setattr(self._inner, name, value)
+                else:
+                    super().__setattr__(name, value)
+
+
         return GymEnvWrapper
 
     if __name__ == '__main__':
@@ -120,5 +127,5 @@ try:
             if d:
                 assert s == env.config["horizon"] and i["max_step"] and d
                 break
-except ImportError:
+except:
     pass
