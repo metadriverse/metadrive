@@ -10,6 +10,8 @@ try:
             return gym.spaces.Box(low=space.low, high=space.high, shape=space.shape)
         elif isinstance(space, gymnasium.spaces.Discrete):
             return gym.spaces.Discrete(n=int(space.n), start=int(space.start))
+        elif isinstance(space, gymnasium.spaces.MultiDiscrete):
+            return gym.spaces.MultiDiscrete(nvec=space.nvec)
         elif isinstance(space, gymnasium.spaces.Tuple):
             return gym.spaces.Tuple([gymnasiumToGym(subspace) for subspace in space.spaces])
         elif isinstance(space, gymnasium.spaces.Dict):
@@ -22,6 +24,8 @@ try:
             return gymnasium.spaces.Box(low=space.low, high=space.high, shape=space.shape)
         elif isinstance(space, gym.spaces.Discrete):
             return gymnasium.spaces.Discrete(n=int(space.n), start=int(space.start))
+        elif isinstance(space, gym.spaces.MultiDiscrete):
+            return gymnasium.spaces.MultiDiscrete(nvec=space.nvec)
         elif isinstance(space, gym.spaces.Tuple):
             return gymnasium.spaces.Tuple([gymToGymnasium(subspace) for subspace in space.spaces])
         elif isinstance(space, gym.spaces.Dict):
@@ -29,29 +33,33 @@ try:
         else:
             raise ValueError("unsupported space")
 
-    def was_overriden(a):
-        # we know that the function is overriden if the function was not defined in this file
-        # because this is a dynamic class, equality checks will always return false
-        # TODO: this is a hack, but i'm not sure how to make it more robust
-        return inspect.getfile(a) != inspect.getfile(createGymWrapper)
-
-    def createOverridenDefaultConfigWrapper(base: type, new_default_config: Callable) -> type:
-        """
-        Returns a class derived from the `base` class. It overrides the `default_config` classmethod, which is set to new_default_config
-        """
-
-        # at this point, if there was an override, we need to provide the overriden method to the inner class.
-        class OverridenDefaultConfigWrapper(base):
-            @classmethod
-            def default_config(cls):
-                return new_default_config()
-
-        return OverridenDefaultConfigWrapper
-
     def createGymWrapper(inner_class: type):
         """
         "inner_class": A gymnasium based Metadrive environment class
         """
+
+        def was_overriden(a):
+            """
+            Returns if function `a` was not defined in this file
+            """
+            # we know that the function is overriden if the function was not defined in this file
+            # because this is a dynamic class, equality checks will always return false
+            # TODO: this is a hack, but i'm not sure how to make it more robust
+            return inspect.getfile(a) != inspect.getfile(createGymWrapper)
+
+        def createOverridenDefaultConfigWrapper(base: type, new_default_config: Callable) -> type:
+            """
+            Returns a class derived from the `base` class. It overrides the `default_config` classmethod, which is set to new_default_config
+            """
+
+            class OverridenDefaultConfigWrapper(base):
+                @classmethod
+                def default_config(cls):
+                    return new_default_config()
+
+            return OverridenDefaultConfigWrapper
+
+
         class GymEnvWrapper(gym.Env):
             @classmethod
             def default_config(cls):
@@ -63,6 +71,7 @@ try:
             def __init__(self, config: Dict[str, Any]):
                 # We can only tell if someone has overriden the default config method at init time.
 
+                # if there was an override, we need to provide the overriden method to the inner class.
                 if was_overriden(type(self).default_config):
                     # when inner_class's init is called, it now has access to the new default_config
                     actual_inner_class = createOverridenDefaultConfigWrapper(inner_class, type(self).default_config)
