@@ -54,6 +54,7 @@ jobs:
         run: |
           pip install cython
           pip install numpy
+          pip install gym
           pip install -e .
           pip install pytest
           pip install pytest-cov
