@@ -6,7 +6,7 @@ from panda3d.bullet import BulletGhostNode, BulletCylinderShape
 from panda3d.core import NodePath
 
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.vehicle_module.distance_detector import DistanceDetector
+from metadrive.component.sensors.distance_detector import DistanceDetector
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_vector

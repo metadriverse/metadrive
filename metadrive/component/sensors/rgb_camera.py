@@ -1,4 +1,4 @@
-from metadrive.component.vehicle_module.base_camera import BaseCamera
+from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.engine.engine_utils import engine_initialized, get_global_config
 from direct.filter.CommonFilters import CommonFilters

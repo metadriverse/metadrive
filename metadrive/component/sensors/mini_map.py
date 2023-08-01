@@ -1,6 +1,6 @@
 from panda3d.core import Vec3
 
-from metadrive.component.vehicle_module.base_camera import BaseCamera
+from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.engine.engine_utils import get_global_config, engine_initialized
 

@@ -1,5 +1,5 @@
 import copy
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.vehicle_panel import VehiclePanel
 import logging
 from typing import Dict, Any
 

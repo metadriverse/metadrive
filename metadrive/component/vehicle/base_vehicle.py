@@ -17,11 +17,11 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.component.vehicle_module.depth_camera import DepthCamera
-from metadrive.component.vehicle_module.distance_detector import SideDetector, LaneLineDetector
-from metadrive.component.vehicle_module.lidar import Lidar
-from metadrive.component.vehicle_module.mini_map import MiniMap
-from metadrive.component.vehicle_module.rgb_camera import RGBCamera
+from metadrive.component.sensors.depth_camera import DepthCamera
+from metadrive.component.sensors.distance_detector import SideDetector, LaneLineDetector
+from metadrive.component.sensors.lidar import Lidar
+from metadrive.component.sensors.mini_map import MiniMap
+from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.constants import MetaDriveType, CollisionGroup

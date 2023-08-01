@@ -1,7 +1,7 @@
-from metadrive.component.vehicle_module.mini_map import MiniMap
-from metadrive.component.vehicle_module.rgb_camera import RGBCamera
-from metadrive.component.vehicle_module.depth_camera import DepthCamera
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.mini_map import MiniMap
+from metadrive.component.sensors.rgb_camera import RGBCamera
+from metadrive.component.sensors.depth_camera import DepthCamera
+from metadrive.component.sensors.vehicle_panel import VehiclePanel
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 
 if __name__ == "__main__":

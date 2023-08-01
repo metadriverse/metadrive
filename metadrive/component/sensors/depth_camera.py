@@ -2,7 +2,7 @@ from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, LVect
 import cv2
 import numpy as np
 
-from metadrive.component.vehicle_module.base_camera import BaseCamera
+from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader

@@ -4,7 +4,7 @@ import math
 import numpy as np
 from panda3d.core import NodePath, TextNode, LQuaternionf
 
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.vehicle_panel import VehiclePanel
 from metadrive.constants import COLLISION_INFO_COLOR, COLOR, MetaDriveType, \
     CamMask, RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
