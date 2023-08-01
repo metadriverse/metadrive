@@ -38,52 +38,61 @@ def test_conversion_functions():
     assert gymnasiumToGym(gymnasium_space_dict) == gym_space_dict
 
 
-def assert_allclose_dict(a:dict[str, np.ndarray], b:dict[str, np.ndarray]):
-    # assert the keys are the same
-    ak = sorted(a.keys())
-    bk = sorted(a.keys())
-    assert ak == bk
-    for k in ak:
-        assert np.allclose(a[k], b[k])
-
-
-def test_gym_wrapper_simple():
-    # test very simple single agent environment
-    class SingleAgentGymnasiumInnerClass(gymnasium.Env):
+def test_gym_wrapper_removes_mode():
+    # test that mode is removed from args
+    class NoModeGymnasiumInnerClass(gymnasium.Env):
         def __init__(self, config: dict):
             super().__init__()
             self.action_space = gymnasium.spaces.Discrete(5)
             self.observation_space = gymnasium.spaces.Box(0, 1, shape=(1, 2, 3), dtype=np.float32)
 
-        def step(self, action):
-            return self.observation_space.sample(), 0, False, False, {}
+        def render(self, **kwargs):
+            assert 'mode' not in kwargs.keys()
 
-        def reset(self, seed: Union[int,None]=None):
-            super().reset(seed=seed)
-            self.observation_space.seed(seed)
-            return self.observation_space.sample(), {}
+    gym_env = createGymWrapper(NoModeGymnasiumInnerClass)(config={})
+    gym_env.render(mode=1)
 
 
-    gymnasium_env = SingleAgentGymnasiumInnerClass(config={})
-    gym_env = createGymWrapper(SingleAgentGymnasiumInnerClass)(config={})
+
+class SingleAgentEnvironment(gymnasium.Env):
+    def __init__(self, config: dict):
+        super().__init__()
+        self.action_space = gymnasium.spaces.Box(-1, 1, shape=(2,))
+        self.observation_space = gymnasium.spaces.Box(0, 1, shape=(1, 2, 3), dtype=np.float32)
+
+        self.active = True
+        self.steps = 0
+        self.reward_source = gymnasium.spaces.Box(0, 100, shape=(1,), dtype=np.float32)
     
-    assert gymToGymnasium(gym_env.observation_space) == gymnasium_env.observation_space
-    assert gymToGymnasium(gym_env.action_space) == gymnasium_env.action_space
+    def step(self, action:np.ndarray):
+        assert not self.active
+        assert self.action_space.contains(action)
 
-    o_gymnasium, _ = gymnasium_env.reset(seed=0)
-    o_gym = gym_env.reset(seed=0)
+        self.steps += 1
 
-    assert np.allclose(o_gymnasium, o_gym)
-
-    o_gymnasium, _, _, _, _= gymnasium_env.step([0, 1])
-    o_gym, _, _, _ = gym_env.step([0, 1])
+        # truncate if steps above 50
+        if self.steps < 50:
+            # terminate if action is less than 0
+            if action[0] < 0:
+                return self.observation_space.sample(), self.reward_source.sample(), True, False, {}
+            else:
+                return self.observation_space.sample(), self.reward_source.sample(), False, False, {}
+        else:
+            self.active = False
+            return self.observation_space.sample(), self.reward_source.sample(), False, True, {}
     
-    assert np.allclose(o_gymnasium, o_gym)
+    def reset(self, seed: Union[int,None]=None):
+        super().reset(seed=seed)
+        self.steps = 0
+        self.observation_space.seed(seed)
+        self.reward_source.seed(seed)
+        return self.observation_space.sample(), {}
 
-def test_gym_wrapper_single_agent_metadrive():
-    # test single agent metadrive environment
-    gymnasium_env = MetaDriveEnv(config={"num_scenarios": 1})
-    gym_env = createGymWrapper(MetaDriveEnv)(config={"num_scenarios": 1})
+
+def test_gym_wrapper_single_agent():
+    # collect data from gymnasium env
+    gymnasium_env = SingleAgentEnvironment(config={})
+    gym_env = createGymWrapper(SingleAgentEnvironment)(config={})
 
     assert gymToGymnasium(gym_env.observation_space) == gymnasium_env.observation_space
     assert gymToGymnasium(gym_env.action_space) == gymnasium_env.action_space
@@ -96,9 +105,10 @@ def test_gym_wrapper_single_agent_metadrive():
 
     assert np.allclose(o_gymnasium, o_gym)
 
+    # test will end due to truncation
     while True:
-        o_gymnasium, r_gymnasium, tm_gymnasium, tc_gymnasium, _ = gymnasium_env.step([0, 1])
-        o_gym, r_gym, d_gym, _ = gym_env.step([0, 1])
+        o_gymnasium, r_gymnasium, tm_gymnasium, tc_gymnasium, _ = gymnasium_env.step(np.ndarray([0, 1]))
+        o_gym, r_gym, d_gym, _ = gym_env.step(np.ndarray([0, 1]))
 
         assert isinstance(o_gymnasium, np.ndarray)
         assert isinstance(o_gym, np.ndarray)
@@ -112,13 +122,87 @@ def test_gym_wrapper_single_agent_metadrive():
 
         assert d_gym == tm_gymnasium or tc_gymnasium
 
-        if d_gym or tm_gymnasium or tc_gymnasium:
+        if d_gym:
             break
+    
+    # now test termination
+    o_gymnasium, _ = gymnasium_env.reset(seed=42)
+    o_gym = gym_env.reset(seed=42)
+
+    assert isinstance(o_gymnasium, np.ndarray)
+    assert isinstance(o_gym, np.ndarray)
+
+    assert np.allclose(o_gymnasium, o_gym)
+
+    # this should terminate
+    o_gymnasium, r_gymnasium, tm_gymnasium, tc_gymnasium, _ = gymnasium_env.step(np.ndarray([-1, 1]))
+    o_gym, r_gym, d_gym, _ = gym_env.step(np.ndarray([-1, 1]))
+
+    assert isinstance(o_gymnasium, np.ndarray)
+    assert isinstance(o_gym, np.ndarray)
+    assert np.allclose(o_gymnasium, o_gym)
+
+    assert isinstance(r_gymnasium, float)
+    assert isinstance(r_gym, float)
+    assert np.allclose(r_gymnasium, r_gym)
+
+    assert not tc_gymnasium
+    assert tm_gymnasium
+
+    assert d_gym
+
+
+class MultiAgentEnvironment(gymnasium.Env):
+    def __init__(self, config: dict):
+        super().__init__()
+
+        assert "num_agents" in config
+        assert isinstance(config["num_agents"])
+        self.action_space = gymnasium.spaces.Box(-1, 1, shape=(2,))
+        self.observation_space = gymnasium.spaces.Box(0, 1, shape=(1, 2, 3), dtype=np.float32)
+
+        self.active = True
+        self.steps = 0
+        self.reward_source = gymnasium.spaces.Box(0, 100, shape=(1,), dtype=np.float32)
+    
+    def step(self, action:np.ndarray):
+        assert not self.active
+        assert self.action_space.contains(action)
+
+        self.steps += 1
+
+        # truncate if steps above 50
+        if self.steps < 50:
+            # terminate if action is less than 0
+            if action[0] < 0:
+                return self.observation_space.sample(), self.reward_source.sample(), True, False, {}
+            else:
+                return self.observation_space.sample(), self.reward_source.sample(), False, False, {}
+        else:
+            self.active = False
+            return self.observation_space.sample(), self.reward_source.sample(), False, True, {}
+    
+    def reset(self, seed: Union[int,None]=None):
+        super().reset(seed=seed)
+        self.steps = 0
+        self.observation_space.seed(seed)
+        self.reward_source.seed(seed)
+        return self.observation_space.sample(), {}
+
+
+def assert_allclose_dict(a: dict[str, np.ndarray], b: dict[str, np.ndarray]):
+    a_keys = sorted(a.keys())
+    b_keys = sorted(b.keys())
+
+    assert a_keys == b_keys
+
+    for key in a_keys:
+        assert np.allclose(a[key], b[key])
 
 def test_gym_wrapper_multi_agent_metadrive():
     # test multi agent metadrive environment
-    gymnasium_env = MetaDriveEnv(config={"num_scenarios": 1, "start_seed": 0, "num_agents": 2})
-    gym_env = createGymWrapper(MetaDriveEnv)(config={"num_scenarios": 1, "start_seed": 0, "num_agents": 2})
+    gymnasium_env = MetaDriveEnv(config={"num_agents": 2})
+    gym_env = createGymWrapper(MetaDriveEnv)(config={"num_agents": 2})
 
     assert gymToGymnasium(gym_env.observation_space) == gymnasium_env.observation_space
     assert gymToGymnasium(gym_env.action_space) == gymnasium_env.action_space
@@ -153,28 +237,11 @@ def test_gym_wrapper_multi_agent_metadrive():
             break
 
 
-def test_gym_wrapper_removes_mode():
-    # test that mode is removed from args
-    class NoModeGymnasiumInnerClass(gymnasium.Env):
-        def __init__(self, config: dict):
-            super().__init__()
-            self.action_space = gymnasium.spaces.Discrete(5)
-            self.observation_space = gymnasium.spaces.Box(0, 1, shape=(1, 2, 3), dtype=np.float32)
-
-        def render(**kwargs):
-            assert 'mode' not in kwargs.keys()
-
-    gym_env = createGymWrapper(NoModeGymnasiumInnerClass)(config={})
-    gym_env.render(mode=1)
-
-
 
 if __name__ == '__main__':
     test_conversion_functions()
-    test_gym_wrapper_simple()
 
     test_gym_wrapper_removes_mode()
 
-    # end to end test with metadrive
-    test_gym_wrapper_single_agent_metadrive()
-    test_gym_wrapper_multi_agent_metadrive()
+    test_gym_wrapper_single_agent()
+    test_gym_wrapper_multi_agent()
