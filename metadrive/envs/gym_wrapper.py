@@ -37,7 +37,6 @@ try:
         """
         "inner_class": A gymnasium based Metadrive environment class
         """
-
         def was_overriden(a):
             """
             Returns if function `a` was not defined in this file
@@ -51,14 +50,12 @@ try:
             """
             Returns a class derived from the `base` class. It overrides the `default_config` classmethod, which is set to new_default_config
             """
-
             class OverridenDefaultConfigWrapper(base):
                 @classmethod
                 def default_config(cls):
                     return new_default_config()
 
             return OverridenDefaultConfigWrapper
-
 
         class GymEnvWrapper(gym.Env):
             @classmethod
