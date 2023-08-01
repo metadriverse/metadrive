@@ -115,11 +115,6 @@ class ScenarioEnv(BaseEnv):
             assert self.config["sequential_seed"], \
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
 
-    def _merge_extra_config(self, config):
-        # config = self.default_config().update(config, allow_add_new_key=True)
-        config = self.default_config().update(config, allow_add_new_key=False)
-        return config
-
     def _get_observations(self):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 

@@ -108,12 +108,6 @@ class MetaDriveEnv(BaseEnv):
         self.env_num = self.config["num_scenarios"]
         self.in_stop = False
 
-    def _merge_extra_config(self, config: Union[dict, Config]) -> Config:
-        config = self.default_config().update(config, allow_add_new_key=False)
-        if config["vehicle_config"]["lidar"]["distance"] > 50:
-            config["max_distance"] = config["vehicle_config"]["lidar"]["distance"]
-        return config
-
     def _post_process_config(self, config):
         config = super(MetaDriveEnv, self)._post_process_config(config)
         if not config["rgb_clip"]:

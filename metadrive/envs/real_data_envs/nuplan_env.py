@@ -93,11 +93,6 @@ class NuPlanEnv(BaseEnv):
     def __init__(self, config=None):
         super(NuPlanEnv, self).__init__(config)
 
-    def _merge_extra_config(self, config):
-        # config = self.default_config().update(config, allow_add_new_key=True)
-        config = self.default_config().update(config, allow_add_new_key=False)
-        return config
-
     def _get_observations(self):
         return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
 

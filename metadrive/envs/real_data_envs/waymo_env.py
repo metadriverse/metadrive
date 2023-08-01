@@ -19,12 +19,6 @@ class WaymoEnv(ScenarioEnv):
     def __init__(self, config=None):
         super(WaymoEnv, self).__init__(config)
 
-    def _merge_extra_config(self, config):
-        config = self.default_config().update(config, allow_add_new_key=False)
-        if config["waymo_data_directory"] is not None:
-            config["data_directory"] = config["waymo_data_directory"]
-        return config
-
 
 if __name__ == "__main__":
     from metadrive.policy.replay_policy import ReplayEgoCarPolicy

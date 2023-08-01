@@ -175,8 +175,6 @@ BASE_DEFAULT_CONFIG = dict(
     height_scale=120,
 
     # ===== Others =====
-    # The maximum distance used in PGLOD. Set to None will use the default values.
-    max_distance=None,
     # Force to generate objects in the left lane.
     _debug_crash_object=False,
     horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
@@ -243,6 +241,7 @@ class BaseEnv(gym.Env):
 
     def _merge_extra_config(self, config: Union[dict, Config]) -> Config:
         """Check, update, sync and overwrite some config."""
+        config = self.default_config().update(config, allow_add_new_key=False)
         return config
 
     def _post_process_config(self, config):
