@@ -76,26 +76,6 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         config.update(MULTI_AGENT_METADRIVE_DEFAULT_CONFIG)
         return config
 
-    def _merge_extra_config(self, config) -> "Config":
-        ret_config = self.default_config().update(
-            config,
-            allow_add_new_key=False,
-            stop_recursive_update=["target_vehicle_configs"],
-        )
-        # if not ret_config["crash_done"] and ret_config["crash_vehicle_penalty"] > 2:
-        #     logging.warning(
-        #         "Are you sure you wish to set crash_vehicle_penalty={} when crash_done=False?".format(
-        #             ret_config["crash_vehicle_penalty"]
-        #         )
-        #     )
-        if ret_config["use_render"] and ret_config["disable_model_compression"]:
-            logging.warning("Turn disable_model_compression=True can decrease the loading time!")
-
-        if "prefer_track_agent" in config and config["prefer_track_agent"]:
-            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["use_special_color"] = True
-        ret_config["vehicle_config"]["random_agent_model"] = ret_config["random_agent_model"]
-        return ret_config
-
     def _post_process_config(self, config):
         from metadrive.manager.spawn_manager import SpawnManager
 
@@ -123,6 +103,12 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 config.update(ret_config["target_vehicle_configs"][agent_id])
             target_vehicle_configs[agent_id] = config
         ret_config["target_vehicle_configs"] = target_vehicle_configs
+        if ret_config["use_render"] and ret_config["disable_model_compression"]:
+            logging.warning("Turn disable_model_compression=True can decrease the loading time!")
+
+        if "prefer_track_agent" in config and config["prefer_track_agent"]:
+            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["use_special_color"] = True
+        ret_config["vehicle_config"]["random_agent_model"] = ret_config["random_agent_model"]
         return ret_config
 
     def done_function(self, vehicle_id):

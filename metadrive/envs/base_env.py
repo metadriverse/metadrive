@@ -213,7 +213,7 @@ class BaseEnv(gym.Env):
         self.logger = logging.getLogger(self.logger_name)
         if config is None:
             config = {}
-        merged_config = self._merge_extra_config(config)
+        merged_config = self.default_config().update(config, False, ["target_vehicle_configs"])
         global_config = self._post_process_config(merged_config)
         global_config["vehicle_config"]["main_camera"] = global_config["window_size"]
 
@@ -238,11 +238,6 @@ class BaseEnv(gym.Env):
         # In MARL envs with respawn mechanism, varying episode lengths might happen.
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
-
-    def _merge_extra_config(self, config: Union[dict, Config]) -> Config:
-        """Check, update, sync and overwrite some config."""
-        config = self.default_config().update(config, allow_add_new_key=False)
-        return config
 
     def _post_process_config(self, config):
         """Add more special process to merged config"""
@@ -474,7 +469,8 @@ class BaseEnv(gym.Env):
 
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
-                   self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(truncateds), self._wrap_as_single_agent(step_infos)
+                   self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(
+                truncateds), self._wrap_as_single_agent(step_infos)
         else:
             return obses, rewards, terminateds, truncateds, step_infos
 
@@ -620,19 +616,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

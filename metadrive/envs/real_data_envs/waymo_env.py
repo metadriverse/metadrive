@@ -19,6 +19,13 @@ class WaymoEnv(ScenarioEnv):
     def __init__(self, config=None):
         super(WaymoEnv, self).__init__(config)
 
+    def _post_process_config(self, config):
+        config = super(WaymoEnv, self)._post_process_config(config)
+        if config["waymo_data_directory"] is not None:
+            # overwrite
+            config["data_directory"] = config["waymo_data_directory"]
+        return config
+
 
 if __name__ == "__main__":
     from metadrive.policy.replay_policy import ReplayEgoCarPolicy
