@@ -360,7 +360,7 @@ class BaseEnv(gym.Env):
             ret = self._render_topdown(text=text, *args, **kwargs)
             return ret
         assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, \
-            ("Panda Renderring is off now, can not render. Please set config['use_render'] = True!")
+            ("Panda Rendering is off now, can not render. Please set config['use_render'] = True!")
 
         self.engine.render_frame(text)
 

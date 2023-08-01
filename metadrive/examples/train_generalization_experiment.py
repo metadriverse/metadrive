@@ -13,6 +13,7 @@ from typing import Dict
 import numpy as np
 
 from metadrive import MetaDriveEnv
+from metadrive.envs.gym_wrapper import createGymWrapper
 
 try:
     import ray
@@ -173,7 +174,7 @@ if __name__ == '__main__':
 
         # ===== Training Environment =====
         # Train the policies in scenario sets with different number of scenarios.
-        env=MetaDriveEnv,
+        env=createGymWrapper(MetaDriveEnv),
         env_config=dict(
             num_scenarios=tune.grid_search([1, 3, 5, 1000]),
             start_seed=tune.grid_search([5000]),

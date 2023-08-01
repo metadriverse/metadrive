@@ -81,7 +81,7 @@ cuda_requirement = [
 ]
 
 gym_requirement = [
-    "gym>=0.20.0, <=0.26.0"
+    "gym>=0.19.0, <=0.26.0"
 ]
 
 setup(
