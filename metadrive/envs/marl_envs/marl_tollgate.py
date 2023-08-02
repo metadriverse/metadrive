@@ -268,8 +268,8 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
 
         return done, done_info
 
-    def get_single_observation(self, vehicle_config):
-        o = TollGateObservation(vehicle_config)
+    def get_single_observation(self):
+        o = TollGateObservation(self.config)
         return o
 
     def step(self, actions):

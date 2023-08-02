@@ -407,11 +407,11 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
             target_speed=self.config["target_speed"]
         )
 
-    def get_single_observation(self, vehicle_config: "Config"):
+    def get_single_observation(self):
         if self.config["use_communication_obs"]:
-            return CommunicationObservation(vehicle_config, self)
+            return CommunicationObservation(self.config, self)
         else:
-            return LidarStateObservation(vehicle_config)
+            return LidarStateObservation(self.config)
 
 
 if __name__ == '__main__':

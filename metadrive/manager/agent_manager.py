@@ -1,4 +1,6 @@
 import copy
+import logging
+
 from metadrive.policy.idm_policy import TrajectoryIDMPOlicy
 from typing import Dict
 
@@ -208,6 +210,8 @@ class AgentManager(BaseManager):
         new_v_name = vehicle.name
         self._agent_to_object[agent_name] = new_v_name
         self._object_to_agent[new_v_name] = agent_name
+        # TODO: this may cause error? Sharing observation
+        logging.warning("Test MARL new agent observation to avoid bug!")
         self.observations[new_v_name] = self._init_observations["agent0"]
         self.observations[new_v_name].reset(vehicle)
         self.observation_spaces[new_v_name] = self._init_observation_spaces["agent0"]

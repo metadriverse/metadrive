@@ -15,8 +15,8 @@ from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.obs.image_obs import ImageStateObservation
+from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.utils import get_np_random
 from metadrive.utils.math import wrap_to_pi
@@ -116,13 +116,13 @@ class ScenarioEnv(BaseEnv):
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
 
     def _get_observations(self):
-        return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
+        return {self.DEFAULT_AGENT: self.get_single_observation()}
 
-    def get_single_observation(self, vehicle_config: "Config"):
+    def get_single_observation(self):
         if self.config["image_observation"]:
-            o = ImageStateObservation(vehicle_config)
+            o = ImageStateObservation(self.config)
         else:
-            o = LidarStateObservation(vehicle_config)
+            o = LidarStateObservation(self.config)
         return o
 
     def switch_to_top_down_view(self):
@@ -244,8 +244,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
 
         # log data to curriculum manager

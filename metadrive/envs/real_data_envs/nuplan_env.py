@@ -94,13 +94,13 @@ class NuPlanEnv(BaseEnv):
         super(NuPlanEnv, self).__init__(config)
 
     def _get_observations(self):
-        return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
+        return {self.DEFAULT_AGENT: self.get_single_observation()}
 
-    def get_single_observation(self, vehicle_config):
+    def get_single_observation(self):
         if self.config["use_nuplan_observation"]:
-            o = NuPlanObservation(vehicle_config)
+            o = NuPlanObservation(self.config)
         else:
-            o = LidarStateObservation(vehicle_config)
+            o = LidarStateObservation(self.config)
         return o
 
     def switch_to_top_down_view(self):

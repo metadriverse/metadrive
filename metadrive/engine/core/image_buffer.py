@@ -31,13 +31,13 @@ class ImageBuffer:
         parent_node: NodePath = None,
         frame_buffer_property=None,
         setup_pbr=False,
-        # engine=None
+        engine=None
     ):
 
         self._node_path_list = []
 
         # from metadrive.engine.engine_utils import get_engine
-        # self.engine = engine or get_engine()
+        self.engine = engine
         try:
             assert self.engine.win is not None, "{} cannot be made without use_render or image_observation".format(
                 self.__class__.__name__
@@ -98,11 +98,6 @@ class ImageBuffer:
             self.tonemap_quad.set_shader_input('exposure', 1.0)
 
         logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
-
-    @property
-    def engine(self):
-        from metadrive.engine.engine_utils import get_engine
-        return get_engine()
 
     def get_image(self):
         """

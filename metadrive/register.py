@@ -1,3 +1,5 @@
+import logging
+
 import gymnasium as gym
 from packaging import version
 from metadrive.envs import MetaDriveEnv
@@ -85,7 +87,7 @@ for env_name, entry in marl_env.items():
         gym.register(id=env_name, entry_point=entry, kwargs=dict(config={}))
 
 if len(envs) > 0:
-    print("Successfully registered the following environments: {}.".format(envs))
+    logging.getLogger("Gym").info("Successfully registered the following environments: {}.".format(envs))
 
 if __name__ == '__main__':
     # Test purpose only

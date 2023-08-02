@@ -181,7 +181,7 @@ class ReplayManager(BaseManager):
         """
         Override me in the future for collecting other modality
         """
-        return LidarStateObservation(self.engine.global_config["vehicle_config"])
+        return LidarStateObservation(self.engine.global_config)
 
     def get_replay_agent_observations(self):
         return {k: self.observation for k in self.current_frame.agents}

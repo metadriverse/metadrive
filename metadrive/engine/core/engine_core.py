@@ -1,4 +1,5 @@
 import logging
+from metadrive.component.sensors.vehicle_panel import VehiclePanel
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -8,7 +9,7 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
 from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
-
+from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
@@ -115,10 +116,6 @@ class EngineCore(ShowBase.ShowBase):
                 if self.global_config["multi_thread_render"] and not self.use_render_pipeline:
                     # render-pipeline can not work with multi-thread rendering
                     loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
-                if self.global_config["vehicle_config"]["image_source"] != "main_camera":
-                    # reduce size as we don't use the main camera content for improving efficiency
-                    self.global_config["window_size"] = (1, 1)
-
             else:
                 self.mode = RENDER_MODE_NONE
                 if self.global_config["show_interface"]:
@@ -319,6 +316,10 @@ class EngineCore(ShowBase.ShowBase):
         if self.global_config["show_coordinates"]:
             self.show_coordinates()
 
+        # create sensors
+        self.sensors = {}
+        self.setup_sensors()
+
     def render_frame(self, text: Optional[Union[dict, str]] = None):
         """
         The real rendering is conducted by the igLoop task maintained by panda3d.
@@ -475,3 +476,28 @@ class EngineCore(ShowBase.ShowBase):
     def reload_shader(self):
         if self.render_pipeline is not None:
             self.render_pipeline.reload_shaders()
+
+    def setup_sensors(self):
+        for sensor_id, sensor_cfg in self.global_config["sensors"].items():
+            if sensor_id == "main_camera":
+                continue
+            cls = sensor_cfg[0]
+            args = sensor_cfg[1:]
+            if issubclass(cls, ImageBuffer):
+                self.add_image_sensor(sensor_id, cls, args)
+            else:
+                raise ValueError("TODO: Add other sensor here")
+
+    def get_sensor(self, sensor_id):
+        if sensor_id not in self.sensors:
+            raise ValueError("Can not get {}, available sensors: {}".format(sensor_id, self.sensors.keys()))
+        return self.sensors[sensor_id]
+
+    def add_image_sensor(self, name: str, cls, args):
+        if self.global_config["image_on_cuda"] and name == self.global_config["vehicle_config"]["image_source"]:
+            args.append(True)
+        sensor = cls(self, *args)
+        assert isinstance(sensor, ImageBuffer), "This API is for adding image sensor"
+        self.sensors[name] = sensor
+        self.graphicsEngine.render_frame()
+        self.graphicsEngine.render_frame()

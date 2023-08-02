@@ -1,3 +1,4 @@
+import logging
 import math
 import os
 from collections import deque
@@ -17,16 +18,12 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.component.sensors.depth_camera import DepthCamera
 from metadrive.component.sensors.distance_detector import SideDetector, LaneLineDetector
 from metadrive.component.sensors.lidar import Lidar
-from metadrive.component.sensors.mini_map import MiniMap
-from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.engine_utils import get_engine, engine_initialized
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Config, safe_clip_for_small_array
@@ -166,7 +163,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.lidar: Optional[Lidar] = None  # detect surrounding vehicles
         self.side_detector: Optional[SideDetector] = None  # detect road side
         self.lane_line_detector: Optional[LaneLineDetector] = None  # detect nearest lane lines
-        self.image_sensors = {}
 
         # state info
         self.throttle_brake = 0.0
@@ -225,29 +221,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.engine.global_config["vehicle_config"]["show_lidar"]
         )
 
-        # vision modules
-        self.setup_sensors()
-
-    def _available_sensors(self):
-        def _main_cam():
-            assert self.engine.main_camera is not None, "Main camera doesn't exist"
-            return self.engine.main_camera
-
-        return {"rgb_camera": RGBCamera, "mini_map": MiniMap, "depth_camera": DepthCamera, "main_camera": _main_cam}
-
-    def setup_sensors(self):
-        if self.engine.global_config["image_observation"]:
-            sensors = self._available_sensors()
-            self.add_image_sensor(self.config["image_source"], sensors[self.config["image_source"]]())
-
-    def get_camera(self, camera_type_str):
-        sensors = self._available_sensors()
-        if camera_type_str not in sensors:
-            raise ValueError("Can not get {}, available type: {}".format(camera_type_str, sensors.keys()))
-        if camera_type_str not in self.image_sensors:
-            self.add_image_sensor(camera_type_str, sensors[camera_type_str]())
-        return self.image_sensors[camera_type_str]
-
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
 
@@ -255,6 +228,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.navigation is None:
             self.add_navigation()  # default added
 
+        logging.warning("Move Lidar Creation to engine core!")
         # add distance detector/lidar
         if self.side_detector is None:
             self.side_detector = SideDetector(
@@ -274,10 +248,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.engine.global_config["vehicle_config"]["show_lidar"]
             )
 
-        # vision modules
-        # self.add_image_sensor("rgb_camera", RGBCamera())
-        # self.add_image_sensor("mini_map", MiniMap())
-        # self.add_image_sensor("depth_camera", DepthCamera())
 
     def _init_step_info(self):
         # done info will be initialized every frame
@@ -744,11 +714,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         wheel.setRollInfluence(0.5)
         return wheel
 
-    def add_image_sensor(self, name: str, sensor: ImageBuffer):
-        self.image_sensors[name] = sensor
-        self.engine.graphicsEngine.render_frame()
-        self.engine.graphicsEngine.render_frame()
-
     def add_navigation(self):
         if not self.config["need_navigation"]:
             return
@@ -870,11 +835,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.lidar is not None:
             self.lidar.destroy()
             self.lidar = None
-        if len(self.image_sensors) != 0:
-            for sensor in self.image_sensors.values():
-                if sensor is not self.engine.main_camera:
-                    sensor.destroy()
-        self.image_sensors = {}
         if self.light is not None:
             self.remove_light()
 
@@ -972,8 +932,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         super(BaseVehicle, self).__del__()
         # self.engine = None
         self.lidar = None
-        self.mini_map = None
-        self.rgb_camera = None
         self.navigation = None
         self.wheels = None
 
