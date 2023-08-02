@@ -206,6 +206,7 @@ BASE_DEFAULT_CONFIG = dict(
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
     preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
+    log_level=None,
 
     # record/replay metadata
     record_episode=False,  # when replay_episode is not None ,this option will be useless
@@ -228,7 +229,8 @@ class BaseEnv(gym.Env):
     def __init__(self, config: dict = None):
         if config is None:
             config = {}
-        self.logger = get_logger(self.logger_name, level=logging.DEBUG if config.get("debug", False) else logging.INFO)
+        self.logger = get_logger(self.logger_name,
+                                 config.get("log_level", logging.DEBUG if config.get("debug", False) else logging.INFO))
         merged_config = self.default_config().update(config, False, ["target_vehicle_configs", "sensors"])
         global_config = self._post_process_config(merged_config)
         global_config["vehicle_config"]["main_camera"] = global_config["window_size"]

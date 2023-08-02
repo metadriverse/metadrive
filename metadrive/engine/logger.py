@@ -23,7 +23,7 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def get_logger(name, propagate=False, level=logging.INFO):
+def get_logger(name, level=logging.INFO, propagate=False):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.propagate = propagate
