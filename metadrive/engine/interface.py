@@ -5,7 +5,6 @@ import time
 import numpy as np
 from panda3d.core import NodePath, TextNode, LQuaternionf
 
-from metadrive.component.sensors.vehicle_panel import VehiclePanel
 from metadrive.constants import COLLISION_INFO_COLOR, COLOR, MetaDriveType, \
     CamMask, RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
@@ -36,11 +35,9 @@ class Interface:
         self._right_arrow = None
         self._contact_banners = {}  # to save time/memory
         self.current_banner = None
-        logging.warning("Temporally Disable this function! Waiting for finishing creating sensors function")
         logging.warning("Please Test MARL tracking!")
-        self.need_interface = False
-        # self.need_interface = base_engine.mode != RENDER_MODE_NONE and not base_engine.global_config[
-        #     "debug_physics_world"] and base_engine.global_config["show_interface"]
+        self.need_interface = base_engine.mode != RENDER_MODE_NONE and not base_engine.global_config[
+            "debug_physics_world"] and base_engine.global_config["show_interface"]
         if base_engine.mode == RENDER_MODE_NONE:
             assert self.need_interface is False, \
                 "We should not using interface with extra cameras when in offscreen mode!"
@@ -64,24 +61,17 @@ class Interface:
             self._node_path_list.append(info_np)
 
             self.contact_result_render = info_np
-            for idx, panel_cls, in enumerate(reversed(self.engine.global_config["interface_panel"])):
+            for idx, panel_name, in enumerate(reversed(self.engine.global_config["interface_panel"])):
                 if idx == 0:
-                    if panel_cls is VehiclePanel:
-                        self.vehicle_panel = self.right_panel = panel_cls(self.engine)
-                    else:
-                        self.right_panel = panel_cls()
+                    self.right_panel = self.engine.get_sensor(panel_name)
                 elif idx == 1:
-                    if panel_cls is VehiclePanel:
-                        self.vehicle_panel = self.mid_panel = panel_cls(self.engine)
-                    else:
-                        self.mid_panel = panel_cls()
+                    self.mid_panel = self.engine.get_sensor(panel_name)
                 elif idx == 2:
-                    if panel_cls is VehiclePanel:
-                        self.vehicle_panel = self.left_panel = panel_cls(self.engine)
-                    else:
-                        self.left_panel = panel_cls()
+                    self.left_panel = self.engine.get_sensor(panel_name)
                 else:
                     raise ValueError("Can not add > 3 panels!")
+                if panel_name == "vehicle_panel":
+                    self.vehicle_panel = self.engine.get_sensor(panel_name)
 
             self.arrow = self.engine.aspect2d.attachNewNode("arrow")
             self._node_path_list.append(self.arrow)

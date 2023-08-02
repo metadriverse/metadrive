@@ -8,10 +8,13 @@ if __name__ == "__main__":
             "traffic_density": 0.1,
             "start_seed": 4,
             "stack_size": 5,
-            "sensors": {"rgb_camera": (RGBCamera, 84, 84)},
-            "interface_panel": ["rgb_camera", "vehicle_panel"],
-            "manual_control": True,
-            "use_render": False,
+            # "debug": True,
+            # "debug_panda3d": True,
+            "vehicle_config":dict(image_source="main_camera"),
+            # "sensors": {"rgb_camera": (RGBCamera, 84, 84)},
+            # "interface_panel": [],
+            "manual_control": False,
+            "use_render": True,
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
             "rgb_clip": True,  # clip rgb to range(0,1) instead of (0, 255)
             # "pstats": True,
@@ -31,7 +34,7 @@ if __name__ == "__main__":
         rgb_cam = env.engine.get_sensor(env.vehicle.config["image_source"])
         rgb_cam.save_image(env.vehicle, name="{}.png".format(i))
         cv2.imshow('img', o["image"][..., -1])
-        cv2.waitKey(0)
+        cv2.waitKey(1)
 
         # if env.config["use_render"]:
         # for i in range(ImageObservation.STACK_SIZE):

@@ -1,23 +1,21 @@
 import logging
-import pprint
-import json
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
 
 import gymnasium as gym
-
 import numpy as np
 from panda3d.core import PNMImage
 
+from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.component.sensors.mini_map import MiniMap
 from metadrive.component.sensors.rgb_camera import RGBCamera
-from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.component.sensors.vehicle_panel import VehiclePanel
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.constants import TerminationState
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
+from metadrive.engine.logger import get_logger
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
@@ -137,13 +135,16 @@ BASE_DEFAULT_CONFIG = dict(
     #    ...
     #   "your_sensor_name": (sensor_class, arg_1, arg_2, ..., arg_n)
     # }
+    # Example:
+    # sensors = dict(
+    #         # rgb_camera=(RGBCamera, 84, 84),
+    #         # mini_map=(MiniMap, 84, 84, 250),
+    #         # depth_camera=(DepthCamera, 84, 84),
+    #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
-    sensors=dict(
-        rgb_camera=(RGBCamera, 84, 84),
-        mini_map=(MiniMap, 84, 84, 250),
-        vehicle_panel=(VehiclePanel,)
-        # depth=(DepthCamera, 84, 84),
-    ),
+    # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
+    sensors={},
+
     # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
     auto_resize_window=True,
 
@@ -181,6 +182,8 @@ BASE_DEFAULT_CONFIG = dict(
     render_pipeline=False,
     # daytime is only available when using render-pipeline
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
+    # debug panda3d
+    debug_panda3d=False,
 
     # ===== Mesh Terrain =====
     # road will have a marin whose width is determined by this value, unit: [m]
@@ -200,7 +203,7 @@ BASE_DEFAULT_CONFIG = dict(
     show_interface=True,
     show_policy_mark=False,  # show marks for policies for debugging multi-policy setting
     show_coordinates=False,  # show coordinates for maps and objects for debug
-    interface_panel=["mini_map", "rgb_camera", "vehicle_panel"],
+    interface_panel=["vehicle_panel"],  # a list whose element chosen from sensors.keys() + "vehicle_panel"
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
     preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
@@ -224,7 +227,7 @@ class BaseEnv(gym.Env):
 
     # ===== Intialization =====
     def __init__(self, config: dict = None):
-        self.logger = logging.getLogger(self.logger_name)
+        self.logger = get_logger(self.logger_name, level=logging.DEBUG if config.get("debug", False) else logging.INFO)
         if config is None:
             config = {}
         merged_config = self.default_config().update(config, False, ["target_vehicle_configs", "sensors"])
@@ -255,19 +258,13 @@ class BaseEnv(gym.Env):
 
     def _post_process_config(self, config):
         """Add more special process to merged config"""
-        # Check sensor existence
-        if config["image_observation"]:
-            assert config["vehicle_config"]["image_source"] in config["sensors"], \
-                "Can not find sensor with id: {} from existing sensors: {}".format(
-                    config["vehicle_config"]["image_source"], config["sensors"])
-
         # Optimize main window
         if not config["use_render"] and config["image_observation"] and \
                 config["vehicle_config"]["image_source"] != "main_camera" and config["auto_resize_window"]:
             # reduce size as we don't use the main camera content for improving efficiency
             config["window_size"] = (1, 1)
-            self.logger.info("Main window size is reduced to (1, 1) for boosting efficiency."
-                             "To cancel this, set auto_resize_window = False")
+            self.logger.debug("Main window size is reduced to (1, 1) for boosting efficiency."
+                              "To cancel this, set auto_resize_window = False")
 
         # Optimize sensor creation
         if not config["use_render"] and not config["image_observation"]:
@@ -277,21 +274,31 @@ class BaseEnv(gym.Env):
                     filtered[id] = cfg
             config["sensors"] = filtered
 
-        # show sensor lists
-        if config["use_render"] or config["image_observation"]:
-            config["sensors"]["main_camera"] = ("MainCamera", config["window_size"])
-        self.logger.info("Requested Sensors:")
-        for id, cfg in config["sensors"].items():
-            self.logger.info("  {}: {}, {}".format(id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:]))
-
         # Merge vehicle_panel config with sensors
         to_use = []
         for panel in config["interface_panel"]:
+            if panel == "vehicle_panel":
+                config["sensors"]["vehicle_panel"] = (VehiclePanel,)
             if panel not in config["sensors"]:
                 self.logger.warning("Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
             else:
                 to_use.append(panel)
         config["interface_panel"] = to_use
+
+        # Check sensor existence
+        if config["use_render"] or config["image_observation"]:
+            config["sensors"]["main_camera"] = ("MainCamera", *config["window_size"])
+        if config["image_observation"]:
+            assert config["vehicle_config"]["image_source"] in config["sensors"], \
+                "Can not find sensor with id: {} from existing sensors: {}".format(
+                    config["vehicle_config"]["image_source"], config["sensors"])
+
+        # show sensor lists
+        _str = "Requested Sensors:"
+        for _id, cfg in config["sensors"].items():
+            _str += "{}: {}, {}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
+        self.logger.info(_str[:-2])
+
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
@@ -320,7 +327,7 @@ class BaseEnv(gym.Env):
         # It is the true init() func to create the main vehicle and its module, to avoid incompatible with ray
         if engine_initialized():
             return
-        engine = initialize_engine(self.config)
+        initialize_engine(self.config)
         # engine setup
         self.setup_engine()
         # other optional initialization
@@ -423,8 +430,6 @@ class BaseEnv(gym.Env):
             # self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT])
             # return self.temporary_img_obs.get_image()
             return self.engine.get_window_image(return_bytes=return_bytes)
-
-        # logging.warning("You do not set 'image_observation' or 'image_observation' to True, so no image will be returned!")
         return None
 
     def reset(self, seed: Union[None, int] = None):

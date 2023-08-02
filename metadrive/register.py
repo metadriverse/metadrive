@@ -1,7 +1,6 @@
-import logging
-
 import gymnasium as gym
-from packaging import version
+
+from metadrive.engine import get_logger
 from metadrive.envs import MetaDriveEnv
 from metadrive.envs import MultiAgentTollgateEnv, MultiAgentBottleneckEnv, MultiAgentRoundaboutEnv, \
     MultiAgentIntersectionEnv, MultiAgentParkingLotEnv, MultiAgentMetaDrive
@@ -87,7 +86,7 @@ for env_name, entry in marl_env.items():
         gym.register(id=env_name, entry_point=entry, kwargs=dict(config={}))
 
 if len(envs) > 0:
-    logging.getLogger("Gym").info("Successfully registered the following environments: {}.".format(envs))
+    get_logger("Gym").info("Successfully registered the following environments: {}.".format(envs))
 
 if __name__ == '__main__':
     # Test purpose only

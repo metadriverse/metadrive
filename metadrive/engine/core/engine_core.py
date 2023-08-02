@@ -1,5 +1,4 @@
 import logging
-from metadrive.component.sensors.vehicle_panel import VehiclePanel
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -9,12 +8,13 @@ from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
 from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
-from metadrive.engine.core.image_buffer import ImageBuffer
+
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
 from metadrive.engine.core.collision_callback import collision_callback
 from metadrive.engine.core.force_fps import ForceFPS
+from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.core.light import Light
 from metadrive.engine.core.onscreen_message import ScreenMessage
 from metadrive.engine.core.physics_world import PhysicsWorld
@@ -30,11 +30,13 @@ def _suppress_warning():
     loadPrcFileData("", "notify-level-pnmimage fatal")
     loadPrcFileData("", "notify-level-thread fatal")
     loadPrcFileData("", "notify-level-bullet fatal")
+    loadPrcFileData("", "notify-level-display fatal")
 
 
 def _free_warning():
     loadPrcFileData("", "notify-level-glgsg debug")
     # loadPrcFileData("", "notify-level-pgraph debug")  # press 4 to use toggle analyze to do this
+    loadPrcFileData("", "notify-level-display debug")  # press 4 to use toggle analyze to do this
     loadPrcFileData("", "notify-level-pnmimage debug")
     loadPrcFileData("", "notify-level-thread debug")
 
@@ -144,7 +146,8 @@ class EngineCore(ShowBase.ShowBase):
         if self.global_config["debug"]:
             # debug setting
             EngineCore.DEBUG = True
-            _free_warning()
+            if self.global_config["debug_panda3d"]:
+                _free_warning()
             setup_logger(debug=True)
             self.accept("1", self.toggleDebug)
             self.accept("2", self.toggleWireframe)
@@ -480,6 +483,7 @@ class EngineCore(ShowBase.ShowBase):
     def setup_sensors(self):
         for sensor_id, sensor_cfg in self.global_config["sensors"].items():
             if sensor_id == "main_camera":
+                # It is added when initializing main_camera
                 continue
             cls = sensor_cfg[0]
             args = sensor_cfg[1:]
