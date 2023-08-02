@@ -15,9 +15,10 @@ class CommunicationObservation(LidarStateObservation):
     @property
     def observation_space(self):
         shape = list(self.state_obs.observation_space.shape)
-        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+        if self.config["vehicle_config"]["lidar"]["num_lasers"] > 0 \
+                and self.config["vehicle_config"]["lidar"]["distance"] > 0:
             # Number of lidar rays and distance should be positive!
-            lidar_dim = self.config["lidar"]["num_lasers"]
+            lidar_dim = self.config["vehicle_config"]["lidar"]["num_lasers"]
             lidar_dim += self.env.num_agents * (5 + (4 if self.config["lidar"]["add_others_navi"] else 0))
             shape[0] += lidar_dim
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
@@ -51,8 +52,8 @@ class CommunicationObservation(LidarStateObservation):
 
             other_v_info += self._add_noise_to_cloud_points(
                 cloud_points,
-                gaussian_noise=self.config["lidar"]["gaussian_noise"],
-                dropout_prob=self.config["lidar"]["dropout_prob"]
+                gaussian_noise=self.config["vehicle_config"]["lidar"]["gaussian_noise"],
+                dropout_prob=self.config["vehicle_config"]["lidar"]["dropout_prob"]
             )
 
             self.cloud_points = cloud_points

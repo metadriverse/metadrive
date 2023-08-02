@@ -17,7 +17,8 @@ def capture_headless_image(cuda, image_source="main_camera"):
             image_on_cuda=cuda,
             traffic_density=0.1,
             image_observation=True,
-            interface_panel=[MiniMap, RGBCamera, VehiclePanel],
+            sensors={"rgb_camera": (RGBCamera, 84, 84)},
+            interface_panel=["rgb_camera", "vehicle_panel"],
             vehicle_config={
                 "image_source": image_source,
                 "rgb_camera": (512, 512),

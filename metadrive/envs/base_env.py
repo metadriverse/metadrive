@@ -122,7 +122,6 @@ BASE_DEFAULT_CONFIG = dict(
         show_lidar=False,
         show_side_detector=False,
         show_lane_line_detector=False,
-
         gaussian_noise=0.0,
         dropout_prob=0.0,
         light=False,  # vehicle light, only available when enabling render-pipeline
@@ -227,9 +226,9 @@ class BaseEnv(gym.Env):
 
     # ===== Intialization =====
     def __init__(self, config: dict = None):
-        self.logger = get_logger(self.logger_name, level=logging.DEBUG if config.get("debug", False) else logging.INFO)
         if config is None:
             config = {}
+        self.logger = get_logger(self.logger_name, level=logging.DEBUG if config.get("debug", False) else logging.INFO)
         merged_config = self.default_config().update(config, False, ["target_vehicle_configs", "sensors"])
         global_config = self._post_process_config(merged_config)
         global_config["vehicle_config"]["main_camera"] = global_config["window_size"]
@@ -273,6 +272,7 @@ class BaseEnv(gym.Env):
                 if not issubclass(cfg[0], BaseCamera):
                     filtered[id] = cfg
             config["sensors"] = filtered
+            config["interface_panel"] = []
 
         # Merge vehicle_panel config with sensors
         to_use = []

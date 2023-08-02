@@ -81,7 +81,7 @@ class VehiclePanel(ImageBuffer):
             parent_node=self.aspect2d_np,
             engine=engine
         )
-        self.add_display_region(self.display_region_size)
+        # self.add_display_region(self.display_region_size)
         self._node_path_list.extend(tmp_node_path_list)
 
     def update_vehicle_state(self, vehicle):

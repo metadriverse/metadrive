@@ -1,5 +1,4 @@
 import gymnasium as gym
-
 import numpy as np
 
 from metadrive.component.map.pg_map import PGMap
@@ -69,7 +68,7 @@ class TollGateStateObservation(StateObservation):
     def observation_space(self):
         # Navi info + Other states
         shape = self.ego_state_obs_dim + self.get_line_detector_dim()
-        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape,), dtype=np.float32)
 
     def observe(self, vehicle):
         ego_state = self.vehicle_state(vehicle)
@@ -85,9 +84,11 @@ class TollGateObservation(LidarStateObservation):
     @property
     def observation_space(self):
         shape = list(self.state_obs.observation_space.shape)
-        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+        if self.config["vehicle_config"]["lidar"]["num_lasers"] > 0 \
+                and self.config["vehicle_config"]["lidar"]["distance"] > 0:
             # Number of lidar rays and distance should be positive!
-            shape[0] += self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4 + 2
+            shape[0] += self.config["vehicle_config"]["lidar"]["num_lasers"] \
+                        + self.config["vehicle_config"]["lidar"]["num_others"] * 4 + 2
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def reset(self, env, vehicle=None):

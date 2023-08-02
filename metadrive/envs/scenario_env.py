@@ -90,7 +90,7 @@ SCENARIO_ENV_CONFIG = dict(
     relax_out_of_road_done=True,
 
     # ===== others =====
-    interface_panel=[VehiclePanel],  # for boosting efficiency
+    interface_panel=["vehicle_panel"],  # for boosting efficiency
     horizon=None,
     allowed_more_steps=None,
 )

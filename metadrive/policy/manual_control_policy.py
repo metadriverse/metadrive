@@ -11,9 +11,10 @@ class ManualControlPolicy(EnvInputPolicy):
 
     DEBUG_MARK_COLOR = (252, 244, 3, 255)
 
-    def __init__(self, obj, seed):
+    def __init__(self, obj, seed, enable_expert=True):
         super(ManualControlPolicy, self).__init__(obj, seed)
         config = self.engine.global_config
+        self.enable_expert = enable_expert
 
         if config["manual_control"] and config["use_render"]:
             self.engine.accept("t", self.toggle_takeover)
@@ -47,7 +48,7 @@ class ManualControlPolicy(EnvInputPolicy):
         self.controller.process_others(takeover_callback=self.toggle_takeover)
 
         try:
-            if self.engine.current_track_vehicle.expert_takeover:
+            if self.engine.current_track_vehicle.expert_takeover and self.enable_expert:
                 return expert(self.engine.current_track_vehicle)
         except (ValueError, AssertionError):
             # if observation doesn't match, fall back to manual control
@@ -76,6 +77,7 @@ class TakeoverPolicy(EnvInputPolicy):
     """
     Record the takeover signal
     """
+
     def __init__(self, obj, seed):
         super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()
