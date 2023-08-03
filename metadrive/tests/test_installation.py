@@ -1,4 +1,5 @@
 import sys
+from metadrive.component.sensors.depth_camera import DepthCamera
 import os
 
 import cv2
@@ -17,12 +18,11 @@ def capture_headless_image(cuda, image_source="main_camera"):
             image_on_cuda=cuda,
             traffic_density=0.1,
             image_observation=True,
-            sensors={"rgb_camera": (RGBCamera, 84, 84)},
-            interface_panel=["rgb_camera", "vehicle_panel"],
+            sensors={"rgb_camera": (RGBCamera, 84, 84), "depth_camera": (DepthCamera, 512, 512, False)},
+            interface_panel=[],
             vehicle_config={
                 "image_source": image_source,
-                "rgb_camera": (512, 512),
-                "depth_camera": (512, 512, False)
+
             },
         )
     )
@@ -39,7 +39,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
                 "{}_from_observation{}.png".format(image_source, "_cuda" if cuda else "")
             ), o
         )
-        cam = env.vehicle.get_camera(image_source)
+        cam = env.engine.get_sensor(image_source)
         cam.save_image(
             env.vehicle,
             os.path.join(

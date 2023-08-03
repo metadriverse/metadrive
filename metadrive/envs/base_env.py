@@ -259,6 +259,10 @@ class BaseEnv(gym.Env):
 
     def _post_process_config(self, config):
         """Add more special process to merged config"""
+        # Cancel interface panel
+        if not config["show_interface"]:
+            config["interface_panel"] = []
+
         # Optimize main window
         if not config["use_render"] and config["image_observation"] and \
                 config["vehicle_config"]["image_source"] != "main_camera" and config["auto_resize_window"]:
@@ -267,7 +271,7 @@ class BaseEnv(gym.Env):
             self.logger.debug("Main window size is reduced to (1, 1) for boosting efficiency."
                               "To cancel this, set auto_resize_window = False")
 
-        # Optimize sensor creation
+        # Optimize sensor creation in none-screen mode
         if not config["use_render"] and not config["image_observation"]:
             filtered = {}
             for id, cfg in config["sensors"].items():

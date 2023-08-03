@@ -1,12 +1,10 @@
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, LVector3, PNMImage
 import cv2
-import numpy as np
+from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.engine.engine_utils import get_global_config, engine_initialized, get_engine
 
 
 class DepthCamera(BaseCamera):
@@ -19,7 +17,6 @@ class DepthCamera(BaseCamera):
     GROUND_MODEL = None
 
     def __init__(self, engine, width, height, cuda=False):
-        config = get_global_config()["vehicle_config"]["depth_camera"]
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
         super(DepthCamera, self).__init__(engine, False, cuda)
@@ -31,7 +28,7 @@ class DepthCamera(BaseCamera):
 
         lens.setFov(60)
         # lens.setAspectRatio(2.0)
-        if get_engine().mode == RENDER_MODE_NONE or not AssetLoader.initialized():
+        if self.engine.mode == RENDER_MODE_NONE or not AssetLoader.initialized():
             return
         # add shader for it
         # if get_global_config()["headless_machine_render"]:
