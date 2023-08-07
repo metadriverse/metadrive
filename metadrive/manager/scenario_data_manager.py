@@ -45,7 +45,7 @@ class ScenarioDataManager(BaseManager):
             assert os.path.exists(p), "No Data at path: {}".format(p)
 
         # stat
-        self.coverage = [0 for _ in range(len(self.summary_lookup))]
+        self.coverage = [0 for _ in range(self.num_scenarios)]
 
     @property
     def current_scenario_summary(self):
@@ -59,7 +59,7 @@ class ScenarioDataManager(BaseManager):
         file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
         ret = read_scenario_data(file_path)
         assert isinstance(ret, SD)
-        self.coverage[i] = 1
+        self.coverage[i-self.start_scenario_index] = 1
         return ret
 
     def before_reset(self):
