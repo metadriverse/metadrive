@@ -59,7 +59,7 @@ class ScenarioDataManager(BaseManager):
         file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
         ret = read_scenario_data(file_path)
         assert isinstance(ret, SD)
-        self.coverage[i-self.start_scenario_index] = 1
+        self.coverage[i - self.start_scenario_index] = 1
         return ret
 
     def before_reset(self):
