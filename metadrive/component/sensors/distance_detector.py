@@ -16,19 +16,18 @@ detect_result = namedtuple("detect_result", "cloud_points detected_objects")
 
 
 def add_cloud_point_vis(
-        point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1, MARK_COLOR2
+    point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1, MARK_COLOR2
 ):
     f = laser_index / num_lasers if ANGLE_FACTOR else 1
-    f*=0.9
-    f+=0.1
+    f *= 0.9
+    f += 0.1
     return laser_index, (point_x, point_y, height), (f * MARK_COLOR0, f * MARK_COLOR1, f * MARK_COLOR2)
 
 
 def perceive(
-        cloud_points, detector_mask, mask, lidar_range, perceive_distance, heading_theta, vehicle_position_x,
-        vehicle_position_y, num_lasers, height, physics_world, extra_filter_node, require_colors, ANGLE_FACTOR,
-        MARK_COLOR0,
-        MARK_COLOR1, MARK_COLOR2
+    cloud_points, detector_mask, mask, lidar_range, perceive_distance, heading_theta, vehicle_position_x,
+    vehicle_position_y, num_lasers, height, physics_world, extra_filter_node, require_colors, ANGLE_FACTOR, MARK_COLOR0,
+    MARK_COLOR1, MARK_COLOR2
 ):
     cloud_points.fill(1.0)
     detected_objects = []
@@ -134,7 +133,7 @@ class DistanceDetector:
         heading_theta = base_vehicle.heading_theta
         assert not isinstance(detector_mask, str), "Please specify detector_mask either with None or a numpy array."
         cloud_points, detected_objects, colors = perceive(
-            cloud_points=np.ones((self.num_lasers,), dtype=float),
+            cloud_points=np.ones((self.num_lasers, ), dtype=float),
             detector_mask=detector_mask.astype(dtype=np.uint8) if detector_mask is not None else None,
             mask=self.mask,
             lidar_range=self._lidar_range,

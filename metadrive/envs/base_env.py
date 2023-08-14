@@ -229,8 +229,9 @@ class BaseEnv(gym.Env):
     def __init__(self, config: dict = None):
         if config is None:
             config = {}
-        self.logger = get_logger(self.logger_name,
-                                 config.get("log_level", logging.DEBUG if config.get("debug", False) else logging.INFO))
+        self.logger = get_logger(
+            self.logger_name, config.get("log_level", logging.DEBUG if config.get("debug", False) else logging.INFO)
+        )
         merged_config = self.default_config().update(config, False, ["target_vehicle_configs", "sensors"])
         global_config = self._post_process_config(merged_config)
         global_config["vehicle_config"]["main_camera"] = global_config["window_size"]
@@ -268,8 +269,10 @@ class BaseEnv(gym.Env):
                 config["vehicle_config"]["image_source"] != "main_camera" and config["auto_resize_window"]:
             # reduce size as we don't use the main camera content for improving efficiency
             config["window_size"] = (1, 1)
-            self.logger.debug("Main window size is reduced to (1, 1) for boosting efficiency."
-                              "To cancel this, set auto_resize_window = False")
+            self.logger.debug(
+                "Main window size is reduced to (1, 1) for boosting efficiency."
+                "To cancel this, set auto_resize_window = False"
+            )
 
         # Optimize sensor creation in none-screen mode
         if not config["use_render"] and not config["image_observation"]:
@@ -284,7 +287,7 @@ class BaseEnv(gym.Env):
         to_use = []
         for panel in config["interface_panel"]:
             if panel == "vehicle_panel":
-                config["sensors"]["vehicle_panel"] = (VehiclePanel,)
+                config["sensors"]["vehicle_panel"] = (VehiclePanel, )
             if panel not in config["sensors"]:
                 self.logger.warning("Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
             else:
@@ -676,20 +679,19 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-            self,
-            policies: Union[dict, Callable],
-            scenario_index: Union[list, int],
-            max_episode_length=None,
-            verbose=False,
-            suppress_warning=False,
-            render_topdown=False,
-            return_done_info=True,
-            to_dict=True
+        self,
+        policies: Union[dict, Callable],
+        scenario_index: Union[list, int],
+        max_episode_length=None,
+        verbose=False,
+        suppress_warning=False,
+        render_topdown=False,
+        return_done_info=True,
+        to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
-
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

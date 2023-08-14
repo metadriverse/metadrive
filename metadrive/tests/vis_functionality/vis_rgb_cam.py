@@ -10,7 +10,7 @@ if __name__ == "__main__":
             "stack_size": 5,
             # "debug": True,
             # "debug_panda3d": True,
-            "vehicle_config":dict(image_source="main_camera"),
+            "vehicle_config": dict(image_source="main_camera"),
             # "sensors": {"rgb_camera": (RGBCamera, 84, 84)},
             # "interface_panel": [],
             "manual_control": False,

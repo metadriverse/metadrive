@@ -15,9 +15,11 @@ class NuPlanObservation(LidarStateObservation):
     @property
     def observation_space(self):
         shape = list(self.state_obs.observation_space.shape)
-        if self.config["vehicle_config"]["lidar"]["num_lasers"] > 0 and self.config["vehicle_config"]["lidar"]["distance"] > 0:
+        if self.config["vehicle_config"]["lidar"]["num_lasers"] > 0 and self.config["vehicle_config"]["lidar"][
+                "distance"] > 0:
             # Number of lidar rays and distance should be positive!
-            lidar_dim = self.config["vehicle_config"]["lidar"]["num_lasers"] + self.config["vehicle_config"]["lidar"]["num_others"] * 4
+            lidar_dim = self.config["vehicle_config"]["lidar"][
+                "num_lasers"] + self.config["vehicle_config"]["lidar"]["num_others"] * 4
             if self.config["vehicle_config"]["lidar"]["add_others_navi"]:
                 lidar_dim += self.config["vehicle_config"]["lidar"]["num_others"] * 4
             shape[0] += lidar_dim

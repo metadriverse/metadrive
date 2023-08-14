@@ -248,7 +248,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.engine.global_config["vehicle_config"]["show_lidar"]
             )
 
-
     def _init_step_info(self):
         # done info will be initialized every frame
         self.init_state_info()

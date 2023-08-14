@@ -77,7 +77,6 @@ class TakeoverPolicy(EnvInputPolicy):
     """
     Record the takeover signal
     """
-
     def __init__(self, obj, seed):
         super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()

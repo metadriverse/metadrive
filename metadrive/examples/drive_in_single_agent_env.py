@@ -62,7 +62,7 @@ if __name__ == "__main__":
                 cv2.imshow('RGB Image in Observation', o["image"][..., -1])
                 cv2.waitKey(1)
             if (tm or tc) and info["arrive_dest"]:
-                env.reset(env.current_seed+1)
+                env.reset(env.current_seed + 1)
                 env.current_track_vehicle.expert_takeover = True
     except Exception as e:
         raise e
