@@ -92,7 +92,7 @@ SCENARIO_ENV_CONFIG = dict(
     # ===== others =====
     interface_panel=[VehiclePanel],  # for boosting efficiency
     horizon=None,
-    allowed_more_steps=None,
+    allowed_more_steps=None,  # None=infinite
 )
 
 

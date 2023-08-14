@@ -4,8 +4,7 @@ import uuid
 from metadrive.constants import CamMask
 import gymnasium as gym
 import numpy as np
-from panda3d.core import NodePath
-
+from panda3d.core import NodePath, Material, LVector4
 from metadrive.base_class.configurable import Configurable
 from metadrive.base_class.randomizable import Randomizable
 from metadrive.engine.asset_loader import AssetLoader
@@ -108,7 +107,10 @@ class BasePolicy(Randomizable, Configurable):
         # texture.set_format(Texture.F_srgb)
         # self._debug_mark.setTexture(texture)
         r, g, b, a = self.DEBUG_MARK_COLOR
-        self._debug_mark.setColor(r / 255, g / 255, b / 255, a / 255)
+        material = Material()
+        material.setBaseColor(LVector4(r / 255, g / 255, b / 255, a / 255))
+
+        self._debug_mark.setMaterial(material)
 
         self._debug_mark.reparentTo(self.engine.origin)
         pos = self.control_object.origin.getPos()
