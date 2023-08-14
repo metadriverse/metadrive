@@ -22,6 +22,14 @@ class ScenarioDataManager(BaseManager):
         self.num_scenarios = engine.global_config["num_scenarios"]
         self.start_scenario_index = engine.global_config["start_scenario_index"]
 
+        # for multi-worker
+        self.worker_index = self.engine.global_config["worker_index"]
+        self.available_scenario_indices = [
+            i for i in range(
+                self.start_scenario_index + self.worker_index, self.start_scenario_index +
+                self.num_scenarios, self.engine.global_config["num_workers"]
+            )
+        ]
         self._scenarios = {}
 
         # Read summary file first:
@@ -45,21 +53,21 @@ class ScenarioDataManager(BaseManager):
             assert os.path.exists(p), "No Data at path: {}".format(p)
 
         # stat
-        self.coverage = [0 for _ in range(len(self.summary_lookup))]
+        self.coverage = [0 for _ in range(self.num_scenarios)]
 
     @property
     def current_scenario_summary(self):
         return self.current_scenario[SD.METADATA]
 
     def _get_scenario(self, i):
-        assert self.start_scenario_index <= i < self.start_scenario_index + self.num_scenarios, \
-            "scenario index exceeds range, scenario index: {}".format(i)
+        assert i in self.available_scenario_indices, \
+            "scenario index exceeds range, scenario index: {}, worker_index: {}".format(i, self.worker_index)
         assert i < len(self.summary_lookup)
         scenario_id = self.summary_lookup[i]
         file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
         ret = read_scenario_data(file_path)
         assert isinstance(ret, SD)
-        self.coverage[i] = 1
+        self.coverage[i - self.start_scenario_index] = 1
         return ret
 
     def before_reset(self):
