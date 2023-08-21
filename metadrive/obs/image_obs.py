@@ -20,10 +20,9 @@ class ImageStateObservation(ObservationBase):
     IMAGE = "image"
     STATE = "state"
 
-    def __init__(self, vehicle_config):
-        config = vehicle_config
+    def __init__(self, config):
         super(ImageStateObservation, self).__init__(config)
-        self.img_obs = ImageObservation(config, config["image_source"], config["rgb_clip"])
+        self.img_obs = ImageObservation(config, config["vehicle_config"]["image_source"], config["rgb_clip"])
         self.state_obs = StateObservation(config)
 
     @property
@@ -46,7 +45,7 @@ class ImageObservation(ObservationBase):
     STACK_SIZE = 3  # use continuous 3 image as the input
 
     def __init__(self, config, image_source: str, clip_rgb: bool):
-        self.enable_cuda = self.global_config["image_on_cuda"]
+        self.enable_cuda = config["image_on_cuda"]
         if self.enable_cuda:
             assert _cuda_enable, "CuPy is not enabled"
         self.STACK_SIZE = config["stack_size"]
@@ -59,7 +58,7 @@ class ImageObservation(ObservationBase):
 
     @property
     def observation_space(self):
-        shape = (self.config[self.image_source][1], self.config[self.image_source][0]
+        shape = (self.config["sensors"][self.image_source][2], self.config["sensors"][self.image_source][1]
                  ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (3, self.STACK_SIZE))
         if self.rgb_clip:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
@@ -67,7 +66,7 @@ class ImageObservation(ObservationBase):
             return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
 
     def observe(self, vehicle):
-        new_obs = vehicle.image_sensors[self.image_source].get_pixels_array(vehicle, self.rgb_clip)
+        new_obs = self.engine.get_sensor(self.image_source).get_pixels_array(vehicle, self.rgb_clip)
         self.state = cp.roll(self.state, -1, axis=-1) if self.enable_cuda else np.roll(self.state, -1, axis=-1)
         self.state[..., -1] = new_obs
         return self.state

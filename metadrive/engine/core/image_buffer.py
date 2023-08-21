@@ -31,13 +31,13 @@ class ImageBuffer:
         parent_node: NodePath = None,
         frame_buffer_property=None,
         setup_pbr=False,
-        # engine=None
+        engine=None
     ):
 
         self._node_path_list = []
 
         # from metadrive.engine.engine_utils import get_engine
-        # self.engine = engine or get_engine()
+        self.engine = engine
         try:
             assert self.engine.win is not None, "{} cannot be made without use_render or image_observation".format(
                 self.__class__.__name__
@@ -99,16 +99,10 @@ class ImageBuffer:
 
         logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
-    @property
-    def engine(self):
-        from metadrive.engine.engine_utils import get_engine
-        return get_engine()
-
     def get_image(self):
         """
         Bugs here! when use offscreen mode, thus the front cam obs is not from front cam now
         """
-        # self.engine.graphicsEngine.renderFrame()
         img = PNMImage()
         self.buffer.getDisplayRegions()[1].getScreenshot(img)
         return img
@@ -120,9 +114,7 @@ class ImageBuffer:
         img = self.get_image()
         img.write(name)
 
-    def get_rgb_array(self):
-        if self.engine.episode_step <= 1:
-            self.engine.graphicsEngine.renderFrame()
+    def get_rgb_array_cpu(self):
         origin_img = self.buffer.getDisplayRegion(1).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))

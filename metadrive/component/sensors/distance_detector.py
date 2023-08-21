@@ -19,6 +19,8 @@ def add_cloud_point_vis(
     point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1, MARK_COLOR2
 ):
     f = laser_index / num_lasers if ANGLE_FACTOR else 1
+    f *= 0.9
+    f += 0.1
     return laser_index, (point_x, point_y, height), (f * MARK_COLOR0, f * MARK_COLOR1, f * MARK_COLOR2)
 
 
@@ -118,15 +120,10 @@ class DistanceDetector:
         if show:
             for laser_debug in range(self.num_lasers):
                 ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-                ball.setScale(0.001)
+                ball.setScale(0.5)
                 ball.setColor(0., 0.5, 0.5, 1)
-                shape = BulletSphereShape(0.1)
-                ghost = BulletGhostNode('Lidar Point')
-                ghost.setIntoCollideMask(CollisionGroup.AllOff)
-                ghost.addShape(shape)
-                laser_np = self.origin.attachNewNode(ghost)
-                self.cloud_points_vis.append(laser_np)
-                ball.getChildren().reparentTo(laser_np)
+                ball.reparentTo(self.origin)
+                self.cloud_points_vis.append(ball)
             # self.origin.flattenStrong()
 
     def perceive(self, base_vehicle, physics_world, detector_mask: np.ndarray = None):

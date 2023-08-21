@@ -40,14 +40,14 @@ def _vis_top_down_with_panda_render():
 
 
 def _vis_top_down_with_panda_render_and_top_down_visualization():
-    env = TopDownMetaDrive({"use_render": True, "render_mode": "top_down"})
+    env = TopDownMetaDrive({"use_render": True})
     try:
         o, _ = env.reset()
         for i in range(2000):
             o, r, tm, tc, i = env.step([0, 1])
             if tm or tc:
                 break
-            env.render()
+            env.render(mode="top_down")
     finally:
         env.close()
 

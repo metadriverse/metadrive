@@ -25,7 +25,6 @@ def test_save_episode(vis=False):
             "start_seed": 1000,
             # "manual_control": vis,
             "use_render": False,
-            "render_mode": "top_down",
             "agent_policy": IDMPolicy,
             "traffic_mode": TrafficMode.Trigger,
             "record_episode": save_episode,
@@ -49,7 +48,7 @@ def test_save_episode(vis=False):
             )
             o, r, tm, tc, info = env.step([0, 1])
             if vis:
-                env.render(road_color=(35, 35, 35))
+                env.render(mode="top_down", road_color=(35, 35, 35))
             if tm or tc:
                 epi_info = env.engine.dump_episode("test_dump_single.pkl" if test_dump else None)
                 break

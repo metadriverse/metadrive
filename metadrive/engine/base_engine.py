@@ -1,4 +1,5 @@
 import logging
+from metadrive.constants import RENDER_MODE_NONE, RENDER_MODE_OFFSCREEN, RENDER_MODE_ONSCREEN
 import pickle
 import time
 from collections import OrderedDict
@@ -67,10 +68,6 @@ class BaseEngine(EngineCore, Randomizable):
 
         # warm up
         self.warmup()
-
-        # for multi-thread rendering
-        self.graphicsEngine.renderFrame()
-        self.graphicsEngine.renderFrame()
 
         # curriculum reset
         self._max_level = self.global_config.get("curriculum_level", 1)
@@ -330,6 +327,10 @@ class BaseEngine(EngineCore, Randomizable):
 
         self.taskMgr.step()
 
+        # refresh graphics to support multi-thread rendering, avoiding bugs like shadow disappearance at first frame
+        for _ in range(5):
+            self.graphicsEngine.renderFrame()
+
     def before_step(self, external_actions: Dict[AnyStr, np.array]):
         """
         Entities make decision here, and prepare for step
@@ -538,7 +539,8 @@ class BaseEngine(EngineCore, Randomizable):
     def setup_main_camera(self):
         from metadrive.engine.core.main_camera import MainCamera
         # Not we should always enable main camera if image obs is required! Or RGBCamera will return incorrect result
-        if self.global_config["use_render"] or self.global_config["image_observation"]:
+        if self.mode == RENDER_MODE_ONSCREEN or (RENDER_MODE_OFFSCREEN and
+                                                 self.global_config["vehicle_config"]["image_source"] == "main_camera"):
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None

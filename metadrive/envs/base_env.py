@@ -4,17 +4,17 @@ from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
 
 import gymnasium as gym
-
 import numpy as np
 from panda3d.core import PNMImage
 
-from metadrive.component.vehicle_module.mini_map import MiniMap
-from metadrive.component.vehicle_module.rgb_camera import RGBCamera
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.base_camera import BaseCamera
+from metadrive.component.sensors.vehicle_panel import VehiclePanel
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
+from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
 from metadrive.constants import TerminationState
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
+from metadrive.engine.logger import get_logger
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
@@ -50,9 +50,14 @@ BASE_DEFAULT_CONFIG = dict(
     use_multi_discrete=False,
     action_check=False,
 
+    # ===== Observation =====
+    rgb_clip=True,  # clip rgb to (0, 1)
+    rgb_to_grayscale=False,  # whether to convert rgb image to grayscale in class ImageObservation
+    stack_size=3,  # the number of timesteps for stacking image observation
+    image_observation=False,  # use image observation or lidar
+
     # ===== Rendering =====
     use_render=False,  # if true pop a window to render
-    render_mode=None,  # if "human", then use_render must be true, if "rgb", return numpy array, if None, do neither
     debug=False,
     disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
@@ -100,7 +105,6 @@ BASE_DEFAULT_CONFIG = dict(
         # ==== others ====
         overtake_stat=False,  # we usually set to True when evaluation
         random_color=False,
-        random_agent_model=False,  # this will be overwritten by env.config["random_agent_model"]
         # The shape of vehicle are predefined by its class. But in special scenario (WaymoVehicle) we might want to
         # set to arbitrary shape.
         width=None,
@@ -115,21 +119,32 @@ BASE_DEFAULT_CONFIG = dict(
         side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
         lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
         show_lidar=False,
-        mini_map=(84, 84, 250),  # buffer length, width
-        rgb_camera=(84, 84),  # buffer length, width
-        depth_camera=(84, 84, True),  # buffer length, width, view_ground
-        main_camera=None,  # buffer length, width
         show_side_detector=False,
         show_lane_line_detector=False,
-
-        # NOTE: rgb_clip will be modified by env level config when initialization
-        rgb_clip=True,  # clip 0-255 to 0-1
-        stack_size=3,  # the number of timesteps for stacking image observation
-        rgb_to_grayscale=False,
         gaussian_noise=0.0,
         dropout_prob=0.0,
         light=False,  # vehicle light, only available when enabling render-pipeline
     ),
+
+    # ===== Sensors =====
+    # It should be a dict like this:
+    # sensors={
+    #   "rgb_camera": (RGBCamera, arg_1, arg_2, ..., arg_n),
+    #    ...
+    #   "your_sensor_name": (sensor_class, arg_1, arg_2, ..., arg_n)
+    # }
+    # Example:
+    # sensors = dict(
+    #         # rgb_camera=(RGBCamera, 84, 84),
+    #         # mini_map=(MiniMap, 84, 84, 250),
+    #         # depth_camera=(DepthCamera, 84, 84),
+    #         )
+    # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
+    # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
+    sensors={},
+
+    # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
+    auto_resize_window=True,
 
     # ===== Agent config =====
     target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
@@ -146,14 +161,12 @@ BASE_DEFAULT_CONFIG = dict(
     # (Deprecated) set to true only when on headless machine and use rgb image!!!!!!
     # turn on to profile the efficiency
     pstats=False,
-    # if need running in offscreen
-    image_observation=False,
     # this is an advanced feature for accessing image with moving them to ram!
     image_on_cuda=False,
+    # We will determine the render mode automatically, it runs at physics-only mode by default
+    _render_mode=RENDER_MODE_NONE,
     # accelerate the lidar perception
     _disable_detector_mask=False,
-    # clip rgb to (0, 1)
-    rgb_clip=True,
     # None: unlimited, number: fps
     force_render_fps=None,
     # if set to True all objects will be force destroyed when call clear()
@@ -167,6 +180,8 @@ BASE_DEFAULT_CONFIG = dict(
     render_pipeline=False,
     # daytime is only available when using render-pipeline
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
+    # debug panda3d
+    debug_panda3d=False,
 
     # ===== Mesh Terrain =====
     # road will have a marin whose width is determined by this value, unit: [m]
@@ -175,8 +190,6 @@ BASE_DEFAULT_CONFIG = dict(
     height_scale=120,
 
     # ===== Others =====
-    # The maximum distance used in PGLOD. Set to None will use the default values.
-    max_distance=None,
     # Force to generate objects in the left lane.
     _debug_crash_object=False,
     horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
@@ -188,10 +201,11 @@ BASE_DEFAULT_CONFIG = dict(
     show_interface=True,
     show_policy_mark=False,  # show marks for policies for debugging multi-policy setting
     show_coordinates=False,  # show coordinates for maps and objects for debug
-    interface_panel=[MiniMap, RGBCamera, VehiclePanel],
+    interface_panel=["dashboard"],  # a list whose element chosen from sensors.keys() + "dashboard"
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
     preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
+    log_level=None,
 
     # record/replay metadata
     record_episode=False,  # when replay_episode is not None ,this option will be useless
@@ -212,10 +226,12 @@ class BaseEnv(gym.Env):
 
     # ===== Intialization =====
     def __init__(self, config: dict = None):
-        self.logger = logging.getLogger(self.logger_name)
         if config is None:
             config = {}
-        merged_config = self._merge_extra_config(config)
+        self.logger = get_logger(
+            self.logger_name, config.get("log_level", logging.DEBUG if config.get("debug", False) else logging.INFO)
+        )
+        merged_config = self.default_config().update(config, False, ["target_vehicle_configs", "sensors"])
         global_config = self._post_process_config(merged_config)
         global_config["vehicle_config"]["main_camera"] = global_config["window_size"]
 
@@ -241,14 +257,67 @@ class BaseEnv(gym.Env):
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
-    def _merge_extra_config(self, config: Union[dict, Config]) -> Config:
-        """Check, update, sync and overwrite some config."""
-        return config
-
     def _post_process_config(self, config):
         """Add more special process to merged config"""
-        config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
-        config["vehicle_config"]["rgb_clip"] = config["rgb_clip"]
+        # Cancel interface panel
+        if not config["show_interface"]:
+            config["interface_panel"] = []
+
+        # Optimize main window
+        if not config["use_render"] and config["image_observation"] and \
+                config["vehicle_config"]["image_source"] != "main_camera" and config["auto_resize_window"]:
+            # reduce size as we don't use the main camera content for improving efficiency
+            config["window_size"] = (1, 1)
+            self.logger.debug(
+                "Main window size is reduced to (1, 1) for boosting efficiency."
+                "To cancel this, set auto_resize_window = False"
+            )
+
+        # Optimize sensor creation in none-screen mode
+        if not config["use_render"] and not config["image_observation"]:
+            filtered = {}
+            for id, cfg in config["sensors"].items():
+                if not issubclass(cfg[0], BaseCamera):
+                    filtered[id] = cfg
+            config["sensors"] = filtered
+            config["interface_panel"] = []
+
+        # Merge vehicle_panel config with sensors
+        to_use = []
+        for panel in config["interface_panel"]:
+            if panel == "dashboard":
+                config["sensors"]["dashboard"] = (VehiclePanel, )
+            if panel not in config["sensors"]:
+                self.logger.warning("Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
+            else:
+                to_use.append(panel)
+        config["interface_panel"] = to_use
+
+        # Check sensor existence
+        if config["use_render"] or config["image_observation"]:
+            config["sensors"]["main_camera"] = ("MainCamera", *config["window_size"])
+        if config["image_observation"]:
+            assert config["vehicle_config"]["image_source"] in config["sensors"], \
+                "Can not find sensor with id: {} from existing sensors: {}".format(
+                    config["vehicle_config"]["image_source"], config["sensors"])
+
+        # show sensor lists
+        _str = "Sensors:"
+        for _id, cfg in config["sensors"].items():
+            _str += "{}: {}, {}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
+        self.logger.info(_str[:-2])
+
+        # determine render mode automatically
+        if config["use_render"]:
+            assert "main_camera" in config["sensors"]
+            config["_render_mode"] = RENDER_MODE_ONSCREEN
+        else:
+            config["_render_mode"] = RENDER_MODE_NONE
+            for sensor in config["sensors"].values():
+                if sensor[0] == "MainCamera" or (issubclass(BaseCamera, sensor[0]) and sensor[0] != VehiclePanel):
+                    config["_render_mode"] = RENDER_MODE_OFFSCREEN
+                    break
+        self.logger.info("Render Mode: {}".format(config["_render_mode"]))
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
@@ -277,7 +346,7 @@ class BaseEnv(gym.Env):
         # It is the true init() func to create the main vehicle and its module, to avoid incompatible with ray
         if engine_initialized():
             return
-        engine = initialize_engine(self.config)
+        initialize_engine(self.config)
         # engine setup
         self.setup_engine()
         # other optional initialization
@@ -354,8 +423,6 @@ class BaseEnv(gym.Env):
         :return: when mode is 'rgb', image array is returned
         """
 
-        mode = mode or self.config["render_mode"]  # for compatibility
-
         if mode in ["top_down", "topdown", "bev", "birdview"]:
             ret = self._render_topdown(text=text, *args, **kwargs)
             return ret
@@ -380,8 +447,6 @@ class BaseEnv(gym.Env):
             # self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT])
             # return self.temporary_img_obs.get_image()
             return self.engine.get_window_image(return_bytes=return_bytes)
-
-        # logging.warning("You do not set 'image_observation' or 'image_observation' to True, so no image will be returned!")
         return None
 
     def reset(self, seed: Union[None, int] = None):
@@ -475,7 +540,8 @@ class BaseEnv(gym.Env):
 
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
-                   self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(truncateds), self._wrap_as_single_agent(step_infos)
+                   self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(
+                truncateds), self._wrap_as_single_agent(step_infos)
         else:
             return obses, rewards, terminateds, truncateds, step_infos
 
@@ -511,11 +577,11 @@ class BaseEnv(gym.Env):
         ego_v = self.vehicles[DEFAULT_AGENT]
         return ego_v
 
-    def get_single_observation(self, vehicle_config: "Config"):
+    def get_single_observation(self):
         if self.config["image_observation"]:
-            o = ImageStateObservation(vehicle_config)
+            o = ImageStateObservation(self.config)
         else:
-            o = LidarStateObservation(vehicle_config)
+            o = LidarStateObservation(self.config)
         return o
 
     def _wrap_as_single_agent(self, data):
@@ -666,7 +732,7 @@ class BaseEnv(gym.Env):
                     done = True
                     info[TerminationState.MAX_STEP] = True
                 if count > 10000 and not suppress_warning:
-                    logging.warning(
+                    self.logger.warning(
                         "Episode length is too long! If this behavior is intended, "
                         "set suppress_warning=True to disable this message"
                     )
@@ -674,7 +740,7 @@ class BaseEnv(gym.Env):
                     self.render("topdown")
             episode = self.engine.dump_episode()
             if verbose:
-                logging.info("Finish scenario {} with {} steps.".format(index, count))
+                self.logger.info("Finish scenario {} with {} steps.".format(index, count))
             scenarios_to_export[index] = convert_recorded_scenario_exported(episode, to_dict=to_dict)
             done_info[index] = info
         self.config["record_episode"] = False
@@ -693,4 +759,4 @@ class BaseEnv(gym.Env):
 
     @property
     def logger_name(self):
-        return __file__
+        return self.__class__.__name__

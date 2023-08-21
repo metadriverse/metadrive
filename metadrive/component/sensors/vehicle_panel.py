@@ -1,7 +1,6 @@
 from panda3d.core import NodePath, PGTop, TextNode, CardMaker, Vec3
 
 from metadrive.constants import CamMask
-from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.core.image_buffer import ImageBuffer
 
 
@@ -16,7 +15,7 @@ class VehiclePanel(ImageBuffer):
     TASK_NAME = "update panel"
     display_region_size = [2 / 3, 1, 0.8, 1.0]
 
-    def __init__(self, engine: EngineCore):
+    def __init__(self, engine):
         if engine.win is None:
             return
         self.aspect2d_np = NodePath(PGTop("aspect2d"))
@@ -80,10 +79,9 @@ class VehiclePanel(ImageBuffer):
             Vec3(-0.9, -1.01, 0.78),
             self.BKG_COLOR,
             parent_node=self.aspect2d_np,
-            # engine=engine
+            engine=engine
         )
-        self.add_display_region(self.display_region_size)
-
+        # self.add_display_region(self.display_region_size)
         self._node_path_list.extend(tmp_node_path_list)
 
     def update_vehicle_state(self, vehicle):
@@ -125,11 +123,6 @@ class VehiclePanel(ImageBuffer):
         for para in self.para_vis_np.values():
             para.removeNode()
         self.aspect2d_np.removeNode()
-
-    @property
-    def engine(self):
-        from metadrive.engine.engine_utils import get_engine
-        return get_engine()
 
     def track(self, base_object):
         # for compatibility

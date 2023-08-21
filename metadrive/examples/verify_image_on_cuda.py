@@ -9,7 +9,7 @@ from metadrive import MetaDriveEnv
 from metadrive.policy.idm_policy import IDMPolicy
 
 
-def _test_rgb_camera_as_obs(render=False, image_on_cuda=True):
+def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False):
     env = MetaDriveEnv(
         dict(
             num_scenarios=1,
@@ -25,7 +25,13 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True):
             show_fps=False,
         )
     )
-    env.reset()
+    o, i = env.reset()
+
+    # for debug
+    if debug:
+        ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
+        cv2.imwrite("reset_frame.png", ret * 255)
+
     action = [0.0, 0.1]
     start = time.time()
     print(
@@ -40,6 +46,13 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True):
             torch_tensor = from_dlpack(o["image"].toDlpack())
         else:
             torch_tensor = torch.Tensor(o["image"])
+
+        if debug:
+            cv2.imwrite(
+                "{}_frame.png".format(i),
+                (o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]) * 255
+            )
+
         if render:
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
             cv2.imshow("window", ret)
@@ -53,6 +66,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--native", action="store_true")
+    parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
-    _test_rgb_camera_as_obs(args.render, image_on_cuda=not args.native)
-    print("Test Successful !!")
+    _test_rgb_camera_as_obs(args.render, image_on_cuda=not args.native, debug=args.debug)
+    print("Test Successful !! The FPS should go beyond 400 FPS if you are running on GPUs better than RTX 3060.")

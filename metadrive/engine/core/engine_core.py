@@ -1,4 +1,5 @@
 import logging
+from metadrive.render_pipeline.rpcore.rpobject import RPObject
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -14,6 +15,7 @@ from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
 from metadrive.engine.core.collision_callback import collision_callback
 from metadrive.engine.core.force_fps import ForceFPS
+from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.core.light import Light
 from metadrive.engine.core.onscreen_message import ScreenMessage
 from metadrive.engine.core.physics_world import PhysicsWorld
@@ -29,11 +31,13 @@ def _suppress_warning():
     loadPrcFileData("", "notify-level-pnmimage fatal")
     loadPrcFileData("", "notify-level-thread fatal")
     loadPrcFileData("", "notify-level-bullet fatal")
+    loadPrcFileData("", "notify-level-display fatal")
 
 
 def _free_warning():
     loadPrcFileData("", "notify-level-glgsg debug")
     # loadPrcFileData("", "notify-level-pgraph debug")  # press 4 to use toggle analyze to do this
+    loadPrcFileData("", "notify-level-display debug")  # press 4 to use toggle analyze to do this
     loadPrcFileData("", "notify-level-pnmimage debug")
     loadPrcFileData("", "notify-level-thread debug")
 
@@ -95,14 +99,14 @@ class EngineCore(ShowBase.ShowBase):
         #     pass
         # else:
         EngineCore.global_config = global_config
-
+        self.mode = global_config["_render_mode"]
         if self.global_config["pstats"]:
             # pstats debug provided by panda3d
             loadPrcFileData("", "want-pstats 1")
 
         # Setup onscreen render
         if self.global_config["use_render"]:
-            self.mode = RENDER_MODE_ONSCREEN
+            assert self.mode == RENDER_MODE_ONSCREEN, "Render mode error"
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.
             if self.global_config["multi_thread_render"] and not self.use_render_pipeline:
@@ -111,16 +115,12 @@ class EngineCore(ShowBase.ShowBase):
         else:
             self.global_config["show_coordinates"] = False
             if self.global_config["image_observation"]:
-                self.mode = RENDER_MODE_OFFSCREEN
+                assert self.mode == RENDER_MODE_OFFSCREEN, "Render mode error"
                 if self.global_config["multi_thread_render"] and not self.use_render_pipeline:
                     # render-pipeline can not work with multi-thread rendering
                     loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
-                if self.global_config["vehicle_config"]["image_source"] != "main_camera":
-                    # reduce size as we don't use the main camera content for improving efficiency
-                    self.global_config["window_size"] = (1, 1)
-
             else:
-                self.mode = RENDER_MODE_NONE
+                assert self.mode == RENDER_MODE_NONE, "Render mode error"
                 if self.global_config["show_interface"]:
                     # Disable useless camera capturing in none mode
                     self.global_config["show_interface"] = False
@@ -131,6 +131,8 @@ class EngineCore(ShowBase.ShowBase):
         loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
 
         if self.use_render_pipeline:
+            if not self.global_config["debug"]:
+                RPObject.set_output_level("warning")  # warning
             self.render_pipeline = RenderPipeline()
             self.render_pipeline.pre_showbase_init()
             # disable it, as some model errors happen!
@@ -147,7 +149,8 @@ class EngineCore(ShowBase.ShowBase):
         if self.global_config["debug"]:
             # debug setting
             EngineCore.DEBUG = True
-            _free_warning()
+            if self.global_config["debug_panda3d"]:
+                _free_warning()
             setup_logger(debug=True)
             self.accept("1", self.toggleDebug)
             self.accept("2", self.toggleWireframe)
@@ -319,6 +322,10 @@ class EngineCore(ShowBase.ShowBase):
         if self.global_config["show_coordinates"]:
             self.show_coordinates()
 
+        # create sensors
+        self.sensors = {}
+        self.setup_sensors()
+
     def render_frame(self, text: Optional[Union[dict, str]] = None):
         """
         The real rendering is conducted by the igLoop task maintained by panda3d.
@@ -475,3 +482,27 @@ class EngineCore(ShowBase.ShowBase):
     def reload_shader(self):
         if self.render_pipeline is not None:
             self.render_pipeline.reload_shaders()
+
+    def setup_sensors(self):
+        for sensor_id, sensor_cfg in self.global_config["sensors"].items():
+            if sensor_id == "main_camera":
+                # It is added when initializing main_camera
+                continue
+            cls = sensor_cfg[0]
+            args = sensor_cfg[1:]
+            if issubclass(cls, ImageBuffer):
+                self.add_image_sensor(sensor_id, cls, args)
+            else:
+                raise ValueError("TODO: Add other sensor here")
+
+    def get_sensor(self, sensor_id):
+        if sensor_id not in self.sensors:
+            raise ValueError("Can not get {}, available sensors: {}".format(sensor_id, self.sensors.keys()))
+        return self.sensors[sensor_id]
+
+    def add_image_sensor(self, name: str, cls, args):
+        if self.global_config["image_on_cuda"] and name == self.global_config["vehicle_config"]["image_source"]:
+            args.append(True)
+        sensor = cls(self, *args)
+        assert isinstance(sensor, ImageBuffer), "This API is for adding image sensor"
+        self.sensors[name] = sensor

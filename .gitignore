@@ -36,3 +36,4 @@
 **/test_export_record_scenario/
 /metadrive/assets/textures/heightfield.png
 **/test_read_copy_waymo
+/metadrive/tests/vis_functionality/*.png

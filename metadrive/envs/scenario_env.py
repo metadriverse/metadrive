@@ -5,7 +5,7 @@ import logging
 
 import numpy as np
 
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.vehicle_panel import VehiclePanel
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
@@ -15,8 +15,8 @@ from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.obs.image_obs import ImageStateObservation
+from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.utils import get_np_random
 from metadrive.utils.math import wrap_to_pi
@@ -90,7 +90,7 @@ SCENARIO_ENV_CONFIG = dict(
     relax_out_of_road_done=True,
 
     # ===== others =====
-    interface_panel=[VehiclePanel],  # for boosting efficiency
+    interface_panel=["dashboard"],  # for boosting efficiency
     horizon=None,
     allowed_more_steps=None,  # None=infinite
 )
@@ -115,19 +115,14 @@ class ScenarioEnv(BaseEnv):
             assert self.config["sequential_seed"], \
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
 
-    def _merge_extra_config(self, config):
-        # config = self.default_config().update(config, allow_add_new_key=True)
-        config = self.default_config().update(config, allow_add_new_key=False)
-        return config
-
     def _get_observations(self):
-        return {self.DEFAULT_AGENT: self.get_single_observation(self.config["vehicle_config"])}
+        return {self.DEFAULT_AGENT: self.get_single_observation()}
 
-    def get_single_observation(self, vehicle_config: "Config"):
+    def get_single_observation(self):
         if self.config["image_observation"]:
-            o = ImageStateObservation(vehicle_config)
+            o = ImageStateObservation(self.config)
         else:
-            o = LidarStateObservation(vehicle_config)
+            o = LidarStateObservation(self.config)
         return o
 
     def switch_to_top_down_view(self):
@@ -203,7 +198,7 @@ class ScenarioEnv(BaseEnv):
         route_completion = vehicle.navigation.route_completion
 
         def msg(reason):
-            return "Scenario {}: {} ended! Reason: {}.".format(
+            return "Episode ended! Scenario Index: {} Scenario id: {} Reason: {}.".format(
                 self.current_seed, self.engine.data_manager.current_scenario_id, reason
             )
 

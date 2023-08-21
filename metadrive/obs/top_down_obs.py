@@ -228,8 +228,3 @@ class TopDownObservation(ObservationBase):
         else:
             img = img.astype(np.uint8)
         return np.transpose(img, (1, 0, 2))
-
-    @property
-    def engine(self):
-        from metadrive.engine.engine_utils import get_engine
-        return get_engine()

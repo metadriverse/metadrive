@@ -2,7 +2,7 @@ import argparse
 import time
 
 import numpy as np
-
+import logging
 from metadrive import MetaDriveEnv
 from metadrive.utils import setup_logger
 
@@ -13,11 +13,7 @@ if __name__ == '__main__':
 
     print("Start to profile the efficiency of MetaDrive with 1000 maps and ~4 vehicles!")
     setup_logger(debug=False)
-    env = MetaDriveEnv(dict(
-        num_scenarios=1000,
-        start_seed=1010,
-        traffic_density=0.05,
-    ))
+    env = MetaDriveEnv(dict(num_scenarios=1000, start_seed=1010, traffic_density=0.05, log_level=logging.FATAL))
     obs, _ = env.reset()
     start = time.time()
     reset_used_time = 0

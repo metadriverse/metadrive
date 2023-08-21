@@ -14,7 +14,7 @@ Options for --env argument:
 
 """
 import argparse
-
+from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive import (
     MultiAgentMetaDrive, MultiAgentTollgateEnv, MultiAgentBottleneckEnv, MultiAgentIntersectionEnv,
     MultiAgentRoundaboutEnv, MultiAgentParkingLotEnv
@@ -49,32 +49,34 @@ if __name__ == "__main__":
     env = envs[env_cls_name](
         {
             "use_render": True if not args.top_down else False,
-            "render_mode": "top_down" if args.top_down else None,
-            "manual_control": False,
             "crash_done": False,
+            "sensors": dict(rgb_camera=(RGBCamera, 512, 256)),
+            "interface_panel": ["rgb_camera", "dashboard"],
             "agent_policy": ManualControllableIDMPolicy
         }
     )
     try:
         env.reset()
-        if env.current_track_vehicle:
-            env.current_track_vehicle.expert_takeover = True
+        # if env.current_track_vehicle:
+        #     env.current_track_vehicle.expert_takeover = True
         print(HELP_MESSAGE)
         env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
         for i in range(1, 10000000000):
             o, r, tm, tc, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
             env.render(
                 **extra_args,
+                mode="top_down" if args.top_down else None,
                 text={
+                    "Quit": "ESC",
                     "Number of existing vehicles": len(env.vehicles),
                     "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
-                    "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
+                    # "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
                 } if not args.top_down else {}
             )
             if tm["__all__"]:
                 env.reset()
-                if env.current_track_vehicle:
-                    env.current_track_vehicle.expert_takeover = True
+                # if env.current_track_vehicle:
+                #     env.current_track_vehicle.expert_takeover = True
     except Exception as e:
         raise e
     finally:

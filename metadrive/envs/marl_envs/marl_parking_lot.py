@@ -212,8 +212,8 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
             ret.append(Road(ParkingLot.node(1, i, 5), ParkingLot.node(1, i, 6)))
         return ret
 
-    def _merge_extra_config(self, config) -> Config:
-        ret_config = super(MultiAgentParkingLotEnv, self)._merge_extra_config(config)
+    def _post_process_config(self, config):
+        ret_config = super(MultiAgentParkingLotEnv, self)._post_process_config(config)
         # add extra assert
         parking_space_num = ret_config["parking_space_num"]
         assert parking_space_num % 2 == 0, "number of parking spaces must be multiples of 2"

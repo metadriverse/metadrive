@@ -19,7 +19,6 @@ if __name__ == "__main__":
             # "controller": "joystick",
             # "manual_control": True,
             "use_render": False,
-            "render_mode": "top_down",
             "decision_repeat": 5,
             "need_inverse_traffic": True,
             "rgb_clip": True,
@@ -65,4 +64,4 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        env.render(track_target_vehicle=True)
+        env.render(track_target_vehicle=True, mode="top_down")

@@ -1,7 +1,7 @@
 import numpy as np
 
 from metadrive.component.lane.point_lane import PointLane
-from metadrive.component.vehicle_module.PID_controller import PIDController
+from metadrive.component.vehicle.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
 from metadrive.utils.math import not_zero, wrap_to_pi, norm
@@ -358,7 +358,7 @@ class IDMPolicy(BasePolicy):
                         # it is time to change lane!
                         self.target_speed = self.NORMAL_SPEED
                         return surrounding_objects.left_front_object(), surrounding_objects.left_front_min_distance(), \
-                            current_lanes[self.routing_target_lane.index[-1] - 1]
+                               current_lanes[self.routing_target_lane.index[-1] - 1]
                 else:
                     # change to right
                     if surrounding_objects.right_back_min_distance(
@@ -371,7 +371,7 @@ class IDMPolicy(BasePolicy):
                         # change lane
                         self.target_speed = self.NORMAL_SPEED
                         return surrounding_objects.right_front_object(), surrounding_objects.right_front_min_distance(), \
-                            current_lanes[self.routing_target_lane.index[-1] + 1]
+                               current_lanes[self.routing_target_lane.index[-1] + 1]
 
         # lane follow or active change lane/overtake for high driving speed
         if abs(self.control_object.speed_km_h - self.NORMAL_SPEED) > 3 and surrounding_objects.has_front_object(
@@ -389,12 +389,12 @@ class IDMPolicy(BasePolicy):
                 expect_lane_idx = current_lanes.index(self.routing_target_lane) - 1
                 if expect_lane_idx in self.available_routing_index_range:
                     return surrounding_objects.left_front_object(), surrounding_objects.left_front_min_distance(), \
-                        current_lanes[expect_lane_idx]
+                           current_lanes[expect_lane_idx]
             if right_front_speed is not None and right_front_speed - front_speed > self.LANE_CHANGE_SPEED_INCREASE:
                 expect_lane_idx = current_lanes.index(self.routing_target_lane) + 1
                 if expect_lane_idx in self.available_routing_index_range:
                     return surrounding_objects.right_front_object(), surrounding_objects.right_front_min_distance(), \
-                        current_lanes[expect_lane_idx]
+                           current_lanes[expect_lane_idx]
 
         # fall back to lane follow
         self.target_speed = self.NORMAL_SPEED
@@ -406,14 +406,18 @@ class ManualControllableIDMPolicy(IDMPolicy):
     """If human is not taking over, then use IDM policy."""
     def __init__(self, *args, **kwargs):
         super(ManualControllableIDMPolicy, self).__init__(*args, **kwargs)
-        self.manual_control_policy = ManualControlPolicy(*args, **kwargs)
+        self.engine.global_config["manual_control"] = True  # hack
+        self.manual_control_policy = ManualControlPolicy(*args, **kwargs, enable_expert=False)
+        self.engine.global_config["manual_control"] = False  # hack
 
     def act(self, agent_id):
-        if self.control_object is self.engine.current_track_vehicle and self.engine.global_config["manual_control"] \
-                and not self.engine.current_track_vehicle.expert_takeover:
+        if self.control_object is self.engine.current_track_vehicle:
+            self.engine.global_config["manual_control"] = True  # hack
             action = self.manual_control_policy.act(agent_id)
+            self.engine.global_config["manual_control"] = False  # hack
             self.action_info["action"] = action
             self.action_info["manual_control"] = True
+            return action
         else:
             self.action_info["manual_control"] = False
             return super(ManualControllableIDMPolicy, self).act(agent_id)

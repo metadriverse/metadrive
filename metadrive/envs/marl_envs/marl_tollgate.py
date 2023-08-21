@@ -1,5 +1,4 @@
 import gymnasium as gym
-
 import numpy as np
 
 from metadrive.component.map.pg_map import PGMap
@@ -85,9 +84,11 @@ class TollGateObservation(LidarStateObservation):
     @property
     def observation_space(self):
         shape = list(self.state_obs.observation_space.shape)
-        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+        if self.config["vehicle_config"]["lidar"]["num_lasers"] > 0 \
+                and self.config["vehicle_config"]["lidar"]["distance"] > 0:
             # Number of lidar rays and distance should be positive!
-            shape[0] += self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4 + 2
+            shape[0] += self.config["vehicle_config"]["lidar"]["num_lasers"] \
+                        + self.config["vehicle_config"]["lidar"]["num_others"] * 4 + 2
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
     def reset(self, env, vehicle=None):
@@ -268,8 +269,8 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
 
         return done, done_info
 
-    def get_single_observation(self, vehicle_config):
-        o = TollGateObservation(vehicle_config)
+    def get_single_observation(self):
+        o = TollGateObservation(self.config)
         return o
 
     def step(self, actions):

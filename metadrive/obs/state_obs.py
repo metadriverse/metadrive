@@ -12,8 +12,8 @@ class StateObservation(ObservationBase):
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
     def __init__(self, config):
-        if config["navigation_module"]:
-            navi_dim = config["navigation_module"].get_navigation_info_dim()
+        if config["vehicle_config"]["navigation_module"]:
+            navi_dim = config["vehicle_config"]["navigation_module"].get_navigation_info_dim()
         else:
             navi_dim = NodeNetworkNavigation.get_navigation_info_dim()
         self.navi_dim = navi_dim
@@ -139,28 +139,30 @@ class StateObservation(ObservationBase):
 
     def get_line_detector_dim(self):
         dim = 0
-        dim += 2 if self.config["side_detector"]["num_lasers"] == 0 else \
-            self.config["side_detector"]["num_lasers"]
-        dim += 1 if self.config["lane_line_detector"]["num_lasers"] == 0 else \
-            self.config["lane_line_detector"]["num_lasers"]
+        dim += 2 if self.config["vehicle_config"]["side_detector"]["num_lasers"] == 0 else \
+            self.config["vehicle_config"]["side_detector"]["num_lasers"]
+        dim += 1 if self.config["vehicle_config"]["lane_line_detector"]["num_lasers"] == 0 else \
+            self.config["vehicle_config"]["lane_line_detector"]["num_lasers"]
         return dim
 
 
 class LidarStateObservation(ObservationBase):
-    def __init__(self, vehicle_config):
-        self.state_obs = StateObservation(vehicle_config)
-        super(LidarStateObservation, self).__init__(vehicle_config)
+    def __init__(self, config):
+        self.state_obs = StateObservation(config)
+        super(LidarStateObservation, self).__init__(config)
         self.cloud_points = None
         self.detected_objects = None
 
     @property
     def observation_space(self):
         shape = list(self.state_obs.observation_space.shape)
-        if self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0:
+        if self.config["vehicle_config"]["lidar"]["num_lasers"] > 0 and self.config["vehicle_config"]["lidar"][
+                "distance"] > 0:
             # Number of lidar rays and distance should be positive!
-            lidar_dim = self.config["lidar"]["num_lasers"] + self.config["lidar"]["num_others"] * 4
-            if self.config["lidar"]["add_others_navi"]:
-                lidar_dim += self.config["lidar"]["num_others"] * 4
+            lidar_dim = self.config["vehicle_config"]["lidar"][
+                "num_lasers"] + self.config["vehicle_config"]["lidar"]["num_others"] * 4
+            if self.config["vehicle_config"]["lidar"]["add_others_navi"]:
+                lidar_dim += self.config["vehicle_config"]["lidar"]["num_others"] * 4
             shape[0] += lidar_dim
         return gym.spaces.Box(-0.0, 1.0, shape=tuple(shape), dtype=np.float32)
 
@@ -193,15 +195,15 @@ class LidarStateObservation(ObservationBase):
         other_v_info = []
         if vehicle.lidar.available:
             cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
-            if self.config["lidar"]["num_others"] > 0:
+            if self.config["vehicle_config"]["lidar"]["num_others"] > 0:
                 other_v_info += vehicle.lidar.get_surrounding_vehicles_info(
-                    vehicle, detected_objects, self.config["lidar"]["num_others"],
-                    self.config["lidar"]["add_others_navi"]
+                    vehicle, detected_objects, self.config["vehicle_config"]["lidar"]["num_others"],
+                    self.config["vehicle_config"]["lidar"]["add_others_navi"]
                 )
             other_v_info += self._add_noise_to_cloud_points(
                 cloud_points,
-                gaussian_noise=self.config["lidar"]["gaussian_noise"],
-                dropout_prob=self.config["lidar"]["dropout_prob"]
+                gaussian_noise=self.config["vehicle_config"]["lidar"]["gaussian_noise"],
+                dropout_prob=self.config["vehicle_config"]["lidar"]["dropout_prob"]
             )
             self.cloud_points = cloud_points
             self.detected_objects = detected_objects

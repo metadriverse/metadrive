@@ -1,5 +1,5 @@
 import copy
-from metadrive.component.vehicle_module.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.vehicle_panel import VehiclePanel
 import logging
 from typing import Dict, Any
 
@@ -58,7 +58,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     traffic_density=0.0,
     camera_height=4,
     map_file_path="",
-    interface_panel=[VehiclePanel],
+    interface_panel=["dashboard"],
 )
 
 
@@ -75,26 +75,6 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         config = MetaDriveEnv.default_config()
         config.update(MULTI_AGENT_METADRIVE_DEFAULT_CONFIG)
         return config
-
-    def _merge_extra_config(self, config) -> "Config":
-        ret_config = self.default_config().update(
-            config,
-            allow_add_new_key=False,
-            stop_recursive_update=["target_vehicle_configs"],
-        )
-        # if not ret_config["crash_done"] and ret_config["crash_vehicle_penalty"] > 2:
-        #     logging.warning(
-        #         "Are you sure you wish to set crash_vehicle_penalty={} when crash_done=False?".format(
-        #             ret_config["crash_vehicle_penalty"]
-        #         )
-        #     )
-        if ret_config["use_render"] and ret_config["disable_model_compression"]:
-            logging.warning("Turn disable_model_compression=True can decrease the loading time!")
-
-        if "prefer_track_agent" in config and config["prefer_track_agent"]:
-            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["use_special_color"] = True
-        ret_config["vehicle_config"]["random_agent_model"] = ret_config["random_agent_model"]
-        return ret_config
 
     def _post_process_config(self, config):
         from metadrive.manager.spawn_manager import SpawnManager
@@ -123,6 +103,12 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 config.update(ret_config["target_vehicle_configs"][agent_id])
             target_vehicle_configs[agent_id] = config
         ret_config["target_vehicle_configs"] = target_vehicle_configs
+        if ret_config["use_render"] and ret_config["disable_model_compression"]:
+            logging.warning("Turn disable_model_compression=True can decrease the loading time!")
+
+        if "prefer_track_agent" in config and config["prefer_track_agent"]:
+            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["use_special_color"] = True
+        ret_config["vehicle_config"]["random_agent_model"] = ret_config["random_agent_model"]
         return ret_config
 
     def done_function(self, vehicle_id):
@@ -203,10 +189,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
             self.switch_to_third_person_view()
 
     def _get_observations(self):
-        return {
-            name: self.get_single_observation(new_config)
-            for name, new_config in self.config["target_vehicle_configs"].items()
-        }
+        return {name: self.get_single_observation() for name in self.config["target_vehicle_configs"].keys()}
 
     def _respawn_vehicles(self, randomize_position=False):
         new_obs_dict = {}
@@ -258,7 +241,6 @@ def _test():
             "num_agents": 12,
             "allow_respawn": False,
             "use_render": True,
-            "render_mode": "top_down",
             "debug": False,
             "manual_control": True,
         }
@@ -274,7 +256,7 @@ def _test():
         # TODO: why does this make sense? total_r is not a vehicle id.
         # d.update({"total_r": total_r})
         # env.render(text=d)
-        env.render()
+        env.render(mode="top_down")
         if len(env.vehicles) == 0:
             total_r = 0
             print("Reset")
@@ -287,7 +269,6 @@ def _vis():
     env = MultiAgentMetaDrive(
         {
             "use_render": True,
-            "render_mode": "top_down",
             "num_agents": 5,
             "start_seed": 8000,
             "num_scenarios": 1,
@@ -319,7 +300,7 @@ def _vis():
             total_r += r_
         # o, r, tm, tc, info = env.step([0,1])
         # tm.update({"total_r": total_r})
-        env.render()
+        env.render(mode="top_down")
         # env.reset()
         if len(env.vehicles) == 0:
             total_r = 0
@@ -341,7 +322,6 @@ def pygame_replay(
     import pygame
 
     extra_config["use_render"] = True
-    extra_config["render_mode"] = "top_down"
     env = env_class(extra_config)
     ckpt = "metasvodist_{}_best.json".format(name) if other_traj is None else other_traj
     with open(ckpt, "r") as f:
@@ -352,7 +332,7 @@ def pygame_replay(
     while True:
         o, r, tm, tc, i = env.step(env.action_space.sample())
         env.engine.force_fps.toggle()
-        env.render(num_stack=50, film_size=film_size, history_smooth=0)
+        env.render(mode="top_down", num_stack=50, film_size=film_size, history_smooth=0)
         if save:
             pygame.image.save(
                 env._top_down_renderer._runtime_canvas,
