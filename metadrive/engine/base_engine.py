@@ -68,10 +68,6 @@ class BaseEngine(EngineCore, Randomizable):
         # warm up
         self.warmup()
 
-        # for multi-thread rendering
-        self.graphicsEngine.renderFrame()
-        self.graphicsEngine.renderFrame()
-
         # curriculum reset
         self._max_level = self.global_config.get("curriculum_level", 1)
         self._current_level = 0
@@ -330,9 +326,8 @@ class BaseEngine(EngineCore, Randomizable):
         self.taskMgr.step()
 
         # refresh graphics to support multi-thread rendering, avoiding bugs like shadow disappearance at first frame
-        self.graphicsEngine.renderFrame()
-        self.graphicsEngine.renderFrame()
-        self.graphicsEngine.renderFrame()
+        for _ in range(5):
+            self.graphicsEngine.renderFrame()
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):
         """

@@ -72,9 +72,8 @@ class BaseCamera(ImageBuffer):
                         self.cuda_rendered_result = array
 
             # Fill the buffer due to multi-thread
-            self.engine.graphicsEngine.renderFrame()
-            self.engine.graphicsEngine.renderFrame()
-            self.engine.graphicsEngine.renderFrame()
+            for _ in range(3):
+                self.engine.graphicsEngine.renderFrame()
             self.cam.node().getDisplayRegion(0).setDrawCallback(_callback_func)
 
             self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
@@ -207,7 +206,6 @@ class BaseCamera(ImageBuffer):
             raise RuntimeError("Cannot map an unregistered buffer.")
         if self.mapped:
             return self._cuda_buffer
-        # self.engine.graphicsEngine.renderFrame()
         check_cudart_err(cudart.cudaGraphicsMapResources(1, self.cuda_graphics_resource, stream))
         array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
         channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))

@@ -129,10 +129,9 @@ class MainCamera:
                     with self as array:
                         self.cuda_rendered_result = array
 
-            # Fill the buffer due to multi-thread
-            engine.graphicsEngine.renderFrame()
-            engine.graphicsEngine.renderFrame()
-            engine.graphicsEngine.renderFrame()
+            # Fill the buffer due to multi-thread (3 stage)
+            for _ in range(3):
+                engine.graphicsEngine.renderFrame()
             engine.cam.node().getDisplayRegion(0).setDrawCallback(_callback_func)
 
             self.gsg = GraphicsStateGuardianBase.getDefaultGsg()
@@ -413,8 +412,6 @@ class MainCamera:
     def get_pixels_array(self, vehicle, clip):
         engine = get_engine()
         assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
-        # if engine.episode_step <= 1:
-        #     engine.graphicsEngine.renderFrame()
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
             img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
@@ -498,7 +495,6 @@ class MainCamera:
             raise RuntimeError("Cannot map an unregistered buffer.")
         if self.mapped:
             return self._cuda_buffer
-        # self.engine.graphicsEngine.renderFrame()
         check_cudart_err(cudart.cudaGraphicsMapResources(1, self.cuda_graphics_resource, stream))
         array = check_cudart_err(cudart.cudaGraphicsSubResourceGetMappedArray(self.graphics_resource, 0, 0))
         channelformat, cudaextent, flag = check_cudart_err(cudart.cudaArrayGetInfo(array))

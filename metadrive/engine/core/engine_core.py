@@ -503,5 +503,3 @@ class EngineCore(ShowBase.ShowBase):
         sensor = cls(self, *args)
         assert isinstance(sensor, ImageBuffer), "This API is for adding image sensor"
         self.sensors[name] = sensor
-        self.graphicsEngine.render_frame()
-        self.graphicsEngine.render_frame()
