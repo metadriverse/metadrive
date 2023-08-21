@@ -1,5 +1,5 @@
 import cv2
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain
+from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, Texture
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
@@ -46,8 +46,13 @@ class DepthCamera(BaseCamera):
         cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
 
         if self.VIEW_GROUND:
+            ground = PNMImage(257, 257, 4)
+            ground.fill(1., 1., 1.)
+            ground_tex = Texture("white lane line")
+            ground_tex.load(ground)
+            
             self.GROUND = GeoMipTerrain("mySimpleTerrain")
-            self.GROUND.setHeightfield(AssetLoader.file_path("textures", "height_map.png"))
+            self.GROUND.setHeightfield(ground_tex)
             self.GROUND.setAutoFlatten(GeoMipTerrain.AFMStrong)
             # terrain.setBruteforce(True)
             # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain
