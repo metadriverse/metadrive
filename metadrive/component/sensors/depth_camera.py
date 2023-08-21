@@ -50,7 +50,7 @@ class DepthCamera(BaseCamera):
             ground.fill(1., 1., 1.)
             ground_tex = Texture("white lane line")
             ground_tex.load(ground)
-            
+
             self.GROUND = GeoMipTerrain("mySimpleTerrain")
             self.GROUND.setHeightfield(ground_tex)
             self.GROUND.setAutoFlatten(GeoMipTerrain.AFMStrong)
