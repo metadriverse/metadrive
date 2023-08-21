@@ -198,7 +198,7 @@ class ScenarioEnv(BaseEnv):
         route_completion = vehicle.navigation.route_completion
 
         def msg(reason):
-            return "Scenario {}: {} ended! Reason: {}.".format(
+            return "Episode ended! Scenario Index: {} Scenario id: {} Reason: {}.".format(
                 self.current_seed, self.engine.data_manager.current_scenario_id, reason
             )
 

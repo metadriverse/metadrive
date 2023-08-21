@@ -302,7 +302,7 @@ class BaseEnv(gym.Env):
                     config["vehicle_config"]["image_source"], config["sensors"])
 
         # show sensor lists
-        _str = "Requested Sensors:"
+        _str = "Sensors:"
         for _id, cfg in config["sensors"].items():
             _str += "{}: {}, {}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
         self.logger.info(_str[:-2])
@@ -317,7 +317,7 @@ class BaseEnv(gym.Env):
                 if sensor[0] == "MainCamera" or (issubclass(BaseCamera, sensor[0]) and sensor[0] != VehiclePanel):
                     config["_render_mode"] = RENDER_MODE_OFFSCREEN
                     break
-
+        self.logger.info("Render Mode: {}".format(config["_render_mode"]))
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
