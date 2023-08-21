@@ -90,6 +90,8 @@ class Interface:
             if self.engine.global_config["show_interface_navi_mark"]:
                 navi_arrow_model.instanceTo(self._left_arrow)
                 navi_arrow_model.instanceTo(self._right_arrow)
+            self._left_arrow.detachNode()
+            self._right_arrow.detachNode()
             self.arrow.setPos(0, 0, 0.08)
             self.arrow.hide(CamMask.AllOn)
             self.arrow.show(CamMask.MainCam)

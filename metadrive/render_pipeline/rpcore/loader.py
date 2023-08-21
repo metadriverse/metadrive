@@ -55,10 +55,10 @@ class timed_loading_operation(object):  # noqa # pylint: disable=invalid-name,to
     def __exit__(self, *args):
         duration = (time.process_time() - self.start_time) * 1000.0
         if duration > 80.0 and timed_loading_operation.WARNING_COUNT < 5:
-            RPObject.global_warn("RPLoader", "Loading '" + self.resource + "' took", round(duration, 2), "ms")
+            RPObject.global_debug("RPLoader", "Loading '" + self.resource + "' took", round(duration, 2), "ms")
             timed_loading_operation.WARNING_COUNT += 1
             if timed_loading_operation.WARNING_COUNT == 5:
-                RPObject.global_warn("RPLoader", "Skipping further loading warnings (max warning count reached)")
+                RPObject.global_debug("RPLoader", "Skipping further loading warnings (max warning count reached)")
 
 
 class RPLoader(RPObject):

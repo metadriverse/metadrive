@@ -1,4 +1,5 @@
 import logging
+from metadrive.render_pipeline.rpcore.rpobject import RPObject
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -130,6 +131,8 @@ class EngineCore(ShowBase.ShowBase):
         loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
 
         if self.use_render_pipeline:
+            if not self.global_config["debug"]:
+                RPObject.set_output_level("warning")  # warning
             self.render_pipeline = RenderPipeline()
             self.render_pipeline.pre_showbase_init()
             # disable it, as some model errors happen!

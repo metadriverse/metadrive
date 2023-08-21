@@ -564,7 +564,7 @@ class RenderPipeline(RPObject):
         self.daytime_mgr.update()
         self.light_mgr.update()
 
-        if Globals.clock.get_frame_count() >= 10:
+        if Globals.clock.get_frame_count() >= 10 and self.loading_screen.fullscreen_node.hasParent():
             self.debug("Hiding loading screen after 10 pre-rendered frames.")
             self.loading_screen.remove()
 
