@@ -49,7 +49,6 @@ if __name__ == "__main__":
     env = envs[env_cls_name](
         {
             "use_render": True if not args.top_down else False,
-            "render_mode": "top_down" if args.top_down else None,
             "crash_done": False,
             "sensors": dict(rgb_camera=(RGBCamera, 512, 256)),
             "interface_panel": ["rgb_camera", "panel"],
@@ -66,7 +65,9 @@ if __name__ == "__main__":
             o, r, tm, tc, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
             env.render(
                 **extra_args,
+                mode="top_down" if args.top_down else None,
                 text={
+                    "Quit": "ESC",
                     "Number of existing vehicles": len(env.vehicles),
                     "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
                     # "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",

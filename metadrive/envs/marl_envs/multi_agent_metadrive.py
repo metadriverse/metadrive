@@ -241,7 +241,6 @@ def _test():
             "num_agents": 12,
             "allow_respawn": False,
             "use_render": True,
-            "render_mode": "top_down",
             "debug": False,
             "manual_control": True,
         }
@@ -257,7 +256,7 @@ def _test():
         # TODO: why does this make sense? total_r is not a vehicle id.
         # d.update({"total_r": total_r})
         # env.render(text=d)
-        env.render()
+        env.render(mode="top_down")
         if len(env.vehicles) == 0:
             total_r = 0
             print("Reset")
@@ -270,7 +269,6 @@ def _vis():
     env = MultiAgentMetaDrive(
         {
             "use_render": True,
-            "render_mode": "top_down",
             "num_agents": 5,
             "start_seed": 8000,
             "num_scenarios": 1,
@@ -302,7 +300,7 @@ def _vis():
             total_r += r_
         # o, r, tm, tc, info = env.step([0,1])
         # tm.update({"total_r": total_r})
-        env.render()
+        env.render(mode="top_down")
         # env.reset()
         if len(env.vehicles) == 0:
             total_r = 0
@@ -324,7 +322,6 @@ def pygame_replay(
     import pygame
 
     extra_config["use_render"] = True
-    extra_config["render_mode"] = "top_down"
     env = env_class(extra_config)
     ckpt = "metasvodist_{}_best.json".format(name) if other_traj is None else other_traj
     with open(ckpt, "r") as f:
@@ -335,7 +332,7 @@ def pygame_replay(
     while True:
         o, r, tm, tc, i = env.step(env.action_space.sample())
         env.engine.force_fps.toggle()
-        env.render(num_stack=50, film_size=film_size, history_smooth=0)
+        env.render(mode="top_down",num_stack=50, film_size=film_size, history_smooth=0)
         if save:
             pygame.image.save(
                 env._top_down_renderer._runtime_canvas,

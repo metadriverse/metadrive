@@ -55,10 +55,10 @@ BASE_DEFAULT_CONFIG = dict(
     rgb_clip=True,  # clip rgb to (0, 1)
     rgb_to_grayscale=False,  # whether to convert rgb image to grayscale in class ImageObservation
     stack_size=3,  # the number of timesteps for stacking image observation
+    image_observation=False,  # use image observation or lidar
 
     # ===== Rendering =====
     use_render=False,  # if true pop a window to render
-    render_mode=None,  # if "human", then use_render must be true, if "rgb", return numpy array, if None, do neither
     debug=False,
     disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
@@ -162,10 +162,10 @@ BASE_DEFAULT_CONFIG = dict(
     # (Deprecated) set to true only when on headless machine and use rgb image!!!!!!
     # turn on to profile the efficiency
     pstats=False,
-    # if need running in offscreen
-    image_observation=False,
     # this is an advanced feature for accessing image with moving them to ram!
     image_on_cuda=False,
+    # We will determine the render mode automatically
+    _render_mode=None,
     # accelerate the lidar perception
     _disable_detector_mask=False,
     # None: unlimited, number: fps
@@ -287,7 +287,7 @@ class BaseEnv(gym.Env):
         to_use = []
         for panel in config["interface_panel"]:
             if panel == "panel":
-                config["sensors"]["panel"] = (VehiclePanel, )
+                config["sensors"]["panel"] = (VehiclePanel,)
             if panel not in config["sensors"]:
                 self.logger.warning("Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
             else:
@@ -412,8 +412,6 @@ class BaseEnv(gym.Env):
         :param text:text to show
         :return: when mode is 'rgb', image array is returned
         """
-
-        mode = mode or self.config["render_mode"]  # for compatibility
 
         if mode in ["top_down", "topdown", "bev", "birdview"]:
             ret = self._render_topdown(text=text, *args, **kwargs)
@@ -679,19 +677,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

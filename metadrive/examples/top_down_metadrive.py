@@ -65,7 +65,6 @@ if __name__ == "__main__":
             # with keyboard in the main window.
             # manual_control=True,
             map="SSSS",
-            render_mode="top_down",
             traffic_density=0.1,
             num_scenarios=100,
             start_seed=random.randint(0, 1000),
@@ -75,7 +74,7 @@ if __name__ == "__main__":
         o, _ = env.reset()
         for i in range(1, 100000):
             o, r, tm, tc, info = env.step(expert(env.vehicle))
-            env.render(film_size=(800, 800))
+            env.render(mode="top_down", text={"Quit": "ESC"}, film_size=(2000, 2000))
             if tm or tc:
                 env.reset()
             if i % 50 == 0:
