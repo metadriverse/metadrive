@@ -8,10 +8,9 @@ import numpy as np
 from panda3d.core import PNMImage
 
 from metadrive.component.sensors.base_camera import BaseCamera
-from metadrive.component.sensors.mini_map import MiniMap
-from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.component.sensors.vehicle_panel import VehiclePanel
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
+from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
 from metadrive.constants import TerminationState
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
@@ -307,6 +306,17 @@ class BaseEnv(gym.Env):
         for _id, cfg in config["sensors"].items():
             _str += "{}: {}, {}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
         self.logger.info(_str[:-2])
+
+        # determine render mode automatically
+        if config["use_render"]:
+            assert "main_camera" in config["sensors"]
+            config["_render_mode"] = RENDER_MODE_ONSCREEN
+        else:
+            config["_render_mode"] = RENDER_MODE_NONE
+            for sensor in config["sensors"].values():
+                if sensor[0] == "MainCamera" or (issubclass(BaseCamera, sensor[0]) and sensor[0] != VehiclePanel):
+                    config["_render_mode"] = RENDER_MODE_OFFSCREEN
+                    break
 
         return config
 

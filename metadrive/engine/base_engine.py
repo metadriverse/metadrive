@@ -1,4 +1,5 @@
 import logging
+from metadrive.constants import RENDER_MODE_NONE
 import pickle
 import time
 from collections import OrderedDict
@@ -537,151 +538,163 @@ class BaseEngine(EngineCore, Randomizable):
     def setup_main_camera(self):
         from metadrive.engine.core.main_camera import MainCamera
         # Not we should always enable main camera if image obs is required! Or RGBCamera will return incorrect result
-        if self.global_config["use_render"] or (
-                self.global_config["image_observation"] and self.global_config["image_source"] == "main_camera"):
+        if self.mode != RENDER_MODE_NONE and self.global_config["vehicle_config"]["image_source"] == "main_camera":
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None
 
-    @property
-    def current_seed(self):
-        return self.global_random_seed
 
-    @property
-    def global_seed(self):
-        return self.global_random_seed
+@property
+def current_seed(self):
+    return self.global_random_seed
 
-    def _object_clean_check(self):
-        if self.global_config["debug"]:
-            from metadrive.component.vehicle.base_vehicle import BaseVehicle
-            from metadrive.component.static_object.traffic_object import TrafficObject
-            for manager in self._managers.values():
-                assert len(manager.spawned_objects) == 0
 
-            objs_need_to_release = self.get_objects(
-                filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, TrafficObject)
-            )
-            assert len(
-                objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
-                                            "in each manager.before_step()"
+@property
+def global_seed(self):
+    return self.global_random_seed
 
-    def update_manager(self, manager_name: str, manager: BaseManager, destroy_previous_manager=True):
-        """
-        Update an existing manager with a new one
-        :param manager_name: existing manager name
-        :param manager: new manager
-        """
-        assert manager_name in self._managers, "You may want to call register manager, since {} is not in engine".format(
-            manager_name
+
+def _object_clean_check(self):
+    if self.global_config["debug"]:
+        from metadrive.component.vehicle.base_vehicle import BaseVehicle
+        from metadrive.component.static_object.traffic_object import TrafficObject
+        for manager in self._managers.values():
+            assert len(manager.spawned_objects) == 0
+
+        objs_need_to_release = self.get_objects(
+            filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, TrafficObject)
         )
-        existing_manager = self._managers.pop(manager_name)
-        if destroy_previous_manager:
-            existing_manager.destroy()
-        self._managers[manager_name] = manager
-        setattr(self, manager_name, manager)
-        self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
+        assert len(
+            objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
+                                        "in each manager.before_step()"
 
-    @property
-    def managers(self):
-        # whether to froze other managers
-        return {"replay_manager": self.replay_manager} if self.replay_episode and not \
-            self.only_reset_when_replay else self._managers
 
-    def change_object_name(self, obj, new_name):
-        raise DeprecationWarning("This function is too dangerous to be used")
-        """
-        Change the name of one object, Note: it may bring some bugs if abusing
-        """
-        obj = self._spawned_objects.pop(obj.name)
-        self._spawned_objects[new_name] = obj
+def update_manager(self, manager_name: str, manager: BaseManager, destroy_previous_manager=True):
+    """
+    Update an existing manager with a new one
+    :param manager_name: existing manager name
+    :param manager: new manager
+    """
+    assert manager_name in self._managers, "You may want to call register manager, since {} is not in engine".format(
+        manager_name
+    )
+    existing_manager = self._managers.pop(manager_name)
+    if destroy_previous_manager:
+        existing_manager.destroy()
+    self._managers[manager_name] = manager
+    setattr(self, manager_name, manager)
+    self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
-    def object_to_agent(self, obj_name):
-        if self.replay_episode:
-            return self.replay_manager.current_frame.object_to_agent(obj_name)
-        else:
-            return self.agent_manager.object_to_agent(obj_name)
 
-    def agent_to_object(self, agent_name):
-        if self.replay_episode:
-            return self.replay_manager.current_frame.agent_to_object(agent_name)
-        else:
-            return self.agent_manager.agent_to_object(agent_name)
+@property
+def managers(self):
+    # whether to froze other managers
+    return {"replay_manager": self.replay_manager} if self.replay_episode and not \
+        self.only_reset_when_replay else self._managers
 
-    def render_topdown(self, text, *args, **kwargs):
-        if self._top_down_renderer is None:
-            from metadrive.obs.top_down_renderer import TopDownRenderer
-            self._top_down_renderer = TopDownRenderer(*args, **kwargs)
-        return self._top_down_renderer.render(text, *args, **kwargs)
 
-    def get_window_image(self, return_bytes=False):
-        window_count = self.graphicsEngine.getNumWindows() - 1
-        texture = self.graphicsEngine.getWindow(window_count).getDisplayRegion(0).getScreenshot()
+def change_object_name(self, obj, new_name):
+    raise DeprecationWarning("This function is too dangerous to be used")
+    """
+    Change the name of one object, Note: it may bring some bugs if abusing
+    """
+    obj = self._spawned_objects.pop(obj.name)
+    self._spawned_objects[new_name] = obj
 
-        assert texture.getXSize() == self.global_config["window_size"][0], (
-            texture.getXSize(), texture.getYSize(), self.global_config["window_size"]
-        )
-        assert texture.getYSize() == self.global_config["window_size"][1], (
-            texture.getXSize(), texture.getYSize(), self.global_config["window_size"]
-        )
 
-        image_bytes = texture.getRamImage().getData()
+def object_to_agent(self, obj_name):
+    if self.replay_episode:
+        return self.replay_manager.current_frame.object_to_agent(obj_name)
+    else:
+        return self.agent_manager.object_to_agent(obj_name)
 
-        if return_bytes:
-            return image_bytes, (texture.getXSize(), texture.getYSize())
 
-        img = np.frombuffer(image_bytes, dtype=np.uint8)
-        img = img.reshape((texture.getYSize(), texture.getXSize(), 4))
-        img = img[::-1]  # Flip vertically
-        img = img[..., :-1]  # Discard useless alpha channel
-        img = img[..., ::-1]  # Correct the colors
+def agent_to_object(self, agent_name):
+    if self.replay_episode:
+        return self.replay_manager.current_frame.agent_to_object(agent_name)
+    else:
+        return self.agent_manager.agent_to_object(agent_name)
 
-        return img
 
-    def show_lane_coordinates(self, lanes):
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.detachNode()
-            self.lane_coordinates_debug_node.removeNode()
+def render_topdown(self, text, *args, **kwargs):
+    if self._top_down_renderer is None:
+        from metadrive.obs.top_down_renderer import TopDownRenderer
+        self._top_down_renderer = TopDownRenderer(*args, **kwargs)
+    return self._top_down_renderer.render(text, *args, **kwargs)
 
-        self.lane_coordinates_debug_node = NodePath("Lane Coordinates debug")
-        for lane in lanes:
-            long_start = lateral_start = lane.position(0, 0)
-            lateral_end = lane.position(0, 2)
 
-            long_end = long_start + lane.heading_at(0) * 4
-            np_y = self.draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
-            np_x = self.draw_line_3d(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=2)
-            np_x.reparentTo(self.lane_coordinates_debug_node)
-            np_y.reparentTo(self.lane_coordinates_debug_node)
-        self.lane_coordinates_debug_node.reparentTo(self.worldNP)
+def get_window_image(self, return_bytes=False):
+    window_count = self.graphicsEngine.getNumWindows() - 1
+    texture = self.graphicsEngine.getWindow(window_count).getDisplayRegion(0).getScreenshot()
 
-    def remove_show_lane_coordinates(self):
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.detachNode()
-            self.lane_coordinates_debug_node.removeNode()
+    assert texture.getXSize() == self.global_config["window_size"][0], (
+        texture.getXSize(), texture.getYSize(), self.global_config["window_size"]
+    )
+    assert texture.getYSize() == self.global_config["window_size"][1], (
+        texture.getXSize(), texture.getYSize(), self.global_config["window_size"]
+    )
 
-    def warmup(self):
-        """
-        This function automatically initialize models/objects. It can prevent the lagging when creating some objects
-        for the first time.
-        """
-        if self.global_config["preload_models"]:
-            from metadrive.component.traffic_participants.pedestrian import Pedestrian
-            from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
-            from metadrive.component.static_object.traffic_object import TrafficBarrier
-            from metadrive.component.static_object.traffic_object import TrafficCone
-            Pedestrian.init_pedestrian_model()
-            warm_up_pedestrian = self.spawn_object(Pedestrian, position=[0, 0], heading_theta=0, record=False)
-            warm_up_light = self.spawn_object(BaseTrafficLight, lane=None, position=[0, 0], record=False)
-            barrier = self.spawn_object(TrafficBarrier, position=[0, 0], heading_theta=0, record=False)
-            cone = self.spawn_object(TrafficCone, position=[0, 0], heading_theta=0, record=False)
-            for vel in Pedestrian.SPEED_LIST:
-                warm_up_pedestrian.set_velocity([1, 0], vel - 0.1)
-                self.taskMgr.step()
-            self.clear_objects([warm_up_pedestrian.id, warm_up_light.id, barrier.id, cone.id], record=False)
-            warm_up_pedestrian = None
-            warm_up_light = None
-            barrier = None
-            cone = None
+    image_bytes = texture.getRamImage().getData()
+
+    if return_bytes:
+        return image_bytes, (texture.getXSize(), texture.getYSize())
+
+    img = np.frombuffer(image_bytes, dtype=np.uint8)
+    img = img.reshape((texture.getYSize(), texture.getXSize(), 4))
+    img = img[::-1]  # Flip vertically
+    img = img[..., :-1]  # Discard useless alpha channel
+    img = img[..., ::-1]  # Correct the colors
+
+    return img
+
+
+def show_lane_coordinates(self, lanes):
+    if self.lane_coordinates_debug_node is not None:
+        self.lane_coordinates_debug_node.detachNode()
+        self.lane_coordinates_debug_node.removeNode()
+
+    self.lane_coordinates_debug_node = NodePath("Lane Coordinates debug")
+    for lane in lanes:
+        long_start = lateral_start = lane.position(0, 0)
+        lateral_end = lane.position(0, 2)
+
+        long_end = long_start + lane.heading_at(0) * 4
+        np_y = self.draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
+        np_x = self.draw_line_3d(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=2)
+        np_x.reparentTo(self.lane_coordinates_debug_node)
+        np_y.reparentTo(self.lane_coordinates_debug_node)
+    self.lane_coordinates_debug_node.reparentTo(self.worldNP)
+
+
+def remove_show_lane_coordinates(self):
+    if self.lane_coordinates_debug_node is not None:
+        self.lane_coordinates_debug_node.detachNode()
+        self.lane_coordinates_debug_node.removeNode()
+
+
+def warmup(self):
+    """
+    This function automatically initialize models/objects. It can prevent the lagging when creating some objects
+    for the first time.
+    """
+    if self.global_config["preload_models"]:
+        from metadrive.component.traffic_participants.pedestrian import Pedestrian
+        from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
+        from metadrive.component.static_object.traffic_object import TrafficBarrier
+        from metadrive.component.static_object.traffic_object import TrafficCone
+        Pedestrian.init_pedestrian_model()
+        warm_up_pedestrian = self.spawn_object(Pedestrian, position=[0, 0], heading_theta=0, record=False)
+        warm_up_light = self.spawn_object(BaseTrafficLight, lane=None, position=[0, 0], record=False)
+        barrier = self.spawn_object(TrafficBarrier, position=[0, 0], heading_theta=0, record=False)
+        cone = self.spawn_object(TrafficCone, position=[0, 0], heading_theta=0, record=False)
+        for vel in Pedestrian.SPEED_LIST:
+            warm_up_pedestrian.set_velocity([1, 0], vel - 0.1)
+            self.taskMgr.step()
+        self.clear_objects([warm_up_pedestrian.id, warm_up_light.id, barrier.id, cone.id], record=False)
+        warm_up_pedestrian = None
+        warm_up_light = None
+        barrier = None
+        cone = None
 
 
 if __name__ == "__main__":

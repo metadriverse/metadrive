@@ -98,14 +98,14 @@ class EngineCore(ShowBase.ShowBase):
         #     pass
         # else:
         EngineCore.global_config = global_config
-
+        self.mode = global_config["_render_mode"]
         if self.global_config["pstats"]:
             # pstats debug provided by panda3d
             loadPrcFileData("", "want-pstats 1")
 
         # Setup onscreen render
         if self.global_config["use_render"]:
-            self.mode = RENDER_MODE_ONSCREEN
+            assert self.mode == RENDER_MODE_ONSCREEN, "Render mode error"
             # Warning it may cause memory leak, Pand3d Official has fixed this in their master branch.
             # You can enable it if your panda version is latest.
             if self.global_config["multi_thread_render"] and not self.use_render_pipeline:
@@ -114,12 +114,12 @@ class EngineCore(ShowBase.ShowBase):
         else:
             self.global_config["show_coordinates"] = False
             if self.global_config["image_observation"]:
-                self.mode = RENDER_MODE_OFFSCREEN
+                assert self.mode == RENDER_MODE_OFFSCREEN, "Render mode error"
                 if self.global_config["multi_thread_render"] and not self.use_render_pipeline:
                     # render-pipeline can not work with multi-thread rendering
                     loadPrcFileData("", "threading-model {}".format(self.global_config["multi_thread_render_mode"]))
             else:
-                self.mode = RENDER_MODE_NONE
+                assert self.mode == RENDER_MODE_NONE, "Render mode error"
                 if self.global_config["show_interface"]:
                     # Disable useless camera capturing in none mode
                     self.global_config["show_interface"] = False
