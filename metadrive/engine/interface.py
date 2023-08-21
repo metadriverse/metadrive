@@ -69,7 +69,7 @@ class Interface:
                     self.left_panel = self.engine.get_sensor(panel_name)
                 else:
                     raise ValueError("Can not add > 3 panels!")
-                if panel_name == "panel":
+                if panel_name == "dashboard":
                     self.vehicle_panel = self.engine.get_sensor(panel_name)
 
             self.arrow = self.engine.aspect2d.attachNewNode("arrow")

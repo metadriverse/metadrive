@@ -12,7 +12,7 @@ if __name__ == "__main__":
             # "debug_panda3d": True,
             "vehicle_config": dict(image_source="main_camera"),
             "sensors": {"rgb_camera": (RGBCamera, 84, 84)},
-            "interface_panel": ["panel", "rgb_camera"],
+            "interface_panel": ["dashboard", "rgb_camera"],
             "manual_control": False,
             "use_render": True,
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation

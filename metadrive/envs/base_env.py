@@ -202,7 +202,7 @@ BASE_DEFAULT_CONFIG = dict(
     show_interface=True,
     show_policy_mark=False,  # show marks for policies for debugging multi-policy setting
     show_coordinates=False,  # show coordinates for maps and objects for debug
-    interface_panel=["panel"],  # a list whose element chosen from sensors.keys() + "panel"
+    interface_panel=["dashboard"],  # a list whose element chosen from sensors.keys() + "dashboard"
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
     preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
@@ -286,8 +286,8 @@ class BaseEnv(gym.Env):
         # Merge vehicle_panel config with sensors
         to_use = []
         for panel in config["interface_panel"]:
-            if panel == "panel":
-                config["sensors"]["panel"] = (VehiclePanel,)
+            if panel == "dashboard":
+                config["sensors"]["dashboard"] = (VehiclePanel,)
             if panel not in config["sensors"]:
                 self.logger.warning("Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
             else:

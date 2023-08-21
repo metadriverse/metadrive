@@ -51,7 +51,7 @@ if __name__ == "__main__":
             "use_render": True if not args.top_down else False,
             "crash_done": False,
             "sensors": dict(rgb_camera=(RGBCamera, 512, 256)),
-            "interface_panel": ["rgb_camera", "panel"],
+            "interface_panel": ["rgb_camera", "dashboard"],
             "agent_policy": ManualControllableIDMPolicy
         }
     )
