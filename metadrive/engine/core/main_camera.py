@@ -413,8 +413,8 @@ class MainCamera:
     def get_pixels_array(self, vehicle, clip):
         engine = get_engine()
         assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
-        if engine.episode_step <= 1:
-            engine.graphicsEngine.renderFrame()
+        # if engine.episode_step <= 1:
+        #     engine.graphicsEngine.renderFrame()
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
             img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]

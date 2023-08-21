@@ -106,7 +106,7 @@ class BaseCamera(ImageBuffer):
             assert self.cuda_rendered_result is not None
             ret = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
         else:
-            ret = self.get_rgb_array()
+            ret = self.get_rgb_array_cpu()
         if self.engine.global_config["rgb_to_grayscale"]:
             ret = np.dot(ret[..., :3], [0.299, 0.587, 0.114])
         if not clip:

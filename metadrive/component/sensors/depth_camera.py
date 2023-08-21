@@ -69,7 +69,7 @@ class DepthCamera(BaseCamera):
 
     def get_image(self, base_object):
         self.origin.reparentTo(base_object.origin)
-        img = super(DepthCamera, self).get_rgb_array()
+        img = super(DepthCamera, self).get_rgb_array_cpu()
         self.track(self.attached_object)
         return img
 
