@@ -163,8 +163,8 @@ BASE_DEFAULT_CONFIG = dict(
     pstats=False,
     # this is an advanced feature for accessing image with moving them to ram!
     image_on_cuda=False,
-    # We will determine the render mode automatically
-    _render_mode=None,
+    # We will determine the render mode automatically, it runs at physics-only mode by default
+    _render_mode=RENDER_MODE_NONE,
     # accelerate the lidar perception
     _disable_detector_mask=False,
     # None: unlimited, number: fps
