@@ -332,7 +332,7 @@ def pygame_replay(
     while True:
         o, r, tm, tc, i = env.step(env.action_space.sample())
         env.engine.force_fps.toggle()
-        env.render(mode="top_down",num_stack=50, film_size=film_size, history_smooth=0)
+        env.render(mode="top_down", num_stack=50, film_size=film_size, history_smooth=0)
         if save:
             pygame.image.save(
                 env._top_down_renderer._runtime_canvas,

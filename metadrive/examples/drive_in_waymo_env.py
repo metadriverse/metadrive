@@ -40,7 +40,15 @@ if __name__ == "__main__":
 
         for i in range(1, 100000):
             o, r, tm, tc, info = env.step([1.0, 0.])
-            env.render(mode="top_down" if args.top_down else None, text={"Quit": "ESC", "Switch perspective": "Q or B", "Reset Episode": "R"}, **extra_args)
+            env.render(
+                mode="top_down" if args.top_down else None,
+                text={
+                    "Quit": "ESC",
+                    "Switch perspective": "Q or B",
+                    "Reset Episode": "R"
+                },
+                **extra_args
+            )
             if tm or tc:
                 env.reset()
     except Exception as e:

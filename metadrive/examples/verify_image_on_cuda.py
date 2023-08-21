@@ -48,8 +48,10 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False):
             torch_tensor = torch.Tensor(o["image"])
 
         if debug:
-            cv2.imwrite("{}_frame.png".format(i),
-                        (o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]) * 255)
+            cv2.imwrite(
+                "{}_frame.png".format(i),
+                (o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]) * 255
+            )
 
         if render:
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]

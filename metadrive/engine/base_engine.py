@@ -118,7 +118,7 @@ class BaseEngine(EngineCore, Randomizable):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -259,6 +259,7 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
+
             def process_memory():
                 import psutil
                 import os
@@ -538,8 +539,8 @@ class BaseEngine(EngineCore, Randomizable):
     def setup_main_camera(self):
         from metadrive.engine.core.main_camera import MainCamera
         # Not we should always enable main camera if image obs is required! Or RGBCamera will return incorrect result
-        if self.mode == RENDER_MODE_ONSCREEN or (
-                RENDER_MODE_OFFSCREEN and self.global_config["vehicle_config"]["image_source"] == "main_camera"):
+        if self.mode == RENDER_MODE_ONSCREEN or (RENDER_MODE_OFFSCREEN and
+                                                 self.global_config["vehicle_config"]["image_source"] == "main_camera"):
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None
