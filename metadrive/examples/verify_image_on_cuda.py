@@ -25,7 +25,11 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True):
             show_fps=False,
         )
     )
-    env.reset()
+    o, i = env.reset()
+    # for debug
+    # ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
+    # cv2.imwrite("reset_frame.png", ret * 255)
+
     action = [0.0, 0.1]
     start = time.time()
     print(
@@ -42,6 +46,8 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True):
             torch_tensor = torch.Tensor(o["image"])
         if render:
             ret = o["image"].get()[..., -1] if env.config["image_on_cuda"] else o["image"][..., -1]
+            # if i==0:
+            #     cv2.imwrite("first_frame.png", ret*255)
             cv2.imshow("window", ret)
             cv2.waitKey(1)
         if d:
@@ -55,4 +61,4 @@ if __name__ == "__main__":
     parser.add_argument("--native", action="store_true")
     args = parser.parse_args()
     _test_rgb_camera_as_obs(args.render, image_on_cuda=not args.native)
-    print("Test Successful !!")
+    print("Test Successful !! The FPS should go beyond 400 FPS if you are running on GPUs better than RTX 3060.")
