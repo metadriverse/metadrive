@@ -36,9 +36,13 @@ if __name__ == "__main__":
     parser.add_argument("--observation", type=str, default="lidar", choices=["lidar", "rgb_camera"])
     args = parser.parse_args()
     if args.observation == "rgb_camera":
-        config.update(dict(image_observation=True,
-                           sensors=dict(rgb_camera=(RGBCamera, 512, 256)),
-                           interface_panel=["rgb_camera", "dashboard"]))
+        config.update(
+            dict(
+                image_observation=True,
+                sensors=dict(rgb_camera=(RGBCamera, 512, 256)),
+                interface_panel=["rgb_camera", "dashboard"]
+            )
+        )
     else:
         config["vehicle_config"]["show_lidar"] = True
     env = MetaDriveEnv(config)

@@ -143,7 +143,9 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 
 Note: make sure you have the right assets dir locally. we will include the assets with the .wheel file
 
-0. Rename VERSION in metadrive/version.py
+-1. Checkout a new branch from main called releases/x.y.z
+
+0. Rename VERSION in metadrive/version.py to x.y,z
 
 1. Revise the version in metadrive/assets/version.txt
 
@@ -171,6 +173,8 @@ Note: make sure you have the right assets dir locally. we will include the asset
 9. Draft a release on github with new version number
 
 10. upload the generated .whl file and new assets folder compressed and named to assets.zip 
+
+11. merge this branch into main
 
 !!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
 
