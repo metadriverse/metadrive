@@ -2,7 +2,7 @@
 
 
 def _test_remote_metadrive_env():
-    from metadrive.envs.remote_env import RemoteMetaDrive
+    from metadrive.envs.legacy_envs.remote_env import RemoteMetaDrive
     # Test
     envs = [RemoteMetaDrive(dict(map=7)) for _ in range(3)]
     ret = [env.reset() for env in envs]
