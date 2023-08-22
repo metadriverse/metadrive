@@ -6,6 +6,7 @@ Note: This script require rendering, please following the installation instructi
 environment that allows popping up an window.
 """
 import argparse
+import logging
 import random
 
 import cv2
@@ -35,7 +36,9 @@ if __name__ == "__main__":
     parser.add_argument("--observation", type=str, default="lidar", choices=["lidar", "rgb_camera"])
     args = parser.parse_args()
     if args.observation == "rgb_camera":
-        config.update(dict(image_observation=True, sensors=dict(rgb_camera=(RGBCamera, 512, 256))))
+        config.update(dict(image_observation=True,
+                           sensors=dict(rgb_camera=(RGBCamera, 512, 256)),
+                           interface_panel=["rgb_camera", "dashboard"]))
     else:
         config["vehicle_config"]["show_lidar"] = True
     env = MetaDriveEnv(config)
@@ -54,7 +57,8 @@ if __name__ == "__main__":
             env.render(
                 text={
                     "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
-                    "Current Observation": args.observation
+                    "Current Observation": args.observation,
+                    "Keyboard Control": "W,A,S,D",
                 }
             )
 
