@@ -29,7 +29,33 @@ print("We will install the following packages: ", packages)
 """ ===== Remember to modify the PG_EDITION at first ====="""
 version = "0.3.0.1"
 
+import os
+import zipfile
+import requests
+
+
+def post_install():
+    ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-0.3.0.1/assets.zip"
+    TARGET_DIR = os.path.join(os.path.dirname(__file__), 'metadrive', 'assets')
+
+    # Fetch the zip file from Google Drive
+    response = requests.get(ASSET_URL, stream=True)
+    zip_path = os.path.join(TARGET_DIR, 'assets.zip')
+
+    with open(zip_path, 'wb') as f:
+        for chunk in response.iter_content(chunk_size=8192):
+            f.write(chunk)
+
+    # Extract the zip file to the desired location
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(TARGET_DIR)
+
+    # Remove the downloaded zip file (optional)
+    os.remove(zip_path)
+
+
 install_requires = [
+    "requests",
     "gymnasium>=0.28, <0.29",
     "numpy>=1.21.6, <=1.24.2",
     "matplotlib",
@@ -106,6 +132,8 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
 )
+
+post_install()
 
 """
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
