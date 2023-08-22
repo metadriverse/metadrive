@@ -1,5 +1,5 @@
 import logging
-from metadrive.engine.asset_loader import AssetLoader
+
 from metadrive.version import VERSION, asset_version
 import os
 from metadrive.pull_asset import pull_asset
@@ -692,6 +692,7 @@ class BaseEngine(EngineCore, Randomizable):
 
     @staticmethod
     def try_pull_asset():
+        from metadrive.engine.asset_loader import AssetLoader
         msg = "Assets folder doesn't exist. Begin to download assets..."
         if not os.path.exists(AssetLoader.asset_path):
             AssetLoader.logger.warning(msg)
