@@ -666,7 +666,7 @@ class BaseEngine(EngineCore, Randomizable):
         This function automatically initialize models/objects. It can prevent the lagging when creating some objects
         for the first time.
         """
-        if self.global_config["preload_models"]:
+        if self.global_config["preload_models"] and self.mode != RENDER_MODE_NONE:
             from metadrive.component.traffic_participants.pedestrian import Pedestrian
             from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
             from metadrive.component.static_object.traffic_object import TrafficBarrier
