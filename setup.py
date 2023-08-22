@@ -12,7 +12,7 @@ ROOT_DIR = os.path.dirname(__file__)
 
 def get_version():
     context = {}
-    with open('./metadrive/constants.py', 'r') as file:
+    with open('./metadrive/version.py', 'r') as file:
         exec(file.read(), context)
     return context['VERSION']
 
@@ -143,7 +143,7 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 
 Note: make sure you have the right assets dir locally. we will include the assets with the .wheel file
 
-0. Rename VERSION in metadrive/constants.py
+0. Rename VERSION in metadrive/version.py
 
 1. Revise the version in metadrive/assets/version.txt
 
