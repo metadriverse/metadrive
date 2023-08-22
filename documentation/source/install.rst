@@ -68,7 +68,7 @@ Installation:
 
 #. After cloning the repo, use ``pip install -e .[cuda]`` to install, or ``pip install -e metadrive-simulator[cuda]`` if you are using pip.
 #. Install Torch: ``conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.6 -c pytorch -c conda-forge``
-#. Install CuPy: ``conda install -c conda-forge cupy``
+#. Install CuPy: ``pip install cupy-cuda11x``
 #. Install Cuda-Python: ``conda install -c nvidia cuda-python``
 #. For verifying your installation, cd ``metadrive/examples`` and run ``python verify_image_on_cuda.py``
 

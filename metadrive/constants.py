@@ -7,7 +7,8 @@ from panda3d.core import Vec4, BitMask32
 
 from metadrive.type import MetaDriveType
 
-EDITION = "MetaDrive v0.3.0.1"
+VERSION = "0.3.0.1"
+EDITION = "MetaDrive v{}".format(VERSION)
 DATA_VERSION = EDITION  # Use MetaDrive version to mark the data version
 DEFAULT_AGENT = "default_agent"
 RENDER_MODE_NONE = "none"  # Do not render
@@ -345,6 +346,7 @@ class SemanticColor:
 
 class MapSemanticColor(SemanticColor):
     """I didn't use it at this time and keep it the same as MapTerrainAttribute"""
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):
@@ -365,6 +367,7 @@ class MapTerrainSemanticColor(SemanticColor):
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):

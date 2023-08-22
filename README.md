@@ -1,6 +1,6 @@
 <br>
 
-![](metadrive/assets/logo-horizon.png)
+![](documentation/source/figs/logo-horizon.png)
 
 <br>
 
