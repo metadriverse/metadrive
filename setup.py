@@ -3,6 +3,9 @@ import os
 import sys
 from os import path
 
+import os
+import zipfile
+import urllib.request
 from setuptools import setup, find_namespace_packages  # This should be place at top!
 
 ROOT_DIR = os.path.dirname(__file__)
@@ -28,23 +31,17 @@ print("We will install the following packages: ", packages)
 
 """ ===== Remember to modify the PG_EDITION at first ====="""
 version = "0.3.0.1"
-
-import os
-import zipfile
-import requests
-
+ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-0.3.0.1/assets.zip"
 
 def post_install():
-    ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-0.3.0.1/assets.zip"
-    TARGET_DIR = os.path.join(os.path.dirname(__file__), 'metadrive', 'assets')
-
-    # Fetch the zip file from Google Drive
-    response = requests.get(ASSET_URL, stream=True)
+    TARGET_DIR = os.path.join(os.path.dirname(__file__), 'metadrive')
+    if os.path.exists(os.path.join(TARGET_DIR, "assets")):
+        return
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
 
-    with open(zip_path, 'wb') as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            f.write(chunk)
+    # Fetch the zip file
+    print("Retrieve the assets from {}".format(ASSET_URL))
+    urllib.request.urlretrieve(ASSET_URL, zip_path)
 
     # Extract the zip file to the desired location
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
@@ -91,7 +88,6 @@ nuplan_requirement = [
     "aioboto3"
 ]
 
-
 # Or try:
 #   pip install git+https://github.com/waymo-research/waymo-open-dataset.git
 waymo_requirement = [
@@ -137,6 +133,8 @@ post_install()
 
 """
 How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
+
+Note: make sure you have the assets dir locally. we will include the assets with the .wheel file
 
 0. Rename version in metadrive/constants.py and setup.py
 

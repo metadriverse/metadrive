@@ -16,7 +16,7 @@ class DepthCamera(BaseCamera):
     GROUND = None
     GROUND_MODEL = None
 
-    def __init__(self, engine, width, height, cuda=False):
+    def __init__(self, engine, width, height, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
         super(DepthCamera, self).__init__(engine, False, cuda)
@@ -48,11 +48,9 @@ class DepthCamera(BaseCamera):
         if self.VIEW_GROUND:
             ground = PNMImage(257, 257, 4)
             ground.fill(1., 1., 1.)
-            ground_tex = Texture("white lane line")
-            ground_tex.load(ground)
 
             self.GROUND = GeoMipTerrain("mySimpleTerrain")
-            self.GROUND.setHeightfield(ground_tex)
+            self.GROUND.setHeightfield(ground)
             self.GROUND.setAutoFlatten(GeoMipTerrain.AFMStrong)
             # terrain.setBruteforce(True)
             # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain

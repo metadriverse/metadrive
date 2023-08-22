@@ -9,7 +9,7 @@ class MiniMap(BaseCamera):
     CAM_MASK = CamMask.MiniMap
     display_region_size = [0., 1 / 3, 0.8, 1.0]
 
-    def __init__(self, engine, width, height, z_pos, cuda=False):
+    def __init__(self, engine, width, height, z_pos, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H, height = width, height, z_pos
         super(MiniMap, self).__init__(engine=engine, need_cuda=cuda)
 

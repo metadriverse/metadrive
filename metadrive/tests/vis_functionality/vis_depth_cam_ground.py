@@ -28,8 +28,9 @@ if __name__ == "__main__":
             "use_render": True,
             "image_observation": True,
             "rgb_clip": True,
-            "interface_panel": [DepthCamera, VehiclePanel],
-            "vehicle_config": dict(depth_camera=(800, 600, True), rgb_camera=(800, 600), image_source="depth_camera"),
+            "interface_panel": ["depth_camera"],
+            "sensors": dict(depth_camera=(DepthCamera, 800, 600)),
+            "vehicle_config": dict(image_source="depth_camera"),
             # "map_config": {
             #     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
             #     BaseMap.GENERATE_CONFIG: 12,

@@ -37,4 +37,4 @@
 /metadrive/assets/textures/heightfield.png
 **/test_read_copy_waymo
 /metadrive/tests/vis_functionality/*.png
-/assets/
+**/assets/

@@ -1,5 +1,4 @@
 import logging
-from metadrive.render_pipeline.rpcore.rpobject import RPObject
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -22,6 +21,7 @@ from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
 from metadrive.render_pipeline.rpcore import RenderPipeline
+from metadrive.render_pipeline.rpcore.rpobject import RPObject
 from metadrive.utils.utils import is_mac, setup_logger
 
 
@@ -502,7 +502,8 @@ class EngineCore(ShowBase.ShowBase):
 
     def add_image_sensor(self, name: str, cls, args):
         if self.global_config["image_on_cuda"] and name == self.global_config["vehicle_config"]["image_source"]:
-            args.append(True)
-        sensor = cls(self, *args)
+            sensor = cls(self, *args, cuda=True)
+        else:
+            sensor = cls(self, *args, cuda=False)
         assert isinstance(sensor, ImageBuffer), "This API is for adding image sensor"
         self.sensors[name] = sensor
