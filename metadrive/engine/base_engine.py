@@ -1,4 +1,5 @@
 import logging
+from metadrive.engine.asset_loader import AssetLoader
 from metadrive.version import VERSION, asset_version
 import os
 from metadrive.pull_asset import pull_asset
