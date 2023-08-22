@@ -24,7 +24,7 @@ class AssetLoader:
         msg = "Assets folder doesn't exist. Begin to download assets..."
         if not os.path.exists(AssetLoader.asset_path):
             AssetLoader.logger.warning(msg)
-            pull_asset()
+            pull_asset(False)
         else:
             if asset_version() != VERSION:
                 AssetLoader.logger.warning(
