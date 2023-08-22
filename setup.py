@@ -118,8 +118,6 @@ setup(
 """
 How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi in Dec 27, 2020.
 
-Note: make sure you have the right assets dir locally. we will include the assets with the .wheel file
-
 -1. Checkout a new branch from main called releases/x.y.z
 
 0. Rename VERSION in metadrive/version.py to x.y,z
