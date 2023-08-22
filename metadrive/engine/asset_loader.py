@@ -29,8 +29,7 @@ class AssetLoader:
             if asset_version() != VERSION:
                 AssetLoader.logger.warning(
                     "Assets version mismatch! Current: {}, Expected: {}. "
-                    "Update the assets by `python -m metadrive.pull_asset --update'".format(
-                        asset_version(), VERSION)
+                    "Update the assets by `python -m metadrive.pull_asset --update'".format(asset_version(), VERSION)
                 )
             else:
                 AssetLoader.logger.info("Assets version: {}".format(VERSION))

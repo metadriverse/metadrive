@@ -36,17 +36,23 @@ def pull_asset():
     TARGET_DIR = os.path.join(os.path.dirname(__file__))
     if os.path.exists(os.path.join(TARGET_DIR, "assets")):
         if not args.update:
-            logger.warning("Fail to pull. Assets already exists, version: {}. Expected version: {}. "
-                           "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
-                asset_version(), VERSION))
+            logger.warning(
+                "Fail to pull. Assets already exists, version: {}. Expected version: {}. "
+                "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
+                    asset_version(), VERSION
+                )
+            )
             return
         else:
             if asset_version() != VERSION:
                 logger.info("Remove existing assets, version: {}..".format(asset_version()))
                 shutil.rmtree(os.path.join(TARGET_DIR, "assets"))
             else:
-                logger.warning("Fail to pull. Assets is already up-to-date, version: {}. MetaDrive version: {}".format(
-                    asset_version(), VERSION))
+                logger.warning(
+                    "Fail to pull. Assets is already up-to-date, version: {}. MetaDrive version: {}".format(
+                        asset_version(), VERSION
+                    )
+                )
                 return
 
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
