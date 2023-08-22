@@ -20,7 +20,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
             image_observation=True,
             sensors={
                 "rgb_camera": (RGBCamera, 84, 84),
-                "depth_camera": (DepthCamera, 512, 512, False)
+                "depth_camera": (DepthCamera, 512, 512)
             },
             interface_panel=[],
             vehicle_config={

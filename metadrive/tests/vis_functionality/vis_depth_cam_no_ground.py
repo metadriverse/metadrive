@@ -12,7 +12,7 @@ if __name__ == "__main__":
             "use_render": True,
             "image_observation": True,
             "rgb_clip": True,
-            "vehicle_config": dict(depth_camera=(200, 88, False), image_source="depth_camera"),
+            "vehicle_config": dict(depth_camera=(200, 88), image_source="depth_camera"),
             "map_config": {
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
                 BaseMap.GENERATE_CONFIG: 12,

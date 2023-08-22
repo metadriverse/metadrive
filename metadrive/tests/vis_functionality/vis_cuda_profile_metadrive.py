@@ -16,7 +16,7 @@ def _test_depth_camera_as_obs(render=False):
             image_observation=True,
             image_on_cuda=True,
             use_render=False,
-            vehicle_config=dict(image_source="depth_camera", depth_camera=(800, 600, False)),
+            vehicle_config=dict(image_source="depth_camera", depth_camera=(800, 600)),
             show_interface=True,
             show_logo=False,
             show_fps=False,
