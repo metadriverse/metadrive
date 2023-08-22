@@ -1,13 +1,15 @@
 import os
+import shutil
 import urllib.request
 import zipfile
 import argparse
-
+from metadrive.engine.logger import get_logger
 from metadrive.version import asset_version
 from metadrive.constants import VERSION
 import progressbar
 
 ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
+
 
 class MyProgressBar():
     def __init__(self):
@@ -26,18 +28,31 @@ class MyProgressBar():
 
 
 def pull_asset():
+    logger = get_logger("Asset", propagate=False)
+    logger.handlers.pop()
     parser = argparse.ArgumentParser()
     parser.add_argument("--update", action="store_true", help="Force overwrite the current assets")
     args = parser.parse_args()
     TARGET_DIR = os.path.join(os.path.dirname(__file__))
-    if os.path.exists(os.path.join(TARGET_DIR, "assets")) and not args.update:
-        print("Fail to pull. Assets already exists, version: {}. "
-              "To overwrite existing assets, add flag '--update' and rerun this script".format(asset_version()))
+    if os.path.exists(os.path.join(TARGET_DIR, "assets")):
+        if not args.update:
+            logger.warning("Fail to pull. Assets already exists, version: {}. Expected version: {}. "
+                           "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
+                asset_version(), VERSION))
+            return
+        else:
+            if asset_version() != VERSION:
+                logger.info("Remove existing assets, version: {}..".format(asset_version()))
+                shutil.rmtree(os.path.join(TARGET_DIR, "assets"))
+            else:
+                logger.warning("Fail to pull. Assets is already up-to-date, version: {}. MetaDrive version: {}".format(
+                    asset_version(), VERSION))
+                return
 
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
 
     # Fetch the zip file
-    print("Pull the assets from {}".format(ASSET_URL))
+    logger.info("Pull the assets from {}".format(ASSET_URL))
     urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
 
     # Extract the zip file to the desired location
@@ -46,7 +61,7 @@ def pull_asset():
 
     # Remove the downloaded zip file (optional)
     os.remove(zip_path)
-    print("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
+    logger.info("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
 
 
 if __name__ == '__main__':
