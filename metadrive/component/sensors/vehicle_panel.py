@@ -15,7 +15,7 @@ class VehiclePanel(ImageBuffer):
     TASK_NAME = "update panel"
     display_region_size = [2 / 3, 1, 0.8, 1.0]
 
-    def __init__(self, engine):
+    def __init__(self, engine, *, cuda):
         if engine.win is None:
             return
         self.aspect2d_np = NodePath(PGTop("aspect2d"))
