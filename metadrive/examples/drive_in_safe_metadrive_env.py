@@ -22,7 +22,8 @@ if __name__ == "__main__":
             env.render(
                 text={
                     "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
-                    "Total episode cost": env.episode_cost
+                    "Total episode cost": env.episode_cost,
+                    "Keyboard Control": "W,A,S,D",
                 }
             )
             if not previous_takeover and env.current_track_vehicle.expert_takeover:

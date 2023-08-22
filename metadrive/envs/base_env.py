@@ -307,7 +307,7 @@ class BaseEnv(gym.Env):
         _str = "Sensors: [{}]"
         sensors_str = ""
         for _id, cfg in config["sensors"].items():
-            sensors_str += "{}: {}, {}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
+            sensors_str += "{}: {}{}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
         self.logger.info(_str.format(sensors_str[:-2]))
 
         # determine render mode automatically

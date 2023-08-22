@@ -41,12 +41,18 @@ Install MetaDrive via:
 git clone https://github.com/metadriverse/metadrive.git
 cd metadrive
 pip install -e .
+
+# pull asset
+python -m metadrive.pull_asset
 ```
 
 or
 
 ```bash
 pip install metadrive-simulator
+
+# pull asset
+python -m metadrive.pull_asset
 ```
 *Note that the program is tested on both Linux and Windows. Some control and display issues in MacOS wait to be solved*
 

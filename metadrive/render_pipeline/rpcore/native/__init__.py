@@ -37,17 +37,17 @@ from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
 # Store a global flag, indicating whether the C++ modules were loaded or the python
 # implemetation of them
-NATIVE_CXX_LOADED = False
+NATIVE_CXX_LOADED = True
 
-# Read the configuration from the flag-file
-current_path = dirname(realpath(__file__))
-cxx_flag_path = join(current_path, "use_cxx.flag")
-if not isfile(cxx_flag_path):
-    RPObject.global_error("CORE", "Could not find cxx flag, please run the setup.py!")
-    sys.exit(1)
-else:
-    with open(join(current_path, "use_cxx.flag"), "r") as handle:
-        NATIVE_CXX_LOADED = handle.read().strip() == "1"
+# Read the configuration from the flag-file, LQY: Bypass this check process.
+# current_path = dirname(realpath(__file__))
+# cxx_flag_path = join(current_path, "use_cxx.flag")
+# if not isfile(cxx_flag_path):
+#     RPObject.global_error("CORE", "Could not find cxx flag, please run the setup.py!")
+#     sys.exit(1)
+# else:
+#     with open(join(current_path, "use_cxx.flag"), "r") as handle:
+#         NATIVE_CXX_LOADED = handle.read().strip() == "1"
 
 # The native module should only be imported once, and that by the internal pipeline code
 assert __package__ == "metadrive.render_pipeline.rpcore.native", "You have included the pipeline in the wrong way!"

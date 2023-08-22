@@ -70,6 +70,7 @@ if __name__ == "__main__":
                     "Quit": "ESC",
                     "Number of existing vehicles": len(env.vehicles),
                     "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
+                    "Keyboard Control": "W,A,S,D",
                     # "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
                 } if not args.top_down else {}
             )

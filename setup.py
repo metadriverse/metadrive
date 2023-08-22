@@ -1,8 +1,6 @@
 # Please don't change the order of following packages!
 import os
 import sys
-import urllib.request
-import zipfile
 from os import path
 
 from setuptools import setup, find_namespace_packages  # This should be place at top!
@@ -18,7 +16,6 @@ def get_version():
 
 
 VERSION = get_version()
-ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
 
 
 def is_mac():
@@ -39,25 +36,6 @@ packages = find_namespace_packages(
     exclude=("docs", "docs.*", "documentation", "documentation.*", "build.*"))
 print("We will install the following packages: ", packages)
 
-
-def post_install():
-    TARGET_DIR = os.path.join(os.path.dirname(__file__), 'metadrive')
-    if os.path.exists(os.path.join(TARGET_DIR, "assets")):
-        return
-    zip_path = os.path.join(TARGET_DIR, 'assets.zip')
-
-    # Fetch the zip file
-    print("Retrieve the assets from {}".format(ASSET_URL))
-    urllib.request.urlretrieve(ASSET_URL, zip_path)
-
-    # Extract the zip file to the desired location
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(TARGET_DIR)
-
-    # Remove the downloaded zip file (optional)
-    os.remove(zip_path)
-
-
 install_requires = [
     "requests",
     "gymnasium>=0.28, <0.29",
@@ -69,6 +47,7 @@ install_requires = [
     "yapf",
     "seaborn",
     "tqdm",
+    "progressbar",
     # "panda3d==1.10.8",
     "panda3d==1.10.13",
     "panda3d-gltf==0.13",  # 0.14 will bring some problems
@@ -136,14 +115,12 @@ setup(
     long_description_content_type='text/markdown',
 )
 
-post_install()
-
 """
 How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi in Dec 27, 2020.
 
-Note: make sure you have the right assets dir locally. we will include the assets with the .wheel file
+-1. Checkout a new branch from main called releases/x.y.z
 
-0. Rename VERSION in metadrive/version.py
+0. Rename VERSION in metadrive/version.py to x.y,z
 
 1. Revise the version in metadrive/assets/version.txt
 
@@ -171,6 +148,8 @@ Note: make sure you have the right assets dir locally. we will include the asset
 9. Draft a release on github with new version number
 
 10. upload the generated .whl file and new assets folder compressed and named to assets.zip 
+
+11. merge this branch into main
 
 !!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
 

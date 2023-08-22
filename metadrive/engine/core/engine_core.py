@@ -20,8 +20,6 @@ from metadrive.engine.core.onscreen_message import ScreenMessage
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
-from metadrive.render_pipeline.rpcore import RenderPipeline
-from metadrive.render_pipeline.rpcore.rpobject import RPObject
 from metadrive.utils.utils import is_mac, setup_logger
 
 
@@ -131,6 +129,8 @@ class EngineCore(ShowBase.ShowBase):
         loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
 
         if self.use_render_pipeline:
+            from metadrive.render_pipeline.rpcore import RenderPipeline
+            from metadrive.render_pipeline.rpcore.rpobject import RPObject
             if not self.global_config["debug"]:
                 RPObject.set_output_level("warning")  # warning
             self.render_pipeline = RenderPipeline()

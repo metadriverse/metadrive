@@ -45,7 +45,8 @@ if __name__ == "__main__":
                 text={
                     "Quit": "ESC",
                     "Switch perspective": "Q or B",
-                    "Reset Episode": "R"
+                    "Reset Episode": "R",
+                    "Keyboard Control": "W,A,S,D",
                 },
                 **extra_args
             )
