@@ -1,4 +1,5 @@
 import logging
+from metadrive.version import VERSION
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
@@ -260,6 +261,7 @@ class BaseEnv(gym.Env):
     def _post_process_config(self, config):
         """Add more special process to merged config"""
         # Cancel interface panel
+        self.logger.info("MetaDrive version: {}".format(VERSION))
         if not config["show_interface"]:
             config["interface_panel"] = []
 

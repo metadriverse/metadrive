@@ -152,7 +152,7 @@ Note: make sure you have the right assets dir locally. we will include the asset
 
 3. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
    This is really important since pypi do not support renaming and re-uploading. 
-   Rename version in metadrive/constants.py and setup.py 
+   Rename version in metadrive/versions.py 
 
 4. Get wheel
     python setup.py sdist bdist_wheel
