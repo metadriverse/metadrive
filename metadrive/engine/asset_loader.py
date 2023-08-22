@@ -1,9 +1,10 @@
 import os
-from metadrive.version import VERSION
 import pathlib
 import sys
+
 from metadrive.engine.logger import get_logger
 from metadrive.utils.utils import is_win
+from metadrive.version import VERSION, assert_version
 
 
 class AssetLoader:
@@ -20,16 +21,16 @@ class AssetLoader:
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
-        asset_version = os.path.join(AssetLoader.asset_path, "version.txt")
-        if not os.path.exists(asset_version):
-            AssetLoader.logger.fatal("Missing assets/version.txt file! Abort")
-            raise FileExistsError("Missing assets/version.txt file! Abort")
+        msg = "Assets folder doesn't exist. Download assets by `python -m metadrive.pull_asset`"
+        if not os.path.exists(AssetLoader.asset_path):
+            AssetLoader.logger.fatal(msg)
+            raise FileExistsError(msg)
         else:
-            with open(asset_version, "r") as file:
-                lines = file.readlines()
-            if lines[0] != VERSION:
+            if assert_version() != VERSION:
                 AssetLoader.logger.warning(
-                    "Assets version mismatch! Current: {}, Expected: {}".format(lines[0], VERSION)
+                    "Assets version mismatch! Current: {}, Expected: {}. "
+                    "Update the assets by `python -m metadrive.pull_asset --update'".format(
+                        assert_version(), VERSION)
                 )
             else:
                 AssetLoader.logger.info("Assets version: {}".format(VERSION))
@@ -38,6 +39,10 @@ class AssetLoader:
             return
         AssetLoader.logger.debug("Onscreen/Offscreen mode, Render/Load Elements")
         AssetLoader.loader = engine.loader
+
+    @property
+    def asset_version(self):
+        return assert_version()
 
     @classmethod
     def get_loader(cls):
@@ -110,3 +115,7 @@ def get_logo_file():
     file = AssetLoader.file_path("logo-tiny.png")
     # assert os.path.exists(file)
     return file
+
+
+def assert_version():
+    return assert_version()

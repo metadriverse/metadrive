@@ -1,6 +1,0 @@
-recursive-include metadrive/assets/ *
-recursive-include metadrive/examples/ *
-recursive-include metadrive\\assets\\ *
-recursive-include metadrive\\examples\\ *
-recursive-include metadrive\assets\ *
-recursive-include metadrive\examples\ *

@@ -1,8 +1,6 @@
 # Please don't change the order of following packages!
 import os
 import sys
-import urllib.request
-import zipfile
 from os import path
 
 from setuptools import setup, find_namespace_packages  # This should be place at top!
@@ -39,25 +37,6 @@ packages = find_namespace_packages(
     exclude=("docs", "docs.*", "documentation", "documentation.*", "build.*"))
 print("We will install the following packages: ", packages)
 
-
-def post_install():
-    TARGET_DIR = os.path.join(os.path.dirname(__file__), 'metadrive')
-    if os.path.exists(os.path.join(TARGET_DIR, "assets")):
-        return
-    zip_path = os.path.join(TARGET_DIR, 'assets.zip')
-
-    # Fetch the zip file
-    print("Retrieve the assets from {}".format(ASSET_URL))
-    urllib.request.urlretrieve(ASSET_URL, zip_path)
-
-    # Extract the zip file to the desired location
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(TARGET_DIR)
-
-    # Remove the downloaded zip file (optional)
-    os.remove(zip_path)
-
-
 install_requires = [
     "requests",
     "gymnasium>=0.28, <0.29",
@@ -69,6 +48,7 @@ install_requires = [
     "yapf",
     "seaborn",
     "tqdm",
+    "progressbar",
     # "panda3d==1.10.8",
     "panda3d==1.10.13",
     "panda3d-gltf==0.13",  # 0.14 will bring some problems
@@ -135,8 +115,6 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
 )
-
-post_install()
 
 """
 How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi in Dec 27, 2020.
