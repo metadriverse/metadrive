@@ -16,7 +16,6 @@ def get_version():
 
 
 VERSION = get_version()
-ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
 
 
 def is_mac():

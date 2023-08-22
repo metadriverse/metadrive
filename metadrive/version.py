@@ -1,12 +1,11 @@
 import os
 
-from metadrive.engine.asset_loader import AssetLoader
-
-VERSION = "0.4.0.1"
+VERSION = "0.3.0.1"
 
 
-def assert_version():
-    asset_version = os.path.join(AssetLoader.asset_path, "version.txt")
+def asset_version():
+    asset_path = os.path.join(os.path.dirname(__file__), "assets")
+    asset_version = os.path.join(asset_path, "version.txt")
     with open(asset_version, "r") as file:
         lines = file.readlines()
     return lines[0]

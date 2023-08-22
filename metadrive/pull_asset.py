@@ -3,11 +3,11 @@ import urllib.request
 import zipfile
 import argparse
 
-from metadrive.version import assert_version
-from setup import ASSET_URL
+from metadrive.version import asset_version
 from metadrive.constants import VERSION
 import progressbar
 
+ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
 
 class MyProgressBar():
     def __init__(self):
@@ -32,7 +32,7 @@ def pull_asset():
     TARGET_DIR = os.path.join(os.path.dirname(__file__))
     if os.path.exists(os.path.join(TARGET_DIR, "assets")) and not args.update:
         print("Fail to pull. Assets already exists, version: {}. "
-              "To overwrite existing assets, add flag '--update' and rerun this script".format(assert_version()))
+              "To overwrite existing assets, add flag '--update' and rerun this script".format(asset_version()))
 
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
 
@@ -46,7 +46,7 @@ def pull_asset():
 
     # Remove the downloaded zip file (optional)
     os.remove(zip_path)
-    print("Successfully download assets, version: {}. MetaDrive version: {}".format(assert_version(), VERSION))
+    print("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
 
 
 if __name__ == '__main__':

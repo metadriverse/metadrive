@@ -4,7 +4,7 @@ import sys
 
 from metadrive.engine.logger import get_logger
 from metadrive.utils.utils import is_win
-from metadrive.version import VERSION, assert_version
+from metadrive.version import VERSION
 
 
 class AssetLoader:
@@ -26,11 +26,11 @@ class AssetLoader:
             AssetLoader.logger.fatal(msg)
             raise FileExistsError(msg)
         else:
-            if assert_version() != VERSION:
+            if asset_version() != VERSION:
                 AssetLoader.logger.warning(
                     "Assets version mismatch! Current: {}, Expected: {}. "
                     "Update the assets by `python -m metadrive.pull_asset --update'".format(
-                        assert_version(), VERSION)
+                        asset_version(), VERSION)
                 )
             else:
                 AssetLoader.logger.info("Assets version: {}".format(VERSION))
@@ -42,7 +42,7 @@ class AssetLoader:
 
     @property
     def asset_version(self):
-        return assert_version()
+        return asset_version()
 
     @classmethod
     def get_loader(cls):
@@ -117,5 +117,6 @@ def get_logo_file():
     return file
 
 
-def assert_version():
-    return assert_version()
+def asset_version():
+    from metadrive.version import asset_version
+    return asset_version()
