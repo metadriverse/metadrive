@@ -1,5 +1,3 @@
-import logging
-
 import numpy as np
 
 from metadrive.utils.cuda import check_cudart_err
@@ -41,7 +39,7 @@ class BaseCamera(ImageBuffer):
         height = self.BUFFER_H
         if (width > 100 or height > 100) and not self.enable_cuda:
             # Too large height or width will cause corruption in Mac.
-            logging.warning(
+            self.logger.warning(
                 "You may using too large buffer! The height is {}, and width is {}. "
                 "It may lower the sample efficiency! Considering reduce buffer size or using cuda image by"
                 " set [image_on_cuda=True].".format(height, width)

@@ -1,7 +1,7 @@
 import os
 import pathlib
 import sys
-
+from metadrive.pull_asset import pull_asset
 from metadrive.engine.logger import get_logger
 from metadrive.utils.utils import is_win
 from metadrive.version import VERSION
@@ -21,10 +21,10 @@ class AssetLoader:
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
-        msg = "Assets folder doesn't exist. Download assets by `python -m metadrive.pull_asset`"
+        msg = "Assets folder doesn't exist. Begin to download assets..."
         if not os.path.exists(AssetLoader.asset_path):
-            AssetLoader.logger.fatal(msg)
-            raise FileExistsError(msg)
+            AssetLoader.logger.warning(msg)
+            pull_asset(False)
         else:
             if asset_version() != VERSION:
                 AssetLoader.logger.warning(

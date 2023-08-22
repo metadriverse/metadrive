@@ -16,9 +16,6 @@ We recommend to use the command following to install::
     cd metadrive
     pip install -e .
 
-    # pull asset
-    python -m metadrive.pull_asset
-
 To check whether MetaDrive is successfully installed, please run::
 
     python -m metadrive.examples.profile_metadrive

@@ -118,38 +118,40 @@ setup(
 """
 How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi in Dec 27, 2020.
 
--1. Checkout a new branch from main called releases/x.y.z
+0. Checkout a new branch from main called releases/x.y.z
 
-0. Rename VERSION in metadrive/version.py to x.y,z
+1. Rename VERSION in metadrive/version.py to x.y,z
 
-1. Revise the version in metadrive/assets/version.txt
+2. Revise the version in metadrive/assets/version.txt, and compress the folder into assets.zip
 
-2. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
+3. commit changes and push this branch to remote
+
+4. Draft a release on github with new version number and upload assets.zip 
+
+5. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
     rm -rf dist/ build/ documentation/build/ metadrive_simulator.egg-info/ docs/build/
 
-3. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
+6. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
    This is really important since pypi do not support renaming and re-uploading. 
    Rename version in metadrive/versions.py 
 
-4. Get wheel
+7. Get wheel
     python setup.py sdist bdist_wheel
 
-5. Upload to test channel
+8. Upload to test channel
     twine upload --repository testpypi dist/*
 
-6. Test as next line. If failed, change the version name and repeat 1, 2, 3, 4, 5.
+9. Test as next line. If failed, change the version name and repeat 1, 2, 3, 4, 5.
     pip install --index-url https://test.pypi.org/simple/ metadrive
 
-7. Rename current version to X.Y.Z in setup.py, rerun 1, 3 steps.
+10. Rename current version to X.Y.Z in setup.py, rerun 1, 3 steps.
 
-8. Upload to production channel 
+11. Upload to production channel 
     twine upload dist/*
 
-9. Draft a release on github with new version number
+12. Upload the generated .whl file to release files
 
-10. upload the generated .whl file and new assets folder compressed and named to assets.zip 
-
-11. merge this branch into main
+13. merge this branch into main
 
 !!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
 

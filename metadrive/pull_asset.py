@@ -1,12 +1,14 @@
+import argparse
 import os
 import shutil
 import urllib.request
 import zipfile
-import argparse
+
+import progressbar
+
+from metadrive.constants import VERSION
 from metadrive.engine.logger import get_logger
 from metadrive.version import asset_version
-from metadrive.constants import VERSION
-import progressbar
 
 ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
 
@@ -27,15 +29,12 @@ class MyProgressBar():
             self.pbar.finish()
 
 
-def pull_asset():
+def pull_asset(update):
     logger = get_logger("Asset", propagate=False)
     logger.handlers.pop()
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--update", action="store_true", help="Force overwrite the current assets")
-    args = parser.parse_args()
     TARGET_DIR = os.path.join(os.path.dirname(__file__))
     if os.path.exists(os.path.join(TARGET_DIR, "assets")):
-        if not args.update:
+        if not update:
             logger.warning(
                 "Fail to pull. Assets already exists, version: {}. Expected version: {}. "
                 "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
@@ -71,4 +70,7 @@ def pull_asset():
 
 
 if __name__ == '__main__':
-    pull_asset()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--update", action="store_true", help="Force overwrite the current assets")
+    args = parser.parse_args()
+    pull_asset(args.update)
