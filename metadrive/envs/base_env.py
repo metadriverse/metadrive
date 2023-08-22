@@ -1,4 +1,5 @@
 import logging
+from metadrive.version import VERSION
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
@@ -205,7 +206,7 @@ BASE_DEFAULT_CONFIG = dict(
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
     preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
-    log_level=None,
+    log_level=logging.INFO,
 
     # record/replay metadata
     record_episode=False,  # when replay_episode is not None ,this option will be useless
@@ -260,6 +261,7 @@ class BaseEnv(gym.Env):
     def _post_process_config(self, config):
         """Add more special process to merged config"""
         # Cancel interface panel
+        self.logger.info("MetaDrive version: {}".format(VERSION))
         if not config["show_interface"]:
             config["interface_panel"] = []
 
@@ -302,10 +304,11 @@ class BaseEnv(gym.Env):
                     config["vehicle_config"]["image_source"], config["sensors"])
 
         # show sensor lists
-        _str = "Sensors:"
+        _str = "Sensors: [{}]"
+        sensors_str = ""
         for _id, cfg in config["sensors"].items():
-            _str += "{}: {}, {}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
-        self.logger.info(_str[:-2])
+            sensors_str += "{}: {}, {}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
+        self.logger.info(_str.format(sensors_str[:-2]))
 
         # determine render mode automatically
         if config["use_render"]:
@@ -456,6 +459,11 @@ class BaseEnv(gym.Env):
         :param seed: The seed to set the env.
         :return: None
         """
+        if self.logger is None:
+            self.logger = get_logger(
+                self.logger_name,
+                self.config.get("log_level", logging.DEBUG if self.config.get("debug", False) else logging.INFO)
+            )
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         self._reset_global_seed(seed)
         if self.engine is None:
@@ -548,6 +556,10 @@ class BaseEnv(gym.Env):
     def close(self):
         if self.engine is not None:
             close_engine()
+        if self.logger is not None:
+            self.logger.handlers.clear()
+            del self.logger
+        self.logger = None
 
     def force_close(self):
         print("Closing environment ... Please wait")

@@ -1,4 +1,4 @@
-.. image:: ../../metadrive/assets/logo-horizon.png
+.. image:: figs/logo-horizon.png
    :width: 1800
    :align: center
 

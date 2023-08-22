@@ -23,7 +23,7 @@ if __name__ == "__main__":
             "vehicle_config": dict(
                 mini_map=(168 * w_f * 6, 84 * h_f * 6, 270),  # buffer length, width
                 rgb_camera=(168 * w_f, 84 * h_f),  # buffer length, width
-                depth_camera=(168 * w_f, 84 * h_f, True),  # buffer length, width, view_ground
+                depth_camera=(168 * w_f, 84 * h_f),  # buffer length, width, view_ground
                 show_navi_mark=False,
                 increment_steering=False,
                 wheel_friction=0.6,

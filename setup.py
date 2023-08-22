@@ -1,14 +1,24 @@
 # Please don't change the order of following packages!
 import os
 import sys
+import urllib.request
+import zipfile
 from os import path
 
-import os
-import zipfile
-import urllib.request
 from setuptools import setup, find_namespace_packages  # This should be place at top!
 
 ROOT_DIR = os.path.dirname(__file__)
+
+
+def get_version():
+    context = {}
+    with open('./metadrive/version.py', 'r') as file:
+        exec(file.read(), context)
+    return context['VERSION']
+
+
+VERSION = get_version()
+ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
 
 
 def is_mac():
@@ -29,9 +39,6 @@ packages = find_namespace_packages(
     exclude=("docs", "docs.*", "documentation", "documentation.*", "build.*"))
 print("We will install the following packages: ", packages)
 
-""" ===== Remember to modify the PG_EDITION at first ====="""
-version = "0.3.0.1"
-ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-0.3.0.1/assets.zip"
 
 def post_install():
     TARGET_DIR = os.path.join(os.path.dirname(__file__), 'metadrive')
@@ -109,7 +116,7 @@ gym_requirement = [
 setup(
     name="metadrive-simulator",
     python_requires='>=3.6, <3.12',  # do version check with assert
-    version=version,
+    version=VERSION,
     description="An open-ended driving simulator with infinite scenes",
     url="https://github.com/metadriverse/metadrive",
     author="MetaDrive Team",
@@ -132,35 +139,39 @@ setup(
 post_install()
 
 """
-How to publish to pypi?  Noted by Zhenghao in Dec 27, 2020.
+How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi in Dec 27, 2020.
 
-Note: make sure you have the assets dir locally. we will include the assets with the .wheel file
+Note: make sure you have the right assets dir locally. we will include the assets with the .wheel file
 
-0. Rename version in metadrive/constants.py and setup.py
+0. Rename VERSION in metadrive/version.py
 
-1. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
+1. Revise the version in metadrive/assets/version.txt
+
+2. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
     rm -rf dist/ build/ documentation/build/ metadrive_simulator.egg-info/ docs/build/
 
-2. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
+3. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
    This is really important since pypi do not support renaming and re-uploading. 
-   Rename version in metadrive/constants.py and setup.py 
+   Rename version in metadrive/versions.py 
 
-3. Get wheel
+4. Get wheel
     python setup.py sdist bdist_wheel
 
-    WARNING: when create wheels on windows, modifying MANIFEST.in to include assets by using
-    recursive-include metadrive\\assets\\ *
-    recursive-include metadrive\\examples\\ *
-
-4. Upload to test channel
+5. Upload to test channel
     twine upload --repository testpypi dist/*
 
-5. Test as next line. If failed, change the version name and repeat 1, 2, 3, 4, 5.
+6. Test as next line. If failed, change the version name and repeat 1, 2, 3, 4, 5.
     pip install --index-url https://test.pypi.org/simple/ metadrive
 
-6. Rename current version to X.Y.Z in setup.py, rerun 1, 3 steps.
+7. Rename current version to X.Y.Z in setup.py, rerun 1, 3 steps.
 
-7. Upload to production channel 
+8. Upload to production channel 
     twine upload dist/*
+
+9. Draft a release on github with new version number
+
+10. upload the generated .whl file and new assets folder compressed and named to assets.zip 
+
+!!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
 
 """

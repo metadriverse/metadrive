@@ -4,10 +4,10 @@ from typing import List, Tuple
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
-
+from metadrive.version import VERSION
 from metadrive.type import MetaDriveType
 
-EDITION = "MetaDrive v0.3.0.1"
+EDITION = "MetaDrive v{}".format(VERSION)
 DATA_VERSION = EDITION  # Use MetaDrive version to mark the data version
 DEFAULT_AGENT = "default_agent"
 RENDER_MODE_NONE = "none"  # Do not render

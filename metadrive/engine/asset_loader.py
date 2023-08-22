@@ -1,8 +1,8 @@
-import logging
 import os
+from metadrive.version import VERSION
 import pathlib
 import sys
-
+from metadrive.engine.logger import get_logger
 from metadrive.utils.utils import is_win
 
 
@@ -10,6 +10,7 @@ class AssetLoader:
     """
     Load model for each element when render is needed.
     """
+    logger = get_logger("Asset")
     loader = None
     asset_path = pathlib.PurePosixPath(__file__).parent.parent.joinpath("assets") if not is_win(
     ) else pathlib.Path(__file__).resolve().parent.parent.joinpath("assets")
@@ -19,10 +20,23 @@ class AssetLoader:
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
+        asset_version = os.path.join(AssetLoader.asset_path, "version.txt")
+        if not os.path.exists(asset_version):
+            AssetLoader.logger.fatal("Missing assets/version.txt file! Abort")
+            raise FileExistsError("Missing assets/version.txt file! Abort")
+        else:
+            with open(asset_version, "r") as file:
+                lines = file.readlines()
+            if lines[0] != VERSION:
+                AssetLoader.logger.warning(
+                    "Assets version mismatch! Current: {}, Expected: {}".format(lines[0], VERSION)
+                )
+            else:
+                AssetLoader.logger.info("Assets version: {}".format(VERSION))
         if engine.win is None:
-            logging.debug("Physics world mode")
+            AssetLoader.logger.debug("Physics world mode")
             return
-        logging.debug("Onscreen/Offscreen mode, Render/Load Elements")
+        AssetLoader.logger.debug("Onscreen/Offscreen mode, Render/Load Elements")
         AssetLoader.loader = engine.loader
 
     @classmethod
@@ -68,7 +82,7 @@ def initialize_asset_loader(engine):
     # load model file in utf-8
     os.environ["PYTHONUTF8"] = "on"
     if AssetLoader.initialized():
-        logging.warning(
+        AssetLoader.logger.warning(
             "AssetLoader is initialize to root path: {}! But you are initializing again!".format(
                 AssetLoader.asset_path
             )
