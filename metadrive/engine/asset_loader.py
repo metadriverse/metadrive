@@ -21,18 +21,6 @@ class AssetLoader:
         """
         Due to the feature of Panda3d, keep reference of loader in static variable
         """
-        msg = "Assets folder doesn't exist. Begin to download assets..."
-        if not os.path.exists(AssetLoader.asset_path):
-            AssetLoader.logger.warning(msg)
-            pull_asset(False)
-        else:
-            if asset_version() != VERSION:
-                AssetLoader.logger.warning(
-                    "Assets version mismatch! Current: {}, Expected: {}. "
-                    "Update the assets by `python -m metadrive.pull_asset --update'".format(asset_version(), VERSION)
-                )
-            else:
-                AssetLoader.logger.info("Assets version: {}".format(VERSION))
         if engine.win is None:
             AssetLoader.logger.debug("Physics world mode")
             return

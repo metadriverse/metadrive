@@ -1,4 +1,7 @@
 import logging
+from metadrive.version import VERSION, asset_version
+import os
+from metadrive.pull_asset import pull_asset
 from metadrive.constants import RENDER_MODE_NONE, RENDER_MODE_OFFSCREEN, RENDER_MODE_ONSCREEN
 import pickle
 import time
@@ -28,6 +31,7 @@ class BaseEngine(EngineCore, Randomizable):
     global_random_seed = None
 
     def __init__(self, global_config):
+        self.try_pull_asset()
         EngineCore.__init__(self, global_config)
         Randomizable.__init__(self, self.global_random_seed)
         self.episode_step = 0
@@ -684,6 +688,21 @@ class BaseEngine(EngineCore, Randomizable):
             warm_up_light = None
             barrier = None
             cone = None
+
+    @staticmethod
+    def try_pull_asset():
+        msg = "Assets folder doesn't exist. Begin to download assets..."
+        if not os.path.exists(AssetLoader.asset_path):
+            AssetLoader.logger.warning(msg)
+            pull_asset(False)
+        else:
+            if asset_version() != VERSION:
+                AssetLoader.logger.warning(
+                    "Assets version mismatch! Current: {}, Expected: {}. "
+                    "Update the assets by `python -m metadrive.pull_asset --update'".format(asset_version(), VERSION)
+                )
+            else:
+                AssetLoader.logger.info("Assets version: {}".format(VERSION))
 
 
 if __name__ == "__main__":
