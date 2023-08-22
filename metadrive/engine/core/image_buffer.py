@@ -1,4 +1,4 @@
-import logging
+from metadrive.engine.logger import get_logger
 from direct.filter.FilterManager import FilterManager
 import panda3d.core as p3d
 from simplepbr import _load_shader_str
@@ -33,7 +33,7 @@ class ImageBuffer:
         setup_pbr=False,
         engine=None
     ):
-
+        self.logger = get_logger(self.__class__.__name__)
         self._node_path_list = []
 
         # from metadrive.engine.engine_utils import get_engine
@@ -44,7 +44,7 @@ class ImageBuffer:
             )
             assert self.CAM_MASK is not None, "Define a camera mask for every image buffer"
         except AssertionError:
-            logging.debug("Cannot create {}".format(self.__class__.__name__))
+            self.logger.debug("Cannot create {}".format(self.__class__.__name__))
             self.buffer = None
             self.cam = NodePath(Camera("non-sense camera"))
             self._node_path_list.append(self.cam)
@@ -97,7 +97,7 @@ class ImageBuffer:
             self.tonemap_quad.set_shader_input('tex', self.scene_tex)
             self.tonemap_quad.set_shader_input('exposure', 1.0)
 
-        logging.debug("Load Image Buffer: {}".format(self.__class__.__name__))
+        self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
     def get_image(self):
         """
@@ -187,7 +187,7 @@ class ImageBuffer:
         clear_node_list(self._node_path_list)
 
     def __del__(self):
-        logging.debug("{} is destroyed".format(self.__class__.__name__))
+        self.logger.debug("{} is destroyed".format(self.__class__.__name__))
 
     @classmethod
     def update_display_region_size(cls, display_region_size):
