@@ -1,8 +1,6 @@
 """
 This environment can load all scenarios exported from other environments via env.export_scenarios()
 """
-import logging
-
 import numpy as np
 
 from metadrive.component.sensors.vehicle_panel import VehiclePanel
@@ -169,13 +167,13 @@ class ScenarioEnv(BaseEnv):
         if self.current_seed + 1 < self.config["start_scenario_index"] + self.config["num_scenarios"]:
             self.reset(self.current_seed + 1)
         else:
-            logging.warning("Can't load next scenario! current seed is already the max scenario index")
+            self.logger.warning("Can't load next scenario! current seed is already the max scenario index")
 
     def last_seed_reset(self):
         if self.current_seed - 1 >= self.config["start_scenario_index"]:
             self.reset(self.current_seed - 1)
         else:
-            logging.warning("Can't load last scenario! current seed is already the min scenario index")
+            self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
 
     def step(self, actions):
         ret = super(ScenarioEnv, self).step(actions)
@@ -204,42 +202,42 @@ class ScenarioEnv(BaseEnv):
 
         if self._is_arrive_destination(vehicle):
             done = True
-            logging.info(msg("arrive_dest"))
+            self.logger.info(msg("arrive_dest"))
             done_info[TerminationState.SUCCESS] = True
 
         elif self._is_out_of_road(vehicle) or route_completion < -0.1:
             done = True
-            logging.info(msg("out_of_road"))
+            self.logger.info(msg("out_of_road"))
             done_info[TerminationState.OUT_OF_ROAD] = True
         elif vehicle.crash_human and self.config["crash_human_done"]:
             done = True
-            logging.info(msg("crash human"))
+            self.logger.info(msg("crash human"))
             done_info[TerminationState.CRASH_HUMAN] = True
         elif vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
-            logging.info(msg("crash vehicle"))
+            self.logger.info(msg("crash vehicle"))
             done_info[TerminationState.CRASH_VEHICLE] = True
         elif vehicle.crash_object and self.config["crash_object_done"]:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
-            logging.info(msg("crash object"))
+            self.logger.info(msg("crash object"))
         elif vehicle.crash_building and self.config["crash_object_done"]:
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
-            logging.info(msg("crash building"))
+            self.logger.info(msg("crash building"))
 
         elif self.config["horizon"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            logging.info(msg("max step"))
+            self.logger.info(msg("max step"))
 
         elif self.config["allowed_more_steps"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.engine.data_manager.current_scenario_length + self.config[
             "allowed_more_steps"] and not self.is_multi_agent:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            logging.info(msg("more step than original episode"))
+            self.logger.info(msg("more step than original episode"))
 
         # for compatibility
         # crash almost equals to crashing with vehicles

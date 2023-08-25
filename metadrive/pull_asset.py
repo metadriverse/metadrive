@@ -57,7 +57,7 @@ def pull_asset(update):
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
 
     # Fetch the zip file
-    logger.info("Pull the assets from {}".format(ASSET_URL))
+    logger.info("Pull assets from {}".format(ASSET_URL))
     urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
 
     # Extract the zip file to the desired location

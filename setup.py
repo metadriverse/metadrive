@@ -53,7 +53,6 @@ install_requires = [
     "panda3d-gltf==0.13",  # 0.14 will bring some problems
     "panda3d-simplepbr",
     "pillow",
-    "protobuf==3.20.3",
     "pytest",
     "opencv-python",
     "lxml",
