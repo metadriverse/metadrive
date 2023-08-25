@@ -53,7 +53,6 @@ install_requires = [
     "panda3d-gltf==0.13",  # 0.14 will bring some problems
     "panda3d-simplepbr",
     "pillow",
-    "protobuf==3.20.3",
     "pytest",
     "opencv-python",
     "lxml",
@@ -122,7 +121,7 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 
 1. Rename VERSION in metadrive/version.py to x.y.z
 
-2. Revise the version in metadrive/assets/version.txt, and compress the folder into assets.zip
+2. Revise the version in metadrive/assets/version.txt, and compress the folder: zip -r assets.zip assets
 
 3. commit changes and push this branch to remote
 

@@ -1,17 +1,14 @@
-import logging
 from collections import deque
 
 import numpy as np
 from panda3d.core import NodePath, Material
-
+from metadrive.engine.logger import get_logger
 from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math import norm, clip
 from metadrive.utils.math import panda_vector
 from metadrive.utils.math import wrap_to_pi
-
-logger = logging.getLogger(__file__)
 
 
 class TrajectoryNavigation(BaseNavigation):
@@ -34,7 +31,7 @@ class TrajectoryNavigation(BaseNavigation):
         vehicle_config=None
     ):
         if show_dest_mark or show_line_to_dest:
-            logging.warning("show_dest_mark and show_line_to_dest are not supported in TrajectoryNavigation")
+            get_logger().warning("show_dest_mark and show_line_to_dest are not supported in TrajectoryNavigation")
         super(TrajectoryNavigation, self).__init__(
             show_navi_mark=False,
             random_navi_mark_color=random_navi_mark_color,
@@ -61,9 +58,9 @@ class TrajectoryNavigation(BaseNavigation):
                     self._navi_point_model.setScale(0.5)
                     if self.engine.use_render_pipeline:
                         material = Material()
-                        material.setBaseColor((1, 1, 1, 1))
-                        material.setShininess(128)
-                        material.setEmission((1, 1, 1, 1))
+                        material.setBaseColor((19 / 255, 212 / 255, 237 / 255, 1))
+                        material.setShininess(16)
+                        material.setEmission((0.2, 0.2, 0.2, 0.2))
                         self._navi_point_model.setMaterial(material, True)
                 self._navi_point_model.instanceTo(model)
                 model.reparentTo(self.origin)

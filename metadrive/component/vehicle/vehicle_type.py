@@ -2,6 +2,7 @@ from panda3d.core import VirtualFileSystem, Filename
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
+import platform
 
 
 def convert_path(pth):
@@ -146,7 +147,7 @@ class SVehicle(BaseVehicle):
 
     @property
     def path(self):
-        if self.use_render_pipeline:
+        if self.use_render_pipeline and platform.system() != "Linux":
             # vfs = VirtualFileSystem.get_global_ptr()
             # vfs.mount(convert_path(AssetLoader.file_path("models", "beetle")), "/$$beetle_model", 0)
             return ['beetle/vehicle.bam', (0.0077, 0.0077, 0.0077), (0.04512, -0.24 - 0.04512, 1.77), (-90, -90, 0)]

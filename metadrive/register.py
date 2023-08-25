@@ -85,8 +85,8 @@ for env_name, entry in marl_env.items():
         envs.append(env_name)
         gym.register(id=env_name, entry_point=entry, kwargs=dict(config={}))
 
-if len(envs) > 0:
-    get_logger("Gym").info("Successfully registered the following environments: {}.".format(envs))
+# if len(envs) > 0:
+#     get_logger("Gym").info("Successfully registered the following environments: {}.".format(envs))
 
 if __name__ == '__main__':
     # Test purpose only

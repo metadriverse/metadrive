@@ -30,7 +30,7 @@ class MyProgressBar():
 
 
 def pull_asset(update):
-    logger = get_logger("Asset", propagate=False)
+    logger = get_logger(propagate=False)
     logger.handlers.pop()
     TARGET_DIR = os.path.join(os.path.dirname(__file__))
     if os.path.exists(os.path.join(TARGET_DIR, "assets")):
@@ -57,7 +57,7 @@ def pull_asset(update):
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
 
     # Fetch the zip file
-    logger.info("Pull the assets from {}".format(ASSET_URL))
+    logger.info("Pull assets from {}".format(ASSET_URL))
     urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
 
     # Extract the zip file to the desired location
