@@ -58,7 +58,7 @@ class TrajectoryNavigation(BaseNavigation):
                     self._navi_point_model.setScale(0.5)
                     if self.engine.use_render_pipeline:
                         material = Material()
-                        material.setBaseColor((19/255, 212/255, 237/255, 1))
+                        material.setBaseColor((19 / 255, 212 / 255, 237 / 255, 1))
                         material.setShininess(16)
                         material.setEmission((0.2, 0.2, 0.2, 0.2))
                         self._navi_point_model.setMaterial(material, True)
