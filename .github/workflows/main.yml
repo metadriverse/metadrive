@@ -36,6 +36,7 @@ jobs:
           pip install cython
           pip install numpy
           pip install -e .
+          python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -56,6 +57,7 @@ jobs:
           pip install numpy
           pip install gym
           pip install -e .
+          python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -75,6 +77,7 @@ jobs:
           pip install cython
           pip install numpy
           pip install -e .
+          python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -94,6 +97,7 @@ jobs:
           pip install cython
           pip install numpy
           pip install -e .
+          python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
           pip install ray
@@ -113,6 +117,7 @@ jobs:
           pip install cython
           pip install numpy
           pip install -e .
+          python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
           pip install ray
