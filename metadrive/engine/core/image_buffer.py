@@ -33,7 +33,7 @@ class ImageBuffer:
         setup_pbr=False,
         engine=None
     ):
-        self.logger = get_logger(self.__class__.__name__)
+        self.logger = get_logger()
         self._node_path_list = []
 
         # from metadrive.engine.engine_utils import get_engine

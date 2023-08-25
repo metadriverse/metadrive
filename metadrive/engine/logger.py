@@ -1,5 +1,7 @@
 import logging
 
+global_logger = None
+
 
 class CustomFormatter(logging.Formatter):
     grey = "\x1b[38;20m"
@@ -7,7 +9,8 @@ class CustomFormatter(logging.Formatter):
     red = "\x1b[31;20m"
     bold_red = "\x1b[31;1m"
     reset = "\x1b[0m"
-    format = "[%(levelname)s] %(message)s (%(name)s %(filename)s:%(lineno)d)"
+    # format = "[%(levelname)s] %(message)s (%(name)s %(filename)s:%(lineno)d)"
+    format = "[%(levelname)s] %(message)s (%(filename)s:%(lineno)d)"
     simple_format = "[%(levelname)s] %(message)s"
 
     FORMATS = {
@@ -24,13 +27,16 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def get_logger(name, level=logging.INFO, propagate=False):
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-    logger.propagate = propagate
-    # create console handler with a higher log level
-    ch = logging.StreamHandler()
-    # create formatter and add it to the handlers
-    ch.setFormatter(CustomFormatter())
-    logger.addHandler(ch)
-    return logger
+def get_logger(level=logging.INFO, propagate=False):
+    global global_logger
+    if global_logger is None:
+        logger = logging.getLogger("MetaDrive")
+        logger.setLevel(level)
+        logger.propagate = propagate
+        # create console handler with a higher log level
+        ch = logging.StreamHandler()
+        # create formatter and add it to the handlers
+        ch.setFormatter(CustomFormatter())
+        logger.addHandler(ch)
+        global_logger = logger
+    return global_logger
