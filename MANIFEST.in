@@ -1,3 +1,7 @@
 recursive-include metadrive/examples/ *
 recursive-include metadrive\\examples\\ *
 recursive-include metadrive\examples\ *
+
+recursive-include metadrive/render_pipeline/ *
+recursive-include metadrive\\render_pipeline\\ *
+recursive-include metadrive\render_pipeline\ *

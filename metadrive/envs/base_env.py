@@ -286,13 +286,14 @@ class BaseEnv(gym.Env):
 
         # Merge vehicle_panel config with sensors
         to_use = []
-        for panel in config["interface_panel"]:
-            if panel == "dashboard":
-                config["sensors"]["dashboard"] = (VehiclePanel, )
-            if panel not in config["sensors"]:
-                self.logger.warning("Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
-            else:
-                to_use.append(panel)
+        if not config["render_pipeline"]:
+            for panel in config["interface_panel"]:
+                if panel == "dashboard":
+                    config["sensors"]["dashboard"] = (VehiclePanel, )
+                if panel not in config["sensors"]:
+                    self.logger.warning("Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
+                else:
+                    to_use.append(panel)
         config["interface_panel"] = to_use
 
         # Check sensor existence
