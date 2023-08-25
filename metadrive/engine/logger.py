@@ -31,7 +31,6 @@ def get_logger(level=logging.INFO, propagate=False):
     global global_logger
     if global_logger is None:
         logger = logging.getLogger("MetaDrive")
-        logger.setLevel(level)
         logger.propagate = propagate
         # create console handler with a higher log level
         ch = logging.StreamHandler()
@@ -39,4 +38,6 @@ def get_logger(level=logging.INFO, propagate=False):
         ch.setFormatter(CustomFormatter())
         logger.addHandler(ch)
         global_logger = logger
+    if global_logger.level != level:
+        global_logger.setLevel(level)
     return global_logger
