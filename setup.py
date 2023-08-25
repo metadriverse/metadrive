@@ -121,7 +121,7 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 
 1. Rename VERSION in metadrive/version.py to x.y.z
 
-2. Revise the version in metadrive/assets/version.txt, and compress the folder into assets.zip
+2. Revise the version in metadrive/assets/version.txt, and compress the folder: zip -r assets.zip assets
 
 3. commit changes and push this branch to remote
 
