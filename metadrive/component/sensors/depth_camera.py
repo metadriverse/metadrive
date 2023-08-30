@@ -5,6 +5,7 @@ from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
+from pprint import pprint
 
 
 class DepthCamera(BaseCamera):
@@ -22,6 +23,14 @@ class DepthCamera(BaseCamera):
         super(DepthCamera, self).__init__(engine, False, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
+        """print(lens.film_size)
+        print(lens.focal_length)
+        print(lens.fov)
+        print(lens.getAspectRatio())
+        print(lens.getProjectionMatInv())
+        print(lens.getProjectionMat())
+        exit()"""
+        
 
         # cam.lookAt(0, 2.4, 1.3)
         cam.lookAt(0, 10.4, 1.6)

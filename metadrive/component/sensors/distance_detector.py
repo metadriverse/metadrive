@@ -126,11 +126,11 @@ class DistanceDetector:
                 self.cloud_points_vis.append(ball)
             # self.origin.flattenStrong()
 
-    def perceive(self, base_vehicle, physics_world, detector_mask: np.ndarray = None):
+    def perceive(self, base_vehicle, physics_world, detector_mask: np.ndarray = None,position = None, heading = None, ):
         assert self.available
         extra_filter_node = set(base_vehicle.dynamic_nodes)
-        vehicle_position = base_vehicle.position
-        heading_theta = base_vehicle.heading_theta
+        vehicle_position = base_vehicle.position if position is None else position   #Added this conditional to make the lidar's spatial property configuration 
+        heading_theta = base_vehicle.heading_theta if heading is None else heading   #Added this conditional to make the lidar's spatial property configuration
         assert not isinstance(detector_mask, str), "Please specify detector_mask either with None or a numpy array."
         cloud_points, detected_objects, colors = perceive(
             cloud_points=np.ones((self.num_lasers, ), dtype=float),
