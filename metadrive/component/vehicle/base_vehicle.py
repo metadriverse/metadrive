@@ -224,8 +224,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 vfov = 0,
                 pos_offset= (1,1),
                 angle_offset= 15,
-                height = 10
-
             ),
             dict(
                 num_lasers = 60,
@@ -235,7 +233,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 vfov = 0,
                 pos_offset= (-1,1),
                 angle_offset= 105,
-                height = 10
             ),
             dict(
                 num_lasers = 60,
@@ -245,7 +242,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 vfov = 0,
                 pos_offset= (-1,-1),
                 angle_offset= 195,
-                height = 10
             ),
             dict(
                 num_lasers = 60,
@@ -255,7 +251,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 vfov = 0,
                 pos_offset= (1,-1),
                 angle_offset= 285,
-                height = 10
             ),
             
   

@@ -186,7 +186,7 @@ class SpecialLidar(Lidar):
     In addition, I couldn't fiure out how to correctly rebase the center of the lidar in car's coordinate.
     """
     def __init__(self, num_lasers: int = 60, distance: float = 50, enable_show=False, 
-                 hfov = 360, vfov = 0, pos_offset = None, angle_offset = None, height = 1.2
+                 hfov = 360, vfov = 0, pos_offset = None, angle_offset = None, height = 1.2, pitch = 0
                  ):
         super(SpecialLidar,self).__init__(num_lasers, distance, enable_show)
         self.radian_unit = np.deg2rad(hfov) / num_lasers
@@ -196,6 +196,7 @@ class SpecialLidar(Lidar):
         self.vfov = vfov #Maybe shoot rays with variations along the vertical axis? Not used at this moment.
         self.angle_offset = angle_offset
         self.angle_delta = (hfov) / num_lasers 
+        self.set_pitch(pitch)
 
     def perceive(self, base_vehicle, detector_mask=True):
         """
@@ -292,7 +293,7 @@ class LidarGroup:
                                     vfov = lidar_spec["vfov"],
                                     pos_offset= lidar_spec["pos_offset"],
                                     angle_offset= lidar_spec["angle_offset"],
-                                    height = lidar_spec["height"]
+                                    pitch = np.deg2rad(2)
                                     )
                                       for lidar_spec in lidar_config]
         self.available = True if self.all_available(self.lidars) else False

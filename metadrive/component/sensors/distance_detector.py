@@ -24,10 +24,21 @@ def add_cloud_point_vis(
     return laser_index, (point_x, point_y, height), (f * MARK_COLOR0, f * MARK_COLOR1, f * MARK_COLOR2)
 
 
+def d3_get_laser_end(lidar_range, perceive_distance, laser_index, heading_theta, 
+                     vehicle_position_x, vehicle_position_y, vehicle_position_z,pitch):
+    angle = lidar_range[laser_index] + heading_theta
+    return (
+        perceive_distance * math.cos(angle) * math.cos(pitch) + vehicle_position_x,
+        perceive_distance * math.sin(angle) * math.cos(pitch) + vehicle_position_y,
+        perceive_distance * math.sin(pitch) + vehicle_position_z
+    )
+
+
+
 def perceive(
     cloud_points, detector_mask, mask, lidar_range, perceive_distance, heading_theta, vehicle_position_x,
     vehicle_position_y, num_lasers, height, physics_world, extra_filter_node, require_colors, ANGLE_FACTOR, MARK_COLOR0,
-    MARK_COLOR1, MARK_COLOR2
+    MARK_COLOR1, MARK_COLOR2,pitch
 ):
     cloud_points.fill(1.0)
     detected_objects = []
@@ -38,23 +49,23 @@ def perceive(
         if (detector_mask is not None) and (not detector_mask[laser_index]):
             # update vis
             if require_colors:
-                point_x, point_y = get_laser_end(
-                    lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y
+                point_x, point_y, point_z = d3_get_laser_end(
+                    lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y,height,pitch
                 )
-                point_x, point_y, point_z = panda_vector(point_x, point_y, height)
+                point_x, point_y, point_z = panda_vector(point_x, point_y, point_z)
                 colors.append(
                     add_cloud_point_vis(
-                        point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1,
+                        point_x, point_y, point_z, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1,
                         MARK_COLOR2
                     )
                 )
             continue
 
         # # coordinates problem here! take care
-        point_x, point_y = get_laser_end(
-            lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y
+        point_x, point_y, point_z = d3_get_laser_end(
+            lidar_range, perceive_distance, laser_index, heading_theta, vehicle_position_x, vehicle_position_y,height,pitch
         )
-        laser_end = panda_vector(point_x, point_y, height)
+        laser_end = panda_vector(point_x, point_y, point_z)
         result = physics_world.rayTestClosest(pg_start_position, laser_end, mask)
         node = result.getNode()
         if node in extra_filter_node:
@@ -78,7 +89,7 @@ def perceive(
         if require_colors:
             colors.append(
                 add_cloud_point_vis(
-                    laser_end[0], laser_end[1], height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1,
+                    laser_end[0], laser_end[1], laser_end[2], num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1,
                     MARK_COLOR2
                 )
             )
@@ -96,7 +107,10 @@ class DistanceDetector:
     MARK_COLOR = (51 / 255, 221 / 255, 1)
     ANGLE_FACTOR = False
 
-    def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show=True):
+    def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show=True, pitch = 0):
+        """
+        pitch: in rad
+        """
         # properties
         self._node_path_list = []
 
@@ -111,6 +125,8 @@ class DistanceDetector:
         self.radian_unit = 2 * np.pi / num_lasers if self.num_lasers > 0 else None
         self.start_phase_offset = 0
         self._lidar_range = np.arange(0, self.num_lasers) * self.radian_unit + self.start_phase_offset
+        self.pitch = pitch
+
 
         # override these properties to decide which elements to detect and show
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
@@ -149,7 +165,8 @@ class DistanceDetector:
             ANGLE_FACTOR=self.ANGLE_FACTOR,
             MARK_COLOR0=self.MARK_COLOR[0],
             MARK_COLOR1=self.MARK_COLOR[1],
-            MARK_COLOR2=self.MARK_COLOR[2]
+            MARK_COLOR2=self.MARK_COLOR[2],
+            pitch = self.pitch
         )
         if self.cloud_points_vis is not None:
             for laser_index, pos, color in colors:
@@ -165,6 +182,9 @@ class DistanceDetector:
         )
 
     def _get_laser_end(self, laser_index, heading_theta, vehicle_position):
+        """
+        This method seems not called anywhere. Consider removing it?
+        """
         point_x = self.perceive_distance * math.cos(self._lidar_range[laser_index] + heading_theta) + \
                   vehicle_position[0]
         point_y = self.perceive_distance * math.sin(self._lidar_range[laser_index] + heading_theta) + \
@@ -202,6 +222,12 @@ class DistanceDetector:
     
     def set_height(self, new_height:float):
         self.height = new_height
+    
+    def set_pitch(self, new_pitch:float):
+        """
+        new_pitch, in radian relative to x-y plane in a right handed system.
+        """
+        self.pitch = new_pitch
 
 
 class SideDetector(DistanceDetector):
