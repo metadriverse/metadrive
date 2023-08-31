@@ -27,8 +27,8 @@ if __name__ == "__main__":
         random_lane_width=True,
         random_lane_num=True,
         vehicle_config=dict(show_lidar=False, show_navi_mark=False),
-        # debug=True,
-        # debug_static_world=True,
+        debug=True,
+        debug_static_world=True,
         map=4,  # seven block
         start_seed=10,
     )

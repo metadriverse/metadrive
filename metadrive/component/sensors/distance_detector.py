@@ -199,6 +199,9 @@ class DistanceDetector:
     def attach_to_world(self, engine):
         if isinstance(self.origin, NodePath):
             self.origin.reparentTo(engine.render)
+    
+    def set_height(self, new_height:float):
+        self.height = new_height
 
 
 class SideDetector(DistanceDetector):

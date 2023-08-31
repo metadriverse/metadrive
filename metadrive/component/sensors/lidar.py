@@ -132,7 +132,7 @@ class Lidar(DistanceDetector):
             head_in_1 = relative_head - head1
             head_in_1_max = head_in_1 + span
             head_in_1_min = head_in_1 - span
-            head_1_max = np.rad2deg(head_in_1_max)
+            head_1_max = np.rad2deg(head_in_1_max) 
             head_1_min = np.rad2deg(head_in_1_min)
             mask = self._mark_this_range(head_1_min, head_1_max, mask)
 
@@ -185,16 +185,17 @@ class SpecialLidar(Lidar):
     as extra parameters for more realistic Lidar setting. Still need to extend the raytest to shoot rays along z axis.
     In addition, I couldn't fiure out how to correctly rebase the center of the lidar in car's coordinate.
     """
-    def __init__(self, num_lasers: int = 60, distance: float = 50, enable_show=False, hfov = 360, vfov = 0, pos_offset = None, angle_offset = None):
+    def __init__(self, num_lasers: int = 60, distance: float = 50, enable_show=False, 
+                 hfov = 360, vfov = 0, pos_offset = None, angle_offset = None, height = 1.2
+                 ):
         super(SpecialLidar,self).__init__(num_lasers, distance, enable_show)
         self.radian_unit = np.deg2rad(hfov) / num_lasers
         self.set_start_phase_offset(angle_offset)
+        self.set_height(height)
         self.pos_offset = pos_offset
         self.vfov = vfov #Maybe shoot rays with variations along the vertical axis? Not used at this moment.
         self.angle_offset = angle_offset
         self.angle_delta = (hfov) / num_lasers 
-
-
 
     def perceive(self, base_vehicle, detector_mask=True):
         """
@@ -203,23 +204,29 @@ class SpecialLidar(Lidar):
         res = self._get_lidar_mask(base_vehicle, self.pos_offset, np.deg2rad(self.angle_offset))
         lidar_mask = res[0] if detector_mask and self.enable_mask else None
         detected_objects = res[1]
-        mpos = (base_vehicle.position[0] + self.pos_offset[0], 
-                base_vehicle.position[1] + self.pos_offset[1])
+        heading = base_vehicle.heading
+        heading_orth = -heading[1],heading[0]
+        mpos = base_vehicle.position if not self.pos_offset else \
+            (base_vehicle.position[0] + heading[0]*self.pos_offset[0] + heading_orth[0]*self.pos_offset[1],
+             base_vehicle.position[1] + heading[1]*self.pos_offset[0] + heading_orth[1]*self.pos_offset[1])
         mheading = base_vehicle.heading_theta #+ np.deg2rad(self.angle_offset)
         return  super(Lidar, self).perceive(base_vehicle, base_vehicle.engine.physics_world.dynamic_world,
                                            lidar_mask, mpos, mheading)[0], detected_objects
-    
     def _get_lidar_mask(self, vehicle, pos_offset = None, angle_offset = None):
         """
         Same as Lidar._get_lidar_mask with extra position offset(erroneous) and angular offset(correct)
         """
-        pos1 = vehicle.position if not pos_offset else (vehicle.position[0] + pos_offset[0],vehicle.position[1] + pos_offset[1])
+        heading = vehicle.heading
+        heading_orth = -heading[1],heading[0]
+        pos1 = vehicle.position if not pos_offset else \
+            (vehicle.position[0] + heading[0]*pos_offset[0] + heading_orth[0]*pos_offset[1],
+            vehicle.position[1] + heading[1]*pos_offset[0] + heading_orth[1]*pos_offset[1])
         head1 = vehicle.heading_theta if not angle_offset else vehicle.heading_theta + angle_offset
         mask = np.zeros((self.num_lasers, ), dtype=bool)
         mask.fill(False)
-        objs = self.get_surrounding_objects(vehicle, pos_offset = None, angle_offset = None)
+        objs = self.get_surrounding_objects(vehicle, pos_offset = pos_offset, angle_offset = angle_offset)
         for obj in objs:
-            pos2 = obj.position
+            pos2 = obj.position #could be hereS
             length = obj.LENGTH if hasattr(obj, "LENGTH") else vehicle.LENGTH
             width = obj.WIDTH if hasattr(obj, "WIDTH") else vehicle.WIDTH
             half_max_span_square = ((length + width) / 2)**2
@@ -235,8 +242,8 @@ class SpecialLidar(Lidar):
             head_in_1 = relative_head - head1
             head_in_1_max = head_in_1 + span
             head_in_1_min = head_in_1 - span
-            head_1_max = np.rad2deg(head_in_1_max) + angle_offset
-            head_1_min = np.rad2deg(head_in_1_min) + self.angle_offset
+            head_1_max = np.rad2deg(head_in_1_max) 
+            head_1_min = np.rad2deg(head_in_1_min) 
             mask = self._mark_this_range(head_1_min, head_1_max, mask)
 
         return mask, objs
@@ -244,7 +251,10 @@ class SpecialLidar(Lidar):
         """
         Same as Lidar._get_lidar_mask with extra position offset(erroneous) and angular offset(correct)
         """
-        pos = vehicle.position if not pos_offset else (vehicle.position[0] + pos_offset[0],vehicle.position[1] + pos_offset[1])
+        heading = vehicle.heading
+        heading_orth = -heading[1],heading[0]
+        pos = vehicle.position if not pos_offset else (vehicle.position[0] + heading[0]*pos_offset[0] + heading_orth[0]*pos_offset[1],
+                                                       vehicle.position[1] + heading[1]*pos_offset[0] + heading_orth[1]*pos_offset[1])
         self.broad_detector.setPos(panda_vector(pos))
         physics_world = vehicle.engine.physics_world.dynamic_world
         contact_results = physics_world.contactTest(self.broad_detector.node(), True).getContacts()
@@ -281,7 +291,8 @@ class LidarGroup:
                                     hfov = lidar_spec["hfov"],
                                     vfov = lidar_spec["vfov"],
                                     pos_offset= lidar_spec["pos_offset"],
-                                    angle_offset= lidar_spec["angle_offset"]
+                                    angle_offset= lidar_spec["angle_offset"],
+                                    height = lidar_spec["height"]
                                     )
                                       for lidar_spec in lidar_config]
         self.available = True if self.all_available(self.lidars) else False
@@ -300,7 +311,6 @@ class LidarGroup:
             obs, objects = lidar.perceive(base_vehicle)
             result.append(min(obs))
             objectss.append(objects)
-        print(result)
         return result,objectss 
     def detach_from_world(self):
         for lidar in self.lidars:

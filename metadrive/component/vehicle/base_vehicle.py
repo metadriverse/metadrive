@@ -215,15 +215,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
             self.engine.global_config["vehicle_config"]["show_lane_line_detector"]
         )
-        """
-        
-        self.lidar = Lidar(
-            config["lidar"]["num_lasers"], config["lidar"]["distance"],
-            self.engine.global_config["vehicle_config"]["show_lidar"]
-        )
-        """
-        #overwrote the Lidar module with LidarGroup. The observation of LidarGroup has shape (n) where n = len(lidar_config)
-        # (for intern purpose, could be easily modified in lidar.py)
         lidar_config = [
             dict(
                 num_lasers = 60,
@@ -231,8 +222,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
                 hfov = 60,
                 vfov = 0,
-                pos_offset= (0,0),
-                angle_offset= 15#22.5
+                pos_offset= (1,1),
+                angle_offset= 15,
+                height = 10
+
             ),
             dict(
                 num_lasers = 60,
@@ -240,8 +233,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
                 hfov = 60,
                 vfov = 0,
-                pos_offset= (0,0),
-                angle_offset= 105 #22.5
+                pos_offset= (-1,1),
+                angle_offset= 105,
+                height = 10
             ),
             dict(
                 num_lasers = 60,
@@ -249,8 +243,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
                 hfov = 60,
                 vfov = 0,
-                pos_offset= (0,0),
-                angle_offset= 195 #22.5
+                pos_offset= (-1,-1),
+                angle_offset= 195,
+                height = 10
             ),
             dict(
                 num_lasers = 60,
@@ -258,13 +253,21 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
                 hfov = 60,
                 vfov = 0,
-                pos_offset= (0,0),
-                angle_offset= 285 #22.5
+                pos_offset= (1,-1),
+                angle_offset= 285,
+                height = 10
             ),
+            
   
-        ]
-        
+        ]        
         self.lidar = LidarGroup(lidar_config)
+        """self.lidar = Lidar(
+        config["lidar"]["num_lasers"], config["lidar"]["distance"],
+        self.engine.global_config["vehicle_config"]["show_lidar"])"""
+
+        #overwrote the Lidar module with LidarGroup. The observation of LidarGroup has shape (n) where n = len(lidar_config)
+        # (for intern purpose, could be easily modified in lidar.py)
+        
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
