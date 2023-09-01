@@ -215,7 +215,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
             self.engine.global_config["vehicle_config"]["show_lane_line_detector"]
         )
-        lidar_config = [
+        DEFAULT_LIDAR_CONFIG = [
             dict(
                 num_lasers = 10,
                 distance = 10,
@@ -259,12 +259,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 angle_offset= 105,
                 pitch = 0,
                 num_lasers_v = 5
-            ),
-            
-  
+            )
         ]       
-        self.lidar = LidarGroup(lidar_config)
-        """ self.lidar = Lidar(
+        self.lidar = LidarGroup(DEFAULT_LIDAR_CONFIG, True, False)
+
+        """self.lidar = Lidar(
         config["lidar"]["num_lasers"], config["lidar"]["distance"],
         self.engine.global_config["vehicle_config"]["show_lidar"])"""
 

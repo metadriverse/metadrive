@@ -145,6 +145,8 @@ class DistanceDetector:
                 self.cloud_points_vis.append(ball)
             # self.origin.flattenStrong()
 
+        self.closest_observed_point = None
+
     def perceive(self, base_vehicle, physics_world, detector_mask: np.ndarray = None,position = None, heading = None, ):
         assert self.available
         assert self.num_lasers_v == 1, "You should use perceive3d!"
@@ -190,6 +192,8 @@ class DistanceDetector:
         all_objcts  = []
         base = 0
         pitch_space = np.linspace(self.pitch - self.vfov/2, self.pitch + self.vfov, self.num_lasers_v)
+        minimum = 2
+        minimum_pos = None
         for i in range(self.num_lasers_v):
             current_pitch = pitch_space[i]
             cloud_points, detected_objects, colors = perceive(
@@ -212,6 +216,10 @@ class DistanceDetector:
                 MARK_COLOR2=self.MARK_COLOR[2],
                 pitch = current_pitch
             )
+            candidate = min(cloud_points)
+            if candidate <1 and candidate < minimum :
+                minimum = candidate
+                minimum_pos = colors[np.argmin(cloud_points)][1]
             if self.cloud_points_vis is not None:
                 for laser_index, pos, color in colors:
                     self.cloud_points_vis[base + laser_index].setPos(pos)
@@ -219,6 +227,7 @@ class DistanceDetector:
                 base += len(colors)
             all_cloud_points += cloud_points.tolist()
             all_objcts += detected_objects
+        self.closest_observed_point = (minimum, minimum_pos)
         return  detect_result(cloud_points=all_cloud_points, detected_objects=all_objcts)
 
     def _add_cloud_point_vis(self, laser_index, pos):

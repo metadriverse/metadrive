@@ -304,7 +304,7 @@ class LidarGroup:
     """
     A group of special lidars. 
     """
-    def __init__(self, lidar_config):
+    def __init__(self, lidar_config, generate_data, debug):
 
         self.lidars = [SpecialLidar(num_lasers = lidar_spec["num_lasers"],
                                     distance = lidar_spec["distance"],
@@ -318,7 +318,9 @@ class LidarGroup:
                                     )
                                       for lidar_spec in lidar_config]
         self.available = True if self.all_available(self.lidars) else False
-
+        self.generate_data = generate_data
+        self.debug = debug
+        self.data = []
 
     def all_available(self,lidars : list):
         for lidar in lidars:
@@ -328,12 +330,19 @@ class LidarGroup:
     def perceive(self, base_vehicle):
         result = []
         objectss = []
+        gts = []
         for lidar in self.lidars:
             obs, objects = lidar.perceive(base_vehicle)
+            if self.debug:
+                print(lidar.closest_observed_point)
+            gts.append(lidar.closest_observed_point)
             result.append(min(obs))
             objectss.append(objects)
-        print(result)
-        return result,objectss 
+        if self.generate_data:
+            self.data = gts
+        if self.debug:
+            print(result)
+        return result,objectss
     def detach_from_world(self):
         for lidar in self.lidars:
             lidar.detach_from_world()

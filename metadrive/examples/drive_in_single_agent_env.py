@@ -11,10 +11,57 @@ import random
 
 import cv2
 import numpy as np
-
+from metadrive.component.sensors.lidar import LidarGroup
 from metadrive import MetaDriveEnv
 from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.constants import HELP_MESSAGE
+
+DEFAULT_LIDAR_CONFIG = [
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = True,
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (1,1),
+                angle_offset= 15,
+                pitch = 0,
+                num_lasers_v = 5
+            ),
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = True,
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (1,-1),
+                angle_offset= 285,
+                pitch = 0,
+                num_lasers_v = 5
+            ),
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = True,
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (-1,-1),
+                angle_offset= 195,
+                pitch = 0,
+                num_lasers_v = 5
+            ),
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = True,
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (-1,1),
+                angle_offset= 105,
+                pitch = 0,
+                num_lasers_v = 5
+            )
+        ]       
 
 if __name__ == "__main__":
     config = dict(
@@ -45,6 +92,7 @@ if __name__ == "__main__":
         )
     else:
         config["vehicle_config"]["show_lidar"] = True
+        #config["vehicle_config"].update(dict(lidar_group = DEFAULT_LIDAR_CONFIG))
     env = MetaDriveEnv(config)
     try:
         o, _ = env.reset(seed=21)
@@ -58,6 +106,10 @@ if __name__ == "__main__":
             print("The observation is an numpy array with shape: ", o.shape)
         for i in range(1, 1000000000):
             o, r, tm, tc, info = env.step([0, 0])
+            agent = env.vehicle
+            if isinstance(agent.lidar, LidarGroup) and agent.lidar.generate_data:
+                observation = o
+                gt = agent.lidar.data
             env.render(
                 text={
                     "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
