@@ -217,46 +217,54 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         )
         lidar_config = [
             dict(
-                num_lasers = 60,
-                distance = 50,
+                num_lasers = 10,
+                distance = 10,
                 enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
                 hfov = 60,
-                vfov = 0,
+                vfov = 5,
                 pos_offset= (1,1),
                 angle_offset= 15,
+                pitch = 0,
+                num_lasers_v = 5
             ),
             dict(
-                num_lasers = 60,
-                distance = 50,
+                num_lasers = 10,
+                distance = 10,
                 enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
                 hfov = 60,
-                vfov = 0,
-                pos_offset= (-1,1),
-                angle_offset= 105,
-            ),
-            dict(
-                num_lasers = 60,
-                distance = 50,
-                enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
-                hfov = 60,
-                vfov = 0,
-                pos_offset= (-1,-1),
-                angle_offset= 195,
-            ),
-            dict(
-                num_lasers = 60,
-                distance = 50,
-                enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
-                hfov = 60,
-                vfov = 0,
+                vfov = 5,
                 pos_offset= (1,-1),
                 angle_offset= 285,
+                pitch = 0,
+                num_lasers_v = 5
+            ),
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (-1,-1),
+                angle_offset= 195,
+                pitch = 0,
+                num_lasers_v = 5
+            ),
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = self.engine.global_config["vehicle_config"]["show_lidar"],
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (-1,1),
+                angle_offset= 105,
+                pitch = 0,
+                num_lasers_v = 5
             ),
             
   
-        ]        
+        ]       
         self.lidar = LidarGroup(lidar_config)
-        """self.lidar = Lidar(
+        """ self.lidar = Lidar(
         config["lidar"]["num_lasers"], config["lidar"]["distance"],
         self.engine.global_config["vehicle_config"]["show_lidar"])"""
 

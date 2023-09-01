@@ -107,13 +107,13 @@ class DistanceDetector:
     MARK_COLOR = (51 / 255, 221 / 255, 1)
     ANGLE_FACTOR = False
 
-    def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show=True, pitch = 0):
+    def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show:bool=True,
+                  pitch:float = 0, vfov:float = 0, num_lasers_v:int = 1):
         """
         pitch: in rad
         """
         # properties
         self._node_path_list = []
-
         self.available = True if num_lasers > 0 and distance > 0 else False
         parent_node_np: NodePath = get_engine().render
         self.origin = parent_node_np.attachNewNode("Could_points")
@@ -125,7 +125,10 @@ class DistanceDetector:
         self.radian_unit = 2 * np.pi / num_lasers if self.num_lasers > 0 else None
         self.start_phase_offset = 0
         self._lidar_range = np.arange(0, self.num_lasers) * self.radian_unit + self.start_phase_offset
+
         self.pitch = pitch
+        self.num_lasers_v = num_lasers_v
+        self.vfov = np.deg2rad(vfov)
 
 
         # override these properties to decide which elements to detect and show
@@ -134,9 +137,9 @@ class DistanceDetector:
         self.cloud_points_vis = [] if show else None
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         if show:
-            for laser_debug in range(self.num_lasers):
+            for laser_debug in range(self.num_lasers*self.num_lasers_v):
                 ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-                ball.setScale(0.5)
+                ball.setScale(0.25)
                 ball.setColor(0., 0.5, 0.5, 1)
                 ball.reparentTo(self.origin)
                 self.cloud_points_vis.append(ball)
@@ -144,6 +147,7 @@ class DistanceDetector:
 
     def perceive(self, base_vehicle, physics_world, detector_mask: np.ndarray = None,position = None, heading = None, ):
         assert self.available
+        assert self.num_lasers_v == 1, "You should use perceive3d!"
         extra_filter_node = set(base_vehicle.dynamic_nodes)
         vehicle_position = base_vehicle.position if position is None else position   #Added this conditional to make the lidar's spatial property configuration 
         heading_theta = base_vehicle.heading_theta if heading is None else heading   #Added this conditional to make the lidar's spatial property configuration
@@ -173,6 +177,49 @@ class DistanceDetector:
                 self.cloud_points_vis[laser_index].setPos(pos)
                 self.cloud_points_vis[laser_index].setColor(*color)
         return detect_result(cloud_points=cloud_points.tolist(), detected_objects=detected_objects)
+    
+
+
+    def perceive3d(self, base_vehicle, physics_world, detector_mask: np.ndarray = None,position = None, 
+                   heading = None):
+        assert self.available
+        extra_filter_node = set(base_vehicle.dynamic_nodes)
+        vehicle_position = base_vehicle.position if position is None else position   
+        heading_theta = base_vehicle.heading_theta if heading is None else heading
+        all_cloud_points = []
+        all_objcts  = []
+        base = 0
+        pitch_space = np.linspace(self.pitch - self.vfov/2, self.pitch + self.vfov, self.num_lasers_v)
+        for i in range(self.num_lasers_v):
+            current_pitch = pitch_space[i]
+            cloud_points, detected_objects, colors = perceive(
+                cloud_points=np.ones((self.num_lasers, ), dtype=float),
+                detector_mask=detector_mask.astype(dtype=np.uint8) if detector_mask is not None else None,
+                mask=self.mask,
+                lidar_range=self._lidar_range,
+                perceive_distance=self.perceive_distance,
+                heading_theta=heading_theta,
+                vehicle_position_x=vehicle_position[0],
+                vehicle_position_y=vehicle_position[1],
+                num_lasers=self.num_lasers,
+                height=self.height,
+                physics_world=physics_world,
+                extra_filter_node=extra_filter_node if extra_filter_node else set(),
+                require_colors=self.cloud_points_vis is not None,
+                ANGLE_FACTOR=self.ANGLE_FACTOR,
+                MARK_COLOR0=self.MARK_COLOR[0],
+                MARK_COLOR1=self.MARK_COLOR[1],
+                MARK_COLOR2=self.MARK_COLOR[2],
+                pitch = current_pitch
+            )
+            if self.cloud_points_vis is not None:
+                for laser_index, pos, color in colors:
+                    self.cloud_points_vis[base + laser_index].setPos(pos)
+                    self.cloud_points_vis[base + laser_index].setColor(*color)
+                base += len(colors)
+            all_cloud_points += cloud_points.tolist()
+            all_objcts += detected_objects
+        return  detect_result(cloud_points=all_cloud_points, detected_objects=all_objcts)
 
     def _add_cloud_point_vis(self, laser_index, pos):
         self.cloud_points_vis[laser_index].setPos(pos)
@@ -228,6 +275,9 @@ class DistanceDetector:
         new_pitch, in radian relative to x-y plane in a right handed system.
         """
         self.pitch = new_pitch
+    def set_vfov(self, new_vfov:float):
+        self.vfov = new_vfov
+
 
 
 class SideDetector(DistanceDetector):

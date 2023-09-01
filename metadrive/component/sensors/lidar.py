@@ -38,6 +38,25 @@ class Lidar(DistanceDetector):
 
         self._node_path_list.append(self.broad_detector)
 
+    def __init__(self, num_lasers: int = 240, distance: float = 50, enable_show=False, num_lasers_v: int = 1):
+        super(Lidar, self).__init__(
+            num_lasers= num_lasers, distance=distance, enable_show=enable_show, num_lasers_v=num_lasers_v
+            )
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.mask = CollisionGroup.can_be_lidar_detected()
+
+        # lidar can calculate the detector mask by itself
+        self.angle_delta = 360 / num_lasers if num_lasers > 0 else None
+        self.broad_detector = NodePath(BulletGhostNode("detector_mask"))
+        self.broad_detector.node().addShape(BulletCylinderShape(self.BROAD_PHASE_EXTRA_DIST + distance, 5))
+        self.broad_detector.node().setIntoCollideMask(CollisionGroup.LidarBroadDetector)
+        self.broad_detector.node().setStatic(True)
+        engine = get_engine()
+        engine.physics_world.static_world.attach(self.broad_detector.node())
+        self.enable_mask = True if not engine.global_config["_disable_detector_mask"] else False
+
+        self._node_path_list.append(self.broad_detector)
+
     def perceive(self, base_vehicle, detector_mask=True):
         res = self._get_lidar_mask(base_vehicle)
         lidar_mask = res[0] if detector_mask and self.enable_mask else None
@@ -186,17 +205,18 @@ class SpecialLidar(Lidar):
     In addition, I couldn't fiure out how to correctly rebase the center of the lidar in car's coordinate.
     """
     def __init__(self, num_lasers: int = 60, distance: float = 50, enable_show=False, 
-                 hfov = 360, vfov = 0, pos_offset = None, angle_offset = None, height = 1.2, pitch = 0
+                 hfov = 360, vfov = 0, pos_offset = None, angle_offset = None, height = 1.2, pitch = 0, num_lasers_v = 1
                  ):
-        super(SpecialLidar,self).__init__(num_lasers, distance, enable_show)
+        super(SpecialLidar,self).__init__(num_lasers, distance, enable_show, num_lasers_v)
         self.radian_unit = np.deg2rad(hfov) / num_lasers
         self.set_start_phase_offset(angle_offset)
         self.set_height(height)
         self.pos_offset = pos_offset
-        self.vfov = vfov #Maybe shoot rays with variations along the vertical axis? Not used at this moment.
+        self.set_vfov(np.deg2rad(vfov)) #Maybe shoot rays with variations along the vertical axis? Not used at this moment.
         self.angle_offset = angle_offset
         self.angle_delta = (hfov) / num_lasers 
         self.set_pitch(pitch)
+        
 
     def perceive(self, base_vehicle, detector_mask=True):
         """
@@ -211,7 +231,7 @@ class SpecialLidar(Lidar):
             (base_vehicle.position[0] + heading[0]*self.pos_offset[0] + heading_orth[0]*self.pos_offset[1],
              base_vehicle.position[1] + heading[1]*self.pos_offset[0] + heading_orth[1]*self.pos_offset[1])
         mheading = base_vehicle.heading_theta #+ np.deg2rad(self.angle_offset)
-        return  super(Lidar, self).perceive(base_vehicle, base_vehicle.engine.physics_world.dynamic_world,
+        return  super(Lidar, self).perceive3d(base_vehicle, base_vehicle.engine.physics_world.dynamic_world,
                                            lidar_mask, mpos, mheading)[0], detected_objects
     def _get_lidar_mask(self, vehicle, pos_offset = None, angle_offset = None):
         """
@@ -293,7 +313,8 @@ class LidarGroup:
                                     vfov = lidar_spec["vfov"],
                                     pos_offset= lidar_spec["pos_offset"],
                                     angle_offset= lidar_spec["angle_offset"],
-                                    pitch = np.deg2rad(2)
+                                    pitch = np.deg2rad(lidar_spec["pitch"]),
+                                    num_lasers_v= lidar_spec["num_lasers_v"]
                                     )
                                       for lidar_spec in lidar_config]
         self.available = True if self.all_available(self.lidars) else False
@@ -303,8 +324,7 @@ class LidarGroup:
         for lidar in lidars:
             if lidar.available == False:
                 return False
-        return True
-    
+        return True 
     def perceive(self, base_vehicle):
         result = []
         objectss = []
@@ -312,6 +332,7 @@ class LidarGroup:
             obs, objects = lidar.perceive(base_vehicle)
             result.append(min(obs))
             objectss.append(objects)
+        print(result)
         return result,objectss 
     def detach_from_world(self):
         for lidar in self.lidars:
