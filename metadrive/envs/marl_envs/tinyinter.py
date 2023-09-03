@@ -51,7 +51,8 @@ class CommunicationObservation(LidarStateObservation):
                 vehicle,
                 physics_world=self.engine.physics_world.dynamic_world,
                 num_lasers=lidar_cfg["num_lasers"],
-                distance=lidar_cfg["distance"]
+                distance=lidar_cfg["distance"],
+                show=self.config["vehicle_config"]["show_lidar"]
             )
 
             other_v_info = self.get_global_info(vehicle)

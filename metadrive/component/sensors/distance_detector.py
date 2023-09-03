@@ -1,7 +1,8 @@
 from collections import namedtuple
+from metadrive.engine.core.line import MyLineNodePath
 
 import numpy as np
-from panda3d.core import NodePath
+from panda3d.core import NodePath, LVecBase4
 
 from metadrive.component.sensors import BaseSensor
 from metadrive.constants import CamMask, CollisionGroup
@@ -14,7 +15,7 @@ detect_result = namedtuple("detect_result", "cloud_points detected_objects")
 
 
 def add_cloud_point_vis(
-    point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1, MARK_COLOR2
+        point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1, MARK_COLOR2
 ):
     f = laser_index / num_lasers if ANGLE_FACTOR else 1
     f *= 0.9
@@ -23,9 +24,10 @@ def add_cloud_point_vis(
 
 
 def perceive(
-    cloud_points, detector_mask, mask, lidar_range, perceive_distance, heading_theta, vehicle_position_x,
-    vehicle_position_y, num_lasers, height, physics_world, extra_filter_node, require_colors, ANGLE_FACTOR, MARK_COLOR0,
-    MARK_COLOR1, MARK_COLOR2
+        cloud_points, detector_mask, mask, lidar_range, perceive_distance, heading_theta, vehicle_position_x,
+        vehicle_position_y, num_lasers, height, physics_world, extra_filter_node, require_colors, ANGLE_FACTOR,
+        MARK_COLOR0,
+        MARK_COLOR1, MARK_COLOR2
 ):
     cloud_points.fill(1.0)
     detected_objects = []
@@ -101,29 +103,27 @@ class DistanceDetector(BaseSensor):
         self._node_path_list = []
         parent_node_np: NodePath = engine.render
         self.origin = parent_node_np.attachNewNode("Could_points")
-        self.show = AssetLoader.loader is not None
         self.start_phase_offset = 0
 
         # override these properties to decide which elements to detect and show
         self.mask = CollisionGroup.BrokenLaneLine
         # visualization
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
-        self.cloud_points_vis = [] if self.show else None
+        self.cloud_points_vis = MyLineNodePath(engine.render, thickness=3.0) if AssetLoader.loader is not None else None
         self.logger.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
-        self.logger.warning("Lidar Fix render")
         self.logger.warning("Lidar Fix Multi-agent render")
         self.logger.warning("Tiny Inter perceive test!")
-        # if show:
-        #     for laser_debug in range(self.num_lasers):
-        #         ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-        #         ball.setScale(0.5)
-        #         ball.setColor(0., 0.5, 0.5, 1)
-        #         ball.reparentTo(self.origin)
-        #         self.cloud_points_vis.append(ball)
-        # self.origin.flattenStrong()
+        self._current_frame = None
 
     def perceive(
-        self, base_vehicle, physics_world, num_lasers, distance, height=None, detector_mask: np.ndarray = None
+            self,
+            base_vehicle,
+            physics_world,
+            num_lasers,
+            distance,
+            height=None,
+            detector_mask: np.ndarray = None,
+            show=False
     ):
         height = height or self.DEFAULT_HEIGHT
         extra_filter_node = set(base_vehicle.dynamic_nodes)
@@ -131,7 +131,7 @@ class DistanceDetector(BaseSensor):
         heading_theta = base_vehicle.heading_theta
         assert not isinstance(detector_mask, str), "Please specify detector_mask either with None or a numpy array."
         cloud_points, detected_objects, colors = perceive(
-            cloud_points=np.ones((num_lasers, ), dtype=float),
+            cloud_points=np.ones((num_lasers,), dtype=float),
             detector_mask=detector_mask.astype(dtype=np.uint8) if detector_mask is not None else None,
             mask=self.mask,
             lidar_range=self._get_lidar_range(num_lasers, self.start_phase_offset),
@@ -150,17 +150,19 @@ class DistanceDetector(BaseSensor):
             MARK_COLOR2=self.MARK_COLOR[2]
         )
 
-        self.logger.warning("Fix Here")
-        # if self.cloud_points_vis is not None:
-        #     for laser_index, pos, color in colors:
-        #         self.cloud_points_vis[laser_index].setPos(pos)
-        #         self.cloud_points_vis[laser_index].setColor(*color)
+        if show and self.cloud_points_vis is not None:
+            colors = colors + colors[:1]
+            if self._current_frame != self.engine.episode_step:
+                self.cloud_points_vis.reset()
+            self._current_frame = self.engine.episode_step
+            self.cloud_points_vis.drawLines([[p[1] for p in colors]], [[LVecBase4(*p[-1], 1) for p in colors[1:]]])
+            self.cloud_points_vis.create()
+
         return detect_result(cloud_points=cloud_points.tolist(), detected_objects=detected_objects)
 
     def destroy(self):
         if self.cloud_points_vis:
-            for vis_laser in self.cloud_points_vis:
-                vis_laser.removeNode()
+            self.cloud_points_vis.removeNode()
         self.origin.removeNode()
         for np in self._node_path_list:
             np.detachNode()

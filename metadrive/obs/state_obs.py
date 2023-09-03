@@ -81,7 +81,8 @@ class StateObservation(ObservationBase):
                 vehicle,
                 num_lasers=vehicle.config["side_detector"]["num_lasers"],
                 distance=vehicle.config["side_detector"]["distance"],
-                physics_world=vehicle.engine.physics_world.static_world
+                physics_world=vehicle.engine.physics_world.static_world,
+                show=self.config["vehicle_config"]["show_side_detector"],
             ).cloud_points
 
         else:
@@ -134,7 +135,8 @@ class StateObservation(ObservationBase):
                 vehicle,
                 vehicle.engine.physics_world.static_world,
                 num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
-                distance=vehicle.config["lane_line_detector"]["distance"]
+                distance=vehicle.config["lane_line_detector"]["distance"],
+                show=self.config["vehicle_config"]["show_lane_line_detector"],
             ).cloud_points
 
         else:
@@ -209,7 +211,8 @@ class LidarStateObservation(ObservationBase):
                 vehicle,
                 physics_world=self.engine.physics_world.dynamic_world,
                 num_lasers=vehicle.config["lidar"]["num_lasers"],
-                distance=vehicle.config["lidar"]["distance"]
+                distance=vehicle.config["lidar"]["distance"],
+                show=self.config["vehicle_config"]["show_lidar"],
             )
             if self.config["vehicle_config"]["lidar"]["num_others"] > 0:
                 other_v_info += self.engine.get_sensor("lidar").get_surrounding_vehicles_info(
