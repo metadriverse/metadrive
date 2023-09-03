@@ -1,6 +1,6 @@
+import math
 from typing import Set
 
-import math
 import numpy as np
 from panda3d.bullet import BulletGhostNode, BulletCylinderShape
 from panda3d.core import NodePath
@@ -21,15 +21,14 @@ class Lidar(DistanceDetector):
 
     BROAD_PHASE_EXTRA_DIST = 0
 
-    def __init__(self, num_lasers: int = 240, distance: float = 50, enable_show=False):
-        super(Lidar, self).__init__(num_lasers, distance, enable_show)
+    def __init__(self, broad_phase_distance, enable_show=False):
+        super(Lidar, self).__init__(enable_show)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = CollisionGroup.can_be_lidar_detected()
 
         # lidar can calculate the detector mask by itself
-        self.angle_delta = 360 / num_lasers if num_lasers > 0 else None
         self.broad_detector = NodePath(BulletGhostNode("detector_mask"))
-        self.broad_detector.node().addShape(BulletCylinderShape(self.BROAD_PHASE_EXTRA_DIST + distance, 5))
+        self.broad_detector.node().addShape(BulletCylinderShape(self.BROAD_PHASE_EXTRA_DIST + broad_phase_distance, 5))
         self.broad_detector.node().setIntoCollideMask(CollisionGroup.LidarBroadDetector)
         self.broad_detector.node().setStatic(True)
         engine = get_engine()
@@ -38,12 +37,23 @@ class Lidar(DistanceDetector):
 
         self._node_path_list.append(self.broad_detector)
 
-    def perceive(self, base_vehicle, detector_mask=True):
-        res = self._get_lidar_mask(base_vehicle)
+    def perceive(self,
+                 base_vehicle,
+                 physics_world,
+                 num_lasers,
+                 distance,
+                 height=None,
+                 detector_mask: np.ndarray = None):
+        res = self._get_lidar_mask(base_vehicle, num_lasers)
         lidar_mask = res[0] if detector_mask and self.enable_mask else None
         detected_objects = res[1]
-        return super(Lidar, self).perceive(base_vehicle, base_vehicle.engine.physics_world.dynamic_world,
-                                           lidar_mask)[0], detected_objects
+        return super(Lidar, self).perceive(base_vehicle,
+                                           physics_world,
+                                           distance=distance,
+                                           height=height,
+                                           num_lasers=num_lasers,
+                                           detector_mask=lidar_mask
+                                           )[0], detected_objects
 
     @staticmethod
     def get_surrounding_vehicles(detected_objects) -> Set:
@@ -55,15 +65,20 @@ class Lidar(DistanceDetector):
                 vehicles.add(ret)
         return vehicles
 
-    def _project_to_vehicle_system(self, target, vehicle):
+    def _project_to_vehicle_system(self, target, vehicle, perceive_distance):
         diff = target - vehicle.position
         norm_distance = norm(diff[0], diff[1])
-        if norm_distance > self.perceive_distance:
-            diff = diff / norm_distance * self.perceive_distance
+        if norm_distance > perceive_distance:
+            diff = diff / norm_distance * perceive_distance
         relative = vehicle.convert_to_local_coordinates(diff, 0.0)
         return relative
 
-    def get_surrounding_vehicles_info(self, ego_vehicle, detected_objects, num_others: int = 4, add_others_navi=False):
+    def get_surrounding_vehicles_info(self,
+                                      ego_vehicle,
+                                      detected_objects,
+                                      perceive_distance,
+                                      num_others,
+                                      add_others_navi):
         surrounding_vehicles = list(self.get_surrounding_vehicles(detected_objects))
         surrounding_vehicles.sort(
             key=lambda v: norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1])
@@ -79,8 +94,8 @@ class Lidar(DistanceDetector):
                 relative_position = ego_vehicle.convert_to_local_coordinates(vehicle.position, ego_position)
                 # It is possible that the centroid of other vehicle is too far away from ego but lidar shed on it.
                 # So the distance may greater than perceive distance.
-                res.append(clip((relative_position[0] / self.perceive_distance + 1) / 2, 0.0, 1.0))
-                res.append(clip((relative_position[1] / self.perceive_distance + 1) / 2, 0.0, 1.0))
+                res.append(clip((relative_position[0] / perceive_distance + 1) / 2, 0.0, 1.0))
+                res.append(clip((relative_position[1] / perceive_distance + 1) / 2, 0.0, 1.0))
 
                 relative_velocity = ego_vehicle.convert_to_local_coordinates(
                     vehicle.velocity_km_h, ego_vehicle.velocity_km_h
@@ -91,13 +106,13 @@ class Lidar(DistanceDetector):
                 if add_others_navi:
                     ckpt1, ckpt2 = vehicle.navigation.get_checkpoints()
 
-                    relative_ckpt1 = self._project_to_vehicle_system(ckpt1, ego_vehicle)
-                    res.append(clip((relative_ckpt1[0] / self.perceive_distance + 1) / 2, 0.0, 1.0))
-                    res.append(clip((relative_ckpt1[1] / self.perceive_distance + 1) / 2, 0.0, 1.0))
+                    relative_ckpt1 = self._project_to_vehicle_system(ckpt1, ego_vehicle, perceive_distance)
+                    res.append(clip((relative_ckpt1[0] / perceive_distance + 1) / 2, 0.0, 1.0))
+                    res.append(clip((relative_ckpt1[1] / perceive_distance + 1) / 2, 0.0, 1.0))
 
-                    relative_ckpt2 = self._project_to_vehicle_system(ckpt2, ego_vehicle)
-                    res.append(clip((relative_ckpt2[0] / self.perceive_distance + 1) / 2, 0.0, 1.0))
-                    res.append(clip((relative_ckpt2[1] / self.perceive_distance + 1) / 2, 0.0, 1.0))
+                    relative_ckpt2 = self._project_to_vehicle_system(ckpt2, ego_vehicle, perceive_distance)
+                    res.append(clip((relative_ckpt2[0] / perceive_distance + 1) / 2, 0.0, 1.0))
+                    res.append(clip((relative_ckpt2[1] / perceive_distance + 1) / 2, 0.0, 1.0))
 
             else:
 
@@ -108,20 +123,20 @@ class Lidar(DistanceDetector):
 
         return res
 
-    def _get_lidar_mask(self, vehicle):
+    def _get_lidar_mask(self, vehicle, num_lasers):
         pos1 = vehicle.position
         head1 = vehicle.heading_theta
 
-        mask = np.zeros((self.num_lasers, ), dtype=bool)
+        mask = np.zeros((num_lasers,), dtype=bool)
         mask.fill(False)
         objs = self.get_surrounding_objects(vehicle)
         for obj in objs:
             pos2 = obj.position
             length = obj.LENGTH if hasattr(obj, "LENGTH") else vehicle.LENGTH
             width = obj.WIDTH if hasattr(obj, "WIDTH") else vehicle.WIDTH
-            half_max_span_square = ((length + width) / 2)**2
+            half_max_span_square = ((length + width) / 2) ** 2
             diff = (pos2[0] - pos1[0], pos2[1] - pos1[1])
-            dist_square = diff[0]**2 + diff[1]**2
+            dist_square = diff[0] ** 2 + diff[1] ** 2
             if dist_square < half_max_span_square:
                 mask.fill(True)
                 continue
@@ -134,7 +149,7 @@ class Lidar(DistanceDetector):
             head_in_1_min = head_in_1 - span
             head_1_max = np.rad2deg(head_in_1_max)
             head_1_min = np.rad2deg(head_in_1_min)
-            mask = self._mark_this_range(head_1_min, head_1_max, mask)
+            mask = self._mark_this_range(head_1_min, head_1_max, mask, num_lasers)
 
         return mask, objs
 
@@ -155,7 +170,7 @@ class Lidar(DistanceDetector):
             objs.remove(vehicle)
         return objs
 
-    def _mark_this_range(self, small_angle, large_angle, mask):
+    def _mark_this_range(self, small_angle, large_angle, mask, num_lasers):
         # We use clockwise to determine small and large angle.
         # For example, if you wish to fill 355 deg to 5 deg, then small_angle is 355, large_angle is 5.
         small_angle = small_angle % 360
@@ -164,8 +179,10 @@ class Lidar(DistanceDetector):
         assert 0 <= small_angle <= 360
         assert 0 <= large_angle <= 360
 
-        small_index = math.floor(small_angle / self.angle_delta)
-        large_index = math.ceil(large_angle / self.angle_delta)
+        angle_delta = 360 / num_lasers if num_lasers > 0 else None
+
+        small_index = math.floor(small_angle / angle_delta)
+        large_index = math.ceil(large_angle / angle_delta)
         if large_angle < small_angle:  # We are in the case like small=355, large=5
             mask[small_index:] = True
             mask[:large_index + 1] = True

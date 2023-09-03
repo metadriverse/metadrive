@@ -1,4 +1,3 @@
-import logging
 import math
 import os
 from collections import deque
@@ -112,12 +111,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -206,20 +205,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_navigation()  # default added
 
         # add distance detector/lidar
-        self.side_detector = SideDetector(
-            config["side_detector"]["num_lasers"], config["side_detector"]["distance"],
-            self.engine.global_config["vehicle_config"]["show_side_detector"]
-        )
-
-        self.lane_line_detector = LaneLineDetector(
-            config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
-            self.engine.global_config["vehicle_config"]["show_lane_line_detector"]
-        )
-
-        self.lidar = Lidar(
-            config["lidar"]["num_lasers"], config["lidar"]["distance"],
-            self.engine.global_config["vehicle_config"]["show_lidar"]
-        )
+        self.side_detector = SideDetector(config["vehicle_config"]["show_side_detector"])
+        self.lane_line_detector = LaneLineDetector(config["vehicle_config"]["show_lane_line_detector"])
+        self.lidar = Lidar(config["vehicle_config"]["show_lidar"])
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
@@ -230,22 +218,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         # add distance detector/lidar
         if self.side_detector is None:
-            self.side_detector = SideDetector(
-                config["side_detector"]["num_lasers"], config["side_detector"]["distance"],
-                self.engine.global_config["vehicle_config"]["show_side_detector"]
-            )
+            self.side_detector = SideDetector(config["vehicle_config"]["show_side_detector"])
 
         if self.lane_line_detector is None:
-            self.lane_line_detector = LaneLineDetector(
-                config["lane_line_detector"]["num_lasers"], config["lane_line_detector"]["distance"],
-                self.engine.global_config["vehicle_config"]["show_lane_line_detector"]
-            )
+            self.lane_line_detector = LaneLineDetector(config["vehicle_config"]["show_lane_line_detector"])
 
         if self.lidar is None:
-            self.lidar = Lidar(
-                config["lidar"]["num_lasers"], config["lidar"]["distance"],
-                self.engine.global_config["vehicle_config"]["show_lidar"]
-            )
+            self.lidar = Lidar(config["vehicle_config"]["show_lidar"])
 
     def _init_step_info(self):
         # done info will be initialized every frame
@@ -323,14 +302,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        vehicle_config=None,
-        name=None,
-        random_seed=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,
-        *args,
-        **kwargs
+            self,
+            vehicle_config=None,
+            name=None,
+            random_seed=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -586,8 +565,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -907,13 +886,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return ret
 
     def _update_overtake_stat(self):
-        if self.config["overtake_stat"] and self.lidar.available:
+        lidar_available = self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0
+        if self.config["overtake_stat"] and lidar_available:
             surrounding_vs = self.lidar.get_surrounding_vehicles()
             routing = self.navigation
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -949,9 +929,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property

@@ -45,15 +45,18 @@ class CommunicationObservation(LidarStateObservation):
 
     def lidar_observe(self, vehicle):
         other_v_info = []
-        if vehicle.lidar.available:
-            cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
+        lidar_cfg = self.config["vehicle_config"]["lidar"]
+        if self.config["vehicle_config"]["lidar"]["num_lasers"] != 0:
+            cloud_points, detected_objects = vehicle.lidar.perceive(vehicle,
+                                                                    num_lasers=lidar_cfg["num_lasers"],
+                                                                    distance=lidar_cfg["distance"])
 
             other_v_info = self.get_global_info(vehicle)
 
             other_v_info += self._add_noise_to_cloud_points(
                 cloud_points,
-                gaussian_noise=self.config["vehicle_config"]["lidar"]["gaussian_noise"],
-                dropout_prob=self.config["vehicle_config"]["lidar"]["dropout_prob"]
+                gaussian_noise=lidar_cfg["gaussian_noise"],
+                dropout_prob=lidar_cfg["dropout_prob"]
             )
 
             self.cloud_points = cloud_points
@@ -124,7 +127,7 @@ class CommunicationObservation(LidarStateObservation):
         return vector
 
     def get_global_info(self, ego_vehicle):
-        perceive_distance = ego_vehicle.lidar.perceive_distance
+        perceive_distance = ego_vehicle.config["lidar"]["distance"]
         # perceive_distance = 20  # m
         speed_scale = 20  # km/h
 
@@ -169,13 +172,13 @@ class CommunicationObservation(LidarStateObservation):
             if add_others_navi:
                 ckpt1, ckpt2 = vehicle.navigation.get_checkpoints()
 
-                relative_ckpt1 = ego_vehicle.lidar._project_to_vehicle_system(ckpt1, ego_vehicle)
+                relative_ckpt1 = ego_vehicle.lidar._project_to_vehicle_system(ckpt1, ego_vehicle, perceive_distance)
                 relative_ckpt1 = self._process_norm(relative_ckpt1, perceive_distance)
                 res[slot_index * res_size + 5] = clip((relative_ckpt1[0] / perceive_distance + 1) / 2, 0.0, 1.0)
                 res[slot_index * res_size + 6] = clip((relative_ckpt1[1] / perceive_distance + 1) / 2, 0.0, 1.0)
 
                 relative_ckpt2 = ego_vehicle.lidar._project_to_vehicle_system(ckpt2, ego_vehicle)
-                relative_ckpt2 = self._process_norm(relative_ckpt2, perceive_distance)
+                relative_ckpt2 = self._process_norm(relative_ckpt2, perceive_distance, perceive_distance)
                 res[slot_index * res_size + 7] = clip((relative_ckpt2[0] / perceive_distance + 1) / 2, 0.0, 1.0)
                 res[slot_index * res_size + 8] = clip((relative_ckpt2[1] / perceive_distance + 1) / 2, 0.0, 1.0)
 
@@ -185,6 +188,7 @@ class CommunicationObservation(LidarStateObservation):
 
 class TinyInterRuleBasedPolicy(IDMPolicy):
     """No IDM and PID are used in this Policy!"""
+
     def __init__(self, control_object, random_seed, target_speed=10):
         super(TinyInterRuleBasedPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = target_speed  # Set to 10km/h. Default is 30km/h.
@@ -217,6 +221,7 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
+
     def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
         super(MixedIDMAgentManager, self).__init__(
             init_observations=init_observations, init_action_space=init_action_space
