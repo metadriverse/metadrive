@@ -267,7 +267,7 @@ def test_detector_mask_in_lidar():
             # print("We have: {} vehicles!".format(env.engine.traffic_manager.get_vehicle_num()))
 
             v = env.vehicle
-            c_p, objs = v.lidar.perceive(v,
+            c_p, objs =  env.engine.get_sensor("lidar").perceive(v,
                                          physics_world=env.engine.physics_world.dynamic_world,
                                          num_lasers=env.vehicle.config["lidar"]["num_lasers"],
                                          distance=env.vehicle.config["lidar"]["distance"],
@@ -303,7 +303,7 @@ def test_detector_mask_in_lidar():
 
             # assert sum(abs(mask.astype(int) - real_mask.astype(int))) <= 3
             v = env.vehicle
-            c_p, objs = v.lidar.perceive(v,
+            c_p, objs = env.engine.get_sensor("lidar").perceive(v,
                                          physics_world=env.vehicle.engine.physics_world.dynamic_world,
                                          num_lasers=env.vehicle.config["lidar"]["num_lasers"],
                                          distance=env.vehicle.config["lidar"]["distance"],)

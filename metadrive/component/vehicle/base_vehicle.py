@@ -842,23 +842,22 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return ret
 
     def _update_overtake_stat(self):
-        raise ValueError
-        # lidar_available = self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0
-        # if self.config["overtake_stat"] and lidar_available:
-        #     surrounding_vs = self.lidar.get_surrounding_vehicles()
-        #     routing = self.navigation
-        #     ckpt_idx = routing._target_checkpoints_index
-        #     for surrounding_v in surrounding_vs:
-        #         if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-        #         ]):
-        #             if self.lane.local_coordinates(self.position)[0] - \
-        #                     self.lane.local_coordinates(surrounding_v.position)[0] < 0:
-        #                 self.front_vehicles.add(surrounding_v)
-        #                 if surrounding_v in self.back_vehicles:
-        #                     self.back_vehicles.remove(surrounding_v)
-        #             else:
-        #                 self.back_vehicles.add(surrounding_v)
-        # return {"overtake_vehicle_num": self.get_overtake_num()}
+        lidar_available = self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0
+        if self.config["overtake_stat"] and lidar_available:
+            surrounding_vs = self.lidar.get_surrounding_vehicles()
+            routing = self.navigation
+            ckpt_idx = routing._target_checkpoints_index
+            for surrounding_v in surrounding_vs:
+                if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
+                ]):
+                    if self.lane.local_coordinates(self.position)[0] - \
+                            self.lane.local_coordinates(surrounding_v.position)[0] < 0:
+                        self.front_vehicles.add(surrounding_v)
+                        if surrounding_v in self.back_vehicles:
+                            self.back_vehicles.remove(surrounding_v)
+                    else:
+                        self.back_vehicles.add(surrounding_v)
+        return {"overtake_vehicle_num": self.get_overtake_num()}
 
     def get_overtake_num(self):
         return len(self.front_vehicles.intersection(self.back_vehicles))
@@ -1006,3 +1005,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)
         self.coordinates_debug_np.reparentTo(self.origin)
+
+    @property
+    def lidar(self):
+        return self.engine.get_sensor("lidar")
+
+    @property
+    def side_detector(self):
+        return self.engine.get_sensor("side_detector")
+
+    @property
+    def lane_line_detector(self):
+        return self.engine.get_sensor("lane_line_detector")

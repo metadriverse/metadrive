@@ -1,4 +1,3 @@
-import logging
 from collections import namedtuple
 
 import numpy as np
@@ -7,7 +6,7 @@ from panda3d.core import NodePath
 from metadrive.component.sensors import BaseSensor
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.engine.engine_utils import get_engine
+from metadrive.engine.logger import get_logger
 from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math import panda_vector, get_laser_end
 
@@ -96,12 +95,14 @@ class DistanceDetector(BaseSensor):
     MARK_COLOR = (51 / 255, 221 / 255, 1)
     ANGLE_FACTOR = False
 
-    def __init__(self, enable_show=True):
+    def __init__(self, engine):
+        self.logger = get_logger()
+        self.engine = engine
         # properties
         self._node_path_list = []
-        parent_node_np: NodePath = get_engine().render
+        parent_node_np: NodePath = engine.render
         self.origin = parent_node_np.attachNewNode("Could_points")
-        self.show = enable_show and (AssetLoader.loader is not None)
+        self.show = AssetLoader.loader is not None
         self.start_phase_offset = 0
 
         # override these properties to decide which elements to detect and show
@@ -109,10 +110,10 @@ class DistanceDetector(BaseSensor):
         # visualization
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.cloud_points_vis = [] if self.show else None
-        logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
-        logging.warning("Lidar Fix render")
-        logging.warning("Lidar Fix Multi-agent render")
-        logging.warning("Tiny Inter perceive test!")
+        self.logger.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
+        self.logger.warning("Lidar Fix render")
+        self.logger.warning("Lidar Fix Multi-agent render")
+        self.logger.warning("Tiny Inter perceive test!")
         # if show:
         #     for laser_debug in range(self.num_lasers):
         #         ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
@@ -153,10 +154,12 @@ class DistanceDetector(BaseSensor):
             MARK_COLOR1=self.MARK_COLOR[1],
             MARK_COLOR2=self.MARK_COLOR[2]
         )
-        if self.cloud_points_vis is not None:
-            for laser_index, pos, color in colors:
-                self.cloud_points_vis[laser_index].setPos(pos)
-                self.cloud_points_vis[laser_index].setColor(*color)
+
+        self.logger.warning("Fix Here")
+        # if self.cloud_points_vis is not None:
+        #     for laser_index, pos, color in colors:
+        #         self.cloud_points_vis[laser_index].setPos(pos)
+        #         self.cloud_points_vis[laser_index].setColor(*color)
         return detect_result(cloud_points=cloud_points.tolist(), detected_objects=detected_objects)
 
     def destroy(self):
@@ -181,7 +184,7 @@ class DistanceDetector(BaseSensor):
         return np.arange(0, num_lasers) * radian_unit + start_phase_offset
 
     def __del__(self):
-        logging.debug("Lidar is destroyed.")
+        self.logger.debug("Lidar is destroyed.")
 
     def detach_from_world(self):
         if isinstance(self.origin, NodePath):
@@ -193,8 +196,8 @@ class DistanceDetector(BaseSensor):
 
 
 class SideDetector(DistanceDetector):
-    def __init__(self, enable_show=True):
-        super(SideDetector, self).__init__(enable_show)
+    def __init__(self, engine):
+        super(SideDetector, self).__init__(engine)
         self.set_start_phase_offset(90)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = CollisionGroup.ContinuousLaneLine
@@ -203,8 +206,8 @@ class SideDetector(DistanceDetector):
 class LaneLineDetector(SideDetector):
     MARK_COLOR = (1, 77 / 255, 77 / 255)
 
-    def __init__(self, enable_show=True):
-        super(SideDetector, self).__init__(enable_show)
+    def __init__(self, engine):
+        super(SideDetector, self).__init__(engine)
         self.set_start_phase_offset(90)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = CollisionGroup.ContinuousLaneLine | CollisionGroup.BrokenLaneLine

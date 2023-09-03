@@ -1,5 +1,4 @@
 import logging
-from metadrive.version import VERSION
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
@@ -9,6 +8,8 @@ import numpy as np
 from panda3d.core import PNMImage
 
 from metadrive.component.sensors.base_camera import BaseCamera
+from metadrive.component.sensors.distance_detector import LaneLineDetector, SideDetector
+from metadrive.component.sensors.lidar import Lidar
 from metadrive.component.sensors.vehicle_panel import VehiclePanel
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
@@ -25,6 +26,7 @@ from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.scenario.utils import convert_recorded_scenario_exported
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
+from metadrive.version import VERSION
 
 BASE_DEFAULT_CONFIG = dict(
 
@@ -136,15 +138,20 @@ BASE_DEFAULT_CONFIG = dict(
     # }
     # Example:
     # sensors = dict(
-    #         # rgb_camera=(RGBCamera, 84, 84),
-    #         # mini_map=(MiniMap, 84, 84, 250),
-    #         # depth_camera=(DepthCamera, 84, 84),
+    #           lidar=(Lidar, 50),
+    #           side_detector=(SideDetector,),
+    #           lane_line_detectory=(LaneLineDetector,)
+    #           rgb_camera=(RGBCamera, 84, 84),
+    #           mini_map=(MiniMap, 84, 84, 250),
+    #           depth_camera=(DepthCamera, 84, 84),
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors={
-
-    },
+    sensors=dict(
+        lidar=(Lidar, 50),
+        side_detector=(SideDetector,),
+        lane_line_detectory=(LaneLineDetector,)
+    ),
 
     # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
     auto_resize_window=True,
@@ -289,7 +296,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (VehiclePanel, )
+                    config["sensors"]["dashboard"] = (VehiclePanel,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -701,19 +708,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

@@ -8,7 +8,6 @@ from panda3d.core import NodePath
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.sensors.distance_detector import DistanceDetector
 from metadrive.constants import CamMask, CollisionGroup
-from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math import norm, clip
 from metadrive.utils.utils import get_object_from_node
@@ -21,17 +20,18 @@ class Lidar(DistanceDetector):
 
     BROAD_PHASE_EXTRA_DIST = 0
 
-    def __init__(self, broad_phase_distance, enable_show=False):
-        super(Lidar, self).__init__(enable_show)
+    def __init__(self, broad_phase_distance, engine):
+        super(Lidar, self).__init__(engine)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = CollisionGroup.can_be_lidar_detected()
 
         # lidar can calculate the detector mask by itself
+        self.broad_phase_distance = broad_phase_distance
         self.broad_detector = NodePath(BulletGhostNode("detector_mask"))
         self.broad_detector.node().addShape(BulletCylinderShape(self.BROAD_PHASE_EXTRA_DIST + broad_phase_distance, 5))
         self.broad_detector.node().setIntoCollideMask(CollisionGroup.LidarBroadDetector)
         self.broad_detector.node().setStatic(True)
-        engine = get_engine()
+        engine = self.engine
         engine.physics_world.static_world.attach(self.broad_detector.node())
         self.enable_mask = True if not engine.global_config["_disable_detector_mask"] else False
 
@@ -48,8 +48,15 @@ class Lidar(DistanceDetector):
         if self.enable_mask:
             lidar_mask = detector_mask or res[0]
         else:
-            lidar_mask=None
+            lidar_mask = None
         detected_objects = res[1]
+        error = self.broad_phase_distance - distance
+        if abs(error) > 1:
+            self.logger.warning("The radius difference between broad phase detector Lidar laser is too large: {}."
+                                "This result in errors "
+                                "when generating point cloud and sensing surrounding objects."
+                                "Please align the two parameters in config "
+                                "to get the best Lidar performance".format(error))
         return super(Lidar, self).perceive(base_vehicle,
                                            physics_world,
                                            distance=distance,
@@ -194,6 +201,6 @@ class Lidar(DistanceDetector):
         return mask
 
     def destroy(self):
-        get_engine().physics_world.static_world.remove(self.broad_detector.node())
+        self.engine.physics_world.static_world.remove(self.broad_detector.node())
         self.broad_detector.removeNode()
         super(Lidar, self).destroy()

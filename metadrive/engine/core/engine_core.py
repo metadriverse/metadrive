@@ -1,6 +1,4 @@
 import logging
-from metadrive.component.sensors.distance_detector import SideDetector, LaneLineDetector
-from metadrive.component.sensors.lidar import Lidar
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -495,7 +493,7 @@ class EngineCore(ShowBase.ShowBase):
             if issubclass(cls, ImageBuffer):
                 self.add_image_sensor(sensor_id, cls, args)
             else:
-                raise ValueError("TODO: Add other sensor here")
+                self.sensors[sensor_id] = sensor_cfg[0](*sensor_cfg[1:], self)
 
     def get_sensor(self, sensor_id):
         if sensor_id not in self.sensors:
@@ -504,8 +502,8 @@ class EngineCore(ShowBase.ShowBase):
 
     def add_image_sensor(self, name: str, cls, args):
         if self.global_config["image_on_cuda"] and name == self.global_config["vehicle_config"]["image_source"]:
-            sensor = cls(self, *args, cuda=True)
+            sensor = cls(*args, self, cuda=True)
         else:
-            sensor = cls(self, *args, cuda=False)
+            sensor = cls(*args, self, cuda=False)
         assert isinstance(sensor, ImageBuffer), "This API is for adding image sensor"
         self.sensors[name] = sensor
