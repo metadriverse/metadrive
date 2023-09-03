@@ -313,6 +313,9 @@ class BaseEnv(gym.Env):
                 "Can not find sensor with id: {} from existing sensors: {}".format(
                     config["vehicle_config"]["image_source"], config["sensors"])
 
+        # Merge default sensor to list
+        config["sensors"].update(self.default_config()["sensors"])
+
         # show sensor lists
         _str = "Sensors: [{}]"
         sensors_str = ""
