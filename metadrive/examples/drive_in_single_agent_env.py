@@ -26,6 +26,8 @@ if __name__ == "__main__":
         random_agent_model=False,
         random_lane_width=True,
         random_lane_num=True,
+        on_continuous_line_done=False,
+        out_of_route_done=True,
         vehicle_config=dict(show_lidar=False, show_navi_mark=False),
         # debug=True,
         # debug_static_world=True,

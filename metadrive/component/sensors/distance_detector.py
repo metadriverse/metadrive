@@ -108,7 +108,7 @@ class DistanceDetector(BaseSensor):
         self.mask = CollisionGroup.BrokenLaneLine
         # visualization
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
-        self.cloud_points_vis = MyLineNodePath(engine.render, thickness=3.0) if AssetLoader.loader is not None else None
+        self.cloud_points_vis = MyLineNodePath(self.origin, thickness=3.0) if AssetLoader.loader is not None else None
         self.logger.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         self._current_frame = None
 
