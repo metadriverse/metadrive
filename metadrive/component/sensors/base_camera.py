@@ -1,5 +1,5 @@
 import numpy as np
-
+from metadrive.component.sensors import BaseSensor
 from metadrive.utils.cuda import check_cudart_err
 
 _cuda_enable = True
@@ -16,7 +16,7 @@ from panda3d.core import Vec3
 from metadrive.engine.core.image_buffer import ImageBuffer
 
 
-class BaseCamera(ImageBuffer):
+class BaseCamera(ImageBuffer, BaseSensor):
     """
     To enable the image observation, set image_observation to True.
     Every objects share the same camera, to boost the efficiency and save memory.
@@ -97,7 +97,7 @@ class BaseCamera(ImageBuffer):
         img = self.get_image(base_object)
         img.write(name)
 
-    def get_pixels_array(self, base_object, clip=True) -> np.ndarray:
+    def perceive(self, base_object, clip=True) -> np.ndarray:
         self.track(base_object)
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None

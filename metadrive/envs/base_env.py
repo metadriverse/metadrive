@@ -142,7 +142,9 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors={},
+    sensors={
+
+    },
 
     # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
     auto_resize_window=True,

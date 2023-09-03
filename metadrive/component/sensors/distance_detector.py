@@ -1,11 +1,10 @@
 import logging
 from collections import namedtuple
 
-import math
 import numpy as np
-from panda3d.bullet import BulletGhostNode, BulletSphereShape
 from panda3d.core import NodePath
 
+from metadrive.component.sensors import BaseSensor
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import get_engine
@@ -86,7 +85,7 @@ def perceive(
     return cloud_points, detected_objects, colors
 
 
-class DistanceDetector:
+class DistanceDetector(BaseSensor):
     """
     It is a module like lidar, used to detect sidewalk/center line or other static things
     """
