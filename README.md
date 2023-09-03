@@ -7,7 +7,7 @@
 # MetaDrive: Composing Diverse Driving Scenarios for Generalizable RL
 
 [![build](https://github.com/metadriverse/metadrive/workflows/test/badge.svg)](http://github.com/metadriverse/metadrive/actions)
-[![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
+[![Documentation](https://readthedocs.org/projects/metadrive-simulator/badge/?version=latest)](https://metadrive-simulator.readthedocs.io)
 [![GitHub license](https://img.shields.io/github/license/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/blob/main/LICENSE.txt)
 [![GitHub contributors](https://img.shields.io/github/contributors/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/graphs/contributors)
 [![Downloads](https://static.pepy.tech/badge/MetaDrive-simulator)](https://pepy.tech/project/MetaDrive-simulator)
