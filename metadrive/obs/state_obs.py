@@ -124,11 +124,15 @@ class StateObservation(ObservationBase):
         yaw_rate = beta_diff / 0.1
         info.append(clip(yaw_rate, 0.0, 1.0))
 
-        if vehicle.config["line_detector"]["num_lasers"] > 0 and vehicle.config["line_detector"]["distance"] > 0:
+        if vehicle.config["lane_line_detector"]["num_lasers"] > 0 and vehicle.config["lane_line_detector"][
+            "distance"] > 0:
 
             # If lane line detector (a Lidar scanning current lane borders) is turn on,
             # then add the cloud points of lane line detector
-            info += vehicle.lane_line_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
+            info += vehicle.lane_line_detector.perceive(vehicle,
+                                                        vehicle.engine.physics_world.static_world,
+                                                        num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
+                                                        distance=vehicle.config["lane_line_detector"]["distance"]).cloud_points
 
         else:
 
