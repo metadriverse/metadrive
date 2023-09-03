@@ -47,17 +47,17 @@ class CommunicationObservation(LidarStateObservation):
         other_v_info = []
         lidar_cfg = self.config["vehicle_config"]["lidar"]
         if self.config["vehicle_config"]["lidar"]["num_lasers"] != 0:
-            cloud_points, detected_objects = self.engine.get_sensor("lidar").perceive(vehicle,
-                                                                    physics_world=self.engine.physics_world.dynamic_world,
-                                                                    num_lasers=lidar_cfg["num_lasers"],
-                                                                    distance=lidar_cfg["distance"])
+            cloud_points, detected_objects = self.engine.get_sensor("lidar").perceive(
+                vehicle,
+                physics_world=self.engine.physics_world.dynamic_world,
+                num_lasers=lidar_cfg["num_lasers"],
+                distance=lidar_cfg["distance"]
+            )
 
             other_v_info = self.get_global_info(vehicle)
 
             other_v_info += self._add_noise_to_cloud_points(
-                cloud_points,
-                gaussian_noise=lidar_cfg["gaussian_noise"],
-                dropout_prob=lidar_cfg["dropout_prob"]
+                cloud_points, gaussian_noise=lidar_cfg["gaussian_noise"], dropout_prob=lidar_cfg["dropout_prob"]
             )
 
             self.cloud_points = cloud_points
@@ -189,7 +189,6 @@ class CommunicationObservation(LidarStateObservation):
 
 class TinyInterRuleBasedPolicy(IDMPolicy):
     """No IDM and PID are used in this Policy!"""
-
     def __init__(self, control_object, random_seed, target_speed=10):
         super(TinyInterRuleBasedPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = target_speed  # Set to 10km/h. Default is 30km/h.
@@ -222,7 +221,6 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
-
     def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
         super(MixedIDMAgentManager, self).__init__(
             init_observations=init_observations, init_action_space=init_action_space

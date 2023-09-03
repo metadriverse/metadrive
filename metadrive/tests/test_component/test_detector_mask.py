@@ -267,11 +267,13 @@ def test_detector_mask_in_lidar():
             # print("We have: {} vehicles!".format(env.engine.traffic_manager.get_vehicle_num()))
 
             v = env.vehicle
-            c_p, objs =  env.engine.get_sensor("lidar").perceive(v,
-                                         physics_world=env.engine.physics_world.dynamic_world,
-                                         num_lasers=env.vehicle.config["lidar"]["num_lasers"],
-                                         distance=env.vehicle.config["lidar"]["distance"],
-                                         detector_mask=None)
+            c_p, objs = env.engine.get_sensor("lidar").perceive(
+                v,
+                physics_world=env.engine.physics_world.dynamic_world,
+                num_lasers=env.vehicle.config["lidar"]["num_lasers"],
+                distance=env.vehicle.config["lidar"]["distance"],
+                detector_mask=None
+            )
             old_objs = v.lidar.get_surrounding_vehicles(objs)
             old_cloud_points = np.array(copy.deepcopy(c_p))
 
@@ -303,10 +305,12 @@ def test_detector_mask_in_lidar():
 
             # assert sum(abs(mask.astype(int) - real_mask.astype(int))) <= 3
             v = env.vehicle
-            c_p, objs = env.engine.get_sensor("lidar").perceive(v,
-                                         physics_world=env.vehicle.engine.physics_world.dynamic_world,
-                                         num_lasers=env.vehicle.config["lidar"]["num_lasers"],
-                                         distance=env.vehicle.config["lidar"]["distance"],)
+            c_p, objs = env.engine.get_sensor("lidar").perceive(
+                v,
+                physics_world=env.vehicle.engine.physics_world.dynamic_world,
+                num_lasers=env.vehicle.config["lidar"]["num_lasers"],
+                distance=env.vehicle.config["lidar"]["distance"],
+            )
             new_cloud_points = np.array(copy.deepcopy(c_p))
             np.testing.assert_almost_equal(old_cloud_points, new_cloud_points)
 

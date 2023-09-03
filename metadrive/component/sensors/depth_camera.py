@@ -16,7 +16,7 @@ class DepthCamera(BaseCamera):
     GROUND = None
     GROUND_MODEL = None
 
-    def __init__(self, width, height, engine,  *, cuda=False):
+    def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
         super(DepthCamera, self).__init__(engine, False, cuda)

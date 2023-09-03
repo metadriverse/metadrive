@@ -4,10 +4,11 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
 def test_sensor_config():
-    env = MetaDriveEnv(
-        {
-            "sensors": {"lidar": (Lidar, 100)},
-        })
+    env = MetaDriveEnv({
+        "sensors": {
+            "lidar": (Lidar, 100)
+        },
+    })
     try:
         env.reset()
         assert env.engine.get_sensor("lidar").broad_phase_distance == 100
@@ -16,10 +17,11 @@ def test_sensor_config():
     finally:
         env.close()
 
-    env = MetaDriveEnv(
-        {
-            "sensors": {"lidar_new": (Lidar, 100)},
-        })
+    env = MetaDriveEnv({
+        "sensors": {
+            "lidar_new": (Lidar, 100)
+        },
+    })
     try:
         env.reset()
         assert env.engine.get_sensor("lidar").broad_phase_distance == 50

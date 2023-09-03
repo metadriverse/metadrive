@@ -1,4 +1,5 @@
 import logging
+from metadrive.component.sensors import BaseSensor
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -490,10 +491,11 @@ class EngineCore(ShowBase.ShowBase):
                 continue
             cls = sensor_cfg[0]
             args = sensor_cfg[1:]
+            assert issubclass(cls, BaseSensor), "{} is not a subclass of BaseSensor".format(cls.__name__)
             if issubclass(cls, ImageBuffer):
                 self.add_image_sensor(sensor_id, cls, args)
             else:
-                self.sensors[sensor_id] = sensor_cfg[0](*sensor_cfg[1:], self)
+                self.sensors[sensor_id] = cls(*args, self)
 
     def get_sensor(self, sensor_id):
         if sensor_id not in self.sensors:

@@ -37,13 +37,9 @@ class Lidar(DistanceDetector):
 
         self._node_path_list.append(self.broad_detector)
 
-    def perceive(self,
-                 base_vehicle,
-                 physics_world,
-                 num_lasers,
-                 distance,
-                 height=None,
-                 detector_mask: np.ndarray = None):
+    def perceive(
+        self, base_vehicle, physics_world, num_lasers, distance, height=None, detector_mask: np.ndarray = None
+    ):
         res = self._get_lidar_mask(base_vehicle, num_lasers)
         if self.enable_mask:
             lidar_mask = detector_mask or res[0]
@@ -52,18 +48,21 @@ class Lidar(DistanceDetector):
         detected_objects = res[1]
         error = self.broad_phase_distance - distance
         if abs(error) > 1:
-            self.logger.warning("The radius difference between broad phase detector Lidar laser is too large: {}."
-                                "This result in errors "
-                                "when generating point cloud and sensing surrounding objects."
-                                "Please align the two parameters in config "
-                                "to get the best Lidar performance".format(error))
-        return super(Lidar, self).perceive(base_vehicle,
-                                           physics_world,
-                                           distance=distance,
-                                           height=height,
-                                           num_lasers=num_lasers,
-                                           detector_mask=lidar_mask
-                                           )[0], detected_objects
+            self.logger.warning(
+                "The radius difference between broad phase detector Lidar laser is too large: {}."
+                "This result in errors "
+                "when generating point cloud and sensing surrounding objects."
+                "Please align the two parameters in config "
+                "to get the best Lidar performance".format(error)
+            )
+        return super(Lidar, self).perceive(
+            base_vehicle,
+            physics_world,
+            distance=distance,
+            height=height,
+            num_lasers=num_lasers,
+            detector_mask=lidar_mask
+        )[0], detected_objects
 
     @staticmethod
     def get_surrounding_vehicles(detected_objects) -> Set:
@@ -83,12 +82,9 @@ class Lidar(DistanceDetector):
         relative = vehicle.convert_to_local_coordinates(diff, 0.0)
         return relative
 
-    def get_surrounding_vehicles_info(self,
-                                      ego_vehicle,
-                                      detected_objects,
-                                      perceive_distance,
-                                      num_others,
-                                      add_others_navi):
+    def get_surrounding_vehicles_info(
+        self, ego_vehicle, detected_objects, perceive_distance, num_others, add_others_navi
+    ):
         surrounding_vehicles = list(self.get_surrounding_vehicles(detected_objects))
         surrounding_vehicles.sort(
             key=lambda v: norm(ego_vehicle.position[0] - v.position[0], ego_vehicle.position[1] - v.position[1])
@@ -137,16 +133,16 @@ class Lidar(DistanceDetector):
         pos1 = vehicle.position
         head1 = vehicle.heading_theta
 
-        mask = np.zeros((num_lasers,), dtype=bool)
+        mask = np.zeros((num_lasers, ), dtype=bool)
         mask.fill(False)
         objs = self.get_surrounding_objects(vehicle)
         for obj in objs:
             pos2 = obj.position
             length = obj.LENGTH if hasattr(obj, "LENGTH") else vehicle.LENGTH
             width = obj.WIDTH if hasattr(obj, "WIDTH") else vehicle.WIDTH
-            half_max_span_square = ((length + width) / 2) ** 2
+            half_max_span_square = ((length + width) / 2)**2
             diff = (pos2[0] - pos1[0], pos2[1] - pos1[1])
-            dist_square = diff[0] ** 2 + diff[1] ** 2
+            dist_square = diff[0]**2 + diff[1]**2
             if dist_square < half_max_span_square:
                 mask.fill(True)
                 continue

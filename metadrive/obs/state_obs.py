@@ -11,7 +11,6 @@ class StateObservation(ObservationBase):
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
     """
-
     def __init__(self, config):
         if config["vehicle_config"]["navigation_module"]:
             navi_dim = config["vehicle_config"]["navigation_module"].get_navigation_info_dim()
@@ -26,7 +25,7 @@ class StateObservation(ObservationBase):
         shape = self.ego_state_obs_dim + self.navi_dim + self.get_line_detector_dim()
         if self.config["random_agent_model"]:
             shape += 2
-        return gym.spaces.Box(-0.0, 1.0, shape=(shape,), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
 
     def observe(self, vehicle):
         """
@@ -78,10 +77,12 @@ class StateObservation(ObservationBase):
         if vehicle.config["side_detector"]["num_lasers"] > 0 and vehicle.config["side_detector"]["distance"] > 0:
 
             # If side detector (a Lidar scanning road borders) is turn on, then add the cloud points of side detector
-            info += self.engine.get_sensor("side_detector").perceive(vehicle,
-                                                   num_lasers=vehicle.config["side_detector"]["num_lasers"],
-                                                   distance=vehicle.config["side_detector"]["distance"],
-                                                   physics_world=vehicle.engine.physics_world.static_world).cloud_points
+            info += self.engine.get_sensor("side_detector").perceive(
+                vehicle,
+                num_lasers=vehicle.config["side_detector"]["num_lasers"],
+                distance=vehicle.config["side_detector"]["distance"],
+                physics_world=vehicle.engine.physics_world.static_world
+            ).cloud_points
 
         else:
 
@@ -129,10 +130,12 @@ class StateObservation(ObservationBase):
 
             # If lane line detector (a Lidar scanning current lane borders) is turn on,
             # then add the cloud points of lane line detector
-            info += self.engine.get_sensor("lane_line_detector").perceive(vehicle,
-                                                        vehicle.engine.physics_world.static_world,
-                                                        num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
-                                                        distance=vehicle.config["lane_line_detector"]["distance"]).cloud_points
+            info += self.engine.get_sensor("lane_line_detector").perceive(
+                vehicle,
+                vehicle.engine.physics_world.static_world,
+                num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
+                distance=vehicle.config["lane_line_detector"]["distance"]
+            ).cloud_points
 
         else:
 
@@ -165,10 +168,10 @@ class LidarStateObservation(ObservationBase):
     def observation_space(self):
         shape = list(self.state_obs.observation_space.shape)
         if self.config["vehicle_config"]["lidar"]["num_lasers"] > 0 and self.config["vehicle_config"]["lidar"][
-            "distance"] > 0:
+                "distance"] > 0:
             # Number of lidar rays and distance should be positive!
             lidar_dim = self.config["vehicle_config"]["lidar"][
-                            "num_lasers"] + self.config["vehicle_config"]["lidar"]["num_others"] * 4
+                "num_lasers"] + self.config["vehicle_config"]["lidar"]["num_others"] * 4
             if self.config["vehicle_config"]["lidar"]["add_others_navi"]:
                 lidar_dim += self.config["vehicle_config"]["lidar"]["num_others"] * 4
             shape[0] += lidar_dim
@@ -202,15 +205,15 @@ class LidarStateObservation(ObservationBase):
     def lidar_observe(self, vehicle):
         other_v_info = []
         if vehicle.config["lidar"]["num_lasers"] > 0 and vehicle.config["lidar"]["distance"] > 0:
-            cloud_points, detected_objects =  self.engine.get_sensor("lidar").perceive(vehicle,
-                                                                    physics_world=self.engine.physics_world.dynamic_world,
-                                                                    num_lasers=vehicle.config["lidar"]["num_lasers"],
-                                                                    distance=vehicle.config["lidar"]["distance"])
+            cloud_points, detected_objects = self.engine.get_sensor("lidar").perceive(
+                vehicle,
+                physics_world=self.engine.physics_world.dynamic_world,
+                num_lasers=vehicle.config["lidar"]["num_lasers"],
+                distance=vehicle.config["lidar"]["distance"]
+            )
             if self.config["vehicle_config"]["lidar"]["num_others"] > 0:
                 other_v_info += self.engine.get_sensor("lidar").get_surrounding_vehicles_info(
-                    vehicle,
-                    detected_objects,
-                    self.config["vehicle_config"]["lidar"]["distance"],
+                    vehicle, detected_objects, self.config["vehicle_config"]["lidar"]["distance"],
                     self.config["vehicle_config"]["lidar"]["num_others"],
                     self.config["vehicle_config"]["lidar"]["add_others_navi"]
                 )
