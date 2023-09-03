@@ -45,7 +45,10 @@ class Lidar(DistanceDetector):
                  height=None,
                  detector_mask: np.ndarray = None):
         res = self._get_lidar_mask(base_vehicle, num_lasers)
-        lidar_mask = res[0] if detector_mask and self.enable_mask else None
+        if self.enable_mask:
+            lidar_mask = detector_mask or res[0]
+        else:
+            lidar_mask=None
         detected_objects = res[1]
         return super(Lidar, self).perceive(base_vehicle,
                                            physics_world,

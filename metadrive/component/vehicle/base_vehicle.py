@@ -205,9 +205,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_navigation()  # default added
 
         # add distance detector/lidar
-        self.side_detector = SideDetector(config["vehicle_config"]["show_side_detector"])
-        self.lane_line_detector = LaneLineDetector(config["vehicle_config"]["show_lane_line_detector"])
-        self.lidar = Lidar(config["vehicle_config"]["show_lidar"])
+        self.side_detector = SideDetector(config["show_side_detector"])
+        self.lane_line_detector = LaneLineDetector(config["show_lane_line_detector"])
+        self.lidar = Lidar(config["show_lidar"])
 
     def _add_modules_for_vehicle_when_reset(self):
         config = self.config
@@ -218,13 +218,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         # add distance detector/lidar
         if self.side_detector is None:
-            self.side_detector = SideDetector(config["vehicle_config"]["show_side_detector"])
+            self.side_detector = SideDetector(config["show_side_detector"])
 
         if self.lane_line_detector is None:
-            self.lane_line_detector = LaneLineDetector(config["vehicle_config"]["show_lane_line_detector"])
+            self.lane_line_detector = LaneLineDetector(config["show_lane_line_detector"])
 
         if self.lidar is None:
-            self.lidar = Lidar(config["vehicle_config"]["show_lidar"])
+            self.lidar = Lidar(config["show_lidar"])
 
     def _init_step_info(self):
         # done info will be initialized every frame

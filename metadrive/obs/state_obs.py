@@ -78,7 +78,10 @@ class StateObservation(ObservationBase):
         if vehicle.config["side_detector"]["num_lasers"] > 0 and vehicle.config["side_detector"]["distance"] > 0:
 
             # If side detector (a Lidar scanning road borders) is turn on, then add the cloud points of side detector
-            info += vehicle.side_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
+            info += vehicle.side_detector.perceive(vehicle,
+                                                   num_lasers=vehicle.config["side_detector"]["num_lasers"],
+                                                   distance=vehicle.config["side_detector"]["distance"],
+                                                   physics_world=vehicle.engine.physics_world.static_world).cloud_points
 
         else:
 
@@ -195,7 +198,10 @@ class LidarStateObservation(ObservationBase):
     def lidar_observe(self, vehicle):
         other_v_info = []
         if vehicle.config["lidar"]["num_lasers"] > 0 and vehicle.config["lidar"]["distance"] > 0:
-            cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
+            cloud_points, detected_objects = vehicle.lidar.perceive(vehicle,
+                                                                    physics_world=self.engine.physics_world.dynamic_world,
+                                                                    num_lasers=vehicle.config["lidar"]["num_lasers"],
+                                                                    distance=vehicle.config["lidar"]["distance"])
             if self.config["vehicle_config"]["lidar"]["num_others"] > 0:
                 other_v_info += vehicle.lidar.get_surrounding_vehicles_info(
                     vehicle,

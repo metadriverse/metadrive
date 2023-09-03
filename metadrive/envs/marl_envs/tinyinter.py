@@ -48,6 +48,7 @@ class CommunicationObservation(LidarStateObservation):
         lidar_cfg = self.config["vehicle_config"]["lidar"]
         if self.config["vehicle_config"]["lidar"]["num_lasers"] != 0:
             cloud_points, detected_objects = vehicle.lidar.perceive(vehicle,
+                                                                    physics_world=self.engine.physics_world.dynamic_world,
                                                                     num_lasers=lidar_cfg["num_lasers"],
                                                                     distance=lidar_cfg["distance"])
 
