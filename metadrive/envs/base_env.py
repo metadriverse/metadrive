@@ -140,7 +140,7 @@ BASE_DEFAULT_CONFIG = dict(
     # sensors = dict(
     #           lidar=(Lidar, 50),
     #           side_detector=(SideDetector,),
-    #           lane_line_detectory=(LaneLineDetector,)
+    #           lane_line_detector=(LaneLineDetector,)
     #           rgb_camera=(RGBCamera, 84, 84),
     #           mini_map=(MiniMap, 84, 84, 250),
     #           depth_camera=(DepthCamera, 84, 84),
@@ -150,7 +150,7 @@ BASE_DEFAULT_CONFIG = dict(
     sensors=dict(
         lidar=(Lidar, 50),
         side_detector=(SideDetector,),
-        lane_line_detectory=(LaneLineDetector,)
+        lane_line_detector=(LaneLineDetector,)
     ),
 
     # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
