@@ -1,4 +1,6 @@
 import logging
+from metadrive.component.sensors.distance_detector import SideDetector, LaneLineDetector
+from metadrive.component.sensors.lidar import Lidar
 import sys
 import time
 from typing import Optional, Union, Tuple
