@@ -9,8 +9,7 @@
 [![build](https://github.com/metadriverse/metadrive/workflows/test/badge.svg)](http://github.com/metadriverse/metadrive/actions)
 [![Documentation](https://readthedocs.org/projects/metadrive/badge/?version=latest)](https://metadrive.readthedocs.io)
 [![GitHub license](https://img.shields.io/github/license/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/blob/main/LICENSE.txt)
-
-[//]: # ([![GitHub contributors]&#40;https://img.shields.io/github/contributors/metadriverse/metadrive&#41;]&#40;https://github.com/metadriverse/metadrive/graphs/contributors&#41;)
+[![GitHub contributors](https://img.shields.io/github/contributors/metadriverse/metadrive)](https://github.com/metadriverse/metadrive/graphs/contributors)
 [![Downloads](https://static.pepy.tech/badge/MetaDrive-simulator)](https://pepy.tech/project/MetaDrive-simulator)
 
 <div style="text-align: center; width:100%; margin: 0 auto; display: inline-block">
