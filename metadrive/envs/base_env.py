@@ -314,7 +314,8 @@ class BaseEnv(gym.Env):
                     config["vehicle_config"]["image_source"], config["sensors"])
 
         # Merge default sensor to list
-        config["sensors"].update(self.default_config()["sensors"])
+        sensor_cfg = self.default_config()["sensors"].update(config["sensors"])
+        config["sensors"] = sensor_cfg
 
         # show sensor lists
         _str = "Sensors: [{}]"
