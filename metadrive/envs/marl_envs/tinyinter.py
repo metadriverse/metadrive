@@ -190,6 +190,7 @@ class CommunicationObservation(LidarStateObservation):
 
 class TinyInterRuleBasedPolicy(IDMPolicy):
     """No IDM and PID are used in this Policy!"""
+
     def __init__(self, control_object, random_seed, target_speed=10):
         super(TinyInterRuleBasedPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = target_speed  # Set to 10km/h. Default is 30km/h.
@@ -222,6 +223,7 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
 class MixedIDMAgentManager(AgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
+
     def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
         super(MixedIDMAgentManager, self).__init__(
             init_observations=init_observations, init_action_space=init_action_space
@@ -296,7 +298,7 @@ class MixedIDMAgentManager(AgentManager):
                 obj._use_special_color = False
                 self.add_policy(obj.id, policy_cls, obj, self.generate_seed(), target_speed=self.target_speed)
             else:
-                policy_cls = self._get_policy()
+                policy_cls = self.agent_policy
                 self.RL_agents.add(agent_id)
                 self.all_previous_RL_agents.add(agent_id)
                 obj._use_special_color = True
@@ -370,7 +372,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         # if self.num_RL_agents == self.num_agents:
         #     return org
 
-        return self.agent_manager.filter_RL_agents(org)
+        return self.agent_manager.filter_RL_agents(org[0])
 
     def step(self, actions):
         o, r, tm, tc, i = super(MultiAgentTinyInter, self).step(actions)
@@ -423,26 +425,28 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 8,
-            "num_RL_agents": 8,
+            "num_agents": 4,
+            "num_RL_agents": 4,
+            "use_render": True,
 
             # "map_config": {"radius": 50},
             # "ignore_delay_done": True,
             # "use_communication_obs": True,
-            # "vehicle_config": {
-            #     "show_line_to_dest": True,
-            #         "lidar": {
-            #         "num_others": 2,
-            #         "add_others_navi": True
-            #     }
-            # },
+            "vehicle_config": {
+                "show_lidar": True,
+                "show_line_to_dest": True,
+                "lidar": {
+                    "num_others": 2,
+                    "add_others_navi": True
+                }
+            },
             # "manual_control": True,
             # "use_render": True,
 
             # "debug_static_world": True,
         }
     )
-    o, _ = env.reset()
+    o = env.reset()
     # env.engine.force_fps.toggle()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
@@ -451,7 +455,7 @@ if __name__ == '__main__':
     ep_reward_sum = 0.0
     ep_success_reward_sum = 0.0
     for i in range(1, 100000):
-        o, r, tm, tc, info = env.step({k: [0.0, 1.0] for k in env.action_space.sample().keys()})
+        o, r, tm, tc, info = env.step({k: [0.0, 0.0] for k in env.action_space.sample().keys()})
         # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
         vehicles = env.vehicles
 
