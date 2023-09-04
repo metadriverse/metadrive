@@ -21,6 +21,56 @@ from metadrive import (
 )
 from metadrive.constants import HELP_MESSAGE
 from metadrive.policy.idm_policy import ManualControllableIDMPolicy
+from metadrive.component.sensors.lidar import LidarGroup
+
+
+DEFAULT_LIDAR_CONFIG = [
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = True,
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (1,1),
+                angle_offset= 15,
+                pitch = 0,
+                num_lasers_v = 5
+            ),
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = True,
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (1,-1),
+                angle_offset= 285,
+                pitch = 0,
+                num_lasers_v = 5
+            ),
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = True,
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (-1,-1),
+                angle_offset= 195,
+                pitch = 0,
+                num_lasers_v = 5
+            ),
+            dict(
+                num_lasers = 10,
+                distance = 10,
+                enable_show = True,
+                hfov = 60,
+                vfov = 5,
+                pos_offset= (-1,1),
+                angle_offset= 105,
+                pitch = 0,
+                num_lasers_v = 5
+            )
+        ]
+
 
 if __name__ == "__main__":
     envs = dict(
@@ -51,8 +101,9 @@ if __name__ == "__main__":
             "use_render": True if not args.top_down else False,
             "crash_done": False,
             "sensors": dict(rgb_camera=(RGBCamera, 512, 256)),
-            "interface_panel": ["rgb_camera", "dashboard"],
-            "agent_policy": ManualControllableIDMPolicy
+            "interface_panel": ["rgb_camera","dashboard"],
+            "agent_policy": ManualControllableIDMPolicy,
+            "vehicle_config": dict(show_lidar=True, show_navi_mark=False),
         }
     )
     try:

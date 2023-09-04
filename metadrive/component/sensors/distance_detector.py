@@ -108,7 +108,7 @@ class DistanceDetector:
     ANGLE_FACTOR = False
 
     def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show:bool=True,
-                  pitch:float = 0, vfov:float = 0, num_lasers_v:int = 1):
+                  pitch:float = 0, vfov:float = 0, num_lasers_v:int = 1, generate = False):
         """
         pitch: in rad
         """
@@ -129,6 +129,8 @@ class DistanceDetector:
         self.pitch = pitch
         self.num_lasers_v = num_lasers_v
         self.vfov = np.deg2rad(vfov)
+        self.enable_show = enable_show
+        self.generate = generate
 
 
         # override these properties to decide which elements to detect and show
@@ -209,25 +211,29 @@ class DistanceDetector:
                 height=self.height,
                 physics_world=physics_world,
                 extra_filter_node=extra_filter_node if extra_filter_node else set(),
-                require_colors=self.cloud_points_vis is not None,
+                require_colors=self.cloud_points_vis is not None or self.generate,
                 ANGLE_FACTOR=self.ANGLE_FACTOR,
                 MARK_COLOR0=self.MARK_COLOR[0],
                 MARK_COLOR1=self.MARK_COLOR[1],
                 MARK_COLOR2=self.MARK_COLOR[2],
                 pitch = current_pitch
             )
-            candidate = min(cloud_points)
-            if candidate <1 and candidate < minimum :
-                minimum = candidate
-                minimum_pos = colors[np.argmin(cloud_points)][1]
-            if self.cloud_points_vis is not None:
+            if self.generate:
+                candidate = min(cloud_points)
+                if candidate <1 and candidate < minimum :
+                    minimum = candidate
+                    #Note: in order to retrieve the world coordinate of the hitted vertice, show_visualiation must be true. Otherwise, no
+                    #points will be appended to colors, and the minimum_pos expression will raise index out of range exception.
+                    minimum_pos = colors[np.argmin(cloud_points)][1]
+            if self.cloud_points_vis is not None and self.enable_show:
                 for laser_index, pos, color in colors:
                     self.cloud_points_vis[base + laser_index].setPos(pos)
                     self.cloud_points_vis[base + laser_index].setColor(*color)
                 base += len(colors)
             all_cloud_points += cloud_points.tolist()
             all_objcts += detected_objects
-        self.closest_observed_point = (minimum, minimum_pos)
+        if self.generate:
+            self.closest_observed_point = (minimum*self.perceive_distance, minimum_pos)
         return  detect_result(cloud_points=all_cloud_points, detected_objects=all_objcts)
 
     def _add_cloud_point_vis(self, laser_index, pos):

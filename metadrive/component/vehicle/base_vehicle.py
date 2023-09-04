@@ -261,7 +261,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 num_lasers_v = 5
             )
         ]       
-        self.lidar = LidarGroup(DEFAULT_LIDAR_CONFIG, True, False)
+        self.lidar = LidarGroup(DEFAULT_LIDAR_CONFIG, False, False)
 
         """self.lidar = Lidar(
         config["lidar"]["num_lasers"], config["lidar"]["distance"],

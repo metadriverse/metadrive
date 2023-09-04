@@ -205,7 +205,8 @@ class SpecialLidar(Lidar):
     In addition, I couldn't fiure out how to correctly rebase the center of the lidar in car's coordinate.
     """
     def __init__(self, num_lasers: int = 60, distance: float = 50, enable_show=False, 
-                 hfov = 360, vfov = 0, pos_offset = None, angle_offset = None, height = 1.2, pitch = 0, num_lasers_v = 1
+                 hfov = 360, vfov = 0, pos_offset = None, angle_offset = None, height = 1.2, pitch = 0, num_lasers_v = 1,
+                 generate = False
                  ):
         super(SpecialLidar,self).__init__(num_lasers, distance, enable_show, num_lasers_v)
         self.radian_unit = np.deg2rad(hfov) / num_lasers
@@ -216,6 +217,7 @@ class SpecialLidar(Lidar):
         self.angle_offset = angle_offset
         self.angle_delta = (hfov) / num_lasers 
         self.set_pitch(pitch)
+        self.generate = generate
         
 
     def perceive(self, base_vehicle, detector_mask=True):
@@ -305,6 +307,9 @@ class LidarGroup:
     A group of special lidars. 
     """
     def __init__(self, lidar_config, generate_data, debug):
+        self.generate_data = generate_data
+        self.debug = debug
+        self.data = []
 
         self.lidars = [SpecialLidar(num_lasers = lidar_spec["num_lasers"],
                                     distance = lidar_spec["distance"],
@@ -314,13 +319,12 @@ class LidarGroup:
                                     pos_offset= lidar_spec["pos_offset"],
                                     angle_offset= lidar_spec["angle_offset"],
                                     pitch = np.deg2rad(lidar_spec["pitch"]),
-                                    num_lasers_v= lidar_spec["num_lasers_v"]
+                                    num_lasers_v= lidar_spec["num_lasers_v"],
+                                    generate = self.generate_data
                                     )
                                       for lidar_spec in lidar_config]
         self.available = True if self.all_available(self.lidars) else False
-        self.generate_data = generate_data
-        self.debug = debug
-        self.data = []
+        
 
     def all_available(self,lidars : list):
         for lidar in lidars:
