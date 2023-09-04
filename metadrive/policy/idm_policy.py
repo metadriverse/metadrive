@@ -174,6 +174,12 @@ class FrontBackObjects:
         return cls(front_ret, back_ret, min_front_long, min_back_long)
 
 
+
+
+
+
+
+
 class IDMPolicy(BasePolicy):
     """
     We implement this policy based on the HighwayEnv code base.
@@ -400,6 +406,28 @@ class IDMPolicy(BasePolicy):
         self.target_speed = self.NORMAL_SPEED
         self.overtake_timer += 1
         return surrounding_objects.front_object(), surrounding_objects.front_min_distance(), self.routing_target_lane
+
+class FreezePolicy(IDMPolicy):
+    def act(self,*args, **kwargs):
+        return [0,0]
+
+class ManualControllableFreezePolicy(FreezePolicy):
+    def __init__(self, *args, **kwargs):
+        super(ManualControllableFreezePolicy, self).__init__(*args, **kwargs)
+        self.engine.global_config["manual_control"] = True  # hack
+        self.manual_control_policy = IDMPolicy(*args, **kwargs)#ManualControlPolicy(*args, **kwargs, enable_expert=False) 
+        self.engine.global_config["manual_control"] = False  # hack
+    def act(self, agent_id):
+        if self.control_object is self.engine.current_track_vehicle:
+            self.engine.global_config["manual_control"] = True  # hack
+            action = self.manual_control_policy.act(agent_id)
+            self.engine.global_config["manual_control"] = False  # hack
+            self.action_info["action"] = action
+            self.action_info["manual_control"] = True
+            return action
+        else:
+            self.action_info["manual_control"] = False
+            return super(ManualControllableFreezePolicy, self).act(agent_id)
 
 
 class ManualControllableIDMPolicy(IDMPolicy):
