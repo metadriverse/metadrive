@@ -1,6 +1,6 @@
 import cv2
-from panda3d.core import RenderState, RenderAttrib, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib
 from panda3d.core import GeoMipTerrain, PNMImage
+from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, LVecBase4, MaterialAttrib
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
@@ -16,6 +16,8 @@ class SemanticCamera(BaseCamera):
     VIEW_GROUND = False
     GROUND = None
     GROUND_MODEL = None
+
+    # BKG_COLOR = LVecBase4(53 / 255, 81 / 255, 167 / 255, 1)
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
