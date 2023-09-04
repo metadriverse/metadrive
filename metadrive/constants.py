@@ -111,6 +111,7 @@ class CamMask(Mask):
     PARA_VIS = BitMask32.bit(13)
     DepthCam = BitMask32.bit(14)
     ScreenshotCam = BitMask32.bit(15)
+    SemanticCam = BitMask32.bit(16)
 
 
 class CollisionGroup(Mask):

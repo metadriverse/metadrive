@@ -335,7 +335,7 @@ class Terrain(BaseObject):
                 super(Terrain, self).set_position(position, height)
 
     def _generate_card_terrain(self):
-        self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam)
+        self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam)
         # self.terrain_normal = self.loader.loadTexture(
         #     AssetLoader.file_path( "textures", "grass2", "normal.jpg")
         # )

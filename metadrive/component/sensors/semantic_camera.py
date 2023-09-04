@@ -1,5 +1,6 @@
 import cv2
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, Texture
+from panda3d.core import RenderState, RenderAttrib, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib
+from panda3d.core import GeoMipTerrain, PNMImage
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
@@ -7,9 +8,9 @@ from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
 
 
-class DepthCamera(BaseCamera):
+class SemanticCamera(BaseCamera):
     # shape(dim_1, dim_2)
-    CAM_MASK = CamMask.DepthCam
+    CAM_MASK = CamMask.SemanticCam
 
     GROUND_HEIGHT = -0.5
     VIEW_GROUND = False
@@ -19,7 +20,7 @@ class DepthCamera(BaseCamera):
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
-        super(DepthCamera, self).__init__(engine, False, cuda)
+        super(SemanticCamera, self).__init__(engine, False, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
 
@@ -30,20 +31,15 @@ class DepthCamera(BaseCamera):
         # lens.setAspectRatio(2.0)
         if self.engine.mode == RENDER_MODE_NONE or not AssetLoader.initialized():
             return
-        # add shader for it
-        # if get_global_config()["headless_machine_render"]:
-        #     vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
-        #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
-        # else:
-        from metadrive.utils import is_mac
-        if is_mac():
-            vert_path = AssetLoader.file_path("shaders", "depth_cam_mac.vert.glsl")
-            frag_path = AssetLoader.file_path("shaders", "depth_cam_mac.frag.glsl")
-        else:
-            vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
-            frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
-        custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
-        cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
+
+        # setup camera
+        cam = cam.node()
+        cam.setInitialState(RenderState.make(LightAttrib.makeAllOff()))
+        cam.setInitialState(RenderState.make(ShaderAttrib.makeOff()))
+        cam.setInitialState(RenderState.make(TextureAttrib.makeAllOff()))
+        cam.setTagStateKey("type")
+        cam.setTagState("vehicle", RenderState.make(ColorAttrib.makeFlat((0, 0, 1, 1))))
+        cam.setTagState("ground", RenderState.make(ColorAttrib.makeFlat((1, 0, 0, 1))))
 
         if self.VIEW_GROUND:
             ground = PNMImage(257, 257, 4)
@@ -53,13 +49,14 @@ class DepthCamera(BaseCamera):
             self.GROUND.setHeightfield(ground)
             self.GROUND.setAutoFlatten(GeoMipTerrain.AFMStrong)
             # terrain.setBruteforce(True)
-            # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain
-            # # model to enable the depth information of terrain
+            # # Since the terrain is a texture, shader will not calculate the sematic information, we add a moving terrain
+            # # model to enable the sematic information of terrain
             self.GROUND_MODEL = self.GROUND.getRoot()
             self.GROUND_MODEL.setPos(-128, -128, self.GROUND_HEIGHT)
             self.GROUND_MODEL.reparentTo(self.engine.render)
             self.GROUND_MODEL.hide(CamMask.AllOn)
-            self.GROUND_MODEL.show(CamMask.DepthCam)
+            self.GROUND_MODEL.show(CamMask.SemanticCam)
+            self.GROUND_MODEL.setTag("type", "ground")
             self.GROUND.generate()
 
     def track(self, base_object):
@@ -69,11 +66,11 @@ class DepthCamera(BaseCamera):
             self.GROUND_MODEL.setH(base_object.origin.getH())
             # self.GROUND_MODEL.setP(-base_object.origin.getR())
             # self.GROUND_MODEL.setR(-base_object.origin.getR())
-        return super(DepthCamera, self).track(base_object)
+        return super(SemanticCamera, self).track(base_object)
 
     def get_image(self, base_object):
         self.origin.reparentTo(base_object.origin)
-        img = super(DepthCamera, self).get_rgb_array_cpu()
+        img = super(SemanticCamera, self).get_rgb_array_cpu()
         self.track(self.attached_object)
         return img
 

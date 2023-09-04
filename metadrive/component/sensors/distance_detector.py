@@ -107,7 +107,7 @@ class DistanceDetector(BaseSensor):
         # override these properties to decide which elements to detect and show
         self.mask = CollisionGroup.BrokenLaneLine
         # visualization
-        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
         self.cloud_points_vis = MyLineNodePath(self.origin, thickness=3.0) if AssetLoader.loader is not None else None
         self.logger.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
         self._current_frame = None
@@ -193,7 +193,7 @@ class SideDetector(DistanceDetector):
     def __init__(self, engine):
         super(SideDetector, self).__init__(engine)
         self.set_start_phase_offset(90)
-        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
         self.mask = CollisionGroup.ContinuousLaneLine
 
 
@@ -203,5 +203,5 @@ class LaneLineDetector(SideDetector):
     def __init__(self, engine):
         super(SideDetector, self).__init__(engine)
         self.set_start_phase_offset(90)
-        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
         self.mask = CollisionGroup.ContinuousLaneLine | CollisionGroup.BrokenLaneLine

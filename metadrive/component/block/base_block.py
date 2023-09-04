@@ -219,7 +219,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         self.lane_vis_node_path.flattenStrong()
         self.lane_vis_node_path.node().collect()
-        self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam)
+        self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam)
 
         self.origin.hide(CamMask.Shadow)
 

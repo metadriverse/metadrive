@@ -22,7 +22,7 @@ class Lidar(DistanceDetector):
 
     def __init__(self, broad_phase_distance, engine):
         super(Lidar, self).__init__(engine)
-        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
         self.mask = CollisionGroup.can_be_lidar_detected()
 
         # lidar can calculate the detector mask by itself
