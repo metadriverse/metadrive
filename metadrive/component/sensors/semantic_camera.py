@@ -36,14 +36,16 @@ class SemanticCamera(BaseCamera):
 
         # setup camera
         cam = cam.node()
-        cam.setInitialState(RenderState.make(ShaderAttrib.makeOff(),
-                                             LightAttrib.makeAllOff(),
-                                             TextureAttrib.makeOff(),
-                                             ColorAttrib.makeFlat((0, 0, 1, 1)), 1))
+        cam.setInitialState(
+            RenderState.make(
+                ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),
+                ColorAttrib.makeFlat((0, 0, 1, 1)), 1
+            )
+        )
         cam.setTagStateKey("type")
-        for t in [v for v, m in vars(Semantics).items() if not (v.startswith('_')  or callable(m))]:
+        for t in [v for v, m in vars(Semantics).items() if not (v.startswith('_') or callable(m))]:
             label, c = getattr(Semantics, t)
-            cam.setTagState(label, RenderState.make(ColorAttrib.makeFlat((c[0]/255, c[1]/255, c[2]/255, 1)), 1))
+            cam.setTagState(label, RenderState.make(ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1))
 
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)

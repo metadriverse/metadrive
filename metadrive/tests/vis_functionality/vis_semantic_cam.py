@@ -1,5 +1,7 @@
 from metadrive.component.sensors.semantic_camera import SemanticCamera
-from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
+from metadrive.engine.asset_loader import AssetLoader
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.envs.real_data_envs.nuscenes_env import NuScenesEnv
 
 if __name__ == "__main__":
 
@@ -13,28 +15,16 @@ if __name__ == "__main__":
         # rgb_cam.save_image(env.vehicle, "rgb_{}.jpg".format(h))
         # env.engine.screenshot()
 
-
-    env = SafeMetaDriveEnv(
+    env = NuScenesEnv(
         {
-            "num_scenarios": 1,
-            "traffic_density": 0.,
-            "accident_prob": 1.,
-            "start_seed": 4,
-            "map": "SSSSS",
-            "manual_control": True,
             "use_render": True,
-            "debug": True,
             "image_observation": True,
             "rgb_clip": True,
+            "agent_policy": ReplayEgoCarPolicy,
             "interface_panel": ["semantic_camera"],
             "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
             "vehicle_config": dict(image_source="semantic_camera"),
-            # "map_config": {
-            #     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
-            #     BaseMap.GENERATE_CONFIG: 12,
-            #     BaseMap.LANE_WIDTH: 3.5,
-            #     BaseMap.LANE_NUM: 3,
-            # }
+            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
         }
     )
     env.reset()
