@@ -1,7 +1,7 @@
 import cv2
 from panda3d.core import GeoMipTerrain, PNMImage
 from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, LVecBase4, MaterialAttrib
-
+from metadrive.constants import Semantics
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import RENDER_MODE_NONE
@@ -41,8 +41,9 @@ class SemanticCamera(BaseCamera):
                                              TextureAttrib.makeOff(),
                                              ColorAttrib.makeFlat((0, 0, 1, 1)), 1))
         cam.setTagStateKey("type")
-        cam.setTagState("vehicle", RenderState.make(ColorAttrib.makeFlat((0, 0, 1, 1)), 1))
-        cam.setTagState("ground", RenderState.make(ColorAttrib.makeFlat((1, 0, 0, 1)), 1))
+        for t in [v for v, m in vars(Semantics).items() if not (v.startswith('_')  or callable(m))]:
+            label, c = getattr(Semantics, t)
+            cam.setTagState(label, RenderState.make(ColorAttrib.makeFlat((c[0]/255, c[1]/255, c[2]/255, 1)), 1))
 
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)
@@ -59,7 +60,7 @@ class SemanticCamera(BaseCamera):
             self.GROUND_MODEL.reparentTo(self.engine.render)
             self.GROUND_MODEL.hide(CamMask.AllOn)
             self.GROUND_MODEL.show(CamMask.SemanticCam)
-            self.GROUND_MODEL.setTag("type", "ground")
+            self.GROUND_MODEL.setTag("type", Semantics.ROAD.label)
             self.GROUND.generate()
 
     def track(self, base_object):

@@ -2,7 +2,7 @@ import math
 import os
 from collections import deque
 from typing import Union, Optional
-
+from metadrive.constants import Semantics
 import numpy as np
 import seaborn as sns
 from panda3d._rplight import RPSpotLight
@@ -74,6 +74,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     MAX_LENGTH = 10
     MAX_WIDTH = 2.5
     MAX_STEERING = 60
+    SEMANTIC_LABEL = Semantics.CAR.label
 
     # LENGTH = None
     # WIDTH = None

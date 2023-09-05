@@ -1,4 +1,5 @@
 import logging
+from metadrive.constants import Semantics
 import math
 from typing import List, Dict
 
@@ -29,7 +30,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
     ID = "B"
 
     def __init__(
-        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+            self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -105,12 +106,12 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True,
-        attach_to_world=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True,
+            attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -200,6 +201,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.sidewalk_node_path = NodePath(RigidBodyCombiner(self.name + "_sidewalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
         self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
+
+        self.sidewalk_node_path.setTag("type", Semantics.SIDEWALK.label)
+        self.lane_vis_node_path.setTag("type", Semantics.ROAD.label)
+        self.lane_line_node_path.setTag("type", Semantics.LANE_LINE.label)
 
         if skip:  # for debug
             pass

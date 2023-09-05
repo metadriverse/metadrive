@@ -3,6 +3,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 import platform
+from metadrive.constants import Semantics
 
 
 def convert_path(pth):
@@ -60,6 +61,7 @@ class XLVehicle(BaseVehicle):
     TIRE_WIDTH = 0.5
     MASS = 1600
     LIGHT_POSITION = (-0.75, 2.7, 0.2)
+    SEMANTIC_LABEL = Semantics.TRUCK.label
     path = ['truck/vehicle.gltf', (1, 1, 1), (0, 0.25, 0.04), (0, 0, 0)]
 
     @property

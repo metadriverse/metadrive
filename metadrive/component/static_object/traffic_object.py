@@ -6,7 +6,7 @@ from panda3d.bullet import BulletCylinderShape
 
 from metadrive.component.static_object.base_static_object import BaseStaticObject
 from metadrive.constants import CollisionGroup
-from metadrive.constants import MetaDriveType
+from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 
@@ -22,6 +22,7 @@ class TrafficObject(BaseStaticObject):
     """
     CLASS_NAME = MetaDriveType.TRAFFIC_OBJECT
     COLLISION_MASK = CollisionGroup.TrafficObject
+    SEMANTIC_LABEL = Semantics.FENCE.label
 
     COST_ONCE = True  # cost will give at the first time
 
