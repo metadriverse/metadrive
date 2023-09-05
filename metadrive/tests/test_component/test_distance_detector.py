@@ -30,10 +30,17 @@ def test_original_lidar(render=False):
         v_config["spawn_lateral"] = 7.5
         another_v = DefaultVehicle(v_config, random_seed=0)
         another_v.reset()
-        objs = env.vehicle.side_detector.perceive(env.vehicle, env.vehicle.engine.physics_world.static_world
-                                                  ).detected_objects + env.vehicle.lane_line_detector.perceive(
-                                                      env.vehicle, env.vehicle.engine.physics_world.static_world
-                                                  ).detected_objects
+        objs =env.engine.get_sensor("side_detector").perceive(env.vehicle,
+                                                  env.vehicle.engine.physics_world.static_world,
+                                                  num_lasers=2,
+                                                  distance=50
+                                                  ).detected_objects + \
+              env.engine.get_sensor("lane_line_detector").perceive(
+                   env.vehicle,
+                   env.vehicle.engine.physics_world.static_world,
+                   num_lasers=2,
+                   distance=50
+               ).detected_objects
         yellow = 0
         for obj in objs:
             if obj.getNode().getName() == MetaDriveType.LINE_SOLID_SINGLE_YELLOW:
@@ -82,10 +89,17 @@ def test_lidar_with_mask(render=False):
         another_v = DefaultVehicle(v_config, random_seed=0)
         another_v.reset()
         # for test
-        objs = env.vehicle.side_detector.perceive(env.vehicle, env.vehicle.engine.physics_world.static_world
-                                                  ).detected_objects + env.vehicle.lane_line_detector.perceive(
-                                                      env.vehicle, env.vehicle.engine.physics_world.static_world
-                                                  ).detected_objects
+        objs = env.engine.get_sensor("side_detector").perceive(env.vehicle,
+                                                  env.vehicle.engine.physics_world.static_world,
+                                                  num_lasers=2,
+                                                  distance=50
+                                                  ).detected_objects + \
+               env.engine.get_sensor("lane_line_detector").perceive(
+                   env.vehicle,
+                   env.vehicle.engine.physics_world.static_world,
+                   num_lasers=2,
+                   distance=50
+               ).detected_objects
         yellow = 0
         for obj in objs:
             if obj.getNode().getName() == MetaDriveType.LINE_SOLID_SINGLE_YELLOW:
@@ -111,4 +125,4 @@ def test_lidar_with_mask(render=False):
 
 if __name__ == "__main__":
     # test_lidar_with_mask(render=True)
-    test_original_lidar(render=True)
+    test_original_lidar(render=False)

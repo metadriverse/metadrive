@@ -1,7 +1,7 @@
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask
 from metadrive.scenario.scenario_description import ScenarioDescription
-from metadrive.constants import MetaDriveType
+from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.pg.utils import generate_static_box_physics_body
 
@@ -11,6 +11,7 @@ class BaseTrafficLight(BaseObject):
     Traffic light should be associated with a lane before using. It is basically an unseen wall object on the route, so
     actors have to react to it.
     """
+    SEMANTIC_LABEL = Semantics.TRAFFIC_LIGHT.label
     AIR_WALL_LENGTH = 0.25
     AIR_WALL_HEIGHT = 1.5
     TRAFFIC_LIGHT_HEIGHT = 3

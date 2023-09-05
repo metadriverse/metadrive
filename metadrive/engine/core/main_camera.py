@@ -22,9 +22,10 @@ try:
     from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase, DisplayRegionDrawCallbackData
 except ImportError:
     _cuda_enable = False
+from metadrive.component.sensors import BaseSensor
 
 
-class MainCamera:
+class MainCamera(BaseSensor):
     """
     Only chase vehicle now
     """
@@ -409,7 +410,7 @@ class MainCamera:
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
-    def get_pixels_array(self, vehicle, clip):
+    def perceive(self, vehicle, clip):
         engine = get_engine()
         assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
         if self.enable_cuda:

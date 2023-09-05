@@ -1,4 +1,5 @@
 import logging
+from metadrive.constants import Semantics
 import math
 from typing import List, Dict
 
@@ -201,6 +202,10 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
         self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
 
+        self.sidewalk_node_path.setTag("type", Semantics.SIDEWALK.label)
+        self.lane_vis_node_path.setTag("type", Semantics.ROAD.label)
+        self.lane_line_node_path.setTag("type", Semantics.LANE_LINE.label)
+
         if skip:  # for debug
             pass
         else:
@@ -219,7 +224,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
         self.lane_vis_node_path.flattenStrong()
         self.lane_vis_node_path.node().collect()
-        self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam)
+        self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam)
 
         self.origin.hide(CamMask.Shadow)
 

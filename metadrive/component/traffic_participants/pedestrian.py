@@ -3,7 +3,7 @@ from panda3d.bullet import BulletCylinderShape
 from panda3d.core import LVector3
 
 from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
-from metadrive.constants import MetaDriveType
+from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils.math import norm
@@ -12,7 +12,7 @@ from metadrive.utils.math import norm
 class Pedestrian(BaseTrafficParticipant):
     MASS = 70  # kg
     TYPE_NAME = MetaDriveType.PEDESTRIAN
-
+    SEMANTIC_LABEL = Semantics.PEDESTRIAN.label
     RADIUS = 0.35
     HEIGHT = 1.75
 

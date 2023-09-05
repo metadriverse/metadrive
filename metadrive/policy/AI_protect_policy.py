@@ -38,8 +38,8 @@ class AIProtectPolicy(ManualControlPolicy):
                             throttle = 0.5
                     # for collision
                     lidar_p = self.engine.agent_manager.observations[vehicle.id].cloud_points
-                    left = int(vehicle.lidar.num_lasers / 4)
-                    right = int(vehicle.lidar.num_lasers / 4 * 3)
+                    left = int(vehicle.config["lidar"]["num_lasers"] / 4)
+                    right = int(vehicle.config["lidar"]["num_lasers"] / 4 * 3)
                     if min(lidar_p[left - 4:left + 6]) < (save_level + 0.1) / 10 or min(lidar_p[right - 4:right + 6]
                                                                                         ) < (save_level + 0.1) / 10:
                         # lateral safe distance 2.0m

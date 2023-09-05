@@ -74,10 +74,16 @@ class StateObservation(ObservationBase):
             # The width of the target vehicle
             info.append(clip(vehicle.WIDTH / vehicle.MAX_WIDTH, 0.0, 1.0))
 
-        if hasattr(vehicle, "side_detector") and vehicle.side_detector.available:
+        if vehicle.config["side_detector"]["num_lasers"] > 0 and vehicle.config["side_detector"]["distance"] > 0:
 
             # If side detector (a Lidar scanning road borders) is turn on, then add the cloud points of side detector
-            info += vehicle.side_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
+            info += self.engine.get_sensor("side_detector").perceive(
+                vehicle,
+                num_lasers=vehicle.config["side_detector"]["num_lasers"],
+                distance=vehicle.config["side_detector"]["distance"],
+                physics_world=vehicle.engine.physics_world.static_world,
+                show=self.config["vehicle_config"]["show_side_detector"],
+            ).cloud_points
 
         else:
 
@@ -120,11 +126,18 @@ class StateObservation(ObservationBase):
         yaw_rate = beta_diff / 0.1
         info.append(clip(yaw_rate, 0.0, 1.0))
 
-        if vehicle.lane_line_detector.available:
+        if vehicle.config["lane_line_detector"]["num_lasers"] > 0 \
+                and vehicle.config["lane_line_detector"]["distance"] > 0:
 
             # If lane line detector (a Lidar scanning current lane borders) is turn on,
             # then add the cloud points of lane line detector
-            info += vehicle.lane_line_detector.perceive(vehicle, vehicle.engine.physics_world.static_world).cloud_points
+            info += self.engine.get_sensor("lane_line_detector").perceive(
+                vehicle,
+                vehicle.engine.physics_world.static_world,
+                num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
+                distance=vehicle.config["lane_line_detector"]["distance"],
+                show=self.config["vehicle_config"]["show_lane_line_detector"],
+            ).cloud_points
 
         else:
 
@@ -193,11 +206,18 @@ class LidarStateObservation(ObservationBase):
 
     def lidar_observe(self, vehicle):
         other_v_info = []
-        if vehicle.lidar.available:
-            cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
+        if vehicle.config["lidar"]["num_lasers"] > 0 and vehicle.config["lidar"]["distance"] > 0:
+            cloud_points, detected_objects = self.engine.get_sensor("lidar").perceive(
+                vehicle,
+                physics_world=self.engine.physics_world.dynamic_world,
+                num_lasers=vehicle.config["lidar"]["num_lasers"],
+                distance=vehicle.config["lidar"]["distance"],
+                show=self.config["vehicle_config"]["show_lidar"],
+            )
             if self.config["vehicle_config"]["lidar"]["num_others"] > 0:
-                other_v_info += vehicle.lidar.get_surrounding_vehicles_info(
-                    vehicle, detected_objects, self.config["vehicle_config"]["lidar"]["num_others"],
+                other_v_info += self.engine.get_sensor("lidar").get_surrounding_vehicles_info(
+                    vehicle, detected_objects, self.config["vehicle_config"]["lidar"]["distance"],
+                    self.config["vehicle_config"]["lidar"]["num_others"],
                     self.config["vehicle_config"]["lidar"]["add_others_navi"]
                 )
             other_v_info += self._add_noise_to_cloud_points(

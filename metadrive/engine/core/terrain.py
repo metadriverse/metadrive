@@ -9,7 +9,7 @@ from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf
 from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage
 
 from metadrive.base_class.base_object import BaseObject
-from metadrive.constants import CamMask
+from metadrive.constants import CamMask, Semantics
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.third_party.diamond_square import diamond_square
@@ -20,6 +20,7 @@ class Terrain(BaseObject):
     HEIGHT = 0.0
     PROBE_HEIGHT = 600
     PROBE_SIZE = 1024
+    SEMANTIC_LABEL = Semantics.TERRAIN.label
 
     def __init__(self, show_terrain, engine):
         use_render_pipeline = engine.use_render_pipeline
@@ -335,7 +336,9 @@ class Terrain(BaseObject):
                 super(Terrain, self).set_position(position, height)
 
     def _generate_card_terrain(self):
-        self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam)
+        self.origin.hide(
+            CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam
+        )
         # self.terrain_normal = self.loader.loadTexture(
         #     AssetLoader.file_path( "textures", "grass2", "normal.jpg")
         # )
