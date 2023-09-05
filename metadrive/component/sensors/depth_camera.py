@@ -46,7 +46,7 @@ class DepthCamera(BaseCamera):
         cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
 
         if self.VIEW_GROUND:
-            ground = PNMImage(257, 257, 4)
+            ground = PNMImage(513, 513, 4)
             ground.fill(1., 1., 1.)
 
             self.GROUND = GeoMipTerrain("mySimpleTerrain")
