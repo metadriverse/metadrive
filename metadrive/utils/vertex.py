@@ -6,16 +6,13 @@ from metadrive.engine.asset_loader import initialize_asset_loader, AssetLoader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 
-def get_reader_writer(o_vdata, new_vdata):
-    raise DeprecationWarning
-    readers = {}
-    writers = {"class": GeomVertexWriter(new_vdata, "class")}
+def get_names(o_vdata):
+    ret = []
     for array in o_vdata.getFormat().getArrays():
         for column in array.getColumns():
             name = column.getName()
-            readers[name] = GeomVertexReader(o_vdata, name)
-            writers[name] = GeomVertexWriter(new_vdata, name)
-    return readers, writers
+            ret.append(name)
+    return ret
 
 
 def get_geom_with_class(geom, class_):
@@ -27,17 +24,19 @@ def get_geom_with_class(geom, class_):
     o_vdata = geom.modifyVertexData()
     o_numrow = o_vdata.getNumRows()
     o_format = o_vdata.getFormat()
-    new_format = copy(o_format)
 
-    class_array = GeomVertexArrayFormat()
-    class_array.addColumn("class", 1, Geom.NTInt8, Geom.CIndex)
-    new_format.addArray(class_array)
-    class_format = GeomVertexFormat.registerFormat(new_format)
-    o_vdata.setFormat(class_format)
-    class_writer = GeomVertexWriter(o_vdata, "class")
+    if "cls" not in get_names(o_vdata):
+        new_format = copy(o_format)
+        class_array = GeomVertexArrayFormat()
+        class_array.addColumn("cls", 1, Geom.NTInt8, Geom.CIndex)
+        new_format.addArray(class_array)
+        class_format = GeomVertexFormat.registerFormat(new_format)
+        o_vdata.setFormat(class_format)
 
-    while not class_writer.isAtEnd():
-        class_writer.setData1i(class_)
+        class_writer = GeomVertexWriter(o_vdata, "cls")
+
+        while not class_writer.isAtEnd():
+            class_writer.setData1i(class_)
     return o_vdata
 
 

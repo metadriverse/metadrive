@@ -23,6 +23,7 @@ if __name__ == "__main__":
             "map": "SSSSS",
             "manual_control": True,
             "use_render": True,
+            "debug": True,
             "image_observation": True,
             "rgb_clip": True,
             "interface_panel": ["semantic_camera"],

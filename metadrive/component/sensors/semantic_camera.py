@@ -1,5 +1,5 @@
 import cv2
-from panda3d.core import GeoMipTerrain, PNMImage
+from panda3d.core import GeoMipTerrain, PNMImage, Shader
 from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, LVecBase4, MaterialAttrib
 
 from metadrive.component.sensors.base_camera import BaseCamera
@@ -33,15 +33,20 @@ class SemanticCamera(BaseCamera):
         # lens.setAspectRatio(2.0)
         if self.engine.mode == RENDER_MODE_NONE or not AssetLoader.initialized():
             return
-
-        # setup camera
-        cam = cam.node()
-        cam.setInitialState(RenderState.make(LightAttrib.makeAllOff()))
-        cam.setInitialState(RenderState.make(ShaderAttrib.makeOff()))
-        cam.setInitialState(RenderState.make(TextureAttrib.makeAllOff()))
-        cam.setTagStateKey("type")
-        cam.setTagState("vehicle", RenderState.make(ColorAttrib.makeFlat((0, 0, 1, 1))))
-        cam.setTagState("ground", RenderState.make(ColorAttrib.makeFlat((1, 0, 0, 1))))
+        # add shader for it
+        # if get_global_config()["headless_machine_render"]:
+        #     vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
+        #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
+        # else:
+        from metadrive.utils import is_mac
+        if is_mac():
+            raise ValueError("Semantic Camera is not available on MAC @Zhenghao Peng, please fix this.")
+        else:
+            vert_path = AssetLoader.file_path("shaders", "semantic_cam.vert.glsl")
+            frag_path = AssetLoader.file_path("shaders", "semantic_cam.frag.glsl")
+        custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
+        cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
+        # cam.setShaderInput()
 
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)
@@ -58,7 +63,6 @@ class SemanticCamera(BaseCamera):
             self.GROUND_MODEL.reparentTo(self.engine.render)
             self.GROUND_MODEL.hide(CamMask.AllOn)
             self.GROUND_MODEL.show(CamMask.SemanticCam)
-            self.GROUND_MODEL.setTag("type", "ground")
             self.GROUND.generate()
 
     def track(self, base_object):
