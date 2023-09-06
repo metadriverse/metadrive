@@ -44,10 +44,12 @@ class DepthCamera(BaseCamera):
             vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
             frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
-        cam.node().setInitialState(RenderState.make(LightAttrib.makeAllOff(),
-                                                    TextureAttrib.makeOff(),
-                                                    ColorAttrib.makeOff(),
-                                                    ShaderAttrib.make(custom_shader, 1)))
+        cam.node().setInitialState(
+            RenderState.make(
+                LightAttrib.makeAllOff(), TextureAttrib.makeOff(), ColorAttrib.makeOff(),
+                ShaderAttrib.make(custom_shader, 1)
+            )
+        )
 
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)

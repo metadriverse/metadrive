@@ -13,9 +13,17 @@ from metadrive.policy.idm_policy import IDMPolicy
 
 def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camera="main"):
     res = (800, 600)
-    mapping = {"depth": {"depth_camera": (DepthCamera, *res)},
-               "rgb": {"rgb_camera": (RGBCamera, *res)},
-               "semantic": {"semantic_camera": (SemanticCamera, *res)}}
+    mapping = {
+        "depth": {
+            "depth_camera": (DepthCamera, *res)
+        },
+        "rgb": {
+            "rgb_camera": (RGBCamera, *res)
+        },
+        "semantic": {
+            "semantic_camera": (SemanticCamera, *res)
+        }
+    }
 
     env = MetaDriveEnv(
         dict(
