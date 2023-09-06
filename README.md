@@ -46,14 +46,12 @@ Install MetaDrive via:
 git clone https://github.com/metadriverse/metadrive.git
 cd metadrive
 pip install -e .
-
 ```
 
 or
 
 ```bash
 pip install metadrive-simulator
-
 ```
 *Note that the program is tested on both Linux and Windows. Some control and display issues in MacOS wait to be solved*
 
@@ -67,7 +65,7 @@ python -m metadrive.examples.profile_metadrive
 *Note that please do not run the above command in a folder that has a sub-folder called `./metadrive`.*
 
 ## 🚕 Examples
-We provide examples to demonstrate features and basic usages of MetaDrive after the local installation.
+We provide [examples](https://github.com/metadriverse/metadrive/tree/main/metadrive/examples) to demonstrate features and basic usages of MetaDrive after the local installation.
 Or you can run some examples directly in Colab. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb) 
 
 ### Single Agent Environment

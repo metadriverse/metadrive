@@ -1,5 +1,6 @@
 import cv2
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, Texture
+from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, Texture, LightAttrib, \
+    TextureAttrib, ColorAttrib
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
@@ -43,7 +44,10 @@ class DepthCamera(BaseCamera):
             vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
             frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
-        cam.node().setInitialState(RenderState.make(ShaderAttrib.make(custom_shader, 1)))
+        cam.node().setInitialState(RenderState.make(LightAttrib.makeAllOff(),
+                                                    TextureAttrib.makeOff(),
+                                                    ColorAttrib.makeOff(),
+                                                    ShaderAttrib.make(custom_shader, 1)))
 
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)
