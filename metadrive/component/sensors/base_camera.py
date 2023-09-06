@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 from metadrive.component.sensors import BaseSensor
 from metadrive.utils.cuda import check_cudart_err
 
@@ -41,7 +42,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
             # Too large height or width will cause corruption in Mac.
             self.logger.warning(
                 "You may using too large buffer! The height is {}, and width is {}. "
-                "It may lower the sample efficiency! Considering reduce buffer size or using cuda image by"
+                "It may lower the sample efficiency! Consider reducing buffer size or use cuda image by"
                 " set [image_on_cuda=True].".format(height, width)
             )
         self.cuda_graphics_resource = None
@@ -88,16 +89,18 @@ class BaseCamera(ImageBuffer, BaseSensor):
         """
         Borrow the camera to get observations
         """
+        self.sync_light(base_object)
         self.origin.reparentTo(base_object.origin)
-        ret = super(BaseCamera, self).get_image()
+        img = self.get_rgb_array_cpu()
         self.track(self.attached_object)
-        return ret
+        return img
 
     def save_image(self, base_object, name="debug.png"):
         img = self.get_image(base_object)
-        img.write(name)
+        cv2.imwrite(name, img)
 
     def perceive(self, base_object, clip=True) -> np.ndarray:
+        self.sync_light(base_object)
         self.track(base_object)
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
@@ -133,6 +136,10 @@ class BaseCamera(ImageBuffer, BaseSensor):
         if base_object is not None and self is not None:
             self.attached_object = base_object
             self.origin.reparentTo(base_object.origin)
+
+    def sync_light(self, obj):
+        if self.engine.world_light is not None:
+            self.engine.world_light.set_pos(obj.position)
 
     def __del__(self):
         if self.enable_cuda:

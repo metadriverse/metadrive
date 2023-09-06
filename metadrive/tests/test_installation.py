@@ -19,7 +19,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
             traffic_density=0.1,
             image_observation=True,
             sensors={
-                "rgb_camera": (RGBCamera, 84, 84),
+                "rgb_camera": (RGBCamera, 512, 512),
                 "depth_camera": (DepthCamera, 512, 512)
             },
             interface_panel=[],
