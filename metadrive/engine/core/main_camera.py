@@ -50,7 +50,7 @@ class MainCamera(BaseSensor):
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                                          ] is not None else None
+                                                                     ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
         self.world_light = engine.world_light  # light chases the chase camera, when not using global light
@@ -227,7 +227,7 @@ class MainCamera(BaseSensor):
             )
 
         if self.world_light is not None:
-            self.world_light.step(current_pos)
+            self.world_light.set_pos(current_pos)
 
         # Don't use reparentTo()
         # pos = vehicle.convert_to_world_coordinates([0.8, 0.], vehicle.position)
@@ -345,6 +345,8 @@ class MainCamera(BaseSensor):
             self.camera_x += 1.0
 
         self.camera.setPos(self.camera_x, self.camera_y, self.top_down_camera_height)
+        if self.world_light is not None:
+            self.world_light.set_pos([self.camera_x, self.camera_y])
         if self.engine.global_config["show_coordinates"]:
             self.engine.set_coordinates_indicator_pos([self.camera_x, self.camera_y])
         self.camera.lookAt(self.camera_x, self.camera_y, 0)
