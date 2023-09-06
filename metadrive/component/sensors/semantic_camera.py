@@ -73,4 +73,3 @@ class SemanticCamera(BaseCamera):
             # self.GROUND_MODEL.setP(-base_object.origin.getR())
             # self.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(SemanticCamera, self).track(base_object)
-
