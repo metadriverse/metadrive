@@ -72,7 +72,7 @@ Installation:
 #. For verifying your installation, cd ``metadrive/examples`` and run ``python verify_image_observation.py --cuda``
 
 
-After running the script, if no error messages, then congratulations! It works. you can also use ``python verify_image_observation.py --render`` to visualize the image observations.
+After running the script, if no error messages, then congratulations! It works. you can also use ``python verify_image_observation.py --cuda --render`` to visualize the image observations.
 Besides, removing ``--cuda`` flag enables benchmarking the original image collection pipeline as a comparison.
-And ``--camera`` argument is for choosing sensors from ["rgb", "depth, "semantic", "main" (default)].
+And ``--camera`` argument is for choosing sensors from [``rgb``, ``depth``, ``semantic``, ``main`` (default)].
 
