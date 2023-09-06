@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 from metadrive.component.sensors import BaseSensor
 from metadrive.utils.cuda import check_cudart_err
 
@@ -90,13 +91,13 @@ class BaseCamera(ImageBuffer, BaseSensor):
         """
         self.sync_light(base_object)
         self.origin.reparentTo(base_object.origin)
-        ret = super(BaseCamera, self).get_image()
+        img = self.get_rgb_array_cpu()
         self.track(self.attached_object)
-        return ret
+        return img
 
     def save_image(self, base_object, name="debug.png"):
         img = self.get_image(base_object)
-        img.write(name)
+        cv2.imwrite(name, img)
 
     def perceive(self, base_object, clip=True) -> np.ndarray:
         self.sync_light(base_object)
