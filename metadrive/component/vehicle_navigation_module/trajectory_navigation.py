@@ -84,7 +84,7 @@ class TrajectoryNavigation(BaseNavigation):
 
     def set_route(self):
         self.checkpoints = self.discretize_reference_trajectory()
-        num_way_point = min(len(self.checkpoints), self.NUM_WAY_POINT)
+        # num_way_point = min(len(self.checkpoints), self.NUM_WAY_POINT)
 
         self._navi_info.fill(0.0)
         self.next_ref_lanes = None

@@ -247,7 +247,8 @@ class ScenarioEnv(BaseEnv):
         )
 
         # log data to curriculum manager
-        self.engine.curriculum_manager.log_episode(done_info[TerminationState.SUCCESS], route_completion)
+        if hasattr(self.engine, "curriculum_manager"):
+            self.engine.curriculum_manager.log_episode(done_info[TerminationState.SUCCESS], route_completion)
 
         return done, done_info
 
