@@ -144,8 +144,6 @@ jobs:
           cd metadrive/
           pip install nbmake pytest-xdist
           cache store
-
-#         move to test dir. If it is in a python package, then the test will fail!
           mkdir ./tests/test_ipynb
           cp ./examples/Basic_MetaDrive_Usages.ipynb ./test/tests_ipynb
           pytest --nbmake -n=auto ./test/tests_ipynb
