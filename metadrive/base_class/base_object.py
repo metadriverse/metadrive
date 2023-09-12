@@ -1,4 +1,5 @@
 import copy
+from metadrive.constants import RENDER_MODE_NONE
 import logging
 import math
 from typing import Dict
@@ -142,6 +143,7 @@ class BaseObject(BaseRunnable):
 
         # render or not
         self.render = False if AssetLoader.loader is None else True
+        assert self.render == (self.engine.mode != RENDER_MODE_NONE)
         if self.render:
             self.loader = AssetLoader.get_loader()
 
