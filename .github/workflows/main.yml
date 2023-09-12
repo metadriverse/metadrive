@@ -143,10 +143,9 @@ jobs:
           pip install ray
           cd metadrive/
           pip install nbmake pytest-xdist
-          cache store
           mkdir ./tests/test_ipynb
-          cp ./examples/Basic_MetaDrive_Usages.ipynb ./test/tests_ipynb
-          pytest --nbmake -n=auto ./test/tests_ipynb
+          cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/tests_ipynb
+          pytest --nbmake -n=auto ./tests/tests_ipynb
 
 #      - name: Upload coverage to Codecov
 #        uses: codecov/codecov-action@v1
