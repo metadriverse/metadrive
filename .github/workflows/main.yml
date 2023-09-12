@@ -144,8 +144,8 @@ jobs:
           cd metadrive/
           pip install nbmake pytest-xdist
           mkdir ./tests/test_ipynb
-          cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/tests_ipynb
-          pytest --nbmake -n=auto ./tests/tests_ipynb
+          cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/test_ipynb/
+          pytest --nbmake -n=auto ./tests/test_ipynb/
 
 #      - name: Upload coverage to Codecov
 #        uses: codecov/codecov-action@v1
