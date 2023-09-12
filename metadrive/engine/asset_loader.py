@@ -1,4 +1,5 @@
 import os
+from metadrive.constants import RENDER_MODE_NONE
 import pathlib
 import sys
 from metadrive.pull_asset import pull_asset
@@ -24,6 +25,7 @@ class AssetLoader:
         if engine.win is None:
             AssetLoader.logger.debug("Physics world mode")
             return
+        assert engine.mode != RENDER_MODE_NONE
         AssetLoader.logger.debug("Onscreen/Offscreen mode, Render/Load Elements")
         AssetLoader.loader = engine.loader
 

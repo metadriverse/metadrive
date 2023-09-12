@@ -42,7 +42,8 @@ class Pedestrian(BaseTrafficParticipant):
         self.current_speed_model = self.SPEED_LIST[0]
         if self._instance is not None:
             self._instance.detachNode()
-        self._instance = Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
+        if self.render:
+            self._instance = Pedestrian._MODEL[self.current_speed_model].instanceTo(self.origin)
 
     @classmethod
     def init_pedestrian_model(cls):
