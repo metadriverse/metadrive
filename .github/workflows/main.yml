@@ -124,6 +124,31 @@ jobs:
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_export_record_scenario
 
+  test_ipynb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Blackbox tests
+        run: |
+          pip install cython
+          pip install numpy
+          pip install -e .
+          python -m metadrive.pull_asset
+          pip install pytest
+          pip install pytest-cov
+          pip install ray
+          cd metadrive/
+          pip install nbmake pytest-xdist
+          cache store
+               
+#         move to test dir. If it is in a python package, then the test will fail!
+          cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests
+          pytest --nbmake -n=auto ./tests
+
 #      - name: Upload coverage to Codecov
 #        uses: codecov/codecov-action@v1
 #        with:
