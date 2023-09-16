@@ -28,6 +28,7 @@ def draw_top_down_map(
         semantic_map=True,
         return_surface=False,
         film_size=None,
+        scaling=None,
         reverse_color=False,
         road_color=color_white,
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
@@ -42,7 +43,7 @@ def draw_top_down_map(
     y_len = b_box[3] - b_box[2]
     max_len = max(x_len, y_len)
     # scaling and center can be easily found by bounding box
-    scaling = film_size[1] / max_len - 0.1
+    scaling = scaling if scaling else film_size[1] / max_len - 0.1
     surface.scaling = scaling
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
@@ -193,6 +194,7 @@ class TopDownRenderer:
             target_vehicle_heading_up=False,
             draw_target_vehicle_trajectory=False,
             semantic_map=False,
+            scaling=None,  # auto-scale
             **kwargs
             # current_track_vehicle=None
     ):
@@ -222,11 +224,13 @@ class TopDownRenderer:
         self._font_size = 25
         self._text_render_interval = 20
         self.semantic_map = semantic_map
+        self.scaling = scaling
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
         self._background_canvas = draw_top_down_map(
             self.map,
+            scaling=self.scaling,
             semantic_map=self.semantic_map,
             return_surface=True,
             film_size=film_size,
@@ -295,6 +299,7 @@ class TopDownRenderer:
         if self.draw_target_vehicle_trajectory:
             self.history_target_vehicle.append(
                 history_object(
+                    type=MetaDriveType.VEHICLE,
                     name=self.current_track_vehicle.name,
                     heading_theta=self.current_track_vehicle.heading_theta,
                     WIDTH=self.current_track_vehicle.top_down_width,
@@ -341,6 +346,7 @@ class TopDownRenderer:
         # Reset the super large background
         self._background_canvas = draw_top_down_map(
             map,
+            scaling=self.scaling,
             semantic_map=self.semantic_map,
             return_surface=True,
             film_size=self._background_size,

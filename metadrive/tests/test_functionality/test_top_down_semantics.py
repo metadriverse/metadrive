@@ -41,6 +41,7 @@ def test_top_down_semantics():
                 semantic_map=True,
                 film_size=(2000, 2000),
                 num_stack=1,
+                scaling=10,
             )
             # save
             # pygame.image.save(this_frame_fig, "{}.png".format(i))
