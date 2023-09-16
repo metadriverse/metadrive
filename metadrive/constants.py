@@ -2,6 +2,7 @@ import math
 from collections import namedtuple
 from typing import List, Tuple
 
+import numpy as np
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
@@ -368,6 +369,7 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):
@@ -381,3 +383,32 @@ class MapTerrainSemanticColor:
             return (0, 0, 0, 1)
         else:
             raise ValueError("Unsupported type: {}".format(type))
+
+
+class TopDownSemanticColor:
+    """
+    Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
+    class lMapSemanticColor
+    """
+
+    @staticmethod
+    def get_color(type, pygame=False):
+        if MetaDriveType.is_yellow_line(type):
+            # return (255, 0, 0, 0)
+            ret = np.array([1, 0, 0, 0])
+        elif MetaDriveType.is_lane(type):
+            ret = np.array([0, 1, 0, 0])
+        elif type == MetaDriveType.GROUND:
+            ret = np.array([0, 0, 1, 0])
+        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_edge(type):
+            ret = np.array([0, 0, 0, 1])
+        elif MetaDriveType.is_vehicle(type):
+            ret = np.array([0, 0, 1, 0])
+        elif type == MetaDriveType.OTHER:
+            ret = np.array([0, 1, 1, 0])
+        else:
+            raise ValueError("Unsupported type: {}".format(type))
+
+        if pygame:
+            ret *= 255
+        return ret
