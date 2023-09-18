@@ -7,6 +7,7 @@ from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.utils.utils import import_pygame
 from metadrive.type import MetaDriveType
+from metadrive.constants import DrivableAreaProperty
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 pygame, gfxdraw = import_pygame()
@@ -419,7 +420,7 @@ class LaneGraphics:
                 pygame.draw.line(
                     surface, color, (surface.vec2pix(lane.position(starts[k], lats[k]))),
                     (surface.vec2pix(lane.position(ends[k], lats[k]))),
-                    max(surface.pix(cls.STRIPE_WIDTH), surface.pix(cls.LANE_LINE_WIDTH))
+                    2 * DrivableAreaProperty.LANE_LINE_WIDTH
                 )
 
     @classmethod

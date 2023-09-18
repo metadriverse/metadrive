@@ -72,8 +72,8 @@ def draw_top_down_map(
                                 TopDownSemanticColor.get_color(obj["type"], True),
                                 surface.vec2pix([s_p[0], s_p[1]]),
                                 surface.vec2pix([e_p[0], e_p[1]]),
-                                max(surface.pix(LaneGraphics.STRIPE_WIDTH),
-                                    surface.pix(LaneGraphics.LANE_LINE_WIDTH))
+                                # max(surface.pix(LaneGraphics.STRIPE_WIDTH),
+                                surface.pix(DrivableAreaProperty.LANE_LINE_WIDTH) * 2
                             )
         else:
             for id, data in map.blocks[-1].map_data.items():
