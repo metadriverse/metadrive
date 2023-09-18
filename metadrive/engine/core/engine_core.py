@@ -4,11 +4,13 @@ import time
 from typing import Optional, Union, Tuple
 
 import gltf
+from metadrive.engine.core.line import MyLineNodePath
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
+from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath, LVecBase4
 
+from metadrive.component.sensors import BaseSensor
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
@@ -452,6 +454,13 @@ class EngineCore(ShowBase.ShowBase):
         # np.reparentTo(self.render)
         return np
 
+    def draw_lines_3d(self, point_lists, parent_node=None, color=LVecBase4(1), thickness=1.0):
+        assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
+        np = MyLineNodePath(parent_node, thickness=thickness, colorVec=color)
+        np.drawLines(point_lists)
+        np.create()
+        return np
+
     def show_coordinates(self):
         if len(self.coordinate_line) > 0:
             return
@@ -490,10 +499,11 @@ class EngineCore(ShowBase.ShowBase):
                 continue
             cls = sensor_cfg[0]
             args = sensor_cfg[1:]
+            assert issubclass(cls, BaseSensor), "{} is not a subclass of BaseSensor".format(cls.__name__)
             if issubclass(cls, ImageBuffer):
                 self.add_image_sensor(sensor_id, cls, args)
             else:
-                raise ValueError("TODO: Add other sensor here")
+                self.sensors[sensor_id] = cls(*args, self)
 
     def get_sensor(self, sensor_id):
         if sensor_id not in self.sensors:
@@ -502,8 +512,8 @@ class EngineCore(ShowBase.ShowBase):
 
     def add_image_sensor(self, name: str, cls, args):
         if self.global_config["image_on_cuda"] and name == self.global_config["vehicle_config"]["image_source"]:
-            sensor = cls(self, *args, cuda=True)
+            sensor = cls(*args, self, cuda=True)
         else:
-            sensor = cls(self, *args, cuda=False)
+            sensor = cls(*args, self, cuda=False)
         assert isinstance(sensor, ImageBuffer), "This API is for adding image sensor"
         self.sensors[name] = sensor

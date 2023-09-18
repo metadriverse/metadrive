@@ -49,13 +49,12 @@ class Light(BaseObject):
         self._node_path_list.append(self.ambient_np)
 
     def step(self, pos):
+        raise DeprecationWarning("Use light.step_pos instead")
+
+    def set_pos(self, pos):
         # if not self.global_light:
         self.direction_np.setPos(pos[0] - 100, pos[1] + 100, 120)
         self.direction_np.lookAt(pos[0], pos[1], 0)
 
     def reset(self, random_seed=None, *args, **kwargs):
-        if self.direction_np is not None and not self.global_light:
-            self.direction_np.setHpr(-90, -120, 0)
-            self.direction_np.setY(20)
-            self.direction_np.setX(0)
-            self.direction_np.setZ(50)
+        raise DeprecationWarning("Use light.step_pos instead")

@@ -1,10 +1,11 @@
 from panda3d.core import NodePath, PGTop, TextNode, CardMaker, Vec3
 
+from metadrive.component.sensors import BaseSensor
 from metadrive.constants import CamMask
 from metadrive.engine.core.image_buffer import ImageBuffer
 
 
-class VehiclePanel(ImageBuffer):
+class VehiclePanel(ImageBuffer, BaseSensor):
     PARA_VIS_LENGTH = 12
     PARA_VIS_HEIGHT = 1
     MAX_SPEED = 120

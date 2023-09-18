@@ -10,13 +10,13 @@ if __name__ == "__main__":
             "stack_size": 5,
             # "debug": True,
             # "debug_panda3d": True,
-            "vehicle_config": dict(image_source="main_camera"),
+            "vehicle_config": dict(image_source="rgb_camera"),
             "sensors": {
-                "rgb_camera": (RGBCamera, 84, 84)
+                "rgb_camera": (RGBCamera, 521, 512)
             },
             "interface_panel": ["dashboard", "rgb_camera"],
             "manual_control": False,
-            "use_render": True,
+            "use_render": False,
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
             "rgb_clip": True,  # clip rgb to range(0,1) instead of (0, 255)
             # "pstats": True,

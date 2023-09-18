@@ -45,15 +45,20 @@ class CommunicationObservation(LidarStateObservation):
 
     def lidar_observe(self, vehicle):
         other_v_info = []
-        if vehicle.lidar.available:
-            cloud_points, detected_objects = vehicle.lidar.perceive(vehicle, )
+        lidar_cfg = self.config["vehicle_config"]["lidar"]
+        if self.config["vehicle_config"]["lidar"]["num_lasers"] != 0:
+            cloud_points, detected_objects = self.engine.get_sensor("lidar").perceive(
+                vehicle,
+                physics_world=self.engine.physics_world.dynamic_world,
+                num_lasers=lidar_cfg["num_lasers"],
+                distance=lidar_cfg["distance"],
+                show=self.config["vehicle_config"]["show_lidar"]
+            )
 
             other_v_info = self.get_global_info(vehicle)
 
             other_v_info += self._add_noise_to_cloud_points(
-                cloud_points,
-                gaussian_noise=self.config["vehicle_config"]["lidar"]["gaussian_noise"],
-                dropout_prob=self.config["vehicle_config"]["lidar"]["dropout_prob"]
+                cloud_points, gaussian_noise=lidar_cfg["gaussian_noise"], dropout_prob=lidar_cfg["dropout_prob"]
             )
 
             self.cloud_points = cloud_points
@@ -124,7 +129,7 @@ class CommunicationObservation(LidarStateObservation):
         return vector
 
     def get_global_info(self, ego_vehicle):
-        perceive_distance = ego_vehicle.lidar.perceive_distance
+        perceive_distance = ego_vehicle.config["lidar"]["distance"]
         # perceive_distance = 20  # m
         speed_scale = 20  # km/h
 
@@ -169,13 +174,13 @@ class CommunicationObservation(LidarStateObservation):
             if add_others_navi:
                 ckpt1, ckpt2 = vehicle.navigation.get_checkpoints()
 
-                relative_ckpt1 = ego_vehicle.lidar._project_to_vehicle_system(ckpt1, ego_vehicle)
+                relative_ckpt1 = ego_vehicle.lidar._project_to_vehicle_system(ckpt1, ego_vehicle, perceive_distance)
                 relative_ckpt1 = self._process_norm(relative_ckpt1, perceive_distance)
                 res[slot_index * res_size + 5] = clip((relative_ckpt1[0] / perceive_distance + 1) / 2, 0.0, 1.0)
                 res[slot_index * res_size + 6] = clip((relative_ckpt1[1] / perceive_distance + 1) / 2, 0.0, 1.0)
 
                 relative_ckpt2 = ego_vehicle.lidar._project_to_vehicle_system(ckpt2, ego_vehicle)
-                relative_ckpt2 = self._process_norm(relative_ckpt2, perceive_distance)
+                relative_ckpt2 = self._process_norm(relative_ckpt2, perceive_distance, perceive_distance)
                 res[slot_index * res_size + 7] = clip((relative_ckpt2[0] / perceive_distance + 1) / 2, 0.0, 1.0)
                 res[slot_index * res_size + 8] = clip((relative_ckpt2[1] / perceive_distance + 1) / 2, 0.0, 1.0)
 
@@ -291,7 +296,7 @@ class MixedIDMAgentManager(AgentManager):
                 obj._use_special_color = False
                 self.add_policy(obj.id, policy_cls, obj, self.generate_seed(), target_speed=self.target_speed)
             else:
-                policy_cls = self._get_policy()
+                policy_cls = self.agent_policy
                 self.RL_agents.add(agent_id)
                 self.all_previous_RL_agents.add(agent_id)
                 obj._use_special_color = True
@@ -365,7 +370,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         # if self.num_RL_agents == self.num_agents:
         #     return org
 
-        return self.agent_manager.filter_RL_agents(org)
+        return self.agent_manager.filter_RL_agents(org[0])
 
     def step(self, actions):
         o, r, tm, tc, i = super(MultiAgentTinyInter, self).step(actions)
@@ -418,26 +423,28 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
 if __name__ == '__main__':
     env = MultiAgentTinyInter(
         config={
-            "num_agents": 8,
-            "num_RL_agents": 8,
+            "num_agents": 4,
+            "num_RL_agents": 4,
+            "use_render": True,
 
             # "map_config": {"radius": 50},
             # "ignore_delay_done": True,
             # "use_communication_obs": True,
-            # "vehicle_config": {
-            #     "show_line_to_dest": True,
-            #         "lidar": {
-            #         "num_others": 2,
-            #         "add_others_navi": True
-            #     }
-            # },
+            "vehicle_config": {
+                "show_lidar": True,
+                "show_line_to_dest": True,
+                "lidar": {
+                    "num_others": 2,
+                    "add_others_navi": True
+                }
+            },
             # "manual_control": True,
             # "use_render": True,
 
             # "debug_static_world": True,
         }
     )
-    o, _ = env.reset()
+    o = env.reset()
     # env.engine.force_fps.toggle()
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     print("RL agent num", len(o))
@@ -446,7 +453,7 @@ if __name__ == '__main__':
     ep_reward_sum = 0.0
     ep_success_reward_sum = 0.0
     for i in range(1, 100000):
-        o, r, tm, tc, info = env.step({k: [0.0, 1.0] for k in env.action_space.sample().keys()})
+        o, r, tm, tc, info = env.step({k: [0.0, 0.0] for k in env.action_space.sample().keys()})
         # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
         vehicles = env.vehicles
 

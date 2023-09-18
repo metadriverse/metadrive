@@ -11,7 +11,7 @@ class RGBCamera(BaseCamera):
     CAM_MASK = CamMask.RgbCam
     PBR_ADAPT = False
 
-    def __init__(self, engine, width, height, *, cuda=False):
+    def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         super(RGBCamera, self).__init__(engine, True, cuda)
         cam = self.get_cam()

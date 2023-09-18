@@ -1,7 +1,7 @@
 from panda3d.core import SamplerState, Shader, ConfigVariableString, Texture
 
 from metadrive.base_class.base_object import BaseObject
-from metadrive.constants import CamMask
+from metadrive.constants import CamMask, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.utils import is_mac
 
@@ -11,6 +11,7 @@ class SkyBox(BaseObject):
     SkyBox is only related to render
     """
     ROTATION_MAX = 5000
+    SEMANTIC_LABEL = Semantics.SKY.label
 
     def __init__(self, pure_background: bool = False):
         super(SkyBox, self).__init__(random_seed=0)

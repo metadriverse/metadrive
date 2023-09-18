@@ -6,7 +6,7 @@ from panda3d.bullet import BulletCylinderShape
 
 from metadrive.component.static_object.base_static_object import BaseStaticObject
 from metadrive.constants import CollisionGroup
-from metadrive.constants import MetaDriveType
+from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 
@@ -22,6 +22,7 @@ class TrafficObject(BaseStaticObject):
     """
     CLASS_NAME = MetaDriveType.TRAFFIC_OBJECT
     COLLISION_MASK = CollisionGroup.TrafficObject
+    SEMANTIC_LABEL = Semantics.FENCE.label
 
     COST_ONCE = True  # cost will give at the first time
 
@@ -56,6 +57,7 @@ class TrafficCone(TrafficObject):
         self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
+            # model.node().setTag("type", "vehicle")
             model.setScale(0.02, 0.02, 0.025)
             model.setPos(0, 0, -self.HEIGHT / 2 + 0.05)
             model.reparentTo(self.origin)

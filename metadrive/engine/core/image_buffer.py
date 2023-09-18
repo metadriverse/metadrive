@@ -99,21 +99,6 @@ class ImageBuffer:
 
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
-    def get_image(self):
-        """
-        Bugs here! when use offscreen mode, thus the front cam obs is not from front cam now
-        """
-        img = PNMImage()
-        self.buffer.getDisplayRegions()[1].getScreenshot(img)
-        return img
-
-    def save_image(self, name="debug.png"):
-        """
-        for debug use
-        """
-        img = self.get_image()
-        img.write(name)
-
     def get_rgb_array_cpu(self):
         origin_img = self.buffer.getDisplayRegion(1).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)

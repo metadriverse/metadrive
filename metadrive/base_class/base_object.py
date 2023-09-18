@@ -1,4 +1,5 @@
 import copy
+
 import logging
 import math
 from typing import Dict
@@ -7,7 +8,7 @@ import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode
 from panda3d.core import LVector3, NodePath, PandaNode
-
+from metadrive.constants import Semantics
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import ObjectState
 from metadrive.engine.asset_loader import AssetLoader
@@ -113,6 +114,7 @@ class BaseObject(BaseRunnable):
     """
     MASS = None  # if object has a body, the mass will be set automatically
     COLLISION_MASK = None
+    SEMANTIC_LABEL = Semantics.UNLABELED.label
 
     def __init__(self, name=None, random_seed=None, config=None, escape_random_seed_assertion=False):
         """
@@ -129,6 +131,9 @@ class BaseObject(BaseRunnable):
 
         # each element has its node_path to render, physics node are child nodes of it
         self.origin = NodePath(self.name)
+
+        # semantic color
+        self.origin.setTag("type", self.SEMANTIC_LABEL)
 
         # Temporally store bullet nodes that have to place in bullet world (not NodePath)
         self.dynamic_nodes = PhysicsNodeList()
@@ -189,6 +194,7 @@ class BaseObject(BaseRunnable):
 
             self._node_path_list.append(self.origin)
             self.origin = new_origin
+            self.origin.setTag("type", self.SEMANTIC_LABEL)
             if add_to_static_world:
                 self.static_nodes.append(physics_body)
             else:

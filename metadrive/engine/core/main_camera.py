@@ -22,9 +22,10 @@ try:
     from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase, DisplayRegionDrawCallbackData
 except ImportError:
     _cuda_enable = False
+from metadrive.component.sensors import BaseSensor
 
 
-class MainCamera:
+class MainCamera(BaseSensor):
     """
     Only chase vehicle now
     """
@@ -226,7 +227,7 @@ class MainCamera:
             )
 
         if self.world_light is not None:
-            self.world_light.step(current_pos)
+            self.world_light.set_pos(current_pos)
 
         # Don't use reparentTo()
         # pos = vehicle.convert_to_world_coordinates([0.8, 0.], vehicle.position)
@@ -344,6 +345,8 @@ class MainCamera:
             self.camera_x += 1.0
 
         self.camera.setPos(self.camera_x, self.camera_y, self.top_down_camera_height)
+        if self.world_light is not None:
+            self.world_light.set_pos([self.camera_x, self.camera_y])
         if self.engine.global_config["show_coordinates"]:
             self.engine.set_coordinates_indicator_pos([self.camera_x, self.camera_y])
         self.camera.lookAt(self.camera_x, self.camera_y, 0)
@@ -409,7 +412,7 @@ class MainCamera:
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
-    def get_pixels_array(self, vehicle, clip):
+    def perceive(self, vehicle, clip):
         engine = get_engine()
         assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
         if self.enable_cuda:

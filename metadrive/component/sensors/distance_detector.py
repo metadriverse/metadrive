@@ -1,14 +1,13 @@
-import logging
 from collections import namedtuple
+from metadrive.engine.core.line import MyLineNodePath
 
-import math
 import numpy as np
-from panda3d.bullet import BulletGhostNode, BulletSphereShape
-from panda3d.core import NodePath
+from panda3d.core import NodePath, LVecBase4
 
+from metadrive.component.sensors import BaseSensor
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.engine.engine_utils import get_engine
+from metadrive.engine.logger import get_logger
 from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math import panda_vector, get_laser_end
 
@@ -85,7 +84,7 @@ def perceive(
     return cloud_points, detected_objects, colors
 
 
-class DistanceDetector:
+class DistanceDetector(BaseSensor):
     """
     It is a module like lidar, used to detect sidewalk/center line or other static things
     """
@@ -96,53 +95,49 @@ class DistanceDetector:
     MARK_COLOR = (51 / 255, 221 / 255, 1)
     ANGLE_FACTOR = False
 
-    def __init__(self, num_lasers: int = 16, distance: float = 50, enable_show=True):
+    def __init__(self, engine):
+        self.logger = get_logger()
+        self.engine = engine
         # properties
         self._node_path_list = []
-
-        self.available = True if num_lasers > 0 and distance > 0 else False
-        parent_node_np: NodePath = get_engine().render
+        parent_node_np: NodePath = engine.render
         self.origin = parent_node_np.attachNewNode("Could_points")
-        show = enable_show and (AssetLoader.loader is not None)
-        self.dim = num_lasers
-        self.num_lasers = num_lasers
-        self.perceive_distance = distance
-        self.height = self.DEFAULT_HEIGHT
-        self.radian_unit = 2 * np.pi / num_lasers if self.num_lasers > 0 else None
         self.start_phase_offset = 0
-        self._lidar_range = np.arange(0, self.num_lasers) * self.radian_unit + self.start_phase_offset
 
         # override these properties to decide which elements to detect and show
-        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
         self.mask = CollisionGroup.BrokenLaneLine
-        self.cloud_points_vis = [] if show else None
-        logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
-        if show:
-            for laser_debug in range(self.num_lasers):
-                ball = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-                ball.setScale(0.5)
-                ball.setColor(0., 0.5, 0.5, 1)
-                ball.reparentTo(self.origin)
-                self.cloud_points_vis.append(ball)
-            # self.origin.flattenStrong()
+        # visualization
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
+        self.cloud_points_vis = MyLineNodePath(self.origin, thickness=3.0) if AssetLoader.loader is not None else None
+        self.logger.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
+        self._current_frame = None
 
-    def perceive(self, base_vehicle, physics_world, detector_mask: np.ndarray = None):
-        assert self.available
+    def perceive(
+        self,
+        base_vehicle,
+        physics_world,
+        num_lasers,
+        distance,
+        height=None,
+        detector_mask: np.ndarray = None,
+        show=False
+    ):
+        height = height or self.DEFAULT_HEIGHT
         extra_filter_node = set(base_vehicle.dynamic_nodes)
         vehicle_position = base_vehicle.position
         heading_theta = base_vehicle.heading_theta
         assert not isinstance(detector_mask, str), "Please specify detector_mask either with None or a numpy array."
         cloud_points, detected_objects, colors = perceive(
-            cloud_points=np.ones((self.num_lasers, ), dtype=float),
+            cloud_points=np.ones((num_lasers, ), dtype=float),
             detector_mask=detector_mask.astype(dtype=np.uint8) if detector_mask is not None else None,
             mask=self.mask,
-            lidar_range=self._lidar_range,
-            perceive_distance=self.perceive_distance,
+            lidar_range=self._get_lidar_range(num_lasers, self.start_phase_offset),
+            perceive_distance=distance,
             heading_theta=heading_theta,
             vehicle_position_x=vehicle_position[0],
             vehicle_position_y=vehicle_position[1],
-            num_lasers=self.num_lasers,
-            height=self.height,
+            num_lasers=num_lasers,
+            height=height,
             physics_world=physics_world,
             extra_filter_node=extra_filter_node if extra_filter_node else set(),
             require_colors=self.cloud_points_vis is not None,
@@ -151,31 +146,20 @@ class DistanceDetector:
             MARK_COLOR1=self.MARK_COLOR[1],
             MARK_COLOR2=self.MARK_COLOR[2]
         )
-        if self.cloud_points_vis is not None:
-            for laser_index, pos, color in colors:
-                self.cloud_points_vis[laser_index].setPos(pos)
-                self.cloud_points_vis[laser_index].setColor(*color)
+
+        if show and self.cloud_points_vis is not None:
+            colors = colors + colors[:1]
+            if self._current_frame != self.engine.episode_step:
+                self.cloud_points_vis.reset()
+            self._current_frame = self.engine.episode_step
+            self.cloud_points_vis.drawLines([[p[1] for p in colors]], [[LVecBase4(*p[-1], 1) for p in colors[1:]]])
+            self.cloud_points_vis.create()
+
         return detect_result(cloud_points=cloud_points.tolist(), detected_objects=detected_objects)
-
-    def _add_cloud_point_vis(self, laser_index, pos):
-        self.cloud_points_vis[laser_index].setPos(pos)
-        f = laser_index / self.num_lasers if self.ANGLE_FACTOR else 1
-        self.cloud_points_vis[laser_index].setColor(
-            f * self.MARK_COLOR[0], f * self.MARK_COLOR[1], f * self.MARK_COLOR[2]
-        )
-
-    def _get_laser_end(self, laser_index, heading_theta, vehicle_position):
-        point_x = self.perceive_distance * math.cos(self._lidar_range[laser_index] + heading_theta) + \
-                  vehicle_position[0]
-        point_y = self.perceive_distance * math.sin(self._lidar_range[laser_index] + heading_theta) + \
-                  vehicle_position[1]
-        laser_end = panda_vector((point_x, point_y), self.height)
-        return laser_end
 
     def destroy(self):
         if self.cloud_points_vis:
-            for vis_laser in self.cloud_points_vis:
-                vis_laser.removeNode()
+            self.cloud_points_vis.removeNode()
         self.origin.removeNode()
         for np in self._node_path_list:
             np.detachNode()
@@ -187,10 +171,14 @@ class DistanceDetector:
         :param angle: phasse offset in [degree]
         """
         self.start_phase_offset = np.deg2rad(angle)
-        self._lidar_range = np.arange(0, self.num_lasers) * self.radian_unit + self.start_phase_offset
+
+    @staticmethod
+    def _get_lidar_range(num_lasers, start_phase_offset):
+        radian_unit = 2 * np.pi / num_lasers if num_lasers > 0 else None
+        return np.arange(0, num_lasers) * radian_unit + start_phase_offset
 
     def __del__(self):
-        logging.debug("Lidar is destroyed.")
+        self.logger.debug("Lidar is destroyed.")
 
     def detach_from_world(self):
         if isinstance(self.origin, NodePath):
@@ -202,18 +190,18 @@ class DistanceDetector:
 
 
 class SideDetector(DistanceDetector):
-    def __init__(self, num_lasers: int = 2, distance: float = 50, enable_show=True):
-        super(SideDetector, self).__init__(num_lasers, distance, enable_show)
+    def __init__(self, engine):
+        super(SideDetector, self).__init__(engine)
         self.set_start_phase_offset(90)
-        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
         self.mask = CollisionGroup.ContinuousLaneLine
 
 
 class LaneLineDetector(SideDetector):
     MARK_COLOR = (1, 77 / 255, 77 / 255)
 
-    def __init__(self, num_lasers: int = 2, distance: float = 50, enable_show=True):
-        super(SideDetector, self).__init__(num_lasers, distance, enable_show)
+    def __init__(self, engine):
+        super(SideDetector, self).__init__(engine)
         self.set_start_phase_offset(90)
-        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam)
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
         self.mask = CollisionGroup.ContinuousLaneLine | CollisionGroup.BrokenLaneLine

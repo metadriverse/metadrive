@@ -1,4 +1,5 @@
 import math
+from collections import namedtuple
 from typing import List, Tuple
 
 from panda3d.bullet import BulletWorld
@@ -111,6 +112,7 @@ class CamMask(Mask):
     PARA_VIS = BitMask32.bit(13)
     DepthCam = BitMask32.bit(14)
     ScreenshotCam = BitMask32.bit(15)
+    SemanticCam = BitMask32.bit(16)
 
 
 class CollisionGroup(Mask):
@@ -336,31 +338,32 @@ class PolicyState:
 
 REPLAY_DONE = "replay_done"
 
-
-class SemanticColor:
-    @staticmethod
-    def get_color(type):
-        raise NotImplementedError
+label_color = namedtuple("label_color", "label color")
 
 
-class MapSemanticColor(SemanticColor):
-    """I didn't use it at this time and keep it the same as MapTerrainAttribute"""
-    @staticmethod
-    def get_color(type):
-        if MetaDriveType.is_yellow_line(type):
-            # return (255, 0, 0, 0)
-            return (1, 0, 0, 0)
-        elif MetaDriveType.is_lane(type):
-            return (0, 1, 0, 0)
-        elif type == MetaDriveType.GROUND:
-            return (0, 0, 1, 0)
-        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_edge(type):
-            return (0, 0, 0, 1)
-        else:
-            raise ValueError("Unsupported type: {}".format(type))
+class Semantics:
+    """
+    For semantic camera
+    """
+    # CitySpace colormap: https://github.com/mcordts/cityscapesScripts/blob/master/cityscapesscripts/helpers/labels.py
+    UNLABELED = label_color("UNLABELED", (0, 0, 0))
+    CAR = label_color("CAR", (0, 0, 142))
+    TRUCK = label_color("TRUCK", (0, 0, 70))
+    PEDESTRIAN = label_color("PEDESTRIAN", (220, 20, 60))
+    BIKE = label_color("BIKE", (119, 11, 32))  # bicycle
+    TERRAIN = label_color("TERRAIN", (152, 251, 152))
+    ROAD = label_color("ROAD", (128, 64, 128))  # road
+    SIDEWALK = label_color("SIDEWALK", (244, 35, 232))
+    SKY = label_color("SKY", (70, 130, 180))
+    TRAFFIC_LIGHT = label_color("TRAFFIC_LIGHT", (250, 170, 30))
+    FENCE = label_color("FENCE", (190, 153, 153))
+    TRAFFIC_SIGN = label_color("TRAFFIC_SIGN", (220, 220, 0))
+
+    # customized
+    LANE_LINE = label_color("LANE_LINE", (255, 255, 255))
 
 
-class MapTerrainSemanticColor(SemanticColor):
+class MapTerrainSemanticColor:
     """
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
