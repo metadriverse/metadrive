@@ -11,7 +11,7 @@ from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGr
     ObservationWindowMultiChannel
 from metadrive.utils import import_pygame, clip
 
-pygame = import_pygame()
+pygame, gfxdraw = import_pygame()
 COLOR_WHITE = pygame.Color("white")
 
 

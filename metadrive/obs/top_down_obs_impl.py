@@ -9,7 +9,7 @@ from metadrive.utils.utils import import_pygame
 from metadrive.type import MetaDriveType
 
 PositionType = Union[Tuple[float, float], np.ndarray]
-pygame = import_pygame()
+pygame, gfxdraw = import_pygame()
 COLOR_BLACK = pygame.Color("black")
 
 

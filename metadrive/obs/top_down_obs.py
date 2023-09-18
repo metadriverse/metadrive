@@ -16,7 +16,7 @@ from metadrive.obs.top_down_obs_impl import WorldSurface, ObservationWindow, COL
     VehicleGraphics, LaneGraphics
 from metadrive.utils import import_pygame
 
-pygame = import_pygame()
+pygame, gfxdraw = import_pygame()
 
 
 class TopDownObservation(ObservationBase):
@@ -38,7 +38,7 @@ class TopDownObservation(ObservationBase):
         # self.obs_shape = (64, 64)
         self.obs_shape = self.resolution
 
-        self.pygame = import_pygame()
+        self.pygame, _ = import_pygame()
 
         self.onscreen = onscreen
         main_window_position = (0, 0)

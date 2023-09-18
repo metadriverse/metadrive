@@ -13,7 +13,7 @@ if (not is_win()) and (not is_mac()):
 
 from metadrive.utils import import_pygame
 
-pygame = import_pygame()
+pygame, gfxdraw = import_pygame()
 
 
 class Controller:

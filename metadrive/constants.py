@@ -411,4 +411,5 @@ class TopDownSemanticColor:
 
         if pygame:
             ret *= 255
+            ret.astype(np.int32)
         return ret

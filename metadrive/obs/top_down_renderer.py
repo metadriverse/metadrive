@@ -16,7 +16,7 @@ from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
 from metadrive.utils.utils import is_map_related_instance
 
-pygame = import_pygame()
+pygame, gfxdraw = import_pygame()
 
 color_white = (255, 255, 255)
 history_object = namedtuple("history_object", "name position heading_theta WIDTH LENGTH color done type")
