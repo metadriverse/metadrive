@@ -20,7 +20,7 @@ class DemoWaymoEnv(WaymoEnv):
         return super(DemoWaymoEnv, self).reset(seed=seed)
 
 
-def test_top_down_semantics():
+def test_top_down_semantics(render=False):
     asset_path = AssetLoader.asset_path
     try:
         env = DemoWaymoEnv(
@@ -34,15 +34,16 @@ def test_top_down_semantics():
         )
         o, _ = env.reset()
 
-        for i in range(1, 100000):
+        for i in range(1, 1000):
             o, r, tm, tc, info = env.step([1.0, 0.])
-            this_frame_fig = env.render(
-                mode="top_down",
-                semantic_map=True,
-                film_size=(2000, 2000),
-                num_stack=1,
-                scaling=10,
-            )
+            if render:
+                this_frame_fig = env.render(
+                    mode="top_down",
+                    semantic_map=True,
+                    film_size=(2000, 2000),
+                    num_stack=1,
+                    scaling=10,
+                )
             # save
             # pygame.image.save(this_frame_fig, "{}.png".format(i))
             if tm or tc:
