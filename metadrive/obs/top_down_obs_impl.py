@@ -197,14 +197,14 @@ class ObjectGraphics:
 
     @classmethod
     def display(
-        cls,
-        object: history_object,
-        surface,
-        color,
-        heading,
-        label: bool = False,
-        draw_countour=False,
-        contour_width=1
+            cls,
+            object: history_object,
+            surface,
+            color,
+            heading,
+            label: bool = False,
+            draw_countour=False,
+            contour_width=1
     ) -> None:
         """
         Display a vehicle on a pygame surface.
@@ -428,7 +428,8 @@ class LaneGraphics:
             if abs(starts[k] - ends[k]) > 0.5 * cls.STRIPE_LENGTH:
                 pygame.draw.line(
                     surface, color, (surface.vec2pix(lane.position(starts[k], lats[k]))),
-                    (surface.vec2pix(lane.position(ends[k], lats[k]))), 2 * DrivableAreaProperty.LANE_LINE_WIDTH
+                    (surface.vec2pix(lane.position(ends[k], lats[k]))),
+                    surface.pix(2 * DrivableAreaProperty.LANE_LINE_WIDTH)
                 )
 
     @classmethod
