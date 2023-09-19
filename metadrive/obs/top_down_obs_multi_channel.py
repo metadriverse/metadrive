@@ -5,11 +5,15 @@ import math
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
+from metadrive.scenario.scenario_description import ScenarioDescription
+from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.constants import Decoration, DEFAULT_AGENT
 from metadrive.obs.top_down_obs import TopDownObservation
 from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
     ObservationWindowMultiChannel
 from metadrive.utils import import_pygame, clip
+
+from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 
 pygame = import_pygame()
 COLOR_WHITE = pygame.Color("white")
@@ -107,15 +111,26 @@ class TopDownMultiChannel(TopDownObservation):
         self.canvas_road_network.move_display_window_to(centering_pos)
 
         # self.draw_navigation(self.canvas_navigation)
-        self.draw_navigation(self.canvas_background, (64, 64, 64))
 
-        for _from in self.road_network.graph.keys():
-            decoration = True if _from == Decoration.start else False
-            for _to in self.road_network.graph[_from].keys():
-                for l in self.road_network.graph[_from][_to]:
-                    two_side = True if l is self.road_network.graph[_from][_to][-1] or decoration else False
-                    LaneGraphics.LANE_LINE_WIDTH = 0.5
-                    LaneGraphics.display(l, self.canvas_background, two_side)
+        if isinstance(self.road_network, NodeRoadNetwork):
+            self.draw_navigation(self.canvas_background, (64, 64, 64))
+
+            for _from in self.road_network.graph.keys():
+                decoration = True if _from == Decoration.start else False
+                for _to in self.road_network.graph[_from].keys():
+                    for l in self.road_network.graph[_from][_to]:
+                        two_side = True if l is self.road_network.graph[_from][_to][-1] or decoration else False
+                        LaneGraphics.LANE_LINE_WIDTH = 0.5
+                        LaneGraphics.display(l, self.canvas_background, two_side)
+        elif hasattr(self.engine, "map_manager"):
+            for data in self.engine.map_manager.current_map.blocks[-1].map_data.values():
+                if ScenarioDescription.POLYLINE in data:
+                    LaneGraphics.display_scenario(
+                        InterpolatingLine(data[ScenarioDescription.POLYLINE]), 
+                        data.get("type", None),
+                        self.canvas_background
+                    )
+        
         self.canvas_road_network.blit(self.canvas_background, (0, 0))
         self.obs_window.reset(self.canvas_runtime)
         self._should_draw_map = False
@@ -142,7 +157,13 @@ class TopDownMultiChannel(TopDownObservation):
         ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
-        for v in self.engine.traffic_manager.vehicles:
+        vehicles = []
+        if hasattr(self.engine, "traffic_manager"):
+            vehicles = self.engine.traffic_manager.vehicles
+        elif hasattr(self.engine, "scenario_traffic_manager"):
+            vehicles = self.engine.scenario_traffic_manager.vehicles
+        
+        for v in vehicles:
             if v is vehicle:
                 continue
             h = v.heading_theta

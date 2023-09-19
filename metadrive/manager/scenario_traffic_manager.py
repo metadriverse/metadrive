@@ -6,6 +6,7 @@ import numpy as np
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
+from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import get_vehicle_type, reset_vehicle_type_count
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
@@ -161,6 +162,10 @@ class ScenarioTrafficManager(BaseManager):
     @property
     def current_scenario_length(self):
         return self.engine.data_manager.current_scenario_length
+
+    @property
+    def vehicles(self):
+        return list(self.engine.get_objects(filter=lambda o: isinstance(o, BaseVehicle)).values())
 
     def spawn_vehicle(self, v_id, track):
         state = parse_object_state(track, self.episode_step)
