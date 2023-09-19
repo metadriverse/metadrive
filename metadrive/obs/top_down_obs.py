@@ -13,7 +13,7 @@ from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, DEFAULT_AGENT, EDITION
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.obs.top_down_obs_impl import WorldSurface, ObservationWindow, COLOR_BLACK, \
-    VehicleGraphics, LaneGraphics
+    ObjectGraphics, LaneGraphics
 from metadrive.utils import import_pygame
 
 pygame, gfxdraw = import_pygame()
@@ -160,15 +160,15 @@ class TopDownObservation(ObservationBase):
         ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
-        VehicleGraphics.display(
-            vehicle=vehicle, surface=self.canvas_runtime, heading=ego_heading, color=VehicleGraphics.GREEN
+        ObjectGraphics.display(
+            object=vehicle, surface=self.canvas_runtime, heading=ego_heading, color=ObjectGraphics.GREEN
         )
         for v in self.engine.traffic_manager.vehicles:
             if v is vehicle:
                 continue
             h = v.heading_theta
             h = h if abs(h) > 2 * np.pi / 180 else 0
-            VehicleGraphics.display(vehicle=v, surface=self.canvas_runtime, heading=h, color=VehicleGraphics.BLUE)
+            ObjectGraphics.display(object=v, surface=self.canvas_runtime, heading=h, color=ObjectGraphics.BLUE)
 
         # Prepare a runtime canvas for rotation
         return self.obs_window.render(canvas=self.canvas_runtime, position=pos, heading=vehicle.heading_theta)

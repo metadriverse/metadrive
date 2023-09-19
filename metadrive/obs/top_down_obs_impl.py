@@ -8,10 +8,12 @@ from metadrive.constants import PGLineType, PGLineColor
 from metadrive.utils.utils import import_pygame
 from metadrive.type import MetaDriveType
 from metadrive.constants import DrivableAreaProperty
+from collections import namedtuple
 
 PositionType = Union[Tuple[float, float], np.ndarray]
 pygame, gfxdraw = import_pygame()
 COLOR_BLACK = pygame.Color("black")
+history_object = namedtuple("history_object", "name position heading_theta WIDTH LENGTH color done type")
 
 
 class ObservationWindow:
@@ -182,7 +184,7 @@ class WorldSurface(pygame.Surface):
         return ret
 
 
-class VehicleGraphics:
+class ObjectGraphics:
     RED = (255, 100, 100)
     GREEN = (50, 200, 0)
     BLUE = (100, 200, 255)
@@ -195,22 +197,23 @@ class VehicleGraphics:
 
     @classmethod
     def display(
-        cls, vehicle, surface, color, heading, label: bool = False, draw_countour=False, contour_width=1
+            cls, object: history_object, surface, color, heading, label: bool = False, draw_countour=False,
+            contour_width=1
     ) -> None:
         """
         Display a vehicle on a pygame surface.
 
         The vehicle is represented as a colored rotated rectangle.
 
-        :param vehicle: the vehicle to be drawn
+        :param object: the vehicle to be drawn
         :param surface: the surface to draw the vehicle on
         :param label: whether a text label should be rendered
         """
-        if not surface.is_visible(vehicle.position):
+        if not surface.is_visible(object.position):
             return
-        w = surface.pix(vehicle.top_down_width)
-        h = surface.pix(vehicle.top_down_length)
-        position = [*surface.pos2pix(vehicle.position[0], vehicle.position[1])]
+        w = surface.pix(object.WIDTH)
+        h = surface.pix(object.LENGTH)
+        position = [*surface.pos2pix(object.position[0], object.position[1])]
         angle = np.rad2deg(heading)
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]
         box_rotate = [p.rotate(angle) + position for p in box]
@@ -223,7 +226,7 @@ class VehicleGraphics:
         if label:
             if cls.font is None:
                 cls.font = pygame.font.Font(None, 15)
-            text = "#{}".format(id(vehicle) % 1000)
+            text = "#{}".format(id(object) % 1000)
             text = cls.font.render(text, 1, (10, 10, 10), (255, 255, 255))
             surface.blit(text, position)
 

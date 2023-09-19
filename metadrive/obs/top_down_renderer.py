@@ -1,7 +1,7 @@
 import copy
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 import math
-from collections import deque, namedtuple
+from collections import deque
 from typing import Optional, Union, Iterable
 
 import numpy as np
@@ -10,7 +10,7 @@ from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.constants import Decoration, TARGET_VEHICLES
 from metadrive.constants import TopDownSemanticColor, MetaDriveType, DrivableAreaProperty
-from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
+from metadrive.obs.top_down_obs_impl import WorldSurface, ObjectGraphics, LaneGraphics, history_object
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
@@ -19,7 +19,7 @@ from metadrive.utils.utils import is_map_related_instance
 pygame, gfxdraw = import_pygame()
 
 color_white = (255, 255, 255)
-history_object = namedtuple("history_object", "name position heading_theta WIDTH LENGTH color done type")
+
 
 
 def draw_top_down_map(
@@ -415,8 +415,8 @@ class TopDownRenderer:
                     c = TopDownSemanticColor.get_color(v.type, True) * (1 - alpha_f) + alpha_f * 255
                 else:
                     c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
-                VehicleGraphics.display(
-                    vehicle=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=False
+                ObjectGraphics.display(
+                    object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=False
                 )
 
         # Draw the whole trajectory of ego vehicle with no gradient colors:
@@ -431,8 +431,8 @@ class TopDownRenderer:
                 x = abs(int(i))
                 alpha_f = min(x / len(self.history_target_vehicle), 0.5)
                 # alpha_f = 0
-                VehicleGraphics.display(
-                    vehicle=v,
+                ObjectGraphics.display(
+                    object=v,
                     surface=self._runtime_canvas,
                     heading=h,
                     color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
@@ -453,8 +453,8 @@ class TopDownRenderer:
                 c = TopDownSemanticColor.get_color(v.type, True) * (1 - alpha_f) + alpha_f * 255
             else:
                 c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
-            VehicleGraphics.display(
-                vehicle=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=True, contour_width=2
+            ObjectGraphics.display(
+                object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=True, contour_width=2
             )
 
         if not hasattr(self, "_deads"):
