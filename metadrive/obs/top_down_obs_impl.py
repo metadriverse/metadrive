@@ -208,8 +208,8 @@ class VehicleGraphics:
         """
         if not surface.is_visible(vehicle.position):
             return
-        w = surface.pix(vehicle.WIDTH)
-        h = surface.pix(vehicle.LENGTH)
+        w = surface.pix(vehicle.top_down_width)
+        h = surface.pix(vehicle.top_down_length)
         position = [*surface.pos2pix(vehicle.position[0], vehicle.position[1])]
         angle = np.rad2deg(heading)
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]

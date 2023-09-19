@@ -53,4 +53,4 @@ def test_top_down_semantics(render=False):
 
 
 if __name__ == '__main__':
-    test_top_down_semantics()
+    test_top_down_semantics(True)

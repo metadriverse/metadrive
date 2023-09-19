@@ -184,8 +184,8 @@ class TopDownMultiChannel(TopDownObservation):
 
     def _draw_ego_vehicle(self):
         vehicle = self.engine.agents[DEFAULT_AGENT]
-        w = vehicle.WIDTH * self.scaling
-        h = vehicle.LENGTH * self.scaling
+        w = vehicle.top_down_width * self.scaling
+        h = vehicle.top_down_length * self.scaling
         position = (self.resolution[0] / 2, self.resolution[1] / 2)
         angle = 90
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]
