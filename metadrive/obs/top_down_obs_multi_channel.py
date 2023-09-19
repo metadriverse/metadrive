@@ -126,11 +126,10 @@ class TopDownMultiChannel(TopDownObservation):
             for data in self.engine.map_manager.current_map.blocks[-1].map_data.values():
                 if ScenarioDescription.POLYLINE in data:
                     LaneGraphics.display_scenario(
-                        InterpolatingLine(data[ScenarioDescription.POLYLINE]), 
-                        data.get("type", None),
+                        InterpolatingLine(data[ScenarioDescription.POLYLINE]), data.get("type", None),
                         self.canvas_background
                     )
-        
+
         self.canvas_road_network.blit(self.canvas_background, (0, 0))
         self.obs_window.reset(self.canvas_runtime)
         self._should_draw_map = False
@@ -162,7 +161,7 @@ class TopDownMultiChannel(TopDownObservation):
             vehicles = self.engine.traffic_manager.vehicles
         elif hasattr(self.engine, "scenario_traffic_manager"):
             vehicles = self.engine.scenario_traffic_manager.vehicles
-        
+
         for v in vehicles:
             if v is vehicle:
                 continue
