@@ -31,9 +31,7 @@ class ScenarioMapManager(BaseManager):
     def reset(self):
         if not self._no_map:
             seed = self.engine.global_random_seed
-            assert self.start_scenario_index <= seed < self.start_scenario_index + self.map_num, (
-                self.start_scenario_index, self.map_num, seed
-            )
+            assert self.start_scenario_index <= seed < self.start_scenario_index + self.map_num
 
             self.current_sdc_route = None
             self.sdc_dest_point = None
