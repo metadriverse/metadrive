@@ -197,14 +197,12 @@ class ScenarioTrafficManager(BaseManager):
             v_cfg["top_down_length"] = track["state"]["length"][self.episode_step]
             v_cfg["top_down_width"] = track["state"]["width"][self.episode_step]
             if v_cfg["top_down_length"] < 1 or v_cfg["top_down_width"] < 0.5:
-                logger.warning("Scenario ID: {}. The top_down size of vehicle {} is weird: "
-                               "{}".format(self.engine.current_seed, v_id, [v_cfg["length"], v_cfg["width"]]))
+                logger.warning(
+                    "Scenario ID: {}. The top_down size of vehicle {} is weird: "
+                    "{}".format(self.engine.current_seed, v_id, [v_cfg["length"], v_cfg["width"]])
+                )
         v = self.spawn_object(
-            vehicle_class,
-            position=state["position"],
-            heading=state["heading"],
-            vehicle_config=v_cfg,
-            name=obj_name
+            vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_cfg, name=obj_name
         )
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id

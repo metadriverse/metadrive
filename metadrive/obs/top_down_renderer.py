@@ -21,7 +21,6 @@ pygame, gfxdraw = import_pygame()
 color_white = (255, 255, 255)
 
 
-
 def draw_top_down_map(
     map,
     resolution: Iterable = (512, 512),
@@ -415,9 +414,7 @@ class TopDownRenderer:
                     c = TopDownSemanticColor.get_color(v.type, True) * (1 - alpha_f) + alpha_f * 255
                 else:
                     c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
-                ObjectGraphics.display(
-                    object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=False
-                )
+                ObjectGraphics.display(object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=False)
 
         # Draw the whole trajectory of ego vehicle with no gradient colors:
         if self.draw_target_vehicle_trajectory:
