@@ -23,14 +23,14 @@ history_object = namedtuple("history_object", "name position heading_theta WIDTH
 
 
 def draw_top_down_map(
-        map,
-        resolution: Iterable = (512, 512),
-        semantic_map=True,
-        return_surface=False,
-        film_size=None,
-        scaling=None,
-        reverse_color=False,
-        road_color=color_white,
+    map,
+    resolution: Iterable = (512, 512),
+    semantic_map=True,
+    return_surface=False,
+    film_size=None,
+    scaling=None,
+    reverse_color=False,
+    road_color=color_white,
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
@@ -55,8 +55,10 @@ def draw_top_down_map(
 
             for obj in all_lanes.values():
                 if MetaDriveType.is_lane(obj["type"]):
-                    pygame.draw.polygon(surface, TopDownSemanticColor.get_color(obj["type"], True),
-                                        [surface.pos2pix(p[0], p[1]) for p in obj["polygon"]])
+                    pygame.draw.polygon(
+                        surface, TopDownSemanticColor.get_color(obj["type"], True),
+                        [surface.pos2pix(p[0], p[1]) for p in obj["polygon"]]
+                    )
 
                 elif (MetaDriveType.is_road_line(obj["type"]) or MetaDriveType.is_sidewalk(obj["type"])):
                     if MetaDriveType.is_broken_line(obj["type"]):
@@ -123,7 +125,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -182,21 +184,21 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-            self,
-            film_size=(1000, 1000),
-            screen_size=(1000, 1000),
-            light_background=True,
-            num_stack=15,
-            history_smooth=0,
-            road_color=(80, 80, 80),
-            show_agent_name=False,
-            camera_position=None,
-            target_vehicle_heading_up=False,
-            draw_target_vehicle_trajectory=False,
-            semantic_map=False,
-            scaling=None,  # auto-scale
-            **kwargs
-            # current_track_vehicle=None
+        self,
+        film_size=(1000, 1000),
+        screen_size=(1000, 1000),
+        light_background=True,
+        num_stack=15,
+        history_smooth=0,
+        road_color=(80, 80, 80),
+        show_agent_name=False,
+        camera_position=None,
+        target_vehicle_heading_up=False,
+        draw_target_vehicle_trajectory=False,
+        semantic_map=False,
+        scaling=None,  # auto-scale
+        **kwargs
+        # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
@@ -238,7 +240,7 @@ class TopDownRenderer:
         )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2 ** 32 - 1
+            pixels ^= 2**32 - 1
             del pixels
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
@@ -355,7 +357,7 @@ class TopDownRenderer:
         self._light_background = self._light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2 ** 32 - 1
+            pixels ^= 2**32 - 1
             del pixels
 
         # Reset several useful variables.
@@ -414,11 +416,7 @@ class TopDownRenderer:
                 else:
                     c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
                 VehicleGraphics.display(
-                    vehicle=v,
-                    surface=self._runtime_canvas,
-                    heading=h,
-                    color=c,
-                    draw_countour=False
+                    vehicle=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=False
                 )
 
         # Draw the whole trajectory of ego vehicle with no gradient colors:
@@ -456,12 +454,7 @@ class TopDownRenderer:
             else:
                 c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
             VehicleGraphics.display(
-                vehicle=v,
-                surface=self._runtime_canvas,
-                heading=h,
-                color=c,
-                draw_countour=True,
-                contour_width=2
+                vehicle=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=True, contour_width=2
             )
 
         if not hasattr(self, "_deads"):

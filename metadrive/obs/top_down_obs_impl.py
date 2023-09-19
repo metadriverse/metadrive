@@ -419,8 +419,7 @@ class LaneGraphics:
             if abs(starts[k] - ends[k]) > 0.5 * cls.STRIPE_LENGTH:
                 pygame.draw.line(
                     surface, color, (surface.vec2pix(lane.position(starts[k], lats[k]))),
-                    (surface.vec2pix(lane.position(ends[k], lats[k]))),
-                    2 * DrivableAreaProperty.LANE_LINE_WIDTH
+                    (surface.vec2pix(lane.position(ends[k], lats[k]))), 2 * DrivableAreaProperty.LANE_LINE_WIDTH
                 )
 
     @classmethod
