@@ -7,6 +7,7 @@ import numpy as np
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.interpolating_line import InterpolatingLine
+from metadrive.component.lane.point_lane import PointLane
 from metadrive.constants import Decoration, DEFAULT_AGENT
 from metadrive.obs.top_down_obs import TopDownObservation
 from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
@@ -14,9 +15,13 @@ from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGr
 from metadrive.utils import import_pygame, clip
 
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
+from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
+from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
+from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 
 pygame = import_pygame()
 COLOR_WHITE = pygame.Color("white")
+DEFAULT_TRAJECTORY_LANE_WIDTH = 5
 
 
 class TopDownMultiChannel(TopDownObservation):
@@ -110,11 +115,15 @@ class TopDownMultiChannel(TopDownObservation):
         self.canvas_background.move_display_window_to(centering_pos)
         self.canvas_road_network.move_display_window_to(centering_pos)
 
-        # self.draw_navigation(self.canvas_navigation)
+        if isinstance(self.target_vehicle.navigation, NodeNetworkNavigation):
+            self.draw_navigation_node(self.canvas_background, (64, 64, 64))
+        elif isinstance(self.target_vehicle.navigation, EdgeNetworkNavigation):
+            # TODO: draw edge network navigation
+            pass
+        elif isinstance(self.target_vehicle.navigation, TrajectoryNavigation):
+            self.draw_navigation_trajectory(self.canvas_background, (64, 64, 64))
 
         if isinstance(self.road_network, NodeRoadNetwork):
-            self.draw_navigation(self.canvas_background, (64, 64, 64))
-
             for _from in self.road_network.graph.keys():
                 decoration = True if _from == Decoration.start else False
                 for _to in self.road_network.graph[_from].keys():
@@ -276,12 +285,16 @@ class TopDownMultiChannel(TopDownObservation):
             img = np.clip(img, 0, 255)
         return np.transpose(img, (1, 0, 2))
 
-    def draw_navigation(self, canvas, color=(128, 128, 128)):
+    def draw_navigation_node(self, canvas, color=(128, 128, 128)):
         checkpoints = self.target_vehicle.navigation.checkpoints
         for i, c in enumerate(checkpoints[:-1]):
             lanes = self.road_network.graph[c][checkpoints[i + 1]]
             for lane in lanes:
                 LaneGraphics.draw_drivable_area(lane, canvas, color=color)
+
+    def draw_navigation_trajectory(self, canvas, color=(128, 128, 128)):
+        lane = PointLane(self.target_vehicle.navigation.checkpoints, DEFAULT_TRAJECTORY_LANE_WIDTH)
+        LaneGraphics.draw_drivable_area(lane, canvas, color=color)
 
     def _get_stack_indices(self, length, frame_skip=None):
         frame_skip = frame_skip or self.frame_skip
