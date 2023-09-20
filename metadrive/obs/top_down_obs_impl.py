@@ -1,5 +1,5 @@
 from typing import List, Tuple, Union
-
+import math
 import numpy as np
 
 from metadrive.component.lane.circular_lane import CircularLane
@@ -131,7 +131,7 @@ class WorldSurface(pygame.Surface):
         :param length: the input distance [m]
         :return: the corresponding size [px]
         """
-        return int(length * self.scaling)
+        return math.ceil(length * self.scaling)
 
     def pos2pix(self, x: float, y: float) -> Tuple[int, int]:
         """
