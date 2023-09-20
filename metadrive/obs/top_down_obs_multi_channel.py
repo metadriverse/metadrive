@@ -47,7 +47,7 @@ class TopDownMultiChannel(TopDownObservation):
         resolution=None,
         max_distance=50
     ):
-        super(TopDownMultiChannel, self).__init__(
+        super().__init__(
             vehicle_config, clip_rgb, onscreen=onscreen, resolution=resolution, max_distance=max_distance
         )
         self.num_stacks = 2 + frame_stack
@@ -68,9 +68,9 @@ class TopDownMultiChannel(TopDownObservation):
         self.obs_window = ObservationWindowMultiChannel(names, (self.max_distance, self.max_distance), self.resolution)
 
     def init_canvas(self):
-        self.canvas_background = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_navigation = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_road_network = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
+        self.canvas_traffic_control = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_runtime = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_ego = WorldSurface(self.MAP_RESOLUTION, 0, pygame.Surface(self.MAP_RESOLUTION))
         self.canvas_past_pos = pygame.Surface(self.resolution)  # A local view
@@ -90,11 +90,11 @@ class TopDownMultiChannel(TopDownObservation):
         # scaling and center can be easily found by bounding box
         b_box = self.road_network.get_bounding_box()
         self.canvas_navigation.fill(COLOR_BLACK)
-        self.canvas_ego.fill(COLOR_BLACK)
         self.canvas_road_network.fill(COLOR_BLACK)
+        self.canvas_traffic_control.fill(COLOR_BLACK)
         self.canvas_runtime.fill(COLOR_BLACK)
-        self.canvas_background.fill(COLOR_BLACK)
-        self.canvas_background.set_colorkey(self.canvas_background.BLACK)
+        self.canvas_ego.fill(COLOR_BLACK)
+
         x_len = b_box[1] - b_box[0]
         y_len = b_box[3] - b_box[2]
         max_len = max(x_len, y_len) + 20  # Add more 20 meters
@@ -102,26 +102,27 @@ class TopDownMultiChannel(TopDownObservation):
         assert scaling > 0
 
         # real-world distance * scaling = pixel in canvas
-        self.canvas_background.scaling = scaling
-        self.canvas_runtime.scaling = scaling
         self.canvas_navigation.scaling = scaling
-        self.canvas_ego.scaling = scaling
         self.canvas_road_network.scaling = scaling
+        self.canvas_traffic_control.scaling = scaling
+        self.canvas_runtime.scaling = scaling
+        self.canvas_ego.scaling = scaling
 
         centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
-        self.canvas_runtime.move_display_window_to(centering_pos)
         self.canvas_navigation.move_display_window_to(centering_pos)
-        self.canvas_ego.move_display_window_to(centering_pos)
-        self.canvas_background.move_display_window_to(centering_pos)
         self.canvas_road_network.move_display_window_to(centering_pos)
+        self.canvas_traffic_control.move_display_window_to(centering_pos)
+        self.canvas_runtime.move_display_window_to(centering_pos)
+        self.canvas_ego.move_display_window_to(centering_pos)
+
 
         if isinstance(self.target_vehicle.navigation, NodeNetworkNavigation):
-            self.draw_navigation_node(self.canvas_background, (64, 64, 64))
+            self.draw_navigation_node(self.canvas_navigation, (64, 64, 64))
         elif isinstance(self.target_vehicle.navigation, EdgeNetworkNavigation):
             # TODO: draw edge network navigation
             pass
         elif isinstance(self.target_vehicle.navigation, TrajectoryNavigation):
-            self.draw_navigation_trajectory(self.canvas_background, (64, 64, 64))
+            self.draw_navigation_trajectory(self.canvas_navigation, (64, 64, 64))
 
         if isinstance(self.road_network, NodeRoadNetwork):
             for _from in self.road_network.graph.keys():
@@ -130,16 +131,15 @@ class TopDownMultiChannel(TopDownObservation):
                     for l in self.road_network.graph[_from][_to]:
                         two_side = True if l is self.road_network.graph[_from][_to][-1] or decoration else False
                         LaneGraphics.LANE_LINE_WIDTH = 0.5
-                        LaneGraphics.display(l, self.canvas_background, two_side)
+                        LaneGraphics.display(l, self.canvas_road_network, two_side)
         elif hasattr(self.engine, "map_manager"):
             for data in self.engine.map_manager.current_map.blocks[-1].map_data.values():
                 if ScenarioDescription.POLYLINE in data:
                     LaneGraphics.display_scenario(
                         InterpolatingLine(data[ScenarioDescription.POLYLINE]), data.get("type", None),
-                        self.canvas_background
+                        self.canvas_road_network
                     )
 
-        self.canvas_road_network.blit(self.canvas_background, (0, 0))
         self.obs_window.reset(self.canvas_runtime)
         self._should_draw_map = False
 
@@ -200,10 +200,11 @@ class TopDownMultiChannel(TopDownObservation):
 
         ret = self.obs_window.render(
             canvas_dict=dict(
+                navigation=self.canvas_navigation,
                 road_network=self.canvas_road_network,
+                traffic_control=self.canvas_traffic_control,
                 traffic_flow=self.canvas_runtime,
                 target_vehicle=self.canvas_ego,
-                # navigation=self.canvas_navigation,
             ),
             position=pos,
             heading=vehicle.heading_theta
@@ -258,9 +259,9 @@ class TopDownMultiChannel(TopDownObservation):
         self.stack_traffic_flow.append(img_dict["traffic_flow"])
 
         img = [
+            img_dict["navigation"],
             img_dict["road_network"] * 2,
-            # img_navigation,
-            # img_dict["navigation"],
+            img_dict["traffic_control"],
             # img_dict["target_vehicle"],
             img_dict["past_pos"],
         ]  # + list(self.stack_traffic_flow)

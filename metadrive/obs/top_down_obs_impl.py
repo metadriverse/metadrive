@@ -455,7 +455,7 @@ class LaneGraphics:
 
 
 class ObservationWindowMultiChannel:
-    CHANNEL_NAMES = ["road_network", "traffic_flow", "target_vehicle", "past_pos"]
+    CHANNEL_NAMES = ["navigation", "road_network", "traffic_control", "traffic_flow", "target_vehicle", "past_pos"]
 
     def __init__(self, names, max_range, resolution):
         assert isinstance(names, list)
@@ -515,6 +515,7 @@ class ObservationWindowMultiChannel:
         if "navigation" in ret:
             _draw(canvas, "navigation", pygame.Color("Blue"))
         _draw(canvas, "road_network", pygame.Color("White"))
+        _draw(canvas, "traffic_control", pygame.Color("Yellow"))
         _draw(canvas, "traffic_flow", pygame.Color("Red"))
         _draw(canvas, "target_vehicle", pygame.Color("Green"))
         return canvas
