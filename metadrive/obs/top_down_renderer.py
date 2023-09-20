@@ -59,7 +59,7 @@ def draw_top_down_map(
                         [surface.pos2pix(p[0], p[1]) for p in obj["polygon"]]
                     )
 
-                elif (MetaDriveType.is_road_line(obj["type"]) or MetaDriveType.is_sidewalk(obj["type"])):
+                elif MetaDriveType.is_road_line(obj["type"]) or MetaDriveType.is_road_boundary_line(obj["type"]):
                     if MetaDriveType.is_broken_line(obj["type"]):
                         points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
                     else:

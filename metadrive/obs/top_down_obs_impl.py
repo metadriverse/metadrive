@@ -310,11 +310,11 @@ class LaneGraphics:
         lane = waymo_poly_line
         if MetaDriveType.is_yellow_line(type):
             color = (0, 80, 220)
-        elif MetaDriveType.is_road_edge(type):
+        elif MetaDriveType.is_road_boundary_line(type):
             color = (160, 160, 160)
         else:
             color = (80, 80, 80)
-        if MetaDriveType.is_road_line(type) or MetaDriveType.is_road_edge(type):
+        if MetaDriveType.is_road_line(type) or MetaDriveType.is_road_boundary_line(type):
             # if len(waymo_poly_line.segment_property) < 1:
             #     return
             stripes_count = int(

@@ -61,6 +61,7 @@ COLLISION_INFO_COLOR = dict(
 # Used for rendering the banner in Interface.
 COLOR = {
     MetaDriveType.BOUNDARY_LINE: "red",
+    MetaDriveType.BOUNDARY_SIDEWALK: "red",
     MetaDriveType.LINE_SOLID_SINGLE_WHITE: "orange",
     MetaDriveType.LINE_SOLID_SINGLE_YELLOW: "orange",
     MetaDriveType.LINE_BROKEN_SINGLE_YELLOW: "yellow",
@@ -378,7 +379,7 @@ class MapTerrainSemanticColor:
             return (0, 1, 0, 0)
         elif type == MetaDriveType.GROUND:
             return (0, 0, 1, 0)
-        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_edge(type):
+        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
             return (0, 0, 0, 1)
         else:
             raise ValueError("Unsupported type: {}".format(type))
@@ -398,7 +399,7 @@ class TopDownSemanticColor:
             ret = np.array([0, 1, 0, 0])
         elif type == MetaDriveType.GROUND:
             ret = np.array([0, 0, 1, 0])
-        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_edge(type):
+        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
             ret = np.array([0, 0, 0, 1])
         elif MetaDriveType.is_vehicle(type):
             ret = np.array([0, 0, 1, 0])

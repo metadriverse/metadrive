@@ -82,7 +82,7 @@ class ScenarioBlock(BaseBlock):
             # else:
             #     raise ValueError("Can not build lane line type: {}".format(type))
             # TODO LQY: DO we need sidewalk?
-            elif MetaDriveType.is_road_edge(type):
+            elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
 
     def construct_continuous_line(self, polyline, color):

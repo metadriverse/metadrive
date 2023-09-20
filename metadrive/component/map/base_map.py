@@ -169,7 +169,7 @@ class BaseMap(BaseRunnable):
                 if MetaDriveType.is_lane(obj["type"]) and "lane" in layer:
                     polygons.append((obj["polygon"], MapTerrainSemanticColor.get_color(obj["type"])))
                 elif "lane_line" in layer and (MetaDriveType.is_road_line(obj["type"])
-                                               or MetaDriveType.is_sidewalk(obj["type"])):
+                                               or MetaDriveType.is_road_boundary_line(obj["type"])):
                     if MetaDriveType.is_broken_line(obj["type"]):
                         for index in range(0, len(obj["polyline"]) - 1, points_to_skip * 2):
                             if index + points_to_skip < len(obj["polyline"]):

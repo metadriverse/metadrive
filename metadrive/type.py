@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,9 +29,10 @@ class MetaDriveType:
     LINE_PASSING_DOUBLE_YELLOW = "ROAD_LINE_PASSING_DOUBLE_YELLOW"
 
     # ===== Edge/Boundary/SideWalk/Region =====
-    BOUNDARY_UNKNOWN = "UNKNOWN"
-    BOUNDARY_LINE = "ROAD_EDGE_BOUNDARY"
-    BOUNDARY_MEDIAN = "ROAD_EDGE_MEDIAN"
+    BOUNDARY_UNKNOWN = "UNKNOWN"  # line
+    BOUNDARY_LINE = "ROAD_EDGE_BOUNDARY"  # line
+    BOUNDARY_MEDIAN = "ROAD_EDGE_MEDIAN"  # line
+    BOUNDARY_SIDEWALK = "ROAD_EDGE_SIDEWALK"  # polygon
     STOP_SIGN = "STOP_SIGN"
     CROSSWALK = "CROSSWALK"
     SPEED_BUMP = "SPEED_BUMP"
@@ -136,7 +138,7 @@ class MetaDriveType:
         return line in [cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_SINGLE_WHITE]
 
     @classmethod
-    def is_road_edge(cls, edge):
+    def is_road_boundary_line(cls, edge):
         """
         This function relates to is_road_line.
         """
@@ -144,7 +146,7 @@ class MetaDriveType:
 
     @classmethod
     def is_sidewalk(cls, edge):
-        return edge == cls.BOUNDARY_LINE
+        return edge == cls.BOUNDARY_SIDEWALK
 
     @classmethod
     def is_vehicle(cls, type):

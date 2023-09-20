@@ -325,7 +325,7 @@ class AbstractLane:
         width = width or block.SIDEWALK_WIDTH
         middle = (lane_start + lane_end) / 2
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_LINE)
+        body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_SIDEWALK)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         side_np = block.sidewalk_node_path.attachNewNode(body_node)

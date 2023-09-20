@@ -75,7 +75,7 @@ class ScenarioMap(BaseMap):
                         "type": MetaDriveType.LINE_SOLID_SINGLE_YELLOW
                         if MetaDriveType.is_yellow_line(type) else MetaDriveType.LINE_SOLID_SINGLE_WHITE
                     }
-            elif MetaDriveType.is_road_edge(type):
+            elif MetaDriveType.is_road_boundary_line(type):
                 line = np.asarray(data[ScenarioDescription.POLYLINE])[..., :2]
                 length = get_polyline_length(line)
                 resampled = resample_polyline(line, interval) if length > interval * 2 else line
