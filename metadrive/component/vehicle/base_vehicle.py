@@ -922,11 +922,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     @property
     def top_down_length(self):
-        return self.LENGTH
+        return self.config["top_down_length"] if self.config["top_down_length"] else self.LENGTH
 
     @property
     def top_down_width(self):
-        return self.WIDTH
+        return self.config["top_down_width"] if self.config["top_down_width"] else self.WIDTH
 
     @property
     def lane(self):

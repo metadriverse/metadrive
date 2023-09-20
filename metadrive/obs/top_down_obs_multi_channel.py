@@ -7,11 +7,11 @@ import numpy as np
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, DEFAULT_AGENT
 from metadrive.obs.top_down_obs import TopDownObservation
-from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
+from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, ObjectGraphics, LaneGraphics, \
     ObservationWindowMultiChannel
 from metadrive.utils import import_pygame, clip
 
-pygame = import_pygame()
+pygame, gfxdraw = import_pygame()
 COLOR_WHITE = pygame.Color("white")
 
 
@@ -147,7 +147,7 @@ class TopDownMultiChannel(TopDownObservation):
                 continue
             h = v.heading_theta
             h = h if abs(h) > 2 * np.pi / 180 else 0
-            VehicleGraphics.display(vehicle=v, surface=self.canvas_runtime, heading=h, color=VehicleGraphics.BLUE)
+            ObjectGraphics.display(object=v, surface=self.canvas_runtime, heading=h, color=ObjectGraphics.BLUE)
 
         raw_pos = vehicle.position
         self.stack_past_pos.append(raw_pos)
@@ -184,8 +184,8 @@ class TopDownMultiChannel(TopDownObservation):
 
     def _draw_ego_vehicle(self):
         vehicle = self.engine.agents[DEFAULT_AGENT]
-        w = vehicle.WIDTH * self.scaling
-        h = vehicle.LENGTH * self.scaling
+        w = vehicle.top_down_width * self.scaling
+        h = vehicle.top_down_length * self.scaling
         position = (self.resolution[0] / 2, self.resolution[1] / 2)
         angle = 90
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]
