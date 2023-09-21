@@ -29,6 +29,8 @@ class ScenarioMap(BaseMap):
             map_index=self.map_index,
             need_lane_localization=self.need_lane_localization
         )
+        self.crosswalks = block.crosswalks
+        self.sidewalks = block.sidewalks
         block.construct_block(self.engine.worldNP, self.engine.physics_world, attach_to_world=True)
         self.blocks.append(block)
 

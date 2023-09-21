@@ -47,7 +47,11 @@ class BaseMap(BaseRunnable):
         # ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
         super(BaseMap, self).__init__(config=map_config)
         self.film_size = (get_global_config()["draw_map_resolution"], get_global_config()["draw_map_resolution"])
+
+        # map features
         self.road_network = self.road_network_type()
+        self.crosswalks = {}
+        self.sidewalks = {}
 
         # A flatten representation of blocks, might cause chaos in city-level generation.
         self.blocks = []
@@ -129,11 +133,10 @@ class BaseMap(BaseRunnable):
 
     def get_map_features(self, interval=2):
         map_features = self.road_network.get_map_features(interval)
-
         boundary_line_vector = self.get_boundary_line_vector(interval)
-
         map_features.update(boundary_line_vector)
-
+        map_features.update(self.sidewalks)
+        map_features.update(self.crosswalks)
         return map_features
 
     def get_boundary_line_vector(self, interval):

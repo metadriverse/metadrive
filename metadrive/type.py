@@ -205,6 +205,10 @@ class MetaDriveType:
             logger.warning("TrafficLightStatus: {} is not MetaDriveType".format(status))
             return cls.LIGHT_UNKNOWN
 
+    @classmethod
+    def is_crosswalk(cls, type):
+        return type == MetaDriveType.CROSSWALK
+
     def __init__(self, type=None):
         # TODO extend this base class to all objects! It is only affect lane so far.
         # TODO Or people can only know the type with isinstance()
