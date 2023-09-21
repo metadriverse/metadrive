@@ -280,7 +280,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
                     ret["{}".format(lane.index)] = {
                         SD.POLYLINE: lane.get_polyline(interval),
                         SD.POLYGON: lane.polygon,
-                        SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
+                        SD.TYPE: lane.metadrive_type,
                         "speed_limit_kmh": lane.speed_limit
                     }
         return ret

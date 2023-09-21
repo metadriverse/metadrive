@@ -200,7 +200,7 @@ class MetaDriveType:
 
     def __init__(self, type=None):
         # TODO extend this base class to all objects! It is only affect lane so far.
-        # TODO Or people can only know the type with isinstance() 
+        # TODO Or people can only know the type with isinstance()
         self.metadrive_type = MetaDriveType.UNSET
         if type is not None:
             self.set_metadrive_type(type)
