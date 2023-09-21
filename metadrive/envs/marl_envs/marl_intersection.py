@@ -359,7 +359,7 @@ def show_map_and_traj():
     env.reset()
     with open("metasvodist_inter_best.json", "r") as f:
         traj = json.load(f)
-    m = draw_top_down_map(env.current_map, draw_drivable_area=False, return_surface=True, reverse_color=True)
+    m = draw_top_down_map(env.current_map, semantic_map=False, return_surface=True, reverse_color=True)
     m = draw_top_down_trajectory(
         m, traj, entry_differ_color=True, color_list=[(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
     )

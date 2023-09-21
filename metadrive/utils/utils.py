@@ -14,7 +14,8 @@ from metadrive.constants import MetaDriveType
 def import_pygame():
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
     import pygame
-    return pygame
+    from pygame import gfxdraw
+    return pygame, gfxdraw
 
 
 def get_time_str():
