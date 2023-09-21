@@ -28,6 +28,7 @@ def draw_top_down_map(
         return_surface=False,
         film_size=None,
         scaling=None,
+        semantic_broken_line=True
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
@@ -44,9 +45,9 @@ def draw_top_down_map(
     surface.scaling = scaling
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
+    line_sample_interval = 2
 
     if semantic_map:
-        line_sample_interval = 2
         all_lanes = map.get_map_features(line_sample_interval)
 
         for obj in all_lanes.values():
@@ -57,14 +58,14 @@ def draw_top_down_map(
                 )
 
             elif MetaDriveType.is_road_line(obj["type"]) or MetaDriveType.is_road_boundary_line(obj["type"]):
-                if MetaDriveType.is_broken_line(obj["type"]):
+                if semantic_broken_line and MetaDriveType.is_broken_line(obj["type"]):
                     points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
                 else:
                     points_to_skip = 1
                 for index in range(0, len(obj["polyline"]) - 1, points_to_skip):
-                    if index + points_to_skip < len(obj["polyline"]):
+                    if index + 1 < len(obj["polyline"]):
                         s_p = obj["polyline"][index]
-                        e_p = obj["polyline"][index + points_to_skip]
+                        e_p = obj["polyline"][index + 1]
                         pygame.draw.line(
                             surface,
                             TopDownSemanticColor.get_color(obj["type"]),
@@ -75,28 +76,18 @@ def draw_top_down_map(
                         )
     else:
         if isinstance(map, ScenarioMap):
-            for id, data in map.blocks[-1].map_data.items():
+            line_sample_interval = 2
+            all_lanes = map.get_map_features(line_sample_interval)
+            for id, data in all_lanes.items():
                 if ScenarioDescription.POLYLINE not in data:
                     continue
-                type = data.get("type", None)
-                if "boundary" in id:
-                    num_seg = int(len(data[ScenarioDescription.POLYLINE]) / 10)
-                    for i in range(num_seg):
-                        # 10 points
-                        end = min((i + 1) * 10, len(data[ScenarioDescription.POLYLINE]))
-                        waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][i * 10:end]))
-                        LaneGraphics.display_scenario(waymo_line, type, surface)
-
-                    if (i + 1) * 10 < len(data[ScenarioDescription.POLYLINE]):
-                        end = len(data[ScenarioDescription.POLYLINE])
-                        waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][(i + 1) * 10:end]))
-                        LaneGraphics.display_scenario(waymo_line, type, surface)
-                else:
-                    waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE]))
-                    LaneGraphics.display_scenario(waymo_line, type, surface)
+                LaneGraphics.display_scenario_line(data["polyline"],
+                                                   data["type"],
+                                                   surface,
+                                                   line_sample_interval=line_sample_interval)
 
         elif isinstance(map, NuPlanMap):
-            raise DeprecationWarning("We are using unifed ScenarioDescription Now")
+            raise DeprecationWarning("We are using unifed ScenarioDescription Now!")
             if semantic_map:
                 for lane_info in map.road_network.graph.values():
                     LaneGraphics.draw_drivable_area(lane_info.lane, surface)
@@ -190,6 +181,7 @@ class TopDownRenderer:
             target_vehicle_heading_up=False,
             draw_target_vehicle_trajectory=False,
             semantic_map=False,
+            semantic_broken_line=True,
             scaling=None,  # auto-scale
             draw_contour=True,
             **kwargs
@@ -201,6 +193,7 @@ class TopDownRenderer:
         self.show_agent_name = show_agent_name
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
         self.contour = draw_contour
+        self.semantic_broken_line = semantic_broken_line
 
         if self.show_agent_name:
             pygame.init()
@@ -230,6 +223,7 @@ class TopDownRenderer:
             semantic_map=self.semantic_map,
             return_surface=True,
             film_size=film_size,
+            semantic_broken_line=self.semantic_broken_line
         )
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
@@ -341,6 +335,7 @@ class TopDownRenderer:
             semantic_map=self.semantic_map,
             return_surface=True,
             film_size=self._background_size,
+            semantic_broken_line=self.semantic_broken_line
         )
 
         # Reset several useful variables.

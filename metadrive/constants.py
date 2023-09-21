@@ -400,16 +400,16 @@ class TopDownSemanticColor:
         if MetaDriveType.is_lane(type):
             # intersection and others
             if type == MetaDriveType.LANE_SURFACE_UNSTRUCTURE:
-                ret = np.array([155, 155, 155])
+                ret = np.array([186, 186, 186])
             # a set of lanes
             else:
-                ret = np.array([208, 208, 208])
+                ret = np.array([210, 210, 210])
         # road divider
-        elif MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_yellow_line(type):
-            ret = np.array([0, 0, 0])
+        elif MetaDriveType.is_yellow_line(type):
+            ret = np.array([20, 20, 20])
         # lane divider
-        elif MetaDriveType.is_white_line(type):
-            ret = np.array([100, 100, 100])
+        elif  MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_white_line(type):
+            ret = np.array([140, 140, 140])
         # vehicle
         elif MetaDriveType.is_vehicle(type):
             ret = np.array([224, 177, 67])

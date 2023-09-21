@@ -197,14 +197,14 @@ class ObjectGraphics:
 
     @classmethod
     def display(
-        cls,
-        object: history_object,
-        surface,
-        color,
-        heading,
-        label: bool = False,
-        draw_contour=False,
-        contour_width=1
+            cls,
+            object: history_object,
+            surface,
+            color,
+            heading,
+            label: bool = False,
+            draw_contour=False,
+            contour_width=1
     ) -> None:
         """
         Display a vehicle on a pygame surface.
@@ -275,11 +275,11 @@ class LaneGraphics:
         for side in range(side):
             if use_line_color:
                 if lane.line_colors[side] == PGLineColor.YELLOW and lane.line_types[side] == PGLineType.CONTINUOUS:
-                    color = (0, 80, 220)
+                    color = (255, 175, 35)
                 elif lane.line_types[side] == PGLineType.SIDE:
-                    color = (160, 160, 160)
+                    color = (95, 95, 95)
                 else:
-                    color = (80, 80, 80)
+                    color = (175, 175, 175)
             if lane.line_types[side] == PGLineType.BROKEN:
                 cls.striped_line(lane, surface, stripes_count, s0, side, color=color)
             # circular side or continuous, it is same now
@@ -299,7 +299,7 @@ class LaneGraphics:
                 raise ValueError("I don't know how to draw this line type: {}".format(lane.line_types[side]))
 
     @classmethod
-    def display_scenario(cls, waymo_poly_line, type, surface) -> None:
+    def display_scenario_line(cls, polyline, type, surface, line_sample_interval=2) -> None:
         """
         Display a lane on a surface.
 
@@ -307,31 +307,31 @@ class LaneGraphics:
         :param surface: the pygame surface
         :param two_side: draw two sides of the lane, or only one side
         """
-        lane = waymo_poly_line
         if MetaDriveType.is_yellow_line(type):
-            color = (0, 80, 220)
+            color = (255, 175, 35)
         elif MetaDriveType.is_road_boundary_line(type):
-            color = (160, 160, 160)
+            color = (255, 175, 35)
         else:
-            color = (80, 80, 80)
+            color = (175, 175, 175)
         if MetaDriveType.is_road_line(type) or MetaDriveType.is_road_boundary_line(type):
             # if len(waymo_poly_line.segment_property) < 1:
             #     return
-            stripes_count = int(
-                2 * (surface.get_height() + surface.get_width()) / (cls.STRIPE_SPACING * surface.scaling)
-            )
-            s_origin, _ = lane.local_coordinates(surface.origin)
-            s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
-
             if MetaDriveType.is_broken_line(type):
-                starts = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING
-                ends = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING + cls.STRIPE_LENGTH
-                lats = [0 for s in starts]
+                points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
             else:
-                starts = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING
-                ends = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING + cls.STRIPE_SPACING
-                lats = [0 for s in starts]
-            cls.draw_stripes(lane, surface, starts, ends, lats, color=color)
+                points_to_skip = 1
+            for index in range(0, len(polyline) - 1, points_to_skip):
+                if index + 1 < len(polyline):
+                    s_p = polyline[index]
+                    e_p = polyline[index + 1]
+                    pygame.draw.line(
+                        surface,
+                        color,
+                        surface.vec2pix([s_p[0], s_p[1]]),
+                        surface.vec2pix([e_p[0], e_p[1]]),
+                        # max(surface.pix(LaneGraphics.STRIPE_WIDTH),
+                        surface.pix(DrivableAreaProperty.LANE_LINE_WIDTH) * 2
+                    )
         elif type == "center_lane" or type is None:
             pass
 
