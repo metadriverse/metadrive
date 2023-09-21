@@ -13,7 +13,8 @@ class MetaDriveType:
 
     # ===== Lane, Road =====
     LANE_SURFACE_STREET = "LANE_SURFACE_STREET"
-    LANE_SURFACE_INTERSECTION = "LANE_SURFACE_INTERSECTION"
+    # Unlike a set of lanes separated by broken/solid line, this includes intersection and some unstrcutured roads.
+    LANE_SURFACE_UNSTRUCTURE = "LANE_SURFACE_UNSTRUCTURE"
 
     # ===== Lane Line =====
     LINE_UNKNOWN = "UNKNOWN_LINE"
@@ -107,7 +108,7 @@ class MetaDriveType:
     @classmethod
     def is_lane(cls, type):
         return type in [cls.LANE_SURFACE_STREET,
-                        cls.LANE_SURFACE_INTERSECTION]
+                        cls.LANE_SURFACE_UNSTRUCTURE]
 
     @classmethod
     def is_road_line(cls, line):

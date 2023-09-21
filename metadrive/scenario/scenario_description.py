@@ -142,8 +142,6 @@ class ScenarioDescription(dict):
     RIGHT_NEIGHBORS = "right_neighbor"
     ENTRY = "entry_lanes"
     EXIT = "exit_lanes"
-    # Unlike a set of lanes separated by broken/solid line, this includes intersection and some unstrcutured roads.
-    IS_CONNECTOR = "is_connector"
 
     # object
     TYPE = "type"
