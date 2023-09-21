@@ -381,7 +381,7 @@ class TopDownRenderer:
             frame_objects.append(
                 history_object(
                     name=name,
-                    type=MetaDriveType.VEHICLE if isinstance(obj, BaseVehicle) else MetaDriveType.OTHER,
+                    type=obj.metadrive_type if hasattr(obj, "metadrive_type") else MetaDriveType.OTHER,
                     heading_theta=obj.heading_theta,
                     WIDTH=obj.top_down_width,
                     LENGTH=obj.top_down_length,

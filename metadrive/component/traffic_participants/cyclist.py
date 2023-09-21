@@ -21,7 +21,7 @@ class Cyclist(BaseTrafficParticipant):
 
     def __init__(self, position, heading_theta, random_seed, name=None):
         super(Cyclist, self).__init__(position, heading_theta, random_seed, name=name)
-
+        self.set_metadrive_type(self.TYPE_NAME)
         n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
         self.add_body(n)
 

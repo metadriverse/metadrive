@@ -1,4 +1,5 @@
 from typing import Sequence, Tuple
+from metadrive.type import MetaDriveType
 
 from panda3d.core import NodePath
 
@@ -18,6 +19,7 @@ class BaseStaticObject(BaseObject):
         :param heading_theta: the angle from positive direction of horizontal axis
         """
         super(BaseStaticObject, self).__init__(random_seed=random_seed, name=name)
+        self.set_metadrive_type(MetaDriveType.TRAFFIC_OBJECT)
         self.set_position(position, self.HEIGHT / 2 if hasattr(self, "HEIGHT") else 0)
         self.set_heading_theta(heading_theta)
         self.lane = lane

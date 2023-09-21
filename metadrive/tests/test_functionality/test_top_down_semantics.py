@@ -28,7 +28,7 @@ def test_top_down_semantics(render=False):
                 "manual_control": True,
                 "reactive_traffic": False,
                 "use_render": False,
-                "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+                "data_directory": AssetLoader.file_path(asset_path, "nuscenes", return_raw_style=False),
                 "num_scenarios": 3
             }
         )
@@ -40,9 +40,9 @@ def test_top_down_semantics(render=False):
                 this_frame_fig = env.render(
                     mode="top_down",
                     semantic_map=True,
-                    film_size=(2000, 2000),
+                    film_size=(5000, 5000),
                     num_stack=1,
-                    scaling=10,
+                    # scaling=10,
                 )
             # save
             # pygame.image.save(this_frame_fig, "{}.png".format(i))

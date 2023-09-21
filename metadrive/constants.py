@@ -397,23 +397,33 @@ class TopDownSemanticColor:
 
     @staticmethod
     def get_color(type):
-        if MetaDriveType.is_yellow_line(type):
-            # return (255, 0, 0, 0)
-            ret = np.array([1, 0, 0, 0])
-        elif MetaDriveType.is_lane(type):
+        if MetaDriveType.is_lane(type):
+            # intersection and others
             if type == MetaDriveType.LANE_SURFACE_UNSTRUCTURE:
-                ret = np.array([1, 1, 0, 0])
+                ret = np.array([227, 227, 227])
+            # a set of lanes
             else:
-                ret = np.array([0, 1, 0, 0])
-        elif type == MetaDriveType.GROUND:
-            ret = np.array([0, 0, 1, 0])
-        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
-            ret = np.array([0, 0, 0, 1])
+                ret = np.array([247, 247, 247])
+        # road divider
+        elif MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_yellow_line(type):
+            ret = np.array([45, 45, 45])
+        # lane divider
+        elif MetaDriveType.is_white_line(type):
+            ret = np.array([128, 128, 128])
+        # vehicle
         elif MetaDriveType.is_vehicle(type):
-            ret = np.array([0, 0, 1, 0])
+            ret = np.array([224, 177, 67])
+        # construction object
+        elif MetaDriveType.is_traffic_object(type):
+            ret = np.array([67, 143, 224])
+        # human
+        elif type == MetaDriveType.PEDESTRIAN:
+            ret = np.array([224, 67, 67])
+        # cyclist and motorcycle
+        elif type == MetaDriveType.CYCLIST:
+            ret = np.array([75, 224, 67])
         elif type == MetaDriveType.OTHER:
-            ret = np.array([0, 1, 1, 0])
+            ret = np.array([125, 67, 224])
         else:
             raise ValueError("Unsupported type: {}".format(type))
-        ret *= 255
-        return ret.astype(int)
+        return ret

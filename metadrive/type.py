@@ -145,6 +145,13 @@ class MetaDriveType:
         return line in [cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_SINGLE_WHITE]
 
     @classmethod
+    def is_solid_line(cls, line):
+        return line in [cls.LINE_SOLID_DOUBLE_WHITE,
+                        cls.LINE_SOLID_DOUBLE_YELLOW,
+                        cls.LINE_SOLID_SINGLE_YELLOW,
+                        cls.LINE_SOLID_SINGLE_WHITE]
+
+    @classmethod
     def is_road_boundary_line(cls, edge):
         """
         This function relates to is_road_line.
