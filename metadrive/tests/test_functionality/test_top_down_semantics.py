@@ -43,7 +43,7 @@ def test_top_down_semantics(render=False):
             if render:
                 this_frame_fig = env.render(
                     mode="top_down",
-                    # semantic_map=True,
+                    semantic_map=True,
                     film_size=(8000, 8000),
                     num_stack=1,
                     scaling=10,
