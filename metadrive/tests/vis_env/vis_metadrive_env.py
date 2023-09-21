@@ -14,7 +14,7 @@ if __name__ == "__main__":
             # "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
-            "show_interface": False,
+            "show_interface": True,
             "cull_scene": False,
             "random_spawn_lane_index": False,
             "random_lane_width": False,
@@ -39,7 +39,7 @@ if __name__ == "__main__":
             "force_destroy": False,
             # "show_skybox": False,
             "show_fps": False,
-            "render_pipeline": True,
+            "render_pipeline": False,
             # "camera_dist": 8,
             "window_size": (1600, 900),
             "camera_dist": 9,
@@ -113,10 +113,10 @@ if __name__ == "__main__":
     for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
-        if tm:
-            s = time.time()
-            env.reset()
-            print(time.time() - s)
+        # if tm:
+        #     s = time.time()
+        #     env.reset()
+        #     print(time.time() - s)
 
         # env.vehicle.set_pitch(-np.pi/4)
         # [0.09231533, 0.491018, 0.47076905, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.48037243, 0.8904728, 0.81229943, 0.7317231, 1.0, 0.85320455, 0.9747932, 0.65675277, 0.0, 0.5, 0.5]

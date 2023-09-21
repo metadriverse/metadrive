@@ -80,7 +80,7 @@ class ScenarioMap(BaseMap):
                 length = get_polyline_length(line)
                 resampled = resample_polyline(line, interval) if length > interval * 2 else line
                 ret[map_feat_id] = {"polyline": resampled, "type": MetaDriveType.BOUNDARY_LINE}
-            elif type == MetaDriveType.LANE_SURFACE_STREET:
+            elif MetaDriveType.is_lane(type):
                 continue
             # else:
             # # for debug

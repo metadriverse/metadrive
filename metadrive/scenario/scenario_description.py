@@ -245,7 +245,7 @@ class ScenarioDescription(dict):
     @classmethod
     def _check_map_features(cls, map_feature):
         for id, feature in map_feature.items():
-            if feature[ScenarioDescription.TYPE] == MetaDriveType.LANE_SURFACE_STREET:
+            if MetaDriveType.is_lane(feature[ScenarioDescription.TYPE]):
                 assert ScenarioDescription.POLYLINE in feature, "No lane center line in map feature"
                 assert isinstance(feature[ScenarioDescription.POLYLINE],
                                   (np.ndarray, list, tuple)), "lane center line is in invalid type"

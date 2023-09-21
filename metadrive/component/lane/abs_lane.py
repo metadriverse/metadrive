@@ -220,6 +220,7 @@ class AbstractLane:
         if lane_index is not None:
             lane.index = lane_index
 
+        # It might be Lane surface intersection
         n = BaseRigidBodyNode(lane.index, MetaDriveType.LANE_SURFACE_STREET)
         segment_np = NodePath(n)
 
@@ -358,6 +359,7 @@ class AbstractLane:
         This usually used with _construct_lane_only_vis_segment
         """
         lane = self
+        # It might be Lane surface intersection
         n = BaseRigidBodyNode(lane.id, MetaDriveType.LANE_SURFACE_STREET)
         segment_np = NodePath(n)
 

@@ -318,6 +318,7 @@ class DrivableAreaProperty:
 
 
 class ObjectState:
+    # this is for internal recording/replaying system
     POSITION = "position"
     HEADING_THETA = "heading_theta"
     VELOCITY = "velocity"
@@ -370,6 +371,7 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):
@@ -390,8 +392,9 @@ class TopDownSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
-    def get_color(type, pygame=False):
+    def get_color(type):
         if MetaDriveType.is_yellow_line(type):
             # return (255, 0, 0, 0)
             ret = np.array([1, 0, 0, 0])
@@ -407,8 +410,4 @@ class TopDownSemanticColor:
             ret = np.array([0, 1, 1, 0])
         else:
             raise ValueError("Unsupported type: {}".format(type))
-
-        if pygame:
-            ret *= 255
-            ret.astype(np.int32)
         return ret

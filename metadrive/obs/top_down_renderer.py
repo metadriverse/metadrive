@@ -55,7 +55,7 @@ def draw_top_down_map(
             for obj in all_lanes.values():
                 if MetaDriveType.is_lane(obj["type"]):
                     pygame.draw.polygon(
-                        surface, TopDownSemanticColor.get_color(obj["type"], True),
+                        surface, TopDownSemanticColor.get_color(obj["type"]),
                         [surface.pos2pix(p[0], p[1]) for p in obj["polygon"]]
                     )
 
@@ -70,7 +70,7 @@ def draw_top_down_map(
                             e_p = obj["polyline"][index + points_to_skip]
                             pygame.draw.line(
                                 surface,
-                                TopDownSemanticColor.get_color(obj["type"], True),
+                                TopDownSemanticColor.get_color(obj["type"]),
                                 surface.vec2pix([s_p[0], s_p[1]]),
                                 surface.vec2pix([e_p[0], e_p[1]]),
                                 # max(surface.pix(LaneGraphics.STRIPE_WIDTH),
@@ -411,7 +411,7 @@ class TopDownRenderer:
                 x = abs(int(i))
                 alpha_f = x / len(self.history_objects)
                 if self.semantic_map:
-                    c = TopDownSemanticColor.get_color(v.type, True) * (1 - alpha_f) + alpha_f * 255
+                    c = TopDownSemanticColor.get_color(v.type) * (1 - alpha_f) + alpha_f * 255
                 else:
                     c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
                 ObjectGraphics.display(object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=False)
@@ -447,7 +447,7 @@ class TopDownRenderer:
             h = h if abs(h) > 2 * np.pi / 180 else 0
             alpha_f = 0
             if self.semantic_map:
-                c = TopDownSemanticColor.get_color(v.type, True) * (1 - alpha_f) + alpha_f * 255
+                c = TopDownSemanticColor.get_color(v.type) * (1 - alpha_f) + alpha_f * 255
             else:
                 c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
             ObjectGraphics.display(

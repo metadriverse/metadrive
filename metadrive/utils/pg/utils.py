@@ -176,7 +176,7 @@ def ray_localization(
     lane_index_dist = []
     if results.hasHits():
         for res in results.getHits():
-            if res.getNode().getName() == MetaDriveType.LANE_SURFACE_STREET:
+            if MetaDriveType.is_lane(res.getNode().getName()):
                 on_lane = True
                 lane = get_object_from_node(res.getNode())
                 long, _ = lane.local_coordinates(position)
