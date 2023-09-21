@@ -14,6 +14,7 @@ if __name__ == "__main__":
             # "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
+            "static_traffic_object": False,
             "show_interface": True,
             "cull_scene": False,
             "random_spawn_lane_index": False,
@@ -72,21 +73,26 @@ if __name__ == "__main__":
 
     speed = 8
 
+
     def acc_speed():
         global speed
         speed *= 2
+
 
     def de_speed():
         global speed
         speed /= 2
 
+
     def lower_terrain():
         pos = env.engine.terrain._mesh_terrain.getPos()
         env.engine.terrain._mesh_terrain.set_pos(pos[0], pos[1], pos[2] - speed)
 
+
     def lift_terrain():
         pos = env.engine.terrain._mesh_terrain.getPos()
         env.engine.terrain._mesh_terrain.set_pos(pos[0], pos[1], pos[2] + speed)
+
 
     init_state = {
         'position': (40.82264362985734, -509.3641208712943),

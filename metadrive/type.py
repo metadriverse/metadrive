@@ -13,9 +13,7 @@ class MetaDriveType:
 
     # ===== Lane, Road =====
     LANE_SURFACE_STREET = "LANE_SURFACE_STREET"
-    LANE_UNKNOWN = "LANE_UNKNOWN"
-    LANE_FREEWAY = "LANE_FREEWAY"
-    LANE_BIKE_LANE = "LANE_BIKE_LANE"
+    LANE_SURFACE_INTERSECTION = "LANE_SURFACE_INTERSECTION"
 
     # ===== Lane Line =====
     LINE_UNKNOWN = "UNKNOWN_LINE"
@@ -108,7 +106,8 @@ class MetaDriveType:
 
     @classmethod
     def is_lane(cls, type):
-        return type in [cls.LANE_SURFACE_STREET, cls.LANE_FREEWAY, cls.LANE_BIKE_LANE]
+        return type in [cls.LANE_SURFACE_STREET,
+                        cls.LANE_SURFACE_INTERSECTION]
 
     @classmethod
     def is_road_line(cls, line):
