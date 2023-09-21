@@ -99,7 +99,7 @@ def draw_top_down_map(
             raise DeprecationWarning("We are using unifed ScenarioDescription Now")
             if semantic_map:
                 for lane_info in map.road_network.graph.values():
-                    LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
+                    LaneGraphics.draw_drivable_area(lane_info.lane, surface)
             else:
                 for block in map.attached_blocks + [map.boundary_block]:
                     for boundary in block.lines.values():
@@ -191,7 +191,7 @@ class TopDownRenderer:
             draw_target_vehicle_trajectory=False,
             semantic_map=False,
             scaling=None,  # auto-scale
-            draw_countour=True,
+            draw_contour=True,
             **kwargs
             # current_track_vehicle=None
     ):
@@ -200,7 +200,7 @@ class TopDownRenderer:
         self.target_vehicle_heading_up = target_vehicle_heading_up
         self.show_agent_name = show_agent_name
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
-        self.contour = draw_countour
+        self.contour = draw_contour
 
         if self.show_agent_name:
             pygame.init()
@@ -216,7 +216,6 @@ class TopDownRenderer:
         # self.current_track_vehicle = current_track_vehicle
         if self.target_vehicle_heading_up:
             assert self.current_track_vehicle is not None, "Specify which vehicle to track"
-        self.road_color = road_color
         self._text_render_pos = [50, 50]
         self._font_size = 25
         self._text_render_interval = 20
@@ -401,7 +400,7 @@ class TopDownRenderer:
                     c = TopDownSemanticColor.get_color(v.type) * (1 - alpha_f) + alpha_f * 255
                 else:
                     c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
-                ObjectGraphics.display(object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=False)
+                ObjectGraphics.display(object=v, surface=self._runtime_canvas, heading=h, color=c, draw_contour=False)
 
         # Draw the whole trajectory of ego vehicle with no gradient colors:
         if self.draw_target_vehicle_trajectory:
@@ -420,7 +419,7 @@ class TopDownRenderer:
                     surface=self._runtime_canvas,
                     heading=h,
                     color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
-                    draw_countour=False
+                    draw_contour=False
                 )
 
         # Draw current vehicle with black contour
@@ -438,7 +437,7 @@ class TopDownRenderer:
             else:
                 c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
             ObjectGraphics.display(
-                object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=self.contour, contour_width=2
+                object=v, surface=self._runtime_canvas, heading=h, color=c, draw_contour=self.contour, contour_width=2
             )
 
         if not hasattr(self, "_deads"):

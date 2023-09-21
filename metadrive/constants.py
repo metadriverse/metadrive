@@ -373,6 +373,7 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):
@@ -393,21 +394,22 @@ class TopDownSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_lane(type):
             # intersection and others
             if type == MetaDriveType.LANE_SURFACE_UNSTRUCTURE:
-                ret = np.array([100, 100, 100])
+                ret = np.array([155, 155, 155])
             # a set of lanes
             else:
-                ret = np.array([47, 47, 47])
+                ret = np.array([208, 208, 208])
         # road divider
         elif MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_yellow_line(type):
-            ret = np.array([245, 245, 245])
+            ret = np.array([0, 0, 0])
         # lane divider
         elif MetaDriveType.is_white_line(type):
-            ret = np.array([160, 160, 160])
+            ret = np.array([100, 100, 100])
         # vehicle
         elif MetaDriveType.is_vehicle(type):
             ret = np.array([224, 177, 67])
@@ -420,8 +422,8 @@ class TopDownSemanticColor:
         # cyclist and motorcycle
         elif type == MetaDriveType.CYCLIST:
             ret = np.array([75, 224, 67])
-        elif type == MetaDriveType.OTHER:
-            ret = np.array([125, 67, 224])
         else:
-            raise ValueError("Unsupported type: {}".format(type))
+            ret = np.array([125, 67, 224])
+        # else:
+        #     raise ValueError("Unsupported type: {}".format(type))
         return ret
