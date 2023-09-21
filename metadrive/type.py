@@ -15,6 +15,10 @@ class MetaDriveType:
     LANE_SURFACE_STREET = "LANE_SURFACE_STREET"
     # Unlike a set of lanes separated by broken/solid line, this includes intersection and some unstrcutured roads.
     LANE_SURFACE_UNSTRUCTURE = "LANE_SURFACE_UNSTRUCTURE"
+    # use them as less frequent as possible, it is for waymo compatibility
+    LANE_UNKNOWN = "LANE_UNKNOWN"
+    LANE_FREEWAY = "LANE_FREEWAY"
+    LANE_BIKE_LANE = "LANE_BIKE_LANE"
 
     # ===== Lane Line =====
     LINE_UNKNOWN = "UNKNOWN_LINE"
@@ -108,7 +112,10 @@ class MetaDriveType:
     @classmethod
     def is_lane(cls, type):
         return type in [cls.LANE_SURFACE_STREET,
-                        cls.LANE_SURFACE_UNSTRUCTURE]
+                        cls.LANE_SURFACE_UNSTRUCTURE,
+                        cls.LANE_UNKNOWN,
+                        cls.LANE_BIKE_LANE,
+                        cls.LANE_FREEWAY]
 
     @classmethod
     def is_road_line(cls, line):
