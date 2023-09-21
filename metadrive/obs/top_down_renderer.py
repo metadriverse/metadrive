@@ -28,15 +28,13 @@ def draw_top_down_map(
         return_surface=False,
         film_size=None,
         scaling=None,
-        reverse_color=False,
-        road_color=color_white,
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
-    if reverse_color:
-        surface.WHITE, surface.BLACK = surface.BLACK, surface.WHITE
-        surface.__init__(film_size, 0, pygame.Surface(film_size))
+    # if reverse_color:
+    #     surface.WHITE, surface.BLACK = surface.BLACK, surface.WHITE
+    #     surface.__init__(film_size, 0, pygame.Surface(film_size))
     b_box = map.road_network.get_bounding_box()
     x_len = b_box[1] - b_box[0]
     y_len = b_box[3] - b_box[2]
@@ -185,10 +183,8 @@ class TopDownRenderer:
             self,
             film_size=(1000, 1000),
             screen_size=(1000, 1000),
-            light_background=True,
             num_stack=15,
             history_smooth=0,
-            road_color=(80, 80, 80),
             show_agent_name=False,
             camera_position=None,
             target_vehicle_heading_up=False,
@@ -221,7 +217,6 @@ class TopDownRenderer:
         if self.target_vehicle_heading_up:
             assert self.current_track_vehicle is not None, "Specify which vehicle to track"
         self.road_color = road_color
-        self._light_background = light_background
         self._text_render_pos = [50, 50]
         self._font_size = 25
         self._text_render_interval = 20
@@ -236,12 +231,7 @@ class TopDownRenderer:
             semantic_map=self.semantic_map,
             return_surface=True,
             film_size=film_size,
-            road_color=road_color,
         )
-        if self._light_background:
-            pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2 ** 32 - 1
-            del pixels
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
         self._runtime_canvas = self._background_canvas.copy()
@@ -352,13 +342,7 @@ class TopDownRenderer:
             semantic_map=self.semantic_map,
             return_surface=True,
             film_size=self._background_size,
-            road_color=self.road_color,
         )
-        self._light_background = self._light_background
-        if self._light_background:
-            pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2 ** 32 - 1
-            del pixels
 
         # Reset several useful variables.
         # self._render_size = self._background_canvas.get_size()

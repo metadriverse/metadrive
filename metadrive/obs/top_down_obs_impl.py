@@ -114,7 +114,7 @@ class WorldSurface(pygame.Surface):
     LANE_LINE_COLOR = (35, 35, 35)
 
     def __init__(self, size: Tuple[int, int], flags: object, surf: pygame.SurfaceType) -> None:
-        surf.fill(pygame.Color("Black"))
+        surf.fill(pygame.Color("White"))
         super().__init__(size, flags, surf)
         self.raw_size = size
         self.raw_flags = flags
@@ -122,7 +122,7 @@ class WorldSurface(pygame.Surface):
         self.origin = np.array([0, 0])
         self.scaling = self.INITIAL_SCALING
         self.centering_position = self.INITIAL_CENTERING
-        self.fill(self.BLACK)
+        self.fill(self.WHITE)
 
     def pix(self, length: float) -> int:
         """

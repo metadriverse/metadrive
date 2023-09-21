@@ -48,7 +48,7 @@ def test_save_episode(vis=False):
             )
             o, r, tm, tc, info = env.step([0, 1])
             if vis:
-                env.render(mode="top_down", road_color=(35, 35, 35))
+                env.render(mode="top_down")
             if tm or tc:
                 epi_info = env.engine.dump_episode("test_dump_single.pkl" if test_dump else None)
                 break
