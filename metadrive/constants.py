@@ -373,7 +373,6 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
-
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):
@@ -394,7 +393,6 @@ class TopDownSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
-
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_lane(type):
@@ -408,7 +406,7 @@ class TopDownSemanticColor:
         elif MetaDriveType.is_yellow_line(type):
             ret = np.array([20, 20, 20])
         # lane divider
-        elif  MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_white_line(type):
+        elif MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_white_line(type):
             ret = np.array([140, 140, 140])
         # vehicle
         elif MetaDriveType.is_vehicle(type):

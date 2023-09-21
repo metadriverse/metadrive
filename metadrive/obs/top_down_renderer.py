@@ -22,13 +22,13 @@ color_white = (255, 255, 255)
 
 
 def draw_top_down_map(
-        map,
-        resolution: Iterable = (512, 512),
-        semantic_map=True,
-        return_surface=False,
-        film_size=None,
-        scaling=None,
-        semantic_broken_line=True
+    map,
+    resolution: Iterable = (512, 512),
+    semantic_map=True,
+    return_surface=False,
+    film_size=None,
+    scaling=None,
+    semantic_broken_line=True
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
@@ -81,10 +81,9 @@ def draw_top_down_map(
             for id, data in all_lanes.items():
                 if ScenarioDescription.POLYLINE not in data:
                     continue
-                LaneGraphics.display_scenario_line(data["polyline"],
-                                                   data["type"],
-                                                   surface,
-                                                   line_sample_interval=line_sample_interval)
+                LaneGraphics.display_scenario_line(
+                    data["polyline"], data["type"], surface, line_sample_interval=line_sample_interval
+                )
 
         elif isinstance(map, NuPlanMap):
             raise DeprecationWarning("We are using unifed ScenarioDescription Now!")
@@ -112,7 +111,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -171,21 +170,21 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-            self,
-            film_size=(1000, 1000),
-            screen_size=(1000, 1000),
-            num_stack=15,
-            history_smooth=0,
-            show_agent_name=False,
-            camera_position=None,
-            target_vehicle_heading_up=False,
-            draw_target_vehicle_trajectory=False,
-            semantic_map=False,
-            semantic_broken_line=True,
-            scaling=None,  # auto-scale
-            draw_contour=True,
-            **kwargs
-            # current_track_vehicle=None
+        self,
+        film_size=(1000, 1000),
+        screen_size=(1000, 1000),
+        num_stack=15,
+        history_smooth=0,
+        show_agent_name=False,
+        camera_position=None,
+        target_vehicle_heading_up=False,
+        draw_target_vehicle_trajectory=False,
+        semantic_map=False,
+        semantic_broken_line=True,
+        scaling=None,  # auto-scale
+        draw_contour=True,
+        **kwargs
+        # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
