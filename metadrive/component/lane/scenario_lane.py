@@ -43,7 +43,8 @@ class ScenarioLane(PointLane):
             width=self.get_lane_width(lane_id, map_data),
             polygon=polygon,
             speed_limit=speed_limit_kmh,
-            need_lane_localization=need_lane_localization
+            need_lane_localization=need_lane_localization,
+            metadrive_type=map_data[lane_id][ScenarioDescription.TYPE]
         )
         self.index = lane_id
         self.lane_type = map_data[lane_id]["type"]

@@ -67,6 +67,7 @@ COLOR = {
     MetaDriveType.LINE_BROKEN_SINGLE_YELLOW: "yellow",
     MetaDriveType.LINE_BROKEN_SINGLE_WHITE: "green",
     MetaDriveType.LANE_SURFACE_STREET: "green",
+    MetaDriveType.LANE_SURFACE_UNSTRUCTURE: "green",
     MetaDriveType.VEHICLE: "red",
     MetaDriveType.GROUND: "yellow",
     MetaDriveType.TRAFFIC_OBJECT: "yellow",

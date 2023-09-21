@@ -1,4 +1,5 @@
 from typing import Tuple, Sequence, Union
+from metadrive.constants import MetaDriveType
 
 import math
 import numpy as np
@@ -10,15 +11,17 @@ from metadrive.utils.math import norm
 
 class StraightLane(PGLane):
     """A lane going in straight line."""
+
     def __init__(
-        self,
-        start: Union[np.ndarray, Sequence[float]],
-        end: Union[np.ndarray, Sequence[float]],
-        width: float = PGLane.DEFAULT_WIDTH,
-        line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0
+            self,
+            start: Union[np.ndarray, Sequence[float]],
+            end: Union[np.ndarray, Sequence[float]],
+            width: float = PGLane.DEFAULT_WIDTH,
+            line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0,
+            metadrive_type=MetaDriveType.LANE_SURFACE_STREET
     ) -> None:
         """
         New straight lane.
@@ -30,7 +33,7 @@ class StraightLane(PGLane):
         :param forbidden: is changing to this lane forbidden
         :param priority: priority level of the lane, for determining who has right of way
         """
-        super(StraightLane, self).__init__()
+        super(StraightLane, self).__init__(metadrive_type)
         self.set_speed_limit(speed_limit)
         self.start = np.array(start)
         self.end = np.array(end)

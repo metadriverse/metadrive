@@ -1,4 +1,5 @@
 import math
+from metadrive.constants import MetaDriveType
 from typing import Tuple
 
 import numpy as np
@@ -11,21 +12,23 @@ from metadrive.utils.math import wrap_to_pi, norm, Vector
 
 class CircularLane(PGLane):
     """A lane going in circle arc."""
+
     def __init__(
-        self,
-        center: Vector,
-        radius: float,
-        start_phase: float,
-        angle: float,
-        clockwise: bool = True,
-        width: float = PGLane.DEFAULT_WIDTH,
-        line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0
+            self,
+            center: Vector,
+            radius: float,
+            start_phase: float,
+            angle: float,
+            clockwise: bool = True,
+            width: float = PGLane.DEFAULT_WIDTH,
+            line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0,
+            metadrive_type=MetaDriveType.LANE_SURFACE_STREET,
     ) -> None:
         assert angle > 0, "Angle should be greater than 0"
-        super().__init__()
+        super().__init__(metadrive_type)
         self.set_speed_limit(speed_limit)
         self.center = Vector(center)
         self.radius = radius

@@ -197,3 +197,17 @@ class MetaDriveType:
         else:
             logger.warning("TrafficLightStatus: {} is not MetaDriveType".format(status))
             return cls.LIGHT_UNKNOWN
+
+    def __init__(self, type=None):
+        # TODO extend this base class to all objects! It is only affect lane so far.
+        # TODO Or people can only know the type with isinstance() 
+        self.metadrive_type = MetaDriveType.UNSET
+        if type is not None:
+            self.set_metadrive_type(type)
+
+    def set_metadrive_type(self, type):
+        if type in MetaDriveType.__dict__.values():
+            # Do something if type matches one of the class variables
+            self.metadrive_type = type
+        else:
+            raise ValueError(f"'{type}' is not a valid MetaDriveType.")

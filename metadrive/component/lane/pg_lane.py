@@ -9,8 +9,8 @@ class PGLane(AbstractLane):
     POLYGON_SAMPLE_RATE = 1
     radius = 0.0
 
-    def __init__(self):
-        super(PGLane, self).__init__()
+    def __init__(self, type):
+        super(PGLane, self).__init__(type)
         # one should implement how to get polygon in property def polygon(self)
         self._polygon = None
         self._shapely_polygon = None

@@ -766,7 +766,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 contacts.add(MetaDriveType.GROUND)
             else:
                 if MetaDriveType.is_lane(res.getNode().getName()):
-                    contacts.add(MetaDriveType.LANE_SURFACE_STREET)
+                    contacts.add(res.getNode().getName())
                 else:
                     contacts.add(MetaDriveType.GROUND)
 

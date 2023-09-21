@@ -1,4 +1,5 @@
 import math
+from metadrive.type import MetaDriveType
 from shapely import geometry
 
 from typing import Tuple, Union
@@ -22,18 +23,19 @@ class PointLane(AbstractLane, InterpolatingLine):
     POLYGON_SAMPLE_RATE = 1
 
     def __init__(
-        self,
-        center_line_points: Union[list, np.ndarray],
-        width: float,
-        polygon=None,
-        forbidden: bool = False,
-        speed_limit: float = 1000,
-        priority: int = 0,
-        need_lane_localization=True,
-        auto_generate_polygon=True
+            self,
+            center_line_points: Union[list, np.ndarray],
+            width: float,
+            polygon=None,
+            forbidden: bool = False,
+            speed_limit: float = 1000,
+            priority: int = 0,
+            need_lane_localization=True,
+            auto_generate_polygon=True,
+            metadrive_type=MetaDriveType.LANE_SURFACE_STREET
     ):
         center_line_points = np.array(center_line_points)[..., :2]
-        AbstractLane.__init__(self)
+        AbstractLane.__init__(self, metadrive_type)
         InterpolatingLine.__init__(self, center_line_points)
         self._bounding_box = get_points_bounding_box(center_line_points)
         self._polygon = polygon

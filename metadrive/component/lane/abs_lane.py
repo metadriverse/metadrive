@@ -21,7 +21,7 @@ from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math import Vector
 
 
-class AbstractLane:
+class AbstractLane(MetaDriveType):
     """A lane on the road, described by its central curve."""
 
     metaclass__ = ABCMeta
@@ -35,7 +35,8 @@ class AbstractLane:
     _RANDOM_HEIGHT_OFFSET = np.arange(0, 0.02, 0.0005)
     _RANDOM_HEIGHT_OFFSET_INDEX = 0
 
-    def __init__(self):
+    def __init__(self, type=MetaDriveType.LANE_SURFACE_STREET):
+        super(AbstractLane, self).__init__(type)
         self.speed_limit = 1000  # should be set manually
         self.index = None
 
@@ -221,7 +222,7 @@ class AbstractLane:
             lane.index = lane_index
 
         # It might be Lane surface intersection
-        n = BaseRigidBodyNode(lane.index, MetaDriveType.LANE_SURFACE_STREET)
+        n = BaseRigidBodyNode(lane.index, self.metadrive_type)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)
@@ -360,7 +361,7 @@ class AbstractLane:
         """
         lane = self
         # It might be Lane surface intersection
-        n = BaseRigidBodyNode(lane.id, MetaDriveType.LANE_SURFACE_STREET)
+        n = BaseRigidBodyNode(lane.id, self.metadrive_type)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)
