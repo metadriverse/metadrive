@@ -401,7 +401,10 @@ class TopDownSemanticColor:
             # return (255, 0, 0, 0)
             ret = np.array([1, 0, 0, 0])
         elif MetaDriveType.is_lane(type):
-            ret = np.array([0, 1, 0, 0])
+            if type == MetaDriveType.LANE_SURFACE_UNSTRUCTURE:
+                ret = np.array([1, 1, 0, 0])
+            else:
+                ret = np.array([0, 1, 0, 0])
         elif type == MetaDriveType.GROUND:
             ret = np.array([0, 0, 1, 0])
         elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
