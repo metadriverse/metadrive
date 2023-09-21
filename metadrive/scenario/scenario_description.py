@@ -222,6 +222,10 @@ class ScenarioDescription(dict):
         for obj_id, obj_state in scenario_dict[cls.DYNAMIC_MAP_STATES].items():
             cls._check_object_state_dict(obj_state, scenario_length=scenario_length, object_id=obj_id)
 
+        # Check map features
+        assert isinstance(scenario_dict[cls.MAP_FEATURES], dict)
+        cls._check_map_features(scenario_dict[cls.MAP_FEATURES])
+
         # Check metadata
         assert isinstance(scenario_dict[cls.METADATA], dict)
         assert cls.METADATA_KEYS.issubset(set(scenario_dict[cls.METADATA].keys())), \
@@ -229,6 +233,14 @@ class ScenarioDescription(dict):
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
         assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
+
+    @classmethod
+    def _check_map_features(cls, map_feature):
+        for id, feature in map_feature.items():
+            if feature[ScenarioDescription.TYPE] == MetaDriveType.LANE_SURFACE_STREET:
+                assert ScenarioDescription.POLYLINE in feature, "No lane center line in map feature"
+                assert isinstance(feature[ScenarioDescription.POLYLINE],
+                                  (np.ndarray, list, tuple)), "lane center line is in invalid type"
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
