@@ -1,4 +1,5 @@
 import numpy as np
+from metadrive.type import MetaDriveType
 from shapely import geometry
 
 from metadrive.component.lane.abs_lane import AbstractLane
@@ -9,7 +10,7 @@ class PGLane(AbstractLane):
     POLYGON_SAMPLE_RATE = 1
     radius = 0.0
 
-    def __init__(self, type):
+    def __init__(self, type=MetaDriveType.LANE_SURFACE_STREET):
         super(PGLane, self).__init__(type)
         # one should implement how to get polygon in property def polygon(self)
         self._polygon = None

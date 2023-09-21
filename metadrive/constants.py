@@ -415,4 +415,5 @@ class TopDownSemanticColor:
             ret = np.array([0, 1, 1, 0])
         else:
             raise ValueError("Unsupported type: {}".format(type))
-        return ret
+        ret *= 255
+        return ret.astype(int)

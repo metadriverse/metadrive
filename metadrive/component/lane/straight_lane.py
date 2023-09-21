@@ -47,7 +47,7 @@ class StraightLane(PGLane):
         self.direction_lateral = np.array([self.direction[1], -self.direction[0]])
 
     def update_properties(self):
-        super(StraightLane, self).__init__()
+        super(StraightLane, self).__init__(self.metadrive_type)
         self.length = norm((self.end - self.start)[0], (self.end - self.start)[1])
         self.heading = math.atan2(self.end[1] - self.start[1], self.end[0] - self.start[0])
         self.direction = (self.end - self.start) / self.length
