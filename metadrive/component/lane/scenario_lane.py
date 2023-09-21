@@ -40,7 +40,7 @@ class ScenarioLane(PointLane):
             speed_limit_kmh = self.MAX_SPEED_LIMIT
         super(ScenarioLane, self).__init__(
             center_line_points=center_line_points,
-            width=self.get_lane_width(lane_id, map_data),
+            width=self.VIS_LANE_WIDTH,
             polygon=polygon,
             speed_limit=speed_limit_kmh,
             need_lane_localization=need_lane_localization,
@@ -98,13 +98,14 @@ class ScenarioLane(PointLane):
         """
         We use this function to get possible lane width from raw data
         """
+        return self.VIS_LANE_WIDTH
         if not (ScenarioDescription.RIGHT_NEIGHBORS in map_data[lane_id]
                 and ScenarioDescription.LEFT_NEIGHBORS in map_data[lane_id]):
             return self.VIS_LANE_WIDTH
         right_lanes = map_data[lane_id][ScenarioDescription.RIGHT_NEIGHBORS]
         left_lanes = map_data[lane_id][ScenarioDescription.LEFT_NEIGHBORS]
         if len(right_lanes) + len(left_lanes) == 0:
-            return max(sum(map_data[lane_id]["width"][0]), self.VIS_LANE_WIDTH)
+            return max(sum(map_data[lane_id].get("width", 0)), self.VIS_LANE_WIDTH)
         dist_to_left_lane = 0
         dist_to_right_lane = 0
         if len(right_lanes) > 0 and "feature_id" in right_lanes[0]:

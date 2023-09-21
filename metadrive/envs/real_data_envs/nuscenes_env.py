@@ -9,7 +9,7 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": True,
+            "use_render": False,
             "no_map": False,
             "agent_policy": ReplayEgoCarPolicy,
             # "manual_control": True,
@@ -55,8 +55,6 @@ if __name__ == "__main__":
                 # light=True,
                 # random_color=True,
                 show_navi_mark=False,
-                image_source="rgb_camera",
-                rgb_camera=(1600, 900),
                 # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50),
                 lane_line_detector=dict(num_lasers=0, distance=50),
