@@ -22,14 +22,14 @@ color_white = (255, 255, 255)
 
 
 def draw_top_down_map(
-    map,
-    resolution: Iterable = (512, 512),
-    semantic_map=True,
-    return_surface=False,
-    film_size=None,
-    scaling=None,
-    reverse_color=False,
-    road_color=color_white,
+        map,
+        resolution: Iterable = (512, 512),
+        semantic_map=True,
+        return_surface=False,
+        film_size=None,
+        scaling=None,
+        reverse_color=False,
+        road_color=color_white,
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
@@ -123,7 +123,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -182,27 +182,29 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-        self,
-        film_size=(1000, 1000),
-        screen_size=(1000, 1000),
-        light_background=True,
-        num_stack=15,
-        history_smooth=0,
-        road_color=(80, 80, 80),
-        show_agent_name=False,
-        camera_position=None,
-        target_vehicle_heading_up=False,
-        draw_target_vehicle_trajectory=False,
-        semantic_map=False,
-        scaling=None,  # auto-scale
-        **kwargs
-        # current_track_vehicle=None
+            self,
+            film_size=(1000, 1000),
+            screen_size=(1000, 1000),
+            light_background=True,
+            num_stack=15,
+            history_smooth=0,
+            road_color=(80, 80, 80),
+            show_agent_name=False,
+            camera_position=None,
+            target_vehicle_heading_up=False,
+            draw_target_vehicle_trajectory=False,
+            semantic_map=False,
+            scaling=None,  # auto-scale
+            draw_countour=True,
+            **kwargs
+            # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
         self.target_vehicle_heading_up = target_vehicle_heading_up
         self.show_agent_name = show_agent_name
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
+        self.contour = draw_countour
 
         if self.show_agent_name:
             pygame.init()
@@ -238,7 +240,7 @@ class TopDownRenderer:
         )
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
@@ -355,7 +357,7 @@ class TopDownRenderer:
         self._light_background = self._light_background
         if self._light_background:
             pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2**32 - 1
+            pixels ^= 2 ** 32 - 1
             del pixels
 
         # Reset several useful variables.
@@ -400,6 +402,8 @@ class TopDownRenderer:
             return
 
         for i, objects in enumerate(self.history_objects):
+            if i == len(self.history_objects) - 1:
+                continue
             i = len(self.history_objects) - i
             if self.history_smooth != 0 and (i % self.history_smooth != 0):
                 continue
@@ -450,7 +454,7 @@ class TopDownRenderer:
             else:
                 c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
             ObjectGraphics.display(
-                object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=True, contour_width=2
+                object=v, surface=self._runtime_canvas, heading=h, color=c, draw_countour=self.contour, contour_width=2
             )
 
         if not hasattr(self, "_deads"):
