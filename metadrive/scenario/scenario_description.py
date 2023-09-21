@@ -142,9 +142,10 @@ class ScenarioDescription(dict):
     RIGHT_NEIGHBORS = "right_neighbor"
     ENTRY = "entry_lanes"
     EXIT = "exit_lanes"
-    # Unlike a set of lanes separater by broken/solid line, this includes intersection and some unstrcutured roads.
+    # Unlike a set of lanes separated by broken/solid line, this includes intersection and some unstrcutured roads.
     IS_CONNECTOR = "is_connector"
 
+    # object
     TYPE = "type"
     STATE = "state"
     OBJECT_ID = "object_id"
@@ -154,6 +155,9 @@ class ScenarioDescription(dict):
     TRAFFIC_LIGHT_POSITION = "stop_point"
     TRAFFIC_LIGHT_STATUS = "object_state"
     TRAFFIC_LIGHT_LANE = "lane"
+    #  for object position/heading
+    POSITION = "position"
+    HEADING = "heading"
 
     METADRIVE_PROCESSED = "metadrive_processed"
     TIMESTEP = "ts"
@@ -214,8 +218,12 @@ class ScenarioDescription(dict):
         assert isinstance(scenario_dict[cls.TRACKS], dict)
         for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
             cls._check_object_state_dict(
-                obj_state, scenario_length=scenario_length, object_id=obj_id, valid_check=valid_check
-            )
+                obj_state, scenario_length=scenario_length, object_id=obj_id, valid_check=valid_check)
+            # position heading check
+            assert ScenarioDescription.HEADING in obj_state[
+                ScenarioDescription.STATE], "heading is required for an object"
+            assert ScenarioDescription.POSITION in obj_state[
+                ScenarioDescription.STATE], "position is required for an object"
 
         # Check dynamic_map_state
         assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
