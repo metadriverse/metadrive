@@ -185,7 +185,7 @@ def get_object_from_node(node: BulletBodyNode):
     from metadrive.engine.engine_utils import get_object
     from metadrive.engine.engine_utils import get_engine
     ret = node.getPythonTag(node.getName()).base_object_name
-    is_road = node.getPythonTag(node.getName()).type_name == MetaDriveType.LANE_SURFACE_STREET
+    is_road = MetaDriveType.is_lane(node.getPythonTag(node.getName()).type_name)
     if is_road:
         return get_engine().current_map.road_network.get_lane(ret)
     else:

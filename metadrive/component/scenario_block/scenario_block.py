@@ -25,6 +25,8 @@ class ScenarioBlock(BaseBlock):
         data = self.engine.data_manager.current_scenario
         sdc_track = data.get_sdc_track()
         self.sdc_start_point = sdc_track["state"]["position"][0]
+        self.crosswalks = {}
+        self.sidewalks = {}
         super(ScenarioBlock, self).__init__(block_index, global_network, random_seed)
 
     @property
@@ -33,12 +35,22 @@ class ScenarioBlock(BaseBlock):
         return e.data_manager.get_scenario(self.map_index, should_copy=False)["map_features"]
 
     def _sample_topology(self) -> bool:
-        for lane_id, data in self.map_data.items():
+        for object_id, data in self.map_data.items():
             if MetaDriveType.is_lane(data.get("type", False)):
                 if len(data[ScenarioDescription.POLYLINE]) <= 1:
                     continue
-                lane = ScenarioLane(lane_id, self.map_data, self.need_lane_localization)
+                lane = ScenarioLane(object_id, self.map_data, self.need_lane_localization)
                 self.block_network.add_lane(lane)
+            elif MetaDriveType.is_sidewalk(data["type"]):
+                self.sidewalks[object_id] = {
+                    ScenarioDescription.TYPE: MetaDriveType.BOUNDARY_SIDEWALK,
+                    ScenarioDescription.POLYGON: data[ScenarioDescription.POLYGON]
+                }
+            elif MetaDriveType.is_crosswalk(data["type"]):
+                self.crosswalks[object_id] = {
+                    ScenarioDescription.TYPE: MetaDriveType.CROSSWALK,
+                    ScenarioDescription.POLYGON: data[ScenarioDescription.POLYGON]
+                }
         return True
 
     def create_in_world(self):
@@ -82,7 +94,7 @@ class ScenarioBlock(BaseBlock):
             # else:
             #     raise ValueError("Can not build lane line type: {}".format(type))
             # TODO LQY: DO we need sidewalk?
-            elif MetaDriveType.is_road_edge(type):
+            elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
 
     def construct_continuous_line(self, polyline, color):

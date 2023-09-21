@@ -1,4 +1,5 @@
 import copy
+from metadrive.type import MetaDriveType
 from typing import Tuple, Union, List
 
 import math
@@ -59,7 +60,8 @@ def CreateRoadFrom(
     side_lane_line_type=PGLineType.SIDE,
     inner_lane_line_type=PGLineType.BROKEN,
     center_line_color=PGLineColor.YELLOW,
-    ignore_intersection_checking=None
+    ignore_intersection_checking=None,
+    metadrive_lane_type=None,
 ) -> bool:
     """
         | | | |
@@ -139,6 +141,9 @@ def CreateRoadFrom(
         )
     for l in lanes:
         roadnet_to_add_lanes.add_lane(road.start_node, road.end_node, l)
+        if metadrive_lane_type is not None:
+            assert MetaDriveType.is_lane(metadrive_lane_type)
+            l.set_metadrive_type(metadrive_lane_type)
     if lane_num == 0:
         lanes[-1].line_types = [center_line_type, side_lane_line_type]
     lanes[0].line_colors = [center_line_color, PGLineColor.GREY]
@@ -146,7 +151,10 @@ def CreateRoadFrom(
 
 
 def ExtendStraightLane(
-    lane: "StraightLane", extend_length: float, line_types: (PGLineType, PGLineType)
+    lane: "StraightLane",
+    extend_length: float,
+    line_types: (PGLineType, PGLineType),
+    metadrive_lane_type=None
 ) -> "StraightLane":
     assert isinstance(lane, StraightLane)
     new_lane = copy.copy(lane)
@@ -156,6 +164,9 @@ def ExtendStraightLane(
     new_lane.end = end_point
     new_lane.line_types = line_types
     new_lane.update_properties()
+    if metadrive_lane_type is not None:
+        assert MetaDriveType.is_lane(metadrive_lane_type)
+        new_lane.set_metadrive_type(metadrive_lane_type)
     return new_lane
 
 
@@ -173,7 +184,8 @@ def CreateAdverseRoad(
     side_lane_line_type=PGLineType.SIDE,
     inner_lane_line_type=PGLineType.BROKEN,
     center_line_color=PGLineColor.YELLOW,
-    ignore_intersection_checking=None
+    ignore_intersection_checking=None,
+    metadrive_lane_type=None
 ) -> bool:
     adverse_road = -positive_road
     lanes = get_lanes_on_road(positive_road, roadnet_to_get_road)
@@ -213,7 +225,8 @@ def CreateAdverseRoad(
         inner_lane_line_type=inner_lane_line_type,
         center_line_type=center_line_type,
         center_line_color=center_line_color,
-        ignore_intersection_checking=ignore_intersection_checking
+        ignore_intersection_checking=ignore_intersection_checking,
+        metadrive_lane_type=metadrive_lane_type
     )
     positive_road.get_lanes(roadnet_to_get_road)[0].line_colors = [center_line_color, PGLineColor.GREY]
     return success

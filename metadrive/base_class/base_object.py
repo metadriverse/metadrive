@@ -1,4 +1,5 @@
 import copy
+from metadrive.type import MetaDriveType
 
 import logging
 import math
@@ -103,7 +104,7 @@ class PhysicsNodeList(list):
         self.clear()
 
 
-class BaseObject(BaseRunnable):
+class BaseObject(BaseRunnable, MetaDriveType):
     """
     BaseObject is something interacting with game engine. If something is expected to have a body in the world or have
     appearance in the world, it must be a subclass of BaseObject.
@@ -122,7 +123,8 @@ class BaseObject(BaseRunnable):
         There parameters doesn't change, such as length of straight road, max speed of one vehicle, etc.
         """
         config = copy.deepcopy(config)
-        super(BaseObject, self).__init__(name, random_seed, config)
+        BaseRunnable.__init__(self, name, random_seed, config)
+        MetaDriveType.__init__(self)
         if not escape_random_seed_assertion:
             assert random_seed is not None, "Please assign a random seed for {} class.".format(self.class_name)
 

@@ -21,7 +21,7 @@ from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math import Vector
 
 
-class AbstractLane:
+class AbstractLane(MetaDriveType):
     """A lane on the road, described by its central curve."""
 
     metaclass__ = ABCMeta
@@ -35,7 +35,8 @@ class AbstractLane:
     _RANDOM_HEIGHT_OFFSET = np.arange(0, 0.02, 0.0005)
     _RANDOM_HEIGHT_OFFSET_INDEX = 0
 
-    def __init__(self):
+    def __init__(self, type=MetaDriveType.LANE_SURFACE_STREET):
+        super(AbstractLane, self).__init__(type)
         self.speed_limit = 1000  # should be set manually
         self.index = None
 
@@ -220,7 +221,8 @@ class AbstractLane:
         if lane_index is not None:
             lane.index = lane_index
 
-        n = BaseRigidBodyNode(lane.index, MetaDriveType.LANE_SURFACE_STREET)
+        # It might be Lane surface intersection
+        n = BaseRigidBodyNode(lane.index, self.metadrive_type)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)
@@ -325,7 +327,7 @@ class AbstractLane:
         width = width or block.SIDEWALK_WIDTH
         middle = (lane_start + lane_end) / 2
         length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_LINE)
+        body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_SIDEWALK)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         side_np = block.sidewalk_node_path.attachNewNode(body_node)
@@ -358,7 +360,8 @@ class AbstractLane:
         This usually used with _construct_lane_only_vis_segment
         """
         lane = self
-        n = BaseRigidBodyNode(lane.id, MetaDriveType.LANE_SURFACE_STREET)
+        # It might be Lane surface intersection
+        n = BaseRigidBodyNode(lane.id, self.metadrive_type)
         segment_np = NodePath(n)
 
         self._node_path_list.append(segment_np)

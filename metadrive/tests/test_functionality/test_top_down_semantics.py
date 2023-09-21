@@ -3,7 +3,7 @@ This script demonstrates how to use the environment where traffic and road map a
 """
 import argparse
 import random
-
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 import pygame
 
 from metadrive.constants import HELP_MESSAGE
@@ -25,29 +25,30 @@ def test_top_down_semantics(render=False):
     try:
         env = DemoWaymoEnv(
             {
-                "manual_control": True,
+                "manual_control": False,
                 "reactive_traffic": False,
+                "no_light": True,
+                "agent_policy": ReplayEgoCarPolicy,
                 "use_render": False,
-                "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
-                "num_scenarios": 3
+                "sequential_seed": True,
+                "data_directory": AssetLoader.file_path(asset_path, "nuscenes", return_raw_style=False),
+                "num_scenarios": 10
             }
         )
         o, _ = env.reset()
-
-        for i in range(1, 1000):
-            o, r, tm, tc, info = env.step([1.0, 0.])
+        for seed in range(100):
+            env.reset(seed=seed)
+            for i in range(1, 10):
+                o, r, tm, tc, info = env.step([1.0, 0.])
             if render:
                 this_frame_fig = env.render(
                     mode="top_down",
                     semantic_map=True,
-                    film_size=(2000, 2000),
+                    film_size=(8000, 8000),
                     num_stack=1,
                     scaling=10,
                 )
-            # save
-            # pygame.image.save(this_frame_fig, "{}.png".format(i))
-            if tm or tc:
-                env.reset()
+                # pygame.image.save(this_frame_fig, "{}.png".format(seed))
     finally:
         env.close()
 
