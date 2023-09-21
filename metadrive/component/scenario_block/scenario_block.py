@@ -42,11 +42,15 @@ class ScenarioBlock(BaseBlock):
                 lane = ScenarioLane(object_id, self.map_data, self.need_lane_localization)
                 self.block_network.add_lane(lane)
             elif MetaDriveType.is_sidewalk(data["type"]):
-                self.sidewalks[object_id] = {ScenarioDescription.TYPE: MetaDriveType.BOUNDARY_SIDEWALK,
-                                             ScenarioDescription.POLYGON: data[ScenarioDescription.POLYGON]}
+                self.sidewalks[object_id] = {
+                    ScenarioDescription.TYPE: MetaDriveType.BOUNDARY_SIDEWALK,
+                    ScenarioDescription.POLYGON: data[ScenarioDescription.POLYGON]
+                }
             elif MetaDriveType.is_crosswalk(data["type"]):
-                self.crosswalks[object_id] = {ScenarioDescription.TYPE: MetaDriveType.CROSSWALK,
-                                              ScenarioDescription.POLYGON: data[ScenarioDescription.POLYGON]}
+                self.crosswalks[object_id] = {
+                    ScenarioDescription.TYPE: MetaDriveType.CROSSWALK,
+                    ScenarioDescription.POLYGON: data[ScenarioDescription.POLYGON]
+                }
         return True
 
     def create_in_world(self):

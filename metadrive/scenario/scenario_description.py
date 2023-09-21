@@ -216,12 +216,13 @@ class ScenarioDescription(dict):
         assert isinstance(scenario_dict[cls.TRACKS], dict)
         for obj_id, obj_state in scenario_dict[cls.TRACKS].items():
             cls._check_object_state_dict(
-                obj_state, scenario_length=scenario_length, object_id=obj_id, valid_check=valid_check)
+                obj_state, scenario_length=scenario_length, object_id=obj_id, valid_check=valid_check
+            )
             # position heading check
-            assert ScenarioDescription.HEADING in obj_state[
-                ScenarioDescription.STATE], "heading is required for an object"
-            assert ScenarioDescription.POSITION in obj_state[
-                ScenarioDescription.STATE], "position is required for an object"
+            assert ScenarioDescription.HEADING in obj_state[ScenarioDescription.STATE
+                                                            ], "heading is required for an object"
+            assert ScenarioDescription.POSITION in obj_state[ScenarioDescription.STATE
+                                                             ], "position is required for an object"
 
         # Check dynamic_map_state
         assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
@@ -238,15 +239,16 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
 
     @classmethod
     def _check_map_features(cls, map_feature):
         for id, feature in map_feature.items():
             if MetaDriveType.is_lane(feature[ScenarioDescription.TYPE]):
                 assert ScenarioDescription.POLYLINE in feature, "No lane center line in map feature"
-                assert isinstance(feature[ScenarioDescription.POLYLINE],
-                                  (np.ndarray, list, tuple)), "lane center line is in invalid type"
+                assert isinstance(
+                    feature[ScenarioDescription.POLYLINE], (np.ndarray, list, tuple)
+                ), "lane center line is in invalid type"
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
@@ -272,7 +274,7 @@ class ScenarioDescription(dict):
             assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
             if state_array.ndim == 2:
                 assert state_array.shape[
-                           1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+                    1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
             if state_key == "valid" and valid_check:
                 assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
@@ -359,7 +361,7 @@ class ScenarioDescription(dict):
         # object
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS] = len(scenario[ScenarioDescription.TRACKS])
         number_summary_dict[ScenarioDescription.SUMMARY.OBJECT_TYPES
-        ] = set(v["type"] for v in scenario[ScenarioDescription.TRACKS].values())
+                            ] = set(v["type"] for v in scenario[ScenarioDescription.TRACKS].values())
         object_types_counter = defaultdict(int)
         for v in scenario[ScenarioDescription.TRACKS].values():
             object_types_counter[v["type"]] += 1
@@ -378,16 +380,16 @@ class ScenarioDescription(dict):
                 dynamic_object_states_types.add(step_state)
                 dynamic_object_states_counter[step_state] += 1
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS
-        ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
+                            ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHT_TYPES] = dynamic_object_states_types
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS_EACH_STEP
-        ] = dict(dynamic_object_states_counter)
+                            ] = dict(dynamic_object_states_counter)
 
         # map
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_MAP_FEATURES
-        ] = len(scenario[ScenarioDescription.MAP_FEATURES])
+                            ] = len(scenario[ScenarioDescription.MAP_FEATURES])
         number_summary_dict[ScenarioDescription.SUMMARY.MAP_HEIGHT_DIFF
-        ] = ScenarioDescription.map_height_diff(scenario[ScenarioDescription.MAP_FEATURES])
+                            ] = ScenarioDescription.map_height_diff(scenario[ScenarioDescription.MAP_FEATURES])
         return number_summary_dict
 
     @staticmethod
@@ -456,6 +458,7 @@ def _recursive_check_type(obj, allow_types, depth=0):
 
     if depth > 1000:
         raise ValueError()
+
 
 # TODO (LQY): Remove me after paper writing
 # {

@@ -17,7 +17,8 @@ def test_read_waymo_data():
 
 def test_read_nuscenes_data():
     summary_dict, summary_list, mapping = read_dataset_summary(
-        AssetLoader.file_path("nuscenes", return_raw_style=False))
+        AssetLoader.file_path("nuscenes", return_raw_style=False)
+    )
     for p in summary_list:
         data = read_scenario_data(AssetLoader.file_path("nuscenes", mapping[p], p, return_raw_style=False))
         data.sanity_check(data, check_self_type=False, valid_check=False)

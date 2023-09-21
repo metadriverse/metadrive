@@ -151,7 +151,10 @@ def CreateRoadFrom(
 
 
 def ExtendStraightLane(
-    lane: "StraightLane", extend_length: float, line_types: (PGLineType, PGLineType), metadrive_lane_type=None
+    lane: "StraightLane",
+    extend_length: float,
+    line_types: (PGLineType, PGLineType),
+    metadrive_lane_type=None
 ) -> "StraightLane":
     assert isinstance(lane, StraightLane)
     new_lane = copy.copy(lane)

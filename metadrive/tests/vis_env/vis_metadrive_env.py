@@ -73,26 +73,21 @@ if __name__ == "__main__":
 
     speed = 8
 
-
     def acc_speed():
         global speed
         speed *= 2
-
 
     def de_speed():
         global speed
         speed /= 2
 
-
     def lower_terrain():
         pos = env.engine.terrain._mesh_terrain.getPos()
         env.engine.terrain._mesh_terrain.set_pos(pos[0], pos[1], pos[2] - speed)
 
-
     def lift_terrain():
         pos = env.engine.terrain._mesh_terrain.getPos()
         env.engine.terrain._mesh_terrain.set_pos(pos[0], pos[1], pos[2] + speed)
-
 
     init_state = {
         'position': (40.82264362985734, -509.3641208712943),

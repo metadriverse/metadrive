@@ -111,11 +111,10 @@ class MetaDriveType:
 
     @classmethod
     def is_lane(cls, type):
-        return type in [cls.LANE_SURFACE_STREET,
-                        cls.LANE_SURFACE_UNSTRUCTURE,
-                        cls.LANE_UNKNOWN,
-                        cls.LANE_BIKE_LANE,
-                        cls.LANE_FREEWAY]
+        return type in [
+            cls.LANE_SURFACE_STREET, cls.LANE_SURFACE_UNSTRUCTURE, cls.LANE_UNKNOWN, cls.LANE_BIKE_LANE,
+            cls.LANE_FREEWAY
+        ]
 
     @classmethod
     def is_road_line(cls, line):
@@ -146,10 +145,10 @@ class MetaDriveType:
 
     @classmethod
     def is_solid_line(cls, line):
-        return line in [cls.LINE_SOLID_DOUBLE_WHITE,
-                        cls.LINE_SOLID_DOUBLE_YELLOW,
-                        cls.LINE_SOLID_SINGLE_YELLOW,
-                        cls.LINE_SOLID_SINGLE_WHITE]
+        return line in [
+            cls.LINE_SOLID_DOUBLE_WHITE, cls.LINE_SOLID_DOUBLE_YELLOW, cls.LINE_SOLID_SINGLE_YELLOW,
+            cls.LINE_SOLID_SINGLE_WHITE
+        ]
 
     @classmethod
     def is_road_boundary_line(cls, edge):
