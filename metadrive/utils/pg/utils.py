@@ -83,11 +83,11 @@ def get_lanes_bounding_box(lanes, extra_lateral=3) -> Tuple:
         line_points = get_curve_contour(lanes, extra_lateral) if isinstance(lanes[0], CircularLane) \
             else get_straight_contour(lanes, extra_lateral)
     else:
-        line_points = get_interpolating_lane_countour(lanes)
+        line_points = get_interpolating_lane_contour(lanes)
     return get_points_bounding_box(line_points)
 
 
-def get_interpolating_lane_countour(lanes):
+def get_interpolating_lane_contour(lanes):
     assert isinstance(lanes[0], InterpolatingLine)
     ret = []
     for lane in lanes:
@@ -176,7 +176,7 @@ def ray_localization(
     lane_index_dist = []
     if results.hasHits():
         for res in results.getHits():
-            if res.getNode().getName() == MetaDriveType.LANE_SURFACE_STREET:
+            if MetaDriveType.is_lane(res.getNode().getName()):
                 on_lane = True
                 lane = get_object_from_node(res.getNode())
                 long, _ = lane.local_coordinates(position)

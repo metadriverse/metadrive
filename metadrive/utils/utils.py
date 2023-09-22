@@ -14,7 +14,8 @@ from metadrive.constants import MetaDriveType
 def import_pygame():
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
     import pygame
-    return pygame
+    from pygame import gfxdraw
+    return pygame, gfxdraw
 
 
 def get_time_str():
@@ -184,7 +185,7 @@ def get_object_from_node(node: BulletBodyNode):
     from metadrive.engine.engine_utils import get_object
     from metadrive.engine.engine_utils import get_engine
     ret = node.getPythonTag(node.getName()).base_object_name
-    is_road = node.getPythonTag(node.getName()).type_name == MetaDriveType.LANE_SURFACE_STREET
+    is_road = MetaDriveType.is_lane(node.getPythonTag(node.getName()).type_name)
     if is_road:
         return get_engine().current_map.road_network.get_lane(ret)
     else:

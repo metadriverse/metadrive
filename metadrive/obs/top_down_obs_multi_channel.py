@@ -5,12 +5,12 @@ import math
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
+from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
 from metadrive.scenario.scenario_description import ScenarioDescription
-from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.constants import Decoration, DEFAULT_AGENT
 from metadrive.obs.top_down_obs import TopDownObservation
-from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, VehicleGraphics, LaneGraphics, \
+from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, ObjectGraphics, LaneGraphics, \
     ObservationWindowMultiChannel
 from metadrive.utils import import_pygame, clip
 
@@ -19,9 +19,9 @@ from metadrive.component.vehicle_navigation_module.node_network_navigation impor
 from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 
-pygame = import_pygame()
+pygame, gfxdraw = import_pygame()
 COLOR_WHITE = pygame.Color("white")
-DEFAULT_TRAJECTORY_LANE_WIDTH = 5
+DEFAULT_TRAJECTORY_LANE_WIDTH = 3
 
 
 class TopDownMultiChannel(TopDownObservation):
@@ -134,8 +134,9 @@ class TopDownMultiChannel(TopDownObservation):
         elif hasattr(self.engine, "map_manager"):
             for data in self.engine.map_manager.current_map.blocks[-1].map_data.values():
                 if ScenarioDescription.POLYLINE in data:
-                    LaneGraphics.display_scenario(
-                        InterpolatingLine(data[ScenarioDescription.POLYLINE]), data.get("type", None),
+                    LaneGraphics.display_scenario_line(
+                        data[ScenarioDescription.POLYLINE],
+                        data[ScenarioDescription.TYPE],
                         self.canvas_background
                     )
 
@@ -165,18 +166,12 @@ class TopDownMultiChannel(TopDownObservation):
         ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
-        vehicles = []
-        if hasattr(self.engine, "traffic_manager"):
-            vehicles = self.engine.traffic_manager.vehicles
-        elif hasattr(self.engine, "scenario_traffic_manager"):
-            vehicles = self.engine.scenario_traffic_manager.vehicles
-
-        for v in vehicles:
+        for v in self.engine.get_objects(lambda o: isinstance(o, BaseVehicle) or isinstance(o, BaseTrafficParticipant)):
             if v is vehicle:
                 continue
             h = v.heading_theta
             h = h if abs(h) > 2 * np.pi / 180 else 0
-            VehicleGraphics.display(vehicle=v, surface=self.canvas_runtime, heading=h, color=VehicleGraphics.BLUE)
+            ObjectGraphics.display(object=v, surface=self.canvas_runtime, heading=h, color=ObjectGraphics.BLUE)
 
         raw_pos = vehicle.position
         self.stack_past_pos.append(raw_pos)
@@ -213,8 +208,8 @@ class TopDownMultiChannel(TopDownObservation):
 
     def _draw_ego_vehicle(self):
         vehicle = self.engine.agents[DEFAULT_AGENT]
-        w = vehicle.WIDTH * self.scaling
-        h = vehicle.LENGTH * self.scaling
+        w = vehicle.top_down_width * self.scaling
+        h = vehicle.top_down_length * self.scaling
         position = (self.resolution[0] / 2, self.resolution[1] / 2)
         angle = 90
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]

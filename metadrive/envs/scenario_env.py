@@ -91,6 +91,7 @@ SCENARIO_ENV_CONFIG = dict(
     interface_panel=["dashboard"],  # for boosting efficiency
     horizon=None,
     allowed_more_steps=None,  # None=infinite
+    top_down_show_real_size=False
 )
 
 

@@ -12,12 +12,8 @@ from direct.stdpy.file import open
 from metadrive.render_pipeline.rpcore.rpobject import RPObject
 
 # Import different PyYaml versions depending on the used python version
-if sys.version_info < (3, 0):
-    from .yaml_py2 import load as yaml_load
-    from .yaml_py2 import YAMLError, SafeLoader
-else:
-    from .yaml_py3 import load as yaml_load
-    from .yaml_py3 import YAMLError, SafeLoader
+from .yaml_py3 import load as yaml_load
+from .yaml_py3 import YAMLError, SafeLoader
 
 __all__ = ["load_yaml_file", "load_yaml_file_flat"]
 

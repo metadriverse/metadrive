@@ -1,94 +1,109 @@
 import copy
-from collections import deque, namedtuple
+import math
+from collections import deque
 from typing import Optional, Union, Iterable
 
 import numpy as np
 
 from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.component.map.scenario_map import ScenarioMap
+from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, TARGET_VEHICLES
-from metadrive.obs.top_down_obs_impl import WorldSurface, VehicleGraphics, LaneGraphics
+from metadrive.constants import TopDownSemanticColor, MetaDriveType, DrivableAreaProperty
+from metadrive.obs.top_down_obs_impl import WorldSurface, ObjectGraphics, LaneGraphics, history_object
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
 from metadrive.utils.utils import is_map_related_instance
 
-pygame = import_pygame()
+pygame, gfxdraw = import_pygame()
 
 color_white = (255, 255, 255)
-history_object = namedtuple("history_object", "name position heading_theta WIDTH LENGTH color done")
 
 
 def draw_top_down_map(
     map,
     resolution: Iterable = (512, 512),
-    draw_drivable_area=True,
+    semantic_map=True,
     return_surface=False,
     film_size=None,
-    reverse_color=False,
-    road_color=color_white,
+    scaling=None,
+    semantic_broken_line=True
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     import cv2
     film_size = film_size or map.film_size
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
-    if reverse_color:
-        surface.WHITE, surface.BLACK = surface.BLACK, surface.WHITE
-        surface.__init__(film_size, 0, pygame.Surface(film_size))
+    # if reverse_color:
+    #     surface.WHITE, surface.BLACK = surface.BLACK, surface.WHITE
+    #     surface.__init__(film_size, 0, pygame.Surface(film_size))
     b_box = map.road_network.get_bounding_box()
     x_len = b_box[1] - b_box[0]
     y_len = b_box[3] - b_box[2]
     max_len = max(x_len, y_len)
     # scaling and center can be easily found by bounding box
-    scaling = film_size[1] / max_len - 0.1
+    scaling = scaling if scaling else film_size[1] / max_len - 0.1
     surface.scaling = scaling
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
+    line_sample_interval = 2
 
-    if isinstance(map, ScenarioMap):
-        if draw_drivable_area:
-            for lane_info in map.road_network.graph.values():
-                LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
-        else:
-            for id, data in map.blocks[-1].map_data.items():
+    if semantic_map:
+        all_lanes = map.get_map_features(line_sample_interval)
+
+        for obj in all_lanes.values():
+            if MetaDriveType.is_lane(obj["type"]):
+                pygame.draw.polygon(
+                    surface, TopDownSemanticColor.get_color(obj["type"]),
+                    [surface.pos2pix(p[0], p[1]) for p in obj["polygon"]]
+                )
+
+            elif MetaDriveType.is_road_line(obj["type"]) or MetaDriveType.is_road_boundary_line(obj["type"]):
+                if semantic_broken_line and MetaDriveType.is_broken_line(obj["type"]):
+                    points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
+                else:
+                    points_to_skip = 1
+                for index in range(0, len(obj["polyline"]) - 1, points_to_skip):
+                    if index + 1 < len(obj["polyline"]):
+                        s_p = obj["polyline"][index]
+                        e_p = obj["polyline"][index + 1]
+                        pygame.draw.line(
+                            surface,
+                            TopDownSemanticColor.get_color(obj["type"]),
+                            surface.vec2pix([s_p[0], s_p[1]]),
+                            surface.vec2pix([e_p[0], e_p[1]]),
+                            # max(surface.pix(LaneGraphics.STRIPE_WIDTH),
+                            surface.pix(DrivableAreaProperty.LANE_LINE_WIDTH) * 2
+                        )
+    else:
+        if isinstance(map, ScenarioMap):
+            line_sample_interval = 2
+            all_lanes = map.get_map_features(line_sample_interval)
+            for id, data in all_lanes.items():
                 if ScenarioDescription.POLYLINE not in data:
                     continue
-                type = data.get("type", None)
-                if "boundary" in id:
-                    num_seg = int(len(data[ScenarioDescription.POLYLINE]) / 10)
-                    for i in range(num_seg):
-                        # 10 points
-                        end = min((i + 1) * 10, len(data[ScenarioDescription.POLYLINE]))
-                        waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][i * 10:end]))
-                        LaneGraphics.display_scenario(waymo_line, type, surface)
+                LaneGraphics.display_scenario_line(
+                    data["polyline"], data["type"], surface, line_sample_interval=line_sample_interval
+                )
 
-                    if (i + 1) * 10 < len(data[ScenarioDescription.POLYLINE]):
-                        end = len(data[ScenarioDescription.POLYLINE])
-                        waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE][(i + 1) * 10:end]))
-                        LaneGraphics.display_scenario(waymo_line, type, surface)
-                else:
-                    waymo_line = InterpolatingLine(np.asarray(data[ScenarioDescription.POLYLINE]))
-                    LaneGraphics.display_scenario(waymo_line, type, surface)
+        elif isinstance(map, NuPlanMap):
+            raise DeprecationWarning("We are using unifed ScenarioDescription Now!")
+            if semantic_map:
+                for lane_info in map.road_network.graph.values():
+                    LaneGraphics.draw_drivable_area(lane_info.lane, surface)
+            else:
+                for block in map.attached_blocks + [map.boundary_block]:
+                    for boundary in block.lines.values():
+                        line = InterpolatingLine(boundary.points)
+                        LaneGraphics.display_nuplan(line, boundary.type, boundary.color, surface)
 
-    elif isinstance(map, NuPlanMap):
-        if draw_drivable_area:
-            for lane_info in map.road_network.graph.values():
-                LaneGraphics.draw_drivable_area(lane_info.lane, surface, color=road_color)
         else:
-            for block in map.attached_blocks + [map.boundary_block]:
-                for boundary in block.lines.values():
-                    line = InterpolatingLine(boundary.points)
-                    LaneGraphics.display_nuplan(line, boundary.type, boundary.color, surface)
-
-    else:
-        for _from in map.road_network.graph.keys():
-            decoration = True if _from == Decoration.start else False
-            for _to in map.road_network.graph[_from].keys():
-                for l in map.road_network.graph[_from][_to]:
-                    if draw_drivable_area:
-                        LaneGraphics.draw_drivable_area(l, surface, color=road_color)
-                    else:
+            for _from in map.road_network.graph.keys():
+                decoration = True if _from == Decoration.start else False
+                for _to in map.road_network.graph[_from].keys():
+                    for l in map.road_network.graph[_from][_to]:
                         two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
                         LaneGraphics.display(l, surface, two_side, use_line_color=True)
+
     if return_surface:
         return surface
     ret = cv2.resize(pygame.surfarray.pixels_red(surface), resolution, interpolation=cv2.INTER_LINEAR)
@@ -158,14 +173,16 @@ class TopDownRenderer:
         self,
         film_size=(1000, 1000),
         screen_size=(1000, 1000),
-        light_background=True,
         num_stack=15,
         history_smooth=0,
-        road_color=(80, 80, 80),
         show_agent_name=False,
         camera_position=None,
         target_vehicle_heading_up=False,
         draw_target_vehicle_trajectory=False,
+        semantic_map=False,
+        semantic_broken_line=True,
+        scaling=None,  # auto-scale
+        draw_contour=True,
         **kwargs
         # current_track_vehicle=None
     ):
@@ -174,6 +191,8 @@ class TopDownRenderer:
         self.target_vehicle_heading_up = target_vehicle_heading_up
         self.show_agent_name = show_agent_name
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
+        self.contour = draw_contour
+        self.semantic_broken_line = semantic_broken_line
 
         if self.show_agent_name:
             pygame.init()
@@ -189,25 +208,22 @@ class TopDownRenderer:
         # self.current_track_vehicle = current_track_vehicle
         if self.target_vehicle_heading_up:
             assert self.current_track_vehicle is not None, "Specify which vehicle to track"
-        self.road_color = road_color
-        self._light_background = light_background
         self._text_render_pos = [50, 50]
         self._font_size = 25
         self._text_render_interval = 20
+        self.semantic_map = semantic_map
+        self.scaling = scaling
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
         self._background_canvas = draw_top_down_map(
             self.map,
-            draw_drivable_area=False,
+            scaling=self.scaling,
+            semantic_map=self.semantic_map,
             return_surface=True,
             film_size=film_size,
-            road_color=road_color,
+            semantic_broken_line=self.semantic_broken_line
         )
-        if self._light_background:
-            pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2**32 - 1
-            del pixels
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
         self._runtime_canvas = self._background_canvas.copy()
@@ -267,6 +283,7 @@ class TopDownRenderer:
         if self.draw_target_vehicle_trajectory:
             self.history_target_vehicle.append(
                 history_object(
+                    type=MetaDriveType.VEHICLE,
                     name=self.current_track_vehicle.name,
                     heading_theta=self.current_track_vehicle.heading_theta,
                     WIDTH=self.current_track_vehicle.top_down_width,
@@ -313,16 +330,12 @@ class TopDownRenderer:
         # Reset the super large background
         self._background_canvas = draw_top_down_map(
             map,
-            draw_drivable_area=False,
+            scaling=self.scaling,
+            semantic_map=self.semantic_map,
             return_surface=True,
             film_size=self._background_size,
-            road_color=self.road_color,
+            semantic_broken_line=self.semantic_broken_line
         )
-        self._light_background = self._light_background
-        if self._light_background:
-            pixels = pygame.surfarray.pixels2d(self._background_canvas)
-            pixels ^= 2**32 - 1
-            del pixels
 
         # Reset several useful variables.
         # self._render_size = self._background_canvas.get_size()
@@ -347,6 +360,7 @@ class TopDownRenderer:
             frame_objects.append(
                 history_object(
                     name=name,
+                    type=obj.metadrive_type if hasattr(obj, "metadrive_type") else MetaDriveType.OTHER,
                     heading_theta=obj.heading_theta,
                     WIDTH=obj.top_down_width,
                     LENGTH=obj.top_down_length,
@@ -365,6 +379,8 @@ class TopDownRenderer:
             return
 
         for i, objects in enumerate(self.history_objects):
+            if i == len(self.history_objects) - 1:
+                continue
             i = len(self.history_objects) - i
             if self.history_smooth != 0 and (i % self.history_smooth != 0):
                 continue
@@ -374,13 +390,11 @@ class TopDownRenderer:
                 h = h if abs(h) > 2 * np.pi / 180 else 0
                 x = abs(int(i))
                 alpha_f = x / len(self.history_objects)
-                VehicleGraphics.display(
-                    vehicle=v,
-                    surface=self._runtime_canvas,
-                    heading=h,
-                    color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
-                    draw_countour=False
-                )
+                if self.semantic_map:
+                    c = TopDownSemanticColor.get_color(v.type) * (1 - alpha_f) + alpha_f * 255
+                else:
+                    c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
+                ObjectGraphics.display(object=v, surface=self._runtime_canvas, heading=h, color=c, draw_contour=False)
 
         # Draw the whole trajectory of ego vehicle with no gradient colors:
         if self.draw_target_vehicle_trajectory:
@@ -394,12 +408,12 @@ class TopDownRenderer:
                 x = abs(int(i))
                 alpha_f = min(x / len(self.history_target_vehicle), 0.5)
                 # alpha_f = 0
-                VehicleGraphics.display(
-                    vehicle=v,
+                ObjectGraphics.display(
+                    object=v,
                     surface=self._runtime_canvas,
                     heading=h,
                     color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
-                    draw_countour=False
+                    draw_contour=False
                 )
 
         # Draw current vehicle with black contour
@@ -412,13 +426,12 @@ class TopDownRenderer:
             c = v.color
             h = h if abs(h) > 2 * np.pi / 180 else 0
             alpha_f = 0
-            VehicleGraphics.display(
-                vehicle=v,
-                surface=self._runtime_canvas,
-                heading=h,
-                color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
-                draw_countour=True,
-                contour_width=2
+            if self.semantic_map:
+                c = TopDownSemanticColor.get_color(v.type) * (1 - alpha_f) + alpha_f * 255
+            else:
+                c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
+            ObjectGraphics.display(
+                object=v, surface=self._runtime_canvas, heading=h, color=c, draw_contour=self.contour, contour_width=2
             )
 
         if not hasattr(self, "_deads"):

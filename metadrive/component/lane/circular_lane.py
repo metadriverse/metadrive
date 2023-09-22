@@ -1,4 +1,5 @@
 import math
+from metadrive.constants import MetaDriveType
 from typing import Tuple
 
 import numpy as np
@@ -22,10 +23,11 @@ class CircularLane(PGLane):
         line_types: Tuple[PGLineType, PGLineType] = (PGLineType.BROKEN, PGLineType.BROKEN),
         forbidden: bool = False,
         speed_limit: float = 1000,
-        priority: int = 0
+        priority: int = 0,
+        metadrive_type=MetaDriveType.LANE_SURFACE_STREET,
     ) -> None:
         assert angle > 0, "Angle should be greater than 0"
-        super().__init__()
+        super().__init__(metadrive_type)
         self.set_speed_limit(speed_limit)
         self.center = Vector(center)
         self.radius = radius

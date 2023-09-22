@@ -115,6 +115,10 @@ BASE_DEFAULT_CONFIG = dict(
         height=None,
         mass=None,
 
+        # only for top-down drawing, the physics size wouldn't be changed
+        top_down_width=None,
+        top_down_length=None,
+
         # ===== vehicle module config =====
         lidar=dict(
             num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0, add_others_navi=False
