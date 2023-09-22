@@ -131,6 +131,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # self.engine = get_engine()
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
+        self.set_metadrive_type(MetaDriveType.VEHICLE)
         self.update_config(vehicle_config)
         use_special_color = self.config["use_special_color"]
 
@@ -747,6 +748,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.crash_sidewalk = True
             contacts.add(MetaDriveType.BOUNDARY_LINE)
 
+        elif res.hasHit() and res.getNode().getName() == MetaDriveType.BOUNDARY_SIDEWALK:
+            self.crash_sidewalk = True
+            contacts.add(MetaDriveType.BOUNDARY_SIDEWALK)
+
         # only for visualization detection
         if self.render:
             res = rect_region_detection(
@@ -758,8 +763,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 CollisionGroup.LaneSurface,
                 in_static_world=True if not self.engine.global_config["debug_static_world"] else False
             )
-            if not res.hasHit() or res.getNode().getName() != MetaDriveType.LANE_SURFACE_STREET:
+            if not res.hasHit():
                 contacts.add(MetaDriveType.GROUND)
+            else:
+                if MetaDriveType.is_lane(res.getNode().getName()):
+                    contacts.add(res.getNode().getName())
+                else:
+                    contacts.add(MetaDriveType.GROUND)
 
         self.contact_results.update(contacts)
 

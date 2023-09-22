@@ -42,8 +42,8 @@ class TInterSection(InterSection):
             lanes = road.get_lanes(self.block_network)
             outside_type = PGLineType.SIDE if i == 0 else PGLineType.NONE
             for k, lane in enumerate(lanes):
-                line_types = [PGLineType.BROKEN, PGLineType.BROKEN
-                              ] if k != len(lanes) - 1 else [PGLineType.BROKEN, outside_type]
+                line_types = [PGLineType.NONE, PGLineType.NONE
+                              ] if k != len(lanes) - 1 else [PGLineType.NONE, outside_type]
                 lane.line_types = line_types
                 if k == 0:
                     lane.line_colors = [PGLineColor.YELLOW, PGLineColor.GREY]

@@ -107,7 +107,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
             ret[id] = {
                 SD.POLYLINE: lane_info.lane.get_polyline(interval),
                 SD.POLYGON: lane_info.lane.polygon,
-                SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
+                SD.TYPE: lane_info.lane.metadrive_type,
                 "speed_limit_kmh": lane_info.lane.speed_limit
             }
         return ret

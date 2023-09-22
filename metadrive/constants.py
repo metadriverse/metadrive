@@ -61,10 +61,13 @@ COLLISION_INFO_COLOR = dict(
 # Used for rendering the banner in Interface.
 COLOR = {
     MetaDriveType.BOUNDARY_LINE: "red",
+    MetaDriveType.BOUNDARY_SIDEWALK: "red",
     MetaDriveType.LINE_SOLID_SINGLE_WHITE: "orange",
     MetaDriveType.LINE_SOLID_SINGLE_YELLOW: "orange",
     MetaDriveType.LINE_BROKEN_SINGLE_YELLOW: "yellow",
     MetaDriveType.LINE_BROKEN_SINGLE_WHITE: "green",
+    MetaDriveType.LANE_SURFACE_STREET: "green",
+    MetaDriveType.LANE_SURFACE_UNSTRUCTURE: "green",
     MetaDriveType.VEHICLE: "red",
     MetaDriveType.GROUND: "yellow",
     MetaDriveType.TRAFFIC_OBJECT: "yellow",
@@ -317,6 +320,7 @@ class DrivableAreaProperty:
 
 
 class ObjectState:
+    # this is for internal recording/replaying system
     POSITION = "position"
     HEADING_THETA = "heading_theta"
     VELOCITY = "velocity"
@@ -378,7 +382,7 @@ class MapTerrainSemanticColor:
             return (0, 1, 0, 0)
         elif type == MetaDriveType.GROUND:
             return (0, 0, 1, 0)
-        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_edge(type):
+        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
             return (0, 0, 0, 1)
         else:
             raise ValueError("Unsupported type: {}".format(type))
@@ -390,24 +394,34 @@ class TopDownSemanticColor:
     class lMapSemanticColor
     """
     @staticmethod
-    def get_color(type, pygame=False):
-        if MetaDriveType.is_yellow_line(type):
-            # return (255, 0, 0, 0)
-            ret = np.array([1, 0, 0, 0])
-        elif MetaDriveType.is_lane(type):
-            ret = np.array([0, 1, 0, 0])
-        elif type == MetaDriveType.GROUND:
-            ret = np.array([0, 0, 1, 0])
-        elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_edge(type):
-            ret = np.array([0, 0, 0, 1])
+    def get_color(type):
+        if MetaDriveType.is_lane(type):
+            # intersection and others
+            if type == MetaDriveType.LANE_SURFACE_UNSTRUCTURE:
+                ret = np.array([186, 186, 186])
+            # a set of lanes
+            else:
+                ret = np.array([210, 210, 210])
+        # road divider
+        elif MetaDriveType.is_yellow_line(type):
+            ret = np.array([20, 20, 20])
+        # lane divider
+        elif MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_white_line(type):
+            ret = np.array([140, 140, 140])
+        # vehicle
         elif MetaDriveType.is_vehicle(type):
-            ret = np.array([0, 0, 1, 0])
-        elif type == MetaDriveType.OTHER:
-            ret = np.array([0, 1, 1, 0])
+            ret = np.array([224, 177, 67])
+        # construction object
+        elif MetaDriveType.is_traffic_object(type):
+            ret = np.array([67, 143, 224])
+        # human
+        elif type == MetaDriveType.PEDESTRIAN:
+            ret = np.array([224, 67, 67])
+        # cyclist and motorcycle
+        elif type == MetaDriveType.CYCLIST:
+            ret = np.array([75, 224, 67])
         else:
-            raise ValueError("Unsupported type: {}".format(type))
-
-        if pygame:
-            ret *= 255
-            ret.astype(np.int32)
+            ret = np.array([125, 67, 224])
+        # else:
+        #     raise ValueError("Unsupported type: {}".format(type))
         return ret

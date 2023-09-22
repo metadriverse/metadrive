@@ -24,6 +24,7 @@ class BaseTrafficLight(BaseObject):
         self, lane, position=None, name=None, random_seed=None, config=None, escape_random_seed_assertion=False
     ):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
+        self.set_metadrive_type(MetaDriveType.TRAFFIC_LIGHT)
         self.lane = lane
         self.status = MetaDriveType.LIGHT_UNKNOWN
 

@@ -23,7 +23,7 @@ if __name__ == "__main__":
             "need_inverse_traffic": True,
             "rgb_clip": True,
             "debug": False,
-            "map": "yBY",
+            "map": "TXO",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
@@ -50,11 +50,11 @@ if __name__ == "__main__":
     # [9.95036221 0.99503618]
     start = time.time()
     o, _ = env.reset()
-    env.vehicle.set_velocity([1, 0.1], 10)
+    # env.vehicle.set_velocity([1, 0.1], 10)
     # print(env.vehicle.speed)
 
     for s in range(1, 10000):
-        o, r, tm, tc, info = env.step([1, 0.5])
+        o, r, tm, tc, info = env.step([0, 0.])
         # print("heading: {} forward_direction: {}".format(env.vehicle.heading, env.vehicle.velocity_direction))
 
         # env.vehicle.set_velocity([1, 10], 10)
@@ -64,4 +64,4 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.vehicle.energy_consumption
-        env.render(track_target_vehicle=True, mode="top_down")
+        env.render(track_target_vehicle=True, mode="top_down", semantic_map=True)

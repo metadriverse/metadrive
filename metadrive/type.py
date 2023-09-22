@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,6 +13,9 @@ class MetaDriveType:
 
     # ===== Lane, Road =====
     LANE_SURFACE_STREET = "LANE_SURFACE_STREET"
+    # Unlike a set of lanes separated by broken/solid line, this includes intersection and some unstrcutured roads.
+    LANE_SURFACE_UNSTRUCTURE = "LANE_SURFACE_UNSTRUCTURE"
+    # use them as less frequent as possible, it is for waymo compatibility
     LANE_UNKNOWN = "LANE_UNKNOWN"
     LANE_FREEWAY = "LANE_FREEWAY"
     LANE_BIKE_LANE = "LANE_BIKE_LANE"
@@ -28,9 +32,10 @@ class MetaDriveType:
     LINE_PASSING_DOUBLE_YELLOW = "ROAD_LINE_PASSING_DOUBLE_YELLOW"
 
     # ===== Edge/Boundary/SideWalk/Region =====
-    BOUNDARY_UNKNOWN = "UNKNOWN"
-    BOUNDARY_LINE = "ROAD_EDGE_BOUNDARY"
-    BOUNDARY_MEDIAN = "ROAD_EDGE_MEDIAN"
+    BOUNDARY_UNKNOWN = "UNKNOWN"  # line
+    BOUNDARY_LINE = "ROAD_EDGE_BOUNDARY"  # line
+    BOUNDARY_MEDIAN = "ROAD_EDGE_MEDIAN"  # line
+    BOUNDARY_SIDEWALK = "ROAD_EDGE_SIDEWALK"  # polygon
     STOP_SIGN = "STOP_SIGN"
     CROSSWALK = "CROSSWALK"
     SPEED_BUMP = "SPEED_BUMP"
@@ -106,7 +111,10 @@ class MetaDriveType:
 
     @classmethod
     def is_lane(cls, type):
-        return type in [cls.LANE_SURFACE_STREET, cls.LANE_FREEWAY, cls.LANE_BIKE_LANE]
+        return type in [
+            cls.LANE_SURFACE_STREET, cls.LANE_SURFACE_UNSTRUCTURE, cls.LANE_UNKNOWN, cls.LANE_BIKE_LANE,
+            cls.LANE_FREEWAY
+        ]
 
     @classmethod
     def is_road_line(cls, line):
@@ -136,7 +144,14 @@ class MetaDriveType:
         return line in [cls.LINE_BROKEN_DOUBLE_YELLOW, cls.LINE_BROKEN_SINGLE_YELLOW, cls.LINE_BROKEN_SINGLE_WHITE]
 
     @classmethod
-    def is_road_edge(cls, edge):
+    def is_solid_line(cls, line):
+        return line in [
+            cls.LINE_SOLID_DOUBLE_WHITE, cls.LINE_SOLID_DOUBLE_YELLOW, cls.LINE_SOLID_SINGLE_YELLOW,
+            cls.LINE_SOLID_SINGLE_WHITE
+        ]
+
+    @classmethod
+    def is_road_boundary_line(cls, edge):
         """
         This function relates to is_road_line.
         """
@@ -144,7 +159,7 @@ class MetaDriveType:
 
     @classmethod
     def is_sidewalk(cls, edge):
-        return edge == cls.BOUNDARY_LINE
+        return edge == cls.BOUNDARY_SIDEWALK
 
     @classmethod
     def is_vehicle(cls, type):
@@ -195,3 +210,21 @@ class MetaDriveType:
         else:
             logger.warning("TrafficLightStatus: {} is not MetaDriveType".format(status))
             return cls.LIGHT_UNKNOWN
+
+    @classmethod
+    def is_crosswalk(cls, type):
+        return type == MetaDriveType.CROSSWALK
+
+    def __init__(self, type=None):
+        # TODO extend this base class to all objects! It is only affect lane so far.
+        # TODO Or people can only know the type with isinstance()
+        self.metadrive_type = MetaDriveType.UNSET
+        if type is not None:
+            self.set_metadrive_type(type)
+
+    def set_metadrive_type(self, type):
+        if type in MetaDriveType.__dict__.values():
+            # Do something if type matches one of the class variables
+            self.metadrive_type = type
+        else:
+            raise ValueError(f"'{type}' is not a valid MetaDriveType.")
