@@ -5,8 +5,11 @@ import math
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
+from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
+from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight 
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.interpolating_line import InterpolatingLine
+from metadrive.type import MetaDriveType
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.constants import Decoration, DEFAULT_AGENT
 from metadrive.obs.top_down_obs import TopDownObservation
@@ -21,7 +24,7 @@ from metadrive.component.vehicle_navigation_module.trajectory_navigation import 
 
 pygame, gfxdraw = import_pygame()
 COLOR_WHITE = pygame.Color("white")
-DEFAULT_TRAJECTORY_LANE_WIDTH = 5
+DEFAULT_TRAJECTORY_LANE_WIDTH = 3
 
 
 class TopDownMultiChannel(TopDownObservation):
@@ -140,6 +143,14 @@ class TopDownMultiChannel(TopDownObservation):
                         self.canvas_road_network
                     )
 
+        # draw traffic lights
+        for trafficlight in self.engine.get_objects(lambda o: isinstance(o, BaseTrafficLight)).values():
+            h = trafficlight.heading_theta
+            h = h if abs(h) > 2 * np.pi / 180 else 0
+            if trafficlight.status == MetaDriveType.LIGHT_RED:
+                ObjectGraphics.display(object=trafficlight, surface=self.canvas_traffic_control, heading=h, color=ObjectGraphics.RED)
+
+
         self.obs_window.reset(self.canvas_runtime)
         self._should_draw_map = False
 
@@ -165,13 +176,7 @@ class TopDownMultiChannel(TopDownObservation):
         ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
-        vehicles = []
-        if hasattr(self.engine, "traffic_manager"):
-            vehicles = self.engine.traffic_manager.vehicles
-        elif hasattr(self.engine, "scenario_traffic_manager"):
-            vehicles = self.engine.scenario_traffic_manager.vehicles
-
-        for v in vehicles:
+        for v in self.engine.get_objects(lambda o: isinstance(o, BaseVehicle) or isinstance(o, BaseTrafficParticipant)).values():
             if v is vehicle:
                 continue
             h = v.heading_theta

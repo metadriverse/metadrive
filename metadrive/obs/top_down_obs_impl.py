@@ -472,12 +472,11 @@ class ObservationWindowMultiChannel:
         assert set(self.CHANNEL_NAMES)
         self.sub_observations = {
             k: ObservationWindow(max_range=max_range, resolution=resolution)
-            for k in ["traffic_flow", "target_vehicle"]
+            for k in ["traffic_flow", "target_vehicle", "traffic_control", "navigation"]
         }
         self.sub_observations["road_network"] = ObservationWindow(
             max_range=max_range,
             resolution=(resolution[0] * 2, resolution[1] * 2)
-            # max_range=max_range, resolution=resolution
         )
 
         self.resolution = (resolution[0] * 2, resolution[1] * 2)
