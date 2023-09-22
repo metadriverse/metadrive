@@ -373,6 +373,7 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_yellow_line(type):
@@ -393,35 +394,44 @@ class TopDownSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_lane(type):
             # intersection and others
             if type == MetaDriveType.LANE_SURFACE_UNSTRUCTURE:
-                ret = np.array([186, 186, 186])
+                ret = np.array([1, 0, 0])
             # a set of lanes
             else:
-                ret = np.array([210, 210, 210])
+                ret = np.array([2, 0, 0])
         # road divider
         elif MetaDriveType.is_yellow_line(type):
-            ret = np.array([20, 20, 20])
+            ret = np.array([3, 0, 0])
         # lane divider
         elif MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_white_line(type):
-            ret = np.array([140, 140, 140])
+            ret = np.array([4, 0, 0])
         # vehicle
         elif MetaDriveType.is_vehicle(type):
-            ret = np.array([224, 177, 67])
+            ret = np.array([5, 0, 0])
         # construction object
         elif MetaDriveType.is_traffic_object(type):
-            ret = np.array([67, 143, 224])
+            ret = np.array([6, 0, 0])
         # human
         elif type == MetaDriveType.PEDESTRIAN:
-            ret = np.array([224, 67, 67])
+            ret = np.array([7, 0, 0])
         # cyclist and motorcycle
         elif type == MetaDriveType.CYCLIST:
-            ret = np.array([75, 224, 67])
+            ret = np.array([8, 0, 0])
         else:
-            ret = np.array([125, 67, 224])
-        # else:
-        #     raise ValueError("Unsupported type: {}".format(type))
+            ret = np.array([9, 0, 0])
         return ret
+
+# 1: intersection/lane connector
+# 2: roadblock (a set of lanes)
+# 3: road divider
+# 4: lane divider
+# 5: vehicle
+# 6: construction
+# 7: Pedestrian
+# 8: Cyclist/Bike/MotorCycle
+# 9: unknown
