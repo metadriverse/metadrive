@@ -138,18 +138,11 @@ class TopDownMultiChannel(TopDownObservation):
         elif hasattr(self.engine, "map_manager"):
             for data in self.engine.map_manager.current_map.blocks[-1].map_data.values():
                 if ScenarioDescription.POLYLINE in data:
-                    LaneGraphics.display_scenario(
-                        InterpolatingLine(data[ScenarioDescription.POLYLINE]), data.get("type", None),
+                    LaneGraphics.display_scenario_line(
+                        data[ScenarioDescription.POLYLINE], 
+                        data[ScenarioDescription.TYPE],
                         self.canvas_road_network
                     )
-
-        # draw traffic lights
-        for trafficlight in self.engine.get_objects(lambda o: isinstance(o, BaseTrafficLight)).values():
-            h = trafficlight.heading_theta
-            h = h if abs(h) > 2 * np.pi / 180 else 0
-            if trafficlight.status == MetaDriveType.LIGHT_RED:
-                ObjectGraphics.display(object=trafficlight, surface=self.canvas_traffic_control, heading=h, color=ObjectGraphics.RED)
-
 
         self.obs_window.reset(self.canvas_runtime)
         self._should_draw_map = False
@@ -166,7 +159,7 @@ class TopDownMultiChannel(TopDownObservation):
 
         clip_size = (int(self.obs_window.get_size()[0] * 1.1), int(self.obs_window.get_size()[0] * 1.1))
 
-        # self._refresh(self.canvas_ego, pos, clip_size)
+        self._refresh(self.canvas_traffic_control, pos, clip_size)
         self._refresh(self.canvas_runtime, pos, clip_size)
         self.canvas_past_pos.fill(COLOR_BLACK)
         # self._draw_ego_vehicle()
@@ -182,6 +175,15 @@ class TopDownMultiChannel(TopDownObservation):
             h = v.heading_theta
             h = h if abs(h) > 2 * np.pi / 180 else 0
             ObjectGraphics.display(object=v, surface=self.canvas_runtime, heading=h, color=ObjectGraphics.BLUE)
+
+        # draw traffic lights
+        for trafficlight in self.engine.get_objects(lambda o: isinstance(o, BaseTrafficLight)).values():
+            h = trafficlight.heading_theta
+            h = h if abs(h) > 2 * np.pi / 180 else 0
+            if trafficlight.status == MetaDriveType.LIGHT_RED:
+                ObjectGraphics.display(object=trafficlight, surface=self.canvas_traffic_control, heading=h, color=ObjectGraphics.RED)
+
+
 
         raw_pos = vehicle.position
         self.stack_past_pos.append(raw_pos)
@@ -202,6 +204,7 @@ class TopDownMultiChannel(TopDownObservation):
             # p = self.canvas_background.pos2pix(p[0], p[1])
             self.canvas_past_pos.fill((255, 255, 255), (p, (1, 1)))
             # pygame.draw.circle(self.canvas_past_pos, (255, 255, 255), p, radius=1)
+
 
         ret = self.obs_window.render(
             canvas_dict=dict(
