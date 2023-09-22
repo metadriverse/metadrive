@@ -135,9 +135,7 @@ class TopDownMultiChannel(TopDownObservation):
             for data in self.engine.map_manager.current_map.blocks[-1].map_data.values():
                 if ScenarioDescription.POLYLINE in data:
                     LaneGraphics.display_scenario_line(
-                        data[ScenarioDescription.POLYLINE],
-                        data[ScenarioDescription.TYPE],
-                        self.canvas_background
+                        data[ScenarioDescription.POLYLINE], data[ScenarioDescription.TYPE], self.canvas_background
                     )
 
         self.canvas_road_network.blit(self.canvas_background, (0, 0))
@@ -166,7 +164,8 @@ class TopDownMultiChannel(TopDownObservation):
         ego_heading = vehicle.heading_theta
         ego_heading = ego_heading if abs(ego_heading) > 2 * np.pi / 180 else 0
 
-        for v in self.engine.get_objects(lambda o: isinstance(o, BaseVehicle) or isinstance(o, BaseTrafficParticipant)):
+        for v in self.engine.get_objects(lambda o: isinstance(o, BaseVehicle) or isinstance(o, BaseTrafficParticipant)
+                                         ).values():
             if v is vehicle:
                 continue
             h = v.heading_theta
