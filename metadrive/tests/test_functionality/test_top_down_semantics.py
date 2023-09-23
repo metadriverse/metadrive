@@ -6,10 +6,12 @@ import os
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from logging import WARNING
 
 
 def test_top_down_semantics(render=False):
     dataset = "waymo"
+    save = False
     try:
         env = WaymoEnv(
             {
@@ -19,6 +21,7 @@ def test_top_down_semantics(render=False):
                 "agent_policy": ReplayEgoCarPolicy,
                 "use_render": False,
                 "sequential_seed": True,
+                "log_level": WARNING,
                 "data_directory": "/home/shady/data/scenarionet/dataset/{}".format(dataset),
                 "num_scenarios": 100
             }
@@ -26,8 +29,9 @@ def test_top_down_semantics(render=False):
         o, _ = env.reset()
         for seed in range(100):
             env.reset(seed=seed)
-            # dir_p = "{}_{}".format(dataset, seed)
-            # os.makedirs(dir_p)
+            if save:
+                dir_p = "{}_{}".format(dataset, seed)
+                os.makedirs(dir_p)
             for step in range(0, 1000):
                 o, r, tm, tc, info = env.step([1.0, 0.])
                 this_frame_fig = env.render(
@@ -39,8 +43,9 @@ def test_top_down_semantics(render=False):
                     draw_contour=False,
                     scaling=10,
                 )
-                # pygame.image.save(this_frame_fig, os.path.join(dir_p, "{}.png".format(step)))
-                if tm:
+                if save:
+                    pygame.image.save(this_frame_fig, os.path.join(dir_p, "{}.png".format(step)))
+                if step == env.engine.data_manager.current_scenario_length:
                     break
     finally:
         env.close()
