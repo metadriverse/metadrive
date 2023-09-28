@@ -110,7 +110,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         if self.engine.global_config["rgb_to_grayscale"]:
             ret = np.dot(ret[..., :3], [0.299, 0.587, 0.114])
         if not clip:
-            return ret.astype(np.uint8)
+            return ret.astype(np.uint8, copy=False, order="C")
         else:
             return ret / 255
 

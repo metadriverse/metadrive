@@ -5,7 +5,7 @@ from simplepbr import _load_shader_str
 from typing import Union, List
 
 import numpy as np
-from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage, Shader, RenderState, ShaderAttrib
+from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage, Shader, RenderState, ShaderAttrib, FrameBufferProperties
 
 from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR, RENDER_MODE_NONE
 
@@ -51,6 +51,9 @@ class ImageBuffer:
 
             self.lens = self.cam.node().getLens()
             return
+        
+        frame_buffer_property = FrameBufferProperties()
+        frame_buffer_property.set_rgba_bits(8,8,8,0) # disable alpha for RGB camera
 
         # self.texture = Texture()
         if frame_buffer_property is None:
@@ -102,10 +105,9 @@ class ImageBuffer:
     def get_rgb_array_cpu(self):
         origin_img = self.buffer.getDisplayRegion(1).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
-        img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
+        img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 3))
         # img = np.swapaxes(img, 1, 0)
         img = img[::-1]
-        img = img[..., :-1]
         return img
 
     @staticmethod
