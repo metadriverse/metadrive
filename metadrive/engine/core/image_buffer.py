@@ -51,9 +51,9 @@ class ImageBuffer:
 
             self.lens = self.cam.node().getLens()
             return
-        
+
         frame_buffer_property = FrameBufferProperties()
-        frame_buffer_property.set_rgba_bits(8,8,8,0) # disable alpha for RGB camera
+        frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
 
         # self.texture = Texture()
         if frame_buffer_property is None:
