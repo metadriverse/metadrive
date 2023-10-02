@@ -32,8 +32,8 @@ class Bottleneck(PGBlock):
 
 class Merge(Bottleneck):
     """
-    -----\
-          \
+    -----\\
+          \\
            -------------------
            -------------------
           /
@@ -180,8 +180,8 @@ class Split(Bottleneck):
                        /
     -------------------
     -------------------
-                       \
-                        \-----
+                       \\
+                        \\-----
     OutBottlecneck
     """
     ID = "Y"
