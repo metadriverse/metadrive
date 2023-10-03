@@ -16,6 +16,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
     Compared to NodeRoadNetwork representing the relation of lanes in a node-based graph, EdgeRoadNetwork stores the
     relationship in edge-based graph, which is more common in real map representation
     """
+
     def __init__(self):
         super(EdgeRoadNetwork, self).__init__()
         self.graph = {}
@@ -108,6 +109,10 @@ class EdgeRoadNetwork(BaseRoadNetwork):
                 SD.POLYLINE: lane_info.lane.get_polyline(interval),
                 SD.POLYGON: lane_info.lane.polygon,
                 SD.TYPE: lane_info.lane.metadrive_type,
+                SD.ENTRY: lane_info.entry_lanes,
+                SD.EXIT: lane_info.exit_lanes,
+                SD.LEFT_NEIGHBORS: lane_info.left_lanes,
+                SD.RIGHT_NEIGHBORS: lane_info.right_lanes,
                 "speed_limit_kmh": lane_info.lane.speed_limit
             }
         return ret
