@@ -271,15 +271,39 @@ class NodeRoadNetwork(BaseRoadNetwork):
         return next(self.bfs_paths(start_road_node, goal), [])
 
     def get_map_features(self, interval=2):
-        from metadrive.type import MetaDriveType
+        def find_entry_exit():
+            entries = dict()
+            exits = dict()
+
+            for _from, _to_dict in self.graph.items():
+                for _to, lanes in _to_dict.items():
+                    if _from in exits:
+                        exits[_from] += ["{}".format(l.index) for l in lanes]
+                    else:
+                        exits[_from] = ["{}".format(l.index) for l in lanes]
+
+                    if _to in entries:
+                        entries[_to] += ["{}".format(l.index) for l in lanes]
+                    else:
+                        entries[_to] = ["{}".format(l.index) for l in lanes]
+            return entries, exits
+
+        entries, exits = find_entry_exit()
 
         ret = {}
         for _from, _to_dict in self.graph.items():
             for _to, lanes in _to_dict.items():
                 for k, lane in enumerate(lanes):
+                    left_n = ["{}".format(l.index) for l in lanes[:k]]
+                    right_n = ["{}".format(l.index) for l in lanes[k + 1:]]
                     ret["{}".format(lane.index)] = {
                         SD.POLYLINE: lane.get_polyline(interval),
                         SD.POLYGON: lane.polygon,
+                        # Convert to EdgeNetwork
+                        SD.LEFT_NEIGHBORS: left_n,
+                        SD.RIGHT_NEIGHBORS: right_n,
+                        SD.ENTRY: entries.get(_from, []),
+                        SD.EXIT: exits.get(_to, []),
                         SD.TYPE: lane.metadrive_type,
                         "speed_limit_kmh": lane.speed_limit
                     }
