@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     print("Start to profile the efficiency of MetaDrive Multi-agent Roundabout environment!")
     setup_logger(debug=False)
-    env = MultiAgentRoundaboutEnv(dict(start_seed=1010, log_level=logging.FATAL))
+    env = MultiAgentRoundaboutEnv(dict(start_seed=1010))
     obs, _ = env.reset()
     start = time.time()
     reset_used_time = 0
