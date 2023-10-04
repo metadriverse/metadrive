@@ -15,17 +15,19 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 def test_search_path(render_export_env=False, render_load_env=False):
     # Origin Data
     env = MetaDriveEnv(
-        dict(start_seed=0,
-             use_render=render_export_env,
-             num_scenarios=1,
-             map_config={
-                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
-                 BaseMap.GENERATE_CONFIG: "OSXCTrCS",  # it can be a file path / block num / block ID sequence
-                 BaseMap.LANE_WIDTH: 3.5,
-                 BaseMap.LANE_NUM: 1,
-                 "exit_length": 50,
-             },
-             agent_policy=IDMPolicy)
+        dict(
+            start_seed=0,
+            use_render=render_export_env,
+            num_scenarios=1,
+            map_config={
+                BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_SEQUENCE,
+                BaseMap.GENERATE_CONFIG: "OSXCTrCS",  # it can be a file path / block num / block ID sequence
+                BaseMap.LANE_WIDTH: 3.5,
+                BaseMap.LANE_NUM: 1,
+                "exit_length": 50,
+            },
+            agent_policy=IDMPolicy
+        )
     )
     policy = lambda x: [0, 1]
     dir = None
@@ -42,12 +44,7 @@ def test_search_path(render_export_env=False, render_load_env=False):
 
         # Loaded Data
         env = WaymoEnv(
-            dict(
-                agent_policy=ReplayEgoCarPolicy,
-                data_directory=dir,
-                use_render=render_load_env,
-                num_scenarios=1
-            )
+            dict(agent_policy=ReplayEgoCarPolicy, data_directory=dir, use_render=render_load_env, num_scenarios=1)
         )
         scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(1)])
         dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
@@ -59,12 +56,7 @@ def test_search_path(render_export_env=False, render_load_env=False):
 
         # reload
         env = WaymoEnv(
-            dict(
-                agent_policy=ReplayEgoCarPolicy,
-                data_directory=dir,
-                use_render=render_load_env,
-                num_scenarios=1
-            )
+            dict(agent_policy=ReplayEgoCarPolicy, data_directory=dir, use_render=render_load_env, num_scenarios=1)
         )
         for index in range(1):
             env.reset(seed=index)
@@ -101,7 +93,6 @@ def test_search_path(render_export_env=False, render_load_env=False):
         to_node = process_data(edges)
         print(to_node)
         assert to_node == nodes
-
 
     finally:
         env.close()

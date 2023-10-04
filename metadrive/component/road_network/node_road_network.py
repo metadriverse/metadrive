@@ -271,7 +271,6 @@ class NodeRoadNetwork(BaseRoadNetwork):
         return next(self.bfs_paths(start_road_node, goal), [])
 
     def get_map_features(self, interval=2):
-
         def find_entry_exit():
             entries = dict()
             exits = dict()
