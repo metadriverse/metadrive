@@ -278,16 +278,15 @@ class NodeRoadNetwork(BaseRoadNetwork):
 
             for _from, _to_dict in self.graph.items():
                 for _to, lanes in _to_dict.items():
-                    lanes = ["{}".format(l.index) for l in lanes]
                     if _from in exits:
-                        exits[_from] += lanes
+                        exits[_from] += ["{}".format(l.index) for l in lanes]
                     else:
-                        exits[_from] = lanes
+                        exits[_from] = ["{}".format(l.index) for l in lanes]
 
                     if _to in entries:
-                        entries[_to] += lanes
+                        entries[_to] += ["{}".format(l.index) for l in lanes]
                     else:
-                        entries[_to] = lanes
+                        entries[_to] = ["{}".format(l.index) for l in lanes]
             return entries, exits
 
         entries, exits = find_entry_exit()
@@ -297,15 +296,15 @@ class NodeRoadNetwork(BaseRoadNetwork):
             for _to, lanes in _to_dict.items():
                 for k, lane in enumerate(lanes):
                     left_n = ["{}".format(l.index) for l in lanes[:k]]
-                    right_n = ["{}".format(l.index) for l in lanes[k:]]
+                    right_n = ["{}".format(l.index) for l in lanes[k + 1:]]
                     ret["{}".format(lane.index)] = {
                         SD.POLYLINE: lane.get_polyline(interval),
                         SD.POLYGON: lane.polygon,
                         # Convert to EdgeNetwork
                         SD.LEFT_NEIGHBORS: left_n,
                         SD.RIGHT_NEIGHBORS: right_n,
-                        SD.ENTRY: entries[_from],
-                        SD.EXIT: exits[_to],
+                        SD.ENTRY: entries.get(_from, []),
+                        SD.EXIT: exits.get(_to, []),
                         SD.TYPE: lane.metadrive_type,
                         "speed_limit_kmh": lane.speed_limit
                     }

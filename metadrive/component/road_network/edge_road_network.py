@@ -1,10 +1,10 @@
 import logging
-from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from collections import namedtuple
 from typing import List
 
 from metadrive.component.road_network.base_road_network import BaseRoadNetwork
 from metadrive.component.road_network.base_road_network import LaneIndex
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.utils.math import get_boxes_bounding_box
 from metadrive.utils.pg.utils import get_lanes_bounding_box
 
@@ -65,16 +65,23 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         """
         Breadth-first search of all routes from start to goal.
 
-        :param start: starting node
-        :param goal: goal node
+        :param start: starting edges
+        :param goal: goal edge
         :return: list of paths from start to goal.
         """
-        queue = [(start, [start])]
+        lanes = self.graph[start].left_lanes + self.graph[start].right_lanes + [start]
+
+        queue = [(lane, [lane]) for lane in lanes]
         while queue:
-            (node, path) = queue.pop(0)
-            if node not in self.graph:
+            (lane, path) = queue.pop(0)
+            if lane not in self.graph:
                 yield []
-            for _next in set(self.graph[node].exit_lanes) - set(path):
+            if len(self.graph[lane].exit_lanes) == 0:
+                continue
+            for _next in set(self.graph[lane].exit_lanes):
+                if _next in path:
+                    # circle
+                    continue
                 if _next == goal:
                     yield path + [_next]
                 elif _next in self.graph:
@@ -100,7 +107,6 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         logging.debug("{} is released".format(self.__class__.__name__))
 
     def get_map_features(self, interval=2):
-        from metadrive.type import MetaDriveType
 
         ret = {}
         for id, lane_info in self.graph.items():
