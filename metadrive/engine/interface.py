@@ -158,8 +158,8 @@ class Interface:
 
     def _render_contact_result(self, contacts):
         contacts = sorted(list(contacts), key=lambda c: COLLISION_INFO_COLOR[COLOR[c]][0])
-        text = contacts[0] if len(contacts) != 0 else ""
-        color = COLLISION_INFO_COLOR[COLOR[text]][1] if text != "" else COLLISION_INFO_COLOR["green"][-1]
+        text = contacts[0] if len(contacts) != 0 else None
+        color = COLLISION_INFO_COLOR[COLOR[text]][1]
         if time.time() - self.engine._episode_start_time < 10:
             text = "Press H to see help message"
         self._render_banner(text, color)
