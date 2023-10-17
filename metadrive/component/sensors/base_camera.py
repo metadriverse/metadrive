@@ -33,7 +33,12 @@ class BaseCamera(ImageBuffer, BaseSensor):
     def __init__(self, engine, setup_pbr=False, need_cuda=False, frame_buffer_property=None):
         self._enable_cuda = need_cuda
         super(BaseCamera, self).__init__(
-            self.BUFFER_W, self.BUFFER_H, Vec3(0., 0.8, 1.5), self.BKG_COLOR, setup_pbr=setup_pbr, engine=engine,
+            self.BUFFER_W,
+            self.BUFFER_H,
+            Vec3(0., 0.8, 1.5),
+            self.BKG_COLOR,
+            setup_pbr=setup_pbr,
+            engine=engine,
             frame_buffer_property=frame_buffer_property
         )
 
