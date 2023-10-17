@@ -91,6 +91,10 @@ gym_requirement = [
     "gym>=0.19.0, <=0.26.0"
 ]
 
+ros_requirement = [
+    "zmq"
+]
+
 setup(
     name="metadrive-simulator",
     python_requires='>=3.6, <3.12',  # do version check with assert
@@ -106,6 +110,7 @@ setup(
         "nuplan": nuplan_requirement,
         "waymo": waymo_requirement,
         "gym": gym_requirement,
+        "ros": ros_requirement,
         "all": nuplan_requirement + cuda_requirement
     },
     include_package_data=True,

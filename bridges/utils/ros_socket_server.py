@@ -1,5 +1,4 @@
-# a simple script to send images via socket
-import random
+# launch sockets to send sensor readings to ROS
 import zmq
 import struct
 import numpy as np
@@ -28,43 +27,34 @@ class myBridge():
     self.obj_socket.set_hwm(5)
       
 
-  def game_runner(self):
+  def run(self):
     config = dict(
       use_render=True, # need this on to get the camera
       num_scenarios=1,
       horizon = 1000,
       image_observation=True,
-      image_on_cuda=True,
       manual_control=True,
       rgb_clip=False,
-      # random_lane_width=True,
-      # random_lane_num=True,
-      # random_agent_model=False,
-      # traffic_density=0.5,
-      # camera_dist= 0.0,
-      # camera_pitch= 0,
-      # camera_height= 0.6,
-      # camera_smooth= False,
+      show_logo=False,
+      show_fps=False,
       show_interface= False,
       physics_world_step_size = 0.02, # this means the actual fps for the camera is 0.1s
-      vehicle_config = dict(image_source="rgb_camera", 
-                            rgb_camera="bridges/sensor_configs/test_camera_parameter.json",
-                            stack_size=1,
+      vehicle_config = dict(image_source="main_camera", 
                             show_navi_mark=False,
                             ),
       data_directory = AssetLoader.file_path("nuscenes", return_raw_style=False),
     )
 
     env = ScenarioEnv(config)
-    #rk = Ratekeeper(4, print_delay_threshold=None)
+    
     try:
 
       env.reset()
       print(HELP_MESSAGE)
       env.vehicle.expert_takeover = False
       while True:
-        o,_,_,_ = env.step([0,0])
-        image_data = o["image"].get()[..., -1]
+        o = env.step([0,0])
+        image_data = o[0]['image'][...,-1]
         #send via socket
         image_data = image_data.astype(np.uint8)
         # import cv2
@@ -80,8 +70,14 @@ class myBridge():
             print("ros_socket_server: error sending image")
         del image_data # explicit delete to free memory
 
-        lidar_data, objs = env.vehicle.lidar.perceive(env.vehicle)
-
+        lidar_data, objs = env.vehicle.lidar.perceive(
+          env.vehicle,
+          env.engine.physics_world.dynamic_world,
+          env.vehicle.config["lidar"]["num_lasers"],
+          env.vehicle.config["lidar"]["distance"],
+          height=1.0,
+        )
+        
         ego_x = env.vehicle.position[0]
         ego_y = env.vehicle.position[1]
         ego_theta = np.arctan2(env.vehicle.heading[1], env.vehicle.heading[0])
@@ -92,8 +88,14 @@ class myBridge():
           obj_x = obj.position[0]
           obj_y = obj.position[1]
           obj_theta = np.arctan2(obj.heading[1], obj.heading[0])
-          obj_data.append(obj_x-ego_x)
-          obj_data.append(obj_y-ego_y)
+
+          obj_x = obj_x-ego_x
+          obj_y = obj_y-ego_y
+          obj_x_new = np.cos(-ego_theta) * obj_x - np.sin(-ego_theta) * obj_y
+          obj_y_new = np.sin(-ego_theta) * obj_x + np.cos(-ego_theta) * obj_y
+
+          obj_data.append(obj_x_new)
+          obj_data.append(obj_y_new)
           obj_data.append(obj_theta-ego_theta)
           obj_data.append(obj.LENGTH)
           obj_data.append(obj.WIDTH)
@@ -108,14 +110,18 @@ class myBridge():
         del obj_data # explicit delete to free memory
       
         # convert lidar data to xyz
-        lidar_data = np.array(lidar_data) * env.vehicle.lidar.perceive_distance
-        point_x = lidar_data * np.cos(env.vehicle.lidar._lidar_range)
-        point_y = lidar_data * np.sin(env.vehicle.lidar._lidar_range)
-        point_z = np.ones(lidar_data.shape)*env.vehicle.lidar.height
+        lidar_data = np.array(lidar_data) * env.vehicle.config["lidar"]["distance"]
+        lidar_range = env.vehicle.lidar._get_lidar_range(
+           env.vehicle.config["lidar"]["num_lasers"], 
+           env.vehicle.lidar.start_phase_offset
+        )
+        point_x = lidar_data * np.cos(lidar_range)
+        point_y = lidar_data * np.sin(lidar_range)
+        point_z = np.ones(lidar_data.shape) # assume height = 1.0
         lidar_data = np.stack([point_x, point_y, point_z], axis=-1).astype(np.float32)
         dim_data = struct.pack('i', len(lidar_data))
         lidar_data = bytearray(lidar_data)
-        # concatenate the dimensions and image data into a single byte array
+        # concatenate the dimensions and lidar data into a single byte array
         lidar_data = dim_data + lidar_data
         try:
             self.lidar_socket.send(lidar_data, zmq.NOBLOCK)
@@ -136,7 +142,7 @@ class myBridge():
         
 def main():
   bridge = myBridge() 
-  bridge.game_runner()  
+  bridge.run()  
 
 if __name__ == "__main__":
   main()
