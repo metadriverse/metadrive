@@ -241,13 +241,18 @@ class AgentManager(BaseManager):
             policy = self.get_policy(self._agent_to_object[agent_id])
             is_replay = isinstance(policy, ReplayTrafficParticipantPolicy)
             assert policy is not None, "No policy is set for agent {}".format(agent_id)
-            if stage == "before_step" and is_replay:
-                action = [0, 0] if is_replay else action
-                step_infos[agent_id] = dict() if is_replay else policy.get_action_info()
-                step_infos[agent_id].update(self.get_agent(agent_id).before_step(action))
-            elif stage == "after_step" and is_replay:
-                action = policy.act(agent_id)
-                step_infos[agent_id] = policy.get_action_info()
+            if is_replay:
+                if stage == "after_step":
+                    policy.act(agent_id)
+                    step_infos[agent_id] = policy.get_action_info()
+                else:
+                    step_infos[agent_id] = self.get_agent(agent_id).before_step([0, 0])
+            else:
+                if stage == "before_step":
+                    action = policy.act(agent_id)
+                    step_infos[agent_id] = policy.get_action_info()
+                    step_infos[agent_id].update(self.get_agent(agent_id).before_step(action))
+
         return step_infos
 
     def before_step(self):
