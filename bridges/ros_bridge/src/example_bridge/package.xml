@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>example_bridge</name>
+  <name>metadrive_example_bridge</name>
   <version>0.0.0</version>
   <description>example ros2 bridge for metadrive</description>
   <maintainer email="zhizheng@cs.ucla.edu">Zhizheng Liu</maintainer>

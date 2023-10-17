@@ -21,7 +21,7 @@ source install/setup.bash
 # Terminal 1, launch socket server
 python bridges/utils/ros_socket_server.py 
 # Terminal 2, launch ROS publishers
-ros2 launch example_bridge example_bridge.launch.py
+ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py
 ```
 
 [Demo Video](https://www.youtube.com/watch?v=WWwdnURnOBM&list=TLGGdRGbC4RGzhAxNzEwMjAyMw)

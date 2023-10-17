@@ -1,7 +1,7 @@
 from setuptools import setup
 from glob import glob
 
-package_name = 'example_bridge'
+package_name = 'metadrive_example_bridge'
 
 setup(
     name=package_name,
@@ -22,9 +22,9 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            'camera_bridge = example_bridge.camera_bridge:main',
-            'lidar_bridge = example_bridge.lidar_bridge:main',
-            'obj_bridge = example_bridge.obj_bridge:main'
+            'camera_bridge = metadrive_example_bridge.camera_bridge:main',
+            'lidar_bridge = metadrive_example_bridge.lidar_bridge:main',
+            'obj_bridge = metadrive_example_bridge.obj_bridge:main'
         ],
     },
 )
