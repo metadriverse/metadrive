@@ -19,7 +19,7 @@ class ObjectPublisher(Node):
         self.socket = context.socket(zmq.PULL)
         self.socket.setsockopt(zmq.CONFLATE, 1)
         self.socket.set_hwm(5)
-        self.socket.connect("ipc:///tmp/obj") #configured in gamerunner.py
+        self.socket.connect("ipc:///tmp/obj")  # configured in gamerunner.py
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
 
@@ -36,11 +36,11 @@ class ObjectPublisher(Node):
             obj_info = obj_info.tolist()
             size = Vector3(x=obj_info[3], y=obj_info[4], z=obj_info[5])
             pos = Point(x=obj_info[0], y=obj_info[1], z=0.0)
-            rot = Quaternion(x=0.0, y=0.0, z=np.sin(obj_info[2]/2.0), w=np.cos(obj_info[2]/2.0))
+            rot = Quaternion(x=0.0, y=0.0, z=np.sin(obj_info[2] / 2.0), w=np.cos(obj_info[2] / 2.0))
             pose = Pose(position=pos, orientation=rot)
             bbox = BoundingBox3D(center=pose, size=size)
             bboxes.append(bbox)
-        obj_msg = BoundingBox3DArray(header = self.get_msg_header(), boxes = bboxes)
+        obj_msg = BoundingBox3DArray(header=self.get_msg_header(), boxes=bboxes)
         obj_msg.header = self.get_msg_header()
         self.publisher_.publish(obj_msg)
         self.i += 1
@@ -60,10 +60,6 @@ class ObjectPublisher(Node):
         time.nanosec = t[1]
         header.stamp = time
         return header
-
-
-    
-
 
 
 def main(args=None):

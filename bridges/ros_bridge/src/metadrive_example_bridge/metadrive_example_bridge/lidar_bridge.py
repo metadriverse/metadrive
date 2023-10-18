@@ -21,6 +21,7 @@ _DATATYPES[PointField.UINT32] = ('I', 4)
 _DATATYPES[PointField.FLOAT32] = ('f', 4)
 _DATATYPES[PointField.FLOAT64] = ('d', 8)
 
+
 class LidarPublisher(Node):
     def __init__(self):
         super().__init__('lidar_publisher')
@@ -30,7 +31,7 @@ class LidarPublisher(Node):
         self.socket = context.socket(zmq.PULL)
         self.socket.setsockopt(zmq.CONFLATE, 1)
         self.socket.set_hwm(5)
-        self.socket.connect("ipc:///tmp/lidar") #configured in gamerunner.py
+        self.socket.connect("ipc:///tmp/lidar")  # configured in gamerunner.py
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.i = 0
 
@@ -39,7 +40,7 @@ class LidarPublisher(Node):
 
         offset = 0
         for field in (f for f in sorted(fields, key=lambda f: f.offset)
-                    if field_names is None or f.name in field_names):
+                      if field_names is None or f.name in field_names):
             if offset < field.offset:
                 fmt += 'x' * (field.offset - offset)
                 offset = field.offset
@@ -78,14 +79,14 @@ class LidarPublisher(Node):
             offset += point_step
 
         point_cloud_msg = PointCloud2(header=header,
-                       height=1,
-                       width=len(lidar),
-                       is_dense=False,
-                       is_bigendian=False,
-                       fields=fields,
-                       point_step=cloud_struct.size,
-                       row_step=cloud_struct.size * len(lidar),
-                       data=buff.raw)
+                                      height=1,
+                                      width=len(lidar),
+                                      is_dense=False,
+                                      is_bigendian=False,
+                                      fields=fields,
+                                      point_step=cloud_struct.size,
+                                      row_step=cloud_struct.size * len(lidar),
+                                      data=buff.raw)
         self.publisher_.publish(point_cloud_msg)
         self.i += 1
 
@@ -104,10 +105,6 @@ class LidarPublisher(Node):
         time.nanosec = t[1]
         header.stamp = time
         return header
-
-
-    
-
 
 
 def main(args=None):
