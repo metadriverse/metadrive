@@ -4,7 +4,7 @@ import progressbar
 import shutil
 import urllib.request
 import zipfile
-from filelock import Filelock
+import filelock
 
 from metadrive.constants import VERSION
 from metadrive.engine.logger import get_logger
@@ -62,7 +62,7 @@ def pull_asset(update):
     urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
 
     # Extract the zip file to the desired location
-    lock = FileLock(zip_lock)
+    lock = filelock.FileLock(zip_lock)
     with lock:
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(TARGET_DIR)
