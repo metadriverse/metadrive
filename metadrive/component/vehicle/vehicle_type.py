@@ -314,6 +314,7 @@ def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
         elif length <= 5.5:
             type_count[1] += 1
             vs = [LVehicle, MVehicle, SVehicle]
+            # vs = [SVehicle, LVehicle, MVehicle]
             if need_default_vehicle:
                 vs.append(TrafficDefaultVehicle)
             return vs[type_count[1] % len(vs)]

@@ -8,7 +8,7 @@ from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.utils.math import get_boxes_bounding_box
 from metadrive.utils.pg.utils import get_lanes_bounding_box
 
-lane_info = namedtuple("neighbor_lanes", "lane entry_lanes exit_lanes left_lanes right_lanes")
+lane_info = namedtuple("edge_lane", ["lane", "entry_lanes", "exit_lanes", "left_lanes", "right_lanes"])
 
 
 class EdgeRoadNetwork(BaseRoadNetwork):

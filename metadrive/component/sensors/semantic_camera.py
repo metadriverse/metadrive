@@ -22,6 +22,7 @@ class SemanticCamera(BaseCamera):
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
+        # The framebuffer can not be 3 channel like RGB Camera...
         super(SemanticCamera, self).__init__(engine, False, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
@@ -66,7 +67,7 @@ class SemanticCamera(BaseCamera):
             self.GROUND.generate()
 
     def track(self, base_object):
-        if self.VIEW_GROUND:
+        if self.VIEW_GROUND and base_object is not None:
             pos = base_object.origin.getPos()
             self.GROUND_MODEL.setPos(pos[0], pos[1], self.GROUND_HEIGHT)
             self.GROUND_MODEL.setH(base_object.origin.getH())
