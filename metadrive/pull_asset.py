@@ -1,10 +1,10 @@
 import argparse
 import os
+import progressbar
 import shutil
 import urllib.request
 import zipfile
-
-import progressbar
+from filelock import Filelock
 
 from metadrive.constants import VERSION
 from metadrive.engine.logger import get_logger
@@ -55,17 +55,21 @@ def pull_asset(update):
                 return
 
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
+    zip_lock = os.path.join(TARGET_DIR, 'assets.zip.lock')
 
     # Fetch the zip file
     logger.info("Pull assets from {}".format(ASSET_URL))
     urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
 
     # Extract the zip file to the desired location
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(TARGET_DIR)
+    lock = FileLock(zip_lock)
+    with lock:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(TARGET_DIR)
 
     # Remove the downloaded zip file (optional)
-    os.remove(zip_path)
+    if os.path.exists(zip_path):
+        os.remove(zip_path)
     logger.info("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
 
 
