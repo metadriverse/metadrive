@@ -12,7 +12,10 @@ below:
 # update dependencies
 pip install -e .[ros] 
 cd bridges/ros_bridge
+# You may need to run the following code, if you are installing ros2 for the first time
+sudo rosdep init
 rosdep update
+# install src for metadrive-ros bridge
 rosdep install --from-paths src --ignore-src -y
 # install
 colcon build
