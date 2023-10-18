@@ -20,6 +20,7 @@ if __name__ == "__main__":
             "use_render": True,
             "image_observation": True,
             "rgb_clip": True,
+            "show_interface": False,
             "agent_policy": ReplayEgoCarPolicy,
             "interface_panel": ["semantic_camera"],
             "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
