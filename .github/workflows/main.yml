@@ -161,7 +161,7 @@ jobs:
         with:
           python-version: 3.8
       - name: checkout code
-          uses: actions/checkout@v2
+        uses: actions/checkout@v2
       - name: Blackbox tests
         run: |
           pip install pyzmq
