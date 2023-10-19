@@ -26,8 +26,8 @@ def is_win():
     return sys.platform == "win32"
 
 
-assert sys.version_info.major == 3 and sys.version_info.minor >= 6 and sys.version_info.minor < 12, \
-    "python version >= 3.6, <3.12 is required"
+assert sys.version_info.major == 3 and sys.version_info.minor >= 6, \
+    "python version >= 3.6 is required"
 
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
