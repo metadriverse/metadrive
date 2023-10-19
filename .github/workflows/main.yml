@@ -148,7 +148,7 @@ jobs:
           pytest --nbmake -n=auto ./tests/test_ipynb/
 
   test_ros:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Set up ROS2 humble
         uses: ros-tooling/setup-ros@v0.7
@@ -161,10 +161,6 @@ jobs:
       - name: Blackbox tests
         run: |
           pip install pyzmq
-          ls -al
-          pip install -e .
-          python -m metadrive.pull_asset
-    
           sudo rosdep init
           sudo rosdep update
           cd bridges/ros_bridge
