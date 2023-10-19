@@ -22,8 +22,34 @@ jobs:
         run: |
           pip install "yapf==0.30.0"
           bash format.sh --test
-          pip install "pydocstyle==6.3.0"
-          python3 -m pydocstyle --convention=google metadrive/
+
+  code_docstring:
+    runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python 3.9
+          uses: actions/setup-python@v2
+          with:
+            python-version: 3.9
+        - name: Install software
+          run: |
+            sudo apt update && sudo apt install -y bc
+            pip install "docstr-coverage==2.3.0"
+        - name: Check docstring coverage after
+          run: 
+            after=$(docstr-coverage --percentage-only metadrive/)
+        - name: Checkout the main branch
+          run: git checkout main
+        - name: Check docstring coverage before
+          run: 
+            before=$(docstr-coverage --percentage-only metadrive/)
+        - name: check if docstring coverage has improved
+          run:
+            if (( $(echo "$after > $before" |bc -l) )); then
+              exit 0
+            fi
+            exit 1
+
 
   test_functionality:
     runs-on: ubuntu-latest
