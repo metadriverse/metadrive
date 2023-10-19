@@ -59,7 +59,8 @@ install_requires = [
     "scipy",
     "psutil",
     "geopandas",
-    "shapely"
+    "shapely",
+    "filelock"
 ]
 
 nuplan_requirement = [

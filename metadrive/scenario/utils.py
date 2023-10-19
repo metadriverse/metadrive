@@ -5,7 +5,6 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
-
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
 from metadrive.component.traffic_participants.cyclist import Cyclist
@@ -323,6 +322,14 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
 
 
 def read_scenario_data(file_path):
+    """Read a scenario pkl file and return the Scenario Description instance.
+
+    Args:
+        file_path: the path to a scenario file (usually ends with `.pkl`).
+
+    Returns:
+        The Scenario Description instance of that scenario.
+    """
     assert SD.is_scenario_file(file_path), "File: {} is not scenario file".format(file_path)
     with open(file_path, "rb") as f:
         # unpickler = CustomUnpickler(f)
@@ -333,11 +340,21 @@ def read_scenario_data(file_path):
 
 def read_dataset_summary(file_folder, check_file_existence=True):
     """
-    We now support two methods to load pickle files.
+    Read the `dataset_summary.pkl` and return the metadata of each scenario in this dataset.
 
-    The first is the old method where we store pickle files in 0.pkl, 1.pkl, ...
+    This function supports two methods to load pickle files. The first is the old method where we store pickle files in
+    0.pkl, 1.pkl, .... The second is the new method which use a summary file to record important metadata of
+    each scenario.
 
-    The second is the new method which use a summary file to record important metadata of each scenario.
+    Args:
+        file_folder: the path to the root folder of your dataset.
+        check_file_existence: check if all scenarios registered in the summary file exist.
+
+    Returns:
+        A tuple of three elements:
+        1) the summary dict mapping from scenario ID to its metadata,
+        2) the list of all scenarios IDs, and
+        3) a dict mapping from scenario IDs to the folder that hosts their files.
     """
     summary_file = os.path.join(file_folder, SD.DATASET.SUMMARY_FILE)
     mapping_file = os.path.join(file_folder, SD.DATASET.MAPPING_FILE)
