@@ -153,9 +153,9 @@ jobs:
       image: ubuntu:jammy
     steps:
       - name: Set up ROS2 humble
-        - uses: ros-tooling/setup-ros@v0.7
-          with:
-            required-ros-distributions: humble
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
