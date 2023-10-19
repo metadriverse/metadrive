@@ -169,7 +169,6 @@ jobs:
           ls -al
           pip install -e .
           python -m metadrive.pull_asset
-          sudo rosdep init
           sudo rosdep update
           cd bridges/ros_bridge
           rosdep install --from-paths src --ignore-src -y
