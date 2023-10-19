@@ -14,6 +14,7 @@ pip install -e .[ros]
 cd bridges/ros_bridge
 # You may need to run the following code, if you are installing ros2 for the first time
 sudo rosdep init
+source /opt/ros/${ROS_DISTRO}/setup.bash
 rosdep update
 # install src for metadrive-ros bridge
 rosdep install --from-paths src --ignore-src -y
@@ -29,6 +30,8 @@ source install/setup.bash
 python bridges/utils/ros_socket_server.py 
 # Terminal 2, launch ROS publishers
 ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py
+# if ros2 can not be found, run
+source /opt/ros/${ROS_DISTRO}/setup.bash
 ```
 
 [Demo Video](https://www.youtube.com/watch?v=WWwdnURnOBM&list=TLGGdRGbC4RGzhAxNzEwMjAyMw)
