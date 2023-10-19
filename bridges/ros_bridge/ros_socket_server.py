@@ -10,9 +10,8 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 
 
-class myBridge():
+class RosSocketServer():
     def __init__(self):
-        # self.params.remove("CalibrationParams")
         self.context = zmq.Context().instance()
         self.context.setsockopt(zmq.IO_THREADS, 2)
         self.img_socket = self.context.socket(zmq.PUSH)
@@ -40,10 +39,11 @@ class myBridge():
             show_logo=False,
             show_fps=False,
             show_interface=False,
-            physics_world_step_size=0.02,  # this means the actual fps for the camera is 0.1s
-            vehicle_config=dict(image_source="main_camera",
-                                show_navi_mark=False,
-                                ),
+            physics_world_step_size=0.02,
+            vehicle_config=dict(
+                image_source="main_camera",
+                show_navi_mark=False,
+            ),
             data_directory=AssetLoader.file_path("nuscenes", return_raw_style=False),
         )
 
@@ -63,9 +63,6 @@ class myBridge():
                     image_data = o[0]['image'][..., -1]
                 # send via socket
                 image_data = image_data.astype(np.uint8)
-                # import cv2
-                # cv2.imshow("window", data)
-                # cv2.waitKey(1)
                 dim_data = struct.pack('ii', image_data.shape[1], image_data.shape[0])
                 image_data = bytearray(image_data)
                 # concatenate the dimensions and image data into a single byte array
@@ -126,8 +123,7 @@ class myBridge():
                 # convert lidar data to xyz
                 lidar_data = np.array(lidar_data) * env.vehicle.config["lidar"]["distance"]
                 lidar_range = env.vehicle.lidar._get_lidar_range(
-                    env.vehicle.config["lidar"]["num_lasers"],
-                    env.vehicle.lidar.start_phase_offset
+                    env.vehicle.config["lidar"]["num_lasers"], env.vehicle.lidar.start_phase_offset
                 )
                 point_x = lidar_data * np.cos(lidar_range)
                 point_y = lidar_data * np.sin(lidar_range)
@@ -159,9 +155,9 @@ class myBridge():
             env.close()
 
 
-def main(test):
-    bridge = myBridge()
-    bridge.run(test)
+def main():
+    server = RosSocketServer()
+    server.run()
 
 
 if __name__ == "__main__":
