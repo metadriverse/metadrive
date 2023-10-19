@@ -165,6 +165,7 @@ jobs:
       - name: Blackbox tests
         run: |
           pip install pyzmq
+          pip install gymnasium==0.28
           ls -al
           pip install -e .
           python -m metadrive.pull_asset
