@@ -161,6 +161,7 @@ jobs:
       - name: Blackbox tests
         run: |
           pip install pyzmq
+          ls -al
           pip install -e .
           python -m metadrive.pull_asset
     
