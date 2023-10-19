@@ -10,15 +10,16 @@ below:
 
 ```bash
 # update dependencies
-pip install -e .[ros] 
+pip install pyzmq # this should be installed with system python interpreter
 cd bridges/ros_bridge
-# You may need to run the following code, if you are installing ros2 for the first time
-sudo rosdep init
-source /opt/ros/${ROS_DISTRO}/setup.bash
-rosdep update
-# install src for metadrive-ros bridge
-rosdep install --from-paths src --ignore-src -y
+
 # install
+sudo rosdep init # You may need to run init, if you are installing ros2 for the first time
+source /opt/ros/${ROS_DISTRO}/setup.bash # ${ROS_DISTRO} is something like foxy, iron 
+rosdep update
+rosdep install --from-paths src --ignore-src -y
+
+# build
 colcon build
 source install/setup.bash
 ```
@@ -26,12 +27,16 @@ source install/setup.bash
 ## Usage
 
 ```bash
-# Terminal 1, launch socket server
-python bridges/utils/ros_socket_server.py 
-# Terminal 2, launch ROS publishers
+# Terminal 1, launch ROS publishers
 ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py
-# if ros2 can not be found, run
-source /opt/ros/${ROS_DISTRO}/setup.bash
+# Terminal 2, launch socket server
+python bridges/utils/ros_socket_server.py 
+
 ```
 
 [Demo Video](https://www.youtube.com/watch?v=WWwdnURnOBM&list=TLGGdRGbC4RGzhAxNzEwMjAyMw)
+
+
+## Known Issues
+If you are using the `conda`, it is very likely that the interpreter will not match the system interpreter 
+and will be incompatible with ROS 2 binaries. 
