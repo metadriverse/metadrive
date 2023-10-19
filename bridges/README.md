@@ -5,17 +5,18 @@ images, LiDAR point clouds, and object 3D bounding boxes.
 
 ## Installation
 
-To install the bridge, first [install ROS2](https://docs.ros.org/en/humble/Installation.html) and follow the scripts
+To install the bridge, first [install ROS2 **humble**](https://docs.ros.org/en/humble/Installation.html) and follow the scripts
 below:
 
 ```bash
-# update dependencies
-pip install pyzmq # this should be installed with system python interpreter
 cd bridges/ros_bridge
 
-# install
-sudo rosdep init # You may need to run init, if you are installing ros2 for the first time
-source /opt/ros/${ROS_DISTRO}/setup.bash # ${ROS_DISTRO} is something like foxy, iron 
+# activate env, ${ROS_DISTRO} is something like foxy, iron, humble
+source /opt/ros/${ROS_DISTRO}/setup.bash
+# You may need to run init, if you are installing ros2 for the first time
+sudo rosdep init 
+# zmq should be installed with system python interpreter
+pip install pyzmq  
 rosdep update
 rosdep install --from-paths src --ignore-src -y
 

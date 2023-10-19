@@ -1,4 +1,5 @@
 # launch sockets to send sensor readings to ROS
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 import struct
 
 import numpy as np
@@ -33,7 +34,8 @@ class myBridge():
             num_scenarios=1,
             horizon=1000,
             image_observation=True,
-            manual_control=True,
+            manual_control=False,
+            agent_policy=ReplayEgoCarPolicy,
             rgb_clip=False,
             show_logo=False,
             show_fps=False,
