@@ -22,6 +22,8 @@ jobs:
         run: |
           pip install "yapf==0.30.0"
           bash format.sh --test
+          pip install "pydocstyle==6.3.0"
+          python3 -m pydocstyle --convention=google metadrive/
 
   test_functionality:
     runs-on: ubuntu-latest
