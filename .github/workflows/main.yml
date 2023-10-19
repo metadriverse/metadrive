@@ -149,8 +149,8 @@ jobs:
 
   test_ros:
     runs-on: ubuntu-22.04
-    container:
-      image: ubuntu:jammy
+#    container:
+#      image: ubuntu:jammy
     steps:
       - name: Set up ROS2 humble
         uses: ros-tooling/setup-ros@v0.7
