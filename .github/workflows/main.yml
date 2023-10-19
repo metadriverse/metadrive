@@ -152,15 +152,19 @@ jobs:
     container:
       image: ubuntu:jammy
     steps:
-      - uses: ros-tooling/setup-ros@v0.7
+      - name: Set up ROS2 humble
+        - uses: ros-tooling/setup-ros@v0.7
+          with:
+            required-ros-distributions: humble
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
         with:
-          required-ros-distributions: humble
+          python-version: 3.8
       - name: Blackbox tests
         run: |
           pip install pyzmq
+          pip install -e .
           python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
     
           sudo rosdep init
           sudo rosdep update
