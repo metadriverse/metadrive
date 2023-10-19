@@ -31,7 +31,7 @@ source install/setup.bash
 # Terminal 1, launch ROS publishers
 ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py
 # Terminal 2, launch socket server
-python bridges/utils/ros_socket_server.py 
+python ros_socket_server.py 
 
 ```
 

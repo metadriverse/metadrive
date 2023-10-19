@@ -1,7 +1,7 @@
 # launch sockets to send sensor readings to ROS
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 import struct
-
+import argparse
 import numpy as np
 import zmq
 
@@ -28,12 +28,12 @@ class myBridge():
         self.obj_socket.bind("ipc:///tmp/obj")
         self.obj_socket.set_hwm(5)
 
-    def run(self):
+    def run(self, test=False):
         config = dict(
-            use_render=True,  # need this on to get the camera
+            use_render=True if not test else False,  # need this on to get the camera
             num_scenarios=1,
             horizon=1000,
-            image_observation=True,
+            image_observation=True if not test else False,
             manual_control=False,
             agent_policy=ReplayEgoCarPolicy,
             rgb_clip=False,
@@ -56,7 +56,11 @@ class myBridge():
             env.vehicle.expert_takeover = False
             while True:
                 o = env.step([0, 0])
-                image_data = o[0]['image'][..., -1]
+                if test:
+                    image_data = np.zeros((512, 512, 3))  # fake data for testing
+                    image_data[::16, :, :] = 255
+                else:
+                    image_data = o[0]['image'][..., -1]
                 # send via socket
                 image_data = image_data.astype(np.uint8)
                 # import cv2
@@ -69,7 +73,11 @@ class myBridge():
                 try:
                     self.img_socket.send(image_data, zmq.NOBLOCK)
                 except zmq.error.Again:
-                    print("ros_socket_server: error sending image")
+                    msg = "ros_socket_server: error sending image"
+                    if test:
+                        raise ValueError(msg)
+                    else:
+                        print(msg)
                 del image_data  # explicit delete to free memory
 
                 lidar_data, objs = env.vehicle.lidar.perceive(
@@ -108,7 +116,11 @@ class myBridge():
                 try:
                     self.obj_socket.send(obj_data, zmq.NOBLOCK)
                 except zmq.error.Again:
-                    print("ros_socket_server: error sending objs")
+                    msg = "ros_socket_server: error sending objs"
+                    if test:
+                        raise ValueError(msg)
+                    else:
+                        print(msg)
                 del obj_data  # explicit delete to free memory
 
                 # convert lidar data to xyz
@@ -128,11 +140,15 @@ class myBridge():
                 try:
                     self.lidar_socket.send(lidar_data, zmq.NOBLOCK)
                 except zmq.error.Again:
-                    print("ros_socket_server: error sending lidar")
+                    msg = "ros_socket_server: error sending lidar"
+                    if test:
+                        raise ValueError(msg)
+                    else:
+                        print(msg)
                 del lidar_data  # explicit delete to free memory
 
-
-
+                if o[2]:  # done
+                    break
 
         except Exception as e:
             import traceback
@@ -143,10 +159,13 @@ class myBridge():
             env.close()
 
 
-def main():
+def main(test):
     bridge = myBridge()
-    bridge.run()
+    bridge.run(test)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test", action="store_true")
+    args = parser.parse_args()
+    main(args.test)

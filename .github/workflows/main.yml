@@ -147,6 +147,31 @@ jobs:
           cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/test_ipynb/
           pytest --nbmake -n=auto ./tests/test_ipynb/
 
+  test_ros:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:jammy
+    steps:
+      - uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+        run: |
+          source /opt/ros/humble/setup.bash
+          pip install pyzmq
+          python -m metadrive.pull_asset
+          pip install pytest
+          pip install pytest-cov
+    
+          sudo rosdep init
+          sudo rosdep update
+          cd bridges/ros_bridge
+          rosdep install --from-paths src --ignore-src -y
+          colcon build
+          source install/setup.bash
+          nohup ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py > ros.txt 2>&1 &
+          
+          python ros_socket_server.py --test
+
 #      - name: Upload coverage to Codecov
 #        uses: codecov/codecov-action@v1
 #        with:
