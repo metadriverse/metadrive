@@ -157,7 +157,6 @@ jobs:
           required-ros-distributions: humble
       - name: Blackbox tests
         run: |
-#          source /opt/ros/humble/setup.bash
           pip install pyzmq
           python -m metadrive.pull_asset
           pip install pytest
