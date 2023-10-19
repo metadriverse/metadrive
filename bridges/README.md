@@ -12,6 +12,7 @@ below:
 # update dependencies
 pip install -e .[ros] 
 cd bridges/ros_bridge
+source /opt/ros/${ROS_DISTRO}/setup.bash
 rosdep update
 rosdep install --from-paths src --ignore-src -y
 # install
