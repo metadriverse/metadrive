@@ -149,6 +149,8 @@ jobs:
 
   test_ros:
     runs-on: ubuntu-22.04
+    container:
+      image: ubuntu:jammy
     steps:
       - name: Set up ROS2 humble
         uses: ros-tooling/setup-ros@v0.7
@@ -158,9 +160,14 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+      - name: checkout code
+          uses: actions/checkout@v2
       - name: Blackbox tests
         run: |
           pip install pyzmq
+          ls -al
+          pip install -e .
+          python -m metadrive.pull_asset
           sudo rosdep init
           sudo rosdep update
           cd bridges/ros_bridge
