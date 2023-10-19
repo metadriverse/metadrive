@@ -1,15 +1,14 @@
-import sys
 import ctypes
-
-import rclpy
-from rclpy.node import Node
-import zmq
 import struct
-import numpy as np
+import sys
 
+import numpy as np
+import rclpy
+import zmq
+from builtin_interfaces.msg import Time
+from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2, PointField
 from std_msgs.msg import Header
-from builtin_interfaces.msg import Time
 
 _DATATYPES = {}
 _DATATYPES[PointField.INT8] = ('b', 1)
@@ -23,6 +22,7 @@ _DATATYPES[PointField.FLOAT64] = ('d', 8)
 
 
 class LidarPublisher(Node):
+
     def __init__(self):
         super().__init__('lidar_publisher')
         self.publisher_ = self.create_publisher(PointCloud2, 'metadrive/lidar', qos_profile=10)
@@ -78,15 +78,17 @@ class LidarPublisher(Node):
             pack_into(buff, offset, *p)
             offset += point_step
 
-        point_cloud_msg = PointCloud2(header=header,
-                                      height=1,
-                                      width=len(lidar),
-                                      is_dense=False,
-                                      is_bigendian=False,
-                                      fields=fields,
-                                      point_step=cloud_struct.size,
-                                      row_step=cloud_struct.size * len(lidar),
-                                      data=buff.raw)
+        point_cloud_msg = PointCloud2(
+            header=header,
+            height=1,
+            width=len(lidar),
+            is_dense=False,
+            is_bigendian=False,
+            fields=fields,
+            point_step=cloud_struct.size,
+            row_step=cloud_struct.size * len(lidar),
+            data=buff.raw
+        )
         self.publisher_.publish(point_cloud_msg)
         self.i += 1
 

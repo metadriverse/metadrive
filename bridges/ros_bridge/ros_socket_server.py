@@ -1,16 +1,18 @@
 # launch sockets to send sensor readings to ROS
-from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-import struct
 import argparse
+import struct
+
 import numpy as np
 import zmq
 
 from metadrive.constants import HELP_MESSAGE
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
 class RosSocketServer():
+
     def __init__(self):
         self.context = zmq.Context().instance()
         self.context.setsockopt(zmq.IO_THREADS, 2)
