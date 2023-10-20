@@ -7,12 +7,13 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.examples import expert, get_terminal_state
 
 
-def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True):
+def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True, render_topdown=False):
     s = time.time()
     np.random.seed(0)
     env_config["random_spawn_lane_index"] = False
     env = MetaDriveEnv(env_config)
     lane_idx_need_to_stay = 0
+    frames = []
     try:
         obs, _ = env.reset()
         lidar_success = False
@@ -25,6 +26,8 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
             # double check lidar
             if env.config["use_render"]:
                 env.render(text={"lane_index": env.vehicle.lane_index, "step": env.episode_step})
+            if render_topdown:
+                frames.append(env.render(mode="topdown"))
             lidar = [True if p == 1.0 else False for p in env.observations[DEFAULT_AGENT].cloud_points]
             if not all(lidar):
                 lidar_success = True
@@ -53,11 +56,11 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
         # )
     finally:
         env.close()
-    return ep_reward_mean, success_rate
+    return ep_reward_mean, success_rate, frames
 
 
 def test_expert_with_traffic(use_render=False):
-    ep_reward, success_rate = _evaluate(
+    ep_reward, success_rate, _ = _evaluate(
         dict(
             num_scenarios=1,
             map="CCC",
@@ -78,7 +81,7 @@ def test_expert_with_traffic(use_render=False):
 
 
 def test_expert_without_traffic(render=False):
-    ep_reward, success_rate = _evaluate(
+    ep_reward, success_rate, _ = _evaluate(
         dict(
             num_scenarios=1,
             random_agent_model=False,
@@ -100,7 +103,7 @@ def test_expert_without_traffic(render=False):
 
 
 def test_expert_in_intersection(render=False):
-    ep_reward, success_rate = _evaluate(
+    ep_reward, success_rate, _ = _evaluate(
         dict(
             num_scenarios=1,
             random_agent_model=False,
@@ -120,11 +123,31 @@ def test_expert_in_intersection(render=False):
 
     assert ep_reward > 400, ep_reward
 
+def test_tmp_MetaDriveTutHardv0(render=False):
+    ep_reward, success_rate, _ = _evaluate(
+        dict(
+            map="CCC",
+            start_seed=0,
+            num_scenarios=10,
+            # discrete_action=True,
+            # discrete_steering_dim=5,
+            # discrete_throttle_dim=5
+        ),
+        num_episode=10,
+        # has_traffic=False
+    )
+    print(ep_reward, success_rate)
+    # We change the ego vehicle dynamics! So the expert is not reliable anymore!
+    # assert success_rate == 1.0, success_rate
+
+    # assert 300 <= ep_reward <= 350, ep_reward
+
 
 if __name__ == '__main__':
     """
     LQY: I fixed a action bug in StateObservation, which may harm expert performance!
     """
     # test_expert_in_intersection(True)
-    test_expert_without_traffic(True)
+    # test_expert_without_traffic(True)
     # test_expert_with_traffic(use_render=True)
+    test_tmp_MetaDriveTutHardv0()
