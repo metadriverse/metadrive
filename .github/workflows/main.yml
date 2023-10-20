@@ -234,7 +234,7 @@ jobs:
           
           cd bridges/ros_bridge
           ls -al
-          sudo rosdep install --from-paths src --ignore-src -y
+          sudo rosdep install --from-paths src --ignore-src -y --rosdistro humble
           pwd
           colcon build
           source install/setup.bash
