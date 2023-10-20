@@ -157,9 +157,9 @@ class RosSocketServer():
             env.close()
 
 
-def main():
+def main(test=False):
     server = RosSocketServer()
-    server.run()
+    server.run(test)
 
 
 if __name__ == "__main__":
