@@ -24,6 +24,7 @@ jobs:
           bash format.sh --test
 
   code_docstring:
+    if: github.event_name != 'pull_request' || github.head_ref != 'main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

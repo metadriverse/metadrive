@@ -1,5 +1,5 @@
 """
-Only for github CI using!
+Only for github CI using! The visualization tool is not available on github server, remove it.
 """
 import os
 
