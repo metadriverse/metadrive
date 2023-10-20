@@ -234,13 +234,14 @@ jobs:
           
           cd bridges/ros_bridge
           ls -al
+          python _delete_rviz_line.py
           sudo rosdep install --from-paths src --ignore-src -y --rosdistro humble
           pwd
           colcon build
           source install/setup.bash
-          nohup ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py > ros.txt 2>&1 &
+          ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py
           
-          python ros_socket_server.py --test
+#          python ros_socket_server.py --test
 
 #      - name: Upload coverage to Codecov
 #        uses: codecov/codecov-action@v1
