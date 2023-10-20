@@ -38,6 +38,7 @@ jobs:
       - name: Check docstring coverage after
         run: |
           after=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
+          echo "after=$after" >> "$GITHUB_ENV"
       - name: Checkout the main branch
         uses: actions/checkout@v4
         with:
@@ -45,9 +46,10 @@ jobs:
       - name: Check docstring coverage before
         run: |
           before=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
+          echo "before=$before" >> "$GITHUB_ENV"
       - name: check if docstring coverage has improved
         run: |
-          printf 'Docstring coverage before pull request: %s\n' "$after"
+          printf 'Docstring coverage before pull request: %s\n' "$before"
           printf 'Docstring coverage after pull request: %s\n' "$after"
           if (( $(echo "$after > $before" |bc -l) )); then
             exit 0
