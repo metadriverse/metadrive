@@ -168,8 +168,10 @@ jobs:
           ls -al
           pwd
           source /opt/ros/humble/setup.bash
-          sudo rosdep init
+          
           sudo rosdep update
+          
+          pwd
           
           pip install pyzmq
           pip install gymnasium==0.28
@@ -178,7 +180,9 @@ jobs:
           python -m metadrive.pull_asset
           
           cd bridges/ros_bridge
+          ls -al
           rosdep install --from-paths src --ignore-src -y
+          pwd
           colcon build
           source install/setup.bash
           nohup ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py > ros.txt 2>&1 &
