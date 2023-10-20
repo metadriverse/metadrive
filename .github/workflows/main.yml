@@ -59,7 +59,7 @@ jobs:
           printf 'Docstring coverage check successful! We require the docstring coverage to be non-decreasing after PR. You have changed the coverage by: %s%%\n' "$improvement"
           roundedbefore=`printf "%.2f" $before`
           roundedafter=`printf "%.2f" $after`
-          roundedimprovement=`printf "%.3f" improvement`
+          roundedimprovement=`printf "%.3f" $improvement`
           ROBOTMSG="[BOT] Great job! You have changed the docstring coverage from ${roundedbefore}\% to ${roundedafter}\%, improving ${roundedimprovement}\%."
           echo $ROBOTMSG
           echo "ROBOTMSG=$ROBOTMSG" >> "$GITHUB_ENV"
