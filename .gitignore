@@ -39,3 +39,8 @@
 **/test_read_copy_waymo
 /metadrive/tests/vis_functionality/*.png
 **/assets/
+
+/bridges/ros_bridge/build
+/bridges/ros_bridge/install
+/bridges/ros_bridge/log
+
