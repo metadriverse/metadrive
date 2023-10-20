@@ -37,12 +37,14 @@ jobs:
           pip install "docstr-coverage==2.3.0"
       - name: Check docstring coverage after
         run: |
-          after=$(docstr-coverage --percentage-only metadrive/)
+          after=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
+          printf 'Docstring coverage after pull request: %s\n' "$after"
       - name: Checkout the main branch
         run: git checkout main
       - name: Check docstring coverage before
         run: |
-          before=$(docstr-coverage --percentage-only metadrive/)
+          before=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
+          printf 'Docstring coverage before pull request: %s\n' "$after"
       - name: check if docstring coverage has improved
         run: |
           if (( $(echo "$after > $before" |bc -l) )); then
