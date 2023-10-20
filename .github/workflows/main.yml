@@ -209,10 +209,6 @@ jobs:
         uses: ros-tooling/setup-ros@v0.7
         with:
           required-ros-distributions: humble
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
       - name: checkout code
         uses: actions/checkout@v2
       - name: Blackbox tests
@@ -239,8 +235,9 @@ jobs:
           pwd
           colcon build
           source install/setup.bash
+          pip install pyzmq
           ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py
-          
+
 #          python ros_socket_server.py --test
 
 #      - name: Upload coverage to Codecov
