@@ -35,7 +35,7 @@ jobs:
         run: |
           sudo apt update && sudo apt install -y bc
           pip install "docstr-coverage==2.3.0"
-      - name: Check docstring coverage after
+      - name: Get post-PR docstring coverage
         run: |
           after=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
           echo "after=$after" >> "$GITHUB_ENV"
@@ -43,21 +43,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: Check docstring coverage before
+      - name: Get pre-PR docstring coverage
         run: |
           before=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
           echo "before=$before" >> "$GITHUB_ENV"
-      - name: check if docstring coverage has improved
+      - name: Check if docstring coverage decreases
         run: |
           printf 'Docstring coverage before pull request: %s%%\n' "$before"
           printf 'Docstring coverage after pull request: %s%%\n' "$after"
           improvement=$(echo "$after - $before" | bc -l)
-          if (( $(echo "$after > $before" |bc -l) )); then
-            printf 'Docstring check successful! You have improved the coverage by: %s%%\n' "$improvement"
-            exit 0
+          if (( $(echo "$after < $before" |bc -l) )); then
+            printf 'Docstring coverage check failed! We require the docstring coverage to be non-decreasing after PR. You have decreased the coverage by: %s%%\n' "$improvement"
+            exit 1
           fi
-          printf 'Docstring check failed! You have only improved the coverage by: %s%%\n' "$improvement"
-          exit 1
+          printf 'Docstring coverage check successful! We require the docstring coverage to be non-decreasing after PR. You have changed the coverage by: %s%%\n' "$improvement"
+          exit 0
+
 
 
   test_functionality:
