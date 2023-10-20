@@ -164,6 +164,13 @@ jobs:
         uses: actions/checkout@v2
       - name: Blackbox tests
         run: |
+          
+          ls -al
+          pwd
+          source /opt/ros/humble/setup.bash
+          sudo rosdep init
+          sudo rosdep update
+          
           pip install pyzmq
           pip install gymnasium==0.28
           ls -al
