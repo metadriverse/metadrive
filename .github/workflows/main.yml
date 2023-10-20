@@ -236,7 +236,8 @@ jobs:
           colcon build
           source install/setup.bash
           pip install pyzmq
-          ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py
+          nohup ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py > ros.txt 2>&1 &
+          python ros_socket_server.py --test
 
 #          python ros_socket_server.py --test
 
