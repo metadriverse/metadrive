@@ -51,9 +51,12 @@ jobs:
         run: |
           printf 'Docstring coverage before pull request: %s\n' "$before"
           printf 'Docstring coverage after pull request: %s\n' "$after"
+          improvement = $(echo "$after - $before" | bc -l)
           if (( $(echo "$after > $before" |bc -l) )); then
+            printf 'Docstring check successful! You have improved the coverage by: %s\n' "$improvement"
             exit 0
           fi
+          printf 'Docstring check failed! You have only improved the coverage by: %s\n' "$improvement"
           exit 1
 
 
