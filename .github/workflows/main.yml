@@ -23,6 +23,59 @@ jobs:
           pip install "yapf==0.30.0"
           bash format.sh --test
 
+  code_docstring:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install software
+        run: |
+          sudo apt update && sudo apt install -y bc
+          pip install "docstr-coverage==2.3.0"
+      - name: Get post-PR docstring coverage
+        run: |
+          after=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
+          echo "after=$after" >> "$GITHUB_ENV"
+      - name: Checkout the main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Get pre-PR docstring coverage
+        run: |
+          before=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
+          echo "before=$before" >> "$GITHUB_ENV"
+      - name: Check if docstring coverage decreases
+        run: |
+          printf 'Docstring coverage before pull request: %s%%\n' "$before"
+          printf 'Docstring coverage after pull request: %s%%\n' "$after"
+          improvement=$(echo "$after - $before" | bc -l)
+          if (( $(echo "$after < $before" |bc -l) )); then
+            printf 'Docstring coverage check failed! We require the docstring coverage to be non-decreasing after PR. You have decreased the coverage by: %s%%\n' "$improvement"
+            exit 1
+          fi
+          printf 'Docstring coverage check successful! We require the docstring coverage to be non-decreasing after PR. You have changed the coverage by: %s%%\n' "$improvement"
+          roundedbefore=`printf "%.2f" $before`
+          roundedafter=`printf "%.2f" $after`
+          roundedimprovement=`printf "%.3f" improvement`
+          ROBOTMSG="[BOT] Great job! You have changed the docstring coverage from ${roundedbefore}\% to ${roundedafter}\%, improving ${roundedimprovement}\%."
+          echo $ROBOTMSG
+          echo "ROBOTMSG=$ROBOTMSG" >> "$GITHUB_ENV"
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${{env.ROBOTMSG}}`
+            })
+
+
+
+
   test_functionality:
     runs-on: ubuntu-latest
     steps:
