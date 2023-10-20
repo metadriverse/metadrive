@@ -59,7 +59,7 @@ jobs:
           printf 'Docstring coverage check successful! We require the docstring coverage to be non-decreasing after PR. You have changed the coverage by: %s%%\n' "$improvement"
           ROBOTMSG="Docstring coverage check successful! You have changed the coverage from ${before} to ${after} by ${improvement}."
           echo $ROBOTMSG
-          echo "$ROBOTMSG=$ROBOTMSG" >> "$GITHUB_ENV"
+          echo "ROBOTMSG=$ROBOTMSG" >> "$GITHUB_ENV"
       - uses: actions/github-script@v6
         with:
           script: |
