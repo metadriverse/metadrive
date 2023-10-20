@@ -58,6 +58,7 @@ jobs:
           fi
           printf 'Docstring coverage check successful! We require the docstring coverage to be non-decreasing after PR. You have changed the coverage by: %s%%\n' "$improvement"
           message='Docstring coverage check successful! You have changed the coverage from ${before} to ${after} by ${improvement}.'
+          printf $message
       - uses: actions/github-script@v6
         with:
           script: |
