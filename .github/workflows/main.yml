@@ -170,9 +170,6 @@ jobs:
           pip install -e .
           python -m metadrive.pull_asset
           
-          sudo rosdep fix-permissions
-          rosdep init
-          rosdep update
           cd bridges/ros_bridge
           rosdep install --from-paths src --ignore-src -y
           colcon build
