@@ -53,7 +53,7 @@ class ImageObservation(ObservationBase):
         self.image_source = image_source
         super(ImageObservation, self).__init__(config)
         self.rgb_clip = clip_rgb
-        self.state = np.zeros(self.observation_space.shape, dtype=np.float32)
+        self.state = np.zeros(self.observation_space.shape, dtype=np.float32 if self.rgb_clip else np.uint8)
         if self.enable_cuda:
             self.state = cp.asarray(self.state)
 
