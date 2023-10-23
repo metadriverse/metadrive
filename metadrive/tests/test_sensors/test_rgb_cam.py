@@ -34,6 +34,7 @@ def test_rgb_cam(config, render=False):
         for i in range(1, 10):
             o, r, tm, tc, info = env.step([0, 1])
             assert env.observation_space.contains(o)
+            # Reverse
             assert o["image"].shape == (config["height"], config["width"], 3, config["stack_size"])
             if render:
                 cv2.imshow('img', o["image"][..., -1])
