@@ -3,7 +3,7 @@ from direct.filter.FilterManager import FilterManager
 import panda3d.core as p3d
 from simplepbr import _load_shader_str
 from typing import Union, List
-
+from panda3d.core import FrameBufferProperties
 import numpy as np
 from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage, Shader, RenderState, ShaderAttrib
 
@@ -22,16 +22,18 @@ class ImageBuffer:
     display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
     line_borders = []
 
+    frame_buffer_rgb_bits = (8, 8, 8, 0)
+
     def __init__(
-        self,
-        width: float,
-        height: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        setup_pbr=False,
-        engine=None
+            self,
+            width: float,
+            height: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            setup_pbr=False,
+            engine=None
     ):
         self.logger = get_logger()
         self._node_path_list = []
@@ -54,10 +56,9 @@ class ImageBuffer:
 
         # self.texture = Texture()
         if frame_buffer_property is None:
-            self.buffer = self.engine.win.makeTextureBuffer("camera", width, height)
-        else:
-            self.buffer = self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
-            # now we have to setup a new scene graph to make this scene
+            frame_buffer_property = FrameBufferProperties()
+        frame_buffer_property.set_rgba_bits(*self.frame_buffer_rgb_bits)  # disable alpha for RGB camera
+        self.buffer = self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
 
         self.origin = NodePath("new render")
 

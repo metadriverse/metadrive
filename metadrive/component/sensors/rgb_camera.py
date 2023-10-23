@@ -12,11 +12,11 @@ class RGBCamera(BaseCamera):
     CAM_MASK = CamMask.RgbCam
     PBR_ADAPT = False
 
+    frame_buffer_rgb_bits = (8, 8, 8, 0)
+
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
-        frame_buffer_property = FrameBufferProperties()
-        frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
-        super(RGBCamera, self).__init__(engine, True, cuda, frame_buffer_property=frame_buffer_property)
+        super(RGBCamera, self).__init__(engine, True, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
         # cam.lookAt(0, 2.4, 1.3)

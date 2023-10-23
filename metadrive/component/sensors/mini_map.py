@@ -9,11 +9,11 @@ class MiniMap(BaseCamera):
     CAM_MASK = CamMask.MiniMap
     display_region_size = [0., 1 / 3, 0.8, 1.0]
 
+    frame_buffer_rgb_bits = (8, 8, 8, 0)
+
     def __init__(self, width, height, z_pos, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H, height = width, height, z_pos
-        frame_buffer_property = FrameBufferProperties()
-        frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
-        super(MiniMap, self).__init__(engine=engine, need_cuda=cuda, frame_buffer_property=frame_buffer_property)
+        super(MiniMap, self).__init__(engine=engine, need_cuda=cuda)
 
         cam = self.get_cam()
         lens = self.get_lens()

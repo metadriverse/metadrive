@@ -1,12 +1,10 @@
-import cv2
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, Texture, LightAttrib, \
+from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, LightAttrib, \
     TextureAttrib, ColorAttrib
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
-from panda3d.core import FrameBufferProperties
 
 
 class DepthCamera(BaseCamera):
@@ -18,12 +16,11 @@ class DepthCamera(BaseCamera):
     GROUND = None
     GROUND_MODEL = None
 
+    frame_buffer_rgb_bits = (8, 0, 0, 0)
+
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
-        frame_buffer_property = FrameBufferProperties()
-        frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
-        # TODO It can be made more efficient by only using one channel
         super(DepthCamera, self).__init__(engine, False, cuda)
         cam = self.get_cam()
         lens = self.get_lens()

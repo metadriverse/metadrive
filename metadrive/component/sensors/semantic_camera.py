@@ -17,12 +17,13 @@ class SemanticCamera(BaseCamera):
     GROUND = None
     GROUND_MODEL = None
 
+    frame_buffer_rgb_bits = (8, 8, 8, 8)
+
     # BKG_COLOR = LVecBase4(53 / 255, 81 / 255, 167 / 255, 1)
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
-        # The framebuffer can not be 3 channel like RGB Camera...
         super(SemanticCamera, self).__init__(engine, False, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
