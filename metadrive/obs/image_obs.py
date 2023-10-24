@@ -63,7 +63,7 @@ class ImageObservation(ObservationBase):
         assert issubclass(sensor_cls, BaseCamera), "Sensor should be subclass of BaseCamera"
         channel = sum([1 if bit > 0 else 0 for bit in sensor_cls.frame_buffer_rgb_bits])
         shape = (self.config["sensors"][self.image_source][2], self.config["sensors"][self.image_source][1]
-                 ) + ((self.STACK_SIZE,) if self.config["rgb_to_grayscale"] else (channel, self.STACK_SIZE))
+                 ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (channel, self.STACK_SIZE))
         if self.rgb_clip:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
