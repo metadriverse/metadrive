@@ -37,21 +37,7 @@ class DepthCamera(BaseCamera):
         #     vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
         #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
         # else:
-        from metadrive.utils import is_mac
-        if is_mac():
-            vert_path = AssetLoader.file_path("shaders", "{}_mac.vert.glsl".format(self.shader_name))
-            frag_path = AssetLoader.file_path("shaders", "{}_mac.frag.glsl".format(self.shader_name))
-        else:
-            vert_path = AssetLoader.file_path("shaders", "{}.vert.glsl".format(self.shader_name))
-            frag_path = AssetLoader.file_path("shaders", "{}.frag.glsl".format(self.shader_name))
-        custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
-        cam.node().setInitialState(
-            RenderState.make(
-                LightAttrib.makeAllOff(), TextureAttrib.makeOff(), ColorAttrib.makeOff(),
-                ShaderAttrib.make(custom_shader, 1)
-            )
-        )
-
+        self.setup_effect()
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)
             ground.fill(1., 1., 1.)
@@ -77,3 +63,24 @@ class DepthCamera(BaseCamera):
             # self.GROUND_MODEL.setP(-base_object.origin.getR())
             # self.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(DepthCamera, self).track(base_object)
+
+    def setup_effect(self):
+        """
+        Setup Camera Effect enabling depth calculation
+
+        Returns: None
+        """
+        from metadrive.utils import is_mac
+        if is_mac():
+            vert_path = AssetLoader.file_path("shaders", "{}_mac.vert.glsl".format(self.shader_name))
+            frag_path = AssetLoader.file_path("shaders", "{}_mac.frag.glsl".format(self.shader_name))
+        else:
+            vert_path = AssetLoader.file_path("shaders", "{}.vert.glsl".format(self.shader_name))
+            frag_path = AssetLoader.file_path("shaders", "{}.frag.glsl".format(self.shader_name))
+        custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
+        self.get_cam().node().setInitialState(
+            RenderState.make(
+                LightAttrib.makeAllOff(), TextureAttrib.makeOff(), ColorAttrib.makeOff(),
+                ShaderAttrib.make(custom_shader, 1)
+            )
+        )
