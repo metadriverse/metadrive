@@ -17,7 +17,6 @@ class DashBoard(ImageBuffer, BaseSensor):
     CAM_MASK = CamMask.PARA_VIS
     GAP = 4.1
     TASK_NAME = "update panel"
-    display_region_size = [2 / 3, 1, 0.8, 1.0]
 
     def __init__(self, engine, *, cuda):
         if engine.win is None:
@@ -85,7 +84,6 @@ class DashBoard(ImageBuffer, BaseSensor):
             parent_node=self.aspect2d_np,
             engine=engine
         )
-        # self.add_display_region(self.display_region_size)
         self._node_path_list.extend(tmp_node_path_list)
 
     def update_vehicle_state(self, vehicle):

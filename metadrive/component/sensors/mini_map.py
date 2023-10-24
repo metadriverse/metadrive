@@ -7,8 +7,6 @@ from panda3d.core import FrameBufferProperties
 
 class MiniMap(BaseCamera):
     CAM_MASK = CamMask.MiniMap
-    display_region_size = [0., 1 / 3, 0.8, 1.0]
-
     frame_buffer_rgb_bits = (8, 8, 8, 0)
 
     def __init__(self, width, height, z_pos, engine, *, cuda=False):

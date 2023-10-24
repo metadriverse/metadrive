@@ -25,7 +25,6 @@ class ImageBuffer:
     # display_bottom = 0.8
     # display_top = 1
     display_region = None
-    display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
     line_borders = []
 
     frame_buffer_rgb_bits = (8, 8, 8, 0)
@@ -173,7 +172,3 @@ class ImageBuffer:
 
     def __del__(self):
         self.logger.debug("{} is destroyed".format(self.__class__.__name__))
-
-    @classmethod
-    def update_display_region_size(cls, display_region_size):
-        cls.display_region_size = display_region_size
