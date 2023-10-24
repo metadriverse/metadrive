@@ -20,15 +20,15 @@ if __name__ == "__main__":
             "use_render": True,
             "image_observation": True,
             "rgb_clip": True,
-            "show_interface": False,
+            "show_interface": True,
             "agent_policy": ReplayEgoCarPolicy,
             "interface_panel": ["semantic_camera"],
             "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
             "vehicle_config": dict(image_source="semantic_camera"),
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("waymo", return_raw_style=False),
         }
     )
-    env.reset()
+    env.reset(seed=1)
     env.engine.accept("m", get_image, extraArgs=[env])
 
     for i in range(1, 100000):

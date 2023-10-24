@@ -54,11 +54,7 @@ class ImageBuffer:
             return
 
         # self.texture = Texture()
-        if frame_buffer_property is None:
-            frame_buffer_property = FrameBufferProperties()
-        frame_buffer_property.set_rgba_bits(*self.frame_buffer_rgb_bits)  # disable alpha for RGB camera
-        self.buffer = self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
-
+        self.buffer = self.create_buffer(width, height, frame_buffer_property)
         self.origin = NodePath("new render")
 
         # this takes care of setting up their camera properly
@@ -73,6 +69,22 @@ class ImageBuffer:
             self.origin.reparentTo(parent_node)
         self.setup_effect()
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
+
+    def create_buffer(self, width, height, frame_buffer_property):
+        """
+        Create the buffer object to render the scene into it
+        Args:
+            width: image width
+            height: image height
+            frame_buffer_property: panda3d.core.FrameBufferProperties
+
+        Returns: buffer object
+
+        """
+        if frame_buffer_property is None:
+            frame_buffer_property = FrameBufferProperties()
+        frame_buffer_property.set_rgba_bits(*self.frame_buffer_rgb_bits)  # disable alpha for RGB camera
+        return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
 
     def setup_effect(self):
         """
