@@ -10,7 +10,7 @@ from panda3d.core import PNMImage
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.component.sensors.distance_detector import LaneLineDetector, SideDetector
 from metadrive.component.sensors.lidar import Lidar
-from metadrive.component.sensors.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.dashboard import DashBoard
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
 from metadrive.constants import TerminationState
@@ -291,12 +291,12 @@ class BaseEnv(gym.Env):
             config["sensors"] = filtered
             config["interface_panel"] = []
 
-        # Merge vehicle_panel config with sensors
+        # Merge dashboard config with sensors
         to_use = []
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (VehiclePanel, )
+                    config["sensors"]["dashboard"] = (DashBoard, )
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -331,7 +331,7 @@ class BaseEnv(gym.Env):
         else:
             config["_render_mode"] = RENDER_MODE_NONE
             for sensor in config["sensors"].values():
-                if sensor[0] == "MainCamera" or (issubclass(BaseCamera, sensor[0]) and sensor[0] != VehiclePanel):
+                if sensor[0] == "MainCamera" or (issubclass(BaseCamera, sensor[0]) and sensor[0] != DashBoard):
                     config["_render_mode"] = RENDER_MODE_OFFSCREEN
                     break
         self.logger.info("Render Mode: {}".format(config["_render_mode"]))

@@ -34,7 +34,7 @@ if __name__ == "__main__":
         assert env.observation_space.contains(o)
         # save
         rgb_cam = env.engine.get_sensor(env.vehicle.config["image_source"])
-        rgb_cam.save_image(env.vehicle, name="{}.png".format(i))
+        # rgb_cam.save_image(env.vehicle, name="{}.png".format(i))
         cv2.imshow('img', o["image"][..., -1])
         cv2.waitKey(1)
 

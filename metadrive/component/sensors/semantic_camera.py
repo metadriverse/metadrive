@@ -22,8 +22,7 @@ class SemanticCamera(BaseCamera):
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
-        # The framebuffer can not be 3 channel like RGB Camera...
-        super(SemanticCamera, self).__init__(engine, False, cuda)
+        super(SemanticCamera, self).__init__(engine, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
 
@@ -34,19 +33,6 @@ class SemanticCamera(BaseCamera):
         # lens.setAspectRatio(2.0)
         if self.engine.mode == RENDER_MODE_NONE or not AssetLoader.initialized():
             return
-
-        # setup camera
-        cam = cam.node()
-        cam.setInitialState(
-            RenderState.make(
-                ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),
-                ColorAttrib.makeFlat((0, 0, 1, 1)), 1
-            )
-        )
-        cam.setTagStateKey("type")
-        for t in [v for v, m in vars(Semantics).items() if not (v.startswith('_') or callable(m))]:
-            label, c = getattr(Semantics, t)
-            cam.setTagState(label, RenderState.make(ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1))
 
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)
@@ -74,3 +60,35 @@ class SemanticCamera(BaseCamera):
             # self.GROUND_MODEL.setP(-base_object.origin.getR())
             # self.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(SemanticCamera, self).track(base_object)
+
+    def _setup_effect(self):
+        """
+        Use tag to apply color to different object class
+        Returns: None
+
+        """
+        # setup camera
+        cam = self.get_cam().node()
+        cam.setInitialState(
+            RenderState.make(
+                ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),
+                ColorAttrib.makeFlat((0, 0, 1, 1)), 1
+            )
+        )
+        cam.setTagStateKey("type")
+        for t in [v for v, m in vars(Semantics).items() if not (v.startswith('_') or callable(m))]:
+            label, c = getattr(Semantics, t)
+            cam.setTagState(label, RenderState.make(ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1))
+
+    def _create_buffer(self, width, height, frame_buffer_property):
+        """
+        The buffer should be created without frame_buffer_property
+        Args:
+            width: Image width
+            height: Image height
+            frame_buffer_property: disabled in Semantic Camera
+
+        Returns: Buffer object
+
+        """
+        return self.engine.win.makeTextureBuffer("camera", width, height)

@@ -1,4 +1,5 @@
 import gymnasium as gym
+from metadrive.component.sensors.base_camera import BaseCamera
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
@@ -52,14 +53,17 @@ class ImageObservation(ObservationBase):
         self.image_source = image_source
         super(ImageObservation, self).__init__(config)
         self.rgb_clip = clip_rgb
-        self.state = np.zeros(self.observation_space.shape, dtype=np.float32)
+        self.state = np.zeros(self.observation_space.shape, dtype=np.float32 if self.rgb_clip else np.uint8)
         if self.enable_cuda:
             self.state = cp.asarray(self.state)
 
     @property
     def observation_space(self):
+        sensor_cls = self.config["sensors"][self.image_source][0]
+        assert sensor_cls == "MainCamera" or issubclass(sensor_cls, BaseCamera), "Sensor should be BaseCamera"
+        channel = sensor_cls.num_channels if sensor_cls != "MainCamera" else 3
         shape = (self.config["sensors"][self.image_source][2], self.config["sensors"][self.image_source][1]
-                 ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (3, self.STACK_SIZE))
+                 ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (channel, self.STACK_SIZE))
         if self.rgb_clip:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:

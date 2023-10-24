@@ -10,7 +10,7 @@ from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
 from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath, LVecBase4
 
-from metadrive.component.sensors import BaseSensor
+from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file

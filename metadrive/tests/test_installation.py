@@ -6,7 +6,7 @@ import cv2
 from metadrive import MetaDrive_PACKAGE_DIR
 from metadrive.component.sensors.mini_map import MiniMap
 from metadrive.component.sensors.rgb_camera import RGBCamera
-from metadrive.component.sensors.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.dashboard import DashBoard
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 

@@ -3,7 +3,7 @@ import sys
 
 import numpy as np
 
-from metadrive.component.sensors.vehicle_panel import VehiclePanel
+from metadrive.component.sensors.dashboard import DashBoard
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import NuPlanTrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.envs.base_env import BaseEnv

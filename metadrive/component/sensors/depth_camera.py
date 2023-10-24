@@ -1,12 +1,10 @@
-import cv2
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, Texture, LightAttrib, \
+from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, LightAttrib, \
     TextureAttrib, ColorAttrib
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.asset_loader import AssetLoader
-from panda3d.core import FrameBufferProperties
 
 
 class DepthCamera(BaseCamera):
@@ -14,17 +12,16 @@ class DepthCamera(BaseCamera):
     CAM_MASK = CamMask.DepthCam
 
     GROUND_HEIGHT = -0.5
-    VIEW_GROUND = False
+    VIEW_GROUND = True
     GROUND = None
     GROUND_MODEL = None
 
+    num_channels = 1
+    shader_name = "depth_cam"
+
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
-        self.VIEW_GROUND = True  # default true
-        frame_buffer_property = FrameBufferProperties()
-        frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
-        # TODO It can be made more efficient by only using one channel
-        super(DepthCamera, self).__init__(engine, False, cuda)
+        super(DepthCamera, self).__init__(engine, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
 
@@ -40,21 +37,6 @@ class DepthCamera(BaseCamera):
         #     vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
         #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
         # else:
-        from metadrive.utils import is_mac
-        if is_mac():
-            vert_path = AssetLoader.file_path("shaders", "depth_cam_mac.vert.glsl")
-            frag_path = AssetLoader.file_path("shaders", "depth_cam_mac.frag.glsl")
-        else:
-            vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
-            frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
-        custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
-        cam.node().setInitialState(
-            RenderState.make(
-                LightAttrib.makeAllOff(), TextureAttrib.makeOff(), ColorAttrib.makeOff(),
-                ShaderAttrib.make(custom_shader, 1)
-            )
-        )
-
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)
             ground.fill(1., 1., 1.)
@@ -80,3 +62,24 @@ class DepthCamera(BaseCamera):
             # self.GROUND_MODEL.setP(-base_object.origin.getR())
             # self.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(DepthCamera, self).track(base_object)
+
+    def _setup_effect(self):
+        """
+        Setup Camera Effect enabling depth calculation
+
+        Returns: None
+        """
+        from metadrive.utils import is_mac
+        if is_mac():
+            vert_path = AssetLoader.file_path("shaders", "{}_mac.vert.glsl".format(self.shader_name))
+            frag_path = AssetLoader.file_path("shaders", "{}_mac.frag.glsl".format(self.shader_name))
+        else:
+            vert_path = AssetLoader.file_path("shaders", "{}.vert.glsl".format(self.shader_name))
+            frag_path = AssetLoader.file_path("shaders", "{}.frag.glsl".format(self.shader_name))
+        custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
+        self.get_cam().node().setInitialState(
+            RenderState.make(
+                LightAttrib.makeAllOff(), TextureAttrib.makeOff(), ColorAttrib.makeOff(),
+                ShaderAttrib.make(custom_shader, 1)
+            )
+        )

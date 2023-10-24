@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from metadrive.component.sensors import BaseSensor
+from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.utils.cuda import check_cudart_err
 
 _cuda_enable = True
@@ -19,25 +19,26 @@ from metadrive.engine.core.image_buffer import ImageBuffer
 
 class BaseCamera(ImageBuffer, BaseSensor):
     """
+    This class wrapping the ImageBuffer and BaseSensor to implement perceive() function to capture images in the virtual
+    world. It also extends a support for cuda, so the rendered images can be retained on GPU and converted to torch
+    tensor directly. The sensor is shared and thus can be set at any position in the world for any objects' use.
     To enable the image observation, set image_observation to True.
-    Every objects share the same camera, to boost the efficiency and save memory.
-    Camera configuration is read from the global config automatically.
     """
     # shape(dim_1, dim_2)
     BUFFER_W = 84  # dim 1
     BUFFER_H = 84  # dim 2
     CAM_MASK = None
-    display_region_size = [1 / 3, 2 / 3, 0.8, 1.0]
     attached_object = None
 
-    def __init__(self, engine, setup_pbr=False, need_cuda=False, frame_buffer_property=None):
+    num_channels = 3
+
+    def __init__(self, engine, need_cuda=False, frame_buffer_property=None):
         self._enable_cuda = need_cuda
         super(BaseCamera, self).__init__(
             self.BUFFER_W,
             self.BUFFER_H,
             Vec3(0., 0.8, 1.5),
             self.BKG_COLOR,
-            setup_pbr=setup_pbr,
             engine=engine,
             frame_buffer_property=frame_buffer_property
         )
@@ -47,7 +48,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         if (width > 100 or height > 100) and not self.enable_cuda:
             # Too large height or width will cause corruption in Mac.
             self.logger.warning(
-                "You may using too large buffer! The height is {}, and width is {}. "
+                "You are using too large buffer! The height is {}, and width is {}. "
                 "It may lower the sample efficiency! Consider reducing buffer size or use cuda image by"
                 " set [image_on_cuda=True].".format(height, width)
             )
@@ -110,7 +111,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.track(base_object)
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
-            ret = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
+            ret = self.cuda_rendered_result[..., :-1][..., ::-1][::-1][..., :self.num_channels]
         else:
             ret = self.get_rgb_array_cpu()
         if self.engine.global_config["rgb_to_grayscale"]:
