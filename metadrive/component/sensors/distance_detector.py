@@ -4,7 +4,7 @@ from metadrive.engine.core.line import MyLineNodePath
 import numpy as np
 from panda3d.core import NodePath, LVecBase4
 
-from metadrive.component.sensors import BaseSensor
+from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.logger import get_logger

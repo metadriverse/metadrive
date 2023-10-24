@@ -12,7 +12,7 @@ blackbox_test_configs = dict(
 
 
 @pytest.mark.parametrize("config", list(blackbox_test_configs.values()), ids=list(blackbox_test_configs.keys()))
-def test_rgb_cam(config, render=False):
+def test_depth_cam(config, render=False):
     """
     Test the output shape of rgb camera. This can not make sure the correctness of rendered image
     Args:

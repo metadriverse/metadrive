@@ -22,7 +22,7 @@ try:
     from panda3d.core import GraphicsOutput, Texture, GraphicsStateGuardianBase, DisplayRegionDrawCallbackData
 except ImportError:
     _cuda_enable = False
-from metadrive.component.sensors import BaseSensor
+from metadrive.component.sensors.base_sensor import BaseSensor
 
 
 class MainCamera(BaseSensor):

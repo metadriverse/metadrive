@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from metadrive.component.sensors import BaseSensor
+from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.utils.cuda import check_cudart_err
 
 _cuda_enable = True

@@ -1,11 +1,14 @@
 from panda3d.core import NodePath, PGTop, TextNode, CardMaker, Vec3
 
-from metadrive.component.sensors import BaseSensor
+from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.constants import CamMask
 from metadrive.engine.core.image_buffer import ImageBuffer
 
 
-class VehiclePanel(ImageBuffer, BaseSensor):
+class DashBoard(ImageBuffer, BaseSensor):
+    """
+    Dashboard for showing the speed and brake/throttle/steering
+    """
     PARA_VIS_LENGTH = 12
     PARA_VIS_HEIGHT = 1
     MAX_SPEED = 120
@@ -74,7 +77,7 @@ class VehiclePanel(ImageBuffer, BaseSensor):
 
                 card.setPos(0.2 + self.PARA_VIS_LENGTH / 2, 0, 0.22)
                 self.para_vis_np[name] = card
-        super(VehiclePanel, self).__init__(
+        super(DashBoard, self).__init__(
             self.BUFFER_W,
             self.BUFFER_H,
             Vec3(-0.9, -1.01, 0.78),
@@ -112,15 +115,15 @@ class VehiclePanel(ImageBuffer, BaseSensor):
 
     def remove_display_region(self):
         self.buffer.set_active(False)
-        super(VehiclePanel, self).remove_display_region()
+        super(DashBoard, self).remove_display_region()
 
     def add_display_region(self, display_region):
-        super(VehiclePanel, self).add_display_region(display_region)
+        super(DashBoard, self).add_display_region(display_region)
         self.buffer.set_active(True)
         self.origin.reparentTo(self.aspect2d_np)
 
     def destroy(self):
-        super(VehiclePanel, self).destroy()
+        super(DashBoard, self).destroy()
         for para in self.para_vis_np.values():
             para.removeNode()
         self.aspect2d_np.removeNode()
