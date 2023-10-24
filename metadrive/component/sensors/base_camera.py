@@ -19,9 +19,10 @@ from metadrive.engine.core.image_buffer import ImageBuffer
 
 class BaseCamera(ImageBuffer, BaseSensor):
     """
+    This class wrapping the ImageBuffer and BaseSensor to implement perceive() function to capture images in the virtual
+    world. It also extends a support for cuda, so the rendered images can be retained on GPU and converted to torch
+    tensor directly. The sensor is shared and thus can be set at any position in the world for any objects' use.
     To enable the image observation, set image_observation to True.
-    Every objects share the same camera, to boost the efficiency and save memory.
-    Camera configuration is read from the global config automatically.
     """
     # shape(dim_1, dim_2)
     BUFFER_W = 84  # dim 1

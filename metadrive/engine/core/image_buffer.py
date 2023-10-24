@@ -11,6 +11,12 @@ from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR, RENDER_MODE_NON
 
 
 class ImageBuffer:
+    """
+    This is a wrapper for FrameBuffer, associated with a camera. The camera scene in the camera view will be rendered
+    into the buffer. Thus, we can access the image in the buffer and can apply effect to the image to implement
+    DepthCamera, SemanticCamera and So on. It also allows opening a display region on the main window to show sensor
+    output.
+    """
     LINE_FRAME_COLOR = (0.8, 0.8, 0.8, 0)
     CAM_MASK = None
     BUFFER_W = 84  # left to right
