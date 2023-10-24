@@ -200,10 +200,8 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.lane_line_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_line"))
         self.sidewalk_node_path = NodePath(RigidBodyCombiner(self.name + "_sidewalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
-        self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
 
         self.sidewalk_node_path.setTag("type", Semantics.SIDEWALK.label)
-        self.lane_vis_node_path.setTag("type", Semantics.ROAD.label)
         self.lane_line_node_path.setTag("type", Semantics.LANE_LINE.label)
 
         if skip:  # for debug
@@ -222,16 +220,11 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.lane_node_path.flattenStrong()
         self.lane_node_path.node().collect()
 
-        self.lane_vis_node_path.flattenStrong()
-        self.lane_vis_node_path.node().collect()
-        self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam)
-
         self.origin.hide(CamMask.Shadow)
 
         self.sidewalk_node_path.reparentTo(self.origin)
         self.lane_line_node_path.reparentTo(self.origin)
         self.lane_node_path.reparentTo(self.origin)
-        self.lane_vis_node_path.reparentTo(self.origin)
         try:
             self._bounding_box = self.block_network.get_bounding_box()
         except:
@@ -242,7 +235,6 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self._node_path_list.append(self.sidewalk_node_path)
         self._node_path_list.append(self.lane_line_node_path)
         self._node_path_list.append(self.lane_node_path)
-        self._node_path_list.append(self.lane_vis_node_path)
 
     def create_in_world(self):
         """

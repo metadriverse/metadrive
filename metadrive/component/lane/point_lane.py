@@ -161,22 +161,6 @@ class PointLane(AbstractLane, InterpolatingLine):
         if lane_index is not None:
             self.index = lane_index
         assert self._polygon is not None, "Polygon is required for building lane"
-        # build visualization
-        segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
-        if segment_num == 0:
-            middle = self.position(self.length / 2, 0)
-            end = self.position(self.length, 0)
-            theta = self.heading_theta_at(self.length / 2)
-            self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, self.length, theta)
-
-        for i in range(segment_num):
-            middle = self.position(self.length * (i + .5) / segment_num, 0)
-            end = self.position(self.length * (i + 1) / segment_num, 0)
-            direction_v = end - middle
-            theta = math.atan2(direction_v[1], direction_v[0])
-            length = self.length
-            self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta)
-
         # build physics contact
         if self.need_lane_localization:
             self._construct_lane_only_physics_polygon(block, self._polygon)
