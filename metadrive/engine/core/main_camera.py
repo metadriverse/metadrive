@@ -41,7 +41,7 @@ class MainCamera(BaseSensor):
     MOUSE_MOVE_INTO_LATENCY = 2
     MOUSE_SPEED_MULTIPLIER = 1
 
-    num_channels=3
+    num_channels = 3
 
     def __init__(self, engine, camera_height: float, camera_dist: float):
         self._origin_height = camera_height

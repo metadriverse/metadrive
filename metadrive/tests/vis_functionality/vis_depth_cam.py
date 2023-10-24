@@ -26,7 +26,6 @@ if __name__ == "__main__":
     )
     env.reset()
 
-
     def get_image(env):
         depth_cam = env.vehicle.get_camera(env.vehicle.config["image_source"])
         rgb_cam = env.vehicle.get_camera("rgb_camera")
@@ -37,7 +36,6 @@ if __name__ == "__main__":
             depth_cam.save_image(env.vehicle, "depth_{}.jpg".format(h))
             rgb_cam.save_image(env.vehicle, "rgb_{}.jpg".format(h))
         env.engine.screenshot()
-
 
     env.engine.accept("m", get_image, extraArgs=[env])
     import cv2

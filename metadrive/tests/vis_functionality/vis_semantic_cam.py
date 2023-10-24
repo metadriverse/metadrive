@@ -41,9 +41,9 @@ if __name__ == "__main__":
         cv2.waitKey(1)
 
         # if env.config["use_render"]:
-            # for i in range(ImageObservation.STACK_SIZE):
-            #     ObservationType.show_gray_scale_array(o["image"][:, :, i])
-            # env.render()
+        # for i in range(ImageObservation.STACK_SIZE):
+        #     ObservationType.show_gray_scale_array(o["image"][:, :, i])
+        # env.render()
         # if tm or tc:
         #     # print("Reset")
         #     env.reset()

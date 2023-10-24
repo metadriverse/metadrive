@@ -30,7 +30,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
     CAM_MASK = None
     attached_object = None
 
-    num_channels=3
+    num_channels = 3
 
     def __init__(self, engine, need_cuda=False, frame_buffer_property=None):
         self._enable_cuda = need_cuda
@@ -111,7 +111,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.track(base_object)
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
-            ret = self.cuda_rendered_result[..., :-1][..., ::-1][::-1][...,:self.num_channels]
+            ret = self.cuda_rendered_result[..., :-1][..., ::-1][::-1][..., :self.num_channels]
         else:
             ret = self.get_rgb_array_cpu()
         if self.engine.global_config["rgb_to_grayscale"]:

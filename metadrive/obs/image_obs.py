@@ -63,7 +63,7 @@ class ImageObservation(ObservationBase):
         assert sensor_cls == "MainCamera" or issubclass(sensor_cls, BaseCamera), "Sensor should be BaseCamera"
         channel = sensor_cls.num_channels if sensor_cls != "MainCamera" else 3
         shape = (self.config["sensors"][self.image_source][2], self.config["sensors"][self.image_source][1]
-                 ) + ((self.STACK_SIZE,) if self.config["rgb_to_grayscale"] else (channel, self.STACK_SIZE))
+                 ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (channel, self.STACK_SIZE))
         if self.rgb_clip:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
