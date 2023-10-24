@@ -79,7 +79,7 @@ class Terrain(BaseObject):
 
             self.simple_terrain_collision_mesh = self.origin.attachNewNode(node)
             self._node_path_list.append(np)
-            self.attach_to_world(self.engine.render, self.engine.physics_world)
+            self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
 
         # Make shader terrain
         self.detach_from_world(self.engine.physics_world)
