@@ -13,7 +13,7 @@ class MetaDriveType:
 
     # ===== Lane, Road =====
     LANE_SURFACE_STREET = "LANE_SURFACE_STREET"
-    # Unlike a set of lanes separated by broken/solid line, this includes intersection and some unstrcutured roads.
+    # Unlike a set of lanes separated by broken/solid line, this includes intersection and some unstructured roads.
     LANE_SURFACE_UNSTRUCTURE = "LANE_SURFACE_UNSTRUCTURE"
     # use them as less frequent as possible, it is for waymo compatibility
     LANE_UNKNOWN = "LANE_UNKNOWN"
@@ -162,8 +162,36 @@ class MetaDriveType:
         return edge == cls.BOUNDARY_SIDEWALK
 
     @classmethod
+    def is_stop_sign(cls, type):
+        return type == MetaDriveType.STOP_SIGN
+
+    @classmethod
+    def is_speed_bump(cls, type):
+        return type == MetaDriveType.SPEED_BUMP
+
+    @classmethod
+    def is_driveway(cls, type):
+        return type == MetaDriveType.DRIVEWAY
+
+    @classmethod
+    def is_crosswalk(cls, type):
+        return type == MetaDriveType.CROSSWALK
+
+    @classmethod
     def is_vehicle(cls, type):
         return type == cls.VEHICLE
+
+    @classmethod
+    def is_pedestrian(cls, type):
+        return type == cls.PEDESTRIAN
+
+    @classmethod
+    def is_cyclist(cls, type):
+        return type == cls.CYCLIST
+
+    @classmethod
+    def is_participant(cls, type):
+        return type in (cls.CYCLIST, cls.PEDESTRIAN, cls.VEHICLE, cls.UNSET, cls.OTHER)
 
     @classmethod
     def is_traffic_light_in_yellow(cls, light):
@@ -210,10 +238,6 @@ class MetaDriveType:
         else:
             logger.warning("TrafficLightStatus: {} is not MetaDriveType".format(status))
             return cls.LIGHT_UNKNOWN
-
-    @classmethod
-    def is_crosswalk(cls, type):
-        return type == MetaDriveType.CROSSWALK
 
     def __init__(self, type=None):
         # TODO extend this base class to all objects! It is only affect lane so far.

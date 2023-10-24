@@ -337,7 +337,8 @@ class ScenarioDescription(dict):
     @staticmethod
     def is_scenario_file(file_name):
         file_name = os.path.basename(file_name)
-        assert file_name[-4:] == ".pkl", "{} is not .pkl file".format(file_name)
+        if not file_name.endswith(".pkl"):
+            return False
         file_name = file_name.replace(".pkl", "")
         return os.path.basename(file_name)[:3] == "sd_" or all(char.isdigit() for char in file_name)
 
