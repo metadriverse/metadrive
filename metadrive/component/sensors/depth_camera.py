@@ -16,7 +16,7 @@ class DepthCamera(BaseCamera):
     GROUND = None
     GROUND_MODEL = None
 
-    frame_buffer_rgb_bits = (8, 8, 8, 0)
+    num_channels = 1
     shader_name = "depth_cam"
 
     def __init__(self, width, height, engine, *, cuda=False):

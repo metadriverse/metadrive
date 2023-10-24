@@ -26,18 +26,17 @@ class ImageBuffer:
     # display_top = 1
     display_region = None
     line_borders = []
-
-    frame_buffer_rgb_bits = (8, 8, 8, 0)
+    num_channels = 3
 
     def __init__(
-        self,
-        width: float,
-        height: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        engine=None
+            self,
+            width: float,
+            height: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            engine=None
     ):
         self.logger = get_logger()
         self._node_path_list = []
@@ -88,7 +87,7 @@ class ImageBuffer:
         """
         if frame_buffer_property is None:
             frame_buffer_property = FrameBufferProperties()
-        frame_buffer_property.set_rgba_bits(*self.frame_buffer_rgb_bits)  # disable alpha for RGB camera
+        frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
         return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
 
     def _setup_effect(self):
@@ -103,8 +102,8 @@ class ImageBuffer:
         origin_img = self.buffer.getDisplayRegion(1).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), -1))
-        # img = np.swapaxes(img, 1, 0)
         img = img[::-1]
+        img = img[..., :self.num_channels]
         return img
 
     @staticmethod

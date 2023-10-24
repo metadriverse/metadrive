@@ -61,7 +61,7 @@ class ImageObservation(ObservationBase):
     def observation_space(self):
         sensor_cls = self.config["sensors"][self.image_source][0]
         assert issubclass(sensor_cls, BaseCamera), "Sensor should be subclass of BaseCamera"
-        channel = sum([1 if bit > 0 else 0 for bit in sensor_cls.frame_buffer_rgb_bits])
+        channel = sensor_cls.num_channels
         shape = (self.config["sensors"][self.image_source][2], self.config["sensors"][self.image_source][1]
                  ) + ((self.STACK_SIZE, ) if self.config["rgb_to_grayscale"] else (channel, self.STACK_SIZE))
         if self.rgb_clip:

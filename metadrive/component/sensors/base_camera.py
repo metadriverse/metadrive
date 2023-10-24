@@ -30,6 +30,8 @@ class BaseCamera(ImageBuffer, BaseSensor):
     CAM_MASK = None
     attached_object = None
 
+    num_channels=3
+
     def __init__(self, engine, need_cuda=False, frame_buffer_property=None):
         self._enable_cuda = need_cuda
         super(BaseCamera, self).__init__(

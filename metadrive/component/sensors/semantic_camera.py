@@ -17,8 +17,6 @@ class SemanticCamera(BaseCamera):
     GROUND = None
     GROUND_MODEL = None
 
-    frame_buffer_rgb_bits = (8, 8, 8, 8)
-
     # BKG_COLOR = LVecBase4(53 / 255, 81 / 255, 167 / 255, 1)
 
     def __init__(self, width, height, engine, *, cuda=False):
