@@ -106,9 +106,6 @@ class ImageBuffer:
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), -1))
         # img = np.swapaxes(img, 1, 0)
         img = img[::-1]
-        if img.shape[-1] == 4:
-            # To 3 channel
-            img = img[..., :-1]
         return img
 
     @staticmethod

@@ -12,15 +12,15 @@ class DepthCamera(BaseCamera):
     CAM_MASK = CamMask.DepthCam
 
     GROUND_HEIGHT = -0.5
-    VIEW_GROUND = False
+    VIEW_GROUND = True
     GROUND = None
     GROUND_MODEL = None
 
     frame_buffer_rgb_bits = (8, 8, 8, 0)
+    shader_name = "depth_cam"
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
-        self.VIEW_GROUND = True  # default true
         super(DepthCamera, self).__init__(engine, False, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
@@ -39,11 +39,11 @@ class DepthCamera(BaseCamera):
         # else:
         from metadrive.utils import is_mac
         if is_mac():
-            vert_path = AssetLoader.file_path("shaders", "depth_cam_mac.vert.glsl")
-            frag_path = AssetLoader.file_path("shaders", "depth_cam_mac.frag.glsl")
+            vert_path = AssetLoader.file_path("shaders", "{}_mac.vert.glsl".format(self.shader_name))
+            frag_path = AssetLoader.file_path("shaders", "{}_mac.frag.glsl".format(self.shader_name))
         else:
-            vert_path = AssetLoader.file_path("shaders", "depth_cam.vert.glsl")
-            frag_path = AssetLoader.file_path("shaders", "depth_cam.frag.glsl")
+            vert_path = AssetLoader.file_path("shaders", "{}.vert.glsl".format(self.shader_name))
+            frag_path = AssetLoader.file_path("shaders", "{}.frag.glsl".format(self.shader_name))
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
         cam.node().setInitialState(
             RenderState.make(
