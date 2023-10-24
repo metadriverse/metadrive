@@ -2,7 +2,6 @@ import math
 import queue
 from collections import deque
 from typing import Tuple
-
 import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Point3, PNMImage
@@ -27,7 +26,8 @@ from metadrive.component.sensors.base_sensor import BaseSensor
 
 class MainCamera(BaseSensor):
     """
-    Only chase vehicle now
+    It is a third-person perspective camera for chasing the vehicle. The view in this camera will be rendered into the
+    main image buffer (main window). It is also a sensor, so perceive() can be called to access the rendered image.
     """
 
     queue_length = 3
@@ -40,6 +40,8 @@ class MainCamera(BaseSensor):
     STATIC_MOUSE_HOLD_TIME = 100  # in steps
     MOUSE_MOVE_INTO_LATENCY = 2
     MOUSE_SPEED_MULTIPLIER = 1
+
+    num_channels=3
 
     def __init__(self, engine, camera_height: float, camera_dist: float):
         self._origin_height = camera_height
@@ -417,16 +419,16 @@ class MainCamera(BaseSensor):
         assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
-            img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
+            img = self.cuda_rendered_result[..., :-1][..., ::self.num_channels][::-1]
         else:
             origin_img = engine.win.getDisplayRegion(1).getScreenshot()
             img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
             img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
             img = img[::-1]
-            img = img[..., :-1]
+            img = img[..., :self.num_channels]
 
         if not clip:
-            return img.astype(np.uint8)
+            return img.astype(np.uint8, copy=False, order="C")
         else:
             return img / 255
 

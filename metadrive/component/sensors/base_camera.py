@@ -111,7 +111,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.track(base_object)
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
-            ret = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
+            ret = self.cuda_rendered_result[..., :-1][..., ::self.num_channels][::-1]
         else:
             ret = self.get_rgb_array_cpu()
         if self.engine.global_config["rgb_to_grayscale"]:
