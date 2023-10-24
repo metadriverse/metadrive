@@ -5,13 +5,14 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 
 blackbox_test_configs = dict(
     standard=dict(stack_size=3, width=256, height=128, rgb_clip=True),
+    small=dict(stack_size=1, width=64, height=32, rgb_clip=False),
     large=dict(stack_size=5, width=800, height=600, rgb_clip=True),
     no_clip=dict(stack_size=3, width=800, height=600, rgb_clip=False),
 )
 
 
 @pytest.mark.parametrize("config", list(blackbox_test_configs.values()), ids=list(blackbox_test_configs.keys()))
-def test_rgb_cam(config, render=False):
+def test_rgb_cam(config, request, render=False):
     env = MetaDriveEnv(
         {
             "num_scenarios": 1,
@@ -44,4 +45,4 @@ def test_rgb_cam(config, render=False):
 
 
 if __name__ == '__main__':
-    test_rgb_cam(config=blackbox_test_configs["standard"], render=True)
+    test_rgb_cam(config=blackbox_test_configs["small"], render=True)
