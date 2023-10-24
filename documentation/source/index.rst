@@ -65,6 +65,13 @@ Please feel free to contact us if you have any suggestions or ideas!
 
    known_issues.rst
 
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Code Docs
+
+   docstring.rst
+
 
 .. raw:: html
 
