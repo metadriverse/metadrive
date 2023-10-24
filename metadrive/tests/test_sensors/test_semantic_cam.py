@@ -1,6 +1,6 @@
 import pytest
 
-from metadrive.component.sensors.depth_camera import DepthCamera
+from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 blackbox_test_configs = dict(
@@ -12,9 +12,9 @@ blackbox_test_configs = dict(
 
 
 @pytest.mark.parametrize("config", list(blackbox_test_configs.values()), ids=list(blackbox_test_configs.keys()))
-def test_depth_cam(config, render=False):
+def test_semantic_cam(config, render=False):
     """
-    Test the output shape of Depth camera. This can not make sure the correctness of rendered image but only for
+    Test the output shape of Semantic camera. This can NOT make sure the correctness of rendered image but only for
     checking the shape of image output and image retrieve pipeline
     Args:
         config: test parameter
@@ -32,7 +32,7 @@ def test_depth_cam(config, render=False):
             "stack_size": config["stack_size"],
             "vehicle_config": dict(image_source="camera"),
             "sensors": {
-                "camera": (DepthCamera, config["width"], config["height"])
+                "camera": (SemanticCamera, config["width"], config["height"])
             },
             "interface_panel": ["dashboard", "camera"],
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
@@ -46,7 +46,7 @@ def test_depth_cam(config, render=False):
             o, r, tm, tc, info = env.step([0, 1])
             assert env.observation_space.contains(o)
             # Reverse
-            assert o["image"].shape == (config["height"], config["width"], 3, config["stack_size"])
+            assert o["image"].shape == (config["height"], config["width"], 4, config["stack_size"])
             if render:
                 cv2.imshow('img', o["image"][..., -1])
                 cv2.waitKey(1)
@@ -55,4 +55,4 @@ def test_depth_cam(config, render=False):
 
 
 if __name__ == '__main__':
-    test_depth_cam(config=blackbox_test_configs["small"], render=True)
+    test_semantic_cam(config=blackbox_test_configs["small"], render=True)

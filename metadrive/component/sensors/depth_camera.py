@@ -37,7 +37,6 @@ class DepthCamera(BaseCamera):
         #     vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
         #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
         # else:
-        self.setup_effect()
         if self.VIEW_GROUND:
             ground = PNMImage(513, 513, 4)
             ground.fill(1., 1., 1.)
@@ -64,7 +63,7 @@ class DepthCamera(BaseCamera):
             # self.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(DepthCamera, self).track(base_object)
 
-    def setup_effect(self):
+    def _setup_effect(self):
         """
         Setup Camera Effect enabling depth calculation
 

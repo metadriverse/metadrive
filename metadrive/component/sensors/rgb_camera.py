@@ -24,7 +24,7 @@ class RGBCamera(BaseCamera):
         cam.lookAt(0, 10.4, 1.6)
         lens.setFov(60)
 
-    def setup_effect(self):
+    def _setup_effect(self):
         """
         Setup simple PBR effect
         Returns: None

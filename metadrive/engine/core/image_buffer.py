@@ -54,7 +54,7 @@ class ImageBuffer:
             return
 
         # self.texture = Texture()
-        self.buffer = self.create_buffer(width, height, frame_buffer_property)
+        self.buffer = self._create_buffer(width, height, frame_buffer_property)
         self.origin = NodePath("new render")
 
         # this takes care of setting up their camera properly
@@ -67,10 +67,10 @@ class ImageBuffer:
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
-        self.setup_effect()
+        self._setup_effect()
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
-    def create_buffer(self, width, height, frame_buffer_property):
+    def _create_buffer(self, width, height, frame_buffer_property):
         """
         Create the buffer object to render the scene into it
         Args:
@@ -86,7 +86,7 @@ class ImageBuffer:
         frame_buffer_property.set_rgba_bits(*self.frame_buffer_rgb_bits)  # disable alpha for RGB camera
         return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
 
-    def setup_effect(self):
+    def _setup_effect(self):
         """
         Apply effect to the render the scene. Usually setup shader here
         Returns: None

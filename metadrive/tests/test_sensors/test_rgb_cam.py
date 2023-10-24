@@ -14,7 +14,8 @@ blackbox_test_configs = dict(
 @pytest.mark.parametrize("config", list(blackbox_test_configs.values()), ids=list(blackbox_test_configs.keys()))
 def test_rgb_cam(config, render=False):
     """
-    Test the output shape of rgb camera. This can not make sure the correctness of rendered image
+    Test the output shape of rgb camera. This can not make sure the correctness of rendered image but only for
+    checking the shape of image output and image retrieve pipeline
     Args:
         config: test parameter
         render: render with cv2

@@ -63,7 +63,7 @@ class SemanticCamera(BaseCamera):
             # self.GROUND_MODEL.setR(-base_object.origin.getR())
         return super(SemanticCamera, self).track(base_object)
 
-    def setup_effect(self):
+    def _setup_effect(self):
         """
         Use tag to apply color to different object class
         Returns: None
@@ -82,7 +82,7 @@ class SemanticCamera(BaseCamera):
             label, c = getattr(Semantics, t)
             cam.setTagState(label, RenderState.make(ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1))
 
-    def create_buffer(self, width, height, frame_buffer_property):
+    def _create_buffer(self, width, height, frame_buffer_property):
         """
         The buffer should be created without frame_buffer_property
         Args:
