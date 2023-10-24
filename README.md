@@ -21,7 +21,7 @@
 |
 <a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
 |
-<a href="https://metadriverse.github.io/metadrive/">Website</a>
+<a href="https://metadriverse.github.io/metadrive-simulator/">Website</a>
 |
 <a href="https://arxiv.org/pdf/2109.12674.pdf">Paper</a>
 |
