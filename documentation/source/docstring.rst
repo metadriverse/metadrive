@@ -4,4 +4,4 @@ Docstring
 .. autosummary::
    :toctree: generated
 
-   metadrive
+   metadrive.scenario.utils
