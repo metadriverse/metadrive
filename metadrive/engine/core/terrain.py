@@ -263,13 +263,10 @@ class Terrain(BaseObject):
 
     def set_position(self, position, height=None):
         if self.render:
-            if self.use_render_pipeline:
-                pos = (self._mesh_terrain.get_pos()[0] + position[0], self._mesh_terrain.get_pos()[1] + position[1])
-                self._mesh_terrain.set_pos(*pos, self._mesh_terrain_height)
-                if self.probe is not None:
-                    self.probe.set_pos(*pos, self.PROBE_HEIGHT)
-            else:
-                super(Terrain, self).set_position(position, height)
+            pos = (self._mesh_terrain.get_pos()[0] + position[0], self._mesh_terrain.get_pos()[1] + position[1])
+            self._mesh_terrain.set_pos(*pos, self._mesh_terrain_height)
+            if self.probe is not None:
+                self.probe.set_pos(*pos, self.PROBE_HEIGHT)
 
     def _generate_card_terrain(self):
         self.origin.hide(
