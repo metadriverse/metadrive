@@ -4,16 +4,11 @@ from metadrive import MetaDrive_PACKAGE_DIR
 import time
 import pytest
 
-examples = ["draw_maps.py",
-            "drive_in_multi_agent_env.py --top_down",
-            "drive_in_waymo_env.py --top_down",
-            "drive_in_waymo_env.py --reactive_traffic",
-            "drive_in_safe_metadrive_env.py",
-            "drive_in_single_agent_env.py",
-            "procedural_generation.py",
-            "profile_metadrive.py",
-            "profile_metadrive_marl.py",
-            "top_down_metadrive.py"]
+examples = [
+    "draw_maps.py", "drive_in_multi_agent_env.py --top_down", "drive_in_waymo_env.py --top_down",
+    "drive_in_waymo_env.py --reactive_traffic", "drive_in_safe_metadrive_env.py", "drive_in_single_agent_env.py",
+    "procedural_generation.py", "profile_metadrive.py", "profile_metadrive_marl.py", "top_down_metadrive.py"
+]
 examples_dir_path = os.path.join(MetaDrive_PACKAGE_DIR, "examples")
 scripts = [os.path.join(examples_dir_path, exp) for exp in examples]
 
