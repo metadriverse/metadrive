@@ -1,5 +1,6 @@
 import copy
 import os
+import pathlib
 import pickle
 
 import matplotlib.pyplot as plt
@@ -147,9 +148,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
-                heading=np.zeros(shape=(episode_len, )),
+                heading=np.zeros(shape=(episode_len,)),
                 velocity=np.zeros(shape=(episode_len, 2)),
-                valid=np.zeros(shape=(episode_len, )),
+                valid=np.zeros(shape=(episode_len,)),
 
                 # Add these items when the object has them.
                 # throttle_brake=np.zeros(shape=(episode_len, 1)),
@@ -172,7 +173,7 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             "state": {
                 ScenarioDescription.TRAFFIC_LIGHT_STATUS: [MetaDriveType.LIGHT_UNKNOWN] * episode_len
             },
-            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3, ), dtype=np.float32),
+            ScenarioDescription.TRAFFIC_LIGHT_POSITION: np.zeros(shape=(3,), dtype=np.float32),
             ScenarioDescription.TRAFFIC_LIGHT_LANE: None,
             "metadata": dict(
                 track_length=episode_len, type=MetaDriveType.TRAFFIC_LIGHT, object_id=k, dataset="metadrive"
@@ -207,11 +208,11 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 if lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] is None:
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] = str(id)
                     lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                               ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                    ] = state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
                 else:
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_LANE] == str(id)
                     assert lights[id][ScenarioDescription.TRAFFIC_LIGHT_POSITION
-                                      ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
+                           ] == state[ScenarioDescription.TRAFFIC_LIGHT_POSITION]
 
             else:
                 tracks[id]["type"] = type
@@ -356,8 +357,9 @@ def read_dataset_summary(file_folder, check_file_existence=True):
         2) the list of all scenarios IDs, and
         3) a dict mapping from scenario IDs to the folder that hosts their files.
     """
-    summary_file = os.path.join(file_folder, SD.DATASET.SUMMARY_FILE)
-    mapping_file = os.path.join(file_folder, SD.DATASET.MAPPING_FILE)
+    file_folder = pathlib.Path(file_folder)
+    summary_file = file_folder / SD.DATASET.SUMMARY_FILE
+    mapping_file = file_folder / SD.DATASET.MAPPING_FILE
     if os.path.isfile(summary_file):
         with open(summary_file, "rb") as f:
             summary_dict = pickle.load(f)
@@ -375,10 +377,12 @@ def read_dataset_summary(file_folder, check_file_existence=True):
         files = [p for p in files]
         summary_dict = {f: read_scenario_data(os.path.join(file_folder, f))["metadata"] for f in files}
 
+    mapping = None
     if os.path.exists(mapping_file):
         with open(mapping_file, "rb") as f:
             mapping = pickle.load(f)
-    else:
+
+    if not mapping:
         # Create a fake one
         mapping = {k: "" for k in summary_dict}
 
@@ -386,7 +390,7 @@ def read_dataset_summary(file_folder, check_file_existence=True):
         for file in summary_dict:
             assert file in mapping, "FileName in mapping mismatch with summary"
             assert SD.is_scenario_file(file), "File:{} is not sd scenario file".format(file)
-            file_path = os.path.join(file_folder, mapping[file], file)
+            file_path = file_folder / mapping[file] / file
             assert os.path.exists(file_path), "Can not find file: {}".format(file_path)
 
     return summary_dict, list(summary_dict.keys()), mapping
