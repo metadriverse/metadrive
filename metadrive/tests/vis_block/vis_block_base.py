@@ -15,6 +15,7 @@ class TestBlock(ShowBase.ShowBase):
     def __init__(self, debug=False, window_type="onscreen"):
         self.debug = debug
         super(TestBlock, self).__init__(windowType=window_type)
+        self.mode = "onscreen"
         self.setBackgroundColor(BKG_COLOR)
         if window_type != "none":
             self.setFrameRateMeter(True)
