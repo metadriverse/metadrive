@@ -21,7 +21,7 @@ class DepthCamera(BaseCamera):
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
-        super(DepthCamera, self).__init__(engine, False, cuda)
+        super(DepthCamera, self).__init__(engine, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
 

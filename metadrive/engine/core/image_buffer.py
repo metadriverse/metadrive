@@ -32,7 +32,6 @@ class ImageBuffer:
             bkg_color: Union[Vec4, Vec3],
             parent_node: NodePath = None,
             frame_buffer_property=None,
-            setup_pbr=False,
             engine=None
     ):
         self.logger = get_logger()
@@ -72,33 +71,16 @@ class ImageBuffer:
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
-        self.scene_tex = None
-        if setup_pbr:
-            self.manager = FilterManager(self.buffer, self.cam)
-            fbprops = p3d.FrameBufferProperties()
-            fbprops.float_color = True
-            fbprops.set_rgba_bits(16, 16, 16, 16)
-            fbprops.set_depth_bits(24)
-            fbprops.set_multisamples(self.engine.pbrpipe.msaa_samples)
-            self.scene_tex = p3d.Texture()
-            self.scene_tex.set_format(p3d.Texture.F_rgba16)
-            self.scene_tex.set_component_type(p3d.Texture.T_float)
-            self.tonemap_quad = self.manager.render_scene_into(colortex=self.scene_tex, fbprops=fbprops)
-            #
-            defines = {}
-            #
-            post_vert_str = _load_shader_str('post.vert', defines)
-            post_frag_str = _load_shader_str('tonemap.frag', defines)
-            tonemap_shader = p3d.Shader.make(
-                p3d.Shader.SL_GLSL,
-                vertex=post_vert_str,
-                fragment=post_frag_str,
-            )
-            self.tonemap_quad.set_shader(tonemap_shader)
-            self.tonemap_quad.set_shader_input('tex', self.scene_tex)
-            self.tonemap_quad.set_shader_input('exposure', 1.0)
-
+        self.setup_effect()
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
+
+    def setup_effect(self):
+        """
+        Apply effect to the render the scene. Usually setup shader here
+        Returns: None
+
+        """
+        pass
 
     def get_rgb_array_cpu(self):
         origin_img = self.buffer.getDisplayRegion(1).getScreenshot()

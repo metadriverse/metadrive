@@ -1,8 +1,9 @@
+import panda3d.core as p3d
+from direct.filter.FilterManager import FilterManager
+from simplepbr import _load_shader_str
+
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
-from metadrive.engine.engine_utils import engine_initialized, get_global_config
-from direct.filter.CommonFilters import CommonFilters
-from panda3d.core import FrameBufferProperties
 
 
 class RGBCamera(BaseCamera):
@@ -16,11 +17,40 @@ class RGBCamera(BaseCamera):
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
-        super(RGBCamera, self).__init__(engine, True, cuda)
+        super(RGBCamera, self).__init__(engine, cuda)
         cam = self.get_cam()
         lens = self.get_lens()
         # cam.lookAt(0, 2.4, 1.3)
         cam.lookAt(0, 10.4, 1.6)
-
         lens.setFov(60)
-        # lens.setAspectRatio(2.0)
+
+    def setup_effect(self):
+        """
+        Setup simple PBR effect
+        Returns: None
+
+        """
+        self.scene_tex = None
+        self.manager = FilterManager(self.buffer, self.cam)
+        fbprops = p3d.FrameBufferProperties()
+        fbprops.float_color = True
+        fbprops.set_rgba_bits(16, 16, 16, 16)
+        fbprops.set_depth_bits(24)
+        fbprops.set_multisamples(self.engine.pbrpipe.msaa_samples)
+        self.scene_tex = p3d.Texture()
+        self.scene_tex.set_format(p3d.Texture.F_rgba16)
+        self.scene_tex.set_component_type(p3d.Texture.T_float)
+        self.tonemap_quad = self.manager.render_scene_into(colortex=self.scene_tex, fbprops=fbprops)
+        #
+        defines = {}
+        #
+        post_vert_str = _load_shader_str('post.vert', defines)
+        post_frag_str = _load_shader_str('tonemap.frag', defines)
+        tonemap_shader = p3d.Shader.make(
+            p3d.Shader.SL_GLSL,
+            vertex=post_vert_str,
+            fragment=post_frag_str,
+        )
+        self.tonemap_quad.set_shader(tonemap_shader)
+        self.tonemap_quad.set_shader_input('tex', self.scene_tex)
+        self.tonemap_quad.set_shader_input('exposure', 1.0)
