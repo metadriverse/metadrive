@@ -1,6 +1,6 @@
 import pytest
 
-from metadrive.component.sensors.rgb_camera import RGBCamera
+from metadrive.component.sensors.depth_camera import DepthCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 blackbox_test_configs = dict(
@@ -29,11 +29,11 @@ def test_depth_cam(config, render=False):
             "map": "S",
             "start_seed": 4,
             "stack_size": config["stack_size"],
-            "vehicle_config": dict(image_source="rgb_camera"),
+            "vehicle_config": dict(image_source="camera"),
             "sensors": {
-                "rgb_camera": (RGBCamera, config["width"], config["height"])
+                "camera": (DepthCamera, config["width"], config["height"])
             },
-            "interface_panel": ["dashboard", "rgb_camera"],
+            "interface_panel": ["dashboard", "camera"],
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
             "rgb_clip": config["rgb_clip"],  # clip rgb to range(0,1) instead of (0, 255)
         }
@@ -54,4 +54,4 @@ def test_depth_cam(config, render=False):
 
 
 if __name__ == '__main__':
-    test_rgb_cam(config=blackbox_test_configs["small"], render=True)
+    test_depth_cam(config=blackbox_test_configs["small"], render=True)

@@ -16,7 +16,7 @@ class DepthCamera(BaseCamera):
     GROUND = None
     GROUND_MODEL = None
 
-    frame_buffer_rgb_bits = (8, 0, 0, 0)
+    frame_buffer_rgb_bits = (8, 8, 8, 0)
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
