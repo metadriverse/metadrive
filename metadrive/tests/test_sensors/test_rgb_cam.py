@@ -42,6 +42,8 @@ def test_rgb_cam(config, render=False):
     env.reset()
     try:
         import cv2
+        import time
+        start = time.time()
         for i in range(1, 10):
             o, r, tm, tc, info = env.step([0, 1])
             assert env.observation_space.contains(o)
@@ -50,6 +52,7 @@ def test_rgb_cam(config, render=False):
             if render:
                 cv2.imshow('img', o["image"][..., -1])
                 cv2.waitKey(1)
+        print("FPS:", 10 / (time.time() - start))
     finally:
         env.close()
 
