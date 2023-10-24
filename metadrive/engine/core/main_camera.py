@@ -419,7 +419,7 @@ class MainCamera(BaseSensor):
         assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
-            img = self.cuda_rendered_result[..., :-1][..., ::self.num_channels][::-1]
+            img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
         else:
             origin_img = engine.win.getDisplayRegion(1).getScreenshot()
             img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
