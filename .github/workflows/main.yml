@@ -178,6 +178,28 @@ jobs:
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_export_record_scenario
 
+  test_sensor_pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: openrndr/setup-opengl@v1.1
+      - run: xvfb-run glxinfo
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Blackbox tests
+        run: |
+          pip install cython
+          pip install numpy
+          pip install -e .
+          python -m metadrive.pull_asset
+          pip install pytest
+          pip install pytest-cov
+          pip install ray
+          cd metadrive/
+          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors
+
   test_ipynb:
     runs-on: ubuntu-latest
     steps:
@@ -203,8 +225,6 @@ jobs:
 
   test_ros:
     runs-on: ubuntu-22.04
-#    container:
-#      image: ubuntu:jammy
     steps:
       - name: Set up ROS2 humble
         uses: ros-tooling/setup-ros@v0.7
