@@ -21,7 +21,7 @@ if __name__ == "__main__":
     straight.construct_block(test.render, test.world)
 
     intersection = TInterSection(3, straight.get_socket(0), global_network, 20)
-    # print(intersection.construct_block(test.render, test.world))
+    print(intersection.construct_block(test.render, test.world))
     id = 4
     for socket_idx in range(intersection.SOCKET_NUM):
         block = Curve(id, intersection.get_socket(socket_idx), global_network, id + 1)
