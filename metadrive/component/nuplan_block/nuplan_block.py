@@ -187,11 +187,6 @@ class NuPlanBlock(BaseBlock):
         self.nuplan_map_data = None
         super(NuPlanBlock, self).destroy()
 
-    def __del__(self):
-        self.destroy()
-        super(NuPlanBlock, self).__del__()
-        # print("NuPlan Block is being deleted.")
-
     @staticmethod
     def _get_points_from_boundary(boundary, center):
         path = boundary.discrete_path

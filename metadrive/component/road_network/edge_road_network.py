@@ -16,6 +16,7 @@ class EdgeRoadNetwork(BaseRoadNetwork):
     Compared to NodeRoadNetwork representing the relation of lanes in a node-based graph, EdgeRoadNetwork stores the
     relationship in edge-based graph, which is more common in real map representation
     """
+
     def __init__(self):
         super(EdgeRoadNetwork, self).__init__()
         self.graph = {}
@@ -96,11 +97,17 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         return ret
 
     def destroy(self):
+        """
+        Destroy all lanes in this road network
+        Returns: None
+
+        """
         super(EdgeRoadNetwork, self).destroy()
-        for k, v in self.graph.items():
-            v.lane.destroy()
-            self.graph[k]: lane_info = None
-        self.graph = None
+        if self.graph is not None:
+            for k, v in self.graph.items():
+                v.lane.destroy()
+                self.graph[k]: lane_info = None
+            self.graph = None
 
     def __del__(self):
         logging.debug("{} is released".format(self.__class__.__name__))
