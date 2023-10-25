@@ -24,6 +24,9 @@ class Terrain(BaseObject):
 
     def __init__(self, show_terrain, engine):
         super(Terrain, self).__init__(random_seed=0)
+        self.origin.hide(
+            CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam
+        )
 
         # collision mesh
         self.simple_terrain_collision_mesh = None  # a flat collision shape
