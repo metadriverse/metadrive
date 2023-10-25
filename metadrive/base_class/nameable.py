@@ -7,7 +7,6 @@ class Nameable:
     """
     Instance of this class will have a special name
     """
-
     def __init__(self, name=None):
         # ID for object
         self.name = random_string() if name is None else name

@@ -339,8 +339,8 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         super(BaseBlock, self).destroy()
 
     # def __del__(self):
-        # self.destroy()
-        # logger.debug("{} is being deleted.".format(type(self)))
+    # self.destroy()
+    # logger.debug("{} is being deleted.".format(type(self)))
 
     @property
     def bounding_box(self):
