@@ -1,3 +1,4 @@
+"""This file visualizes a Bottleneck block."""
 from metadrive.component.pgblock.bottleneck import Merge, Split
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork

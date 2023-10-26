@@ -1,3 +1,4 @@
+"""This file visualizes the process of BIG algorithm, a procedural generation algorithm."""
 from metadrive.component.algorithm.BIG import BIG
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.asset_loader import initialize_asset_loader
@@ -9,7 +10,7 @@ def vis_big(debug: bool = False):
 
     test.cam.setPos(250, 100, 2000)
 
-    initialize_asset_loader(test)
+    initialize_asset_loader(engine=test)
     global_network = NodeRoadNetwork()
 
     big = BIG(2, 3.5, global_network, test.render, test.world, random_seed=5)

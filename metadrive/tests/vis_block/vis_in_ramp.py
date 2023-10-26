@@ -1,3 +1,4 @@
+"""This file visualizes a InRampOnStraight block. Use mouse left button to draw down for zooming out."""
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.ramp import InRampOnStraight
 from metadrive.component.pgblock.straight import Straight
@@ -14,11 +15,11 @@ if __name__ == "__main__":
     global_network = NodeRoadNetwork()
     straight = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
     straight = Straight(4, straight.get_socket(0), global_network, 1)
-    print(straight.construct_block(test.render, test.world))
-    print(len(straight.dynamic_nodes))
+    straight.construct_block(test.render, test.world)
+    # print(len(straight.dynamic_nodes))
     for i in range(1, 3):
         straight = InRampOnStraight(i, straight.get_socket(0), global_network, i)
-        print(straight.construct_block(test.render, test.world))
-        print(len(straight.dynamic_nodes))
+        straight.construct_block(test.render, test.world)
+        # print(len(straight.dynamic_nodes))
     test.show_bounding_box(global_network)
     test.run()
