@@ -385,7 +385,6 @@ if __name__ == "__main__":
     #     False,
     #     other_traj="metasvodist_inter.json",
     #     extra_config={
-    #         "global_light": True
     #     }
     # )
     # pygame_replay()

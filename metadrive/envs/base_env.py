@@ -163,7 +163,6 @@ BASE_DEFAULT_CONFIG = dict(
     window_size=(1200, 900),  # or (width, height), if set to None, it will be automatically determined
     physics_world_step_size=2e-2,
     show_fps=True,
-    global_light=True,
     # only render physics world without model, a special debug option
     debug_physics_world=False,
     # debug static world

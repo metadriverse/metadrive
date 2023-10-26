@@ -4,7 +4,7 @@ import time
 from typing import Optional, Union, Tuple
 
 import gltf
-from metadrive.engine.core.line import MyLineNodePath
+from metadrive.engine.core.draw_line import ColorLineNodePath
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
@@ -291,6 +291,11 @@ class EngineCore(ShowBase.ShowBase):
                 self.world_light.attach_to_world(self.render, self.physics_world)
                 self.render.setLight(self.world_light.direction_np)
                 self.render.setLight(self.world_light.ambient_np)
+
+                # pssm shadow
+
+
+                # enable default shaders
                 self.render.setShaderAuto()
                 self.render.setAntialias(AntialiasAttrib.MAuto)
 
@@ -456,7 +461,7 @@ class EngineCore(ShowBase.ShowBase):
 
     def draw_lines_3d(self, point_lists, parent_node=None, color=LVecBase4(1), thickness=1.0):
         assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
-        np = MyLineNodePath(parent_node, thickness=thickness, colorVec=color)
+        np = ColorLineNodePath(parent_node, thickness=thickness, colorVec=color)
         np.drawLines(point_lists)
         np.create()
         return np
