@@ -12,6 +12,7 @@ if __name__ == "__main__":
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             # "debug": True,
+            # "global_light": False,
             # "debug_static_world": True,
             "static_traffic_object": False,
             "show_interface": True,
@@ -38,11 +39,11 @@ if __name__ == "__main__":
             # "pstats": True,
             "force_destroy": False,
             # "show_skybox": False,
+            "show_fps": False,
             "render_pipeline": False,
             # "camera_dist": 8,
-            "window_size": (1200, 800),
+            "window_size": (1600, 900),
             "camera_dist": 9,
-            "show_fps": True,
             # "camera_pitch": 30,
             # "camera_height": 1,
             # "camera_smooth": False,
@@ -63,7 +64,7 @@ if __name__ == "__main__":
                 # "side_detector": dict(num_lasers=2, distance=50),
                 # "lane_line_detector": dict(num_lasers=2, distance=50),
                 # "show_line_to_navi_mark": True,
-                "show_navi_mark": True,
+                "show_navi_mark": False,
                 # "show_dest_mark": True
             },
         }
@@ -104,7 +105,6 @@ if __name__ == "__main__":
         env.engine.accept("8", de_speed)
         env.engine.accept("9", lift_terrain)
         env.engine.accept("0", lower_terrain)
-    env.engine.accept("`", env.engine.terrain.reload_terrain_shader)
     # env.main_camera.set_follow_lane(True)
     # env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
     # for line in env.engine.coordinate_line:
@@ -153,8 +153,3 @@ if __name__ == "__main__":
 
 # 0.81229913, 0.8904725, 0.7317231, 1.0, 0.85320455,
 # 0.6567526, 0.9747927, 0.0, 0.5, 0.5]
-#
-#
-#
-# network["last_second_node"][">"] = network["last_second_node"]["last_node"]
-
