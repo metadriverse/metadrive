@@ -14,6 +14,7 @@ if __name__ == "__main__":
             "debug": True,
             # "debug_static_world": True,
             "static_traffic_object": False,
+            "drivable_region_extension": 30,
             "show_interface": True,
             "cull_scene": False,
             "random_spawn_lane_index": False,

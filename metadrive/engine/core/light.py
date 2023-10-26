@@ -8,6 +8,8 @@ class Light(BaseObject):
     """
     It is dynamic element since it will follow the camera
     """
+    direction_pos = (-100, 100, 120)
+
     def __init__(self):
         super(Light, self).__init__(random_seed=0)
         self.direction_np = NodePath(DirectionalLight("direction light"))
@@ -30,7 +32,7 @@ class Light(BaseObject):
         self.direction_np.node().setColor(LVector4(1, 1, 1, 1))
         self.direction_np.node().set_color_temperature(6000)
         self.direction_np.node().setCameraMask(CamMask.Shadow)
-        self.direction_np.setPos(-100, 100, 120)
+        self.direction_np.setPos(self.direction_pos)
         self.direction_np.lookAt(0, 0, 0)
 
         # dlens = self.direction_np.node().getLens()

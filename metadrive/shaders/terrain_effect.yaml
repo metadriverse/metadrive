@@ -1,0 +1,192 @@
+# Author: @QuanyiLi. This terrain effect can texture road surface/road line. It is modified from:
+# terrain-effect by @tobspr: https://github.com/tobspr/RenderPipeline
+# Panda3D shader-terrain example: https://github.com/panda3d/panda3d/tree/master/samples/shader-terrain
+# texture splatting @wezu: https://gist.github.com/wezu/3892a0a61ae9ddfe57c0aa3f22825ac0#file-terrain_tex_f-glsl-L49
+
+vertex:
+    inout: |
+        uniform struct {
+            sampler2D data_texture;
+            sampler2D heightfield;
+            int view_index;
+            int terrain_size;
+            int chunk_size;
+        } ShaderTerrainMesh;
+        out vec2 terrain_uv;
+
+    transform: |
+        // Terrain data has the layout:
+        // x: x-pos, y: y-pos, z: size, w: clod
+        vec4 terrain_data = texelFetch(ShaderTerrainMesh.data_texture,
+        ivec2(gl_InstanceID, ShaderTerrainMesh.view_index), 0);
+
+        // Get initial chunk position in the (0, 0, 0), (1, 1, 0) range
+        vec3 chunk_position = p3d_Vertex.xyz;
+
+        // CLOD implementation
+        float clod_factor = smoothstep(0, 1, terrain_data.w);
+        chunk_position.xy -= clod_factor * fract(chunk_position.xy * ShaderTerrainMesh.chunk_size / 2.0)
+                              * 2.0 / ShaderTerrainMesh.chunk_size;
+
+        // Scale the chunk
+        chunk_position *= terrain_data.z * float(ShaderTerrainMesh.chunk_size)
+                        / float(ShaderTerrainMesh.terrain_size);
+        chunk_position.z *= ShaderTerrainMesh.chunk_size;
+
+        // Offset the chunk, it is important that this happens after the scale
+        chunk_position.xy += terrain_data.xy / float(ShaderTerrainMesh.terrain_size);
+
+        // Compute the terrain UV coordinates
+        terrain_uv = chunk_position.xy;
+
+        // Sample the heightfield and offset the terrain - we do not need to multiply
+        // the height with anything since the terrain transform is included in the
+        // model view projection matrix.
+        chunk_position.z += texture(ShaderTerrainMesh.heightfield, terrain_uv).x;
+
+        // Lower the terrain on the borders - this ensures the shadow map is generated
+        // correctly.
+        if ( min(terrain_uv.x, terrain_uv.y) < 8.0 / ShaderTerrainMesh.terrain_size ||
+           max(terrain_uv.x, terrain_uv.y) > 1 - 9.0 / ShaderTerrainMesh.terrain_size) {
+           chunk_position.z = 0;
+        }
+
+        vOutput.position = (p3d_ModelMatrix * vec4(chunk_position, 1)).xyz;
+
+fragment:
+    defines: |
+        #define DONT_FETCH_DEFAULT_TEXTURES 0
+        #define DONT_SET_MATERIAL_PROPERTIES 1
+
+    inout: |
+        layout(location=4) in vec2 terrain_uv;
+        
+        in vec3 vtx_pos;
+        
+        out vec4 color;
+        layout(location=5)  uniform struct {
+          sampler2D data_texture;
+          sampler2D heightfield;
+          int view_index;
+          int terrain_size;
+          int chunk_size;
+        } ShaderTerrainMesh;
+        
+        // texture for build road  
+        
+        uniform sampler2D yellow_tex;
+        uniform sampler2D white_tex;
+        uniform sampler2D road_tex;
+        uniform sampler2D road_normal;
+        uniform sampler2D road_rough;
+        
+        uniform sampler2D grass_tex;
+        uniform sampler2D grass_normal;
+        uniform sampler2D grass_rough;
+        
+        uniform sampler2D rock_tex;
+        uniform sampler2D rock_normal;
+        uniform sampler2D rock_rough;
+        
+        uniform sampler2D attribute_tex;
+        
+        // just learned that uniform means the variable won't change in each stage, while in/out is able to do that : )
+        uniform float elevation_texture_ratio; 
+        uniform float height_scale; 
+
+    material: |
+        float road_tex_ratio = 32.0 * elevation_texture_ratio;
+        float grass_tex_ratio = 128.0 * elevation_texture_ratio;
+        const float r_min = (1-1/elevation_texture_ratio)/2;
+        const float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
+        vec4 attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);
+        
+        vec3 pixel_size = vec3(1.0, -1.0, 0) / textureSize(ShaderTerrainMesh.heightfield, 0).xxx;
+        float h_u0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.yz).x * height_scale;
+        float h_u1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.xz).x * height_scale;
+        float h_v0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zy).x * height_scale;
+        float h_v1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zx).x * height_scale;
+        vec3 tangent = normalize(vec3(1, 0, h_u1 - h_u0));
+        vec3 binormal = normalize(vec3(0, 1, h_v1 - h_v0));
+        vec3 normal = normalize(cross(tangent, binormal));
+        // normal.x *= -1;
+        mat3 tbn = mat3(tangent, binormal, normal);
+        
+        if ((attri.g > 0 || attri.a > 0 || attri.b > 0) && terrain_uv.x>r_min && terrain_uv.y > r_min && terrain_uv.x<r_max && terrain_uv.y<r_max){
+            // texture splatting, mixing ratio can be determined via rgba, no grass here
+            vec3 diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb * attri.g;
+            diffuse += texture(yellow_tex, terrain_uv * road_tex_ratio).rgb * attri.b;
+            diffuse += texture(white_tex, terrain_uv * road_tex_ratio).rgb * attri.a; 
+        
+            m.shading_model = SHADING_MODEL_DEFAULT;
+            m.specular_ior = 1.51;
+            m.metallic = 0.0;
+            m.roughness = texture(road_rough, terrain_uv * road_tex_ratio).r;
+            m.shading_model_param0 = 0.0;
+            m.normal = normalize(texture(road_normal, terrain_uv * road_tex_ratio).rgb*2.0-1.0);
+            
+            m.basecolor = diffuse.xyz;
+            m.normal = normalize(tbn * m.normal);
+        }
+        else{
+            // Material splatting
+            float height = (h_u0 + h_u1 + h_v0 + h_v1) / (4.0 * height_scale); // xxx
+            float slope = 1.0 - normal.z;
+            float grass = 0.0;
+            float rock = 0.0;
+            float snow = 0.0;
+    
+            { // Snow
+                snow = saturate(4.0 * (height-0.49));
+                snow *= saturate(pow(saturate(1.0 - slope), 2.0)) * 12.0;
+    
+                //snow -= 0.6;
+                //snow *= 0.5;
+                snow = saturate(snow);
+                snow = pow(snow, 2.0);
+            }
+    
+            { // Rock
+                rock = saturate((pow(slope, 1.2) * 12.0 - 0.02) * 4.5);
+            }
+    
+            { // Grass
+                grass = 1.0 - saturate(rock + snow);
+            }
+    
+    
+            // Material definitions
+    
+            MaterialShaderOutput grass_mat = make_default_material_output();
+            grass_mat.basecolor = texture(grass_tex, terrain_uv * grass_tex_ratio).rgb;
+            grass_mat.roughness = texture(grass_rough, terrain_uv * grass_tex_ratio).r;
+            grass_mat.normal = texture(grass_normal, terrain_uv * grass_tex_ratio).rgb*2.0-1.0;
+            grass_mat.specular_ior = 0.;
+    
+            MaterialShaderOutput rock_mat = make_default_material_output();
+            rock_mat.basecolor = texture(rock_tex, terrain_uv * grass_tex_ratio).rgb;
+            rock_mat.roughness = texture(rock_rough, terrain_uv * grass_tex_ratio).r;
+            rock_mat.normal = texture(rock_normal, terrain_uv * grass_tex_ratio).rgb*2.0-1.0;
+            rock_mat.specular_ior = 1.7;
+    
+            MaterialShaderOutput snow_mat = make_default_material_output();
+            snow_mat.basecolor = vec3(0.6, 0.6, 0.9);
+            snow_mat.roughness = 0.5;
+            snow_mat.specular_ior = 1.7;
+    
+            m.basecolor = vec3(0);
+            m.shading_model = SHADING_MODEL_DEFAULT;
+            m.specular_ior = 0.0;
+            m.metallic = 0.0;
+            m.roughness = 0.0;
+            m.shading_model_param0 = 0.0;
+            m.normal = vec3(0);
+    
+            merge_material_output(m, grass_mat, grass);
+            merge_material_output(m, rock_mat, rock);
+            merge_material_output(m, snow_mat, snow);
+    
+            m.normal = normalize(tbn * m.normal);
+        }
+        
+

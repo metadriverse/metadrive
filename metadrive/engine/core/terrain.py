@@ -185,11 +185,11 @@ class Terrain(BaseObject):
         if not self._terrain_shader_set:
             if engine.use_render_pipeline:
                 engine.render_pipeline.reload_shaders()
-                terrain_effect = AssetLoader.file_path("effect", "terrain_effect.yaml")
+                terrain_effect = AssetLoader.file_path("shaders", "terrain_effect.yaml")
                 engine.render_pipeline.set_effect(self._mesh_terrain, terrain_effect, {}, 100)
             else:
-                vert = AssetLoader.file_path("shaders", "terrain.vert.glsl")
-                frag = AssetLoader.file_path("shaders", "terrain.frag.glsl")
+                vert = AssetLoader.file_path("../shaders", "terrain.vert.glsl")
+                frag = AssetLoader.file_path("../shaders", "terrain.frag.glsl")
                 terrain_shader = Shader.load(Shader.SL_GLSL, vert, frag)
                 self._mesh_terrain.set_shader(terrain_shader)
             # # height
@@ -221,8 +221,8 @@ class Terrain(BaseObject):
         Returns: None
 
         """
-        vert = AssetLoader.file_path("shaders", "terrain.vert.glsl")
-        frag = AssetLoader.file_path("shaders", "terrain.frag.glsl")
+        vert = AssetLoader.file_path("../shaders", "terrain.vert.glsl")
+        frag = AssetLoader.file_path("../shaders", "terrain.frag.glsl")
         terrain_shader = Shader.load(Shader.SL_GLSL, vert, frag)
         self._mesh_terrain.clear_shader()
         self._mesh_terrain.set_shader(terrain_shader)

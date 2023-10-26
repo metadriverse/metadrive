@@ -200,7 +200,9 @@ class PSSM:
                                  border_bias=self.border_bias,
                                  fixed_bias=self.fixed_bias,
                                  use_pssm=self.use_pssm,
-                                 fog=self.fog)
+                                 fog=self.fog,
+                                 split_count=self.num_splits,
+                                 light_direction=self.engine.world_light.direction_pos)
 
     def create_render_buffer(self, size_x, size_y, depth_bits, depth_tex):
         """
