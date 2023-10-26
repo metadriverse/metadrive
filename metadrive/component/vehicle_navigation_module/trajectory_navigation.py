@@ -1,4 +1,5 @@
 from collections import deque
+from metadrive.constants import CamMask
 
 import numpy as np
 from panda3d.core import NodePath, Material
@@ -41,6 +42,8 @@ class TrajectoryNavigation(BaseNavigation):
             name=name,
             vehicle_config=vehicle_config
         )
+        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
+
         self._route_completion = 0
         self.checkpoints = None  # All check points
 

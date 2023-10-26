@@ -1,4 +1,5 @@
 from panda3d._rplight import PSSMCameraRig
+from metadrive.constants import CamMask
 from panda3d.core import PTA_LMatrix4
 from panda3d.core import Texture
 from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsOutput
@@ -21,7 +22,7 @@ class PSSM:
         self.split_regions = []
 
         # Basic PSSM configuration
-        self.num_splits = 5
+        self.num_splits = 2
         self.split_resolution = 1024
         self.border_bias = 0.058
         self.fixed_bias = 0.5
@@ -126,9 +127,9 @@ class PSSM:
         """
         self.camera_rig = PSSMCameraRig(self.num_splits)
         # Set the max distance from the camera where shadows are rendered
-        self.camera_rig.set_pssm_distance(256)
+        self.camera_rig.set_pssm_distance(32)
         # Set the distance between the far plane of the frustum and the sun, objects farther do not cas shadows
-        self.camera_rig.set_sun_distance(512)
+        self.camera_rig.set_sun_distance(64)
         # Set the logarithmic factor that defines the splits
         self.camera_rig.set_logarithmic_factor(2.4)
 
@@ -183,6 +184,7 @@ class PSSM:
         for i in range(self.num_splits):
             camera_np = self.camera_rig.get_camera(i)
             camera_np.node().set_scene(self.engine.render)
+            camera_np.node().setCameraMask(CamMask.Shadow)
             self.split_regions[i].set_camera(camera_np)
 
     def set_shader_inputs(self, target):

@@ -15,7 +15,7 @@ class DemoWaymoEnv(WaymoEnv):
             seeds = [i for i in range(self.config["num_scenarios"])]
             seeds.remove(self.current_seed)
             seed = random.choice(seeds)
-        return super(DemoWaymoEnv, self).reset(seed=seed)
+        return super(DemoWaymoEnv, self).reset(seed=2)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 #version 330
 
 // Number of splits in the PSSM, it must be in line with what is configured in the PSSMCameraRig
-const int split_count=5;
+const int split_count=2;
 uniform  vec3 light_direction;
 
 uniform mat3 p3d_NormalMatrix;
