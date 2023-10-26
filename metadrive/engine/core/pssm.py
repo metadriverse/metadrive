@@ -33,9 +33,9 @@ class PSSM:
         self.buffer = None
 
         # Cast shadow
-        engine.world_light.direction_np.node().set_shadow_caster(True, 1024, 1024)
-        engine.world_light.direction_np.node().getLens().set_near_far(0, 1024)
-        engine.world_light.direction_np.node().getLens().set_film_size(1024, 1024)
+        engine.world_light.direction_np.node().set_shadow_caster(True, 256, 256)
+        engine.world_light.direction_np.node().getLens().set_near_far(0, 512)
+        engine.world_light.direction_np.node().getLens().set_film_size(512, 512)
 
     def init(self):
         """
