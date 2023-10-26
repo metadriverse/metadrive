@@ -1,5 +1,7 @@
 from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
+from metadrive.policy.idm_policy import IDMPolicy
+
 
 if __name__ == "__main__":
     env = MetaDriveEnv(
@@ -8,6 +10,7 @@ if __name__ == "__main__":
             "traffic_density": 0.1,
             "start_seed": 4,
             "stack_size": 5,
+            "agent_policy": IDMPolicy,
             # "debug": True,
             # "debug_panda3d": True,
             "vehicle_config": dict(image_source="rgb_camera"),
@@ -43,7 +46,7 @@ if __name__ == "__main__":
         #      ObservationType.show_gray_scale_array(o["image"][:, :, i])
         # image = env.render(mode="any str except human", text={"can you see me": i})
         # ObservationType.show_gray_scale_array(image)
-        if tm or tc:
-            # print("Reset")
-            env.reset()
+        # if tm or tc:
+        #     # print("Reset")
+        #     env.reset()
     env.close()

@@ -548,9 +548,8 @@ class BaseEngine(EngineCore, Randomizable):
 
     def setup_main_camera(self):
         from metadrive.engine.core.main_camera import MainCamera
-        # Not we should always enable main camera if image obs is required! Or RGBCamera will return incorrect result
-        if self.mode == RENDER_MODE_ONSCREEN or (self.mode == RENDER_MODE_OFFSCREEN and
-                                                 self.global_config["vehicle_config"]["image_source"] == "main_camera"):
+        # Not we should always enable main camera RGBCamera will return incorrect result, as we are using PSSM!
+        if self.mode != RENDER_MODE_NONE:
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None
