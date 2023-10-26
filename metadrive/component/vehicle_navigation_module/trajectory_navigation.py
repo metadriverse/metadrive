@@ -42,7 +42,8 @@ class TrajectoryNavigation(BaseNavigation):
             name=name,
             vehicle_config=vehicle_config
         )
-        self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
+        if self.origin is not None:
+            self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
 
         self._route_completion = 0
         self.checkpoints = None  # All check points

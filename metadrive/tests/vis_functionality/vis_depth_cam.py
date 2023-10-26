@@ -13,6 +13,7 @@ if __name__ == "__main__":
             # "use_render": True,
             "image_observation": True,
             "rgb_clip": True,
+            "debug": True,
             "interface_panel": ["depth_camera"],
             "sensors": dict(depth_camera=(DepthCamera, 800, 600)),
             "vehicle_config": dict(image_source="depth_camera"),
