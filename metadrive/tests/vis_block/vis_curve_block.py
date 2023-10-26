@@ -1,3 +1,4 @@
+"""This file visualizes a Curve block. Use mouse left button to draw down for zooming out."""
 from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork

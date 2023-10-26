@@ -1,3 +1,4 @@
+"""This file visualizes a StdInterSection block and a StdTInterSection block."""
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.std_intersection import StdInterSection
 from metadrive.component.pgblock.std_t_intersection import StdTInterSection
@@ -9,13 +10,10 @@ if __name__ == "__main__":
     from metadrive.engine.asset_loader import initialize_asset_loader
 
     initialize_asset_loader(test)
-
     global_network = NodeRoadNetwork()
     first = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
-
     intersection = StdInterSection(3, first.get_socket(0), global_network, 1)
-    # print(intersection.construct_block(test.render, test.world))
-
+    intersection.construct_block(test.render, test.world)
     id = 4
     for socket_idx in range(intersection.SOCKET_NUM):
         block = StdTInterSection(id, intersection.get_socket(socket_idx), global_network, id)
