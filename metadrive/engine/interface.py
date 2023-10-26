@@ -25,7 +25,7 @@ class Interface:
     def __init__(self, base_engine):
         self._node_path_list = []
         # self.engine = base_engine
-        self.vehicle_panel = None
+        self.dashboard = None
         self.right_panel = None
         self.mid_panel = None
         self.left_panel = None
@@ -46,8 +46,8 @@ class Interface:
     def after_step(self):
         if self.engine.current_track_vehicle is not None and self.need_interface and self.engine.mode != RENDER_MODE_NONE:
             track_v = self.engine.current_track_vehicle
-            if self.vehicle_panel is not None:
-                self.vehicle_panel.update_vehicle_state(track_v)
+            if self.dashboard is not None:
+                self.dashboard.update_vehicle_state(track_v)
             self._render_contact_result(track_v.contact_results)
             if hasattr(track_v, "navigation") and track_v.navigation is not None:
                 self._update_navi_arrow(track_v.navigation.navi_arrow_dir)
@@ -70,7 +70,7 @@ class Interface:
                 else:
                     raise ValueError("Can not add > 3 panels!")
                 if panel_name == "dashboard":
-                    self.vehicle_panel = self.engine.get_sensor(panel_name)
+                    self.dashboard = self.engine.get_sensor(panel_name)
 
             self.arrow = self.engine.aspect2d.attachNewNode("arrow")
             self._node_path_list.append(self.arrow)

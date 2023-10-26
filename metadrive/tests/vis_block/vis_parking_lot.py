@@ -1,3 +1,4 @@
+"""This file visualizes a ParkingLot block. Use mouse left button to draw down for zooming out."""
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.parking_lot import ParkingLot
 from metadrive.component.pgblock.std_intersection import StdInterSection

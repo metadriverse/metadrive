@@ -1,3 +1,7 @@
+"""
+This file visualizes a map with Merge block and a Split block, which is similar to a Bottleneck block.
+This environment is interactive.
+"""
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.envs.metadrive_env import MetaDriveEnv

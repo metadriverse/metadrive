@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>metadrive_example_bridge</name>
+    <version>0.0.0</version>
+    <description>example ros2 bridge for metadrive</description>
+    <maintainer email="zhizheng@cs.ucla.edu">Zhizheng Liu</maintainer>
+    <license>MIT</license>
+    <exec_depend>vision_msgs</exec_depend>
+    <exec_depend>vision_msgs_rviz_plugins</exec_depend>
+    <export>
+        <build_type>ament_python</build_type>
+    </export>
+</package>

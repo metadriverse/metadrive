@@ -1,3 +1,5 @@
+"""This file visualizes a small town. Please zoom out in the pop-up window."""
+from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.roundabout import Roundabout
@@ -7,12 +9,11 @@ from metadrive.component.pgblock.t_intersection import TInterSection
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
-from metadrive.component.pg_space import Parameter
 
 if __name__ == "__main__":
     FirstPGBlock.ENTRANCE_LENGTH = 0.5
     test = TestBlock(False)
-    initialize_asset_loader(test)
+    initialize_asset_loader(engine=test)
     global_network = NodeRoadNetwork()
     blocks = []
     init_block = FirstPGBlock(global_network, 3.0, 3, test.render, test.world, 1)

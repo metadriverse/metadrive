@@ -54,7 +54,6 @@ if __name__ == "__main__":
 
     # for sensor in env.vehicle.image_sensors.values():
     #     sensor.remove_display_region(env.engine)
-    # env.vehicle.vehicle_panel.remove_display_region(env.engine)
     # env.vehicle.contact_result_render.detachNode()
     # env.vehicle.navigation._right_arrow.detachNode()
 
