@@ -1,10 +1,22 @@
+from panda3d._rplight import PSSMCameraRig
+from panda3d.core import PTA_LMatrix4
+from panda3d.core import Texture
+from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsOutput
 
-class PSSMShadow:
+
+class PSSM:
     """
     This is the implementation of PSSM for adding shadwo for the scene.
     It is based on https://github.com/el-dee/panda3d-samples
     """
-    def __init__(self):
+
+    def __init__(self, engine):
+        assert engine.terrain, "terrain should be created before having this shadow"
+        assert engine.world_light, "world_light should be created before having this shadow"
+
+        # engine
+        self.engine = engine
+
         self.camera_rig = None
         self.split_regions = []
 
@@ -16,8 +28,221 @@ class PSSMShadow:
         self.use_pssm = True
         self.freeze_pssm = False
         self.fog = True
-        self.last_cache_reset = globalClock.get_frame_time()
+        self.last_cache_reset = engine.clock.get_frame_time()
 
-        # Increase camera FOV as well as the far plane
-        self.camLens.set_fov(90)
-        self.camLens.set_near_far(0.1, 50000)
+        # Cast shadow
+        engine.world_light.direction_np.node().set_shadow_caster(True, 1024, 1024)
+        engine.world_light.direction_np.node().set_near_far(0, 1024)
+        engine.world_light.direction_np.node().set_film_size(1024, 1024)
+
+        # Create the PSSM
+        self.create_pssm_camera_rig()
+        self.create_pssm_buffer()
+        self.attach_pssm_camera_rig()
+        self.set_shader_inputs(engine.terrain.mesh_terrain)
+
+    @property
+    def terrain(self):
+        """
+        Pointer to created mesh terrain
+        Returns: mesh_terrain node path
+
+        """
+        return self.engine.terrain.mesh_terrain
+
+    @property
+    def directional_light(self):
+        """
+        Return existing directional light
+        Returns: Directional Light node path
+
+        """
+        return self.engine.world_light.direction_np
+
+    def toggle_shadows_mode(self):
+        """
+        Switch between shadow casting or not
+        Returns: None
+
+        """
+        self.use_pssm = not self.use_pssm
+        self.terrain.set_shader_inputs(use_pssm=self.use_pssm)
+
+    def toggle_freeze_pssm(self):
+        """
+        Stop update shadow
+        Returns: None
+
+        """
+        self.freeze_pssm = not self.freeze_pssm
+
+    def toggle_fog(self):
+        """
+        Enable fog
+        Returns: None
+
+        """
+        self.fog = not self.fog
+        self.terrain.set_shader_inputs(fog=self.fog)
+
+    def update(self, task):
+        """
+        Engine task for updating shadow caster
+        Args:
+            task: Panda task, will be filled automatically
+
+        Returns: task.con (task.continue)
+
+        """
+        if not self.freeze_pssm:
+            # Update the camera position and the light direction
+            light_dir = self.directional_light.get_mat().xform(-self.directional_light.node().get_direction()).xyz
+            self.camera_rig.update(self.engine.camera, light_dir)
+        cache_diff = self.engine.clock - self.last_cache_reset
+        if cache_diff > 5.0:
+            self.last_cache_reset = self.engine.clock.get_frame_time()
+            self.camera_rig.reset_film_size_cache()
+
+        src_mvp_array = self.camera_rig.get_mvp_array()
+        mvp_array = PTA_LMatrix4()
+        for array in src_mvp_array:
+            mvp_array.push_back(array)
+        self.terrain.set_shader_inputs(pssm_mvps=mvp_array)
+
+        return task.cont
+
+    def create_pssm_camera_rig(self):
+        """
+        Construct the actual PSSM rig
+        Returns: None
+
+        """
+        self.camera_rig = PSSMCameraRig(self.num_splits)
+        # Set the max distance from the camera where shadows are rendered
+        self.camera_rig.set_pssm_distance(2048)
+        # Set the distance between the far plane of the frustum and the sun, objects farther do not cas shadows
+        self.camera_rig.set_sun_distance(1024)
+        # Set the logarithmic factor that defines the splits
+        self.camera_rig.set_logarithmic_factor(2.4)
+
+        self.camera_rig.set_border_bias(self.border_bias)
+        # Enable CSM splits snapping to avoid shadows flickering when moving
+        self.camera_rig.set_use_stable_csm(True)
+        # Keep the film size roughly constant to avoid flickering when moving
+        self.camera_rig.set_use_fixed_film_size(True)
+        # Set the resolution of each split shadow map
+        self.camera_rig.set_resolution(self.split_resolution)
+        self.camera_rig.reparent_to(self.render)
+
+    def create_pssm_buffer(self):
+        """
+        Create the depth buffer
+        The depth buffer is the concatenation of num_splits shadow maps
+        Returns: NOne
+
+        """
+        self.depth_tex = Texture("PSSMShadowMap")
+        self.buffer = self.create_render_buffer(
+            self.split_resolution * self.num_splits, self.split_resolution,
+            32,
+            self.depth_tex)
+
+        # Remove all unused display regions
+        self.buffer.remove_all_display_regions()
+        self.buffer.get_display_region(0).set_active(False)
+        self.buffer.disable_clears()
+
+        # Set a clear on the buffer instead on all regions
+        self.buffer.set_clear_depth(1)
+        self.buffer.set_clear_depth_active(True)
+
+        # Prepare the display regions, one for each split
+        for i in range(self.num_splits):
+            region = self.buffer.make_display_region(
+                i / self.num_splits,
+                i / self.num_splits + 1 / self.num_splits, 0, 1)
+            region.set_sort(25 + i)
+            # Clears are done on the buffer
+            region.disable_clears()
+            region.set_active(True)
+            self.split_regions.append(region)
+
+    def attach_pssm_camera_rig(self):
+        """
+        Attach the cameras to the shadow stage
+        Returns: None
+
+        """
+        for i in range(5):
+            camera_np = self.camera_rig.get_camera(i)
+            camera_np.node().set_scene(self.render)
+            self.split_regions[i].set_camera(camera_np)
+
+    def set_shader_inputs(self, target):
+        """
+        Configure the parameters for the PSSM Shader
+        Args:
+            target: Target node path to set shader input
+
+        Returns: None
+
+        """
+        target.set_shader_inputs(PSSMShadowAtlas=self.depth_tex,
+                                 pssm_mvps=self.camera_rig.get_mvp_array(),
+                                 pssm_nearfar=self.camera_rig.get_nearfar_array(),
+                                 border_bias=self.border_bias,
+                                 fixed_bias=self.fixed_bias,
+                                 use_pssm=self.use_pssm,
+                                 fog=self.fog)
+
+    def create_render_buffer(self, size_x, size_y, depth_bits, depth_tex):
+        """
+        Boilerplate code to create a render buffer producing only a depth texture
+        Args:
+            size_x: Render buffer size x
+            size_y: Render buffer size y
+            depth_bits: bit for Depth test
+            depth_tex: Deprecated
+
+        Returns: FrameBuffer for rendering into
+
+        """
+        window_props = WindowProperties.size(size_x, size_y)
+        buffer_props = FrameBufferProperties()
+
+        buffer_props.set_rgba_bits(0, 0, 0, 0)
+        buffer_props.set_accum_bits(0)
+        buffer_props.set_stencil_bits(0)
+        buffer_props.set_back_buffers(0)
+        buffer_props.set_coverage_samples(0)
+        buffer_props.set_depth_bits(depth_bits)
+
+        if depth_bits == 32:
+            buffer_props.set_float_depth(True)
+
+        buffer_props.set_force_hardware(True)
+        buffer_props.set_multisamples(0)
+        buffer_props.set_srgb_color(False)
+        buffer_props.set_stereo(False)
+        buffer_props.set_stencil_bits(0)
+
+        buffer = self.engine.graphics_engine.make_output(
+            self.engine.win.get_pipe(), "pssm_buffer", 1,
+            buffer_props, window_props, GraphicsPipe.BF_refuse_window,
+            self.engine.win.gsg, self.engine.win)
+
+        if buffer is None:
+            print("Failed to create buffer")
+            return
+
+        buffer.add_render_texture(
+            self.depth_tex, GraphicsOutput.RTM_bind_or_copy,
+            GraphicsOutput.RTP_depth)
+
+        buffer.set_sort(-1000)
+        buffer.disable_clears()
+        buffer.get_display_region(0).disable_clears()
+        buffer.get_overlay_display_region().disable_clears()
+        buffer.get_overlay_display_region().set_active(False)
+
+        return buffer

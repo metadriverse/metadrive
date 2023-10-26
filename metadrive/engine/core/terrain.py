@@ -433,6 +433,15 @@ class Terrain(BaseObject):
         heightfield[:length, -length:] = array_3
         heightfield[-length:, -length:] = array_3
 
+    @property
+    def mesh_terrain(self):
+        """
+        Exposing the mesh_terrain for outside use, i.e. shadow caster
+        Returns: mesh_terrain node path
+
+        """
+        return self._mesh_terrain
+
 # Some useful threads
 # GeoMipTerrain:
 # https://discourse.panda3d.org/t/texture-mapping-according-with-vertex-position-terrain-generation/28929

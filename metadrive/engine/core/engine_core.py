@@ -4,7 +4,6 @@ import time
 from typing import Optional, Union, Tuple
 
 import gltf
-from metadrive.engine.core.draw_line import ColorLineNodePath
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
@@ -15,11 +14,13 @@ from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
 from metadrive.engine.core.collision_callback import collision_callback
+from metadrive.engine.core.draw_line import ColorLineNodePath
 from metadrive.engine.core.force_fps import ForceFPS
 from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.core.light import Light
 from metadrive.engine.core.onscreen_message import ScreenMessage
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.engine.core.pssm import PSSM
 from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
 from metadrive.utils.utils import is_mac, setup_logger
@@ -292,8 +293,14 @@ class EngineCore(ShowBase.ShowBase):
                 self.render.setLight(self.world_light.direction_np)
                 self.render.setLight(self.world_light.ambient_np)
 
-                # pssm shadow
+                # lens property
+                lens = self.cam.node().getLens()
+                lens.setFov(self.global_config["camera_fov"])
+                lens.set_near_far(0.1, 50000)
 
+                # setup pssm shadow
+                self.pssm = PSSM(self)
+                self.task_mgr.add(self.pssm.update)
 
                 # enable default shaders
                 self.render.setShaderAuto()
@@ -303,9 +310,6 @@ class EngineCore(ShowBase.ShowBase):
             self.cam.node().setCameraMask(CamMask.MainCam)
             self.cam.node().getDisplayRegion(0).setClearColorActive(True)
             self.cam.node().getDisplayRegion(0).setClearColor(BKG_COLOR)
-            lens = self.cam.node().getLens()
-
-            lens.setFov(self.global_config["camera_fov"])
 
             # ui and render property
             if self.global_config["show_fps"]:
