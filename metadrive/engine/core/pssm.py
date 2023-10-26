@@ -10,7 +10,6 @@ class PSSM:
     This is the implementation of PSSM for adding shadwo for the scene.
     It is based on https://github.com/el-dee/panda3d-samples
     """
-
     def __init__(self, engine):
         assert engine.terrain, "terrain should be created before having this shadow"
         assert engine.world_light, "world_light should be created before having this shadow"
@@ -151,9 +150,8 @@ class PSSM:
         """
         self.depth_tex = Texture("PSSMShadowMap")
         self.buffer = self.create_render_buffer(
-            self.split_resolution * self.num_splits, self.split_resolution,
-            32,
-            self.depth_tex)
+            self.split_resolution * self.num_splits, self.split_resolution, 32, self.depth_tex
+        )
 
         # Remove all unused display regions
         self.buffer.remove_all_display_regions()
@@ -167,8 +165,8 @@ class PSSM:
         # Prepare the display regions, one for each split
         for i in range(self.num_splits):
             region = self.buffer.make_display_region(
-                i / self.num_splits,
-                i / self.num_splits + 1 / self.num_splits, 0, 1)
+                i / self.num_splits, i / self.num_splits + 1 / self.num_splits, 0, 1
+            )
             region.set_sort(25 + i)
             # Clears are done on the buffer
             region.disable_clears()
@@ -196,15 +194,17 @@ class PSSM:
         Returns: None
 
         """
-        target.set_shader_inputs(PSSMShadowAtlas=self.depth_tex,
-                                 pssm_mvps=self.camera_rig.get_mvp_array(),
-                                 pssm_nearfar=self.camera_rig.get_nearfar_array(),
-                                 border_bias=self.border_bias,
-                                 fixed_bias=self.fixed_bias,
-                                 use_pssm=self.use_pssm,
-                                 fog=self.fog,
-                                 split_count=self.num_splits,
-                                 light_direction=self.engine.world_light.direction_pos)
+        target.set_shader_inputs(
+            PSSMShadowAtlas=self.depth_tex,
+            pssm_mvps=self.camera_rig.get_mvp_array(),
+            pssm_nearfar=self.camera_rig.get_nearfar_array(),
+            border_bias=self.border_bias,
+            fixed_bias=self.fixed_bias,
+            use_pssm=self.use_pssm,
+            fog=self.fog,
+            split_count=self.num_splits,
+            light_direction=self.engine.world_light.direction_pos
+        )
 
     def create_render_buffer(self, size_x, size_y, depth_bits, depth_tex):
         """
@@ -238,17 +238,15 @@ class PSSM:
         buffer_props.set_stencil_bits(0)
 
         buffer = self.engine.graphics_engine.make_output(
-            self.engine.win.get_pipe(), "pssm_buffer", 1,
-            buffer_props, window_props, GraphicsPipe.BF_refuse_window,
-            self.engine.win.gsg, self.engine.win)
+            self.engine.win.get_pipe(), "pssm_buffer", 1, buffer_props, window_props, GraphicsPipe.BF_refuse_window,
+            self.engine.win.gsg, self.engine.win
+        )
 
         if buffer is None:
             print("Failed to create buffer")
             return
 
-        buffer.add_render_texture(
-            self.depth_tex, GraphicsOutput.RTM_bind_or_copy,
-            GraphicsOutput.RTP_depth)
+        buffer.add_render_texture(self.depth_tex, GraphicsOutput.RTM_bind_or_copy, GraphicsOutput.RTP_depth)
 
         buffer.set_sort(-1000)
         buffer.disable_clears()

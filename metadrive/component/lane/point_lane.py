@@ -176,7 +176,9 @@ class PointLane(AbstractLane, InterpolatingLine):
                 direction_v = end - middle
                 theta = math.atan2(direction_v[1], direction_v[0])
                 length = self.length
-                self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta)
+                self._construct_lane_only_vis_segment(
+                    block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta
+                )
 
         # build physics contact
         if self.need_lane_localization:

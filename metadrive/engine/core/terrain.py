@@ -119,25 +119,23 @@ class Terrain(BaseObject):
         # # update collision every time!
         # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
         # self._generate_collision_mesh(heightfield_img, self.height_scale)
-        self._generate_mesh_vis_terrain(self._terrain_size,
-                                        heightfield_tex,
-                                        semantic_tex,
-                                        height_scale=self._height_scale,
-                                        height_offset=0)
+        self._generate_mesh_vis_terrain(
+            self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale, height_offset=0
+        )
         self.attach_to_world(self.engine.render, self.engine.physics_world)
 
         # reset position
         self.set_position(center_position)
 
     def _generate_mesh_vis_terrain(
-            self,
-            size,
-            heightfield: Texture,
-            attribute_tex: Texture,
-            target_triangle_width=10,
-            height_scale=100,
-            height_offset=0.,
-            engine=None,
+        self,
+        size,
+        heightfield: Texture,
+        attribute_tex: Texture,
+        target_triangle_width=10,
+        height_scale=100,
+        height_offset=0.,
+        engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -453,6 +451,7 @@ class Terrain(BaseObject):
 
         """
         return self._mesh_terrain
+
 
 # Some useful threads
 # GeoMipTerrain:

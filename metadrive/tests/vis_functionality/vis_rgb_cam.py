@@ -2,7 +2,6 @@ from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.policy.idm_policy import IDMPolicy
 
-
 if __name__ == "__main__":
     env = MetaDriveEnv(
         {
