@@ -241,6 +241,22 @@ class AbstractLane(MetaDriveType):
         segment_np.setP(-90)
         segment_np.reparentTo(block.lane_node_path)
 
+        if block.naive_draw_map:
+            cm = CardMaker('card')
+            cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
+            cm.setHasNormals(True)
+            cm.setUvRange((-length / 5, -width / 5), (length / 5, width / 5))
+            card = block.lane_vis_node_path.attachNewNode(cm.generate())
+            self._node_path_list.append(card)
+
+            card.setPos(panda_vector(position, np.random.rand() * 0.02 - 0.015))
+
+            card.setH(theta / np.pi * 180)
+            card.setP(-90)
+            # card.setTransparency(TransparencyAttrib.MMultisample)
+            # card.setTexture(block.ts_normal, block.road_normal)
+            card.setTexture(block.ts_color, block.road_texture)
+
     @staticmethod
     def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: PGLineType):
         node_path_list = []
@@ -287,18 +303,18 @@ class AbstractLane(MetaDriveType):
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
 
-        # if block.render and not block.use_render_pipeline:
-        #     # For visualization
-        #     lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-        #     lane_line.setTwoSided(False)
-        #     lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
-        #     height = 0
-        #     lane_line.setTexture(block.ts_color, block.lane_line_texture)
-        #     height += 0.01 if line_color == PGLineColor.YELLOW else 0
-        #     lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-        #     lane_line.setPos(panda_vector(middle, height))
-        #     lane_line.reparentTo(parent_np)
-        #     lane_line.set_color(line_color)
+        if block.naive_draw_map:
+            # For visualization
+            lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            lane_line.setTwoSided(False)
+            lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
+            height = 0
+            lane_line.setTexture(block.ts_color, block.lane_line_texture)
+            height += 0.01 if line_color == PGLineColor.YELLOW else 0
+            lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
+            lane_line.setPos(panda_vector(middle, height))
+            lane_line.reparentTo(parent_np)
+            lane_line.set_color(line_color)
 
         return node_path_list
 
@@ -367,6 +383,27 @@ class AbstractLane(MetaDriveType):
         block.static_nodes.append(segment_node)
         segment_np.reparentTo(block.lane_node_path)
 
+    def _construct_lane_only_vis_segment(self, block, position, width, length, theta):
+        """
+        Only create visual part for this lane, usually used with _construct_lane_only_physics_polygon()
+        """
+        # The lane surface is created with terrain now
+        if block.naive_draw_map:
+            length += 0.1
+            theta = panda_heading(theta)
+            cm = CardMaker('card')
+            cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
+            cm.setHasNormals(True)
+            cm.setUvRange((0, 0), (length / 20, width / 10))
+            card = block.lane_vis_node_path.attachNewNode(cm.generate())
+            self._node_path_list.append(card)
+
+            card.setPos(panda_vector(position, np.random.rand() * 0.02 - 0.015))
+
+            card.setH(theta / np.pi * 180)
+            card.setP(-90)
+            # card.setTransparency(TransparencyAttrib.MMultisample)
+            card.setTexture(block.ts_color, block.road_texture)
 
     def destroy(self):
         try:

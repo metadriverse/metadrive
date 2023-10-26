@@ -90,6 +90,14 @@ class CircularLane(PGLane):
             self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
             return
 
+        if block.naive_draw_map:
+            for i in range(segment_num):
+                middle = self.position(self.length * (i + .5) / segment_num, 0)
+                theta = self.heading_theta_at(self.length * (i + .5) / segment_num)
+                width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
+                length = self.length
+                self._construct_lane_only_vis_segment(block, middle, width, length * 1.3 / segment_num, theta)
+
         self._construct_lane_only_physics_polygon(block, self.polygon)
 
     @property
