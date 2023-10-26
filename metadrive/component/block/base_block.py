@@ -330,9 +330,9 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self._global_network = None
         super(BaseBlock, self).destroy()
 
-    def __del__(self):
-        self.destroy()
-        logger.debug("{} is being deleted.".format(type(self)))
+    # def __del__(self):
+    # self.destroy()
+    # logger.debug("{} is being deleted.".format(type(self)))
 
     @property
     def bounding_box(self):

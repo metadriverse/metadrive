@@ -187,7 +187,6 @@ class BaseNavigation:
         self.FORCE_CALCULATE = force
 
     def __del__(self):
-        self.destroy()
         logging.debug("{} is destroyed".format(self.__class__.__name__))
 
     def get_current_lateral_range(self, current_position, engine) -> float:

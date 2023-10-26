@@ -1,3 +1,8 @@
+"""
+This file create a TestBlock class, which resembles the ``engine'' in normal code. By building this TestBlock,
+we can directly pop up a Panda3D window and visualize the content, e.g. the road blocks that are constructed via
+block.construct_block(test_block.render, test_block.world).
+"""
 from typing import Union, Tuple
 
 from direct.showbase import ShowBase
@@ -115,7 +120,6 @@ class TestBlock(ShowBase.ShowBase):
         line_seg.setThickness(thickness)
         np = NodePath(line_seg.create(False))
         np.reparentTo(self.render)
-        # TODO(PZH): NodePath is not registered.
 
     def show_bounding_box(self, road_network):
         bound_box = road_network.get_bounding_box()

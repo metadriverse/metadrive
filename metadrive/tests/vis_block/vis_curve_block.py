@@ -1,3 +1,4 @@
+"""This file visualizes a Curve block. Use mouse left button to draw down for zooming out."""
 from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
@@ -13,10 +14,10 @@ if __name__ == "__main__":
     curve = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
     for i in range(1, 13):
         curve = Curve(i, curve.get_socket(0), global_network, i)
-        # print(i)
+        print(i)
         while True:
             success = curve.construct_block(test.render, test.world)
-            # print(success)
+            print(success)
             if success:
                 break
             curve.destruct_block(test.world)

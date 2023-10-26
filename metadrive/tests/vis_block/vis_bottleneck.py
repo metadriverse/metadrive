@@ -1,3 +1,4 @@
+"""This file visualizes a Bottleneck block."""
 from metadrive.component.pgblock.bottleneck import Merge, Split
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
@@ -10,7 +11,7 @@ if __name__ == "__main__":
     initialize_asset_loader(test)
 
     global_network = NodeRoadNetwork()
-    b = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
+    b = FirstPGBlock(global_network, 3.0, 2, test.render, test.world, 1)
     for i in range(1, 13):
         tp = Merge if i % 3 == 0 else Split
         b = tp(i, b.get_socket(0), global_network, i)

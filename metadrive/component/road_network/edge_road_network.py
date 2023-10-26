@@ -96,11 +96,17 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         return ret
 
     def destroy(self):
+        """
+        Destroy all lanes in this road network
+        Returns: None
+
+        """
         super(EdgeRoadNetwork, self).destroy()
-        for k, v in self.graph.items():
-            v.lane.destroy()
-            self.graph[k]: lane_info = None
-        self.graph = None
+        if self.graph is not None:
+            for k, v in self.graph.items():
+                v.lane.destroy()
+                self.graph[k]: lane_info = None
+            self.graph = None
 
     def __del__(self):
         logging.debug("{} is released".format(self.__class__.__name__))

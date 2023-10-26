@@ -18,11 +18,9 @@ class Nameable:
 
     def __del__(self):
         try:
-            str(self)
-        except AttributeError:
-            pass
-        else:
             logging.debug("{} is destroyed".format(str(self)))
+        except:
+            pass
 
     def __repr__(self):
         return "{}".format(str(self))

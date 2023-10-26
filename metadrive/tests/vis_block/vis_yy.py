@@ -1,3 +1,7 @@
+"""
+This file visualizes a map with Merge block and a Split block, which is similar to a Bottleneck block.
+This environment is interactive.
+"""
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.envs.metadrive_env import MetaDriveEnv
@@ -38,7 +42,7 @@ if __name__ == "__main__":
     )
 
     o, _ = env.reset()
-    # print("vehicle num", len(env.engine.traffic_manager.vehicles))
+    print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])
         info["fuel"] = env.vehicle.energy_consumption
@@ -50,6 +54,6 @@ if __name__ == "__main__":
             }
         )
         if tm or tc:
-            # print("Reset")
+            print("Reset")
             env.reset()
     env.close()
