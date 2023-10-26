@@ -1,6 +1,9 @@
 from metadrive.component.map.pg_map import PGMap
+from metadrive.component.pg_space import Parameter
+from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.roundabout import Roundabout
+from metadrive.component.pgblock.straight import Straight
 from metadrive.component.road_network import Road
 from metadrive.manager.pg_map_manager import PGMapManager
 import copy
@@ -27,7 +30,77 @@ from metadrive.constants import HELP_MESSAGE
 
 class RacingMap(PGMap):
     def _generate(self):
-        super(RacingMap, self)._generate()
+        FirstPGBlock.ENTRANCE_LENGTH = 0.5
+        parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
+        assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
+
+        # test = TestBlock(False)
+        # initialize_asset_loader(engine=test)
+        # global_network = NodeRoadNetwork()
+        blocks = []
+        init_block = FirstPGBlock(self.road_network, 3.0, 3, parent_node_path, physics_world, 1)
+        self.blocks.append(init_block)
+
+        block_s1 = Straight(1, init_block.get_socket(0), self.road_network, 1)
+        block_s1.construct_from_config(
+            {
+                Parameter.length: 100
+            }, parent_node_path, physics_world
+        )
+        self.blocks.append(block_s1)
+
+        block_c1 = Curve(2, block_s1.get_socket(0), self.road_network, 1)
+        block_c1.construct_from_config({
+            Parameter.length: 200,
+            Parameter.radius: 100,
+            Parameter.angle: 90,
+            Parameter.dir: 1,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c1)
+
+        block_s2 = Straight(3, block_c1.get_socket(0), self.road_network, 1)
+        block_s2.construct_from_config(
+            {
+                Parameter.length: 100,
+            }, parent_node_path, physics_world
+        )
+        self.blocks.append(block_s2)
+
+        block_c2 = Curve(4, block_s2.get_socket(0), self.road_network, 1)
+        block_c2.construct_from_config({
+            Parameter.length: 100,
+            Parameter.radius: 60,
+            Parameter.angle: 90,
+            Parameter.dir: 1,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c2)
+
+        block_c3 = Curve(5, block_c2.get_socket(0), self.road_network, 1)
+        block_c3.construct_from_config({
+            Parameter.length: 100,
+            Parameter.radius: 60,
+            Parameter.angle: 90,
+            Parameter.dir: 1,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c3)
+
+        block_s3 = Straight(6, block_c3.get_socket(0), self.road_network, 1)
+        block_s3.construct_from_config(
+            {
+                Parameter.length: 200,
+            }, parent_node_path, physics_world
+        )
+        self.blocks.append(block_s3)
+
+        block_c4 = Curve(7, block_s3.get_socket(0), self.road_network, 1)
+        block_c4.construct_from_config({
+            Parameter.length: 100,
+            Parameter.radius: 60,
+            Parameter.angle: 90,
+            Parameter.dir: 1,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c4)
+
 
 # class RoundaboutSpawnManager(SpawnManager):
 #     def update_destination_for(self, vehicle_id, vehicle_config):
@@ -51,6 +124,9 @@ class RacingMapManager(PGMapManager):
         # self.current_map.spawn_roads = config["spawn_roads"]
 
 
+
+
+
 class RacingEnv(MetaDriveEnv):
     # @staticmethod
     # def default_config() -> Config:
@@ -61,26 +137,48 @@ class RacingEnv(MetaDriveEnv):
         # self.engine.update_manager("spawn_manager", RoundaboutSpawnManager())
         self.engine.update_manager("map_manager", RacingMapManager())
 
+
+
+
+
+
 if __name__ == "__main__":
-    config = dict(
+    Racing_config = dict(
         # controller="joystick",
         # num_agents=2,
         use_render=False,
         manual_control=True,
         traffic_density=0.1,
-        num_scenarios=10000,
         random_agent_model=False,
-        random_lane_width=True,
-        random_lane_num=True,
+        top_down_camera_initial_x=95,
+        top_down_camera_initial_y=15,
+        top_down_camera_initial_z=120,
+        # random_lane_width=True,
+        # random_lane_num=True,
         on_continuous_line_done=False,
         out_of_route_done=True,
         vehicle_config=dict(show_lidar=False, show_navi_mark=False),
-        map_config={"config": "CCC", "type": "block_sequence"},
-        start_seed=10,
     )
+
+    # MABidirectionConfig = dict(
+    #     spawn_roads=[Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3), -Road(Split.node(3, 0, 0), Split.node(3, 0, 1))],
+    #     num_agents=20,
+    #     map_config=dict(exit_length=60, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
+    #     top_down_camera_initial_x=95,
+    #     top_down_camera_initial_y=15,
+    #     top_down_camera_initial_z=120,
+    #     cross_yellow_line_done=True,
+    #     vehicle_config={
+    #         "show_lidar": False,
+    #         # "show_side_detector": True,
+    #         # "show_lane_line_detector": True,
+    #         "side_detector": dict(num_lasers=4, distance=50),  # laser num, distance
+    #         "lane_line_detector": dict(num_lasers=4, distance=20)
+    #     }  # laser num, distance
+    # )
     parser = argparse.ArgumentParser()
     args = parser.parse_args()
-    env = RacingEnv(config)
+    env = RacingEnv(Racing_config)
     try:
         o, _ = env.reset(seed=21)
         print(HELP_MESSAGE)
