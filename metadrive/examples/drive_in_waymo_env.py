@@ -10,6 +10,9 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 
 
 class DemoWaymoEnv(WaymoEnv):
+    """
+    Make sure non-repetitive scenes are showed
+    """
     def reset(self, seed=None):
         if self.engine is not None:
             seeds = [i for i in range(self.config["num_scenarios"])]
