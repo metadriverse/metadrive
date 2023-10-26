@@ -321,13 +321,13 @@ class Terrain(BaseObject):
 
         # grass
         self.grass_tex = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
+            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
         )
         self.grass_normal = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
+            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_NRM_1K.jpg")
         )
         self.grass_rough = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_BUMP_1K.jpg")
         )
 
         v_wrap = Texture.WMRepeat

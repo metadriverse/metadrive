@@ -89,7 +89,7 @@ vec3 get_color(vec3 diffuse, sampler2D normal_tex, float tex_ratio, mat3 tbn){
 
 void main() {
   float road_tex_ratio = 32.0 * elevation_texture_ratio;
-  float grass_tex_ratio = 128.0 * elevation_texture_ratio;
+  float grass_tex_ratio = 64.0 * elevation_texture_ratio;
   float r_min = (1-1/elevation_texture_ratio)/2;
   float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
   vec4 attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);
