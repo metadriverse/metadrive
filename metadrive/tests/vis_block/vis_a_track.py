@@ -1,4 +1,8 @@
-from metadrive import MetaDriveEnv
+"""
+This file visualizes a single track.
+Please draw the left button of mouse down to zoom out and see the whole picture of the scene.
+"""
+from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.roundabout import Roundabout
@@ -8,20 +12,12 @@ from metadrive.component.pgblock.t_intersection import TInterSection
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
-from metadrive.component.pg_space import Parameter
 
 if __name__ == "__main__":
     FirstPGBlock.ENTRANCE_LENGTH = 0.5
     test = TestBlock(False)
-    from metadrive.envs.base_env import BASE_DEFAULT_CONFIG
-    from metadrive.engine.engine_utils import initialize_engine
 
-    default_config = MetaDriveEnv.default_config()
-    default_config["use_render"] = False
-    # default_config["use_render"] = True
-    default_config["debug"] = True
-    engine = initialize_engine(default_config)
-    initialize_asset_loader(engine)
+    initialize_asset_loader(engine=test)
 
     global_network = NodeRoadNetwork()
     blocks = []
