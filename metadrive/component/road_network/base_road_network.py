@@ -86,6 +86,11 @@ class BaseRoadNetwork:
             np.removeNode()
 
     def destroy(self):
+        """
+        Destroy all lanes in this network
+        Returns: None
+
+        """
         self.bounding_box = None
 
     def has_connection(self, lane_index_1, lane_index_2):

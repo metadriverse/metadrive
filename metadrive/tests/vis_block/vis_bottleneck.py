@@ -11,7 +11,7 @@ if __name__ == "__main__":
     initialize_asset_loader(test)
 
     global_network = NodeRoadNetwork()
-    b = FirstPGBlock(global_network, 3.0, 1, test.render, test.world, 1)
+    b = FirstPGBlock(global_network, 3.0, 2, test.render, test.world, 1)
     for i in range(1, 13):
         tp = Merge if i % 3 == 0 else Split
         b = tp(i, b.get_socket(0), global_network, i)

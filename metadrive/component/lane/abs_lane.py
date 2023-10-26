@@ -412,9 +412,6 @@ class AbstractLane(MetaDriveType):
         else:
             clear_node_list(self._node_path_list)
 
-    def __del__(self):
-        self.destroy()
-
     def get_polyline(self, interval=2, lateral=0):
         """
         This method will return the center line of this Lane in a discrete vector representation

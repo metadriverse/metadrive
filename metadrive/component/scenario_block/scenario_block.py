@@ -169,7 +169,3 @@ class ScenarioBlock(BaseBlock):
         self.map_index = None
         # self.map_data = None
         super(ScenarioBlock, self).destroy()
-
-    def __del__(self):
-        self.destroy()
-        super(ScenarioBlock, self).__del__()

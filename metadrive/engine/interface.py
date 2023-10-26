@@ -196,7 +196,7 @@ class Interface:
             dir_0 = np.array([math.cos(lane_0_heading), math.sin(lane_0_heading), 0])
             dir_1 = np.array([math.cos(lane_1_heading), math.sin(lane_1_heading), 0])
             cross_product = np.cross(dir_1, dir_0)
-            left = False if cross_product[-1] < 0 else True
+            left = True if cross_product[-1] < 0 else False
             if not self._is_showing_arrow:
                 self._is_showing_arrow = True
             if left:
