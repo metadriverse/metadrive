@@ -21,7 +21,7 @@ class PSSM:
         self.split_regions = []
 
         # Basic PSSM configuration
-        self.num_splits = 6
+        self.num_splits = 5
         self.split_resolution = 1024
         self.border_bias = 0.058
         self.fixed_bias = 0.5
@@ -102,21 +102,20 @@ class PSSM:
         Returns: task.con (task.continue)
 
         """
-        if not self.freeze_pssm:
-            # Update the camera position and the light direction
-            light_dir = self.directional_light.get_mat().xform(-self.directional_light.node().get_direction()).xyz
-            self.camera_rig.update(self.engine.camera, light_dir)
-        cache_diff = self.engine.clock.get_frame_time() - self.last_cache_reset
-        if cache_diff > 5.0:
-            self.last_cache_reset = self.engine.clock.get_frame_time()
-            self.camera_rig.reset_film_size_cache()
-
         src_mvp_array = self.camera_rig.get_mvp_array()
         mvp_array = PTA_LMatrix4()
         for array in src_mvp_array:
             mvp_array.push_back(array)
         self.terrain.set_shader_inputs(pssm_mvps=mvp_array)
 
+        if not self.freeze_pssm:
+            # Update the camera position and the light direction
+            light_dir = self.directional_light.get_mat().xform(-self.directional_light.node().get_direction()).xyz
+            self.camera_rig.update(self.engine.camera, light_dir)
+        cache_diff = self.engine.clock.get_frame_time() - self.last_cache_reset
+        # if cache_diff > 5.0:
+        self.last_cache_reset = self.engine.clock.get_frame_time()
+        self.camera_rig.reset_film_size_cache()
         return task.cont
 
     def create_pssm_camera_rig(self):
@@ -127,9 +126,9 @@ class PSSM:
         """
         self.camera_rig = PSSMCameraRig(self.num_splits)
         # Set the max distance from the camera where shadows are rendered
-        self.camera_rig.set_pssm_distance(2048)
+        self.camera_rig.set_pssm_distance(256)
         # Set the distance between the far plane of the frustum and the sun, objects farther do not cas shadows
-        self.camera_rig.set_sun_distance(1024)
+        self.camera_rig.set_sun_distance(512)
         # Set the logarithmic factor that defines the splits
         self.camera_rig.set_logarithmic_factor(2.4)
 

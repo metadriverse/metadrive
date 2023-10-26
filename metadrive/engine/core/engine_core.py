@@ -288,7 +288,7 @@ class EngineCore(ShowBase.ShowBase):
                 self.sky_box = SkyBox(not self.global_config["show_skybox"])
                 self.sky_box.attach_to_world(self.render, self.physics_world)
 
-                self.world_light = Light(self.global_config)
+                self.world_light = Light()
                 self.world_light.attach_to_world(self.render, self.physics_world)
                 self.render.setLight(self.world_light.direction_np)
                 self.render.setLight(self.world_light.ambient_np)
@@ -296,7 +296,7 @@ class EngineCore(ShowBase.ShowBase):
                 # lens property
                 lens = self.cam.node().getLens()
                 lens.setFov(self.global_config["camera_fov"])
-                lens.set_near_far(0.1, 50000)
+                lens.set_near_far(0.1, 2048)
 
                 # setup pssm shadow
                 self.pssm = PSSM(self)

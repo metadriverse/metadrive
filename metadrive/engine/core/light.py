@@ -8,7 +8,7 @@ class Light(BaseObject):
     """
     It is dynamic element since it will follow the camera
     """
-    def __init__(self, config):
+    def __init__(self):
         super(Light, self).__init__(random_seed=0)
         self.direction_np = NodePath(DirectionalLight("direction light"))
         # self.light.node().setScene(self.render)
@@ -28,9 +28,12 @@ class Light(BaseObject):
         # self.light.node().getLens().setNearFar(10, 100)
 
         self.direction_np.node().setColor(LVector4(1, 1, 1, 1))
+        self.direction_np.node().set_color_temperature(6000)
         self.direction_np.node().setCameraMask(CamMask.Shadow)
+        self.direction_np.setPos(-100, 100, 120)
+        self.direction_np.lookAt(0, 0, 0)
 
-        dlens = self.direction_np.node().getLens()
+        # dlens = self.direction_np.node().getLens()
         # if self.global_light:
         #     dlens.setFilmSize(64, 64)
         # else:
@@ -48,12 +51,15 @@ class Light(BaseObject):
 
         self._node_path_list.append(self.ambient_np)
 
-    def step(self, pos):
-        raise DeprecationWarning("Use light.step_pos instead")
-
     def set_pos(self, pos):
-        self.direction_np.setPos(pos[0] - 100, pos[1] + 100, 120)
-        self.direction_np.lookAt(pos[0], pos[1], 0)
+        """
+        Disable sync pos now
+        Args:
+            pos: target light position
 
-    def reset(self, random_seed=None, *args, **kwargs):
-        raise DeprecationWarning("Use light.step_pos instead")
+        Returns:
+
+        """
+        return
+        self.direction_np.setPos(-100, 100, 120)
+        self.direction_np.lookAt(0, 0, 0)
