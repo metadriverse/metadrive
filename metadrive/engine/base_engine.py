@@ -328,7 +328,7 @@ class BaseEngine(EngineCore, Randomizable):
         self.terrain.reset(center_p)
 
         # init shadow if required
-        if self.pssm.buffer is None:
+        if hasattr(self, "pssm") and self.pssm.buffer is None:
             self.pssm.init()
 
         # move skybox

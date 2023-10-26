@@ -531,4 +531,4 @@ class BaseObject(BaseRunnable, MetaDriveType):
         Returns: Boolean
 
         """
-        return self.engine is not None and self.engine.use_render_pipeline
+        return self.engine.use_render_pipeline

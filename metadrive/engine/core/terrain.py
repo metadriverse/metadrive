@@ -34,7 +34,7 @@ class Terrain(BaseObject):
 
         # visualization mesh feature
         heightfield_image_size = 4096  # fixed image size 4096*4096
-        self._height_scale = engine.global_config["height_scale"]  # [m]
+        self._height_scale = engine.global_config["height_scale"] if engine.use_render_pipeline else 25  # [m]
         self._drivable_region_extension = engine.global_config["drivable_region_extension"]  # [m] road marin
         self._terrain_size = 2048  # [m]
         self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
@@ -51,7 +51,7 @@ class Terrain(BaseObject):
 
         if self.render and show_terrain:
             # if engine.use_render_pipeline:
-            self._load_mesh_terrain_textures()
+            self._load_mesh_terrain_textures(engine)
             self._mesh_terrain_node = ShaderTerrainMesh()
             # disable env probe as some vehicle models may break it
             # self.probe = engine.render_pipeline.add_environment_probe()
@@ -185,7 +185,7 @@ class Terrain(BaseObject):
         if not self._terrain_shader_set:
             if engine.use_render_pipeline:
                 engine.render_pipeline.reload_shaders()
-                terrain_effect = AssetLoader.file_path("shaders", "terrain_effect.yaml")
+                terrain_effect = AssetLoader.file_path("../shaders", "terrain_effect.yaml")
                 engine.render_pipeline.set_effect(self._mesh_terrain, terrain_effect, {}, 100)
             else:
                 vert = AssetLoader.file_path("../shaders", "terrain.vert.glsl")
@@ -302,7 +302,7 @@ class Terrain(BaseObject):
         self.terrain_texture.setAnisotropicDegree(8)
         card.setQuat(LQuaternionf(math.cos(-math.pi / 4), math.sin(-math.pi / 4), 0, 0))
 
-    def _load_mesh_terrain_textures(self, anisotropic_degree=16, filter_type=Texture.FTLinearMipmapLinear):
+    def _load_mesh_terrain_textures(self, engine, anisotropic_degree=16, filter_type=Texture.FTLinearMipmapLinear):
         """
         Only maintain one copy of all asset
         :param anisotropic_degree: https://docs.panda3d.org/1.10/python/programming/texturing/texture-filter-types
@@ -320,15 +320,27 @@ class Terrain(BaseObject):
         self.heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
 
         # grass
-        self.grass_tex = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
-        )
-        self.grass_normal = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_NRM_1K.jpg")
-        )
-        self.grass_rough = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_BUMP_1K.jpg")
-        )
+        if engine.use_render_pipeline:
+            # grass
+            self.grass_tex = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
+            )
+            self.grass_normal = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
+            )
+            self.grass_rough = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+            )
+        else:
+            self.grass_tex = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
+            )
+            self.grass_normal = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_NRM_1K.jpg")
+            )
+            self.grass_rough = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_BUMP_1K.jpg")
+            )
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
