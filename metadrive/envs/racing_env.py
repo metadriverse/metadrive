@@ -148,7 +148,8 @@ if __name__ == "__main__":
         # num_agents=2,
         use_render=False,
         manual_control=True,
-        traffic_density=0.1,
+        traffic_density=0,
+        num_scenarios=10000,
         random_agent_model=False,
         top_down_camera_initial_x=95,
         top_down_camera_initial_y=15,
@@ -180,7 +181,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     env = RacingEnv(Racing_config)
     try:
-        o, _ = env.reset(seed=21)
+        o, _ = env.reset()
         print(HELP_MESSAGE)
         env.vehicle.expert_takeover = True
         for i in range(1, 1000000000):
