@@ -49,68 +49,115 @@ class RacingMap(PGMap):
         # )
         # self.blocks.append(block_s1)
 
-        block_c1 = Curve(1, init_block.get_socket(0), self.road_network, 1)
+        block_s1 = Straight(1, init_block.get_socket(0),  self.road_network, 1)
+        block_s1.construct_from_config(
+            {
+                Parameter.length: 100
+            },parent_node_path, physics_world
+        )
+        self.blocks.append(block_s1)
+
+        block_c1 = Curve(2, block_s1.get_socket(0),  self.road_network, 1)
         block_c1.construct_from_config({
-            Parameter.length: 100,
-            Parameter.radius: 50,
+            Parameter.length: 200,
+            Parameter.radius: 100,
             Parameter.angle: 90,
             Parameter.dir: 1,
         }, parent_node_path, physics_world)
         self.blocks.append(block_c1)
 
-        block_s2 = Straight(2, block_c1.get_socket(0), self.road_network, 1)
+        block_s2 = Straight(3, block_c1.get_socket(0),  self.road_network, 1)
         block_s2.construct_from_config(
             {
                 Parameter.length: 100,
-            }, parent_node_path, physics_world
+            },parent_node_path, physics_world
         )
         self.blocks.append(block_s2)
-        #
-        block_c2 = Curve(3, block_s2.get_socket(0), self.road_network, 1)
+
+        block_c2 = Curve(4, block_s2.get_socket(0),  self.road_network, 1)
         block_c2.construct_from_config({
             Parameter.length: 100,
-            Parameter.radius: 50,
+            Parameter.radius: 60,
             Parameter.angle: 90,
             Parameter.dir: 1,
         }, parent_node_path, physics_world)
         self.blocks.append(block_c2)
 
-        block_c3 = Curve(4, block_c2.get_socket(0), self.road_network, 1)
+        block_c3 = Curve(5, block_c2.get_socket(0),  self.road_network, 1)
         block_c3.construct_from_config({
             Parameter.length: 100,
-            Parameter.radius: 50,
+            Parameter.radius: 60,
             Parameter.angle: 90,
             Parameter.dir: 1,
         }, parent_node_path, physics_world)
         self.blocks.append(block_c3)
 
-        block_s3 = Straight(5, block_c3.get_socket(0), self.road_network, 1)
+        block_s3 = Straight(6, block_c3.get_socket(0),  self.road_network, 1)
         block_s3.construct_from_config(
             {
-                Parameter.length: 100,
+                Parameter.length: 200,
             }, parent_node_path, physics_world
         )
         self.blocks.append(block_s3)
 
-        block_c4 = Curve(6, block_s3.get_socket(0), self.road_network, 1)
+        block_c4 = Curve(7, block_s3.get_socket(0),  self.road_network, 1)
         block_c4.construct_from_config({
-            Parameter.length: 100,
-            Parameter.radius: 50,
+            Parameter.length: 80,
+            Parameter.radius: 40,
             Parameter.angle: 90,
             Parameter.dir: 1,
         }, parent_node_path, physics_world)
         self.blocks.append(block_c4)
 
+        block_c5 = Curve(8, block_c4.get_socket(0),  self.road_network, 1)
+        block_c5.construct_from_config({
+            Parameter.length: 40,
+            Parameter.radius: 50,
+            Parameter.angle: 180,
+            Parameter.dir: 1,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c5)
 
+        block_c6 = Curve(9, block_c5.get_socket(0), self.road_network, 1)
+        block_c6.construct_from_config({
+            Parameter.length: 40,
+            Parameter.radius: 50,
+            Parameter.angle: 220,
+            Parameter.dir: 0,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c6)
 
-        pos_from_node = list(self.road_network.graph.keys())[-2]
-        pos_to_node = list(self.road_network.graph[pos_from_node].keys())[-1]
-        self.road_network.graph[pos_to_node] = {
-            '>': self.road_network.graph[pos_from_node][pos_to_node]
-        }
+        block_c7 = Curve(10, block_c6.get_socket(0), self.road_network, 1)
+        block_c7.construct_from_config({
+            Parameter.length: 40,
+            Parameter.radius: 20,
+            Parameter.angle: 180,
+            Parameter.dir: 1,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c7)
 
+        block_s4 = Straight(11, block_c7.get_socket(0), self.road_network, 1)
+        block_s4.construct_from_config({
+            Parameter.length: 100,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_s4)
 
-        # to connect last road and the first
+        block_c8 = Curve(12, block_s4.get_socket(0), self.road_network, 1)
+        block_c8.construct_from_config({
+            Parameter.length: 100,
+            Parameter.radius: 40,
+            Parameter.angle: 140,
+            Parameter.dir: 0,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c8)
+
+        # # to connect last road and the first
+        # pos_from_node = list(self.road_network.graph.keys())[-2]
+        # pos_to_node = list(self.road_network.graph[pos_from_node].keys())[-1]
+        # self.road_network.graph[pos_to_node] = {
+        #     '>': self.road_network.graph[pos_from_node][pos_to_node]
+        # }
+
 
 
 

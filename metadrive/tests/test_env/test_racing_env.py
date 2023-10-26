@@ -21,6 +21,7 @@ def test_racing_env_idm(render=False):
         on_continuous_line_done=False,
         out_of_route_done=True,
         vehicle_config=dict(show_lidar=False, show_navi_mark=False),
+        agent_policy=IDMPolicy,
     )
 
     env = RacingEnv(racing_config)
