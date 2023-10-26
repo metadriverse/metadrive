@@ -191,6 +191,8 @@ BASE_DEFAULT_CONFIG = dict(
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
     # debug panda3d
     debug_panda3d=False,
+    # global light
+    shadow_range=32,
 
     # ===== Mesh Terrain =====
     # road will have a marin whose width is determined by this value, unit: [m]

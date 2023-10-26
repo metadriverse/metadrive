@@ -126,7 +126,7 @@ class PSSM:
         """
         self.camera_rig = PSSMCameraRig(self.num_splits)
         # Set the max distance from the camera where shadows are rendered
-        self.camera_rig.set_pssm_distance(32)
+        self.camera_rig.set_pssm_distance(self.engine.global_config["shadow_range"])
         # Set the distance between the far plane of the frustum and the sun, objects farther do not cas shadows
         self.camera_rig.set_sun_distance(64)
         # Set the logarithmic factor that defines the splits

@@ -49,6 +49,8 @@ class Terrain(BaseObject):
         self._terrain_shader_set = False  # only set once
         self.probe = None
 
+        self.show_terrain = show_terrain
+
         if self.render and show_terrain:
             # if engine.use_render_pipeline:
             self._load_mesh_terrain_textures(engine)
@@ -84,48 +86,49 @@ class Terrain(BaseObject):
             self._node_path_list.append(np)
             self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
 
-        # Make shader terrain
-        self.detach_from_world(self.engine.physics_world)
-        assert self.engine.current_map is not None, "Can not find current map"
-        semantics = self.engine.current_map.get_semantic_map(
-            size=self._semantic_map_size,
-            pixels_per_meter=self._semantic_map_pixel_per_meter,
-            polyline_thickness=int(1024 / self._semantic_map_size),
-            layer=["lane", "lane_line"]
-        )
-        semantics = semantics.astype(np.float32)
-        semantic_tex = Texture()
-        semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
-        semantic_tex.setRamImage(semantics)
+        if self.render and self.show_terrain:
+            # Make shader terrain
+            self.detach_from_world(self.engine.physics_world)
+            assert self.engine.current_map is not None, "Can not find current map"
+            semantics = self.engine.current_map.get_semantic_map(
+                size=self._semantic_map_size,
+                pixels_per_meter=self._semantic_map_pixel_per_meter,
+                polyline_thickness=int(1024 / self._semantic_map_size),
+                layer=["lane", "lane_line"]
+            )
+            semantics = semantics.astype(np.float32)
+            semantic_tex = Texture()
+            semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
+            semantic_tex.setRamImage(semantics)
 
-        # we will downsmaple the precision after this
-        drivable_region = self.engine.current_map.get_height_map(
-            self._terrain_size, self._downsample_rate, self._drivable_region_extension
-        )
-        drivable_region_height = np.mean(self.heightfield_img[np.where(drivable_region)]).astype(np.uint16)
-        heightfield_img = np.where(drivable_region, drivable_region_height, self.heightfield_img)
+            # we will downsmaple the precision after this
+            drivable_region = self.engine.current_map.get_height_map(
+                self._terrain_size, self._downsample_rate, self._drivable_region_extension
+            )
+            drivable_region_height = np.mean(self.heightfield_img[np.where(drivable_region)]).astype(np.uint16)
+            heightfield_img = np.where(drivable_region, drivable_region_height, self.heightfield_img)
 
-        # set to zero height
-        heightfield_img -= drivable_region_height
+            # set to zero height
+            heightfield_img -= drivable_region_height
 
-        # down sample
-        heightfield_img = np.array(heightfield_img[::self._downsample_rate, ::self._downsample_rate])
-        heightfield = heightfield_img
+            # down sample
+            heightfield_img = np.array(heightfield_img[::self._downsample_rate, ::self._downsample_rate])
+            heightfield = heightfield_img
 
-        heightfield_tex = Texture()
-        heightfield_tex.setup2dTexture(*heightfield.shape[:2], Texture.TShort, Texture.FLuminance)
-        heightfield_tex.setRamImage(heightfield)
+            heightfield_tex = Texture()
+            heightfield_tex.setup2dTexture(*heightfield.shape[:2], Texture.TShort, Texture.FLuminance)
+            heightfield_tex.setRamImage(heightfield)
 
-        # # update collision every time!
-        # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
-        # self._generate_collision_mesh(heightfield_img, self.height_scale)
-        self._generate_mesh_vis_terrain(
-            self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale, height_offset=0
-        )
-        self.attach_to_world(self.engine.render, self.engine.physics_world)
+            # # update collision every time!
+            # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
+            # self._generate_collision_mesh(heightfield_img, self.height_scale)
+            self._generate_mesh_vis_terrain(
+                self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale, height_offset=0
+            )
+            self.attach_to_world(self.engine.render, self.engine.physics_world)
 
-        # reset position
-        self.set_position(center_position)
+            # reset position
+            self.set_position(center_position)
 
     def _generate_mesh_vis_terrain(
         self,
