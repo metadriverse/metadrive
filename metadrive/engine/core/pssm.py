@@ -21,7 +21,7 @@ class PSSM:
         self.split_regions = []
 
         # Basic PSSM configuration
-        self.num_splits = 5
+        self.num_splits = 6
         self.split_resolution = 1024
         self.border_bias = 0.058
         self.fixed_bias = 0.5
@@ -29,17 +29,25 @@ class PSSM:
         self.freeze_pssm = False
         self.fog = True
         self.last_cache_reset = engine.clock.get_frame_time()
+        self.depth_tex = None
+        self.buffer = None
 
         # Cast shadow
         engine.world_light.direction_np.node().set_shadow_caster(True, 1024, 1024)
-        engine.world_light.direction_np.node().set_near_far(0, 1024)
-        engine.world_light.direction_np.node().set_film_size(1024, 1024)
+        engine.world_light.direction_np.node().getLens().set_near_far(0, 1024)
+        engine.world_light.direction_np.node().getLens().set_film_size(1024, 1024)
 
-        # Create the PSSM
+    def init(self):
+        """
+        Create the PSSM. Lazy init
+        Returns: None
+
+        """
         self.create_pssm_camera_rig()
         self.create_pssm_buffer()
         self.attach_pssm_camera_rig()
-        self.set_shader_inputs(engine.terrain.mesh_terrain)
+        self.set_shader_inputs(self.engine.terrain.mesh_terrain)
+        self.engine.task_mgr.add(self.update)
 
     @property
     def terrain(self):
@@ -98,7 +106,7 @@ class PSSM:
             # Update the camera position and the light direction
             light_dir = self.directional_light.get_mat().xform(-self.directional_light.node().get_direction()).xyz
             self.camera_rig.update(self.engine.camera, light_dir)
-        cache_diff = self.engine.clock - self.last_cache_reset
+        cache_diff = self.engine.clock.get_frame_time() - self.last_cache_reset
         if cache_diff > 5.0:
             self.last_cache_reset = self.engine.clock.get_frame_time()
             self.camera_rig.reset_film_size_cache()
@@ -132,7 +140,7 @@ class PSSM:
         self.camera_rig.set_use_fixed_film_size(True)
         # Set the resolution of each split shadow map
         self.camera_rig.set_resolution(self.split_resolution)
-        self.camera_rig.reparent_to(self.render)
+        self.camera_rig.reparent_to(self.engine.render)
 
     def create_pssm_buffer(self):
         """
@@ -173,9 +181,9 @@ class PSSM:
         Returns: None
 
         """
-        for i in range(5):
+        for i in range(self.num_splits):
             camera_np = self.camera_rig.get_camera(i)
-            camera_np.node().set_scene(self.render)
+            camera_np.node().set_scene(self.engine.render)
             self.split_regions[i].set_camera(camera_np)
 
     def set_shader_inputs(self, target):

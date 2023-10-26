@@ -300,7 +300,6 @@ class EngineCore(ShowBase.ShowBase):
 
                 # setup pssm shadow
                 self.pssm = PSSM(self)
-                self.task_mgr.add(self.pssm.update)
 
                 # enable default shaders
                 self.render.setShaderAuto()

@@ -123,7 +123,7 @@ class BaseEngine(EngineCore, Randomizable):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -264,7 +264,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -327,6 +326,12 @@ class BaseEngine(EngineCore, Randomizable):
         # reset terrain
         center_p = self.current_map.get_center_point() if self.current_map else [0, 0]
         self.terrain.reset(center_p)
+
+        # init shadow if required
+        if self.pssm.buffer is None:
+            self.pssm.init()
+
+        # move skybox
         if self.sky_box is not None:
             self.sky_box.set_position(center_p)
 
