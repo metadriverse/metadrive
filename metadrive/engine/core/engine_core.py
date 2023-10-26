@@ -296,7 +296,6 @@ class EngineCore(ShowBase.ShowBase):
                 # lens property
                 lens = self.cam.node().getLens()
                 lens.setFov(self.global_config["camera_fov"])
-                lens.set_near_far(0.1, 2048)
 
                 # setup pssm shadow
                 self.pssm = PSSM(self)

@@ -68,18 +68,6 @@ in vec4 projecteds[1];
 
 out vec4 color;
 
-vec3 get_terrain_normal() {
-  const float terrain_height = 50.0;
-  vec3 pixel_size = vec3(1.0, -1.0, 0) / textureSize(ShaderTerrainMesh.heightfield, 0).xxx;
-  float u0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.yz).x * terrain_height;
-  float u1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.xz).x * terrain_height;
-  float v0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zy).x * terrain_height;
-  float v1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zx).x * terrain_height;
-  vec3 tangent = normalize(vec3(1.0, 0, u1 - u0));
-  vec3 binormal = normalize(vec3(0, 1.0, v1 - v0));
-  return normalize(cross(tangent, binormal));
-}
-
 // Projects a point using the given mvp
 vec3 project(mat4 mvp, vec3 p) {
     vec4 projected = mvp * vec4(p, 1);
@@ -93,8 +81,8 @@ vec3 get_color(vec3 diffuse, sampler2D normal_tex, float tex_ratio, mat3 tbn){
 
       vec3 basecolor = diffuse.xyz;
       normal = normalize(tbn * normal);
-      vec3 fake_sun = normalize(light_direction);
-      vec3 shading = max(0.0, dot(normal, fake_sun)) * diffuse;
+      vec3 light_dir = normalize(light_direction);
+      vec3 shading = max(0.0, dot(normal, light_dir)) * diffuse;
 
       return shading;
 }
@@ -106,6 +94,7 @@ void main() {
   float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
   vec4 attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);
 
+  // terrain normal
   vec3 pixel_size = vec3(1.0, -1.0, 0) / textureSize(ShaderTerrainMesh.heightfield, 0).xxx;
   float h_u0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.yz).x * height_scale;
   float h_u1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.xz).x * height_scale;
@@ -113,7 +102,8 @@ void main() {
   float h_v1 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.zx).x * height_scale;
   vec3 tangent = normalize(vec3(1, 0, h_u1 - h_u0));
   vec3 binormal = normalize(vec3(0, 1, h_v1 - h_v0));
-  vec3 normal = normalize(p3d_NormalMatrix * normalize(cross(tangent, binormal)));
+  vec3 terrain_normal = normalize(cross(tangent, binormal));
+  vec3 normal = normalize(p3d_NormalMatrix * terrain_normal);
   // normal.x *= -1;
 
   mat3 tbn = mat3(tangent, binormal, normal);
@@ -149,6 +139,13 @@ void main() {
       vec3 diffuse = texture(grass_tex, terrain_uv * grass_tex_ratio).rgb;
       color_origin=get_color(diffuse, grass_normal, grass_tex_ratio, tbn);
     }
+
+  // static shadow
+  vec3 light_dir = normalize(light_direction);
+  shading *= max(0.0, dot(terrain_normal, light_dir));
+//   shading += vec3(0.07, 0.07, 0.1);
+
+  // dynamic shadow
   if (use_pssm) {
     // Find in which split the current point is present.
     int split = 99;
@@ -183,7 +180,7 @@ void main() {
 
         shading *= shadow_factor;
     }
-  }
+    }
 
   shading += p3d_LightModel.ambient.xyz;
 
@@ -192,7 +189,7 @@ void main() {
   if (fog) {
     // Fake fog
     float dist = distance(vtx_pos, wspos_camera);
-    float fog_factor = smoothstep(0, 1, dist / 2000.0);
+    float fog_factor = smoothstep(0, 1, dist / 8000.0);
     shading = mix(shading, vec3(0.7, 0.7, 0.8), fog_factor);
   }
   color = vec4(shading, 1.0);
