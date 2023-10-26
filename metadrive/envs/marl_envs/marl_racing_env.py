@@ -1,33 +1,6 @@
 
-from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.component.map.pg_map import PGMap
-from metadrive.component.pg_space import Parameter
-from metadrive.component.pgblock.curve import Curve
-from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.roundabout import Roundabout
-from metadrive.component.pgblock.straight import Straight
-from metadrive.component.road_network import Road
-from metadrive.manager.pg_map_manager import PGMapManager
-import copy
-from metadrive import MetaDriveEnv
-from metadrive.component.map.pg_map import PGMap
-from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.roundabout import Roundabout
-from metadrive.component.road_network import Road
-from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
-from metadrive.manager.pg_map_manager import PGMapManager
-from metadrive.manager.spawn_manager import SpawnManager
+
 from metadrive.policy.idm_policy import IDMPolicy
-from metadrive.utils import Config
-
-
-import argparse
-import cv2
-import numpy as np
-
-from metadrive import MetaDriveEnv
-from metadrive.component.sensors.rgb_camera import RGBCamera
-from metadrive.constants import HELP_MESSAGE
 
 
 
@@ -50,14 +23,6 @@ from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.manager.spawn_manager import SpawnManager
 from metadrive.utils import Config
 
-
-import argparse
-import cv2
-import numpy as np
-
-from metadrive import MetaDriveEnv
-from metadrive.component.sensors.rgb_camera import RGBCamera
-from metadrive.constants import HELP_MESSAGE
 from metadrive.utils import Config
 from metadrive.utils.math import clip
 
@@ -65,7 +30,7 @@ Racing_config = dict(
     # controller="joystick",
     num_agents=2,
     use_render=False,
-    manual_control=True,
+    manual_control=False,
     traffic_density=0,
     num_scenarios=10000,
     random_agent_model=False,
@@ -80,6 +45,8 @@ Racing_config = dict(
     on_continuous_line_done=False,
     out_of_route_done=True,
     vehicle_config=dict(show_lidar=False, show_navi_mark=False),
+    agent_policy=IDMPolicy,
+
 )
 
 
@@ -309,113 +276,6 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
 
 
 
-def _draw():
-    env = MultiAgentRacingEnv()
-    o, _ = env.reset()
-    from metadrive.utils.draw_top_down_map import draw_top_down_map
-    import matplotlib.pyplot as plt
-
-    plt.imshow(draw_top_down_map(env.current_map))
-    plt.show()
-    env.close()
-
-
-def _expert():
-    env = MultiAgentRacingEnv(
-        {
-            "vehicle_config": {
-                "lidar": {
-                    "num_lasers": 240,
-                    "num_others": 4,
-                    "distance": 50
-                },
-            },
-            "use_AI_protector": True,
-            "save_level": 1.,
-            "debug_physics_world": True,
-
-            "use_render": False,
-            "debug": True,
-            "manual_control": True,
-            "num_agents": 2,
-            "agent_policy": IDMPolicy,
-        }
-    )
-    o, _ = env.reset()
-    total_r = 0
-    ep_s = 0
-    for i in range(1, 100000):
-        o, r, tm, tc, info = env.step(env.action_space.sample())
-        for r_ in r.values():
-            total_r += r_
-        ep_s += 1
-        tm.update({"total_r": total_r, "episode length": ep_s})
-        # env.render(text=d)
-        if tm["__all__"]:
-            print(
-                "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
-                    i, total_r, total_r / env.agent_manager.next_agent_count
-                )
-            )
-            break
-        if len(env.vehicles) == 0:
-            total_r = 0
-            print("Reset")
-            env.reset()
-    env.close()
-
-
-def _vis_debug_respawn():
-    env = MultiAgentRacingEnv(
-        {
-            "horizon": 100000,
-            "vehicle_config": {
-                "lidar": {
-                    "num_lasers": 72,
-                    "num_others": 0,
-                    "distance": 40
-                },
-                "show_lidar": False,
-            },
-            "debug_physics_world": True,
-            "use_render": False,
-            "debug": False,
-            "manual_control": True,
-            "num_agents": 2,
-        }
-    )
-    o, _ = env.reset()
-    total_r = 0
-    ep_s = 0
-    for i in range(1, 100000):
-        action = {k: [.0, 1.0] for k in env.vehicles.keys()}
-        o, r, tm, tc, info = env.step(action)
-        for r_ in r.values():
-            total_r += r_
-        ep_s += 1
-        # d.update({"total_r": total_r, "episode length": ep_s})
-        render_text = {
-            "total_r": total_r,
-            "episode length": ep_s,
-            "cam_x": env.main_camera.camera_x,
-            "cam_y": env.main_camera.camera_y,
-            "cam_z": env.main_camera.top_down_camera_height
-        }
-        env.render(text=render_text)
-        if tm["__all__"]:
-            print(
-                "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
-                    i, total_r, total_r / env.agent_manager.next_agent_count
-                )
-            )
-            # break
-        if len(env.vehicles) == 0:
-            total_r = 0
-            print("Reset")
-            env.reset()
-    env.close()
-
-
 def _vis():
     env = MultiAgentRacingEnv(
         {
@@ -430,8 +290,9 @@ def _vis():
             },
             "use_render": False,
             # "debug": True,
-            "manual_control": True,
+            "manual_control": False,
             "num_agents": 2,
+            "agent_policy":IDMPolicy
         }
     )
     o, _ = env.reset()
@@ -442,20 +303,7 @@ def _vis():
         for r_ in r.values():
             total_r += r_
         ep_s += 1
-        # d.update({"total_r": total_r, "episode length": ep_s})
-        render_text = {
-            "total_r": total_r,
-            "episode length": ep_s,
-            "cam_x": env.main_camera.camera_x,
-            "cam_y": env.main_camera.camera_y,
-            "cam_z": env.main_camera.top_down_camera_height,
-            "current_track_v": env.agent_manager.object_to_agent(env.current_track_vehicle.name)
-        }
-        track_v = env.agent_manager.object_to_agent(env.current_track_vehicle.name)
-        render_text["tack_v_reward"] = r[track_v]
-        render_text["dist_to_right"] = env.current_track_vehicle.dist_to_right_side
-        render_text["dist_to_left"] = env.current_track_vehicle.dist_to_left_side
-        env.render(text=render_text)
+
         if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
@@ -470,83 +318,10 @@ def _vis():
     env.close()
 
 
-def _profile():
-    import time
-    env = MultiAgentRacingEnv({"num_agents": 2})
-    obs, _ = env.reset()
-    start = time.time()
-    for s in range(10000):
-        o, r, tm, tc, i = env.step(env.action_space.sample())
-
-        # mask_ratio = env.engine.detector_mask.get_mask_ratio()
-        # print("Mask ratio: ", mask_ratio)
-
-        if all(tm.values()):
-            env.reset()
-        if (s + 1) % 100 == 0:
-            print(
-                "Finish {}/10000 simulation steps. Time elapse: {:.4f}. Average FPS: {:.4f}".format(
-                    s + 1,
-                    time.time() - start, (s + 1) / (time.time() - start)
-                )
-            )
-    print(f"(MetaDriveEnv) Total Time Elapse: {time.time() - start}")
 
 
-def _long_run():
-    # Please refer to test_ma_Bidirection_reward_done_alignment()
-    _out_of_road_penalty = 3
-    env = MultiAgentRacingEnv(
-        {
-            "num_agents": 2,
-            "vehicle_config": {
-                "lidar": {
-                    "num_others": 8
-                }
-            },
-            **dict(
-                out_of_road_penalty=_out_of_road_penalty,
-                crash_vehicle_penalty=1.333,
-                crash_object_penalty=11,
-                crash_vehicle_cost=13,
-                crash_object_cost=17,
-                out_of_road_cost=19,
-            )
-        }
-    )
-    try:
-        obs, _ = env.reset()
-        assert env.observation_space.contains(obs)
-        for step in range(10000):
-            act = env.action_space.sample()
-            o, r, tm, tc, i = env.step(act)
-            if step == 0:
-                assert not any(tm.values())
 
-            if any(tm.values()):
-                print("Current Done: {}\nReward: {}".format(d, r))
-                for kkk, ddd in tm.items():
-                    if ddd and kkk != "__all__":
-                        print("Info {}: {}\n".format(kkk, i[kkk]))
-                print("\n")
 
-            for kkk, rrr in r.items():
-                if rrr == -_out_of_road_penalty:
-                    assert tm[kkk]
-
-            if (step + 1) % 200 == 0:
-                print(
-                    "{}/{} Agents: {} {}\nO: {}\nR: {}\nD: {}\nI: {}\n\n".format(
-                        step + 1, 10000, len(env.vehicles), list(env.vehicles.keys()),
-                        {k: (oo.shape, oo.mean(), oo.min(), oo.max())
-                         for k, oo in o.items()}, r, d, i
-                    )
-                )
-            if tm["__all__"]:
-                print('Current step: ', step)
-                break
-    finally:
-        env.close()
 
 
 if __name__ == "__main__":
