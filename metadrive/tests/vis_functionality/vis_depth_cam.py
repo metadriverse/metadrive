@@ -10,7 +10,7 @@ if __name__ == "__main__":
             "start_seed": 4,
             "map": "SSSSS",
             "manual_control": False,
-            "use_render": False,
+            # "use_render": True,
             "image_observation": True,
             "rgb_clip": True,
             "interface_panel": ["depth_camera"],

@@ -38,7 +38,7 @@ class DepthCamera(BaseCamera):
         #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
         # else:
         if self.VIEW_GROUND:
-            ground = PNMImage(513, 513, 4)
+            ground = PNMImage(257, 257, 4)
             ground.fill(1., 1., 1.)
 
             self.GROUND = GeoMipTerrain("mySimpleTerrain")
@@ -71,11 +71,11 @@ class DepthCamera(BaseCamera):
         """
         from metadrive.utils import is_mac
         if is_mac():
-            vert_path = AssetLoader.file_path("shaders", "{}_mac.vert.glsl".format(self.shader_name))
-            frag_path = AssetLoader.file_path("shaders", "{}_mac.frag.glsl".format(self.shader_name))
+            vert_path = AssetLoader.file_path("../shaders", "{}_mac.vert.glsl".format(self.shader_name))
+            frag_path = AssetLoader.file_path("../shaders", "{}_mac.frag.glsl".format(self.shader_name))
         else:
-            vert_path = AssetLoader.file_path("shaders", "{}.vert.glsl".format(self.shader_name))
-            frag_path = AssetLoader.file_path("shaders", "{}.frag.glsl".format(self.shader_name))
+            vert_path = AssetLoader.file_path("../shaders", "{}.vert.glsl".format(self.shader_name))
+            frag_path = AssetLoader.file_path("../shaders", "{}.frag.glsl".format(self.shader_name))
         custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
         self.get_cam().node().setInitialState(
             RenderState.make(
