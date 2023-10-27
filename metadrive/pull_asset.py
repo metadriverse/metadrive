@@ -62,6 +62,8 @@ def pull_asset(update):
     # Remove the downloaded zip file (optional)
     if os.path.exists(zip_path):
         os.remove(zip_path)
+    if os.path.exists(zip_lock):
+        os.remove(zip_lock)
     logger.info("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
 
 
