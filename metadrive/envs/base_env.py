@@ -196,7 +196,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Mesh Terrain =====
     # road will have a marin whose width is determined by this value, unit: [m]
-    drivable_region_extension=6,
+    drivable_area_extension=6,
     # height scale for mountains, unit: [m]
     height_scale=120,
 

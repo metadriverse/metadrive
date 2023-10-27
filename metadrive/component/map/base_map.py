@@ -1,4 +1,7 @@
 import logging
+import geopandas as gpd
+from shapely.ops import unary_union
+from metadrive.utils.utils import time_me
 import math
 
 import cv2
@@ -144,13 +147,13 @@ class BaseMap(BaseRunnable):
 
     # @time_me
     def get_semantic_map(
-        self,
-        size=512,
-        pixels_per_meter=8,
-        color_setting=MapTerrainSemanticColor,
-        line_sample_interval=2,
-        polyline_thickness=1,
-        layer=("lane_line", "lane")
+            self,
+            size=512,
+            pixels_per_meter=8,
+            color_setting=MapTerrainSemanticColor,
+            line_sample_interval=2,
+            polyline_thickness=1,
+            layer=("lane_line", "lane")
     ):
         """
         Get semantics of the map for terrain generation
@@ -210,12 +213,13 @@ class BaseMap(BaseRunnable):
             self._semantic_map = mask
         return self._semantic_map
 
+    # @time_me
     def get_height_map(
-        self,
-        size=2048,
-        pixels_per_meter=1,
-        extension=2,
-        height=1,
+            self,
+            size=2048,
+            pixels_per_meter=1,
+            extension=2,
+            height=1,
     ):
         """
         Get height of the map for terrain generation
@@ -240,30 +244,19 @@ class BaseMap(BaseRunnable):
             center_p = self.get_center_point()
             need_scale = abs(extension - 1) > 1e-1
             for polygon in polygons:
-                if need_scale:
-                    scaled_polygon = Polygon(polygon).buffer(extension, join_style=2)
-                    if isinstance(scaled_polygon, MultiPolygon):
-                        scaled_polygons = scaled_polygon.geoms
-                    else:
-                        scaled_polygons = [scaled_polygon]
-                    for scaled_polygon in scaled_polygons:
-                        points = [
-                            [
-                                int(
-                                    (scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter +
-                                    size / 2
-                                ),
-                                int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) +
-                                size / 2
-                            ] for index in range(len(scaled_polygon.exterior.coords.xy[0]))
-                        ]
-                else:
-                    points = [
-                        [
-                            int((x - center_p[0]) * pixels_per_meter + size / 2),
-                            int((y - center_p[1]) * pixels_per_meter) + size / 2
-                        ] for x, y in polygon
-                    ]
+                points = [
+                    [
+                        int((x - center_p[0]) * pixels_per_meter + size / 2),
+                        int((y - center_p[1]) * pixels_per_meter) + size / 2
+                    ] for x, y in polygon
+                ]
                 cv2.fillPoly(mask, np.asarray([points]).astype(np.int32), color=[height])
+            if need_scale:
+                # Define a kernel. A 3x3 rectangle kernel
+                kernel = np.ones((extension * pixels_per_meter + 1, extension * pixels_per_meter + 1), np.uint8)
+
+                # Apply dilation
+                mask = cv2.dilate(mask, kernel, iterations=1)
+                mask = np.expand_dims(mask, axis=-1)
             self._height_map = mask
         return self._height_map

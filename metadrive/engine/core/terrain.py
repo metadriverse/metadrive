@@ -1,7 +1,8 @@
 # import numpy
+#
 
 import math
-
+from metadrive.utils.utils import time_me
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.bullet import ZUp, BulletHeightfieldShape
@@ -33,14 +34,13 @@ class Terrain(BaseObject):
         self.terrain_collision_mesh = None  # a 3d mesh, Not available yet!
 
         # visualization mesh feature
-        heightfield_image_size = 4096  # fixed image size 4096*4096
-        self._height_scale = engine.global_config["height_scale"] if engine.use_render_pipeline else 25  # [m]
-        self._drivable_region_extension = engine.global_config["drivable_region_extension"]  # [m] road marin
         self._terrain_size = 2048  # [m]
-        self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
+        self._height_scale = engine.global_config["height_scale"] if engine.use_render_pipeline else 25  # [m]
+        self._drivable_area_extension = engine.global_config["drivable_area_extension"]  # [m] road marin
+        self._heightmap_size = self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
+        self._heightfield_start = int((self._terrain_size - self._heightmap_size) / 2)
         self._semantic_map_pixel_per_meter = 22  # [m] how many pixels per meter
         # pre calculate some variables
-        self._downsample_rate = int(heightfield_image_size / self._terrain_size)  # downsample to 2048 m
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
 
         self._mesh_terrain = None
@@ -62,6 +62,7 @@ class Terrain(BaseObject):
             # else:
             #     self._generate_card_terrain()
 
+    @time_me
     def reset(self, center_position):
         """
         Update terrain according to current map
@@ -101,20 +102,23 @@ class Terrain(BaseObject):
             semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
             semantic_tex.setRamImage(semantics)
 
-            # we will downsmaple the precision after this
+            # modify default height image
             drivable_region = self.engine.current_map.get_height_map(
-                self._terrain_size, self._downsample_rate, self._drivable_region_extension
+                self._heightmap_size, 1, self._drivable_area_extension
             )
-            drivable_region_height = np.mean(self.heightfield_img[np.where(drivable_region)]).astype(np.uint16)
-            heightfield_img = np.where(drivable_region, drivable_region_height, self.heightfield_img)
+            # embed to the original height image
+            start = self._heightfield_start
+            end = self._heightfield_start + self._heightmap_size
+            heightfield = self.heightfield_img[start:end, start:end, ...]
+            drivable_region_height = np.mean(heightfield[np.where(drivable_region)]).astype(np.uint16)
+            heightfield = np.where(drivable_region, drivable_region_height, heightfield)
+            heightfield_img = np.copy(self.heightfield_img)
+            heightfield_img[start:end, start:end, ...] = heightfield
 
             # set to zero height
-            heightfield_img -= drivable_region_height
+            heightfield = heightfield_img - drivable_region_height
 
-            # down sample
-            heightfield_img = np.array(heightfield_img[::self._downsample_rate, ::self._downsample_rate])
-            heightfield = heightfield_img
-
+            # to panda texture
             heightfield_tex = Texture()
             heightfield_tex.setup2dTexture(*heightfield.shape[:2], Texture.TShort, Texture.FLuminance)
             heightfield_tex.setRamImage(heightfield)
@@ -131,14 +135,14 @@ class Terrain(BaseObject):
             self.set_position(center_position)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        height_scale=100,
-        height_offset=0.,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            height_scale=100,
+            height_offset=0.,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -319,7 +323,9 @@ class Terrain(BaseObject):
         # basic height_field
         heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
         heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
-        self.heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
+        heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
+        down_sample_rate = int(heightfield_tex.getYSize() / self._terrain_size)  # downsample to 2048 m
+        self.heightfield_img = np.array(heightfield_img[::down_sample_rate, ::down_sample_rate])
 
         # grass
         if engine.use_render_pipeline:
@@ -457,7 +463,6 @@ class Terrain(BaseObject):
 
         """
         return self._mesh_terrain
-
 
 # Some useful threads
 # GeoMipTerrain:
