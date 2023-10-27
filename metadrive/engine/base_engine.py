@@ -701,13 +701,14 @@ class BaseEngine(EngineCore, Randomizable):
         msg = "Assets folder doesn't exist. Begin to download assets..."
         if not os.path.exists(AssetLoader.asset_path):
             AssetLoader.logger.warning(msg)
-            pull_asset(False)
+            pull_asset(update=False)
         else:
-            if asset_version() != VERSION:
+            if AssetLoader.should_update_asset():
                 AssetLoader.logger.warning(
-                    "Assets version mismatch! Current: {}, Expected: {}. "
-                    "Update the assets by `python -m metadrive.pull_asset --update'".format(asset_version(), VERSION)
+                    "Assets outdated! Current: {}, Expected: {}. "
+                    "Updating the assets ...".format(asset_version(), VERSION)
                 )
+                pull_asset(update=True)
             else:
                 AssetLoader.logger.info("Assets version: {}".format(VERSION))
 
