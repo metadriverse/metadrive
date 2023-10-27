@@ -46,8 +46,8 @@ def makeGrassBlades():
 for x in range(4):
     for y in range(4):
         grass_group = render.attachNewNode(makeGrassBlades())
-        grass_group.setTexture(loader.loadTexture("grass_mini.png"))
-        grass_group.setColor(1, 1, 1, 1)
+        # grass_group.setTexture(loader.loadTexture("grass_mini.png"))
+        grass_group.setColor(0, 1, 0, 1)
         grass_group.setPos(x * 8, y * 8, 0)
 
 # grass_group.analyze()

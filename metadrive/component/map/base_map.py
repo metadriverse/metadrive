@@ -153,14 +153,14 @@ class BaseMap(BaseRunnable):
         layer=("lane_line", "lane")
     ):
         """
-        Get semantics of the map
+        Get semantics of the map for terrain generation
         :param size: [m] length and width
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param color_setting: color palette for different attribute. When generating terrain, make sure using
         :param line_sample_interval: [m] It determines the resolution of sampled points.
         :param layer: layer to get
         MapTerrainAttribute
-        :return: heightfield image
+        :return: semantic map
         """
         if self._semantic_map is None:
             all_lanes = self.get_map_features(interval=line_sample_interval)
@@ -218,7 +218,7 @@ class BaseMap(BaseRunnable):
         height=1,
     ):
         """
-        Get height of the map
+        Get height of the map for terrain generation
         :param size: [m] length and width
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param extension: If > 1, the returned height map's drivable region will be enlarged.
