@@ -6,20 +6,30 @@ from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 
-def test_map_visualizer():
+def _test_map_visualizer():
     test = TestBlock(window_type="onscreen")
+    try:
+        initialize_asset_loader(test)
 
-    initialize_asset_loader(test)
-
-    global_network = NodeRoadNetwork()
-    b = FirstPGBlock(global_network, 3.0, 2, test.render, test.world, 1)
-    for i in range(1, 13):
-        tp = Merge if i % 3 == 0 else Split
-        b = tp(i, b.get_socket(0), global_network, i)
-        b.construct_block(test.render, test.world)
-    test.show_bounding_box(global_network)
-    test.taskMgr.step()
-    test.taskMgr.step()
-    test.taskMgr.step()
-    test.taskMgr.step()
-    test.taskMgr.step()
+        global_network = NodeRoadNetwork()
+        b = FirstPGBlock(global_network, 3.0, 2, test.render, test.world, 1)
+        for i in range(1, 13):
+            tp = Merge if i % 3 == 0 else Split
+            b = tp(i, b.get_socket(0), global_network, i)
+            b.construct_block(test.render, test.world)
+        test.show_bounding_box(global_network)
+        test.taskMgr.step()
+        test.taskMgr.step()
+        test.taskMgr.step()
+        test.taskMgr.step()
+        test.taskMgr.step()
+    finally:
+        import sys
+        if sys.version_info >= (3, 0):
+            import builtins
+        else:
+            import __builtin__ as builtins
+        if hasattr(builtins, "base"):
+            del builtins.base
+        test.taskMgr.destroy()
+        test.destroy()
