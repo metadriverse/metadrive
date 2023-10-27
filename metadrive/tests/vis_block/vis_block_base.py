@@ -151,6 +151,7 @@ class TestBlock(ShowBase.ShowBase):
         if hasattr(builtins, "base"):
             del builtins.base
 
+
 if __name__ == "__main__":
     TestBlock = TestBlock()
     TestBlock.run()
