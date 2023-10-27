@@ -26,6 +26,7 @@ def test_rgb_cam(config, render=False):
             "num_scenarios": 1,
             "traffic_density": 0.1,
             "map": "S",
+            "show_terrain": False,
             "start_seed": 4,
             "stack_size": config["stack_size"],
             "vehicle_config": dict(image_source="rgb_camera"),

@@ -24,6 +24,7 @@ def test_main_camera(config, render=False):
         {
             "num_scenarios": 1,
             "traffic_density": 0.1,
+            "show_terrain": False,
             "map": "S",
             "start_seed": 4,
             "window_size": (config["width"], config["height"]),
