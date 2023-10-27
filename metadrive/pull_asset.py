@@ -62,10 +62,10 @@ def pull_asset(update):
                 "Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION)
             )
             # Remove the downloaded zip file (optional)
-            if os.path.exists(zip_path):
-                os.remove(zip_path)
-            if os.path.exists(zip_lock):
-                os.remove(zip_lock)
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
+        if os.path.exists(zip_lock):
+            os.remove(zip_lock)
 
     except Timeout:
         logger.info(
