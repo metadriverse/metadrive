@@ -13,6 +13,7 @@ class DemoWaymoEnv(WaymoEnv):
     """
     Make sure non-repetitive scenes are showed
     """
+
     def reset(self, seed=None):
         if self.engine is not None:
             seeds = [i for i in range(self.config["num_scenarios"])]
@@ -20,6 +21,13 @@ class DemoWaymoEnv(WaymoEnv):
             seed = random.choice(seeds)
         return super(DemoWaymoEnv, self).reset(seed=seed)
 
+
+RENDER_MESSAGE = {
+    "Quit": "ESC",
+    "Switch perspective": "Q or B",
+    "Reset Episode": "R",
+    "Keyboard Control": "W,A,S,D",
+}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -45,12 +53,7 @@ if __name__ == "__main__":
             o, r, tm, tc, info = env.step([1.0, 0.])
             env.render(
                 mode="top_down" if args.top_down else None,
-                text={
-                    "Quit": "ESC",
-                    "Switch perspective": "Q or B",
-                    "Reset Episode": "R",
-                    "Keyboard Control": "W,A,S,D",
-                },
+                text=None if args.top_down else RENDER_MESSAGE,
                 **extra_args
             )
             if tm or tc:
