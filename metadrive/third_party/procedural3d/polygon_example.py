@@ -59,7 +59,7 @@ class MyApp(ShowBase):
         node = GeomNode("poly_node")
         node.add_geom(geom)
         poly = self.render.attach_new_node(node)
-        poly.setColor(1,0,0,0)
+        poly.setColor(1, 0, 0, 0)
         poly.set_render_mode_wireframe()
 
 

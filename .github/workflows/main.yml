@@ -200,10 +200,7 @@ jobs:
           pip install pytest-cov
           pip install ray
           cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/test_depth_cam.py
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/test_main_camera.py
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/test_rgb_cam.py
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/test_semantic_cam.py
+          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/
 
   test_examples:
     runs-on: ubuntu-latest
