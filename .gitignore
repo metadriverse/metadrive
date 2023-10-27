@@ -44,3 +44,5 @@
 /bridges/ros_bridge/install
 /bridges/ros_bridge/log
 
+**/tests/**/*.jpg
+**/tests/**/*.png
