@@ -5,8 +5,14 @@ from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 from metadrive.utils.opendrive.map_load import load_opendrive_map
 
-if __name__ == "__main__":
-    engine = TestBlock(True)
+
+def test_load_carla_town():
+    """
+    Test opendrive related feature
+    Returns: None
+
+    """
+    engine = TestBlock(window_type="none")
 
     # load map
     initialize_asset_loader(engine)
@@ -23,10 +29,6 @@ if __name__ == "__main__":
 
     # engine.enableMouse()
     engine.show_bounding_box(global_network)
-    lanes = [lane_info.lane for lane_info in global_network.graph.values()]
-
-    res_x_min, res_x_max, res_y_min, res_y_max = global_network.bounding_box
-    engine.camera.setPos((res_x_min + res_x_max) / 2, -(res_y_min + res_y_max) / 2, 700)
-
-    while True:
-        engine.taskMgr.step()
+    engine.taskMgr.step()
+    engine.taskMgr.step()
+    engine.taskMgr.step()

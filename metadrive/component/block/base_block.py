@@ -357,4 +357,4 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         Returns: Boolean
 
         """
-        return self.engine is None
+        return self.engine is None and self.render
