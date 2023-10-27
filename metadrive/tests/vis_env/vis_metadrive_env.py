@@ -105,6 +105,7 @@ if __name__ == "__main__":
         env.engine.accept("8", de_speed)
         env.engine.accept("9", lift_terrain)
         env.engine.accept("0", lower_terrain)
+    env.engine.accept("`", env.engine.terrain.reload_terrain_shader)
     # env.main_camera.set_follow_lane(True)
     # env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
     # for line in env.engine.coordinate_line:

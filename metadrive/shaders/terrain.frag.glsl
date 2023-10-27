@@ -77,7 +77,7 @@ vec3 project(mat4 mvp, vec3 p) {
 
 vec3 get_color(vec3 diffuse, sampler2D normal_tex, float tex_ratio, mat3 tbn){
     // roughness = texture(road_rough, terrain_uv * road_tex_ratio).r;
-      vec3 normal = normalize(texture(normal_tex, terrain_uv * tex_ratio).rgb*2.0-1.0);
+      vec3 normal = normalize(texture(normal_tex, terrain_uv * tex_ratio).rgb*2.0-1.0) * p3d_NormalMatrix;
 
       vec3 basecolor = diffuse.xyz;
       normal = normalize(tbn * normal);
