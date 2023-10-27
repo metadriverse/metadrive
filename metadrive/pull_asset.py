@@ -43,16 +43,8 @@ def pull_asset(update):
             )
             return
         else:
-            if asset_version() != VERSION:
-                logger.info("Remove existing assets, version: {}..".format(asset_version()))
-                shutil.rmtree(os.path.join(TARGET_DIR, "assets"))
-            else:
-                logger.warning(
-                    "Fail to pull. Assets is already up-to-date, version: {}. MetaDrive version: {}".format(
-                        asset_version(), VERSION
-                    )
-                )
-                return
+            logger.info("Remove existing assets, version: {}..".format(asset_version()))
+            shutil.rmtree(os.path.join(TARGET_DIR, "assets"))
 
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
     zip_lock = os.path.join(TARGET_DIR, 'assets.zip.lock')
