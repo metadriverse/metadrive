@@ -6,7 +6,7 @@ from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 
 
-def _test_map_visualizer():
+def test_map_visualizer():
     test = TestBlock(window_type="onscreen")
     try:
         initialize_asset_loader(test)
@@ -24,12 +24,4 @@ def _test_map_visualizer():
         test.taskMgr.step()
         test.taskMgr.step()
     finally:
-        import sys
-        if sys.version_info >= (3, 0):
-            import builtins
-        else:
-            import __builtin__ as builtins
-        if hasattr(builtins, "base"):
-            del builtins.base
-        test.taskMgr.destroy()
-        test.destroy()
+        test.close()

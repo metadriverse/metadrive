@@ -13,22 +13,24 @@ def test_load_carla_town():
 
     """
     engine = TestBlock(window_type="none")
+    try:
+        # load map
+        initialize_asset_loader(engine)
+        map = load_opendrive_map(AssetLoader.file_path("carla", "CARLA_town01.xodr", return_raw_style=False))
+        global_network = OpenDriveRoadNetwork()
+        i = 0
+        blocks = []
+        for road in map.roads:
+            for section in road.lanes.lane_sections:
+                block = OpenDriveBlock(i, global_network, 0, section)
+                block.construct_block(engine.render, engine.physics_world)
+                blocks.append(block)
+                i += 1
 
-    # load map
-    initialize_asset_loader(engine)
-    map = load_opendrive_map(AssetLoader.file_path("carla", "CARLA_town01.xodr", return_raw_style=False))
-    global_network = OpenDriveRoadNetwork()
-    i = 0
-    blocks = []
-    for road in map.roads:
-        for section in road.lanes.lane_sections:
-            block = OpenDriveBlock(i, global_network, 0, section)
-            block.construct_block(engine.render, engine.physics_world)
-            blocks.append(block)
-            i += 1
-
-    # engine.enableMouse()
-    engine.show_bounding_box(global_network)
-    engine.taskMgr.step()
-    engine.taskMgr.step()
-    engine.taskMgr.step()
+        # engine.enableMouse()
+        engine.show_bounding_box(global_network)
+        engine.taskMgr.step()
+        engine.taskMgr.step()
+        engine.taskMgr.step()
+    finally:
+        engine.close()

@@ -4,7 +4,7 @@ we can directly pop up a Panda3D window and visualize the content, e.g. the road
 block.construct_block(test_block.render, test_block.world).
 """
 from typing import Union, Tuple
-
+from metadrive.engine.asset_loader import close_asset_loader
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletPlaneShape, BulletRigidBodyNode, BulletDebugNode
 from panda3d.core import Vec3, NodePath, LineSegs
@@ -128,6 +128,28 @@ class TestBlock(ShowBase.ShowBase):
             for p_ in points[k + 1:]:
                 self.draw_line_3d((*p, 2), (*p_, 2), (1, 0., 0., 1), 2)
 
+    def close(self):
+        """
+        Close the showbase
+        Returns: None
+
+        """
+        self.taskMgr.stop()
+        # It will report a warning said AsynTaskChain is created when taskMgr.destroy() is called but a new showbase is
+        # created.
+        self.taskMgr.destroy()
+        self.physics_world.dynamic_world.clearContactAddedCallback()
+        self.physics_world.destroy()
+        self.destroy()
+        close_asset_loader()
+
+        import sys
+        if sys.version_info >= (3, 0):
+            import builtins
+        else:
+            import __builtin__ as builtins
+        if hasattr(builtins, "base"):
+            del builtins.base
 
 if __name__ == "__main__":
     TestBlock = TestBlock()
