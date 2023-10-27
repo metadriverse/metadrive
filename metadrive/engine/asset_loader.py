@@ -79,7 +79,7 @@ class AssetLoader:
         # In PR #531, we introduced new assets. For the user that installed MetaDrive before
         # this PR, we need to pull the latest texture again.
         grass_texture_exists = os.path.exists(
-            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
+            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg", return_raw_style=False)
         )
 
         return (not asset_version_match) or (not grass_texture_exists)
