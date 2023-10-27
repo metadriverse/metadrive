@@ -76,10 +76,10 @@ vec3 project(mat4 mvp, vec3 p) {
 }
 
 
-vec3 get_color(vec3 diffuse, sampler2D normal_tex, float tex_ratio, mat3 tbn){
-    // roughness = texture(road_rough, terrain_uv * road_tex_ratio).r;
+vec3 get_color(vec3 diffuse, sampler2D normal_tex, sampler2D rough_tex, float tex_ratio, mat3 tbn){
+//       float roughness = texture(rough_tex, terrain_uv * tex_ratio).r;
       vec3 normal = normalize(texture(normal_tex, terrain_uv * tex_ratio).rgb*2.0-1.0) * p3d_NormalMatrix;
-
+//       normal = normalize(normal + (roughness - 0.5) * 2.0);
       vec3 basecolor = diffuse.xyz;
       normal = normalize(tbn * normal);
       vec3 light_dir = normalize(light_direction);
@@ -132,13 +132,13 @@ void main() {
       diffuse += texture(yellow_tex, terrain_uv * road_tex_ratio).rgb * attri.b;
       diffuse += texture(white_tex, terrain_uv * road_tex_ratio).rgb * attri.a;
 
-      color_origin=get_color(diffuse, road_normal, road_tex_ratio, tbn);
+      color_origin=get_color(diffuse, road_normal,  road_rough, road_tex_ratio, tbn);
   }
   else{
 
       // texture splatting, mixing ratio can be determined via rgba, no grass here
       vec3 diffuse = texture(grass_tex, terrain_uv * grass_tex_ratio).rgb;
-      color_origin=get_color(diffuse, grass_normal, grass_tex_ratio, tbn);
+      color_origin=get_color(diffuse, grass_normal, grass_rough, grass_tex_ratio, tbn);
     }
 
   // static shadow
