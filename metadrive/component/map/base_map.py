@@ -189,8 +189,8 @@ class BaseMap(BaseRunnable):
                         polylines.append((obj["polyline"], MapTerrainSemanticColor.get_color(obj["type"])))
 
             size = int(size * pixels_per_meter)
-            mask = np.zeros([size, size, 4], dtype=np.float32)
-            mask[..., 0:] = color_setting.get_color(MetaDriveType.GROUND)
+            mask = np.zeros([size, size, 1], dtype=np.float32)
+            mask[..., 0] = color_setting.get_color(MetaDriveType.GROUND)
             # create an example bounding box polygon
             # for idx in range(len(polygons)):
             center_p = self.get_center_point()

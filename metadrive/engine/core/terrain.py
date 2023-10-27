@@ -62,7 +62,7 @@ class Terrain(BaseObject):
             # else:
             #     self._generate_card_terrain()
 
-    @time_me
+    # @time_me
     def reset(self, center_position):
         """
         Update terrain according to current map
@@ -97,9 +97,8 @@ class Terrain(BaseObject):
                 polyline_thickness=int(1024 / self._semantic_map_size),
                 layer=["lane", "lane_line"]
             )
-            semantics = semantics.astype(np.float32)
             semantic_tex = Texture()
-            semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
+            semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
             semantic_tex.setRamImage(semantics)
 
             # modify default height image

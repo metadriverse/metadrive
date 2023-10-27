@@ -126,13 +126,20 @@ void main() {
     shading += light_shading;
   }
   vec3 color_origin;
-  if ((attri.g > 0 || attri.a > 0 || attri.b > 0) && terrain_uv.x>r_min && terrain_uv.y > r_min && terrain_uv.x<r_max && terrain_uv.y<r_max){
-      // texture splatting, mixing ratio can be determined via rgba, no grass here
-      vec3 diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb * attri.g;
-      diffuse += texture(yellow_tex, terrain_uv * road_tex_ratio).rgb * attri.b;
-      diffuse += texture(white_tex, terrain_uv * road_tex_ratio).rgb * attri.a;
-
-      color_origin=get_color(diffuse, road_normal,  road_rough, road_tex_ratio, tbn);
+  if ((attri.r > 0.01) && terrain_uv.x>r_min && terrain_uv.y > r_min && terrain_uv.x<r_max && terrain_uv.y<r_max){
+    float value = attri.r; // Assuming it's a red channel texture
+    vec3 diffuse;
+    if (value < 0.11) {
+        // Semantics for value 1
+        diffuse=texture(yellow_tex, terrain_uv * road_tex_ratio).rgb;
+    } else if (value < 0.21) {
+        // Semantics for value 2
+        diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb;
+    } else{
+        // Semantics for value 4
+        diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
+    }
+    color_origin=get_color(diffuse, road_normal,  road_rough, road_tex_ratio, tbn);
   }
   else{
 
