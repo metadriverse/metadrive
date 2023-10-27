@@ -42,6 +42,7 @@ uniform sampler2D road_rough;
 uniform sampler2D grass_tex;
 uniform sampler2D grass_normal;
 uniform sampler2D grass_rough;
+uniform float grass_tex_ratio;
 
 uniform sampler2D rock_tex;
 uniform sampler2D rock_normal;
@@ -89,7 +90,7 @@ vec3 get_color(vec3 diffuse, sampler2D normal_tex, float tex_ratio, mat3 tbn){
 
 void main() {
   float road_tex_ratio = 32.0 * elevation_texture_ratio;
-  float grass_tex_ratio = 64.0 * elevation_texture_ratio;
+  float grass_tex_ratio = grass_tex_ratio * elevation_texture_ratio;
   float r_min = (1-1/elevation_texture_ratio)/2;
   float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
   vec4 attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);

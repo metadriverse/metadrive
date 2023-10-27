@@ -131,14 +131,14 @@ class Terrain(BaseObject):
             self.set_position(center_position)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        height_scale=100,
-        height_offset=0.,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            height_scale=100,
+            height_offset=0.,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -201,6 +201,7 @@ class Terrain(BaseObject):
             self._mesh_terrain.set_shader_input("grass_tex", self.grass_tex)
             self._mesh_terrain.set_shader_input("grass_normal", self.grass_normal)
             self._mesh_terrain.set_shader_input("grass_rough", self.grass_rough)
+            self._mesh_terrain.set_shader_input("grass_tex_ratio", self.grass_tex_ratio)
 
             # road
             self._mesh_terrain.set_shader_input("rock_tex", self.rock_tex)
@@ -332,6 +333,7 @@ class Terrain(BaseObject):
             self.grass_rough = self.loader.loadTexture(
                 AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
             )
+            self.grass_tex_ratio = 128.0
         else:
             self.grass_tex = self.loader.loadTexture(
                 AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
@@ -342,6 +344,7 @@ class Terrain(BaseObject):
             self.grass_rough = self.loader.loadTexture(
                 AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_BUMP_1K.jpg")
             )
+            self.grass_tex_ratio = 64.0
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -454,7 +457,6 @@ class Terrain(BaseObject):
 
         """
         return self._mesh_terrain
-
 
 # Some useful threads
 # GeoMipTerrain:
