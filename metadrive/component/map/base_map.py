@@ -1,4 +1,7 @@
 import logging
+import geopandas as gpd
+from shapely.ops import unary_union
+from metadrive.utils.utils import time_me
 import math
 
 import cv2
@@ -153,14 +156,14 @@ class BaseMap(BaseRunnable):
         layer=("lane_line", "lane")
     ):
         """
-        Get semantics of the map
+        Get semantics of the map for terrain generation
         :param size: [m] length and width
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param color_setting: color palette for different attribute. When generating terrain, make sure using
         :param line_sample_interval: [m] It determines the resolution of sampled points.
         :param layer: layer to get
         MapTerrainAttribute
-        :return: heightfield image
+        :return: semantic map
         """
         if self._semantic_map is None:
             all_lanes = self.get_map_features(interval=line_sample_interval)
@@ -186,8 +189,8 @@ class BaseMap(BaseRunnable):
                         polylines.append((obj["polyline"], MapTerrainSemanticColor.get_color(obj["type"])))
 
             size = int(size * pixels_per_meter)
-            mask = np.zeros([size, size, 4], dtype=np.float32)
-            mask[..., 0:] = color_setting.get_color(MetaDriveType.GROUND)
+            mask = np.zeros([size, size, 1], dtype=np.float32)
+            mask[..., 0] = color_setting.get_color(MetaDriveType.GROUND)
             # create an example bounding box polygon
             # for idx in range(len(polygons)):
             center_p = self.get_center_point()
@@ -210,6 +213,7 @@ class BaseMap(BaseRunnable):
             self._semantic_map = mask
         return self._semantic_map
 
+    # @time_me
     def get_height_map(
         self,
         size=2048,
@@ -218,7 +222,7 @@ class BaseMap(BaseRunnable):
         height=1,
     ):
         """
-        Get height of the map
+        Get height of the map for terrain generation
         :param size: [m] length and width
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param extension: If > 1, the returned height map's drivable region will be enlarged.
@@ -240,30 +244,19 @@ class BaseMap(BaseRunnable):
             center_p = self.get_center_point()
             need_scale = abs(extension - 1) > 1e-1
             for polygon in polygons:
-                if need_scale:
-                    scaled_polygon = Polygon(polygon).buffer(extension, join_style=2)
-                    if isinstance(scaled_polygon, MultiPolygon):
-                        scaled_polygons = scaled_polygon.geoms
-                    else:
-                        scaled_polygons = [scaled_polygon]
-                    for scaled_polygon in scaled_polygons:
-                        points = [
-                            [
-                                int(
-                                    (scaled_polygon.exterior.coords.xy[0][index] - center_p[0]) * pixels_per_meter +
-                                    size / 2
-                                ),
-                                int((scaled_polygon.exterior.coords.xy[1][index] - center_p[1]) * pixels_per_meter) +
-                                size / 2
-                            ] for index in range(len(scaled_polygon.exterior.coords.xy[0]))
-                        ]
-                else:
-                    points = [
-                        [
-                            int((x - center_p[0]) * pixels_per_meter + size / 2),
-                            int((y - center_p[1]) * pixels_per_meter) + size / 2
-                        ] for x, y in polygon
-                    ]
+                points = [
+                    [
+                        int((x - center_p[0]) * pixels_per_meter + size / 2),
+                        int((y - center_p[1]) * pixels_per_meter) + size / 2
+                    ] for x, y in polygon
+                ]
                 cv2.fillPoly(mask, np.asarray([points]).astype(np.int32), color=[height])
+            if need_scale:
+                # Define a kernel. A 3x3 rectangle kernel
+                kernel = np.ones((extension * pixels_per_meter + 1, extension * pixels_per_meter + 1), np.uint8)
+
+                # Apply dilation
+                mask = cv2.dilate(mask, kernel, iterations=1)
+                mask = np.expand_dims(mask, axis=-1)
             self._height_map = mask
         return self._height_map

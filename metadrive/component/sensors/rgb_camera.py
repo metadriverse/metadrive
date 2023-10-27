@@ -1,7 +1,7 @@
 import panda3d.core as p3d
 from direct.filter.FilterManager import FilterManager
 from simplepbr import _load_shader_str
-
+from panda3d.core import FrameBufferProperties
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 
@@ -52,3 +52,19 @@ class RGBCamera(BaseCamera):
         self.tonemap_quad.set_shader(tonemap_shader)
         self.tonemap_quad.set_shader_input('tex', self.scene_tex)
         self.tonemap_quad.set_shader_input('exposure', 1.0)
+
+    def _create_buffer(self, width, height, frame_buffer_property):
+        """
+        Create the buffer object to render the scene into it. Use 3 channels speed up the data retrieval for RGB Camera.
+        Args:
+            width: image width
+            height: image height
+            frame_buffer_property: panda3d.core.FrameBufferProperties
+
+        Returns: buffer object
+
+        """
+        if frame_buffer_property is None:
+            frame_buffer_property = FrameBufferProperties()
+        frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
+        return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)

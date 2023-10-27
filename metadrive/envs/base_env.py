@@ -62,7 +62,7 @@ BASE_DEFAULT_CONFIG = dict(
     # ===== Rendering =====
     use_render=False,  # if true pop a window to render
     debug=False,
-    disable_model_compression=False,  # disable compression if you wish to launch the window quicker.
+    disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
     cull_scene=True,  # only for debug use
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=2.2,
@@ -163,7 +163,6 @@ BASE_DEFAULT_CONFIG = dict(
     window_size=(1200, 900),  # or (width, height), if set to None, it will be automatically determined
     physics_world_step_size=2e-2,
     show_fps=True,
-    global_light=True,
     # only render physics world without model, a special debug option
     debug_physics_world=False,
     # debug static world
@@ -192,10 +191,12 @@ BASE_DEFAULT_CONFIG = dict(
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
     # debug panda3d
     debug_panda3d=False,
+    # global light
+    shadow_range=32,
 
     # ===== Mesh Terrain =====
     # road will have a marin whose width is determined by this value, unit: [m]
-    drivable_region_extension=6,
+    drivable_area_extension=6,
     # height scale for mountains, unit: [m]
     height_scale=120,
 

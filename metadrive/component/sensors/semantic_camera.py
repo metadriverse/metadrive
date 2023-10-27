@@ -79,16 +79,3 @@ class SemanticCamera(BaseCamera):
         for t in [v for v, m in vars(Semantics).items() if not (v.startswith('_') or callable(m))]:
             label, c = getattr(Semantics, t)
             cam.setTagState(label, RenderState.make(ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1))
-
-    def _create_buffer(self, width, height, frame_buffer_property):
-        """
-        The buffer should be created without frame_buffer_property
-        Args:
-            width: Image width
-            height: Image height
-            frame_buffer_property: disabled in Semantic Camera
-
-        Returns: Buffer object
-
-        """
-        return self.engine.win.makeTextureBuffer("camera", width, height)

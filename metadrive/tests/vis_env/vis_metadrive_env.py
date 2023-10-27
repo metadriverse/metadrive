@@ -11,7 +11,7 @@ if __name__ == "__main__":
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            # "debug": True,
+            "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
             "static_traffic_object": False,
@@ -40,9 +40,9 @@ if __name__ == "__main__":
             "force_destroy": False,
             # "show_skybox": False,
             "show_fps": False,
-            "render_pipeline": False,
+            "render_pipeline": True,
             # "camera_dist": 8,
-            "window_size": (1600, 900),
+            "window_size": (1200, 800),
             "camera_dist": 9,
             # "camera_pitch": 30,
             # "camera_height": 1,
@@ -105,6 +105,7 @@ if __name__ == "__main__":
         env.engine.accept("8", de_speed)
         env.engine.accept("9", lift_terrain)
         env.engine.accept("0", lower_terrain)
+    env.engine.accept("`", env.engine.terrain.reload_terrain_shader)
     # env.main_camera.set_follow_lane(True)
     # env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
     # for line in env.engine.coordinate_line:

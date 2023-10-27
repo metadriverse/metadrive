@@ -526,4 +526,9 @@ class BaseObject(BaseRunnable, MetaDriveType):
 
     @property
     def use_render_pipeline(self):
+        """
+        Return if we are using render_pipeline
+        Returns: Boolean
+
+        """
         return self.engine is not None and self.engine.use_render_pipeline

@@ -6,16 +6,7 @@ from metadrive.tests.vis_block.vis_block_base import TestBlock
 from metadrive.utils.opendrive.map_load import load_opendrive_map
 
 if __name__ == "__main__":
-    from metadrive.engine.engine_utils import initialize_engine, set_global_random_seed
-    from metadrive.envs.base_env import BASE_DEFAULT_CONFIG
-
-    default_config = BASE_DEFAULT_CONFIG
-    default_config["use_render"] = True
-    default_config["debug"] = True
-    default_config["show_coordinates"] = True
-    default_config["debug_static_world"] = True
-    engine = initialize_engine(default_config)
-    set_global_random_seed(0)
+    engine = TestBlock(True)
 
     # load map
     initialize_asset_loader(engine)
@@ -31,12 +22,11 @@ if __name__ == "__main__":
             i += 1
 
     # engine.enableMouse()
-    global_network.show_bounding_box(engine, (1, 0, 0, 1))
+    engine.show_bounding_box(global_network)
     lanes = [lane_info.lane for lane_info in global_network.graph.values()]
-    engine.show_lane_coordinates(lanes)
 
     res_x_min, res_x_max, res_y_min, res_y_max = global_network.bounding_box
     engine.camera.setPos((res_x_min + res_x_max) / 2, -(res_y_min + res_y_max) / 2, 700)
 
     while True:
-        engine.step()
+        engine.taskMgr.step()

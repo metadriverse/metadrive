@@ -1,8 +1,8 @@
 import os
-from metadrive.constants import RENDER_MODE_NONE
 import pathlib
 import sys
-from metadrive.pull_asset import pull_asset
+
+from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.logger import get_logger
 from metadrive.utils.utils import is_win
 from metadrive.version import VERSION
@@ -70,6 +70,19 @@ class AssetLoader:
     @classmethod
     def initialized(cls):
         return cls.loader is not None
+
+    @classmethod
+    def should_update_asset(cls):
+        """Return should pull the asset or not."""
+        asset_version_match = asset_version() == VERSION
+
+        # In PR #531, we introduced new assets. For the user that installed MetaDrive before
+        # this PR, we need to pull the latest texture again.
+        grass_texture_exists = os.path.exists(
+            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg", return_raw_style=False)
+        )
+
+        return (not asset_version_match) or (not grass_texture_exists)
 
 
 def initialize_asset_loader(engine):

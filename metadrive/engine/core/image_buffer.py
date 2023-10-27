@@ -76,19 +76,19 @@ class ImageBuffer:
 
     def _create_buffer(self, width, height, frame_buffer_property):
         """
-        Create the buffer object to render the scene into it
+        The buffer is created without frame_buffer_property by default
         Args:
-            width: image width
-            height: image height
-            frame_buffer_property: panda3d.core.FrameBufferProperties
+            width: Image width
+            height: Image height
+            frame_buffer_property: disabled in Semantic Camera
 
-        Returns: buffer object
+        Returns: Buffer object
 
         """
-        if frame_buffer_property is None:
-            frame_buffer_property = FrameBufferProperties()
-        frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
-        return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
+        if frame_buffer_property is not None:
+            return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
+        else:
+            return self.engine.win.makeTextureBuffer("camera", width, height)
 
     def _setup_effect(self):
         """

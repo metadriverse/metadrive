@@ -36,8 +36,8 @@ class SkyBox(BaseObject):
         gles = ConfigVariableString("load-display").getValue()
         if gles == "pandagles2":
             skybox_shader = Shader.load(
-                Shader.SL_GLSL, AssetLoader.file_path("shaders", "skybox_gles.vert.glsl"),
-                AssetLoader.file_path("shaders", "skybox_gles.frag.glsl")
+                Shader.SL_GLSL, AssetLoader.file_path("../shaders", "skybox_gles.vert.glsl"),
+                AssetLoader.file_path("../shaders", "skybox_gles.frag.glsl")
             )
         else:
             if is_mac():
@@ -47,8 +47,8 @@ class SkyBox(BaseObject):
                 vert_file = "skybox.vert.glsl"
                 frag_file = "skybox.frag.glsl"
             skybox_shader = Shader.load(
-                Shader.SL_GLSL, AssetLoader.file_path("shaders", vert_file),
-                AssetLoader.file_path("shaders", frag_file)
+                Shader.SL_GLSL, AssetLoader.file_path("../shaders", vert_file),
+                AssetLoader.file_path("../shaders", frag_file)
             )
         skybox.set_shader(skybox_shader)
         skybox.reparentTo(self.origin)

@@ -1,12 +1,13 @@
 # import numpy
+#
 
 import math
-
+from metadrive.utils.utils import time_me
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.bullet import ZUp, BulletHeightfieldShape
 from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf
-from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage
+from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage, Shader
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask, Semantics
@@ -23,22 +24,23 @@ class Terrain(BaseObject):
     SEMANTIC_LABEL = Semantics.TERRAIN.label
 
     def __init__(self, show_terrain, engine):
-        use_render_pipeline = engine.use_render_pipeline
         super(Terrain, self).__init__(random_seed=0)
+        self.origin.hide(
+            CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam
+        )
 
         # collision mesh
         self.simple_terrain_collision_mesh = None  # a flat collision shape
-        self.terrain_collision_mesh = None  # a 3d mesh
+        self.terrain_collision_mesh = None  # a 3d mesh, Not available yet!
 
         # visualization mesh feature
-        heightfield_image_size = 4096  # fixed image size 4096*4096
-        self._height_scale = engine.global_config["height_scale"]  # [m]
-        self._drivable_region_extension = engine.global_config["drivable_region_extension"]  # [m] road marin
         self._terrain_size = 2048  # [m]
-        self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
+        self._height_scale = engine.global_config["height_scale"] if engine.use_render_pipeline else 25  # [m]
+        self._drivable_area_extension = engine.global_config["drivable_area_extension"]  # [m] road marin
+        self._heightmap_size = self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
+        self._heightfield_start = int((self._terrain_size - self._heightmap_size) / 2)
         self._semantic_map_pixel_per_meter = 22  # [m] how many pixels per meter
         # pre calculate some variables
-        self._downsample_rate = int(heightfield_image_size / self._terrain_size)  # downsample to 2048 m
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
 
         self._mesh_terrain = None
@@ -47,111 +49,90 @@ class Terrain(BaseObject):
         self._terrain_shader_set = False  # only set once
         self.probe = None
 
+        self.show_terrain = show_terrain
+
         if self.render and show_terrain:
-            if engine.use_render_pipeline:
-                self._load_mesh_terrain_textures()
-                self._mesh_terrain_node = ShaderTerrainMesh()
-                # disable env probe as some vehicle models may break it
-                # self.probe = engine.render_pipeline.add_environment_probe()
-                # self.probe.set_pos(0, 0, self.PROBE_HEIGHT)
-                # self.probe.set_scale(self.PROBE_SIZE * 2, self.PROBE_SIZE * 2, 1000)
-            else:
-                self._generate_card_terrain()
-
-    def _load_mesh_terrain_textures(self, anisotropic_degree=16, minfilter=SamplerState.FT_linear_mipmap_linear):
-        """
-        Only maintain one copy of all asset
-        :param anisotropic_degree: https://docs.panda3d.org/1.10/python/programming/texturing/texture-filter-types
-        :param minfilter: https://docs.panda3d.org/1.10/python/programming/texturing/texture-filter-types
-        :return: None
-        """
-        # texture stage
-        self.ts_color = TextureStage("color")
-        self.ts_normal = TextureStage("normal")
-        self.ts_normal.setMode(TextureStage.M_normal)
-
-        # basic height_field
-        heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
-        heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
-        self.heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
-
-        # grass
-        self.grass_tex = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
-        )
-        self.grass_normal = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
-        )
-        self.grass_rough = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
-        )
-
-        v_wrap = Texture.WMRepeat
-        u_warp = Texture.WMMirror
-        filter_type = Texture.FTLinearMipmapLinear
-        anisotropic_degree = 16
-        for tex in [self.grass_tex, self.grass_normal, self.grass_rough]:
-            tex.set_wrap_u(u_warp)
-            tex.set_wrap_v(v_wrap)
-            tex.setMinfilter(filter_type)
-            tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
-
-        # rock
-        self.rock_tex = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_diff_1k.png")
-        )
-        self.rock_normal = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_nor_gl_1k.png")
-        )
-        self.rock_rough = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_rough_1k.png")
-        )
-
-        v_wrap = Texture.WMRepeat
-        u_warp = Texture.WMMirror
-        filter_type = Texture.FTLinearMipmapLinear
-        anisotropic_degree = 16
-        for tex in [self.rock_tex, self.rock_normal, self.rock_rough]:
-            tex.set_wrap_u(u_warp)
-            tex.set_wrap_v(v_wrap)
-            tex.setMinfilter(filter_type)
-            tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
-
-        # Road surface
-        # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
-        self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "diff_2k.png"))
-        self.road_texture_normal = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "asphalt", "normal_2k.png")
-        )
-        self.road_texture_rough = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "rough_2k.png"))
-        v_wrap = Texture.WMRepeat
-        u_warp = Texture.WMMirror
-        filter_type = Texture.FTLinearMipmapLinear
-        anisotropic_degree = 16
-        for tex in [self.road_texture_rough, self.road_texture, self.road_texture_normal]:
-            tex.set_wrap_u(u_warp)
-            tex.set_wrap_v(v_wrap)
-            tex.setMinfilter(filter_type)
-            tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
-        # self.road_texture_displacement = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
-        # self.road_texture.setMinfilter(minfilter)
-        # self.road_texture.setAnisotropicDegree(anisotropic_degree)
-
-        # lane line
-        white_lane_line = PNMImage(1024, 1024, 4)
-        white_lane_line.fill(1., 1., 1.)
-        self.white_lane_line = Texture("white lane line")
-        self.white_lane_line.load(white_lane_line)
-
-        yellow_lane_line = PNMImage(1024, 1024, 4)
-        yellow_lane_line.fill(*(255 / 255, 200 / 255, 0 / 255))
-        self.yellow_lane_line = Texture("white lane line")
-        self.yellow_lane_line.load(yellow_lane_line)
+            # if engine.use_render_pipeline:
+            self._load_mesh_terrain_textures(engine)
+            self._mesh_terrain_node = ShaderTerrainMesh()
+            # disable env probe as some vehicle models may break it
+            # self.probe = engine.render_pipeline.add_environment_probe()
+            # self.probe.set_pos(0, 0, self.PROBE_HEIGHT)
+            # self.probe.set_scale(self.PROBE_SIZE * 2, self.PROBE_SIZE * 2, 1000)
+            # else:
+            #     self._generate_card_terrain()
 
     # @time_me
+    def reset(self, center_position):
+        """
+        Update terrain according to current map
+        """
+        assert self.engine is not None, "Can not call this without initializing engine"
+
+        # if not self.use_render_pipeline and self.simple_terrain_collision_mesh is None:
+        # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
+        if self.simple_terrain_collision_mesh is None:
+            # Create once for lazy-reset
+            self.detach_from_world(self.engine.physics_world)
+            # If no render pipeline, we can only have 2d terrain. It will only be generated for once.
+            shape = BulletPlaneShape(Vec3(0, 0, 1), -0.05)
+            node = BulletRigidBodyNode(MetaDriveType.GROUND)
+            node.setFriction(.9)
+            node.addShape(shape)
+
+            node.setIntoCollideMask(self.COLLISION_MASK)
+            self.dynamic_nodes.append(node)
+
+            self.simple_terrain_collision_mesh = self.origin.attachNewNode(node)
+            self._node_path_list.append(np)
+            self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
+
+        if self.render and self.show_terrain:
+            # Make shader terrain
+            self.detach_from_world(self.engine.physics_world)
+            assert self.engine.current_map is not None, "Can not find current map"
+            semantics = self.engine.current_map.get_semantic_map(
+                size=self._semantic_map_size,
+                pixels_per_meter=self._semantic_map_pixel_per_meter,
+                polyline_thickness=int(1024 / self._semantic_map_size),
+                layer=["lane", "lane_line"]
+            )
+            semantic_tex = Texture()
+            semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
+            semantic_tex.setRamImage(semantics)
+
+            # modify default height image
+            drivable_region = self.engine.current_map.get_height_map(
+                self._heightmap_size, 1, self._drivable_area_extension
+            )
+            # embed to the original height image
+            start = self._heightfield_start
+            end = self._heightfield_start + self._heightmap_size
+            heightfield = self.heightfield_img[start:end, start:end, ...]
+            drivable_region_height = np.mean(heightfield[np.where(drivable_region)]).astype(np.uint16)
+            heightfield = np.where(drivable_region, drivable_region_height, heightfield)
+            heightfield_img = np.copy(self.heightfield_img)
+            heightfield_img[start:end, start:end, ...] = heightfield
+
+            # set to zero height
+            heightfield = heightfield_img - drivable_region_height
+
+            # to panda texture
+            heightfield_tex = Texture()
+            heightfield_tex.setup2dTexture(*heightfield.shape[:2], Texture.TShort, Texture.FLuminance)
+            heightfield_tex.setRamImage(heightfield)
+
+            # # update collision every time!
+            # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
+            # self._generate_collision_mesh(heightfield_img, self.height_scale)
+            self._generate_mesh_vis_terrain(
+                self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale, height_offset=0
+            )
+            self.attach_to_world(self.engine.render, self.engine.physics_world)
+
+            # reset position
+            self.set_position(center_position)
+
     def _generate_mesh_vis_terrain(
         self,
         size,
@@ -205,17 +186,25 @@ class Terrain(BaseObject):
         Note: you have to make sure you modified the terrain_effect.yaml and vert.glsl/frag.glsl together, as they are
         made for different render pipeline. We expect the same terrain generated from different pipelines.
         """
-        if engine.use_render_pipeline and not self._terrain_shader_set:
-            engine.render_pipeline.reload_shaders()
-            terrain_effect = AssetLoader.file_path("effect", "terrain_effect.yaml")
-            engine.render_pipeline.set_effect(self._mesh_terrain, terrain_effect, {}, 100)
+        if not self._terrain_shader_set:
+            if engine.use_render_pipeline:
+                engine.render_pipeline.reload_shaders()
+                terrain_effect = AssetLoader.file_path("../shaders", "terrain_effect.yaml")
+                engine.render_pipeline.set_effect(self._mesh_terrain, terrain_effect, {}, 100)
+            else:
+                vert = AssetLoader.file_path("../shaders", "terrain.vert.glsl")
+                frag = AssetLoader.file_path("../shaders", "terrain.frag.glsl")
+                terrain_shader = Shader.load(Shader.SL_GLSL, vert, frag)
+                self._mesh_terrain.set_shader(terrain_shader)
             # # height
+            self._mesh_terrain.set_shader_input("camera", self.engine.camera)
             self._mesh_terrain.set_shader_input("height_scale", self._height_scale)
 
             # grass
             self._mesh_terrain.set_shader_input("grass_tex", self.grass_tex)
             self._mesh_terrain.set_shader_input("grass_normal", self.grass_normal)
             self._mesh_terrain.set_shader_input("grass_rough", self.grass_rough)
+            self._mesh_terrain.set_shader_input("grass_tex_ratio", self.grass_tex_ratio)
 
             # road
             self._mesh_terrain.set_shader_input("rock_tex", self.rock_tex)
@@ -231,73 +220,28 @@ class Terrain(BaseObject):
             self._terrain_shader_set = True
         self._mesh_terrain.set_shader_input("attribute_tex", attribute_tex)
 
-    def reset(self, center_position):
+    def reload_terrain_shader(self):
         """
-        Update terrain according to current map
+        Reload terrain shader for debug/develop
+        Returns: None
+
         """
-        assert self.engine is not None, "Can not call this without initializing engine"
-
-        # if not self.use_render_pipeline and self.simple_terrain_collision_mesh is None:
-        # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
-        if self.simple_terrain_collision_mesh is None:
-            self.detach_from_world(self.engine.physics_world)
-            # If no render pipeline, we can only have 2d terrain. It will only be generated for once.
-            shape = BulletPlaneShape(Vec3(0, 0, 1), -0.05)
-            node = BulletRigidBodyNode(MetaDriveType.GROUND)
-            node.setFriction(.9)
-            node.addShape(shape)
-
-            node.setIntoCollideMask(self.COLLISION_MASK)
-            self.dynamic_nodes.append(node)
-
-            self.simple_terrain_collision_mesh = self.origin.attachNewNode(node)
-            self._node_path_list.append(np)
-            self.attach_to_world(self.engine.render, self.engine.physics_world)
-
-        # elif self.use_render_pipeline:
-        if self.use_render_pipeline:
-            self.detach_from_world(self.engine.physics_world)
-            assert self.engine.current_map is not None, "Can not find current map"
-            semantics = self.engine.current_map.get_semantic_map(
-                size=self._semantic_map_size,
-                pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=int(1024 / self._semantic_map_size),
-                layer=["lane", "lane_line"]
-            )
-            semantics = semantics.astype(np.float32)
-            semantic_tex = Texture()
-            semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.FRgba)
-            semantic_tex.setRamImage(semantics)
-
-            # we will downsmaple the precision after this
-            drivable_region = self.engine.current_map.get_height_map(
-                self._terrain_size, self._downsample_rate, self._drivable_region_extension
-            )
-            drivable_region_height = np.mean(self.heightfield_img[np.where(drivable_region)]).astype(np.uint16)
-            heightfield_img = np.where(drivable_region, drivable_region_height, self.heightfield_img)
-
-            # set to zero height
-            heightfield_img -= drivable_region_height
-
-            # down sample
-            heightfield_img = np.array(heightfield_img[::self._downsample_rate, ::self._downsample_rate])
-            heightfield = heightfield_img
-
-            heightfield_tex = Texture()
-            heightfield_tex.setup2dTexture(*heightfield.shape[:2], Texture.TShort, Texture.FLuminance)
-            heightfield_tex.setRamImage(heightfield)
-
-            # # update collision every time!
-            # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
-            # self._generate_collision_mesh(heightfield_img, self.height_scale)
-            self._generate_mesh_vis_terrain(
-                self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale, height_offset=0
-            )
-            self.attach_to_world(self.engine.render, self.engine.physics_world)
-
-        self.set_position(center_position)
+        vert = AssetLoader.file_path("../shaders", "terrain.vert.glsl")
+        frag = AssetLoader.file_path("../shaders", "terrain.frag.glsl")
+        terrain_shader = Shader.load(Shader.SL_GLSL, vert, frag)
+        self._mesh_terrain.clear_shader()
+        self._mesh_terrain.set_shader(terrain_shader)
 
     def _generate_collision_mesh(self, heightfield_img, height_scale):
+        """
+        Work in Progress
+        Args:
+            heightfield_img:
+            height_scale:
+
+        Returns:
+
+        """
         # TODO we can do some optimization here, only update some regions
         # clear previous mesh
         self.dynamic_nodes.clear()
@@ -327,13 +271,10 @@ class Terrain(BaseObject):
 
     def set_position(self, position, height=None):
         if self.render:
-            if self.use_render_pipeline:
-                pos = (self._mesh_terrain.get_pos()[0] + position[0], self._mesh_terrain.get_pos()[1] + position[1])
-                self._mesh_terrain.set_pos(*pos, self._mesh_terrain_height)
-                if self.probe is not None:
-                    self.probe.set_pos(*pos, self.PROBE_HEIGHT)
-            else:
-                super(Terrain, self).set_position(position, height)
+            pos = (self._mesh_terrain.get_pos()[0] + position[0], self._mesh_terrain.get_pos()[1] + position[1])
+            self._mesh_terrain.set_pos(*pos, self._mesh_terrain_height)
+            if self.probe is not None:
+                self.probe.set_pos(*pos, self.PROBE_HEIGHT)
 
     def _generate_card_terrain(self):
         self.origin.hide(
@@ -366,7 +307,125 @@ class Terrain(BaseObject):
         self.terrain_texture.setAnisotropicDegree(8)
         card.setQuat(LQuaternionf(math.cos(-math.pi / 4), math.sin(-math.pi / 4), 0, 0))
 
+    def _load_mesh_terrain_textures(self, engine, anisotropic_degree=16, filter_type=Texture.FTLinearMipmapLinear):
+        """
+        Only maintain one copy of all asset
+        :param anisotropic_degree: https://docs.panda3d.org/1.10/python/programming/texturing/texture-filter-types
+        :param filter_type: https://docs.panda3d.org/1.10/python/programming/texturing/texture-filter-types
+        :return: None
+        """
+        # texture stage
+        self.ts_color = TextureStage("color")
+        self.ts_normal = TextureStage("normal")
+        self.ts_normal.setMode(TextureStage.M_normal)
+
+        # basic height_field
+        heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
+        heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
+        heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
+        down_sample_rate = int(heightfield_tex.getYSize() / self._terrain_size)  # downsample to 2048 m
+        self.heightfield_img = np.array(heightfield_img[::down_sample_rate, ::down_sample_rate])
+
+        # grass
+        if engine.use_render_pipeline:
+            # grass
+            self.grass_tex = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
+            )
+            self.grass_normal = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
+            )
+            self.grass_rough = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+            )
+            self.grass_tex_ratio = 128.0
+        else:
+            self.grass_tex = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
+            )
+            self.grass_normal = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_NRM_1K.jpg")
+            )
+            self.grass_rough = self.loader.loadTexture(
+                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_BUMP_1K.jpg")
+            )
+            self.grass_tex_ratio = 128.0
+
+        v_wrap = Texture.WMRepeat
+        u_warp = Texture.WMMirror
+
+        for tex in [self.grass_tex, self.grass_normal, self.grass_rough]:
+            tex.set_wrap_u(u_warp)
+            tex.set_wrap_v(v_wrap)
+            tex.setMinfilter(filter_type)
+            tex.setMagfilter(filter_type)
+            tex.setAnisotropicDegree(anisotropic_degree)
+
+        # rock
+        self.rock_tex = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_diff_1k.png")
+        )
+        self.rock_normal = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_nor_gl_1k.png")
+        )
+        self.rock_rough = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_rough_1k.png")
+        )
+
+        v_wrap = Texture.WMRepeat
+        u_warp = Texture.WMMirror
+
+        for tex in [self.rock_tex, self.rock_normal, self.rock_rough]:
+            tex.set_wrap_u(u_warp)
+            tex.set_wrap_v(v_wrap)
+            tex.setMinfilter(filter_type)
+            tex.setMagfilter(filter_type)
+            tex.setAnisotropicDegree(anisotropic_degree)
+
+        # Road surface
+        # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
+        self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "diff_2k.png"))
+        self.road_texture_normal = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "asphalt", "normal_2k.png")
+        )
+        self.road_texture_rough = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "rough_2k.png"))
+        v_wrap = Texture.WMRepeat
+        u_warp = Texture.WMMirror
+        filter_type = Texture.FTLinearMipmapLinear
+        anisotropic_degree = 16
+        for tex in [self.road_texture_rough, self.road_texture, self.road_texture_normal]:
+            tex.set_wrap_u(u_warp)
+            tex.set_wrap_v(v_wrap)
+            tex.setMinfilter(filter_type)
+            tex.setMagfilter(filter_type)
+            tex.setAnisotropicDegree(anisotropic_degree)
+        # self.road_texture_displacement = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
+        # self.road_texture.setMinfilter(minfilter)
+        # self.road_texture.setAnisotropicDegree(anisotropic_degree)
+
+        # lane line
+        white_lane_line = PNMImage(1024, 1024, 4)
+        white_lane_line.fill(1., 1., 1.)
+        self.white_lane_line = Texture("white lane line")
+        self.white_lane_line.load(white_lane_line)
+
+        yellow_lane_line = PNMImage(1024, 1024, 4)
+        yellow_lane_line.fill(*(255 / 255, 200 / 255, 0 / 255))
+        self.yellow_lane_line = Texture("white lane line")
+        self.yellow_lane_line.load(yellow_lane_line)
+
     def _make_random_terrain(self, texture_size, terrain_size, heightfield):
+        """
+        Deprecated
+        Args:
+            texture_size:
+            terrain_size:
+            heightfield:
+
+        Returns:
+
+        """
+        raise DeprecationWarning
         height_1 = width_2 = height_3 = width_3 = length = int((terrain_size - texture_size) / 2)
         width_1 = height_2 = width = texture_size
         max_height = 8192
@@ -394,6 +453,15 @@ class Terrain(BaseObject):
         heightfield[-length:, :length] = array_3
         heightfield[:length, -length:] = array_3
         heightfield[-length:, -length:] = array_3
+
+    @property
+    def mesh_terrain(self):
+        """
+        Exposing the mesh_terrain for outside use, i.e. shadow caster
+        Returns: mesh_terrain node path
+
+        """
+        return self._mesh_terrain
 
 
 # Some useful threads

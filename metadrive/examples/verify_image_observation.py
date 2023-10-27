@@ -86,4 +86,7 @@ if __name__ == "__main__":
     parser.add_argument("--camera", default="main", choices=["main", "rgb", "depth", "semantic"])
     args = parser.parse_args()
     _test_rgb_camera_as_obs(args.render, image_on_cuda=args.cuda, debug=args.debug, camera=args.camera)
-    print("Test Successful !! The FPS should go beyond 400 FPS if you are running on GPUs better than RTX 3060.")
+    print(
+        "Test Successful !! The FPS should go beyond 400 FPS "
+        "if you are running in offscreen mode with GPUs better than RTX 3060."
+    )

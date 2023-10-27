@@ -1,4 +1,5 @@
 from collections import deque
+from metadrive.constants import CamMask
 
 import numpy as np
 from panda3d.core import NodePath, Material
@@ -41,6 +42,9 @@ class TrajectoryNavigation(BaseNavigation):
             name=name,
             vehicle_config=vehicle_config
         )
+        if self.origin is not None:
+            self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
+
         self._route_completion = 0
         self.checkpoints = None  # All check points
 
@@ -56,12 +60,12 @@ class TrajectoryNavigation(BaseNavigation):
                 if self._navi_point_model is None:
                     self._navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
                     self._navi_point_model.setScale(0.5)
-                    if self.engine.use_render_pipeline:
-                        material = Material()
-                        material.setBaseColor((19 / 255, 212 / 255, 237 / 255, 1))
-                        material.setShininess(16)
-                        material.setEmission((0.2, 0.2, 0.2, 0.2))
-                        self._navi_point_model.setMaterial(material, True)
+                    # if self.engine.use_render_pipeline:
+                    material = Material()
+                    material.setBaseColor((19 / 255, 212 / 255, 237 / 255, 1))
+                    material.setShininess(16)
+                    material.setEmission((0.2, 0.2, 0.2, 0.2))
+                    self._navi_point_model.setMaterial(material, True)
                 self._navi_point_model.instanceTo(model)
                 model.reparentTo(self.origin)
 

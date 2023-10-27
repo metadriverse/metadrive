@@ -240,7 +240,8 @@ class AbstractLane(MetaDriveType):
         segment_np.setH(theta / np.pi * 180)
         segment_np.setP(-90)
         segment_np.reparentTo(block.lane_node_path)
-        if block.render and not block.use_render_pipeline:
+
+        if block.naive_draw_map:
             cm = CardMaker('card')
             cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
             cm.setHasNormals(True)
@@ -302,7 +303,7 @@ class AbstractLane(MetaDriveType):
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
 
-        if block.render and not block.use_render_pipeline:
+        if block.naive_draw_map:
             # For visualization
             lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             lane_line.setTwoSided(False)
@@ -387,7 +388,7 @@ class AbstractLane(MetaDriveType):
         Only create visual part for this lane, usually used with _construct_lane_only_physics_polygon()
         """
         # The lane surface is created with terrain now
-        if block.render and not block.use_render_pipeline:
+        if block.naive_draw_map:
             length += 0.1
             theta = panda_heading(theta)
             cm = CardMaker('card')

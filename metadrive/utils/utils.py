@@ -214,6 +214,14 @@ def dict_recursive_remove_array(d):
 
 
 def time_me(fn):
+    """
+    Wrapper for testing the function time
+    Args:
+        fn: function
+
+    Returns: None
+
+    """
     def _wrapper(*args, **kwargs):
         start = time.time()
         ret = fn(*args, **kwargs)
