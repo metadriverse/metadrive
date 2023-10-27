@@ -1,11 +1,12 @@
 import argparse
+import time
 import os
 import progressbar
 import shutil
 import urllib.request
 import zipfile
 import filelock
-
+from filelock import Timeout
 from metadrive.constants import VERSION
 from metadrive.engine.logger import get_logger
 from metadrive.version import asset_version
@@ -31,7 +32,6 @@ class MyProgressBar():
 
 def pull_asset(update):
     logger = get_logger(propagate=False)
-    logger.handlers.pop()
     TARGET_DIR = os.path.join(os.path.dirname(__file__))
     if os.path.exists(os.path.join(TARGET_DIR, "assets")):
         if not update:
@@ -48,23 +48,35 @@ def pull_asset(update):
 
     zip_path = os.path.join(TARGET_DIR, 'assets.zip')
     zip_lock = os.path.join(TARGET_DIR, 'assets.zip.lock')
-
-    # Fetch the zip file
-    logger.info("Pull assets from {}".format(ASSET_URL))
-    urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
-
+    # filelock
+    lock = filelock.FileLock(zip_lock, timeout=1)
     # Extract the zip file to the desired location
-    lock = filelock.FileLock(zip_lock)
-    with lock:
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(TARGET_DIR)
+    try:
+        with lock.acquire():
+            # Fetch the zip file
+            logger.info("Pull assets from {}".format(ASSET_URL))
+            urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(TARGET_DIR)
+            logger.info(
+                "Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION)
+            )
+            # Remove the downloaded zip file (optional)
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+            if os.path.exists(zip_lock):
+                os.remove(zip_lock)
 
-    # Remove the downloaded zip file (optional)
-    if os.path.exists(zip_path):
-        os.remove(zip_path)
-    if os.path.exists(zip_lock):
-        os.remove(zip_lock)
-    logger.info("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
+    except Timeout:
+        logger.info(
+            "Another instance of this program is already running. "
+            "Wait for the asset pulling finished from another program..."
+        )
+        while os.path.exists(zip_lock):
+            logger.info("Assets not pulled yet. Waiting for 10 seconds...")
+            time.sleep(10)
+
+        logger.info("Assets are now available.")
 
 
 if __name__ == '__main__':
