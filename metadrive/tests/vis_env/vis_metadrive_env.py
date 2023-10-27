@@ -40,7 +40,7 @@ if __name__ == "__main__":
             "force_destroy": False,
             # "show_skybox": False,
             "show_fps": False,
-            "render_pipeline": False,
+            "render_pipeline": True,
             # "camera_dist": 8,
             "window_size": (1200, 800),
             "camera_dist": 9,
