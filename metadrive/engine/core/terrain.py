@@ -35,8 +35,8 @@ class Terrain(BaseObject):
         self.origin.hide(
             CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam
         )
-        # use plane terrain or mesh terrain， True by default. When rendering is on it will be overwritten
-        self.plane_terrain = True
+        # use plane terrain or mesh terrain， True by default.
+        self.plane_terrain = engine.global_config["plane_terrain"]
 
         # collision mesh
         self.plane_collision_terrain = None  # a flat collision shape
@@ -66,7 +66,6 @@ class Terrain(BaseObject):
             # if engine.use_render_pipeline:
             self._load_mesh_terrain_textures(engine)
             self._mesh_terrain_node = ShaderTerrainMesh()
-            self.plane_terrain = engine.global_config["plane_terrain"]
             # disable env probe as some vehicle models may break it
             # self.probe = engine.render_pipeline.add_environment_probe()
             # self.probe.set_pos(0, 0, self.PROBE_HEIGHT)
@@ -86,20 +85,7 @@ class Terrain(BaseObject):
         if self.plane_terrain and self.plane_collision_terrain is None:
             self.generate_plane_collision_terrain()
 
-        if self.render and self.show_terrain:
-            # Make shader terrain
-            self.detach_from_world(self.engine.physics_world)
-            assert self.engine.current_map is not None, "Can not find current map"
-            semantics = self.engine.current_map.get_semantic_map(
-                size=self._semantic_map_size,
-                pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=int(1024 / self._semantic_map_size),
-                layer=["lane", "lane_line"]
-            )
-            semantic_tex = Texture()
-            semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
-            semantic_tex.setRamImage(semantics)
-
+        if (self.render and self.show_terrain) or not self.plane_terrain:
             # modify default height image
             drivable_region = self.engine.current_map.get_height_map(
                 self._heightmap_size, 1, self._drivable_area_extension
@@ -118,23 +104,37 @@ class Terrain(BaseObject):
             )
             heightfield_to_modify = heightfield_base[start:end, start:end, ...]
             heightfield_base[start:end, start:end,
-                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+            ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if not self.plane_terrain:
                 self._generate_collision_mesh(heightfield_to_modify, self._height_scale)
 
-            # to panda texture
-            heightfield_tex = Texture()
-            heightfield_tex.setup2dTexture(*heightfield_base.shape[:2], Texture.TShort, Texture.FLuminance)
-            heightfield_tex.setRamImage(heightfield_base)
+            if self.render and self.show_terrain:
+                # Make semantics for shader terrain
+                self.detach_from_world(self.engine.physics_world)
+                assert self.engine.current_map is not None, "Can not find current map"
+                semantics = self.engine.current_map.get_semantic_map(
+                    size=self._semantic_map_size,
+                    pixels_per_meter=self._semantic_map_pixel_per_meter,
+                    polyline_thickness=int(1024 / self._semantic_map_size),
+                    layer=["lane", "lane_line"]
+                )
+                semantic_tex = Texture()
+                semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
+                semantic_tex.setRamImage(semantics)
 
-            # generate terrain visualization
-            self._generate_mesh_vis_terrain(self._terrain_size, heightfield_tex, semantic_tex)
-            self.attach_to_world(self.engine.render, self.engine.physics_world)
+                # to panda texture
+                heightfield_tex = Texture()
+                heightfield_tex.setup2dTexture(*heightfield_base.shape[:2], Texture.TShort, Texture.FLuminance)
+                heightfield_tex.setRamImage(heightfield_base)
 
-            # reset position
-            self.set_position(center_position)
+                # generate terrain visualization
+                self._generate_mesh_vis_terrain(self._terrain_size, heightfield_tex, semantic_tex)
+                self.attach_to_world(self.engine.render, self.engine.physics_world)
+
+                # reset position
+                self.set_position(center_position)
 
     def generate_plane_collision_terrain(self):
         """
@@ -159,12 +159,12 @@ class Terrain(BaseObject):
         self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -482,7 +482,6 @@ class Terrain(BaseObject):
 
         """
         return self._mesh_terrain
-
 
 # Some useful threads
 # GeoMipTerrain:

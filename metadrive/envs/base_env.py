@@ -199,7 +199,7 @@ BASE_DEFAULT_CONFIG = dict(
     drivable_area_extension=7,
     # height scale for mountains, unit: [m]
     height_scale=50,
-    # use plane collision or mesh collision, only available when rendering is turned on
+    # use plane collision or mesh collision
     plane_terrain=True,
 
     # ===== Others =====
