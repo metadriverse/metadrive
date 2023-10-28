@@ -1,19 +1,25 @@
 # import numpy
+import pathlib
+import sys
+import os.path
+from metadrive.engine.asset_loader import AssetLoader
 #
-
+#
+import cv2
 import math
 from metadrive.utils.utils import time_me
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.bullet import ZUp, BulletHeightfieldShape
 from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf
-from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage, Shader
+from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage, Shader, Filename
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask, Semantics
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.third_party.diamond_square import diamond_square
+from metadrive.utils.utils import is_win
 
 
 class Terrain(BaseObject):
@@ -22,24 +28,28 @@ class Terrain(BaseObject):
     PROBE_HEIGHT = 600
     PROBE_SIZE = 1024
     SEMANTIC_LABEL = Semantics.TERRAIN.label
+    PATH = pathlib.PurePosixPath(__file__).parent if not is_win() else pathlib.Path(__file__).resolve().parent
 
     def __init__(self, show_terrain, engine):
         super(Terrain, self).__init__(random_seed=0)
         self.origin.hide(
             CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam
         )
+        # use plane terrain or mesh terrain， True by default. When rendering is on it will be overwritten
+        self.plane_terrain = True
 
         # collision mesh
-        self.simple_terrain_collision_mesh = None  # a flat collision shape
-        self.terrain_collision_mesh = None  # a 3d mesh, Not available yet!
+        self.plane_collision_terrain = None  # a flat collision shape
+        self.mesh_collision_terrain = None  # a 3d mesh, Not available yet!
 
         # visualization mesh feature
         self._terrain_size = 2048  # [m]
-        self._height_scale = engine.global_config["height_scale"] if engine.use_render_pipeline else 25  # [m]
+        self._height_scale = engine.global_config["height_scale"]  # [m]
         self._drivable_area_extension = engine.global_config["drivable_area_extension"]  # [m] road marin
         self._heightmap_size = self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
         self._heightfield_start = int((self._terrain_size - self._heightmap_size) / 2)
         self._semantic_map_pixel_per_meter = 22  # [m] how many pixels per meter
+        self._terrain_offset = 2055  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
         # pre calculate some variables
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
 
@@ -55,6 +65,7 @@ class Terrain(BaseObject):
             # if engine.use_render_pipeline:
             self._load_mesh_terrain_textures(engine)
             self._mesh_terrain_node = ShaderTerrainMesh()
+            self.plane_terrain = engine.global_config["plane_terrain"]
             # disable env probe as some vehicle models may break it
             # self.probe = engine.render_pipeline.add_environment_probe()
             # self.probe.set_pos(0, 0, self.PROBE_HEIGHT)
@@ -71,21 +82,8 @@ class Terrain(BaseObject):
 
         # if not self.use_render_pipeline and self.simple_terrain_collision_mesh is None:
         # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
-        if self.simple_terrain_collision_mesh is None:
-            # Create once for lazy-reset
-            self.detach_from_world(self.engine.physics_world)
-            # If no render pipeline, we can only have 2d terrain. It will only be generated for once.
-            shape = BulletPlaneShape(Vec3(0, 0, 1), -0.05)
-            node = BulletRigidBodyNode(MetaDriveType.GROUND)
-            node.setFriction(.9)
-            node.addShape(shape)
-
-            node.setIntoCollideMask(self.COLLISION_MASK)
-            self.dynamic_nodes.append(node)
-
-            self.simple_terrain_collision_mesh = self.origin.attachNewNode(node)
-            self._node_path_list.append(np)
-            self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
+        if self.plane_terrain and self.plane_collision_terrain is None:
+            self.generate_plane_collision_terrain()
 
         if self.render and self.show_terrain:
             # Make shader terrain
@@ -105,43 +103,68 @@ class Terrain(BaseObject):
             drivable_region = self.engine.current_map.get_height_map(
                 self._heightmap_size, 1, self._drivable_area_extension
             )
+
             # embed to the original height image
             start = self._heightfield_start
             end = self._heightfield_start + self._heightmap_size
-            heightfield = self.heightfield_img[start:end, start:end, ...]
-            drivable_region_height = np.mean(heightfield[np.where(drivable_region)]).astype(np.uint16)
-            heightfield = np.where(drivable_region, drivable_region_height, heightfield)
-            heightfield_img = np.copy(self.heightfield_img)
-            heightfield_img[start:end, start:end, ...] = heightfield
+            heightfield_base = np.copy(self.heightfield_img)
+            drivable_area_height_mean = np.mean(
+                self.heightfield_img[start:end, start:end, ...][np.where(drivable_region)]).astype(np.uint16)
+            heightfield_base = np.where(heightfield_base > (drivable_area_height_mean - self._terrain_offset),
+                                        heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0)
+            heightfield_to_modify = heightfield_base[start:end, start:end, ...]
+            heightfield_base[start:end, start:end, ...] = np.where(drivable_region, self._terrain_offset,
+                                                                   heightfield_to_modify)
 
-            # set to zero height
-            heightfield = heightfield_img - drivable_region_height
+            # generate collision mesh
+            if not self.plane_terrain:
+                self._generate_collision_mesh(heightfield_to_modify, self._height_scale)
 
             # to panda texture
             heightfield_tex = Texture()
-            heightfield_tex.setup2dTexture(*heightfield.shape[:2], Texture.TShort, Texture.FLuminance)
-            heightfield_tex.setRamImage(heightfield)
+            heightfield_tex.setup2dTexture(*heightfield_base.shape[:2], Texture.TShort, Texture.FLuminance)
+            heightfield_tex.setRamImage(heightfield_base)
 
-            # # update collision every time!
-            # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
-            # self._generate_collision_mesh(heightfield_img, self.height_scale)
+            # generate terrain visualization
             self._generate_mesh_vis_terrain(
-                self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale, height_offset=0
+                self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale,
+                height_offset=-(self._terrain_offset + 1) / 65536 * self._height_scale * 2
             )
             self.attach_to_world(self.engine.render, self.engine.physics_world)
 
             # reset position
             self.set_position(center_position)
 
+    def generate_plane_collision_terrain(self):
+        """
+        generate a plane as terrain
+        Returns:
+
+        """
+        # Create once for lazy-reset
+        self.detach_from_world(self.engine.physics_world)
+        # If no render pipeline, we can only have 2d terrain. It will only be generated for once.
+        shape = BulletPlaneShape(Vec3(0, 0, 1), -0.05)
+        node = BulletRigidBodyNode(MetaDriveType.GROUND)
+        node.setFriction(.9)
+        node.addShape(shape)
+
+        node.setIntoCollideMask(self.COLLISION_MASK)
+        self.dynamic_nodes.append(node)
+
+        self.plane_collision_terrain = self.origin.attachNewNode(node)
+        self._node_path_list.append(np)
+        self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
+
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        height_scale=100,
-        height_offset=0.,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            height_scale=100,
+            height_offset=0.,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -245,18 +268,16 @@ class Terrain(BaseObject):
         # TODO we can do some optimization here, only update some regions
         # clear previous mesh
         self.dynamic_nodes.clear()
-        mesh = np.zeros([heightfield_img.shape[0] + 1, heightfield_img.shape[1] + 1, 1])
-        mesh[:heightfield_img.shape[0], :heightfield_img.shape[1]] = heightfield_img
-        mesh = mesh.astype(np.uint16)
+        mesh = heightfield_img
+        mesh = np.flipud(mesh)
+        mesh = cv2.resize(mesh, (mesh.shape[0] + 1, mesh.shape[1] + 1))
+        path_to_store = self.PATH.joinpath("run_time_map_mesh.png")
+        cv2.imwrite(str(path_to_store), mesh)
+        if sys.platform.startswith("win"):
+            path_to_store = AssetLoader.windows_style2unix_style(path_to_store)
+        p = PNMImage(Filename(str(path_to_store)))
 
-        heightfield_tex = Texture()
-        heightfield_tex.setup2dTexture(*mesh.shape[:2], Texture.TShort, Texture.FLuminance)
-        heightfield_tex.setRamImage(mesh)
-
-        p = PNMImage()
-        heightfield_tex.store(p)
-
-        shape = BulletHeightfieldShape(p, height_scale, ZUp)
+        shape = BulletHeightfieldShape(p, height_scale * 2, ZUp)
         shape.setUseDiamondSubdivision(True)
 
         node = BulletRigidBodyNode(MetaDriveType.GROUND)
@@ -266,13 +287,15 @@ class Terrain(BaseObject):
         node.setIntoCollideMask(CollisionGroup.Terrain)
         self.dynamic_nodes.append(node)
 
-        self.terrain_collision_mesh = self.origin.attachNewNode(node)
-        self._node_path_list.append(np)
+        self.mesh_collision_terrain = self.origin.attachNewNode(node)
 
     def set_position(self, position, height=None):
         if self.render:
             pos = (self._mesh_terrain.get_pos()[0] + position[0], self._mesh_terrain.get_pos()[1] + position[1])
             self._mesh_terrain.set_pos(*pos, self._mesh_terrain_height)
+            if not self.plane_terrain:
+                z = self._height_scale - (self._terrain_offset + 1) / 65536 * self._height_scale * 2 - 0.05
+                self.mesh_collision_terrain.set_pos(*position[:2], z)
             if self.probe is not None:
                 self.probe.set_pos(*pos, self.PROBE_HEIGHT)
 
@@ -462,7 +485,6 @@ class Terrain(BaseObject):
 
         """
         return self._mesh_terrain
-
 
 # Some useful threads
 # GeoMipTerrain:
