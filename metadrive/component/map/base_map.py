@@ -253,7 +253,7 @@ class BaseMap(BaseRunnable):
                 cv2.fillPoly(mask, np.asarray([points]).astype(np.int32), color=[height])
             if need_scale:
                 # Define a kernel. A 3x3 rectangle kernel
-                kernel = np.ones((extension * pixels_per_meter + 1, extension * pixels_per_meter + 1), np.uint8)
+                kernel = np.ones(((extension + 1) * pixels_per_meter, (extension + 1) * pixels_per_meter), np.uint8)
 
                 # Apply dilation
                 mask = cv2.dilate(mask, kernel, iterations=1)

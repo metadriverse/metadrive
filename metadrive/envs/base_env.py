@@ -196,9 +196,11 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Mesh Terrain =====
     # road will have a marin whose width is determined by this value, unit: [m]
-    drivable_area_extension=6,
+    drivable_area_extension=7,
     # height scale for mountains, unit: [m]
-    height_scale=120,
+    height_scale=50,
+    # use plane collision or mesh collision
+    plane_terrain=True,
 
     # ===== Others =====
     # Force to generate objects in the left lane.
