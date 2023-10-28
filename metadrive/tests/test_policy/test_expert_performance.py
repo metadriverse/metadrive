@@ -1,4 +1,5 @@
 import time
+import pytest
 
 import numpy as np
 
@@ -56,11 +57,13 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
     return ep_reward_mean, success_rate
 
 
-def test_expert_with_traffic(use_render=False):
+@pytest.mark.parametrize("plane", [True, False], ids=["plane", "mesh"])
+def test_expert_with_traffic(plane, use_render=False):
     ep_reward, success_rate = _evaluate(
         dict(
             num_scenarios=1,
             map="CCC",
+            plane_terrain=plane,
             start_seed=2,
             random_traffic=False,
             # debug_static_world=True,

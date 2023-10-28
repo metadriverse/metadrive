@@ -70,19 +70,21 @@ class Terrain(BaseObject):
             # self.probe = engine.render_pipeline.add_environment_probe()
             # self.probe.set_pos(0, 0, self.PROBE_HEIGHT)
             # self.probe.set_scale(self.PROBE_SIZE * 2, self.PROBE_SIZE * 2, 1000)
-            # else:
-            #     self._generate_card_terrain()
+
+        if not self.plane_terrain or self.render and show_terrain:
+            self._load_height_field_image(engine)
 
     # @time_me
     def reset(self, center_position):
         """
         Update terrain according to current map
         """
+        # detach current map
         assert self.engine is not None, "Can not call this without initializing engine"
+        self.detach_from_world(self.engine.physics_world)
 
-        # if not self.use_render_pipeline and self.simple_terrain_collision_mesh is None:
-        # TODO: I disabled online terrain collision mesh generation now, consider enabling it in the future
         if self.plane_terrain and self.plane_collision_terrain is None:
+            # only generate once if plane terrain
             self.generate_plane_collision_terrain()
 
         if (self.render and self.show_terrain) or not self.plane_terrain:
@@ -112,7 +114,6 @@ class Terrain(BaseObject):
 
             if self.render and self.show_terrain:
                 # Make semantics for shader terrain
-                self.detach_from_world(self.engine.physics_world)
                 assert self.engine.current_map is not None, "Can not find current map"
                 semantics = self.engine.current_map.get_semantic_map(
                     size=self._semantic_map_size,
@@ -131,10 +132,9 @@ class Terrain(BaseObject):
 
                 # generate terrain visualization
                 self._generate_mesh_vis_terrain(self._terrain_size, heightfield_tex, semantic_tex)
-                self.attach_to_world(self.engine.render, self.engine.physics_world)
-
-                # reset position
-                self.set_position(center_position)
+        # reset position
+        self.set_position(center_position)
+        self.attach_to_world(self.engine.render, self.engine.physics_world)
 
     def generate_plane_collision_terrain(self):
         """
@@ -143,7 +143,6 @@ class Terrain(BaseObject):
 
         """
         # Create once for lazy-reset
-        self.detach_from_world(self.engine.physics_world)
         # If no render pipeline, we can only have 2d terrain. It will only be generated for once.
         shape = BulletPlaneShape(Vec3(0, 0, 1), -0.05)
         node = BulletRigidBodyNode(MetaDriveType.GROUND)
@@ -156,7 +155,6 @@ class Terrain(BaseObject):
         self.plane_collision_terrain = self.origin.attachNewNode(node)
         self.plane_collision_terrain.setZ(-self.origin.getZ())
         self._node_path_list.append(np)
-        self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
 
     def _generate_mesh_vis_terrain(
             self,
@@ -288,15 +286,29 @@ class Terrain(BaseObject):
         self.mesh_collision_terrain = self.origin.attachNewNode(node)
 
     def set_position(self, position, height=None):
+        """
+        Set the terrain position to the map center
+        Args:
+            position: position in world coordinates
+            height: Placeholder, No effect
+
+        Returns:
+
+        """
         if self.render:
             pos = (self._mesh_terrain.get_pos()[0] + position[0], self._mesh_terrain.get_pos()[1] + position[1])
             self._mesh_terrain.set_pos(*pos, 0)
-            if not self.plane_terrain:
-                self.mesh_collision_terrain.set_pos(*position[:2], self._height_scale)
             if self.probe is not None:
                 self.probe.set_pos(*pos, self.PROBE_HEIGHT)
+        if not self.plane_terrain:
+            self.mesh_collision_terrain.set_pos(*position[:2], self._height_scale)
 
     def _generate_card_terrain(self):
+        """
+        Generate a 2D-card terrain, which is deprecated
+        Returns:
+
+        """
         self.origin.hide(
             CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam
         )
@@ -327,6 +339,14 @@ class Terrain(BaseObject):
         self.terrain_texture.setAnisotropicDegree(8)
         card.setQuat(LQuaternionf(math.cos(-math.pi / 4), math.sin(-math.pi / 4), 0, 0))
 
+    def _load_height_field_image(self, engine):
+        # basic height_field
+        heightfield_tex = engine.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
+        heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
+        heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
+        down_sample_rate = int(heightfield_tex.getYSize() / self._terrain_size)  # downsample to 2048 m
+        self.heightfield_img = np.array(heightfield_img[::down_sample_rate, ::down_sample_rate])
+
     def _load_mesh_terrain_textures(self, engine, anisotropic_degree=16, filter_type=Texture.FTLinearMipmapLinear):
         """
         Only maintain one copy of all asset
@@ -338,13 +358,6 @@ class Terrain(BaseObject):
         self.ts_color = TextureStage("color")
         self.ts_normal = TextureStage("normal")
         self.ts_normal.setMode(TextureStage.M_normal)
-
-        # basic height_field
-        heightfield_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
-        heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
-        heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
-        down_sample_rate = int(heightfield_tex.getYSize() / self._terrain_size)  # downsample to 2048 m
-        self.heightfield_img = np.array(heightfield_img[::down_sample_rate, ::down_sample_rate])
 
         # grass
         if engine.use_render_pipeline:
