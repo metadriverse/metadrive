@@ -7,6 +7,9 @@ from metadrive.constants import CamMask
 
 
 class RGBCamera(BaseCamera):
+    """
+    Create a new RGBCamera
+    """
     # shape(dim_1, dim_2)
     BUFFER_W = 84  # dim 1
     BUFFER_H = 84  # dim 2
