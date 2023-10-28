@@ -52,6 +52,7 @@ class Terrain(BaseObject):
         self._terrain_offset = 2055  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
         # pre calculate some variables
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
+        self.origin.setZ(-(self._terrain_offset + 1) / 65536 * self._height_scale * 2 - 0.05)
 
         self._mesh_terrain = None
         self._mesh_terrain_height = None
@@ -126,10 +127,7 @@ class Terrain(BaseObject):
             heightfield_tex.setRamImage(heightfield_base)
 
             # generate terrain visualization
-            self._generate_mesh_vis_terrain(
-                self._terrain_size, heightfield_tex, semantic_tex, height_scale=self._height_scale,
-                height_offset=-(self._terrain_offset + 1) / 65536 * self._height_scale * 2
-            )
+            self._generate_mesh_vis_terrain(self._terrain_size, heightfield_tex, semantic_tex)
             self.attach_to_world(self.engine.render, self.engine.physics_world)
 
             # reset position
@@ -153,6 +151,7 @@ class Terrain(BaseObject):
         self.dynamic_nodes.append(node)
 
         self.plane_collision_terrain = self.origin.attachNewNode(node)
+        self.plane_collision_terrain.setZ(-self.origin.getZ())
         self._node_path_list.append(np)
         self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
 
@@ -162,8 +161,6 @@ class Terrain(BaseObject):
             heightfield: Texture,
             attribute_tex: Texture,
             target_triangle_width=10,
-            height_scale=100,
-            height_offset=0.,
             engine=None,
     ):
         """
@@ -174,7 +171,6 @@ class Terrain(BaseObject):
         :param heightfield: terrain heightfield. It should be a 16-bit png and have a quadratic size of a power of two.
         :param attribute_tex: doing texture splatting. r,g,b,a represent: grass/road/lane_line ratio respectively
         :param target_triangle_width: For a value of 10.0 for example, the terrain will attempt to make every triangle 10 pixels wide on screen.
-        :param height_scale: Scale the height of mountain.
         :param engine: engine instance
         :return:
         """
@@ -197,9 +193,8 @@ class Terrain(BaseObject):
 
         # Attach the terrain to the main scene and set its scale. With no scale
         # set, the terrain ranges from (0, 0, 0) to (1, 1, 1)
-        self._mesh_terrain.set_scale(size, size, height_scale)
-        self._mesh_terrain_height = height_offset
-        self._mesh_terrain.set_pos(-size / 2, -size / 2, self._mesh_terrain_height)
+        self._mesh_terrain.set_scale(size, size, self._height_scale)
+        self._mesh_terrain.set_pos(-size / 2, -size / 2, 0)
 
     def _set_terrain_shader(self, engine, attribute_tex):
         """
@@ -292,10 +287,9 @@ class Terrain(BaseObject):
     def set_position(self, position, height=None):
         if self.render:
             pos = (self._mesh_terrain.get_pos()[0] + position[0], self._mesh_terrain.get_pos()[1] + position[1])
-            self._mesh_terrain.set_pos(*pos, self._mesh_terrain_height)
+            self._mesh_terrain.set_pos(*pos, 0)
             if not self.plane_terrain:
-                z = self._height_scale - (self._terrain_offset + 1) / 65536 * self._height_scale * 2 - 0.05
-                self.mesh_collision_terrain.set_pos(*position[:2], z)
+                self.mesh_collision_terrain.set_pos(*position[:2], self._height_scale)
             if self.probe is not None:
                 self.probe.set_pos(*pos, self.PROBE_HEIGHT)
 

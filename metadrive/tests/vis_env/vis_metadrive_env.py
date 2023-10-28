@@ -6,12 +6,11 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 10,
-            "traffic_density": 0.15,
-            "traffic_mode": "hybrid",
+            "traffic_density": 0,
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": True,
+            # "debug": False,
             # "global_light": False,
             # "debug_static_world": True,
             "static_traffic_object": False,
@@ -25,6 +24,7 @@ if __name__ == "__main__":
             "random_agent_model": False,
             "manual_control": True,
             "use_render": True,
+            # "plane_terrain": False,
             "accident_prob": 1,
             "decision_repeat": 5,
             "daytime": "19:00",
@@ -38,9 +38,10 @@ if __name__ == "__main__":
             "driving_reward": 1.0,
             # "pstats": True,
             "force_destroy": False,
+            # "show_terrain"
             # "show_skybox": False,
             "show_fps": False,
-            "render_pipeline": True,
+            "render_pipeline": False,
             # "camera_dist": 8,
             "window_size": (1200, 800),
             "camera_dist": 9,
@@ -49,7 +50,7 @@ if __name__ == "__main__":
             # "camera_smooth": False,
             # "camera_height": -1,
             "vehicle_config": {
-                "enable_reverse": False,
+                "enable_reverse": True,
                 # "vehicle_model": "xl",
                 # "rgb_camera": (1024, 1024),
                 # "spawn_velocity": [8.728615581032535, -0.24411703918728195],

@@ -147,13 +147,13 @@ class BaseMap(BaseRunnable):
 
     # @time_me
     def get_semantic_map(
-        self,
-        size=512,
-        pixels_per_meter=8,
-        color_setting=MapTerrainSemanticColor,
-        line_sample_interval=2,
-        polyline_thickness=1,
-        layer=("lane_line", "lane")
+            self,
+            size=512,
+            pixels_per_meter=8,
+            color_setting=MapTerrainSemanticColor,
+            line_sample_interval=2,
+            polyline_thickness=1,
+            layer=("lane_line", "lane")
     ):
         """
         Get semantics of the map for terrain generation
@@ -215,11 +215,11 @@ class BaseMap(BaseRunnable):
 
     # @time_me
     def get_height_map(
-        self,
-        size=2048,
-        pixels_per_meter=1,
-        extension=2,
-        height=1,
+            self,
+            size=2048,
+            pixels_per_meter=1,
+            extension=2,
+            height=1,
     ):
         """
         Get height of the map for terrain generation
@@ -253,7 +253,7 @@ class BaseMap(BaseRunnable):
                 cv2.fillPoly(mask, np.asarray([points]).astype(np.int32), color=[height])
             if need_scale:
                 # Define a kernel. A 3x3 rectangle kernel
-                kernel = np.ones((extension * pixels_per_meter + 1, extension * pixels_per_meter + 1), np.uint8)
+                kernel = np.ones(((extension+1) * pixels_per_meter, (extension+1) * pixels_per_meter), np.uint8)
 
                 # Apply dilation
                 mask = cv2.dilate(mask, kernel, iterations=1)
