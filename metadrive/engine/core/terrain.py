@@ -110,12 +110,15 @@ class Terrain(BaseObject):
             end = self._heightfield_start + self._heightmap_size
             heightfield_base = np.copy(self.heightfield_img)
             drivable_area_height_mean = np.mean(
-                self.heightfield_img[start:end, start:end, ...][np.where(drivable_region)]).astype(np.uint16)
-            heightfield_base = np.where(heightfield_base > (drivable_area_height_mean - self._terrain_offset),
-                                        heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0)
+                self.heightfield_img[start:end, start:end, ...][np.where(drivable_region)]
+            ).astype(np.uint16)
+            heightfield_base = np.where(
+                heightfield_base > (drivable_area_height_mean - self._terrain_offset),
+                heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0
+            )
             heightfield_to_modify = heightfield_base[start:end, start:end, ...]
-            heightfield_base[start:end, start:end, ...] = np.where(drivable_region, self._terrain_offset,
-                                                                   heightfield_to_modify)
+            heightfield_base[start:end, start:end,
+                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if not self.plane_terrain:
@@ -156,12 +159,12 @@ class Terrain(BaseObject):
         self.attach_to_world(self.engine.pbr_render, self.engine.physics_world)
 
     def _generate_mesh_vis_terrain(
-            self,
-            size,
-            heightfield: Texture,
-            attribute_tex: Texture,
-            target_triangle_width=10,
-            engine=None,
+        self,
+        size,
+        heightfield: Texture,
+        attribute_tex: Texture,
+        target_triangle_width=10,
+        engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -479,6 +482,7 @@ class Terrain(BaseObject):
 
         """
         return self._mesh_terrain
+
 
 # Some useful threads
 # GeoMipTerrain:
