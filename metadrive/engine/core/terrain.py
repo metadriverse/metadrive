@@ -60,9 +60,9 @@ class Terrain(BaseObject):
         self._terrain_shader_set = False  # only set once
         self.probe = None
 
-        self.show_terrain = show_terrain
+        self.render = self.render and show_terrain
 
-        if self.render and show_terrain:
+        if self.render:
             # if engine.use_render_pipeline:
             self._load_mesh_terrain_textures(engine)
             self._mesh_terrain_node = ShaderTerrainMesh()
@@ -71,7 +71,7 @@ class Terrain(BaseObject):
             # self.probe.set_pos(0, 0, self.PROBE_HEIGHT)
             # self.probe.set_scale(self.PROBE_SIZE * 2, self.PROBE_SIZE * 2, 1000)
 
-        if not self.plane_terrain or self.render and show_terrain:
+        if not self.plane_terrain or self.render:
             self._load_height_field_image(engine)
 
     # @time_me
@@ -87,7 +87,7 @@ class Terrain(BaseObject):
             # only generate once if plane terrain
             self.generate_plane_collision_terrain()
 
-        if (self.render and self.show_terrain) or not self.plane_terrain:
+        if self.render or not self.plane_terrain:
             # modify default height image
             drivable_region = self.engine.current_map.get_height_map(
                 self._heightmap_size, 1, self._drivable_area_extension
@@ -112,7 +112,7 @@ class Terrain(BaseObject):
             if not self.plane_terrain:
                 self._generate_collision_mesh(heightfield_to_modify, self._height_scale)
 
-            if self.render and self.show_terrain:
+            if self.render:
                 # Make semantics for shader terrain
                 assert self.engine.current_map is not None, "Can not find current map"
                 semantics = self.engine.current_map.get_semantic_map(
