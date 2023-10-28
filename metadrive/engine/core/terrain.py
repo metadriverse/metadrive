@@ -186,6 +186,10 @@ class Terrain(BaseObject):
 
         # Set the target triangle width.
         self._mesh_terrain_node.target_triangle_width = target_triangle_width
+        self._mesh_terrain_node.setTargetTriangleWidth(target_triangle_width)
+        # self._mesh_terrain_node.setUpdateEnabled(False)
+        self._mesh_terrain_node.setChunkSize(128)
+        # self._mesh_terrain_node.setChunkSize(64)
 
         # Generate the terrain
         self._mesh_terrain_node.generate()

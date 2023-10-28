@@ -10,19 +10,20 @@ if __name__ == "__main__":
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": True,
+            "debug": False,
             # "global_light": False,
             # "debug_static_world": True,
             "pstats": True,
             "static_traffic_object": False,
             "show_interface": True,
+            "random_agent_model": True,
             "cull_scene": False,
             "random_spawn_lane_index": False,
             "random_lane_width": False,
             # "image_observation": True,
             # "controller": "joystick",
             # "show_coordinates": True,
-            "random_agent_model": False,
+            # "random_agent_model": False,
             "manual_control": True,
             "use_render": True,
             "plane_terrain": False,
@@ -42,12 +43,12 @@ if __name__ == "__main__":
             # "show_terrain"
             # "show_skybox": False,
             "show_fps": False,
-            "render_pipeline": False,
+            "render_pipeline": True,
             # "camera_dist": 8,
             "window_size": (1200, 800),
-            "camera_dist": 9,
+            "camera_dist": 13,
             # "camera_pitch": 30,
-            # "camera_height": 1,
+            "camera_height": 3,
             # "camera_smooth": False,
             # "camera_height": -1,
             "vehicle_config": {
@@ -101,6 +102,7 @@ if __name__ == "__main__":
     start = time.time()
 
     o, _ = env.reset()
+    env.engine.accept("~", env.engine.terrain.reload_terrain_shader)
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
         env.engine.accept("7", acc_speed)
