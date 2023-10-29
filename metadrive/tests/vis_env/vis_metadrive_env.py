@@ -26,7 +26,7 @@ if __name__ == "__main__":
             # "random_agent_model": False,
             "manual_control": True,
             "use_render": True,
-            "plane_terrain": False,
+            "use_mesh_terrain": False,
             "accident_prob": 1,
             "decision_repeat": 5,
             "daytime": "19:00",

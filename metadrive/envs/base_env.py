@@ -200,7 +200,9 @@ BASE_DEFAULT_CONFIG = dict(
     # height scale for mountains, unit: [m]
     height_scale=50,
     # use plane collision or mesh collision
-    plane_terrain=True,
+    use_mesh_terrain=False,
+    # use full-size mesh terrain
+    full_size_mesh=True,
 
     # ===== Others =====
     # Force to generate objects in the left lane.

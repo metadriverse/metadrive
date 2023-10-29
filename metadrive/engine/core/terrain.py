@@ -36,7 +36,8 @@ class Terrain(BaseObject):
             CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam
         )
         # use plane terrain or mesh terrain， True by default.
-        self.plane_terrain = engine.global_config["plane_terrain"]
+        self.use_mesh_terrain = engine.global_config["use_mesh_terrain"]
+        self.full_size_mesh = engine.global_config["full_size_mesh"]
 
         # collision mesh
         self.plane_collision_terrain = None  # a flat collision shape
@@ -71,7 +72,7 @@ class Terrain(BaseObject):
             # self.probe.set_pos(0, 0, self.PROBE_HEIGHT)
             # self.probe.set_scale(self.PROBE_SIZE * 2, self.PROBE_SIZE * 2, 1000)
 
-        if not self.plane_terrain or self.render:
+        if self.use_mesh_terrain or self.render:
             self._load_height_field_image(engine)
 
     # @time_me
@@ -83,11 +84,11 @@ class Terrain(BaseObject):
         assert self.engine is not None, "Can not call this without initializing engine"
         self.detach_from_world(self.engine.physics_world)
 
-        if self.plane_terrain and self.plane_collision_terrain is None:
+        if not self.use_mesh_terrain and self.plane_collision_terrain is None:
             # only generate once if plane terrain
             self.generate_plane_collision_terrain()
 
-        if self.render or not self.plane_terrain:
+        if self.render or self.use_mesh_terrain:
             # modify default height image
             drivable_region = self.engine.current_map.get_height_map(
                 self._heightmap_size, 1, self._drivable_area_extension
@@ -109,8 +110,10 @@ class Terrain(BaseObject):
                              ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
-            if not self.plane_terrain:
-                self._generate_collision_mesh(heightfield_to_modify, self._height_scale)
+            if self.use_mesh_terrain:
+                self._generate_collision_mesh(
+                    heightfield_base if self.full_size_mesh else heightfield_to_modify, self._height_scale
+                )
 
             if self.render:
                 # Make semantics for shader terrain
@@ -304,7 +307,7 @@ class Terrain(BaseObject):
             self._mesh_terrain.set_pos(*pos, 0)
             if self.probe is not None:
                 self.probe.set_pos(*pos, self.PROBE_HEIGHT)
-        if not self.plane_terrain:
+        if self.use_mesh_terrain:
             self.mesh_collision_terrain.set_pos(*position[:2], self._height_scale)
 
     def _generate_card_terrain(self):
