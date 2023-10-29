@@ -63,7 +63,7 @@ def test_expert_with_traffic(plane, use_render=False):
         dict(
             num_scenarios=1,
             map="CCC",
-            plane_terrain=plane,
+            use_mesh_terrain=plane,
             start_seed=2,
             random_traffic=False,
             # debug_static_world=True,

@@ -28,9 +28,9 @@ def _create_vehicle():
     return v
 
 
-@pytest.mark.parametrize("plane_terrain", [True, False], ids=["plane", "mesh"])
-def test_idm_policy_briefly(plane_terrain):
-    env = MetaDriveEnv({"plane_terrain": plane_terrain})
+@pytest.mark.parametrize("use_mesh_terrain", [True, False], ids=["plane", "mesh"])
+def test_idm_policy_briefly(use_mesh_terrain):
+    env = MetaDriveEnv({"use_mesh_terrain": use_mesh_terrain})
     env.reset()
     try:
         vehicles = env.engine.traffic_manager.traffic_vehicles
@@ -54,10 +54,10 @@ def test_idm_policy_briefly(plane_terrain):
         env.close()
 
 
-@pytest.mark.parametrize("plane_terrain", [True, False], ids=["plane", "mesh"])
-def test_idm_policy_is_moving(plane_terrain, render=False, in_test=True):
+@pytest.mark.parametrize("use_mesh_terrain", [True, False], ids=["plane", "mesh"])
+def test_idm_policy_is_moving(use_mesh_terrain, render=False, in_test=True):
     # config = {"traffic_mode": "hybrid", "map": "SS", "traffic_density": 1.0}
-    config = {"plane_terrain": plane_terrain, "traffic_mode": "respawn", "map": "SS", "traffic_density": 1.0}
+    config = {"use_mesh_terrain": use_mesh_terrain, "traffic_mode": "respawn", "map": "SS", "traffic_density": 1.0}
     if render:
         config.update({"use_render": True, "manual_control": True})
     env = MetaDriveEnv(config)
