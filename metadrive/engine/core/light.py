@@ -8,7 +8,7 @@ class Light(BaseObject):
     """
     It is dynamic element since it will follow the camera
     """
-    direction_pos = (-100, 100, 120)
+    direction_pos = (-100, 100, 100)
 
     def __init__(self):
         super(Light, self).__init__(random_seed=0)
