@@ -389,7 +389,7 @@ class Terrain(BaseObject):
             self.grass_rough = self.loader.loadTexture(
                 AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_BUMP_1K.jpg")
             )
-            self.grass_tex_ratio = 128.0
+            self.grass_tex_ratio = 64.0
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
