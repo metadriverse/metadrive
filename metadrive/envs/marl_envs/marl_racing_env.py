@@ -300,10 +300,13 @@ def _vis():
     ep_s = 0
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step({k: [1.0, .0] for k in env.vehicles.keys()})
+
+
+
         for r_ in r.values():
             total_r += r_
         ep_s += 1
-
+        env.render(mode="topdown")
         if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
@@ -321,16 +324,9 @@ def _vis():
 
 
 
-
-
-
 if __name__ == "__main__":
-    # _draw()
     _vis()
-    # _vis_debug_respawn()
-    # _profile()
-    # _long_run()
-    # pygame_replay("bottle")
+
 
 
 
