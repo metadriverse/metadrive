@@ -3,7 +3,7 @@
 #
 # This module contains a class to generate cone primitives.
 
-from .base import *
+from metadrive.third_party.procedural3d.base import *
 
 
 class ConeMaker(ModelMaker):

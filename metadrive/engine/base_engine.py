@@ -327,6 +327,13 @@ class BaseEngine(EngineCore, Randomizable):
         # reset terrain
         center_p = self.current_map.get_center_point() if self.current_map else [0, 0]
         self.terrain.reset(center_p)
+
+        # init shadow if required
+        if hasattr(self, "pssm") and self.pssm.buffer is None and self.global_config["show_terrain"] \
+                and not self.global_config["debug_physics_world"]:
+            self.pssm.init()
+
+        # move skybox
         if self.sky_box is not None:
             self.sky_box.set_position(center_p)
 
@@ -543,9 +550,8 @@ class BaseEngine(EngineCore, Randomizable):
 
     def setup_main_camera(self):
         from metadrive.engine.core.main_camera import MainCamera
-        # Not we should always enable main camera if image obs is required! Or RGBCamera will return incorrect result
-        if self.mode == RENDER_MODE_ONSCREEN or (self.mode == RENDER_MODE_OFFSCREEN and
-                                                 self.global_config["vehicle_config"]["image_source"] == "main_camera"):
+        # Not we should always enable main camera RGBCamera will return incorrect result, as we are using PSSM!
+        if self.mode != RENDER_MODE_NONE:
             return MainCamera(self, self.global_config["camera_height"], self.global_config["camera_dist"])
         else:
             return None
@@ -696,13 +702,14 @@ class BaseEngine(EngineCore, Randomizable):
         msg = "Assets folder doesn't exist. Begin to download assets..."
         if not os.path.exists(AssetLoader.asset_path):
             AssetLoader.logger.warning(msg)
-            pull_asset(False)
+            pull_asset(update=False)
         else:
-            if asset_version() != VERSION:
+            if AssetLoader.should_update_asset():
                 AssetLoader.logger.warning(
-                    "Assets version mismatch! Current: {}, Expected: {}. "
-                    "Update the assets by `python -m metadrive.pull_asset --update'".format(asset_version(), VERSION)
+                    "Assets outdated! Current: {}, Expected: {}. "
+                    "Updating the assets ...".format(asset_version(), VERSION)
                 )
+                pull_asset(update=True)
             else:
                 AssetLoader.logger.info("Assets version: {}".format(VERSION))
 

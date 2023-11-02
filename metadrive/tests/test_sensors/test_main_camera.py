@@ -3,7 +3,7 @@ import pytest
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 blackbox_test_configs = dict(
-    standard=dict(stack_size=3, width=256, height=128, rgb_clip=True),
+    standard=dict(stack_size=3, width=64, height=32, rgb_clip=True),
     small=dict(stack_size=1, width=64, height=32, rgb_clip=False),
 )
 
@@ -24,6 +24,7 @@ def test_main_camera(config, render=False):
         {
             "num_scenarios": 1,
             "traffic_density": 0.1,
+            "show_terrain": False,
             "map": "S",
             "start_seed": 4,
             "window_size": (config["width"], config["height"]),

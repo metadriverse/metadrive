@@ -245,13 +245,13 @@ class BaseObject(BaseRunnable, MetaDriveType):
         """
         Fully delete this element and release the memory
         """
+        super(BaseObject, self).destroy()
         try:
             from metadrive.engine.engine_utils import get_engine
         except ImportError:
             pass
         else:
             engine = get_engine()
-
             if engine is not None:
                 self.detach_from_world(engine.physics_world)
                 if self._body is not None and hasattr(self.body, "object"):
@@ -526,4 +526,9 @@ class BaseObject(BaseRunnable, MetaDriveType):
 
     @property
     def use_render_pipeline(self):
+        """
+        Return if we are using render_pipeline
+        Returns: Boolean
+
+        """
         return self.engine is not None and self.engine.use_render_pipeline

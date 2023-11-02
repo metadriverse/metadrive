@@ -12,7 +12,6 @@ if __name__ == "__main__":
             "start_seed": 22,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "global_light": True,
             # "debug_static_world":True,
             "cull_scene": False,
             # "image_observation": True,

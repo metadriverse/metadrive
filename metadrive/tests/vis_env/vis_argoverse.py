@@ -32,7 +32,6 @@ if __name__ == "__main__":
             "traffic_density": 0.,
             # "debug_physics_world": True,
             "pstats": True,
-            "global_light": True,
             # "debug_static_world":True,
             "cull_scene": False,
             # "controller":"joystick",

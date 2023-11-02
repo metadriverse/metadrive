@@ -319,3 +319,17 @@ class NodeRoadNetwork(BaseRoadNetwork):
             for _to, lanes in _to_dict.items():
                 ret += lanes
         return ret
+
+    def destroy(self):
+        """
+        Destroy all lanes in this network
+        Returns: None
+
+        """
+        super(NodeRoadNetwork, self).destroy()
+        if self.graph is not None:
+            for from_, _to_dict in self.graph.items():
+                for _to, lanes in _to_dict.items():
+                    for lane in lanes:
+                        lane.destroy()
+            self.graph = None

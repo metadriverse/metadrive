@@ -12,7 +12,8 @@ if __name__ == "__main__":
     global_network = NodeRoadNetwork()
     first = FirstPGBlock(global_network, 3.0, 2, test.render, test.world, 20)
     intersection = InterSection(3, first.get_socket(0), global_network, 1)
-    intersection.construct_block(test.render, test.world)
+    # print(intersection.construct_block(test.render, test.world))
+
     id = 4
     for socket_idx in range(intersection.SOCKET_NUM):
         block = Curve(id, intersection.get_socket(socket_idx), global_network, id)

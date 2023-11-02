@@ -1,5 +1,6 @@
 from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
+from metadrive.policy.idm_policy import IDMPolicy
 
 if __name__ == "__main__":
     env = MetaDriveEnv(
@@ -8,15 +9,17 @@ if __name__ == "__main__":
             "traffic_density": 0.1,
             "start_seed": 4,
             "stack_size": 5,
-            # "debug": True,
+            "agent_policy": IDMPolicy,
+            "debug": True,
+            "use_mesh_terrain": True,
             # "debug_panda3d": True,
             "vehicle_config": dict(image_source="rgb_camera"),
             "sensors": {
                 "rgb_camera": (RGBCamera, 521, 512)
             },
             "interface_panel": ["dashboard", "rgb_camera"],
-            "manual_control": False,
-            "use_render": False,
+            "manual_control": True,
+            "use_render": True,
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
             "rgb_clip": True,  # clip rgb to range(0,1) instead of (0, 255)
             # "pstats": True,
@@ -24,9 +27,7 @@ if __name__ == "__main__":
     )
     env.reset()
     # # print m to capture rgb observation
-    env.engine.accept(
-        "m", env.engine.get_sensor(env.vehicle.config["image_source"]).save_image, extraArgs=[env.vehicle]
-    )
+    env.engine.accept("m", env.engine.terrain.reload_terrain_shader)
     import cv2
 
     for i in range(1, 100000):
@@ -43,7 +44,7 @@ if __name__ == "__main__":
         #      ObservationType.show_gray_scale_array(o["image"][:, :, i])
         # image = env.render(mode="any str except human", text={"can you see me": i})
         # ObservationType.show_gray_scale_array(image)
-        if tm or tc:
-            # print("Reset")
-            env.reset()
+        # if tm or tc:
+        #     # print("Reset")
+        #     env.reset()
     env.close()

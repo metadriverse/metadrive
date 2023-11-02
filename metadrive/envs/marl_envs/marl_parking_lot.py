@@ -405,7 +405,6 @@ def _vis():
             },
             "debug_static_world": True,
             "debug_physics_world": True,
-            "global_light": True,
             "use_render": True,
             "debug": True,
             "manual_control": True,
@@ -569,5 +568,4 @@ if __name__ == "__main__":
     #     MultiAgentParkingLotEnv,
     #     False,
     #     other_traj="metasvodist_parking_best.json",
-    #     extra_config={"global_light": True}
     # )

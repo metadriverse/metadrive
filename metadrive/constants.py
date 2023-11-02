@@ -68,6 +68,7 @@ COLOR = {
     MetaDriveType.LINE_BROKEN_SINGLE_WHITE: "green",
     MetaDriveType.LANE_SURFACE_STREET: "green",
     MetaDriveType.LANE_SURFACE_UNSTRUCTURE: "green",
+    MetaDriveType.LANE_BIKE_LANE: "green",
     MetaDriveType.VEHICLE: "red",
     MetaDriveType.GROUND: "yellow",
     MetaDriveType.TRAFFIC_OBJECT: "yellow",
@@ -144,7 +145,7 @@ class CollisionGroup(Mask):
             (cls.Terrain, cls.Vehicle, True),
             (cls.Terrain, cls.ContinuousLaneLine, False),
             (cls.Terrain, cls.InvisibleWall, False),
-            (cls.Terrain, cls.Sidewalk, True),
+            (cls.Terrain, cls.Sidewalk, False),
             (cls.Terrain, cls.LidarBroadDetector, False),
             (cls.Terrain, cls.TrafficObject, True),
             (cls.Terrain, cls.TrafficParticipants, True),
@@ -376,17 +377,33 @@ class MapTerrainSemanticColor:
     """
     @staticmethod
     def get_color(type):
+        """
+        Each channel represents a type. This should be aligned with shader terrain.frag.glsl
+        Args:
+            type: MetaDriveType
+
+        Returns:
+
+        """
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # Note: modify it with shaders together!
         if MetaDriveType.is_yellow_line(type):
             # return (255, 0, 0, 0)
-            return (1, 0, 0, 0)
+            # return (1, 0, 0, 0)
+            return 0.1
         elif MetaDriveType.is_lane(type):
-            return (0, 1, 0, 0)
+            # return (0, 1, 0, 0)
+            return 0.2
         elif type == MetaDriveType.GROUND:
-            return (0, 0, 1, 0)
+            # return (0, 0, 1, 0)
+            return 0.0
         elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
-            return (0, 0, 0, 1)
+            # return (0, 0, 0, 1)
+            return 0.3
         else:
             raise ValueError("Unsupported type: {}".format(type))
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # Note: modify it with shaders together!
 
 
 class TopDownSemanticColor:

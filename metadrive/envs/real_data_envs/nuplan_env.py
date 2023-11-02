@@ -294,7 +294,6 @@ if __name__ == "__main__":
             "debug_static_world": False,
             "debug_physics_world": False,
             "load_city_map": True,
-            # "global_light": False,
             "window_size": (1200, 800),
             # "multi_thread_render_mode": "Cull/Draw",
             "start_scenario_index": 0,

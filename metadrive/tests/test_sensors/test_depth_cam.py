@@ -25,6 +25,7 @@ def test_depth_cam(config, render=False):
         {
             "num_scenarios": 1,
             "traffic_density": 0.1,
+            "show_terrain": False,
             "map": "S",
             "start_seed": 4,
             "stack_size": config["stack_size"],

@@ -44,3 +44,6 @@
 /bridges/ros_bridge/install
 /bridges/ros_bridge/log
 
+**/tests/**/*.jpg
+**/tests/**/*.png
+/metadrive/engine/core/run_time_map_mesh.png

@@ -4,7 +4,7 @@ from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 blackbox_test_configs = dict(
-    standard=dict(stack_size=3, width=256, height=128, rgb_clip=True),
+    standard=dict(stack_size=3, width=32, height=64, rgb_clip=True),
     # small=dict(stack_size=1, width=64, height=32, rgb_clip=False),
 )
 
@@ -26,6 +26,7 @@ def test_rgb_cam(config, render=False):
             "num_scenarios": 1,
             "traffic_density": 0.1,
             "map": "S",
+            "show_terrain": False,
             "start_seed": 4,
             "stack_size": config["stack_size"],
             "vehicle_config": dict(image_source="rgb_camera"),

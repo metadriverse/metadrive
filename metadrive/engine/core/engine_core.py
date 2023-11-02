@@ -4,7 +4,6 @@ import time
 from typing import Optional, Union, Tuple
 
 import gltf
-from metadrive.engine.core.line import MyLineNodePath
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
@@ -15,11 +14,13 @@ from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
 from metadrive.engine.core.collision_callback import collision_callback
+from metadrive.engine.core.draw_line import ColorLineNodePath
 from metadrive.engine.core.force_fps import ForceFPS
 from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.core.light import Light
 from metadrive.engine.core.onscreen_message import ScreenMessage
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.engine.core.pssm import PSSM
 from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
 from metadrive.utils.utils import is_mac, setup_logger
@@ -287,10 +288,19 @@ class EngineCore(ShowBase.ShowBase):
                 self.sky_box = SkyBox(not self.global_config["show_skybox"])
                 self.sky_box.attach_to_world(self.render, self.physics_world)
 
-                self.world_light = Light(self.global_config)
+                self.world_light = Light()
                 self.world_light.attach_to_world(self.render, self.physics_world)
                 self.render.setLight(self.world_light.direction_np)
                 self.render.setLight(self.world_light.ambient_np)
+
+                # lens property
+                lens = self.cam.node().getLens()
+                lens.setFov(self.global_config["camera_fov"])
+
+                # setup pssm shadow
+                self.pssm = PSSM(self)
+
+                # enable default shaders
                 self.render.setShaderAuto()
                 self.render.setAntialias(AntialiasAttrib.MAuto)
 
@@ -298,9 +308,6 @@ class EngineCore(ShowBase.ShowBase):
             self.cam.node().setCameraMask(CamMask.MainCam)
             self.cam.node().getDisplayRegion(0).setClearColorActive(True)
             self.cam.node().getDisplayRegion(0).setClearColor(BKG_COLOR)
-            lens = self.cam.node().getLens()
-
-            lens.setFov(self.global_config["camera_fov"])
 
             # ui and render property
             if self.global_config["show_fps"]:
@@ -456,7 +463,7 @@ class EngineCore(ShowBase.ShowBase):
 
     def draw_lines_3d(self, point_lists, parent_node=None, color=LVecBase4(1), thickness=1.0):
         assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
-        np = MyLineNodePath(parent_node, thickness=thickness, colorVec=color)
+        np = ColorLineNodePath(parent_node, thickness=thickness, colorVec=color)
         np.drawLines(point_lists)
         np.create()
         return np

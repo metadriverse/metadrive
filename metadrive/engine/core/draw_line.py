@@ -1,7 +1,7 @@
 from direct.directtools.DirectGeometry import LineNodePath
 
 
-class MyLineNodePath(LineNodePath):
+class ColorLineNodePath(LineNodePath):
     def drawLines(self, lineList, colorList=None):
         """
         Given a list of lists of points, draw a separate line for each list
@@ -9,7 +9,7 @@ class MyLineNodePath(LineNodePath):
         The number of points in lineList[0] - 1 should equal to the number of color segments of colorList[0]
         """
         if colorList is None:
-            super(MyLineNodePath, self).drawLines(lineList)
+            super(ColorLineNodePath, self).drawLines(lineList)
         else:
             for pointList, lineColor in zip(lineList, colorList):
                 self.moveTo(*pointList[0])

@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.engine.engine_utils import initialize_engine
@@ -27,8 +28,9 @@ def _create_vehicle():
     return v
 
 
-def test_idm_policy_briefly():
-    env = MetaDriveEnv()
+@pytest.mark.parametrize("use_mesh_terrain", [True, False], ids=["plane", "mesh"])
+def test_idm_policy_briefly(use_mesh_terrain):
+    env = MetaDriveEnv({"use_mesh_terrain": use_mesh_terrain})
     env.reset()
     try:
         vehicles = env.engine.traffic_manager.traffic_vehicles
@@ -52,9 +54,10 @@ def test_idm_policy_briefly():
         env.close()
 
 
-def test_idm_policy_is_moving(render=False, in_test=True):
+@pytest.mark.parametrize("use_mesh_terrain", [True, False], ids=["plane", "mesh"])
+def test_idm_policy_is_moving(use_mesh_terrain, render=False, in_test=True):
     # config = {"traffic_mode": "hybrid", "map": "SS", "traffic_density": 1.0}
-    config = {"traffic_mode": "respawn", "map": "SS", "traffic_density": 1.0}
+    config = {"use_mesh_terrain": use_mesh_terrain, "traffic_mode": "respawn", "map": "SS", "traffic_density": 1.0}
     if render:
         config.update({"use_render": True, "manual_control": True})
     env = MetaDriveEnv(config)
@@ -76,4 +79,4 @@ def test_idm_policy_is_moving(render=False, in_test=True):
 
 if __name__ == '__main__':
     # test_idm_policy_briefly()
-    test_idm_policy_is_moving(render=True, in_test=False)
+    test_idm_policy_is_moving(False, render=True, in_test=False)
