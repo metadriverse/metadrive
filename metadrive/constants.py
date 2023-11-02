@@ -268,6 +268,7 @@ class PGLineType:
     BROKEN = "broken"
     CONTINUOUS = "continuous"
     SIDE = "side"
+    BARRIER = "barrier"
 
     @staticmethod
     def prohibit(line_type) -> bool:

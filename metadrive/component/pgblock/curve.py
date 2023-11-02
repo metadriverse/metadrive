@@ -18,6 +18,7 @@ class Curve(PGBlock):
     ID = "C"
     SOCKET_NUM = 1
     PARAMETER_SPACE = ParameterSpace(BlockParameterSpace.CURVE)
+    has_guardrail = False
 
     def _try_plug_into_previous_block(self) -> bool:
         parameters = self.get_config()
@@ -32,10 +33,16 @@ class Curve(PGBlock):
         direction = parameters[Parameter.dir]
         angle = parameters[Parameter.angle]
         radius = parameters[Parameter.radius]
-        curve, straight = create_bend_straight(
-            basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
-            (PGLineType.BROKEN, PGLineType.SIDE)
-        )
+        if not self.has_guardrail:
+            curve, straight = create_bend_straight(
+                basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
+                (PGLineType.BROKEN, PGLineType.SIDE)
+            )
+        else:
+            curve, straight = create_bend_straight(
+                basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
+                (PGLineType.BROKEN, PGLineType.BARRIER)
+            )
         no_cross = CreateRoadFrom(
             curve,
             lane_num,

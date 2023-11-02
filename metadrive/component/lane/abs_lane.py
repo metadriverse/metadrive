@@ -154,6 +154,9 @@ class AbstractLane(MetaDriveType):
             elif line_type == PGLineType.SIDE:
                 self.construct_continuous_line(block, lateral, line_color, line_type)
                 self.construct_sidewalk(block, lateral)
+            elif line_type == PGLineType.BARRIER:
+                self.construct_continuous_line(block, lateral, line_color, PGLineType.SIDE)
+                self.construct_sidewalk(block, lateral, is_guardrail=True)
             elif line_type == PGLineType.NONE:
                 continue
             else:
@@ -197,7 +200,7 @@ class AbstractLane(MetaDriveType):
             node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
             self._node_path_list.extend(node_path_list)
 
-    def construct_sidewalk(self, block, lateral):
+    def construct_sidewalk(self, block, lateral, is_guardrail=False):
         """
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
@@ -318,7 +321,7 @@ class AbstractLane(MetaDriveType):
         return node_path_list
 
     @staticmethod
-    def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0):
+    def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0, guardrail_height=1/2):
         node_path_list = []
 
         direction_v = lane_end - lane_start
@@ -333,7 +336,7 @@ class AbstractLane(MetaDriveType):
         side_np = block.sidewalk_node_path.attachNewNode(body_node)
         node_path_list.append(side_np)
 
-        shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
+        shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, guardrail_height))
         body_node.addShape(shape)
         body_node.setIntoCollideMask(block.SIDEWALK_COLLISION_MASK)
         if block.render:

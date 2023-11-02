@@ -23,7 +23,7 @@ class PGLane(AbstractLane):
             self._shapely_polygon = geometry.Polygon(geometry.LineString(self._polygon))
         return self._shapely_polygon
 
-    def construct_sidewalk(self, block, lateral):
+    def construct_sidewalk(self, block, lateral, is_guardrail=False):
         if block.use_render_pipeline:
             # donot construct sidewalk
             return
@@ -41,13 +41,23 @@ class PGLane(AbstractLane):
                     factor = (1 - block.SIDEWALK_LINE_DIST / radius)
                 else:
                     factor = (1 + block.SIDEWALK_WIDTH / radius) * (1 + block.SIDEWALK_LINE_DIST / radius)
-            node_path_list = self.construct_sidewalk_segment(
-                block,
-                lane_start,
-                lane_end,
-                length_multiply=factor,
-                extra_thrust=DrivableAreaProperty.SIDEWALK_WIDTH / 2 + DrivableAreaProperty.SIDEWALK_LINE_DIST
-            )
+            if not is_guardrail:
+                node_path_list = self.construct_sidewalk_segment(
+                    block,
+                    lane_start,
+                    lane_end,
+                    length_multiply=factor,
+                    extra_thrust=DrivableAreaProperty.SIDEWALK_WIDTH / 2 + DrivableAreaProperty.SIDEWALK_LINE_DIST
+                )
+            else:
+                node_path_list = self.construct_sidewalk_segment(
+                    block,
+                    lane_start,
+                    lane_end,
+                    length_multiply=factor,
+                    extra_thrust=DrivableAreaProperty.SIDEWALK_WIDTH / 2 + DrivableAreaProperty.SIDEWALK_LINE_DIST,
+                    guardrail_height=5
+                )
             self._node_path_list.extend(node_path_list)
 
     @property

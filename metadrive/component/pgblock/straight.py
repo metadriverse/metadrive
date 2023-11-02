@@ -16,6 +16,7 @@ class Straight(PGBlock):
     ID = "S"
     SOCKET_NUM = 1
     PARAMETER_SPACE = ParameterSpace(BlockParameterSpace.STRAIGHT)
+    has_Guardrail = False
 
     def _try_plug_into_previous_block(self) -> bool:
         self.set_part_idx(0)  # only one part in simple block like straight, and curve
@@ -23,7 +24,10 @@ class Straight(PGBlock):
         length = para[Parameter.length]
         basic_lane = self.positive_basic_lane
         assert isinstance(basic_lane, StraightLane), "Straight road can only connect straight type"
-        new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.SIDE])
+        if not self.has_Guardrail:
+            new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.SIDE])
+        else:
+            new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.SIDE, PGLineType.BARRIER])
         start = self.pre_block_socket.positive_road.end_node
         end = self.add_road_node()
         socket = Road(start, end)
