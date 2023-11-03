@@ -34,10 +34,7 @@ class RacingMap(PGMap):
         parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
-        # test = TestBlock(False)
-        # initialize_asset_loader(engine=test)
-        # global_network = NodeRoadNetwork()
-        blocks = []
+
         init_block = FirstPGBlock(self.road_network, 3.0, 3, parent_node_path, physics_world, 1)
         self.blocks.append(init_block)
 
@@ -50,15 +47,15 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_s1)
 
-        # block_c1 = Curve(2, block_s1.get_socket(0), self.road_network, 1)
-        # block_c1.has_guardrail = True
-        # block_c1.construct_from_config({
-        #     Parameter.length: 200,
-        #     Parameter.radius: 100,
-        #     Parameter.angle: 90,
-        #     Parameter.dir: 1,
-        # }, parent_node_path, physics_world)
-        # self.blocks.append(block_c1)
+        block_c1 = Curve(2, block_s1.get_socket(0), self.road_network, 1)
+        block_c1.has_guardrail = True
+        block_c1.construct_from_config({
+            Parameter.length: 200,
+            Parameter.radius: 100,
+            Parameter.angle: 90,
+            Parameter.dir: 1,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_c1)
         #
         # block_s2 = Straight(3, block_c1.get_socket(0), self.road_network, 1)
         # block_s2.construct_from_config(
@@ -147,6 +144,7 @@ if __name__ == "__main__":
         traffic_density=0,
         num_scenarios=10000,
         random_agent_model=False,
+        debug=True,
         top_down_camera_initial_x=95,
         top_down_camera_initial_y=15,
         top_down_camera_initial_z=120,

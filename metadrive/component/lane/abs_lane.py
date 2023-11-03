@@ -340,11 +340,11 @@ class AbstractLane(MetaDriveType):
         shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, guardrail_height))
         body_node.addShape(shape)
         body_node.setIntoCollideMask(block.SIDEWALK_COLLISION_MASK)
-        if block.render:
+        # if block.render:
             # a trick to acc off-rendering training
-            block.dynamic_nodes.append(body_node)
-        else:
-            block.static_nodes.append(body_node)
+        block.dynamic_nodes.append(body_node)
+        # else:
+        #     block.static_nodes.append(body_node)
 
         direction_v = lane_end - lane_start
         if extra_thrust != 0:

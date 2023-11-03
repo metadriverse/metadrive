@@ -285,7 +285,7 @@ class LaneGraphics:
             # circular side or continuous, it is same now
             elif lane.line_types[side] == PGLineType.CONTINUOUS and isinstance(lane, CircularLane):
                 cls.continuous_curve(lane, surface, stripes_count, s0, side, color=color)
-            elif lane.line_types[side] == PGLineType.SIDE and isinstance(lane, CircularLane):
+            elif (lane.line_types[side] == PGLineType.SIDE or lane.line_types[side] == PGLineType.BARRIER) and isinstance(lane, CircularLane):
                 cls.continuous_curve(lane, surface, stripes_count, s0, side, color=color)
             # the line of continuous straight and side straight is same now
             elif (lane.line_types[side] == PGLineType.CONTINUOUS) and isinstance(lane, StraightLane):
