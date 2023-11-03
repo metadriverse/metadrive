@@ -9,8 +9,7 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": False,
-            "no_map": False,
+            "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
             # "manual_control": True,
             "show_interface": False,
@@ -28,19 +27,9 @@ if __name__ == "__main__":
             # "debug": True,
             "no_static_vehicles": False,
             # "pstats": True,
-            "render_pipeline": True,
-            # "daytime": "22:01",
-            # "no_traffic": True,
-            # "no_light": False,
-            # "debug":True,
-            # Make video
-            # "episodes_to_evaluate_curriculum": 5,
+            "render_pipeline": False,
             "window_size": (1600, 900),
             "camera_dist": 9,
-            # "camera_height": 0.5,
-            # "camera_pitch": np.pi / 3,
-            # "camera_fov": 60,
-            # "force_render_fps": 10,
             "start_scenario_index": 0,
             "num_scenarios": 10,
             # "force_reuse_object_name": True,
@@ -60,7 +49,7 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=0, distance=50),
                 side_detector=dict(num_lasers=12, distance=50)
             ),
-            "data_directory": "/home/shady/data/scenarionet/dataset/nuscenes"
+            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
         }
     )
 
