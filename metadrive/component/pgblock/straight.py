@@ -27,27 +27,49 @@ class Straight(PGBlock):
         if not self.has_Guardrail:
             new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.SIDE])
         else:
-            new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.SIDE, PGLineType.BARRIER])
+            new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.BARRIER])
         start = self.pre_block_socket.positive_road.end_node
         end = self.add_road_node()
         socket = Road(start, end)
         _socket = -socket
 
-        # create positive road
-        no_cross = CreateRoadFrom(
-            new_lane,
-            self.positive_lane_num,
-            socket,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        )
-        # create negative road
-        no_cross = CreateAdverseRoad(
-            socket,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        ) and no_cross
+
+        if not self.has_Guardrail:
+            # create positive road
+            no_cross = CreateRoadFrom(
+                new_lane,
+                self.positive_lane_num,
+                socket,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
+            # create negative road
+            no_cross = CreateAdverseRoad(
+                socket,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            ) and no_cross
+
+        else: # if we need guardian at the side instead of normal sidewalk
+            no_cross = CreateRoadFrom(
+                new_lane,
+                self.positive_lane_num,
+                socket,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking,
+                side_lane_line_type=PGLineType.BARRIER
+            )
+            # create negative road
+            no_cross = CreateAdverseRoad(
+                socket,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking,
+                side_lane_line_type=PGLineType.BARRIER
+            ) and no_cross
+
         self.add_sockets(PGBlockSocket(socket, _socket))
         return no_cross

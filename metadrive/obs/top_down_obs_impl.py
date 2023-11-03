@@ -290,7 +290,7 @@ class LaneGraphics:
             # the line of continuous straight and side straight is same now
             elif (lane.line_types[side] == PGLineType.CONTINUOUS) and isinstance(lane, StraightLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
-            elif (lane.line_types[side] == PGLineType.SIDE) and isinstance(lane, StraightLane):
+            elif (lane.line_types[side] == PGLineType.SIDE or lane.line_types[side] == PGLineType.BARRIER) and isinstance(lane, StraightLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
             # special scenario
             elif lane.line_types[side] == PGLineType.NONE:
