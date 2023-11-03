@@ -29,7 +29,6 @@ uniform struct {
   vec4 ambient;
 } p3d_LightModel;
 
-uniform sampler2D p3d_Texture0;
 uniform vec3 wspos_camera;
 
 // asset
@@ -101,6 +100,24 @@ void main() {
   // tbn is calulated in world space
   mat3 tbn = mat3(tangent, binormal, terrain_normal);
 
+  vec3 shading = vec3(0.0);
+
+  // Calculate the shading of each light in the scene
+  for (int i = 0; i < p3d_LightSource.length(); ++i) {
+    vec3 diff = p3d_LightSource[i].position.xyz - vtx_pos * p3d_LightSource[i].position.w;
+    vec3 light_vector = normalize(diff);
+    vec3 light_shading = clamp(dot(normalize(p3d_NormalMatrix * terrain_normal), light_vector), 0.0, 1.0) * p3d_LightSource[i].color;
+    // If PSSM is not used, use the shadowmap from the light
+    // This is deeply ineficient, it's only to be able to compare the rendered shadows
+    if (!use_pssm) {
+      vec4 projected = projecteds[i];
+      // Apply a bias to remove some of the self-shadow acne
+      projected.z -= fixed_bias * 0.01 * projected.w;
+      light_shading *= textureProj(p3d_LightSource[i].shadowMap, projected);
+    }
+    shading += light_shading;
+  }
+
   // get the color and terrain normal in world space
   vec3 diffuse;
   vec3 tex_normal_world;
@@ -126,24 +143,6 @@ void main() {
     }
 
 //   vec3 terrain_normal_view =  normalize(tex_normal_world);
-
-  vec3 shading = vec3(0.0);
-
-  // Calculate the shading of each light in the scene
-  for (int i = 0; i < p3d_LightSource.length(); ++i) {
-    vec3 diff = p3d_LightSource[i].position.xyz - vtx_pos * p3d_LightSource[i].position.w;
-    vec3 light_vector = normalize(diff);
-    vec3 light_shading = clamp(dot(normalize(p3d_NormalMatrix * tex_normal_world), light_vector), 0.0, 1.0) * p3d_LightSource[i].color;
-    // If PSSM is not used, use the shadowmap from the light
-    // This is deeply ineficient, it's only to be able to compare the rendered shadows
-    if (!use_pssm) {
-      vec4 projected = projecteds[i];
-      // Apply a bias to remove some of the self-shadow acne
-      projected.z -= fixed_bias * 0.01 * projected.w;
-      light_shading *= textureProj(p3d_LightSource[i].shadowMap, projected);
-    }
-    shading += light_shading;
-  }
 
   // static shadow
   vec3 light_dir = normalize(light_direction);
