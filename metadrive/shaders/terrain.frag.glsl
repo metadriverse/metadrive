@@ -148,7 +148,7 @@ void main() {
   // static shadow
   vec3 light_dir = normalize(light_direction);
   shading *= max(0.0, dot(tex_normal_world, light_dir));
-  shading += vec3(0.01, 0.01, 0.01);
+  shading += vec3(0.07, 0.07, 0.1);
 
 //   dynamic shadow
   if (use_pssm) {
