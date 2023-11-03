@@ -14,6 +14,8 @@ import numpy as np
 
 from metadrive import MetaDriveEnv
 from metadrive.component.sensors.rgb_camera import RGBCamera
+from metadrive.component.sensors.instance_camera import InstanceCamera
+from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.constants import HELP_MESSAGE
 
 if __name__ == "__main__":
@@ -41,7 +43,7 @@ if __name__ == "__main__":
         config.update(
             dict(
                 image_observation=True,
-                sensors=dict(rgb_camera=(RGBCamera, 512, 256)),
+                sensors=dict(rgb_camera=(InstanceCamera, 512, 256)),
                 interface_panel=["rgb_camera", "dashboard"]
             )
         )
@@ -67,10 +69,15 @@ if __name__ == "__main__":
                     "Keyboard Control": "W,A,S,D",
                 }
             )
-
+            
             if args.observation == "rgb_camera":
                 cv2.imshow('RGB Image in Observation', o["image"][..., -1])
                 cv2.waitKey(1)
+
+                """image = o["image"][...,-1]
+                image = image.reshape(-1, 3)
+                unique_colors = np.unique(image, axis=0)
+                print(unique_colors)"""
             if (tm or tc) and info["arrive_dest"]:
                 env.reset(env.current_seed + 1)
                 env.current_track_vehicle.expert_takeover = True

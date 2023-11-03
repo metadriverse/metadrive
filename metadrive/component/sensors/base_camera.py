@@ -141,6 +141,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
 
     def track(self, base_object):
         if base_object is not None and self is not None:
+            self._setup_effect()
             self.attached_object = base_object
             self.origin.reparentTo(base_object.origin)
 
