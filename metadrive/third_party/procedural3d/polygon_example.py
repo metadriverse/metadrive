@@ -1,66 +1,44 @@
 # Author: Epihaius
 # Date: 2023-04-29
-
-import array
-
+import numpy as np
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import *
 
 
+# @time_me
+from metadrive.utils.vertex import make_polygon_model
+
+
+def calculate_normal(p1, p2, p3):
+    # These are three points (numpy arrays) on the face
+    v1 = np.array(p2) - np.array(p1)
+    v2 = np.array(p3) - np.array(p1)
+    normal = np.cross(v1, v2)
+    normal = normal / np.linalg.norm(normal)
+    return normal
+
+
 class MyApp(ShowBase):
     def __init__(self):
-
         ShowBase.__init__(self)
 
         # set up a light source
         p_light = PointLight("point_light")
         p_light.set_color((1., 1., 1., 1.))
         self.light = self.camera.attach_new_node(p_light)
-        self.light.set_pos(5., -10., 7.)
+        self.light.set_pos(0., 10., 0.)
         self.render.set_light(self.light)
         self.disable_mouse()
-        self.camera.set_pos(0., -50., 50.)
-        self.camera.look_at(-10., 0., 0.)
+        self.camera.set_pos(0., 15., 15.)
+        self.camera.look_at(0., 0., 0.)
 
-        triangulator = Triangulator()
-        values = array.array("f", [])
-        vertex_data = GeomVertexData("poly", GeomVertexFormat.get_v3n3(), Geom.UH_static)
-
-        with open("poly_coords.txt", "r") as coords_file:
-            coords = coords_file.readlines()
-
-        for i, coord in enumerate(coords):
-            x, y = [float(c) for c in coord.replace("\n", "").split(" ")]
-            values.extend((x, y, 0., 0., 0., 1.))
-            triangulator.add_vertex(x, y)
-            triangulator.add_polygon_vertex(i)
-
-        triangulator.triangulate()
-        prim = GeomTriangles(Geom.UH_static)
-
-        for i in range(triangulator.get_num_triangles()):
-            index0 = triangulator.get_triangle_v0(i)
-            index1 = triangulator.get_triangle_v1(i)
-            index2 = triangulator.get_triangle_v2(i)
-            prim.add_vertices(index0, index1, index2)
-
-        # add the values to the vertex table using a memoryview;
-        # since the size of a memoryview cannot change, the vertex data table
-        # already needs to have the right amount of rows before creating
-        # memoryviews from its array(s)
-        vertex_data.unclean_set_num_rows(len(coords))
-        # retrieve the data array for modification
-        data_array = vertex_data.modify_array(0)
-        memview = memoryview(data_array).cast("B").cast("f")
-        memview[:] = values
-
-        geom = Geom(vertex_data)
-        geom.add_primitive(prim)
-        node = GeomNode("poly_node")
-        node.add_geom(geom)
-        poly = self.render.attach_new_node(node)
-        poly.setColor(1, 0, 0, 0)
-        poly.set_render_mode_wireframe()
+        coords = [(0, 0), (1, 0), (2, 1), (3, 2), (4, 3), (3, 5), (2, 4), (-1, 1), (1, 2)]
+        poly = make_polygon_model(coords, 1, force_anticlockwise=True)
+        poly.reparentTo(self.render)
+        poly.setColor(0.8, 0.5, 0.8, 0)
+        # poly.set_render_mode_wireframe()
+        poly.hprInterval(6, (360, 0, 0)).loop()
+        # self.camera.look_at(poly)
 
 
 app = MyApp()
