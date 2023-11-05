@@ -226,7 +226,7 @@ jobs:
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_examples
 
-  test_examples_windows:
+  test_policy_windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -234,10 +234,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: Prepare OpenGL
-        run: |
-          sudo apt-get -y install xvfb
-          sudo /usr/bin/Xvfb :0 -screen 0 1280x1024x24 &
       - name: Blackbox tests
         run: |
           pip install cython
@@ -248,7 +244,7 @@ jobs:
           pip install pytest-cov
           pip install ray
           cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_examples
+          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
 
   test_ipynb:
     runs-on: ubuntu-latest
