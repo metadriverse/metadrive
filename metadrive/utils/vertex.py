@@ -69,6 +69,17 @@ def is_anticlockwise(points):
     return sum > 0
 
 
+# def get_bounding_box(polygon_points):
+#     """
+#     Get bounding box of a polygon
+#     """
+#     min_x = min(polygon_points, key=lambda point: point[0])[0]
+#     min_y = min(polygon_points, key=lambda point: point[1])[1]
+#     max_x = max(polygon_points, key=lambda point: point[0])[0]
+#     max_y = max(polygon_points, key=lambda point: point[1])[1]
+#     return min_x, min_y, max_x, max_y
+
+
 def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockwise=False):
     """
     Given a polygon represented by a set of 2D points in x-y plane, return a 3D model by extruding along z-axis.

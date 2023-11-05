@@ -243,6 +243,10 @@ class BaseMap(BaseRunnable):
 
             center_p = self.get_center_point()
             need_scale = abs(extension - 1) > 1e-1
+
+            for sidewalk in self.sidewalks.values():
+                polygons.append(sidewalk["polygon"])
+
             for polygon in polygons:
                 points = [
                     [

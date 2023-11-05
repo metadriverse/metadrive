@@ -11,7 +11,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            # "manual_control": True,
+            "manual_control": True,
             "show_interface": False,
             # "need_lane_localization": False,
             # "image_observation": True,
@@ -33,13 +33,7 @@ if __name__ == "__main__":
             "start_scenario_index": 0,
             "num_scenarios": 10,
             # "force_reuse_object_name": True,
-            # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
-            # "no_static_vehicles": True,
-            # "show_policy_mark": True,
-            # "show_coordinates": True,
-            # "force_destroy": True,
-            # "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
                 # light=True,
                 # random_color=True,
@@ -49,7 +43,8 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=0, distance=50),
                 side_detector=dict(num_lasers=12, distance=50)
             ),
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": "/home/shady/data/scenarionet/dataset/nuscenes",
+            # "drivable_area_extension": 0,
         }
     )
 
@@ -84,12 +79,12 @@ if __name__ == "__main__":
                     },
                     # mode="topdown"
                 )
-            if tm or tc:
-                print(
-                    "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
-                        time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num
-                    )
-                )
-                print("seed:{}, success".format(env.engine.global_random_seed))
-                print(list(env.engine.curriculum_manager.recent_success.dict.values()))
-                break
+            # if tm or tc:
+            #     print(
+            #         "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
+            #             time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num
+            #         )
+            #     )
+            #     print("seed:{}, success".format(env.engine.global_random_seed))
+            #     print(list(env.engine.curriculum_manager.recent_success.dict.values()))
+            #     break
