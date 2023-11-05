@@ -1,4 +1,5 @@
 import math
+from metadrive.utils.vertex import make_polygon_model
 
 import numpy as np
 
@@ -96,6 +97,8 @@ class ScenarioBlock(BaseBlock):
             # TODO LQY: DO we need sidewalk?
             elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
+        for sidewalk in self.sidewalks:
+            self.construct_sidewalk(sidewalk)
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -129,37 +132,11 @@ class ScenarioBlock(BaseBlock):
             node_path_list = ScenarioLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)
             self._node_path_list.extend(node_path_list)
 
-    def construct_sidewalk(self, polyline):
-        line = InterpolatingLine(polyline)
-        seg_len = DrivableAreaProperty.LANE_SEGMENT_LENGTH
-        segment_num = int(line.length / seg_len)
-        # last_theta = None
-        for segment in range(segment_num):
-            lane_start = line.get_point(segment * seg_len)
-            lane_end = line.get_point((segment + 1) * seg_len)
-            if segment == segment_num - 1:
-                lane_end = line.get_point(line.length)
-            direction_v = lane_end - lane_start
-            theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
-            # if segment == segment_num - 1:
-            #     factor = 1
-            # else:
-            #     factor = 1.25
-            #     if last_theta is not None:
-            #         diff = wrap_to_pi(theta) - wrap_to_pi(last_theta)
-            #         if diff > 0:
-            #             factor += math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
-            #                 lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
-            #             ) + 0.15
-            #         else:
-            #             factor -= math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
-            #                 lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
-            #             )
-            last_theta = theta
-            node_path_list = ScenarioLane.construct_sidewalk_segment(
-                self, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0.2
-            )
-            self._node_path_list.extend(node_path_list)
+    def construct_sidewalk(self, polygon):
+        np = make_polygon_model(polygon, 0.2, True)
+        np.reparentTo(self.sidewalk_node_path)
+        np.setPos(0, 0, 0.2)
+        self._node_path_list.extend(np)
 
     @property
     def block_network_type(self):
