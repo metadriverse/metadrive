@@ -46,7 +46,7 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=0, distance=50),
                 side_detector=dict(num_lasers=12, distance=50)
             ),
-            "data_directory": "/home/shady/data/scenarionet/dataset/nuscenes",
+            "data_directory": AssetLoader.file_path("nuscenes"),
             # "drivable_area_extension": 0,
         }
     )
