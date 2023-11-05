@@ -203,7 +203,7 @@ jobs:
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/
 
   test_examples:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9

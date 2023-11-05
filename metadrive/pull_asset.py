@@ -54,7 +54,7 @@ def pull_asset(update):
     try:
         with lock.acquire():
             # Fetch the zip file
-            logger.info("Pull assets from {}".format(ASSET_URL))
+            logger.info("Pull assets from {} to {}".format(ASSET_URL, zip_path))
             urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(TARGET_DIR)
