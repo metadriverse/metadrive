@@ -97,8 +97,9 @@ class ScenarioBlock(BaseBlock):
             # TODO LQY: DO we need sidewalk?
             elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
-        # for sidewalk in self.sidewalks.values():
-        #     self.construct_sidewalk(sidewalk["polygon"])
+        if self.engine.global_config["show_sidewalk"]:
+            for sidewalk in self.sidewalks.values():
+                self.construct_sidewalk(sidewalk["polygon"])
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -133,11 +134,11 @@ class ScenarioBlock(BaseBlock):
             self._node_path_list.extend(node_path_list)
 
     def construct_sidewalk(self, polygon):
-        np = make_polygon_model(polygon[:-1], 0.2)
+        np = make_polygon_model(polygon, 0.2)
         np.reparentTo(self.sidewalk_node_path)
-        np.setPos(0, 0, 0.2)
-        # np.setTexture(self.ts_color, self.side_texture)
-        # np.setTexture(self.ts_normal, self.side_normal)
+        np.setPos(0, 0, 0.1)
+        np.setTexture(self.ts_color, self.side_texture)
+        np.setTexture(self.ts_normal, self.side_normal)
         self._node_path_list.append(np)
 
     @property

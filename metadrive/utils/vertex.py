@@ -80,7 +80,7 @@ def is_anticlockwise(points):
 #     return min_x, min_y, max_x, max_y
 
 
-def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockwise=False):
+def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockwise=False, texture_scale=0.5):
     """
     Given a polygon represented by a set of 2D points in x-y plane, return a 3D model by extruding along z-axis.
     Args:
@@ -88,6 +88,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
         height: height to extrude
         force_anticlockwise: force making the points anticlockwise. It is helpful if your points has no order
         auto_anticlockwise: if the points are in clockwise order, we automatically reverse it.
+        texture_scale: change the uv coordinate to set the texture scale
 
     Returns: panda3d.NodePath
 
@@ -108,7 +109,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
     for i, coord in enumerate(coords):
         x, y = [coord[0], coord[1]]
         # Top surface
-        values.extend((x, y, 0., 0, 0, 1, 0.0, 0.0))
+        values.extend((x, y, 0., 0, 0, 1, x*texture_scale, y*texture_scale))
 
         pre_p = coords[(i + p_num - 1) % p_num]
         edge_1 = [x - pre_p[0], y - pre_p[1]]

@@ -231,6 +231,10 @@ class Terrain(BaseObject):
             self._mesh_terrain.set_shader_input("grass_normal", self.grass_normal)
             self._mesh_terrain.set_shader_input("grass_rough", self.grass_rough)
             self._mesh_terrain.set_shader_input("grass_tex_ratio", self.grass_tex_ratio)
+            #
+            # # side
+            # self._mesh_terrain.set_shader_input("side_tex", self.side_tex)
+            # self._mesh_terrain.set_shader_input("side_normal", self.side_normal)
 
             # road
             self._mesh_terrain.set_shader_input("rock_tex", self.rock_tex)
@@ -422,6 +426,20 @@ class Terrain(BaseObject):
             tex.setMinfilter(filter_type)
             tex.setMagfilter(filter_type)
             tex.setAnisotropicDegree(anisotropic_degree)
+
+        # # sidewalk
+        # self.side_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
+        # self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
+        #
+        # v_wrap = Texture.WMRepeat
+        # u_warp = Texture.WMMirror
+        #
+        # for tex in [self.side_tex, self.side_normal]:
+        #     tex.set_wrap_u(u_warp)
+        #     tex.set_wrap_v(v_wrap)
+        #     tex.setMinfilter(filter_type)
+        #     tex.setMagfilter(filter_type)
+        #     tex.setAnisotropicDegree(anisotropic_degree)
 
         # Road surface
         # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
