@@ -1,7 +1,9 @@
 import math
-from metadrive.utils.vertex import make_polygon_model
-
+from metadrive.constants import CollisionGroup
+from metadrive.utils.utils import time_me
 import numpy as np
+from panda3d.bullet import BulletConvexHullShape, BulletTriangleMeshShape, BulletTriangleMesh
+from panda3d.core import Vec3, LQuaternionf, LPoint3f
 
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.scenario_lane import ScenarioLane
@@ -9,11 +11,14 @@ from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.engine_utils import get_engine
+from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.type import MetaDriveType
-from metadrive.utils.coordinates_shift import panda_heading
+from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.interpolating_line import InterpolatingLine
+from metadrive.utils.math import Vector
 from metadrive.utils.math import norm
+from metadrive.utils.vertex import make_polygon_model
 
 
 class ScenarioBlock(BaseBlock):
@@ -97,9 +102,7 @@ class ScenarioBlock(BaseBlock):
             # TODO LQY: DO we need sidewalk?
             elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
-        if self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline:
-            for sidewalk in self.sidewalks.values():
-                self.construct_sidewalk(sidewalk["polygon"])
+        self.construct_sidewalk()
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -133,13 +136,35 @@ class ScenarioBlock(BaseBlock):
             node_path_list = ScenarioLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)
             self._node_path_list.extend(node_path_list)
 
-    def construct_sidewalk(self, polygon):
-        np = make_polygon_model(polygon, 0.2)
-        np.reparentTo(self.sidewalk_node_path)
-        np.setPos(0, 0, 0.1)
-        np.setTexture(self.ts_color, self.side_texture)
-        np.setTexture(self.ts_normal, self.side_normal)
-        self._node_path_list.append(np)
+    def construct_sidewalk(self):
+        """
+        Construct the sidewalk with collision shape
+        """
+        if self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline:
+            for sidewalk in self.sidewalks.values():
+                polygon = sidewalk["polygon"]
+                np = make_polygon_model(polygon, 0.2)
+                np.reparentTo(self.sidewalk_node_path)
+                np.setPos(0, 0, 0.1)
+                np.setTexture(self.ts_color, self.side_texture)
+                np.setTexture(self.ts_normal, self.side_normal)
+
+                body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_SIDEWALK)
+                body_node.setKinematic(False)
+                body_node.setStatic(True)
+                body_np = self.sidewalk_node_path.attachNewNode(body_node)
+                body_np.setPos(0, 0, 0.1)
+                self._node_path_list.append(body_np)
+
+                geom = np.node().getGeom(0)
+                mesh = BulletTriangleMesh()
+                mesh.addGeom(geom)
+                shape = BulletTriangleMeshShape(mesh, dynamic=False)
+
+                body_node.addShape(shape)
+                self.dynamic_nodes.append(body_node)
+                body_node.setIntoCollideMask(CollisionGroup.Sidewalk)
+                self._node_path_list.append(np)
 
     @property
     def block_network_type(self):

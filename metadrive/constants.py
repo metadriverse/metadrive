@@ -200,7 +200,7 @@ class CollisionGroup(Mask):
             (cls.Sidewalk, cls.Sidewalk, False),
             (cls.Sidewalk, cls.LidarBroadDetector, False),
             (cls.Sidewalk, cls.TrafficObject, True),
-            (cls.Sidewalk, cls.TrafficParticipants, False),  # don't allow sidewalk contact
+            (cls.Sidewalk, cls.TrafficParticipants, True),  # don't allow sidewalk contact
 
             # LidarBroadDetector
             (cls.LidarBroadDetector, cls.LidarBroadDetector, False),
