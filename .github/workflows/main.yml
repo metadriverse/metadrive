@@ -226,6 +226,26 @@ jobs:
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_examples
 
+  test_policy_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Blackbox tests
+        run: |
+          pip install cython
+          pip install numpy
+          pip install -e .
+          python -m metadrive.pull_asset
+          pip install pytest
+          pip install pytest-cov
+          pip install ray
+          cd metadrive/
+          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
+
   test_ipynb:
     runs-on: ubuntu-latest
     steps:

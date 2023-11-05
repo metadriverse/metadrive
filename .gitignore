@@ -12,6 +12,7 @@
 /metadrive.egg-info/
 .DS_Store
 **/.DS_Store
+**/**.zip.lock
 **/test_10maps.json
 /metadrive/examples/**.png
 /metadrive/examples/**.jpg

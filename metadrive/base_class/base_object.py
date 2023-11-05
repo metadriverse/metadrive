@@ -276,6 +276,7 @@ class BaseObject(BaseRunnable, MetaDriveType):
         """
         Set this object to a place, the default value is the regular height for red car
         :param position: 2d array or list
+        :param height: give a fixed height
         """
         assert len(position) == 2 or len(position) == 3
         if len(position) == 3:

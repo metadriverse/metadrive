@@ -89,11 +89,16 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
 
             # side
             self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
-            self.side_texture.set_format(Texture.F_srgb)
+            # self.side_texture.set_format(Texture.F_srgb)
+            self.side_texture.setWrapU(Texture.WM_repeat)
+            self.side_texture.setWrapV(Texture.WM_repeat)
             self.side_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
             self.side_texture.setAnisotropicDegree(8)
             self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
-            self.side_normal.set_format(Texture.F_srgb)
+            # self.side_normal.set_format(Texture.F_srgb)
+            self.side_normal.setWrapU(Texture.WM_repeat)
+            self.side_normal.setWrapV(Texture.WM_repeat)
+
             self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             self.sidewalk.setTwoSided(False)
             self.sidewalk.setTexture(self.ts_color, self.side_texture)
