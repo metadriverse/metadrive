@@ -25,7 +25,7 @@ if __name__ == "__main__":
             "curriculum_level": 1,
             "show_fps": False,
             "show_sidewalk": True,
-            # "debug": True,
+            "debug": True,
             "no_static_vehicles": False,
             # "pstats": True,
             # "render_pipeline": True,

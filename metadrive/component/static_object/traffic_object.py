@@ -60,7 +60,7 @@ class TrafficCone(TrafficObject):
             model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
             # model.node().setTag("type", "vehicle")
             model.setScale(0.02, 0.02, 0.025)
-            model.setPos(0, 0, -self.HEIGHT / 2 + 0.05)
+            model.setPos(0, 0, -self.HEIGHT / 2 - 0.05)
             model.reparentTo(self.origin)
 
     @property
@@ -140,7 +140,7 @@ class TrafficBarrier(TrafficObject):
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
             model.setH(-90)
-            model.setPos(0, 0, -0.93)
+            model.setPos(0, 0, -1.05)
             model.setScale(0.7)
             model.reparentTo(self.origin)
 
