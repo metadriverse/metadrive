@@ -129,7 +129,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
             normal = np.mean(normal, axis=0)
             normal = normal / np.linalg.norm(normal)
 
-        back_side_values.extend((x, y, -height, *normal, 0.0, 0.0))
+        back_side_values.extend((x, y, -height, *normal, x*texture_scale, y*texture_scale))
         triangulator.add_vertex(x, y)
         triangulator.add_polygon_vertex(i)
 

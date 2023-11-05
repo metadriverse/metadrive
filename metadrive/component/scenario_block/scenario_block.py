@@ -97,7 +97,7 @@ class ScenarioBlock(BaseBlock):
             # TODO LQY: DO we need sidewalk?
             elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
-        if self.engine.global_config["show_sidewalk"]:
+        if self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline:
             for sidewalk in self.sidewalks.values():
                 self.construct_sidewalk(sidewalk["polygon"])
 
