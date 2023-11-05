@@ -109,7 +109,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
     for i, coord in enumerate(coords):
         x, y = [coord[0], coord[1]]
         # Top surface
-        values.extend((x, y, 0., 0, 0, 1, x*texture_scale, y*texture_scale))
+        values.extend((x, y, 0., 0, 0, 1, x * texture_scale, y * texture_scale))
 
         pre_p = coords[(i + p_num - 1) % p_num]
         edge_1 = [x - pre_p[0], y - pre_p[1]]
@@ -129,7 +129,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
             normal = np.mean(normal, axis=0)
             normal = normal / np.linalg.norm(normal)
 
-        back_side_values.extend((x, y, -height, *normal, x*texture_scale, y*texture_scale))
+        back_side_values.extend((x, y, -height, *normal, x * texture_scale, y * texture_scale))
         triangulator.add_vertex(x, y)
         triangulator.add_polygon_vertex(i)
 

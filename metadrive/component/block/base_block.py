@@ -232,7 +232,7 @@ class BaseBlock(BaseObject, DrivableAreaProperty):
         self.lane_vis_node_path.node().collect()
         self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam)
 
-        # self.origin.hide(CamMask.Shadow)
+        self.origin.hide(CamMask.Shadow)
 
         self.sidewalk_node_path.reparentTo(self.origin)
         self.lane_line_node_path.reparentTo(self.origin)

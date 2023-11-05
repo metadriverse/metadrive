@@ -146,8 +146,8 @@ class ScenarioBlock(BaseBlock):
                 np = make_polygon_model(polygon, 0.2)
                 np.reparentTo(self.sidewalk_node_path)
                 np.setPos(0, 0, 0.1)
-                np.setTexture(self.ts_color, self.side_texture)
-                np.setTexture(self.ts_normal, self.side_normal)
+                np.setTexture(self.side_texture)
+                # np.setTexture(self.ts_normal, self.side_normal)
 
                 body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_SIDEWALK)
                 body_node.setKinematic(False)
