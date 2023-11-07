@@ -17,6 +17,11 @@ class InstanceCamera(SemanticCamera):
     def __init__(self, width, height, engine, *, cuda=False):
         super().__init__(width, height, engine, cuda=cuda)
 
+
+    def track(self, base_object):
+        self._setup_effect()
+        super().track(base_object)
+
     def _setup_effect(self):
         """
         Use tag to apply color to different object class

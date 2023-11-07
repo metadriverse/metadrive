@@ -22,7 +22,7 @@ from metadrive.utils.utils import is_map_related_class
 
 logger = logging.getLogger(__name__)
 
-COLOR_SPACE = [
+"""COLOR_SPACE = [
     (255, 0, 0),  # Red
     (0, 255, 0),  # Green
     (0, 0, 255),  # Blue
@@ -44,7 +44,7 @@ COLOR_SPACE = [
     (255, 255, 255)  # White
     # Add more colors as needed
 ]
-num_additional_colors = 256 - len(COLOR_SPACE)
+num_additional_colors = 4096 - len(COLOR_SPACE)
 if num_additional_colors > 0:
     start_color = COLOR_SPACE[-1]
     end_color = COLOR_SPACE[0]
@@ -55,7 +55,21 @@ if num_additional_colors > 0:
         b = int((1 - alpha) * start_color[2] + alpha * end_color[2])
         COLOR_SPACE.append((r, g, b))
 COLOR_SPACE = [(r / 255, g / 255, b / 255) for r, g, b in COLOR_SPACE]
-COLOR_SPACE = [(round(r, 5), round(g, 5), round(b, 5)) for r, g, b in COLOR_SPACE]
+COLOR_SPACE = [(round(r, 5), round(g, 5), round(b, 5)) for r, g, b in COLOR_SPACE]"""
+def generate_distinct_rgb_values():
+    distinct_rgb_values = []
+    step = 256 // 32  # 8 intervals for each RGB component (0-31, 32-63, ..., 224-255)
+
+    for r in range(step, 256, step):
+        for g in range(0, 256, step):
+            for b in range(0, 256, step):
+                distinct_rgb_values.append((round(r/255,5), round(g/255,5), round(b/255,5)))
+
+    return distinct_rgb_values[:4096]  # Return the first 4096 values
+
+
+COLOR_SPACE = generate_distinct_rgb_values()
+
 
 
 class BaseEngine(EngineCore, Randomizable):
@@ -217,7 +231,7 @@ class BaseEngine(EngineCore, Randomizable):
         assert (len(BaseEngine.COLORS_FREE) > 0)
         my_color = BaseEngine.COLORS_FREE.pop()
         BaseEngine.COLORS_OCCUPIED.add(my_color)
-        #print("After picking:",len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
+        print("After picking:",len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
         self.id_c[id] = my_color
         self.c_id[my_color] = id
         return my_color
@@ -236,7 +250,7 @@ class BaseEngine(EngineCore, Randomizable):
             my_color = self.id_c[id]
             BaseEngine.COLORS_OCCUPIED.remove(my_color)
             BaseEngine.COLORS_FREE.add(my_color)
-            #print("After cleaning:,",len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
+            print("After cleaning:,",len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
             self.id_c.pop(id)
             self.c_id.pop(my_color)
 
@@ -244,14 +258,14 @@ class BaseEngine(EngineCore, Randomizable):
         if id in self.id_c.keys():
             return self.id_c[id]
         else:
-            #print("Invalid ID: ", id)
+            print("Invalid ID: ", id)
             return -1, -1, -1
 
     def color_to_id(self, color):
         if color in self.c_id.keys():
             return self.c_id[color]
         else:
-            #print("Invalid color:", color)
+            print("Invalid color:", color)
             return "NA"
 
     def get_objects(self, filter: Optional[Union[Callable, List]] = None):
@@ -452,7 +466,7 @@ class BaseEngine(EngineCore, Randomizable):
         BaseEngine.COLORS_OCCUPIED = set()
         new_i2c = {}
         new_c2i = {}
-        #print("rest objects",len(self.get_objects()))
+        print("rest objects",len(self.get_objects()))
         for object in self.get_objects().values():
             if object.id in self.id_c.keys():
                 id = object.id
@@ -461,7 +475,7 @@ class BaseEngine(EngineCore, Randomizable):
                 BaseEngine.COLORS_FREE.remove(color)
                 new_i2c[id] = color
                 new_c2i[color] = id
-        #print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
+        print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
         self.c_id = new_c2i
         self.id_c = new_i2c
 
