@@ -41,7 +41,7 @@ class InstanceCamera(SemanticCamera):
                 )
             )
             for id, c in mapping.items():
-                 cam.setTagState(id, RenderState.make(ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1))
+                 cam.setTagState(id, RenderState.make(ColorAttrib.makeFlat((c[0], c[1], c[2], 1)), 1))
 
 
 
