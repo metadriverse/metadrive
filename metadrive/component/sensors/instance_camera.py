@@ -13,9 +13,9 @@ import random
 
 class InstanceCamera(SemanticCamera):
     CAM_MASK = CamMask.SemanticCam
+
     def __init__(self, width, height, engine, *, cuda=False):
         super().__init__(width, height, engine, cuda=cuda)
-
 
     def _setup_effect(self):
         """
@@ -24,14 +24,14 @@ class InstanceCamera(SemanticCamera):
 
         """
         # setup camera
-        
+
         if get_engine() is None:
             super()._setup_effect()
         else:
             mapping = get_engine().id_c
             spawned_objects = get_engine().get_objects()
-            for id, obj  in spawned_objects.items():
-                obj.origin.setTag("id",id)
+            for id, obj in spawned_objects.items():
+                obj.origin.setTag("id", id)
             cam = self.get_cam().node()
             cam.setTagStateKey("id")
             cam.setInitialState(
@@ -41,19 +41,4 @@ class InstanceCamera(SemanticCamera):
                 )
             )
             for id, c in mapping.items():
-                 cam.setTagState(id, RenderState.make(ColorAttrib.makeFlat((c[0], c[1], c[2], 1)), 1))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+                cam.setTagState(id, RenderState.make(ColorAttrib.makeFlat((c[0], c[1], c[2], 1)), 1))

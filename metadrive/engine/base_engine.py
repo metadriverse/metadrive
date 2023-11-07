@@ -9,8 +9,7 @@ import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
-
-from collections import deque 
+from collections import deque
 import numpy as np
 from panda3d.core import NodePath, Vec3
 
@@ -21,28 +20,27 @@ from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
 
-
 logger = logging.getLogger(__name__)
 
-COLOR_SPACE =  [
-    (255, 0, 0),     # Red
-    (0, 255, 0),     # Green
-    (0, 0, 255),     # Blue
-    (255, 255, 0),   # Yellow
-    (255, 0, 255),   # Magenta
-    (0, 255, 255),   # Cyan
-    (128, 0, 0),     # Maroon
-    (0, 128, 0),     # Olive
-    (128, 0, 128),   # Purple
-    (0, 128, 128),   # Teal
-    (128, 128, 0),   # Yellow-green
-    (128, 128, 128), # Gray
-    (192, 192, 192), # Silver
-    (255, 165, 0),   # Orange
-    (255, 192, 203), # Pink
-    (139, 69, 19),   # Saddle brown
-    (0, 0, 128),     # Navy
-    (1, 1, 1),       # Black
+COLOR_SPACE = [
+    (255, 0, 0),  # Red
+    (0, 255, 0),  # Green
+    (0, 0, 255),  # Blue
+    (255, 255, 0),  # Yellow
+    (255, 0, 255),  # Magenta
+    (0, 255, 255),  # Cyan
+    (128, 0, 0),  # Maroon
+    (0, 128, 0),  # Olive
+    (128, 0, 128),  # Purple
+    (0, 128, 128),  # Teal
+    (128, 128, 0),  # Yellow-green
+    (128, 128, 128),  # Gray
+    (192, 192, 192),  # Silver
+    (255, 165, 0),  # Orange
+    (255, 192, 203),  # Pink
+    (139, 69, 19),  # Saddle brown
+    (0, 0, 128),  # Navy
+    (1, 1, 1),  # Black
     (255, 255, 255)  # White
     # Add more colors as needed
 ]
@@ -53,11 +51,11 @@ if num_additional_colors > 0:
     alpha_values = np.linspace(0, 1, num_additional_colors)
     for alpha in alpha_values:
         r = int((1 - alpha) * start_color[0] + alpha * end_color[0])
-        g = int((alpha) * start_color[1] + (1-alpha) * end_color[1])
+        g = int((alpha) * start_color[1] + (1 - alpha) * end_color[1])
         b = int((1 - alpha) * start_color[2] + alpha * end_color[2])
         COLOR_SPACE.append((r, g, b))
-COLOR_SPACE = [(r/255,g/255,b/255) for r,g,b in COLOR_SPACE]
-COLOR_SPACE = [(round(r,5),round(g,5),round(b,5)) for r,g,b in COLOR_SPACE]
+COLOR_SPACE = [(r / 255, g / 255, b / 255) for r, g, b in COLOR_SPACE]
+COLOR_SPACE = [(round(r, 5), round(g, 5), round(b, 5)) for r, g, b in COLOR_SPACE]
 
 
 class BaseEngine(EngineCore, Randomizable):
@@ -199,15 +197,14 @@ class BaseEngine(EngineCore, Randomizable):
             self.record_manager.add_spawn_info(obj, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
         color = self.pick_color(obj.id)
-        if color == (-1,-1,-1):
+        if color == (-1, -1, -1):
             print("FK!~")
             exit()
-        
+
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
 
-
-    def pick_color(self,id):
+    def pick_color(self, id):
         """
         Return a color multiplier representing a unique color for an object if some colors are available.
         Return -1,-1,-1 if no color available
@@ -216,15 +213,15 @@ class BaseEngine(EngineCore, Randomizable):
         SideEffect: COLORS_OCCUPIED[COLOR_PTR] will not be avilable
         """
         if len(BaseEngine.COLORS_OCCUPIED) == BaseEngine.MAX_COLOR:
-            return (-1,-1,-1)
-        assert(len(BaseEngine.COLORS_FREE)>0)
+            return (-1, -1, -1)
+        assert (len(BaseEngine.COLORS_FREE) > 0)
         my_color = BaseEngine.COLORS_FREE.pop()
         BaseEngine.COLORS_OCCUPIED.add(my_color)
         #print("After picking:",len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
         self.id_c[id] = my_color
         self.c_id[my_color] = id
         return my_color
-    
+
     def clean_color(self, id):
         """
         Relinquish a color once the object is focibly destroyed
@@ -248,9 +245,7 @@ class BaseEngine(EngineCore, Randomizable):
             return self.id_c[id]
         else:
             #print("Invalid ID: ", id)
-            return -1,-1,-1
-    
-
+            return -1, -1, -1
 
     def color_to_id(self, color):
         if color in self.c_id.keys():
@@ -451,7 +446,7 @@ class BaseEngine(EngineCore, Randomizable):
         # refresh graphics to support multi-thread rendering, avoiding bugs like shadow disappearance at first frame
         for _ in range(5):
             self.graphicsEngine.renderFrame()
-        
+
         #reset colors
         BaseEngine.COLORS_FREE = set(COLOR_SPACE)
         BaseEngine.COLORS_OCCUPIED = set()
@@ -469,12 +464,6 @@ class BaseEngine(EngineCore, Randomizable):
         #print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
         self.c_id = new_c2i
         self.id_c = new_i2c
-
-
-
-
-        
-        
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):
         """
@@ -638,7 +627,7 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             assert start_seed is not None
             return start_seed
-        
+
     @property
     def max_level(self):
         return self._max_level

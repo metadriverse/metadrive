@@ -69,11 +69,10 @@ if __name__ == "__main__":
                     "Keyboard Control": "W,A,S,D",
                 }
             )
-            
+
             if args.observation == "rgb_camera":
                 cv2.imshow('RGB Image in Observation', o["image"][..., -1])
                 cv2.waitKey(1)
-
                 """image = o["image"][...,-1]
                 image = image.reshape(-1, 3)
                 unique_colors = np.unique(image, axis=0)
