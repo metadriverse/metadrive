@@ -1,29 +1,29 @@
-from metadrive.component.map.pg_map import PGMap
+# from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import Curve
-from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.roundabout import Roundabout
+# from metadrive.component.pgblock.first_block import FirstPGBlock
+# from metadrive.component.pgblock.roundabout import Roundabout
 from metadrive.component.pgblock.straight import Straight
-from metadrive.component.road_network import Road
-from metadrive.manager.pg_map_manager import PGMapManager
-import copy
-from metadrive import MetaDriveEnv
+# from metadrive.component.road_network import Road
+# from metadrive.manager.pg_map_manager import PGMapManager
+# import copy
+# from metadrive import MetaDriveEnv
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.roundabout import Roundabout
-from metadrive.component.road_network import Road
-from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
+# from metadrive.component.pgblock.roundabout import Roundabout
+# from metadrive.component.road_network import Road
+# from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
-from metadrive.manager.spawn_manager import SpawnManager
-from metadrive.utils import Config
+# from metadrive.manager.spawn_manager import SpawnManager
+# from metadrive.utils import Config
 
 
 import argparse
-import cv2
-import numpy as np
+# import cv2
+# import numpy as np
 
-from metadrive import MetaDriveEnv
-from metadrive.component.sensors.rgb_camera import RGBCamera
+from metadrive.envs.metadrive_env import MetaDriveEnv
+# from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.constants import HELP_MESSAGE
 
 
@@ -50,6 +50,7 @@ class RacingMap(PGMap):
         # self.blocks.append(block_s1)
 
         block_s1 = Straight(1, init_block.get_socket(0),  self.road_network, 1)
+        block_s1.has_Guardrail = True
         block_s1.construct_from_config(
             {
                 Parameter.length: 100
@@ -58,6 +59,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_s1)
 
         block_c1 = Curve(2, block_s1.get_socket(0),  self.road_network, 1)
+        block_c1.has_guardrail = True
         block_c1.construct_from_config({
             Parameter.length: 200,
             Parameter.radius: 100,
@@ -67,6 +69,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_c1)
 
         block_s2 = Straight(3, block_c1.get_socket(0),  self.road_network, 1)
+        block_s2.has_Guardrail = True
         block_s2.construct_from_config(
             {
                 Parameter.length: 100,
@@ -75,6 +78,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_s2)
 
         block_c2 = Curve(4, block_s2.get_socket(0),  self.road_network, 1)
+        block_c2.has_guardrail = True
         block_c2.construct_from_config({
             Parameter.length: 100,
             Parameter.radius: 60,
@@ -84,6 +88,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_c2)
 
         block_c3 = Curve(5, block_c2.get_socket(0),  self.road_network, 1)
+        block_c3.has_guardrail = True
         block_c3.construct_from_config({
             Parameter.length: 100,
             Parameter.radius: 60,
@@ -93,6 +98,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_c3)
 
         block_s3 = Straight(6, block_c3.get_socket(0),  self.road_network, 1)
+        block_s3.has_Guardrail = True
         block_s3.construct_from_config(
             {
                 Parameter.length: 200,
@@ -101,6 +107,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_s3)
 
         block_c4 = Curve(7, block_s3.get_socket(0),  self.road_network, 1)
+        block_c4.has_guardrail = True
         block_c4.construct_from_config({
             Parameter.length: 80,
             Parameter.radius: 40,
@@ -110,6 +117,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_c4)
 
         block_c5 = Curve(8, block_c4.get_socket(0),  self.road_network, 1)
+        block_c5.has_guardrail = True
         block_c5.construct_from_config({
             Parameter.length: 40,
             Parameter.radius: 50,
@@ -119,6 +127,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_c5)
 
         block_c6 = Curve(9, block_c5.get_socket(0), self.road_network, 1)
+        block_c6.has_guardrail = True
         block_c6.construct_from_config({
             Parameter.length: 40,
             Parameter.radius: 50,
@@ -128,6 +137,7 @@ class RacingMap(PGMap):
         self.blocks.append(block_c6)
 
         block_c7 = Curve(10, block_c6.get_socket(0), self.road_network, 1)
+        block_c7.has_guardrail = True
         block_c7.construct_from_config({
             Parameter.length: 40,
             Parameter.radius: 20,
@@ -137,12 +147,14 @@ class RacingMap(PGMap):
         self.blocks.append(block_c7)
 
         block_s4 = Straight(11, block_c7.get_socket(0), self.road_network, 1)
+        block_s4.has_Guardrail = True
         block_s4.construct_from_config({
             Parameter.length: 100,
         }, parent_node_path, physics_world)
         self.blocks.append(block_s4)
 
         block_c8 = Curve(12, block_s4.get_socket(0), self.road_network, 1)
+        block_c8.has_guardrail = True
         block_c8.construct_from_config({
             Parameter.length: 100,
             Parameter.radius: 40,
