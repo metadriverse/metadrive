@@ -85,7 +85,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
     Given a polygon represented by a set of 2D points in x-y plane, return a 3D model by extruding along z-axis.
     Args:
         points: a list of 2D points in anticlockwise order!
-        height: height to extrude
+        height: height to extrude. If set to 0, it will generate a card
         force_anticlockwise: force making the points anticlockwise. It is helpful if your points has no order
         auto_anticlockwise: if the points are in clockwise order, we automatically reverse it.
         texture_scale: change the uv coordinate to set the texture scale
@@ -93,6 +93,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
     Returns: panda3d.NodePath
 
     """
+    no_side = abs(height) > 0.01
     if force_anticlockwise:
         points = sort_points_anticlockwise(points)
     elif not is_anticlockwise(points) and auto_anticlockwise:
@@ -129,7 +130,8 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
             normal = np.mean(normal, axis=0)
             normal = normal / np.linalg.norm(normal)
 
-        back_side_values.extend((x, y, -height, *normal, x * texture_scale, y * texture_scale))
+        if no_side:
+            back_side_values.extend((x, y, -height, *normal, x * texture_scale, y * texture_scale))
         triangulator.add_vertex(x, y)
         triangulator.add_polygon_vertex(i)
 
@@ -144,22 +146,27 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
         prim.add_vertices(index0, index1, index2)
         # prim.closePrimitive()
 
-    for i in range(p_num):
-        # First triangle
-        prim.add_vertices((i + 1) % p_num + p_num, i + p_num, i)
-        # Second triangle
-        prim.add_vertices((i + 1) % p_num + p_num, i, (i + 1) % p_num)
-        prim.closePrimitive()
+    if no_side:
+        # Add side
+        for i in range(p_num):
+            # First triangle
+            prim.add_vertices((i + 1) % p_num + p_num, i + p_num, i)
+            # Second triangle
+            prim.add_vertices((i + 1) % p_num + p_num, i, (i + 1) % p_num)
+            prim.closePrimitive()
 
     # add the values to the vertex table using a memoryview;
     # since the size of a memoryview cannot change, the vertex data table
     # already needs to have the right amount of rows before creating
     # memoryviews from its array(s)
-    vertex_data.unclean_set_num_rows(len(coords) * 2)
+    vertex_data.unclean_set_num_rows(len(coords) * 2 if no_side else len(coords))
     # retrieve the data array for modification
     data_array = vertex_data.modify_array(0)
     memview = memoryview(data_array).cast("B").cast("f")
-    memview[:] = values + back_side_values
+    if no_side:
+        memview[:] = values + back_side_values
+    else:
+        memview[:] = values
 
     geom = Geom(vertex_data)
     geom.add_primitive(prim)
