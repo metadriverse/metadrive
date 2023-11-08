@@ -4,3 +4,4 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 from metadrive.envs.top_down_env import TopDownSingleFrameMetaDriveEnv, TopDownMetaDrive, TopDownMetaDriveEnvV2
 from metadrive.envs.varying_dynamics_env import VaryingDynamicsEnv
+from metadrive.envs.racing_env import RacingEnv
