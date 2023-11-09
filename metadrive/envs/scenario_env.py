@@ -49,7 +49,7 @@ SCENARIO_ENV_CONFIG = dict(
     skip_missing_light=True,
     static_traffic_object=True,
     show_sidewalk=False,
-    show_crosswalk=False,
+
 
     # ===== Agent config =====
     vehicle_config=dict(

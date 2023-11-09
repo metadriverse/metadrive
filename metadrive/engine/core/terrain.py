@@ -118,11 +118,14 @@ class Terrain(BaseObject):
             if self.render:
                 # Make semantics for shader terrain
                 assert self.engine.current_map is not None, "Can not find current map"
+                layer = ["lane", "lane_line"]
+                if self.engine.global_config["show_crosswalk"]:
+                    layer.append("crosswalk")
                 semantics = self.engine.current_map.get_semantic_map(
                     size=self._semantic_map_size,
                     pixels_per_meter=self._semantic_map_pixel_per_meter,
                     polyline_thickness=int(1024 / self._semantic_map_size),
-                    layer=["lane", "lane_line"]
+                    layer=layer
                 )
                 semantic_tex = Texture()
                 semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
@@ -247,6 +250,9 @@ class Terrain(BaseObject):
             self._mesh_terrain.set_shader_input("road_normal", self.road_texture_normal)
             self._mesh_terrain.set_shader_input("road_rough", self.road_texture_rough)
             self._mesh_terrain.set_shader_input("elevation_texture_ratio", self._elevation_texture_ratio)
+
+            # crosswalk
+            self._mesh_terrain.set_shader_input("crosswalk_tex", self.crosswalk_tex)
             self._terrain_shader_set = True
         self._mesh_terrain.set_shader_input("attribute_tex", attribute_tex)
 
@@ -477,10 +483,11 @@ class Terrain(BaseObject):
         tex = np.frombuffer(self.road_texture.getRamImage().getData(), dtype=np.uint8)
         tex = tex.copy()
         tex = tex.reshape((self.road_texture.getYSize(), self.road_texture.getXSize(), 3))
-        for x in range(0, 2048, 512):
-            tex[x:x + 256, ...] = 220
+        step_size = 64
+        for x in range(0, 2048, step_size*2):
+            tex[x:x + step_size, ...] = 220
         self.crosswalk_tex = Texture()
-        self.crosswalk_tex.setup2dTexture(*tex.shape[:2], Texture.TUnsignedByte, Texture.F_srgb)
+        self.crosswalk_tex.setup2dTexture(*tex.shape[:2], Texture.TUnsignedByte, Texture.F_rgb)
         self.crosswalk_tex.setRamImage(tex)
         # self.crosswalk_tex.write("test_crosswalk.png")
 

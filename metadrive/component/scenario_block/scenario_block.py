@@ -104,7 +104,6 @@ class ScenarioBlock(BaseBlock):
             elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
         self.construct_sidewalk()
-        # self.construct_crosswalk()
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)

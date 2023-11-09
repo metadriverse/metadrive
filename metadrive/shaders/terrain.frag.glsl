@@ -37,6 +37,7 @@ uniform sampler2D white_tex;
 uniform sampler2D road_tex;
 uniform sampler2D road_normal;
 uniform sampler2D road_rough;
+uniform sampler2D crosswalk_tex;
 
 uniform sampler2D grass_tex;
 uniform sampler2D grass_normal;
@@ -125,11 +126,19 @@ void main() {
   if ((attri.r > 0.01) && terrain_uv.x>r_min && terrain_uv.y > r_min && terrain_uv.x<r_max && terrain_uv.y<r_max){
     float value = attri.r; // Assuming it's a red channel texture
     if (value < 0.11) {
-        // Semantics for value 1
+        // yellow
         diffuse=texture(yellow_tex, terrain_uv * road_tex_ratio).rgb;
     } else if (value < 0.21) {
-        // Semantics for value 2
+        // road
         diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb;
+    } else if (value < 0.31) {
+        // white
+        diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
+    }  else if (value > 0.3999 ||  value < 0.760001) {
+        // crosswalk
+        float theta=(value-0.39999) * 1000/180 * 3.1415926535;
+        vec2 new_terrain_uv = vec2(cos(theta)*terrain_uv.x - sin(theta)*terrain_uv.y, sin(theta)*terrain_uv.x+cos(theta)*terrain_uv.y);
+        diffuse = texture(crosswalk_tex, new_terrain_uv * road_tex_ratio).rgb;
     } else{
         // Semantics for value 4
         diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
