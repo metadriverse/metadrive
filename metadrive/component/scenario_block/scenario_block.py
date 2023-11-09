@@ -104,7 +104,7 @@ class ScenarioBlock(BaseBlock):
             elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
         self.construct_sidewalk()
-        self.construct_crosswalk()
+        # self.construct_crosswalk()
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -172,6 +172,7 @@ class ScenarioBlock(BaseBlock):
         """
         Construct the crosswalk
         """
+        raise DeprecationWarning("The Crosswalk is built on terrain now")
         if self.engine.global_config["show_crosswalk"] and not self.engine.use_render_pipeline:
             for sidewalk in self.crosswalks.values():
                 polygon = sidewalk["polygon"]

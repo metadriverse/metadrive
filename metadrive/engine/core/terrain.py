@@ -107,7 +107,7 @@ class Terrain(BaseObject):
             )
             heightfield_to_modify = heightfield_base[start:end, start:end, ...]
             heightfield_base[start:end, start:end,
-                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+            ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -160,12 +160,12 @@ class Terrain(BaseObject):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -473,6 +473,17 @@ class Terrain(BaseObject):
         self.yellow_lane_line = Texture("white lane line")
         self.yellow_lane_line.load(yellow_lane_line)
 
+        # crosswalk
+        tex = np.frombuffer(self.road_texture.getRamImage().getData(), dtype=np.uint8)
+        tex = tex.copy()
+        tex = tex.reshape((self.road_texture.getYSize(), self.road_texture.getXSize(), 3))
+        for x in range(0, 2048, 512):
+            tex[x:x + 256, ...] = 220
+        self.crosswalk_tex = Texture()
+        self.crosswalk_tex.setup2dTexture(*tex.shape[:2], Texture.TUnsignedByte, Texture.F_srgb)
+        self.crosswalk_tex.setRamImage(tex)
+        # self.crosswalk_tex.write("test_crosswalk.png")
+
     def _make_random_terrain(self, texture_size, terrain_size, heightfield):
         """
         Deprecated
@@ -521,7 +532,6 @@ class Terrain(BaseObject):
 
         """
         return self._mesh_terrain
-
 
 # Some useful threads
 # GeoMipTerrain:
