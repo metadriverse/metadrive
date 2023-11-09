@@ -148,13 +148,13 @@ class BaseMap(BaseRunnable):
 
     # @time_me
     def get_semantic_map(
-            self,
-            size=512,
-            pixels_per_meter=8,
-            color_setting=MapTerrainSemanticColor,
-            line_sample_interval=2,
-            polyline_thickness=1,
-            layer=("lane_line", "lane")
+        self,
+        size=512,
+        pixels_per_meter=8,
+        color_setting=MapTerrainSemanticColor,
+        line_sample_interval=2,
+        polyline_thickness=1,
+        layer=("lane_line", "lane")
     ):
         """
         Get semantics of the map for terrain generation
@@ -224,24 +224,26 @@ class BaseMap(BaseRunnable):
                     # edges = find_longest_parallel_edges(polygon)
                     # p_1, p_2 = edges[0]
                     p_1, p_2 = find_longest_edge(polygon)[0]
-                    dir = (p_2[0] - p_1[0], p_2[1] - p_1[1],)
+                    dir = (
+                        p_2[0] - p_1[0],
+                        p_2[1] - p_1[1],
+                    )
                     # 0-2pi
                     angle = np.arctan2(*dir) / np.pi * 180 + 180
                     # normalize to 0.4-0.714
                     angle = angle / 1000 + MapTerrainSemanticColor.get_color(MetaDriveType.CROSSWALK)
-                    cv2.fillPoly(mask, np.array([points]).astype(np.int32),
-                                 color=angle)
+                    cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=angle)
 
             self._semantic_map = mask
         return self._semantic_map
 
     # @time_me
     def get_height_map(
-            self,
-            size=2048,
-            pixels_per_meter=1,
-            extension=2,
-            height=1,
+        self,
+        size=2048,
+        pixels_per_meter=1,
+        extension=2,
+        height=1,
     ):
         """
         Get height of the map for terrain generation

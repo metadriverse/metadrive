@@ -50,7 +50,6 @@ SCENARIO_ENV_CONFIG = dict(
     static_traffic_object=True,
     show_sidewalk=False,
 
-
     # ===== Agent config =====
     vehicle_config=dict(
         lidar=dict(num_lasers=120, distance=50),

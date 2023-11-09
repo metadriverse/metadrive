@@ -16,7 +16,7 @@ if __name__ == '__main__':
     tex = tex.reshape((tex_origin.getYSize(), tex_origin.getXSize(), 3))
 
     for x in range(0, 2048, 512):
-        tex[x:x + 256,...] = 220
+        tex[x:x + 256, ...] = 220
 
     cv2.imwrite("test_tex.png", tex)
 

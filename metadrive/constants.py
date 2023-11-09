@@ -375,7 +375,6 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
-
     @staticmethod
     def get_color(type):
         """
@@ -417,7 +416,6 @@ class TopDownSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
-
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_lane(type):
