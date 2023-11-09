@@ -203,6 +203,8 @@ BASE_DEFAULT_CONFIG = dict(
     use_mesh_terrain=False,
     # use full-size mesh terrain
     full_size_mesh=True,
+    # show crosswalk
+    show_crosswalk=False,
 
     # ===== Others =====
     # Force to generate objects in the left lane.

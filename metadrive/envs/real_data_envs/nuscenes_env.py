@@ -25,12 +25,13 @@ if __name__ == "__main__":
             "curriculum_level": 1,
             "show_fps": True,
             "show_sidewalk": True,
+            "show_crosswalk": True,
             # "pstats": True,
             # "use_mesh_terrain": True,
             # "debug": True,
             "no_static_vehicles": False,
             # "pstats": True,
-            # "render_pipeline": True,
+            "render_pipeline": True,
             "window_size": (1600, 900),
             "camera_dist": 9,
             "start_scenario_index": 0,
@@ -46,7 +47,7 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=0, distance=50),
                 side_detector=dict(num_lasers=12, distance=50)
             ),
-            "data_directory": AssetLoader.file_path("nuscenes"),
+            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
             # "drivable_area_extension": 0,
         }
     )

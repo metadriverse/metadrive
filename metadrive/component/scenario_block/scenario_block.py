@@ -1,4 +1,5 @@
 import math
+from metadrive.utils.shapely_utils.geom import cut_polygon_along_parallel_edges
 from metadrive.constants import CollisionGroup
 from metadrive.utils.utils import time_me
 import numpy as np
@@ -164,6 +165,21 @@ class ScenarioBlock(BaseBlock):
                 body_node.addShape(shape)
                 self.dynamic_nodes.append(body_node)
                 body_node.setIntoCollideMask(CollisionGroup.Sidewalk)
+                self._node_path_list.append(np)
+
+    def construct_crosswalk(self):
+        """
+        Construct the crosswalk
+        """
+        raise DeprecationWarning("The Crosswalk is built on terrain now")
+        if self.engine.global_config["show_crosswalk"] and not self.engine.use_render_pipeline:
+            for sidewalk in self.crosswalks.values():
+                polygon = sidewalk["polygon"]
+                np = make_polygon_model(polygon, 0.0)
+                np.reparentTo(self.sidewalk_node_path)
+                np.setPos(0, 0, -0.05)
+                np.setTexture(self.side_texture)
+                # np.setTexture(self.ts_normal, self.side_normal)
                 self._node_path_list.append(np)
 
     @property
