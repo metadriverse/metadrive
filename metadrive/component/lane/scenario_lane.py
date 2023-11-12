@@ -137,7 +137,7 @@ class ScenarioLane(PointLane):
 
 
 if __name__ == "__main__":
-    file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
+    file_path = AssetLoader.file_path("waymo", "test.pkl", unix_style=False)
     data = read_scenario_data(file_path)
     print(data)
     lane = ScenarioLane(108, data["map_features"])

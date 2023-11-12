@@ -20,7 +20,7 @@ from metadrive.utils.math import wrap_to_pi
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Scenario Config =====
-    data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+    data_directory=AssetLoader.file_path("waymo", unix_style=False),
     start_scenario_index=0,
     num_scenarios=3,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
@@ -474,7 +474,7 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
             ),
-            "data_directory": AssetLoader.file_path("nuplan", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuplan", unix_style=False),
         }
     )
     success = []

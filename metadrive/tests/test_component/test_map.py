@@ -13,8 +13,8 @@ def test_map_get_semantic_map(dir="waymo", render=False, show=False):
     default_config["use_render"] = render
     default_config["debug"] = False
     default_config["debug_static_world"] = False
-    default_config["data_directory"] = AssetLoader.file_path(dir, return_raw_style=False)
-    # default_config["data_directory"] = AssetLoader.file_path("nuscenes", return_raw_style=False)
+    default_config["data_directory"] = AssetLoader.file_path(dir, unix_style=False)
+    # default_config["data_directory"] = AssetLoader.file_path("nuscenes", unix_style=False)
     # default_config["data_directory"] = "/home/shady/Downloads/test_processed"
     default_config["num_scenarios"] = 3
     engine = initialize_engine(default_config)
@@ -38,8 +38,8 @@ def test_map_get_elevation_map(dir="waymo", render=False, show=False):
     default_config["use_render"] = render
     default_config["debug"] = False
     default_config["debug_static_world"] = False
-    default_config["data_directory"] = AssetLoader.file_path(dir, return_raw_style=False)
-    # default_config["data_directory"] = AssetLoader.file_path("nuscenes", return_raw_style=False)
+    default_config["data_directory"] = AssetLoader.file_path(dir, unix_style=False)
+    # default_config["data_directory"] = AssetLoader.file_path("nuscenes", unix_style=False)
     # default_config["data_directory"] = "/home/shady/Downloads/test_processed"
     default_config["num_scenarios"] = 3
     engine = initialize_engine(default_config)

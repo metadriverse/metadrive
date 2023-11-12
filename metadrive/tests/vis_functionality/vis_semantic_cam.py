@@ -25,7 +25,7 @@ if __name__ == "__main__":
             "interface_panel": ["semantic_camera"],
             "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
             "vehicle_config": dict(image_source="semantic_camera"),
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
     env.reset(seed=0)

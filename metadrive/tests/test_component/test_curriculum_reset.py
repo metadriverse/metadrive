@@ -17,7 +17,7 @@ def _test_level(level=1, render=False):
             "horizon": 1000,
             "curriculum_level": level,
             "no_static_vehicles": True,
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
     try:
@@ -55,7 +55,7 @@ def test_curriculum_up_1_level(render=False, level=5):
             "horizon": 1000,
             "curriculum_level": level,
             "no_static_vehicles": True,
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
     try:
@@ -86,7 +86,7 @@ def test_curriculum_level_up(render=False):
             "horizon": 1000,
             "curriculum_level": 2,
             "no_static_vehicles": True,
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
     try:
@@ -118,7 +118,7 @@ def _worker_env(render, worker_index, level_up=False):
             "episodes_to_evaluate_curriculum": 4,
             "curriculum_level": level,
             "no_static_vehicles": True,
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
             "worker_index": worker_index,
             "num_workers": 2,
         }
@@ -179,7 +179,7 @@ def level_up_worker(render, worker_index):
             "no_static_vehicles": True,
             "num_workers": 2,
             "worker_index": worker_index,
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
     try:
@@ -220,7 +220,7 @@ def test_start_seed_not_0(render=False, worker_index=0):
             "no_static_vehicles": True,
             "num_workers": 2,
             "worker_index": worker_index,
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
     try:
@@ -258,7 +258,7 @@ def test_start_seed_1_9(render=False, worker_index=0):
             "no_static_vehicles": True,
             "num_workers": 2,
             "worker_index": worker_index,
-            "data_directory": AssetLoader.file_path("nuscenes", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
     try:

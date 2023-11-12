@@ -76,7 +76,7 @@ def convert_scenarios(version, dataroot, output_path, worker_index=None, verbose
 
 
 if __name__ == "__main__":
-    output_path = AssetLoader.file_path("nuscenes", return_raw_style=False)
+    output_path = AssetLoader.file_path("nuscenes", unix_style=False)
     version = 'v1.0-mini'
     verbose = True
     dataroot = '/home/shady/data/nuscenes'

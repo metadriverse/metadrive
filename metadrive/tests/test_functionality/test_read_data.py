@@ -8,25 +8,25 @@ from metadrive.scenario.utils import read_dataset_summary, read_scenario_data
 
 
 def test_read_waymo_data():
-    summary_dict, summary_list, mapping = read_dataset_summary(AssetLoader.file_path("waymo", return_raw_style=False))
+    summary_dict, summary_list, mapping = read_dataset_summary(AssetLoader.file_path("waymo", unix_style=False))
     for p in summary_list:
-        data = read_scenario_data(AssetLoader.file_path("waymo", mapping[p], p, return_raw_style=False))
+        data = read_scenario_data(AssetLoader.file_path("waymo", mapping[p], p, unix_style=False))
         data.sanity_check(data, check_self_type=False, valid_check=False)
         print("Finish: ", p)
 
 
 def test_read_nuscenes_data():
     summary_dict, summary_list, mapping = read_dataset_summary(
-        AssetLoader.file_path("nuscenes", return_raw_style=False)
+        AssetLoader.file_path("nuscenes", unix_style=False)
     )
     for p in summary_list:
-        data = read_scenario_data(AssetLoader.file_path("nuscenes", mapping[p], p, return_raw_style=False))
+        data = read_scenario_data(AssetLoader.file_path("nuscenes", mapping[p], p, unix_style=False))
         data.sanity_check(data, check_self_type=False, valid_check=False)
         print("Finish: ", p)
 
 
 def test_read_data_no_summary():
-    dir = AssetLoader.file_path("waymo", return_raw_style=False)
+    dir = AssetLoader.file_path("waymo", unix_style=False)
     new_dir = "test_read_copy_waymo"
 
     #  make fake dataset

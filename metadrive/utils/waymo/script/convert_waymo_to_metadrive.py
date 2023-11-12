@@ -267,6 +267,6 @@ if __name__ == "__main__":
     file_list = os.listdir(raw_data_path)
     parse_data(file_list, raw_data_path, output_path)
     sys.exit()
-    # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", return_raw_style=False)
+    # file_path = AssetLoader.file_path("waymo", "processed", "0.pkl", unix_style=False)
     # data = read_waymo_data(file_path)
     # draw_waymo_map(data)

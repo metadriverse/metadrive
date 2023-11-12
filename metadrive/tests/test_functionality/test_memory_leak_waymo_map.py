@@ -32,7 +32,7 @@ def test_waymo_env_memory_leak(num_reset=100):
 
 def test_waymo_map_memory_leak():
     default_config = WaymoEnv.default_config()
-    default_config["data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
+    default_config["data_directory"] = AssetLoader.file_path("waymo", unix_style=False)
     default_config["num_scenarios"] = 1
 
     try:

@@ -31,7 +31,7 @@ def test_top_down_semantics(render=False):
                 "agent_policy": ReplayEgoCarPolicy,
                 "use_render": False,
                 "sequential_seed": True,
-                "data_directory": AssetLoader.file_path(asset_path, "nuscenes", return_raw_style=False),
+                "data_directory": AssetLoader.file_path(asset_path, "nuscenes", unix_style=False),
                 "num_scenarios": 10
             }
         )
