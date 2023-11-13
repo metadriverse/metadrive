@@ -8,7 +8,7 @@ import math
 import cv2
 import numpy as np
 from metadrive.base_class.base_runnable import BaseRunnable
-from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, DrivableAreaProperty
+from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, PGDrivableAreaProperty
 from metadrive.engine.engine_utils import get_global_config
 from shapely.geometry import Polygon, MultiPolygon
 
@@ -171,7 +171,7 @@ class BaseMap(BaseRunnable):
             polygons = []
             polylines = []
 
-            points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval)
+            points_to_skip = math.floor(PGDrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval)
             for obj in all_lanes.values():
                 if MetaDriveType.is_lane(obj["type"]) and "lane" in layer:
                     polygons.append((obj["polygon"], MapTerrainSemanticColor.get_color(obj["type"])))

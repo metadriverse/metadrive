@@ -5,7 +5,7 @@ from typing import Tuple
 import numpy as np
 
 from metadrive.component.lane.pg_lane import PGLane
-from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import PGLineType
 from metadrive.utils.math import wrap_to_pi, norm, Vector
 

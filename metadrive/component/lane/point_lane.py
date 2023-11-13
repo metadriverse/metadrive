@@ -7,7 +7,7 @@ from typing import Tuple, Union
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import PGLineType
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math import get_points_bounding_box

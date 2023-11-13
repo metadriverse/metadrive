@@ -205,6 +205,8 @@ BASE_DEFAULT_CONFIG = dict(
     full_size_mesh=True,
     # show crosswalk
     show_crosswalk=False,
+    # show sidewalk
+    show_sidewalk=True,
 
     # ===== Others =====
     # Force to generate objects in the left lane.

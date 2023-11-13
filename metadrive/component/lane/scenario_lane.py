@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import PGDrivableAreaProperty
 import math
 
 from metadrive.component.lane.point_lane import PointLane

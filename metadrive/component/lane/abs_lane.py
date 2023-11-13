@@ -11,7 +11,7 @@ from panda3d.core import Vec3, LQuaternionf, NodePath
 from panda3d.core import Vec4
 from shapely import geometry
 
-from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import MetaDriveType
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.engine.physics_node import BaseRigidBodyNode
@@ -118,70 +118,6 @@ class AbstractLane(MetaDriveType):
         if self.need_lane_localization:
             self._construct_lane_only_physics_polygon(block, self.polygon)
 
-    def construct_lane_line_in_block(self, block, construct_left_right=(True, True)):
-        """
-        Construct lane line in the Panda3d world for getting contact information
-        """
-        for idx, line_type, line_color, need, in zip([-1, 1], self.line_types, self.line_colors, construct_left_right):
-            if not need:
-                continue
-            lateral = idx * self.width_at(0) / 2
-            if line_type == PGLineType.CONTINUOUS:
-                self.construct_continuous_line(block, lateral, line_color, line_type)
-            elif line_type == PGLineType.BROKEN:
-                self.construct_broken_line(block, lateral, line_color, line_type)
-            elif line_type == PGLineType.SIDE:
-                self.construct_continuous_line(block, lateral, line_color, line_type)
-                self.construct_sidewalk(block, lateral)
-            elif line_type == PGLineType.NONE:
-                continue
-            else:
-                raise ValueError(
-                    "You have to modify this cuntion and implement a constructing method for line type: {}".
-                    format(line_type)
-                )
-
-    def construct_broken_line(self, block, lateral, line_color, line_type):
-        """
-        Lateral: left[-1/2 * width] or right[1/2 * width]
-        """
-        segment_num = int(self.length / (2 * DrivableAreaProperty.STRIPE_LENGTH))
-        for segment in range(segment_num):
-            start = self.position(segment * DrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
-            end = self.position(
-                segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH, lateral
-            )
-            if segment == segment_num - 1:
-                end = self.position(self.length - DrivableAreaProperty.STRIPE_LENGTH, lateral)
-            node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
-            self._node_path_list.extend(node_path_list)
-
-    def construct_continuous_line(self, block, lateral, line_color, line_type):
-        """
-        We process straight line to several pieces by default, which can be optimized through overriding this function
-        Lateral: left[-1/2 * width] or right[1/2 * width]
-        """
-        segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
-        if segment_num == 0:
-            start = self.position(0, lateral)
-            end = self.position(self.length, lateral)
-            node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
-            self._node_path_list.extend(node_path_list)
-        for segment in range(segment_num):
-            start = self.position(DrivableAreaProperty.LANE_SEGMENT_LENGTH * segment, lateral)
-            if segment == segment_num - 1:
-                end = self.position(self.length, lateral)
-            else:
-                end = self.position((segment + 1) * DrivableAreaProperty.LANE_SEGMENT_LENGTH, lateral)
-            node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
-            self._node_path_list.extend(node_path_list)
-
-    def construct_sidewalk(self, block, lateral):
-        """
-        Lateral: left[-1/2 * width] or right[1/2 * width]
-        """
-        pass
-
     @staticmethod
     def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: PGLineType):
         node_path_list = []
@@ -214,57 +150,19 @@ class AbstractLane(MetaDriveType):
         node_path_list.append(body_node)
 
         # its scale will change by setScale
-        body_height = DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
-        shape = BulletBoxShape(Vec3(length / 2, DrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
+        body_height = PGDrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
+        shape = BulletBoxShape(Vec3(length / 2, PGDrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
         body_np.node().addShape(shape)
-        mask = DrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN else DrivableAreaProperty.BROKEN_COLLISION_MASK
+        mask = PGDrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN else PGDrivableAreaProperty.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(mask)
         block.static_nodes.append(body_np.node())
 
         # position and heading
-        body_np.setPos(panda_vector(middle, DrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
+        body_np.setPos(panda_vector(middle, PGDrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
         direction_v = end_point - start_point
         # theta = -numpy.arctan2(direction_v[1], direction_v[0])
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-
-        return node_path_list
-
-    @staticmethod
-    def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0):
-        node_path_list = []
-
-        direction_v = lane_end - lane_start
-        if abs(norm(direction_v[0], direction_v[1])) < 0.1:
-            return []
-        width = width or block.SIDEWALK_WIDTH
-        middle = (lane_start + lane_end) / 2
-        length = norm(lane_end[0] - lane_start[0], lane_end[1] - lane_start[1])
-        body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_SIDEWALK)
-        body_node.setKinematic(False)
-        body_node.setStatic(True)
-        side_np = block.sidewalk_node_path.attachNewNode(body_node)
-        node_path_list.append(side_np)
-
-        shape = BulletBoxShape(Vec3(1 / 2, 1 / 2, 1 / 2))
-        body_node.addShape(shape)
-        body_node.setIntoCollideMask(block.SIDEWALK_COLLISION_MASK)
-        if block.render:
-            # a trick to acc off-rendering training
-            block.dynamic_nodes.append(body_node)
-        else:
-            block.static_nodes.append(body_node)
-
-        direction_v = lane_end - lane_start
-        if extra_thrust != 0:
-            vertical_v = Vector((direction_v[1], -direction_v[0])) / norm(*direction_v)
-            middle += vertical_v * extra_thrust
-        side_np.setPos(panda_vector(middle, 0))
-        theta = math.atan2(direction_v[1], direction_v[0])
-        side_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-        side_np.setScale(length * length_multiply, width, block.SIDEWALK_THICKNESS * (1 + 0.1 * np.random.rand()))
-        if block.render and not block.use_render_pipeline:
-            block.sidewalk.instanceTo(side_np)
 
         return node_path_list
 
@@ -333,7 +231,7 @@ class AbstractLane(MetaDriveType):
         Returns: a list of 2D points representing Polygon
 
         """
-        raise NotImplementedError
+        raise NotImplementedError("Overwrite this function to allow getting polygon for this lane")
 
     @property
     def shapely_polygon(self):
