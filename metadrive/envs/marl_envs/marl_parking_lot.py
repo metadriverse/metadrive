@@ -25,7 +25,6 @@ MAParkingLotConfig = dict(
         -Road(TInterSection.node(2, 0, 0), TInterSection.node(2, 0, 1)),
         -Road(TInterSection.node(2, 2, 0), TInterSection.node(2, 2, 1)),
     ],
-    show_sidewalk=False,
     out_spawn_roads=None,  # auto fill
     spawn_roads=None,  # auto fill
     num_agents=10,
