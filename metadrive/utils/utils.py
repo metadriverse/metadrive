@@ -119,12 +119,12 @@ def merge_dicts(old_dict, new_dict, allow_new_keys=False, without_copy=False):
 
 
 def _deep_update(
-    original,
-    new_dict,
-    new_keys_allowed=False,
-    allow_new_subkey_list=None,
-    override_all_if_type_changes=None,
-    raise_error=True
+        original,
+        new_dict,
+        new_keys_allowed=False,
+        allow_new_subkey_list=None,
+        override_all_if_type_changes=None,
+        raise_error=True
 ):
     allow_new_subkey_list = allow_new_subkey_list or []
     override_all_if_type_changes = override_all_if_type_changes or []
@@ -222,6 +222,7 @@ def time_me(fn):
     Returns: None
 
     """
+
     def _wrapper(*args, **kwargs):
         start = time.time()
         ret = fn(*args, **kwargs)
@@ -288,30 +289,34 @@ def create_rectangle_from_midpoints(p1, p2, width, length_factor=1.0):
     return np.array([p4, p3, p5, p6])
 
 
-if __name__ == '__main__':
+def draw_polygon(polygon):
+    """
+    Visualize the polygon with matplot lib
+    Args:
+        polygon: a list of 2D points
+
+    Returns: None
+
+    """
     import matplotlib.pyplot as plt
 
-    p1 = [1, 1]
-    p2 = [4, 4]
-    width = 2
-
     # Create the rectangle
-    rectangle_points = create_rectangle_from_midpoints(p1, p2, width, 1.5)
+    rectangle_points = np.array(polygon)
     # Extract the points for easier plotting
     x_rect, y_rect = rectangle_points.T
 
     # Extract the original midpoints
-    x_mid, y_mid = np.array([p1, p2]).T
 
     # Plot the rectangle
     plt.figure(figsize=(8, 8))
-    plt.plot(*zip(*np.append(rectangle_points, [rectangle_points[0]], axis=0)), marker='o', label='Rectangle Vertices')
+    plt.plot(*zip(*np.append(rectangle_points, [rectangle_points[0]], axis=0)), marker='o',
+             label='Rectangle Vertices')
     plt.fill(
         *zip(*np.append(rectangle_points, [rectangle_points[0]], axis=0)), alpha=0.3
     )  # Fill the rectangle with light opacity
 
     # Plot the original midpoints
-    plt.scatter(x_mid, y_mid, color='red', zorder=5, label='Midpoints')
+    # plt.scatter(x_mid, y_mid, color='red', zorder=5, label='Midpoints')
 
     # Set equal scaling and labels
     plt.axis('equal')
