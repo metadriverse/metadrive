@@ -1,15 +1,14 @@
 import logging
 import math
-from typing import List, Dict
+from abc import ABC
+from typing import Dict
 
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
 from panda3d.bullet import BulletTriangleMeshShape, BulletTriangleMesh
-from panda3d.core import Vec3, LQuaternionf, Vec4, RigidBodyCombiner, \
+from panda3d.core import Vec3, LQuaternionf, RigidBodyCombiner, \
     SamplerState, NodePath, Texture
 
 from metadrive.base_class.base_object import BaseObject
-from metadrive.component.lane.abs_lane import AbstractLane
-from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.road_network.road import Road
 from metadrive.constants import CollisionGroup
@@ -25,7 +24,7 @@ from metadrive.utils.vertex import make_polygon_model
 logger = logging.getLogger(__name__)
 
 
-class BaseBlock(BaseObject, PGDrivableAreaProperty):
+class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     """
     Block is a driving area consisting of several roads
     Note: overriding the _sample() function to fill block_network/respawn_roads in subclass
@@ -332,6 +331,9 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty):
                 shape = BulletTriangleMeshShape(mesh, dynamic=False)
 
                 body_node.addShape(shape)
-                self.dynamic_nodes.append(body_node)
+                if self.render:
+                    self.dynamic_nodes.append(body_node)
+                else:
+                    self.static_nodes.append(body_node)
                 body_node.setIntoCollideMask(CollisionGroup.Sidewalk)
                 self._node_path_list.append(np)

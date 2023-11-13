@@ -136,6 +136,14 @@ class BaseMap(BaseRunnable):
         pass
 
     def get_map_features(self, interval=2):
+        """
+        Get the map features represented by a set of point lists or polygons
+        Args:
+            interval: Sampling rate
+
+        Returns: None
+
+        """
         map_features = self.road_network.get_map_features(interval)
         boundary_line_vector = self.get_boundary_line_vector(interval)
         map_features.update(boundary_line_vector)
