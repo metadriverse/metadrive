@@ -95,7 +95,8 @@ class PhysicsNodeList(list):
         if not self.attached:
             return
         for node in self:
-            bullet_world.remove(node)
+            if node in bullet_world.getRigidBodies() + bullet_world.getGhosts():
+                bullet_world.remove(node)
         self.attached = False
 
     def destroy_node_list(self, bullet_world: BulletWorld):

@@ -5,8 +5,8 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 1,
-            "traffic_density": 0,
+            "num_scenarios": 10,
+            "traffic_density": 0.,
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
@@ -27,13 +27,13 @@ if __name__ == "__main__":
             "manual_control": True,
             "use_render": True,
             "use_mesh_terrain": False,
-            "accident_prob": 1,
+            "accident_prob": 0,
             "decision_repeat": 5,
             "daytime": "19:00",
             "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "CCCCCCCCC",
+            "map": "SSS",
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
