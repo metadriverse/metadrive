@@ -3,6 +3,8 @@ import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import PGLineType
+from metadrive.engine.core.draw_line import ColorLineNodePath
+from metadrive.engine.engine_utils import get_engine
 from metadrive.type import MetaDriveType
 
 
@@ -57,6 +59,11 @@ class PGLane(AbstractLane):
         Returns:
 
         """
+        # engine = get_engine()
+        # cloud_points_vis = ColorLineNodePath(
+        #     engine.render, thickness=3.0
+        # )
+        # draw_lists = [[], []]
         if str(self.index) in block.sidewalks:
             return
         polygon = []
@@ -71,6 +78,9 @@ class PGLane(AbstractLane):
                 longitude = min(self.length + 0.1, longitude)
                 point = self.position(longitude, lateral)
                 polygon.append([point[0], point[1]])
+                # draw_lists[k].append([point[0], point[1], 1])
+        # cloud_points_vis.drawLines(draw_lists)
+        # cloud_points_vis.create()
         block.sidewalks[str(self.index)] = {"polygon": polygon}
 
     def construct_lane_line_in_block(self, block, construct_left_right=(True, True)):
