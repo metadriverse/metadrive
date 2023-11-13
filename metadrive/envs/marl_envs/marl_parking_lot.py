@@ -25,6 +25,7 @@ MAParkingLotConfig = dict(
         -Road(TInterSection.node(2, 0, 0), TInterSection.node(2, 0, 1)),
         -Road(TInterSection.node(2, 2, 0), TInterSection.node(2, 2, 1)),
     ],
+    show_sidewalk=False,
     out_spawn_roads=None,  # auto fill
     spawn_roads=None,  # auto fill
     num_agents=10,
@@ -51,6 +52,7 @@ class ParkingLotSpawnManager(SpawnManager):
     parking space and entrances of parking lot, vehicle can not respawn in parking space which has been assigned to a
     vehicle who drives into this parking lot.
     """
+
     def __init__(self):
         super(ParkingLotSpawnManager, self).__init__()
         self.parking_space_available = set()
@@ -201,6 +203,7 @@ class MultiAgentParkingLotEnv(MultiAgentMetaDrive):
     """
     Env will be done when vehicle is on yellow or white continuous lane line!
     """
+
     @staticmethod
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(MAParkingLotConfig, allow_add_new_key=True)
@@ -450,6 +453,7 @@ def _vis():
             render_text["current_road"] = v.navigation.current_road
 
         env.render(text=render_text)
+        d = tm
         for kkk, ddd in d.items():
             if ddd and kkk != "__all__":
                 print(
@@ -527,6 +531,7 @@ def _long_run():
         for step in range(10000):
             act = env.action_space.sample()
             o, r, tm, tc, i = env.step(act)
+            d = tm
             if step == 0:
                 assert not any(d.values())
 

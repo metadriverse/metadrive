@@ -312,6 +312,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         Construct the sidewalk with collision shape
         """
+        return
         if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
             for sidewalk in self.sidewalks.values():
                 polygon = sidewalk["polygon"]
