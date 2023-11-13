@@ -73,8 +73,10 @@ class PGLane(AbstractLane):
         start_lat = +self.width_at(0) / 2 + 0.2
         side_lat = start_lat + PGDrivableAreaProperty.SIDEWALK_WIDTH
         if self.radius != 0 and side_lat > self.radius:
-            raise ValueError("The sidewalk width ({}) is too large."
-                             " It should be < radius ({})".format(side_lat, self.radius))
+            raise ValueError(
+                "The sidewalk width ({}) is too large."
+                " It should be < radius ({})".format(side_lat, self.radius)
+            )
         for k, lateral in enumerate([start_lat, side_lat]):
             if k == 1:
                 longs = longs[::-1]
