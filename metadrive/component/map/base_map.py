@@ -1,21 +1,19 @@
 import logging
-from metadrive.utils.shapely_utils.geom import find_longest_parallel_edges, find_longest_edge
-import geopandas as gpd
-from shapely.ops import unary_union
-from metadrive.utils.utils import time_me
 import math
+from abc import ABC
 
 import cv2
 import numpy as np
+
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, PGDrivableAreaProperty
 from metadrive.engine.engine_utils import get_global_config
-from shapely.geometry import Polygon, MultiPolygon
+from metadrive.utils.shapely_utils.geom import find_longest_edge
 
 logger = logging.getLogger(__name__)
 
 
-class BaseMap(BaseRunnable):
+class BaseMap(BaseRunnable, ABC):
     """
     Base class for Map generation!
     """

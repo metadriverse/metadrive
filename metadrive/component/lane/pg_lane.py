@@ -60,13 +60,15 @@ class PGLane(AbstractLane):
         if str(self.index) in block.sidewalks:
             return
         polygon = []
-        longs = np.arange(0, self.length + PGDrivableAreaProperty.SIDEWALK_LENGTH, PGDrivableAreaProperty.SIDEWALK_LENGTH)
+        longs = np.arange(
+            0, self.length + PGDrivableAreaProperty.SIDEWALK_LENGTH, PGDrivableAreaProperty.SIDEWALK_LENGTH
+        )
         start_lat = +self.width_at(0) / 2 + 0.2
         for k, lateral in enumerate([start_lat, start_lat + PGDrivableAreaProperty.SIDEWALK_WIDTH]):
             if k == 1:
                 longs = longs[::-1]
             for longitude in longs:
-                longitude = min(self.length+0.1, longitude)
+                longitude = min(self.length + 0.1, longitude)
                 point = self.position(longitude, lateral)
                 polygon.append([point[0], point[1]])
         block.sidewalks[str(self.index)] = {"polygon": polygon}

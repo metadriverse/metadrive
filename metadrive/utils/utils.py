@@ -119,12 +119,12 @@ def merge_dicts(old_dict, new_dict, allow_new_keys=False, without_copy=False):
 
 
 def _deep_update(
-        original,
-        new_dict,
-        new_keys_allowed=False,
-        allow_new_subkey_list=None,
-        override_all_if_type_changes=None,
-        raise_error=True
+    original,
+    new_dict,
+    new_keys_allowed=False,
+    allow_new_subkey_list=None,
+    override_all_if_type_changes=None,
+    raise_error=True
 ):
     allow_new_subkey_list = allow_new_subkey_list or []
     override_all_if_type_changes = override_all_if_type_changes or []
@@ -222,7 +222,6 @@ def time_me(fn):
     Returns: None
 
     """
-
     def _wrapper(*args, **kwargs):
         start = time.time()
         ret = fn(*args, **kwargs)
@@ -307,8 +306,9 @@ if __name__ == '__main__':
     # Plot the rectangle
     plt.figure(figsize=(8, 8))
     plt.plot(*zip(*np.append(rectangle_points, [rectangle_points[0]], axis=0)), marker='o', label='Rectangle Vertices')
-    plt.fill(*zip(*np.append(rectangle_points, [rectangle_points[0]], axis=0)),
-             alpha=0.3)  # Fill the rectangle with light opacity
+    plt.fill(
+        *zip(*np.append(rectangle_points, [rectangle_points[0]], axis=0)), alpha=0.3
+    )  # Fill the rectangle with light opacity
 
     # Plot the original midpoints
     plt.scatter(x_mid, y_mid, color='red', zorder=5, label='Midpoints')

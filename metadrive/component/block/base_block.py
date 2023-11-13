@@ -33,7 +33,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     ID = "B"
 
     def __init__(
-            self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -82,12 +82,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         raise NotImplementedError
 
     def construct_block(
-            self,
-            root_render_np: NodePath,
-            physics_world: PhysicsWorld,
-            extra_config: Dict = None,
-            no_same_node=True,
-            attach_to_world=True
+        self,
+        root_render_np: NodePath,
+        physics_world: PhysicsWorld,
+        extra_config: Dict = None,
+        no_same_node=True,
+        attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -313,7 +313,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 polygon = sidewalk["polygon"]
                 np = make_polygon_model(polygon, PGDrivableAreaProperty.SIDEWALK_THICKNESS)
                 np.reparentTo(self.sidewalk_node_path)
-                np.setPos(0, 0, PGDrivableAreaProperty.SIDEWALK_THICKNESS/2)
+                np.setPos(0, 0, PGDrivableAreaProperty.SIDEWALK_THICKNESS / 2)
                 if self.render:
                     np.setTexture(self.side_texture)
                 # np.setTexture(self.ts_normal, self.side_normal)

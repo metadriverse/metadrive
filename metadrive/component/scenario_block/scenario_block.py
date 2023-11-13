@@ -105,7 +105,9 @@ class ScenarioBlock(BaseBlock):
             dist = norm(start[0] - self.sdc_start_point[0], start[1] - self.sdc_start_point[1])
             if dist > self.LINE_CULL_DIST:
                 continue
-            end = line.get_point(segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH)
+            end = line.get_point(
+                segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH
+            )
             if segment == segment_num - 1:
                 end = line.get_point(line.length - PGDrivableAreaProperty.STRIPE_LENGTH)
             node_path_list = ScenarioLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)

@@ -72,9 +72,8 @@ class AssetLoader:
         :return: file path used to load asset
         """
         path = AssetLoader.asset_path.joinpath(*path_string)
-        return AssetLoader.windows_style2unix_style(
-            path
-        ) if sys.platform.startswith("win") and unix_style else str(path)
+        return AssetLoader.windows_style2unix_style(path
+                                                    ) if sys.platform.startswith("win") and unix_style else str(path)
 
     @classmethod
     def load_model(cls, file_path):

@@ -140,7 +140,9 @@ class NuPlanBlock(BaseBlock):
         segment_num = int(line.length / (2 * PGDrivableAreaProperty.STRIPE_LENGTH))
         for segment in range(segment_num):
             start = line.get_point(segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2)
-            end = line.get_point(segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH)
+            end = line.get_point(
+                segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH
+            )
             if segment == segment_num - 1:
                 end = line.get_point(line.length - PGDrivableAreaProperty.STRIPE_LENGTH)
             node_path_list = NuPlanLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)

@@ -112,7 +112,7 @@ def CreateRoadFrom(
     # check the left lane and right lane
     ignore = (ignore_start, ignore_end)
     factor = (
-                     PGDrivableAreaProperty.SIDEWALK_WIDTH + PGDrivableAreaProperty.SIDEWALK_LINE_DIST + lane_width / 2.0
+        PGDrivableAreaProperty.SIDEWALK_WIDTH + PGDrivableAreaProperty.SIDEWALK_LINE_DIST + lane_width / 2.0
     ) * 2.0 / lane_width
     if not detect_one_side:
         # Because of side walk, the width of side walk should be consider
