@@ -21,6 +21,8 @@ from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
 
 logger = logging.getLogger(__name__)
+
+
 def generate_distinct_rgb_values():
     distinct_rgb_values = []
     step = 256 // 32  # 8 intervals for each RGB component (0-31, 32-63, ..., 224-255)

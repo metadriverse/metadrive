@@ -53,18 +53,20 @@ def test_instance_cam(config, render=False):
             assert o["image"].shape == (
                 config["height"], config["width"], InstanceCamera.num_channels, config["stack_size"]
             )
-            image = o["image"][...,-1]
+            image = o["image"][..., -1]
             image = image.reshape(-1, 3)
             unique_colors = np.unique(image, axis=0)
             #Making sure every color observed correspond to an object
             for unique_color in unique_colors:
-                if (unique_color != np.array((0,0,0))).all(): #Ignore the black background.
+                if (unique_color != np.array((0, 0, 0))).all():  #Ignore the black background.
                     color = unique_color.tolist()
-                    color = (round(color[2],5), round(color[1],5), round(color[0],5)) #In engine, we use 5-diigt float for keys
+                    color = (
+                        round(color[2], 5), round(color[1], 5), round(color[0], 5)
+                    )  #In engine, we use 5-diigt float for keys
                     assert color in env.engine.COLORS_OCCUPIED
                     assert color not in env.engine.COLORS_FREE
                     assert color in env.engine.c_id.keys()
-                    assert env.engine.id_c[env.engine.c_id[color]] == color #Making sure the color-id is a bijection
+                    assert env.engine.id_c[env.engine.c_id[color]] == color  #Making sure the color-id is a bijection
                     assert len(env.engine.c_id.keys()) == len(env.engine.COLORS_OCCUPIED)
                     assert len(env.engine.id_c.keys()) == len(env.engine.COLORS_OCCUPIED)
                     assert len(env.engine.COLORS_FREE) + len(env.engine.COLORS_OCCUPIED) == 4096
@@ -77,7 +79,6 @@ def test_instance_cam(config, render=False):
         print("FPS:", 10 / (time.time() - start))
     finally:
         env.close()
-        
 
 
 if __name__ == '__main__':
