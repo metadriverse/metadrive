@@ -130,6 +130,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         for obj in self._block_objects:
             obj.destroy()
         self._block_objects = None
+        self.sidewalks = {}
+        self.crosswalks = {}
 
     def construct_from_config(self, config: Dict, root_render_np: NodePath, physics_world: PhysicsWorld):
         success = self.construct_block(root_render_np, physics_world, config)
@@ -293,6 +295,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.PART_IDX = 0
         self.ROAD_IDX = 0
         self._respawn_roads.clear()
+        self.crosswalks = {}
+        self.sidewalks = {}
         self._global_network = None
         super(BaseBlock, self).destroy()
 

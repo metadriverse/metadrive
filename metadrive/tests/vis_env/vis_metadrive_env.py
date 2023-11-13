@@ -5,7 +5,7 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 10,
+            "num_scenarios": 1,
             "traffic_density": 0,
             "start_seed": 74,
             # "_disable_detector_mask":True,
@@ -23,6 +23,7 @@ if __name__ == "__main__":
             # "controller": "joystick",
             # "show_coordinates": True,
             # "random_agent_model": False,
+            "debug_static_world":True,
             "manual_control": True,
             "use_render": True,
             "use_mesh_terrain": False,
@@ -32,7 +33,7 @@ if __name__ == "__main__":
             "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "CX",
+            "map": "CCCCCCCCC",
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
