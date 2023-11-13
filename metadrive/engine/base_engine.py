@@ -123,7 +123,7 @@ class BaseEngine(EngineCore, Randomizable):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -264,7 +264,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -595,6 +594,9 @@ class BaseEngine(EngineCore, Randomizable):
             filtered.append(body)
         assert len(filtered) == 0, "Physics Bodies should be cleaned before manager.reset() is called. " \
                                    "Uncleared bodies: {}".format(filtered)
+
+        children = self.pbr_worldNP.getChildren() + self.worldNP.getChildren()
+        assert len(children) == 0, "NodePath are not cleaned thoroughly. Remaining NodePath: {}".format(children)
 
     def update_manager(self, manager_name: str, manager: BaseManager, destroy_previous_manager=True):
         """
