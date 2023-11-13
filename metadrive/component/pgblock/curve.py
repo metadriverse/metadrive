@@ -70,13 +70,13 @@ class Curve(PGBlock):
                 ignore_intersection_checking=self.ignore_intersection_checking,
                 side_lane_line_type=PGLineType.BARRIER
             )
-            no_cross = CreateAdverseRoad(
-                positive_road,
-                self.block_network,
-                self._global_network,
-                ignore_intersection_checking=self.ignore_intersection_checking,
-                side_lane_line_type=PGLineType.BARRIER
-            ) and no_cross
+            # no_cross = CreateAdverseRoad(
+            #     positive_road,
+            #     self.block_network,
+            #     self._global_network,
+            #     ignore_intersection_checking=self.ignore_intersection_checking,
+            #     side_lane_line_type=PGLineType.BARRIER
+            # ) and no_cross
 
 
         # part 2
@@ -110,13 +110,13 @@ class Curve(PGBlock):
                 ignore_intersection_checking=self.ignore_intersection_checking,
                 side_lane_line_type=PGLineType.BARRIER
             ) and no_cross
-            no_cross = CreateAdverseRoad(
-                positive_road,
-                self.block_network,
-                self._global_network,
-                ignore_intersection_checking=self.ignore_intersection_checking,
-                side_lane_line_type=PGLineType.BARRIER
-            ) and no_cross
+            # no_cross = CreateAdverseRoad(
+            #     positive_road,
+            #     self.block_network,
+            #     self._global_network,
+            #     ignore_intersection_checking=self.ignore_intersection_checking,
+            #     side_lane_line_type=PGLineType.BARRIER
+            # ) and no_cross
 
         # common properties
         self.add_sockets(self.create_socket_from_positive_road(positive_road))

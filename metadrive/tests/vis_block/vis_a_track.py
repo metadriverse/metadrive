@@ -73,20 +73,53 @@ if __name__ == "__main__":
 
     block_c4 = Curve(7, block_s3.get_socket(0), global_network, 1)
     block_c4.construct_from_config({
-        Parameter.length: 100,
-        Parameter.radius: 60,
+        Parameter.length: 80,
+        Parameter.radius: 40,
         Parameter.angle: 90,
         Parameter.dir: 1,
     }, test.render, test.world)
 
 
-    # block_c5 = Curve(8, block_c4.get_socket(0), global_network, 1)
-    # block_c5.construct_from_config({
-    #     Parameter.length: 60,
-    #     Parameter.radius: 60,
-    #     Parameter.angle: 90,
-    #     Parameter.dir: 1,
-    # }, test.render, test.world)
+    block_c5 = Curve(8, block_c4.get_socket(0), global_network, 1)
+    block_c5.construct_from_config({
+        Parameter.length: 40,
+        Parameter.radius: 50,
+        Parameter.angle: 180,
+        Parameter.dir: 1,
+    }, test.render, test.world)
+
+
+    block_c6 = Curve(9, block_c5.get_socket(0), global_network, 1)
+    block_c6.construct_from_config({
+        Parameter.length: 40,
+        Parameter.radius: 50,
+        Parameter.angle: 220,
+        Parameter.dir: 0,
+    }, test.render, test.world)
+
+
+    block_c7 = Curve(10, block_c6.get_socket(0), global_network, 1)
+    block_c7.construct_from_config({
+        Parameter.length: 40,
+        Parameter.radius: 20,
+        Parameter.angle: 180,
+        Parameter.dir: 1,
+    }, test.render, test.world)
+
+
+    block_s4 = Straight(11, block_c7.get_socket(0), global_network, 1)
+    block_s4.construct_from_config({
+        Parameter.length: 100,
+    }, test.render, test.world)
+
+
+    block_c8 = Curve(12, block_s4.get_socket(0), global_network, 1)
+    block_c8.construct_from_config({
+        Parameter.length: 100,
+        Parameter.radius: 40,
+        Parameter.angle: 140,
+        Parameter.dir: 0,
+    }, test.render, test.world)
 
 
 

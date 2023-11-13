@@ -98,11 +98,11 @@ class PGBlock(BaseBlock):
         # used to create this block, but for first block it is nonsense
         if block_index != 0:
             self.positive_lanes = self.pre_block_socket.get_positive_lanes(self._global_network)
-            self.negative_lanes = self.pre_block_socket.get_negative_lanes(self._global_network)
+            # self.negative_lanes = self.pre_block_socket.get_negative_lanes(self._global_network)
             self.positive_lane_num = len(self.positive_lanes)
-            self.negative_lane_num = len(self.negative_lanes)
+            # self.negative_lane_num = len(self.negative_lanes)
             self.positive_basic_lane = self.positive_lanes[-1]  # most right or outside lane is the basic lane
-            self.negative_basic_lane = self.negative_lanes[-1]  # most right or outside lane is the basic lane
+            # self.negative_basic_lane = self.negative_lanes[-1]  # most right or outside lane is the basic lane
             self.lane_width = self.positive_basic_lane.width_at(0)
 
     def _sample_topology(self) -> bool:

@@ -63,13 +63,13 @@ class Straight(PGBlock):
                 side_lane_line_type=PGLineType.BARRIER
             )
             # create negative road
-            no_cross = CreateAdverseRoad(
-                socket,
-                self.block_network,
-                self._global_network,
-                ignore_intersection_checking=self.ignore_intersection_checking,
-                side_lane_line_type=PGLineType.BARRIER
-            ) and no_cross
+            # no_cross = CreateAdverseRoad(
+            #     socket,
+            #     self.block_network,
+            #     self._global_network,
+            #     ignore_intersection_checking=self.ignore_intersection_checking,
+            #     side_lane_line_type=PGLineType.BARRIER
+            # ) and no_cross
 
         self.add_sockets(PGBlockSocket(socket, _socket))
         return no_cross
