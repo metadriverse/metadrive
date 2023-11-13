@@ -42,7 +42,6 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.width = width if width else self.VIS_LANE_WIDTH
         if self._polygon is None and auto_generate_polygon:
             self._polygon = self.auto_generate_polygon()
-        self.shapely_polygon = geometry.Polygon(geometry.LineString(self._polygon))
         self.need_lane_localization = need_lane_localization
         self.set_speed_limit(speed_limit)
         self.forbidden = forbidden
@@ -154,40 +153,6 @@ class PointLane(AbstractLane, InterpolatingLine):
         InterpolatingLine.destroy(self)
         super(PointLane, self).destroy()
 
-    def construct_lane_in_block(self, block, lane_index):
-        """
-        Modified from base class, the width is set to 6.5
-        """
-        if lane_index is not None:
-            self.index = lane_index
-        assert self._polygon is not None, "Polygon is required for building lane"
-        # build visualization
-        if block.naive_draw_map:
-            segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
-            if segment_num == 0:
-                middle = self.position(self.length / 2, 0)
-                end = self.position(self.length, 0)
-                theta = self.heading_theta_at(self.length / 2)
-                self._construct_lane_only_vis_segment(block, middle, self.VIS_LANE_WIDTH, self.length, theta)
-
-            for i in range(segment_num):
-                middle = self.position(self.length * (i + .5) / segment_num, 0)
-                end = self.position(self.length * (i + 1) / segment_num, 0)
-                direction_v = end - middle
-                theta = math.atan2(direction_v[1], direction_v[0])
-                length = self.length
-                self._construct_lane_only_vis_segment(
-                    block, middle, self.VIS_LANE_WIDTH, length * 1.3 / segment_num, theta
-                )
-
-        # build physics contact
-        if self.need_lane_localization:
-            self._construct_lane_only_physics_polygon(block, self._polygon)
-
     @property
     def polygon(self):
         return self._polygon
-
-    def point_on_lane(self, point):
-        s_point = geometry.Point(point[0], point[1])
-        return self.shapely_polygon.contains(s_point)

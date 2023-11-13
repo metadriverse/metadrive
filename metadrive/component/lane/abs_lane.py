@@ -7,13 +7,13 @@ from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletGhostNode
 from panda3d.core import LPoint3f
-from panda3d.core import Vec3, LQuaternionf, CardMaker, NodePath
+from panda3d.core import Vec3, LQuaternionf, NodePath
 from panda3d.core import Vec4
+from shapely import geometry
 
 from metadrive.constants import DrivableAreaProperty
 from metadrive.constants import MetaDriveType
 from metadrive.constants import PGLineType, PGLineColor
-from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils import norm
@@ -39,7 +39,9 @@ class AbstractLane(MetaDriveType):
         super(AbstractLane, self).__init__(type)
         self.speed_limit = 1000  # should be set manually
         self.index = None
-
+        self._polygon = None
+        self._shapely_polygon = None
+        self.need_lane_localization = True
         self._node_path_list = []
 
     def set_speed_limit(self, speed_limit):
@@ -90,23 +92,6 @@ class AbstractLane(MetaDriveType):
         """
         raise NotImplementedError()
 
-    def on_lane(self, position: np.ndarray, longitudinal: float = None, lateral: float = None, margin: float = 0) \
-            -> bool:
-        """
-        Whether a given physx_world position is on the lane.
-
-        :param position: a physx_world position [m]
-        :param longitudinal: (optional) the corresponding longitudinal lane coordinate, if known [m]
-        :param lateral: (optional) the corresponding lateral lane coordinate, if known [m]
-        :param margin: (optional) a supplementary margin around the lane width
-        :return: is the position on the lane?
-        """
-        if not longitudinal or not lateral:
-            longitudinal, lateral = self.local_coordinates(position)
-        is_on = math.fabs(lateral) <= self.width_at(longitudinal) / 2 + margin and \
-                -self.VEHICLE_LENGTH <= longitudinal < self.length + self.VEHICLE_LENGTH
-        return is_on
-
     def distance(self, position):
         """Compute the L1 distance [m] from a position to the lane."""
         s, r = self.local_coordinates(position)
@@ -123,21 +108,15 @@ class AbstractLane(MetaDriveType):
         return False
 
     def construct_lane_in_block(self, block, lane_index):
-        segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
-        if segment_num == 0:
-            middle = self.position(self.length / 2, 0)
-            end = self.position(self.length, 0)
-            theta = self.heading_theta_at(self.length / 2)
-            width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
-            self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
-        for i in range(segment_num):
-            middle = self.position(self.length * (i + .5) / segment_num, 0)
-            end = self.position(self.length * (i + 1) / segment_num, 0)
-            direction_v = end - middle
-            theta = math.atan2(direction_v[1], direction_v[0])
-            width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
-            length = self.length
-            self.construct_lane_segment(block, middle, width, length * 1.3 / segment_num, theta, lane_index)
+        """
+        Modified from base class, the width is set to 6.5
+        """
+        if lane_index is not None:
+            self.index = lane_index
+        assert self.polygon is not None, "Polygon is required for building lane"
+        # build physics contact
+        if self.need_lane_localization:
+            self._construct_lane_only_physics_polygon(block, self.polygon)
 
     def construct_lane_line_in_block(self, block, construct_left_right=(True, True)):
         """
@@ -203,60 +182,6 @@ class AbstractLane(MetaDriveType):
         """
         pass
 
-    def construct_lane_segment(self, block, position, width, length, theta, lane_index):
-        """
-        Construct a PART of this lane in block. The reason for using this is that we can use box shape to apporximate
-        almost all shapes
-
-        :param block: it should be constructed in block
-        :param position: Middle point
-        :param width: Lane width
-        :param length: Segment length
-        :param theta: Rotate theta
-        :param lane_index: set index for this lane, sometimes lane index is decided after building graph
-        """
-        theta = panda_heading(theta)
-        lane = self
-        length += 0.1
-        if lane_index is not None:
-            lane.index = lane_index
-
-        # It might be Lane surface intersection
-        n = BaseRigidBodyNode(lane.index, self.metadrive_type)
-        segment_np = NodePath(n)
-
-        self._node_path_list.append(segment_np)
-        self._node_path_list.append(n)
-
-        segment_node = segment_np.node()
-        segment_node.set_active(False)
-        segment_node.setKinematic(False)
-        segment_node.setStatic(True)
-        shape = BulletBoxShape(Vec3(length / 2, 0.1, width / 2))
-        segment_node.addShape(shape)
-        block.static_nodes.append(segment_node)
-        segment_np.setPos(panda_vector(position, -0.1))
-
-        segment_np.setH(theta / np.pi * 180)
-        segment_np.setP(-90)
-        segment_np.reparentTo(block.lane_node_path)
-
-        if block.naive_draw_map:
-            cm = CardMaker('card')
-            cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
-            cm.setHasNormals(True)
-            cm.setUvRange((-length / 5, -width / 5), (length / 5, width / 5))
-            card = block.lane_vis_node_path.attachNewNode(cm.generate())
-            self._node_path_list.append(card)
-
-            card.setPos(panda_vector(position, np.random.rand() * 0.02 - 0.015))
-
-            card.setH(theta / np.pi * 180)
-            card.setP(-90)
-            # card.setTransparency(TransparencyAttrib.MMultisample)
-            # card.setTexture(block.ts_normal, block.road_normal)
-            card.setTexture(block.ts_color, block.road_texture)
-
     @staticmethod
     def construct_lane_line_segment(block, start_point, end_point, line_color: Vec4, line_type: PGLineType):
         node_path_list = []
@@ -281,7 +206,7 @@ class AbstractLane(MetaDriveType):
 
         # add bullet body for it
         body_node = BulletGhostNode(node_name)
-        body_node.set_active(False)
+        body_node.setActive(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
         body_np = parent_np.attachNewNode(body_node)
@@ -302,19 +227,6 @@ class AbstractLane(MetaDriveType):
         # theta = -numpy.arctan2(direction_v[1], direction_v[0])
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-
-        if block.naive_draw_map:
-            # For visualization
-            lane_line = block.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            lane_line.setTwoSided(False)
-            lane_line.setScale(length, DrivableAreaProperty.LANE_LINE_WIDTH, DrivableAreaProperty.LANE_LINE_THICKNESS)
-            height = 0
-            lane_line.setTexture(block.ts_color, block.lane_line_texture)
-            height += 0.01 if line_color == PGLineColor.YELLOW else 0
-            lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-            lane_line.setPos(panda_vector(middle, height))
-            lane_line.reparentTo(parent_np)
-            lane_line.set_color(line_color)
 
         return node_path_list
 
@@ -383,28 +295,6 @@ class AbstractLane(MetaDriveType):
         block.static_nodes.append(segment_node)
         segment_np.reparentTo(block.lane_node_path)
 
-    def _construct_lane_only_vis_segment(self, block, position, width, length, theta):
-        """
-        Only create visual part for this lane, usually used with _construct_lane_only_physics_polygon()
-        """
-        # The lane surface is created with terrain now
-        if block.naive_draw_map:
-            length += 0.1
-            theta = panda_heading(theta)
-            cm = CardMaker('card')
-            cm.setFrame(-length / 2, length / 2, -width / 2, width / 2)
-            cm.setHasNormals(True)
-            cm.setUvRange((0, 0), (length / 20, width / 10))
-            card = block.lane_vis_node_path.attachNewNode(cm.generate())
-            self._node_path_list.append(card)
-
-            card.setPos(panda_vector(position, np.random.rand() * 0.02 - 0.015))
-
-            card.setH(theta / np.pi * 180)
-            card.setP(-90)
-            # card.setTransparency(TransparencyAttrib.MMultisample)
-            card.setTexture(block.ts_color, block.road_texture)
-
     def destroy(self):
         try:
             from metadrive.base_class.base_object import clear_node_list
@@ -412,6 +302,8 @@ class AbstractLane(MetaDriveType):
             self._node_path_list.clear()
         else:
             clear_node_list(self._node_path_list)
+        self._polygon = None
+        self._shapely_polygon = None
 
     def get_polyline(self, interval=2, lateral=0):
         """
@@ -431,8 +323,22 @@ class AbstractLane(MetaDriveType):
         """
         Return True if the point is in the lane polygon
         """
-        raise NotImplementedError
+        s_point = geometry.Point(point[0], point[1])
+        return self.shapely_polygon.contains(s_point)
 
     @property
     def polygon(self):
+        """
+        Return the polygon of this lane
+        Returns: a list of 2D points representing Polygon
+
+        """
         raise NotImplementedError
+
+    @property
+    def shapely_polygon(self):
+        """Return the polygon in shapely.geometry.Polygon"""
+        if self._shapely_polygon is None:
+            assert self.polygon is not None
+            self._shapely_polygon = geometry.Polygon(geometry.LineString(self.polygon))
+        return self._shapely_polygon

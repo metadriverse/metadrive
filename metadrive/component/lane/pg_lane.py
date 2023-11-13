@@ -12,16 +12,6 @@ class PGLane(AbstractLane):
 
     def __init__(self, type=MetaDriveType.LANE_SURFACE_STREET):
         super(PGLane, self).__init__(type)
-        # one should implement how to get polygon in property def polygon(self)
-        self._polygon = None
-        self._shapely_polygon = None
-
-    @property
-    def shapely_polygon(self):
-        if self._shapely_polygon is None:
-            assert self._polygon is not None
-            self._shapely_polygon = geometry.Polygon(geometry.LineString(self._polygon))
-        return self._shapely_polygon
 
     def construct_sidewalk(self, block, lateral):
         if block.use_render_pipeline:
@@ -53,7 +43,3 @@ class PGLane(AbstractLane):
     @property
     def polygon(self):
         raise NotImplementedError("Overwrite this function to allow getting polygon for this lane")
-
-    def point_on_lane(self, point):
-        s_point = geometry.Point(point[0], point[1])
-        return self.shapely_polygon.contains(s_point)

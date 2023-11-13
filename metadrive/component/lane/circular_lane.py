@@ -78,28 +78,6 @@ class CircularLane(PGLane):
         lateral = -self.direction * (self.radius - r)
         return longitudinal, lateral
 
-    def construct_lane_in_block(self, block, lane_index):
-        if self.index is None:
-            self.index = lane_index
-        segment_num = int(self.length / DrivableAreaProperty.LANE_SEGMENT_LENGTH)
-        if segment_num == 0:
-            middle = self.position(self.length / 2, 0)
-            end = self.position(self.length, 0)
-            theta = self.heading_theta_at(self.length / 2)
-            width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
-            self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
-            return
-
-        if block.naive_draw_map:
-            for i in range(segment_num):
-                middle = self.position(self.length * (i + .5) / segment_num, 0)
-                theta = self.heading_theta_at(self.length * (i + .5) / segment_num)
-                width = self.width_at(0) + DrivableAreaProperty.SIDEWALK_LINE_DIST * 2
-                length = self.length
-                self._construct_lane_only_vis_segment(block, middle, width, length * 1.3 / segment_num, theta)
-
-        self._construct_lane_only_physics_polygon(block, self.polygon)
-
     @property
     def polygon(self):
         if self._polygon is None:
