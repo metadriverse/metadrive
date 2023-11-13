@@ -589,7 +589,7 @@ class BaseEngine(EngineCore, Randomizable):
 
         filtered = []
         for body in bodies:
-            if body.getName() == "detector_mask":
+            if body.getName() in ["detector_mask", "debug"]:
                 continue
             filtered.append(body)
         assert len(filtered) == 0, "Physics Bodies should be cleaned before manager.reset() is called. " \
