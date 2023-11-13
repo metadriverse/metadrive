@@ -6,7 +6,7 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 10,
-            "traffic_density": 0.,
+            "traffic_density": 1,
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o, _ = env.reset()
+    o, _ = env.reset(seed=74)
     env.engine.accept("~", env.engine.terrain.reload_terrain_shader)
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)

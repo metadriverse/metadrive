@@ -123,7 +123,7 @@ class BaseEngine(EngineCore, Randomizable):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -264,7 +264,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -284,7 +283,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if lm - cm != 0:
                     print("{}: Before Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
                 cm = lm
-
+        self.terrain.before_reset()
         self._object_clean_check()
 
         for manager_name, manager in self.managers.items():
@@ -565,18 +564,36 @@ class BaseEngine(EngineCore, Randomizable):
         return self.global_random_seed
 
     def _object_clean_check(self):
-        if self.global_config["debug"]:
-            from metadrive.component.vehicle.base_vehicle import BaseVehicle
-            from metadrive.component.static_object.traffic_object import TrafficObject
-            for manager in self._managers.values():
-                assert len(manager.spawned_objects) == 0
+        # objects check
+        from metadrive.component.vehicle.base_vehicle import BaseVehicle
+        from metadrive.component.static_object.traffic_object import TrafficObject
+        for manager in self._managers.values():
+            assert len(manager.spawned_objects) == 0
 
-            objs_need_to_release = self.get_objects(
-                filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, TrafficObject)
-            )
-            assert len(
-                objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
-                                            "in each manager.before_step()"
+        objs_need_to_release = self.get_objects(
+            filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, TrafficObject)
+        )
+        assert len(
+            objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
+                                        "in each manager.before_step()"
+
+        # rigid body check
+        bodies = []
+        for world in [self.physics_world.dynamic_world, self.physics_world.static_world]:
+            bodies += world.getRigidBodies()
+            bodies += world.getSoftBodies()
+            bodies += world.getGhosts()
+            bodies += world.getVehicles()
+            bodies += world.getCharacters()
+            bodies += world.getManifolds()
+
+        filtered = []
+        for body in bodies:
+            if body.getName() == "detector_mask":
+                continue
+            filtered.append(body)
+        assert len(filtered) == 0, "Physics Bodies should be cleaned before manager.reset() is called. " \
+                                   "Uncleared bodies: {}".format(filtered)
 
     def update_manager(self, manager_name: str, manager: BaseManager, destroy_previous_manager=True):
         """

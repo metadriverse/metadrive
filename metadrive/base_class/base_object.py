@@ -1,4 +1,6 @@
 import copy
+from abc import ABC
+
 from metadrive.type import MetaDriveType
 
 import logging
@@ -7,7 +9,7 @@ from typing import Dict
 
 import numpy as np
 import seaborn as sns
-from panda3d.bullet import BulletWorld, BulletBodyNode
+from panda3d.bullet import BulletWorld, BulletBodyNode, BulletVehicle
 from panda3d.core import LVector3, NodePath, PandaNode
 from metadrive.constants import Semantics
 from metadrive.base_class.base_runnable import BaseRunnable
@@ -95,8 +97,9 @@ class PhysicsNodeList(list):
         if not self.attached:
             return
         for node in self:
-            if node in bullet_world.getRigidBodies() + bullet_world.getGhosts():
-                bullet_world.remove(node)
+            bullet_world.remove(node)
+            if isinstance(node, BulletVehicle):
+                break
         self.attached = False
 
     def destroy_node_list(self, bullet_world: BulletWorld):
@@ -105,7 +108,7 @@ class PhysicsNodeList(list):
         self.clear()
 
 
-class BaseObject(BaseRunnable, MetaDriveType):
+class BaseObject(BaseRunnable, MetaDriveType, ABC):
     """
     BaseObject is something interacting with game engine. If something is expected to have a body in the world or have
     appearance in the world, it must be a subclass of BaseObject.
