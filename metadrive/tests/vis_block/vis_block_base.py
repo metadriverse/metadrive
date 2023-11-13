@@ -18,7 +18,7 @@ from metadrive.engine.core.physics_world import PhysicsWorld
 
 class TestBlock(ShowBase.ShowBase):
     def __init__(self, debug=False, window_type="onscreen"):
-        self.debug = debug
+        self.debug = True
         super(TestBlock, self).__init__(windowType=window_type)
         self.mode = "onscreen"
         self.setBackgroundColor(BKG_COLOR)
@@ -59,8 +59,6 @@ class TestBlock(ShowBase.ShowBase):
             self.debugNP = debugNP
         if self.debugNP.isHidden():
             self.debugNP.show()
-        else:
-            self.debugNP.hide()
 
     def vis_big(self, big):
         # self.cam.setPos(200, 700, 1000)
@@ -77,7 +75,7 @@ class TestBlock(ShowBase.ShowBase):
 
     def setup(self):
         self.worldNP = self.render.attachNewNode('World')
-        self.world = PhysicsWorld()
+        self.world = PhysicsWorld(debug=self.debug)
         self.physics_world = self.world
 
         # Ground (static)
@@ -87,6 +85,7 @@ class TestBlock(ShowBase.ShowBase):
         self.groundNP.setPos(0, 0, 0)
         self.groundNP.setCollideMask(CollisionGroup.AllOn)
         self.world.dynamic_world.attachRigidBody(self.groundNP.node())
+        self.toggleDebug()
 
     def update(self, task):
         dt = 1 / 60
