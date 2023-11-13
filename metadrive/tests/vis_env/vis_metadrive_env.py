@@ -23,7 +23,7 @@ if __name__ == "__main__":
             # "controller": "joystick",
             # "show_coordinates": True,
             # "random_agent_model": False,
-            "debug_static_world":True,
+            "debug_static_world": True,
             "manual_control": True,
             "use_render": True,
             "use_mesh_terrain": False,
