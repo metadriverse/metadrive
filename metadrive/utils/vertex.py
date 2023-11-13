@@ -93,7 +93,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
     Returns: panda3d.NodePath
 
     """
-    no_side = abs(height) > 0.01
+    need_side = abs(height) > 0.01
     if force_anticlockwise:
         points = sort_points_anticlockwise(points)
     elif not is_anticlockwise(points) and auto_anticlockwise:
@@ -126,11 +126,11 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
             edge_1 = [edge_1[0] / l_1, edge_1[1] / l_1]
             edge_2 = [edge_2[0] / l2, edge_2[1] / l2]
 
-            normal = np.array([[edge_1[1], -edge_1[0], 0], [edge_2[1], -edge_2[0], 0]])
+            normal = np.array([[-edge_1[1], edge_1[0], 0], [-edge_2[1], edge_2[0], 0]])
             normal = np.mean(normal, axis=0)
             normal = normal / np.linalg.norm(normal)
 
-        if no_side:
+        if need_side:
             back_side_values.extend((x, y, -height, *normal, x * texture_scale, y * texture_scale))
         triangulator.add_vertex(x, y)
         triangulator.add_polygon_vertex(i)
@@ -146,7 +146,7 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
         prim.add_vertices(index0, index1, index2)
         # prim.closePrimitive()
 
-    if no_side:
+    if need_side:
         # Add side
         for i in range(p_num):
             # First triangle
@@ -159,11 +159,11 @@ def make_polygon_model(points, height, auto_anticlockwise=True, force_anticlockw
     # since the size of a memoryview cannot change, the vertex data table
     # already needs to have the right amount of rows before creating
     # memoryviews from its array(s)
-    vertex_data.unclean_set_num_rows(len(coords) * 2 if no_side else len(coords))
+    vertex_data.unclean_set_num_rows(len(coords) * 2 if need_side else len(coords))
     # retrieve the data array for modification
     data_array = vertex_data.modify_array(0)
     memview = memoryview(data_array).cast("B").cast("f")
-    if no_side:
+    if need_side:
         memview[:] = values + back_side_values
     else:
         memview[:] = values
