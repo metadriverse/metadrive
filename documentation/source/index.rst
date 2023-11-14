@@ -62,7 +62,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    :maxdepth: 2
    :caption: Debugging
 
-   known_issues.rst
+   points_and_lines.ipynb
 
 .. toctree::
    :hidden:
