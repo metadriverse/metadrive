@@ -163,49 +163,63 @@ class MetaDriveEnv(BaseEnv):
         }
         if self._is_arrive_destination(vehicle):
             done = True
-            self.logger.info("Episode ended! Scenario Index: {} Reason: arrive_dest.".format(self.current_seed),
-                             extra={"log_once": True})
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: arrive_dest.".format(self.current_seed),
+                extra={"log_once": True}
+            )
             done_info[TerminationState.SUCCESS] = True
         if self._is_out_of_road(vehicle):
             done = True
-            self.logger.info("Episode ended! Scenario Index: {} Reason: out_of_road.".format(self.current_seed),
-                             extra={"log_once": True})
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: out_of_road.".format(self.current_seed),
+                extra={"log_once": True}
+            )
             done_info[TerminationState.OUT_OF_ROAD] = True
         if vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
-            self.logger.info("Episode ended! Scenario Index: {} Reason: crash vehicle ".format(self.current_seed),
-                             extra={"log_once": True})
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: crash vehicle ".format(self.current_seed),
+                extra={"log_once": True}
+            )
             done_info[TerminationState.CRASH_VEHICLE] = True
         if vehicle.crash_object and self.config["crash_object_done"]:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
-            self.logger.info("Episode ended! Scenario Index: {} Reason: crash object ".format(self.current_seed),
-                             extra={"log_once": True})
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: crash object ".format(self.current_seed),
+                extra={"log_once": True}
+            )
         if vehicle.crash_building:
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
-            self.logger.info("Episode ended! Scenario Index: {} Reason: crash building ".format(self.current_seed),
-                             extra={"log_once": True})
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: crash building ".format(self.current_seed),
+                extra={"log_once": True}
+            )
         if self.config["max_step_per_agent"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["max_step_per_agent"]:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            self.logger.info("Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
-                             extra={"log_once": True})
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
+                extra={"log_once": True}
+            )
 
         if self.config["horizon"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
             # single agent horizon has the same meaning as max_step_per_agent
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            self.logger.info("Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
-                             extra={"log_once": True})
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
+                extra={"log_once": True}
+            )
 
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-                or done_info[TerminationState.CRASH_BUILDING]
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -224,8 +238,8 @@ class MetaDriveEnv(BaseEnv):
     def _is_arrive_destination(self, vehicle):
         long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
         flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
-                vehicle.navigation.get_current_lane_width() / 2 >= lat >=
-                (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
+            vehicle.navigation.get_current_lane_width() / 2 >= lat >=
+            (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
         )
         return flag
 
@@ -363,7 +377,6 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
-
 
     env = MetaDriveEnv()
     try:
