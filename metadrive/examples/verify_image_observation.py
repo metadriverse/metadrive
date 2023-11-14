@@ -41,6 +41,12 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
             show_fps=False,
         )
     )
+    print(
+        "Use {} with resolution {}".format(
+            env.config["vehicle_config"]["image_source"],
+            (env.observation_space["image"].shape[0], env.observation_space["image"].shape[1])
+        )
+    )
     o, i = env.reset()
 
     # for debug
@@ -49,15 +55,13 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
         cv2.imwrite("reset_frame.png", ret * 255)
 
     action = [0.0, 0.1]
-    start = time.time()
-    print(
-        "Use {} with resolution {}".format(
-            env.config["vehicle_config"]["image_source"],
-            (env.observation_space["image"].shape[0], env.observation_space["image"].shape[1])
-        )
-    )
+
+    fps_cal_start_frame = 5
     for i in range(20000):
         o, r, d, _, _ = env.step(action)
+        if i == fps_cal_start_frame:
+            # the first several frames may be slow. Ignore them when calculating FPS
+            start = time.time()
         if image_on_cuda:
             torch_tensor = from_dlpack(o["image"].toDlpack())
         else:
@@ -74,7 +78,7 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
             cv2.imshow("window", ret)
             cv2.waitKey(1)
         if d:
-            print("FPS: {}".format(i / (time.time() - start)))
+            print("FPS: {}".format((i - fps_cal_start_frame) / (time.time() - start)))
             break
 
 
