@@ -63,22 +63,6 @@ install_requires = [
     "filelock"
 ]
 
-nuplan_requirement = [
-    "bokeh==2.4",
-    "hydra-core",
-    "chardet",
-    "pyarrow",
-    "aiofiles",
-    "retry",
-    "boto3",
-    "aioboto3"
-]
-
-# Or try:
-#   pip install git+https://github.com/waymo-research/waymo-open-dataset.git
-waymo_requirement = [
-    "waymo-open-dataset-tf-2.11.0==1.5.0"
-]
 
 cuda_requirement = [
     "cuda-python==12.0.0",
@@ -108,11 +92,8 @@ setup(
     install_requires=install_requires,
     extras_require={
         "cuda": cuda_requirement,
-        "nuplan": nuplan_requirement,
-        "waymo": waymo_requirement,
         "gym": gym_requirement,
         "ros": ros_requirement,
-        "all": nuplan_requirement + cuda_requirement
     },
     include_package_data=True,
     license="Apache 2.0",
