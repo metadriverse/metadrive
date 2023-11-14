@@ -3,7 +3,7 @@ This folder contains files for the documentation: [https://metadrive-simulator.r
 To build documents locally, please run the following codes:
 
 ```
-pip install sphinx sphinx_rtd_theme
+pip install sphinx sphinx_rtd_theme nbsphinx
 cd metadrive/documentation
 make html
 ```
