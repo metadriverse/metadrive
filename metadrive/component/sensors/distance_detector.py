@@ -154,8 +154,7 @@ class DistanceDetector(BaseSensor):
             if self._current_frame != self.engine.episode_step:
                 self.cloud_points_vis.reset()
             self._current_frame = self.engine.episode_step
-            self.cloud_points_vis.drawLines([[p[1] for p in colors]], [[LVecBase4(*p[-1], 1) for p in colors[1:]]])
-            self.cloud_points_vis.create()
+            self.cloud_points_vis.draw_lines([[p[1] for p in colors]], [[LVecBase4(*p[-1], 1) for p in colors[1:]]])
 
         return detect_result(cloud_points=cloud_points.tolist(), detected_objects=detected_objects)
 

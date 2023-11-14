@@ -461,11 +461,11 @@ class EngineCore(ShowBase.ShowBase):
         # np.reparentTo(self.render)
         return np
 
-    def draw_lines_3d(self, point_lists, parent_node=None, color=LVecBase4(1), thickness=1.0):
+    def make_line_drawer(self, parent_node=None, thickness=1.0):
         assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
-        drawer = ColorLineNodePath(parent_node, thickness=thickness, colorVec=color)
-        drawer.drawLines(point_lists)
-        drawer.create()
+        if parent_node is None:
+            parent_node = self.render
+        drawer = ColorLineNodePath(parent_node, thickness=thickness)
         return drawer
 
     def show_coordinates(self):

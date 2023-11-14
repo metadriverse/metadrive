@@ -611,7 +611,7 @@ class BaseEngine(EngineCore, Randomizable):
         elif start_scenario_index is not None:
             return start_scenario_index
         else:
-            logger.info("Can not find `start_seed` or `start_scenario_index`. Use 0 as `start_seed`")
+            logger.warning("Can not find `start_seed` or `start_scenario_index`. Use 0 as `start_seed`")
             return 0
 
     @property
