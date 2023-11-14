@@ -310,7 +310,7 @@ class LaneGraphics:
         if MetaDriveType.is_yellow_line(type):
             color = (255, 175, 35)
         elif MetaDriveType.is_road_boundary_line(type):
-            color = (255, 175, 35)
+            color = (100, 100, 100)
         else:
             color = (175, 175, 175)
         if MetaDriveType.is_road_line(type) or MetaDriveType.is_road_boundary_line(type):

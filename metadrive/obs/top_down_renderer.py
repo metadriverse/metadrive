@@ -185,7 +185,7 @@ def draw_top_down_trajectory(
 class TopDownRenderer:
     def __init__(
         self,
-        film_size=(10000, 10000),
+        film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
         screen_size=(1000, 1000),
         num_stack=15,
         history_smooth=0,
