@@ -57,6 +57,20 @@ Please feel free to contact us if you have any suggestions or ideas!
    development.rst
    policy.rst
 
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Debugging
+
+   known_issues.rst
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Ecosystem
+
+   known_issues.rst
+
 
 .. toctree::
    :hidden:

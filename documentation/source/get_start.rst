@@ -12,7 +12,8 @@ We provide a script to let you try out MetaDrive by keyboard immediately after i
     # Make sure current folder does not have a sub-folder named metadrive
     python -m metadrive.examples.drive_in_single_agent_env
 
-In the same script, you can even experience an "auto-drive" journey carried out by our pre-trained RL agent. Press T in the main window will kick-off this. You can also press H to visit the helper information on other shortcuts.
+In the same script, you can even experience an "auto-drive" journey carried out by our pre-trained RL agent. Press `T` in the main window will kick-off this.
+You can also press `H` to visit the helper information on other shortcuts.
 
 
 To enjoy the process of generating map through our Procedural Generation (PG) algorithm, please run this script::
@@ -30,7 +31,7 @@ Besides, you can verify the efficiency of MetaDrive via running::
     python -m metadrive.examples.profile_metadrive
 
 
-As we will discuss in :ref:`rl_environments`, MetaDrive provides three sets of RL environments: the generalization environments, the Safe RL environments and the Multi-agent RL environments.
+As we will discuss in :ref:`rl_environments`, MetaDrive provides three sets of RL environments: the generalization environments, the real-world environments, the Safe RL environments and the Multi-agent RL environments.
 We provide the examples for those suites as follow:
 
 .. code-block::
@@ -39,6 +40,9 @@ We provide the examples for those suites as follow:
 
     # ===== Generalization Environments =====
     python -m metadrive.examples.drive_in_single_agent_env
+
+    # ===== Real-world Environments =====
+    python -m metadrive.examples.drive_in_waymo_env
 
     # ===== Safe RL Environments =====
     python -m metadrive.examples.drive_in_safe_metadrive_env
@@ -54,22 +58,40 @@ Using MetaDrive in Your Code
 
 The usage of MetaDrive is as same as other **gym** environments.
 Almost all decision making algorithms are compatible with MetaDrive, as long as they are compatible with OpenAI gym.
-The following scripts is a minimal example for instantiating a MetaDrive environment instance
+The following scripts is a minimal example for instantiating a MetaDrive environment instance.
 
 .. code-block:: python
 
-    import metadrive  # Import this package to register the environment!
+    from metadrive.envs.metadrive_env import MetaDriveEnv
     import gymnasium as gym
 
-    env = gym.make("MetaDrive-validation-v0", config={"use_render": True})
-    env.reset()
+    env = MetaDriveEnv(config={"use_render": True})
+    obs, info = env.reset()
     for i in range(1000):
         obs, reward, terminated, truncated, info = env.step(env.action_space.sample())
         if terminated or truncated:
             env.reset()
     env.close()
 
+If your training framework is under the support of openai.gym instead of gymnasium, you can wrap the environment to make
+it compatible with the training framework.
 
-.. Note:: Please note that each process should only have one single MetaDrive instance due to the limit of the underlying simulation engine. As a workaround, we provide an asynchronous version of MetaDrive through `Ray framework <https://github.com/ray-project/ray>`_, please find the environment in `remove_env.py <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/remote_env.py>`_.
+.. code-block:: python
+
+    from metadrive.envs.metadrive_env import MetaDriveEnv
+    import gymnasium as gym
+    from metadrive.envs.gym_wrapper import createGymWrapper # import the wrapper
+
+    env = createGymWrapper(MetaDriveEnv)(config={"use_render": True}) # wrap the environment
+    obs = env.reset()
+    for i in range(1000):
+        obs, reward, done, info = env.step(env.action_space.sample()) # the return value contains no truncate
+        if done:
+            env.reset()
+    env.close()
+
+
+.. Note:: Please note that each process should only have one single MetaDrive instance due to the limit of the underlying simulation engine.
+    Thus the parallelization of training environment should be in process-level instead of thread-level.
 
 You can also try out our example of using RLLib to train RL policies in :ref:`Training with RLLib`.

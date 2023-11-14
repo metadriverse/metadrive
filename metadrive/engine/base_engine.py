@@ -571,7 +571,7 @@ class BaseEngine(EngineCore, Randomizable):
             self._top_down_renderer = None
 
     def __del__(self):
-        logging.debug("{} is destroyed".format(self.__class__.__name__))
+        logger.debug("{} is destroyed".format(self.__class__.__name__))
 
     def _stop_replay(self):
         raise DeprecationWarning
