@@ -1,4 +1,4 @@
-import logging
+from metadrive.engine.logger import get_logger, reset_logger
 
 from metadrive.version import VERSION, asset_version
 import os
@@ -19,7 +19,7 @@ from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 class BaseEngine(EngineCore, Randomizable):
@@ -77,7 +77,7 @@ class BaseEngine(EngineCore, Randomizable):
         # curriculum reset
         self._max_level = self.global_config.get("curriculum_level", 1)
         self._current_level = 0
-        self._num_scenarios_per_level = int(self.global_config.get("num_scenarios", 0) / self._max_level)
+        self._num_scenarios_per_level = int(self.global_config.get("num_scenarios", 1) / self._max_level)
 
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         policy = policy_class(*args, **kwargs)
@@ -123,7 +123,7 @@ class BaseEngine(EngineCore, Randomizable):
         return True if object_id in self._object_tasks else False
 
     def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -250,6 +250,9 @@ class BaseEngine(EngineCore, Randomizable):
         """
         Clear and generate the whole scene
         """
+        # reset logger
+        reset_logger()
+
         # initialize
         self._episode_start_time = time.time()
         self.episode_step = 0
@@ -264,7 +267,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -497,12 +499,15 @@ class BaseEngine(EngineCore, Randomizable):
     def gets_start_index(self):
         start_seed = self.global_config.get("start_seed", None)
         start_scenario_index = self.global_config.get("start_scenario_index", None)
-        if start_seed is None:
-            assert start_scenario_index is not None
+        assert start_seed is None or start_scenario_index is None, \
+            "It is not allowed to define `start_seed` and `start_scenario_index`"
+        if start_seed is not None:
+            return start_seed
+        elif start_scenario_index is not None:
             return start_scenario_index
         else:
-            assert start_seed is not None
-            return start_seed
+            logger.info("Can not find `start_seed` or `start_scenario_index`. Use 0 as `start_seed`")
+            return 0
 
     @property
     def max_level(self):
@@ -530,7 +535,7 @@ class BaseEngine(EngineCore, Randomizable):
             if hasattr(self, "map_manager"):
                 return self.map_manager.current_map
             else:
-                raise ValueError("No mapmanager in {}".format(self.managers))
+                return None
 
     @property
     def current_track_vehicle(self):

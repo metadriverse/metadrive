@@ -1,6 +1,49 @@
 import logging
 
 global_logger = None
+dup_filter = None
+
+
+class DuplicateFilter(object):
+    """
+    For filtering specific messages
+    """
+
+    def __init__(self):
+        self.msgs = set()
+
+    def filter(self, record):
+        """
+        Determining filtering or not
+        Args:
+            record:
+
+        Returns: boolean
+
+        """
+        rv = record.msg not in self.msgs
+        if getattr(record, "log_once", False):
+            self.add_msg(record.msg)
+        return rv
+
+    def add_msg(self, msg):
+        """
+        Add a msg to the filter
+        Args:
+            msg: message for filtering
+
+        Returns: None
+
+        """
+        self.msgs.add(msg)
+
+    def reset(self):
+        """
+        Reset the filter
+        Returns: None
+
+        """
+        self.msgs.clear()
 
 
 class CustomFormatter(logging.Formatter):
@@ -29,7 +72,9 @@ class CustomFormatter(logging.Formatter):
 
 def get_logger(level=logging.INFO, propagate=False):
     global global_logger
+    global dup_filter
     if global_logger is None:
+        dup_filter = DuplicateFilter()
         logger = logging.getLogger("MetaDrive")
         logger.propagate = propagate
         # create console handler with a higher log level
@@ -37,7 +82,17 @@ def get_logger(level=logging.INFO, propagate=False):
         # create formatter and add it to the handlers
         ch.setFormatter(CustomFormatter())
         logger.addHandler(ch)
+        logger.addFilter(dup_filter)
         global_logger = logger
     if global_logger.level != level:
         global_logger.setLevel(level)
     return global_logger
+
+
+def reset_logger():
+    """
+    Reset the logger
+    Returns: None
+    """
+    global dup_filter
+    dup_filter.reset()
