@@ -195,7 +195,7 @@ class TopDownRenderer:
         draw_target_vehicle_trajectory=False,
         semantic_map=False,
         semantic_broken_line=True,
-        scaling=1,  # auto-scale
+        scaling=5,  # auto-scale
         draw_contour=True,
         **kwargs
         # current_track_vehicle=None
@@ -227,6 +227,7 @@ class TopDownRenderer:
         self._text_render_interval = 20
         self.semantic_map = semantic_map
         self.scaling = scaling
+        self.film_size = film_size
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
@@ -235,7 +236,7 @@ class TopDownRenderer:
             scaling=self.scaling,
             semantic_map=self.semantic_map,
             return_surface=True,
-            film_size=film_size,
+            film_size=self.film_size,
             semantic_broken_line=self.semantic_broken_line
         )
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
@@ -251,7 +252,6 @@ class TopDownRenderer:
 
         # Setup some runtime variables
         self._render_size = screen_size
-        self._background_size = tuple(self._background_canvas.get_size())
         # screen_size = self._screen_size or self._render_size
         # self._blit_size = (int(screen_size[0] * self._zoomin), int(screen_size[1] * self._zoomin))
         # self._blit_rect = (
@@ -347,7 +347,7 @@ class TopDownRenderer:
             scaling=self.scaling,
             semantic_map=self.semantic_map,
             return_surface=True,
-            film_size=self._background_size,
+            film_size=self.film_size,
             semantic_broken_line=self.semantic_broken_line
         )
 
@@ -357,9 +357,6 @@ class TopDownRenderer:
 
         self._runtime_canvas = self._background_canvas.copy()
         self.canvas_rotate = pygame.Surface(self.receptive_field_double)
-
-        # self._runtime_output = self._background_canvas.copy()
-        self._background_size = tuple(self._background_canvas.get_size())
 
         self.history_objects.clear()
         self.history_target_vehicle.clear()
