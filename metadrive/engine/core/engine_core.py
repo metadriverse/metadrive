@@ -14,7 +14,7 @@ from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
 from metadrive.engine.core.collision_callback import collision_callback
-from metadrive.engine.core.draw_line import ColorLineNodePath
+from metadrive.engine.core.draw import ColorLineNodePath
 from metadrive.engine.core.force_fps import ForceFPS
 from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.core.light import Light

@@ -3,7 +3,7 @@ import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import PGLineType
-from metadrive.engine.core.draw_line import ColorLineNodePath
+from metadrive.engine.core.draw import ColorLineNodePath
 from metadrive.engine.engine_utils import get_engine
 from metadrive.type import MetaDriveType
 

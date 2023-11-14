@@ -1,5 +1,5 @@
 from collections import namedtuple
-from metadrive.engine.core.draw_line import ColorLineNodePath
+from metadrive.engine.core.draw import ColorLineNodePath
 
 import numpy as np
 from panda3d.core import NodePath, LVecBase4
