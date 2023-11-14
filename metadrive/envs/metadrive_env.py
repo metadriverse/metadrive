@@ -258,6 +258,7 @@ class MetaDriveEnv(BaseEnv):
             o = ImageStateObservation(self.config)
         else:
             o = LidarStateObservation(self.config)
+        return o
 
     def reward_function(self, vehicle_id: str):
         """
