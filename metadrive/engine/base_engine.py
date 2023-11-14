@@ -9,6 +9,7 @@ import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
+from collections import deque
 import numpy as np
 from panda3d.core import NodePath, Vec3
 
@@ -22,6 +23,21 @@ from metadrive.utils.utils import is_map_related_class
 logger = logging.getLogger(__name__)
 
 
+def generate_distinct_rgb_values():
+    distinct_rgb_values = []
+    step = 256 // 32  # 8 intervals for each RGB component (0-31, 32-63, ..., 224-255)
+
+    for r in range(step, 256, step):
+        for g in range(0, 256, step):
+            for b in range(0, 256, step):
+                distinct_rgb_values.append((round(r / 255, 5), round(g / 255, 5), round(b / 255, 5)))
+
+    return distinct_rgb_values[:4096]  # Return the first 4096 values
+
+
+COLOR_SPACE = generate_distinct_rgb_values()
+
+
 class BaseEngine(EngineCore, Randomizable):
     """
     Due to the feature of Panda3D, BaseEngine should only be created once(Singleton Pattern)
@@ -31,7 +47,13 @@ class BaseEngine(EngineCore, Randomizable):
     singleton = None
     global_random_seed = None
 
+    MAX_COLOR = len(COLOR_SPACE)
+    COLORS_OCCUPIED = set()
+    COLORS_FREE = set(COLOR_SPACE)
+
     def __init__(self, global_config):
+        self.c_id = dict()
+        self.id_c = dict()
         self.try_pull_asset()
         EngineCore.__init__(self, global_config)
         Randomizable.__init__(self, self.global_random_seed)
@@ -154,8 +176,63 @@ class BaseEngine(EngineCore, Randomizable):
         if self.global_config["record_episode"] and not self.replay_episode and record:
             self.record_manager.add_spawn_info(obj, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
+        color = self.pick_color(obj.id)
+        if color == (-1, -1, -1):
+            print("FK!~")
+            exit()
+
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
+
+    def pick_color(self, id):
+        """
+        Return a color multiplier representing a unique color for an object if some colors are available.
+        Return -1,-1,-1 if no color available
+
+        SideEffect: COLOR_PTR will no longer point to the available color
+        SideEffect: COLORS_OCCUPIED[COLOR_PTR] will not be avilable
+        """
+        if len(BaseEngine.COLORS_OCCUPIED) == BaseEngine.MAX_COLOR:
+            return (-1, -1, -1)
+        assert (len(BaseEngine.COLORS_FREE) > 0)
+        my_color = BaseEngine.COLORS_FREE.pop()
+        BaseEngine.COLORS_OCCUPIED.add(my_color)
+        #print("After picking:", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
+        self.id_c[id] = my_color
+        self.c_id[my_color] = id
+        return my_color
+
+    def clean_color(self, id):
+        """
+        Relinquish a color once the object is focibly destroyed
+        SideEffect:
+        BaseEngins.COLORS_OCCUPIED += 1
+        BaseEngine.COLOR_PTR now points to the idx just released
+        BaseEngine.COLORS_RECORED
+        Mapping Destroyed
+
+        """
+        if id in self.id_c.keys():
+            my_color = self.id_c[id]
+            BaseEngine.COLORS_OCCUPIED.remove(my_color)
+            BaseEngine.COLORS_FREE.add(my_color)
+            #print("After cleaning:,", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
+            self.id_c.pop(id)
+            self.c_id.pop(my_color)
+
+    def id_to_color(self, id):
+        if id in self.id_c.keys():
+            return self.id_c[id]
+        else:
+            print("Invalid ID: ", id)
+            return -1, -1, -1
+
+    def color_to_id(self, color):
+        if color in self.c_id.keys():
+            return self.c_id[color]
+        else:
+            print("Invalid color:", color)
+            return "NA"
 
     def get_objects(self, filter: Optional[Union[Callable, List]] = None):
         """
@@ -195,6 +272,10 @@ class BaseEngine(EngineCore, Randomizable):
 
         filter: A list of object ids or a function returning a list of object id
         """
+        """
+        In addition, we need to remove a color mapping whenever an object is destructed.
+        
+        """
         force_destroy_this_obj = True if force_destroy or self.global_config["force_destroy"] else False
 
         if isinstance(filter, (list, tuple)):
@@ -214,6 +295,7 @@ class BaseEngine(EngineCore, Randomizable):
                 policy = self._object_policies.pop(id)
                 policy.destroy()
             if force_destroy_this_obj:
+                self.clean_color(obj.id)
                 obj.destroy()
             else:
                 obj.detach_from_world(self.physics_world)
@@ -228,6 +310,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if len(self._dying_objects[obj.class_name]) < self.global_config["num_buffering_objects"]:
                     self._dying_objects[obj.class_name].append(obj)
                 else:
+                    self.clean_color(obj.id)
                     obj.destroy()
             if self.global_config["record_episode"] and not self.replay_episode and record:
                 self.record_manager.add_clear_info(obj)
@@ -243,6 +326,7 @@ class BaseEngine(EngineCore, Randomizable):
                 obj in self._dying_objects[obj.class_name]:
             self._dying_objects[obj.class_name].remove(obj)
             if hasattr(obj, "destroy"):
+                self.clean_color(obj.id)
                 obj.destroy()
         del obj
 
@@ -342,6 +426,24 @@ class BaseEngine(EngineCore, Randomizable):
         # refresh graphics to support multi-thread rendering, avoiding bugs like shadow disappearance at first frame
         for _ in range(5):
             self.graphicsEngine.renderFrame()
+
+        #reset colors
+        BaseEngine.COLORS_FREE = set(COLOR_SPACE)
+        BaseEngine.COLORS_OCCUPIED = set()
+        new_i2c = {}
+        new_c2i = {}
+        #print("rest objects", len(self.get_objects()))
+        for object in self.get_objects().values():
+            if object.id in self.id_c.keys():
+                id = object.id
+                color = self.id_c[object.id]
+                BaseEngine.COLORS_OCCUPIED.add(color)
+                BaseEngine.COLORS_FREE.remove(color)
+                new_i2c[id] = color
+                new_c2i[color] = id
+        #print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
+        self.c_id = new_c2i
+        self.id_c = new_i2c
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):
         """
@@ -449,9 +551,11 @@ class BaseEngine(EngineCore, Randomizable):
                 self._object_policies.pop(id).destroy()
             if id in self._object_tasks:
                 self._object_tasks.pop(id).destroy()
+            self.clean_color(obj.id)
             obj.destroy()
         for cls, pending_obj in self._dying_objects.items():
             for obj in pending_obj:
+                self.clean_color(obj.id)
                 obj.destroy()
         if self.main_camera is not None:
             self.main_camera.destroy()
