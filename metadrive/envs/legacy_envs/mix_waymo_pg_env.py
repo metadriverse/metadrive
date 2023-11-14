@@ -19,7 +19,7 @@ from metadrive.utils import get_np_random
 
 MIX_WAYMO_PG_ENV_CONFIG = dict(
     # ===== Waymo Map Config =====
-    data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+    data_directory=AssetLoader.file_path("waymo", unix_style=False),
     start_scenario_index=0,
     num_scenarios=50,
     store_map=True,
@@ -223,7 +223,7 @@ if __name__ == "__main__":
         dict(
             manual_control=True,
             use_render=True,
-            data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+            data_directory=AssetLoader.file_path("waymo", unix_style=False),
             # # start_scenario=32,
             total_num_scenarios=10,
             real_data_ratio=0.3

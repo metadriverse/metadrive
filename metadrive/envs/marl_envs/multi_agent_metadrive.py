@@ -4,6 +4,8 @@ from typing import Dict, Any
 
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
+from metadrive.component.sensors.distance_detector import LaneLineDetector, SideDetector
+from metadrive.component.sensors.lidar import Lidar
 from metadrive.constants import TerminationState
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.spawn_manager import SpawnManager
@@ -45,6 +47,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
         # for more information
         vehicle_model="static_default",
     ),
+    sensors=dict(lidar=(Lidar, 40)),
     target_vehicle_configs=dict(),
     # ===== New Reward Setting =====
     out_of_road_penalty=10,

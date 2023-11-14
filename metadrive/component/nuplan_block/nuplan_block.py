@@ -17,7 +17,7 @@ except ImportError:
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.lane.nuplan_lane import NuPlanLane
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
-from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import PGLineColor, PGLineType
 from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.math import wrap_to_pi, norm
@@ -137,18 +137,20 @@ class NuPlanBlock(BaseBlock):
 
     def construct_nuplan_broken_line(self, polyline, color):
         line = InterpolatingLine(polyline)
-        segment_num = int(line.length / (2 * DrivableAreaProperty.STRIPE_LENGTH))
+        segment_num = int(line.length / (2 * PGDrivableAreaProperty.STRIPE_LENGTH))
         for segment in range(segment_num):
-            start = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2)
-            end = line.get_point(segment * DrivableAreaProperty.STRIPE_LENGTH * 2 + DrivableAreaProperty.STRIPE_LENGTH)
+            start = line.get_point(segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2)
+            end = line.get_point(
+                segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH
+            )
             if segment == segment_num - 1:
-                end = line.get_point(line.length - DrivableAreaProperty.STRIPE_LENGTH)
+                end = line.get_point(line.length - PGDrivableAreaProperty.STRIPE_LENGTH)
             node_path_list = NuPlanLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)
             self._node_path_list.extend(node_path_list)
 
     def construct_nuplan_sidewalk(self, polyline):
         line = InterpolatingLine(polyline)
-        seg_len = DrivableAreaProperty.LANE_SEGMENT_LENGTH
+        seg_len = PGDrivableAreaProperty.LANE_SEGMENT_LENGTH
         segment_num = int(line.length / seg_len)
         last_theta = None
         for segment in range(segment_num):
@@ -165,11 +167,11 @@ class NuPlanBlock(BaseBlock):
                 if last_theta is not None:
                     diff = wrap_to_pi(theta) - wrap_to_pi(last_theta)
                     if diff > 0:
-                        factor += math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
+                        factor += math.sin(abs(diff) / 2) * PGDrivableAreaProperty.SIDEWALK_WIDTH / norm(
                             lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
                         ) + 0.15
                     else:
-                        factor -= math.sin(abs(diff) / 2) * DrivableAreaProperty.SIDEWALK_WIDTH / norm(
+                        factor -= math.sin(abs(diff) / 2) * PGDrivableAreaProperty.SIDEWALK_WIDTH / norm(
                             lane_start[0] - lane_end[0], lane_start[1] - lane_end[1]
                         )
             last_theta = theta

@@ -20,7 +20,7 @@ from metadrive.utils.math import wrap_to_pi
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Scenario Config =====
-    data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+    data_directory=AssetLoader.file_path("waymo", unix_style=False),
     start_scenario_index=0,
     num_scenarios=3,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
@@ -114,9 +114,6 @@ class ScenarioEnv(BaseEnv):
             assert self.config["sequential_seed"], \
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
 
-    def _get_observations(self):
-        return {self.DEFAULT_AGENT: self.get_single_observation()}
-
     def get_single_observation(self):
         if self.config["image_observation"]:
             o = ImageStateObservation(self.config)
@@ -203,42 +200,42 @@ class ScenarioEnv(BaseEnv):
 
         if self._is_arrive_destination(vehicle):
             done = True
-            self.logger.info(msg("arrive_dest"))
+            self.logger.info(msg("arrive_dest"), extra={"log_once": True})
             done_info[TerminationState.SUCCESS] = True
 
         elif self._is_out_of_road(vehicle) or route_completion < -0.1:
             done = True
-            self.logger.info(msg("out_of_road"))
+            self.logger.info(msg("out_of_road"), extra={"log_once": True})
             done_info[TerminationState.OUT_OF_ROAD] = True
         elif vehicle.crash_human and self.config["crash_human_done"]:
             done = True
-            self.logger.info(msg("crash human"))
+            self.logger.info(msg("crash human"), extra={"log_once": True})
             done_info[TerminationState.CRASH_HUMAN] = True
         elif vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
             done = True
-            self.logger.info(msg("crash vehicle"))
+            self.logger.info(msg("crash vehicle"), extra={"log_once": True})
             done_info[TerminationState.CRASH_VEHICLE] = True
         elif vehicle.crash_object and self.config["crash_object_done"]:
             done = True
             done_info[TerminationState.CRASH_OBJECT] = True
-            self.logger.info(msg("crash object"))
+            self.logger.info(msg("crash object"), extra={"log_once": True})
         elif vehicle.crash_building and self.config["crash_object_done"]:
             done = True
             done_info[TerminationState.CRASH_BUILDING] = True
-            self.logger.info(msg("crash building"))
+            self.logger.info(msg("crash building"), extra={"log_once": True})
 
         elif self.config["horizon"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            self.logger.info(msg("max step"))
+            self.logger.info(msg("max step"), extra={"log_once": True})
 
         elif self.config["allowed_more_steps"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.engine.data_manager.current_scenario_length + self.config[
             "allowed_more_steps"] and not self.is_multi_agent:
             done = True
             done_info[TerminationState.MAX_STEP] = True
-            self.logger.info(msg("more step than original episode"))
+            self.logger.info(msg("more step than original episode"), extra={"log_once": True})
 
         # for compatibility
         # crash almost equals to crashing with vehicles
@@ -474,7 +471,7 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
             ),
-            "data_directory": AssetLoader.file_path("nuplan", return_raw_style=False),
+            "data_directory": AssetLoader.file_path("nuplan", unix_style=False),
         }
     )
     success = []

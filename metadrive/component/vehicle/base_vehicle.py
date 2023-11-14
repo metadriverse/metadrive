@@ -1,4 +1,5 @@
 import math
+from metadrive.engine.logger import get_logger
 import os
 from collections import deque
 from typing import Union, Optional
@@ -28,6 +29,8 @@ from metadrive.utils.math import get_vertical_vector, norm, clip
 from metadrive.utils.math import wrap_to_pi
 from metadrive.utils.pg.utils import rect_region_detection
 from metadrive.utils.utils import get_object_from_node
+
+logger = get_logger()
 
 
 class BaseVehicleState:
@@ -302,10 +305,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         elif self.config["spawn_position_heading"] is None:
             # spawn_lane_index has second priority
             map = self.engine.current_map
-            assert map, "Map should not be None"
-            lane = map.road_network.get_lane(self.config["spawn_lane_index"])
-            position = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
-            heading = lane.heading_theta_at(self.config["spawn_longitude"])
+            if map is None:
+                logger.warning("No map is provided. Set vehicle to position (0, 0) with heading 0")
+                position = [0, 0]
+                heading = 0
+            else:
+                lane = map.road_network.get_lane(self.config["spawn_lane_index"])
+                position = lane.position(self.config["spawn_longitude"], self.config["spawn_lateral"])
+                heading = lane.heading_theta_at(self.config["spawn_longitude"])
         else:
             assert self.config["spawn_position_heading"] is not None, "At least setting one initialization method"
             position = self.config["spawn_position_heading"][0]
@@ -351,7 +358,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
         self.expert_takeover = False
-        if self.config["need_navigation"]:
+        if self.config["need_navigation"] and self.engine.current_map is not None:
             assert self.navigation
 
         if self.config["spawn_velocity"] is not None:
@@ -657,9 +664,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return wheel
 
     def add_navigation(self):
-        if self.navigation is not None:
-            return
-        if not self.config["need_navigation"]:
+        if self.navigation is not None or not self.config["need_navigation"] or self.engine.current_map is None:
             return
         navi = self.config["navigation_module"]
         if navi is None:
@@ -914,7 +919,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         super(BaseVehicle, self).detach_from_world(physics_world)
 
     def attach_to_world(self, parent_node_path, physics_world):
-        if self.config["show_navi_mark"] and self.config["need_navigation"]:
+        if self.config["show_navi_mark"] and self.config["need_navigation"] and self.navigation is not None:
             self.navigation.attach_to_world(self.engine)
         super(BaseVehicle, self).attach_to_world(parent_node_path, physics_world)
 

@@ -10,7 +10,7 @@ from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.constants import PGLineType, PGLineColor, DrivableAreaProperty
+from metadrive.constants import PGLineType, PGLineColor, PGDrivableAreaProperty
 from metadrive.utils.math import get_vertical_vector
 from metadrive.utils.pg.utils import check_lane_on_road
 
@@ -112,7 +112,7 @@ def CreateRoadFrom(
     # check the left lane and right lane
     ignore = (ignore_start, ignore_end)
     factor = (
-        DrivableAreaProperty.SIDEWALK_WIDTH + DrivableAreaProperty.SIDEWALK_LINE_DIST + lane_width / 2.0
+        PGDrivableAreaProperty.SIDEWALK_WIDTH + PGDrivableAreaProperty.SIDEWALK_LINE_DIST + lane_width / 2.0
     ) * 2.0 / lane_width
     if not detect_one_side:
         # Because of side walk, the width of side walk should be consider

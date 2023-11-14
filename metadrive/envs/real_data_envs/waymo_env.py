@@ -4,7 +4,7 @@ import time
 
 WAYMO_ENV_CONFIG = dict(
     # ===== Map Config =====
-    data_directory=AssetLoader.file_path("waymo", return_raw_style=False),
+    data_directory=AssetLoader.file_path("waymo", unix_style=False),
     waymo_data_directory=None,  # for compatibility
 )
 

@@ -46,7 +46,7 @@ class RosSocketServer():
                 image_source="main_camera",
                 show_navi_mark=False,
             ),
-            data_directory=AssetLoader.file_path("nuscenes", return_raw_style=False),
+            data_directory=AssetLoader.file_path("nuscenes", unix_style=False),
         )
 
         env = ScenarioEnv(config)

@@ -7,7 +7,7 @@ from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.constants import PGLineType, PGLineColor
 from metadrive.utils.utils import import_pygame
 from metadrive.type import MetaDriveType
-from metadrive.constants import DrivableAreaProperty
+from metadrive.constants import PGDrivableAreaProperty
 from collections import namedtuple
 
 PositionType = Union[Tuple[float, float], np.ndarray]
@@ -317,7 +317,7 @@ class LaneGraphics:
             # if len(waymo_poly_line.segment_property) < 1:
             #     return
             if MetaDriveType.is_broken_line(type):
-                points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
+                points_to_skip = math.floor(PGDrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
             else:
                 points_to_skip = 1
             for index in range(0, len(polyline) - 1, points_to_skip):
@@ -330,7 +330,7 @@ class LaneGraphics:
                         surface.vec2pix([s_p[0], s_p[1]]),
                         surface.vec2pix([e_p[0], e_p[1]]),
                         # max(surface.pix(LaneGraphics.STRIPE_WIDTH),
-                        surface.pix(DrivableAreaProperty.LANE_LINE_WIDTH) * 2
+                        surface.pix(PGDrivableAreaProperty.LANE_LINE_WIDTH) * 2
                     )
         elif type == "center_lane" or type is None:
             pass
@@ -429,7 +429,7 @@ class LaneGraphics:
                 pygame.draw.line(
                     surface, color, (surface.vec2pix(lane.position(starts[k], lats[k]))),
                     (surface.vec2pix(lane.position(ends[k], lats[k]))),
-                    surface.pix(2 * DrivableAreaProperty.LANE_LINE_WIDTH)
+                    surface.pix(2 * PGDrivableAreaProperty.LANE_LINE_WIDTH)
                 )
 
     @classmethod

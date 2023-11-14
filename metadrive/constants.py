@@ -266,10 +266,10 @@ BKG_COLOR = Vec3(1, 1, 1)
 class PGLineType:
     """A lane side line type."""
 
-    NONE = "none"
-    BROKEN = "broken"
-    CONTINUOUS = "continuous"
-    SIDE = "side"
+    NONE = MetaDriveType.LINE_UNKNOWN
+    BROKEN = MetaDriveType.LINE_BROKEN_SINGLE_WHITE
+    CONTINUOUS = MetaDriveType.LINE_SOLID_SINGLE_WHITE
+    SIDE = MetaDriveType.BOUNDARY_LINE
 
     @staticmethod
     def prohibit(line_type) -> bool:
@@ -284,7 +284,10 @@ class PGLineColor:
     YELLOW = (255 / 255, 200 / 255, 0 / 255, 1)
 
 
-class DrivableAreaProperty:
+class PGDrivableAreaProperty:
+    """
+    Defining some properties for creating PGMap
+    """
     # road network property
     ID = None  # each block must have a unique ID
     SOCKET_NUM = None
@@ -295,9 +298,9 @@ class DrivableAreaProperty:
     LANE_LINE_WIDTH = 0.15
     LANE_LINE_THICKNESS = 0.016
 
-    SIDEWALK_THICKNESS = 0.4
+    SIDEWALK_THICKNESS = 0.3
     SIDEWALK_LENGTH = 3
-    SIDEWALK_WIDTH = 3
+    SIDEWALK_WIDTH = 2
     SIDEWALK_LINE_DIST = 0.6
 
     # visualization color property

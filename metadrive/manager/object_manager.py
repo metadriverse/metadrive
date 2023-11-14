@@ -78,7 +78,10 @@ class TrafficObjectManager(BaseManager):
                 is_ramp = isinstance(block, InRampOnStraight) or isinstance(block, OutRampOnStraight)
                 on_left = True if self.np_random.rand() > 0.5 or (accident_road is road_2 and is_ramp) else False
                 lanes = accident_road.get_lanes(engine.current_map.road_network)
-                accident_lane_idx = self.np_random.randint(0, len(lanes) - 1) if on_left else -1
+                if len(lanes) - 1 == 0:
+                    accident_lane_idx = -1
+                else:
+                    accident_lane_idx = self.np_random.randint(0, len(lanes) - 1) if on_left else -1
                 lane = lanes[accident_lane_idx]
                 self.accident_lanes.append(accident_road.get_lanes(engine.current_map.road_network)[accident_lane_idx])
                 longitude = self.np_random.rand() * lane.length / 2 + lane.length / 2

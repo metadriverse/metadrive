@@ -84,7 +84,7 @@ def test_scenario_map_destroy():
     out_loop_num = int(total_num / num)
 
     default_config = ScenarioEnv.default_config()
-    default_config["data_directory"] = AssetLoader.file_path("waymo", return_raw_style=False)
+    default_config["data_directory"] = AssetLoader.file_path("waymo", unix_style=False)
     default_config["num_scenarios"] = num
     default_config["store_map"] = False
 

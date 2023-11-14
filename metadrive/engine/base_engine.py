@@ -1,4 +1,4 @@
-import logging
+from metadrive.engine.logger import get_logger, reset_logger
 
 from metadrive.version import VERSION, asset_version
 import os
@@ -20,7 +20,7 @@ from metadrive.manager.base_manager import BaseManager
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 def generate_distinct_rgb_values():
@@ -99,7 +99,7 @@ class BaseEngine(EngineCore, Randomizable):
         # curriculum reset
         self._max_level = self.global_config.get("curriculum_level", 1)
         self._current_level = 0
-        self._num_scenarios_per_level = int(self.global_config.get("num_scenarios", 0) / self._max_level)
+        self._num_scenarios_per_level = int(self.global_config.get("num_scenarios", 1) / self._max_level)
 
     def add_policy(self, object_id, policy_class, *args, **kwargs):
         policy = policy_class(*args, **kwargs)
@@ -334,6 +334,9 @@ class BaseEngine(EngineCore, Randomizable):
         """
         Clear and generate the whole scene
         """
+        # reset logger
+        reset_logger()
+
         # initialize
         self._episode_start_time = time.time()
         self.episode_step = 0
@@ -368,7 +371,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if lm - cm != 0:
                     print("{}: Before Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
                 cm = lm
-
+        self.terrain.before_reset()
         self._object_clean_check()
 
         for manager_name, manager in self.managers.items():
@@ -601,12 +604,15 @@ class BaseEngine(EngineCore, Randomizable):
     def gets_start_index(self):
         start_seed = self.global_config.get("start_seed", None)
         start_scenario_index = self.global_config.get("start_scenario_index", None)
-        if start_seed is None:
-            assert start_scenario_index is not None
+        assert start_seed is None or start_scenario_index is None, \
+            "It is not allowed to define `start_seed` and `start_scenario_index`"
+        if start_seed is not None:
+            return start_seed
+        elif start_scenario_index is not None:
             return start_scenario_index
         else:
-            assert start_seed is not None
-            return start_seed
+            logger.info("Can not find `start_seed` or `start_scenario_index`. Use 0 as `start_seed`")
+            return 0
 
     @property
     def max_level(self):
@@ -634,7 +640,7 @@ class BaseEngine(EngineCore, Randomizable):
             if hasattr(self, "map_manager"):
                 return self.map_manager.current_map
             else:
-                raise ValueError("No mapmanager in {}".format(self.managers))
+                return None
 
     @property
     def current_track_vehicle(self):
@@ -669,18 +675,39 @@ class BaseEngine(EngineCore, Randomizable):
         return self.global_random_seed
 
     def _object_clean_check(self):
-        if self.global_config["debug"]:
-            from metadrive.component.vehicle.base_vehicle import BaseVehicle
-            from metadrive.component.static_object.traffic_object import TrafficObject
-            for manager in self._managers.values():
-                assert len(manager.spawned_objects) == 0
+        # objects check
+        from metadrive.component.vehicle.base_vehicle import BaseVehicle
+        from metadrive.component.static_object.traffic_object import TrafficObject
+        for manager in self._managers.values():
+            assert len(manager.spawned_objects) == 0
 
-            objs_need_to_release = self.get_objects(
-                filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, TrafficObject)
-            )
-            assert len(
-                objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
-                                            "in each manager.before_step()"
+        objs_need_to_release = self.get_objects(
+            filter=lambda obj: isinstance(obj, BaseVehicle) or isinstance(obj, TrafficObject)
+        )
+        assert len(
+            objs_need_to_release) == 0, "You should clear all generated objects by using engine.clear_objects " \
+                                        "in each manager.before_step()"
+
+        # rigid body check
+        bodies = []
+        for world in [self.physics_world.dynamic_world, self.physics_world.static_world]:
+            bodies += world.getRigidBodies()
+            bodies += world.getSoftBodies()
+            bodies += world.getGhosts()
+            bodies += world.getVehicles()
+            bodies += world.getCharacters()
+            bodies += world.getManifolds()
+
+        filtered = []
+        for body in bodies:
+            if body.getName() in ["detector_mask", "debug"]:
+                continue
+            filtered.append(body)
+        assert len(filtered) == 0, "Physics Bodies should be cleaned before manager.reset() is called. " \
+                                   "Uncleared bodies: {}".format(filtered)
+
+        children = self.pbr_worldNP.getChildren() + self.worldNP.getChildren()
+        assert len(children) == 0, "NodePath are not cleaned thoroughly. Remaining NodePath: {}".format(children)
 
     def update_manager(self, manager_name: str, manager: BaseManager, destroy_previous_manager=True):
         """

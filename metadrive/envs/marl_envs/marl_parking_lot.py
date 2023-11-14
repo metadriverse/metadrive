@@ -403,8 +403,8 @@ def _vis():
                 },
                 "show_lidar": False,
             },
-            "debug_static_world": True,
-            "debug_physics_world": True,
+            "debug_static_world": False,
+            "debug_physics_world": False,
             "use_render": True,
             "debug": True,
             "manual_control": True,
@@ -450,6 +450,7 @@ def _vis():
             render_text["current_road"] = v.navigation.current_road
 
         env.render(text=render_text)
+        d = tm
         for kkk, ddd in d.items():
             if ddd and kkk != "__all__":
                 print(
@@ -527,6 +528,7 @@ def _long_run():
         for step in range(10000):
             act = env.action_space.sample()
             o, r, tm, tc, i = env.step(act)
+            d = tm
             if step == 0:
                 assert not any(d.values())
 
