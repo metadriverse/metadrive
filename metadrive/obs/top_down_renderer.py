@@ -45,7 +45,7 @@ def draw_top_down_map(
 
     """
     import cv2
-    film_size = film_size or map.film_size
+    # print(film_size)
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
     # if reverse_color:
     #     surface.WHITE, surface.BLACK = surface.BLACK, surface.WHITE
@@ -185,7 +185,7 @@ def draw_top_down_trajectory(
 class TopDownRenderer:
     def __init__(
         self,
-        film_size=(1000, 1000),
+        film_size=(10000, 10000),
         screen_size=(1000, 1000),
         num_stack=15,
         history_smooth=0,
@@ -195,7 +195,7 @@ class TopDownRenderer:
         draw_target_vehicle_trajectory=False,
         semantic_map=False,
         semantic_broken_line=True,
-        scaling=None,  # auto-scale
+        scaling=1,  # auto-scale
         draw_contour=True,
         **kwargs
         # current_track_vehicle=None

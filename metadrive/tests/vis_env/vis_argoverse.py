@@ -17,7 +17,6 @@ class ArgoverseEnv(MetaDriveEnv):
             self.config["map_config"].update(
                 {
                     "city": "PIT",
-                    # "draw_map_resolution": 1024,
                     "center": ArgoverseMap.metadrive_vector([xcenter, ycenter]),
                     "radius": 100
                 }

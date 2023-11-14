@@ -48,7 +48,6 @@ class BaseMap(BaseRunnable, ABC):
         #     self.SEED
         # ], "Global seed {} should equal to seed in map config {}".format(random_seed, map_config[self.SEED])
         super(BaseMap, self).__init__(config=map_config)
-        self.film_size = (get_global_config()["draw_map_resolution"], get_global_config()["draw_map_resolution"])
 
         # map features
         self.road_network = self.road_network_type()

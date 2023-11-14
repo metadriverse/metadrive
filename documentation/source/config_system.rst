@@ -125,7 +125,6 @@ The config in this part specifies the setting related to visualization. The :cod
     - :code:`use_chase_camera_follow_lane` (bool = False): whether to force the third-person view camera following the heading of current lane
     - :code:`camera_dist/height` (float = 6.0, 1.8): the initial distance and height of the third-person view camera
     - :code:`prefer_track_agent` (str = None): specify the name of the agent that you wish to track in the third-person view. This is useful in the visualization in multi-agent environments.
-    - :code:`draw_map_resolution` (int = 1024): the size of the image capturing the top-down view of the road network
     - :code:`top_down_camera_initial_x/y/z` (int = 0, 0, 200): the initial position of the top-down view camera
 
 
