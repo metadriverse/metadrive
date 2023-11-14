@@ -446,7 +446,7 @@ class EngineCore(ShowBase.ShowBase):
             self._loading_logo.setColor((1, 1, 1, new_alpha))
             return task.cont
 
-    def draw_line_3d(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+    def _draw_line_3d(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
         assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
         start_p = [*start_p]
         end_p = [*end_p]
@@ -463,19 +463,19 @@ class EngineCore(ShowBase.ShowBase):
 
     def draw_lines_3d(self, point_lists, parent_node=None, color=LVecBase4(1), thickness=1.0):
         assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
-        np = ColorLineNodePath(parent_node, thickness=thickness, colorVec=color)
-        np.drawLines(point_lists)
-        np.create()
-        return np
+        drawer = ColorLineNodePath(parent_node, thickness=thickness, colorVec=color)
+        drawer.drawLines(point_lists)
+        drawer.create()
+        return drawer
 
     def show_coordinates(self):
         if len(self.coordinate_line) > 0:
             return
         # x direction = red
-        np_x = self.draw_line_3d(Vec3(0, 0, 0.1), Vec3(100, 0, 0.1), color=[1, 0, 0, 1], thickness=2)
+        np_x = self._draw_line_3d(Vec3(0, 0, 0.1), Vec3(100, 0, 0.1), color=[1, 0, 0, 1], thickness=2)
         np_x.reparentTo(self.render)
         # y direction = blue
-        np_y = self.draw_line_3d(Vec3(0, 0, 0.1), Vec3(0, 50, 0.1), color=[0, 1, 0, 1], thickness=2)
+        np_y = self._draw_line_3d(Vec3(0, 0, 0.1), Vec3(0, 50, 0.1), color=[0, 1, 0, 1], thickness=2)
         np_y.reparentTo(self.render)
         self.coordinate_line.append(np_x)
         self.coordinate_line.append(np_y)

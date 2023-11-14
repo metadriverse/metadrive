@@ -72,9 +72,9 @@ class BaseTrafficParticipant(BaseObject):
             self.coordinates_debug_np.reparentTo(self.origin)
         height = self.HEIGHT
         self.coordinates_debug_np = NodePath("debug coordinate")
-        x = self.engine.draw_line_3d([0, 0, height], [1, 0, height], [1, 0, 0, 1], 1)
-        y = self.engine.draw_line_3d([0, 0, height], [0, 0.5, height], [1, 0, 0, 1], 1)
-        z = self.engine.draw_line_3d([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 1)
+        x = self.engine._draw_line_3d([0, 0, height], [1, 0, height], [1, 0, 0, 1], 1)
+        y = self.engine._draw_line_3d([0, 0, height], [0, 0.5, height], [1, 0, 0, 1], 1)
+        z = self.engine._draw_line_3d([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 1)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)
