@@ -48,7 +48,7 @@ class ImageObservation(ObservationBase):
     def __init__(self, config, image_source: str, clip_rgb: bool):
         self.enable_cuda = config["image_on_cuda"]
         if self.enable_cuda:
-            assert _cuda_enable, "CuPy is not enabled"
+            assert _cuda_enable, "CuPy is not enabled. Fail to set up image_on_cuda."
         self.STACK_SIZE = config["stack_size"]
         self.image_source = image_source
         super(ImageObservation, self).__init__(config)
