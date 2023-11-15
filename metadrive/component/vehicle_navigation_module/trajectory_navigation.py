@@ -228,4 +228,3 @@ class TrajectoryNavigation(BaseNavigation):
 
 
 WaymoTrajectoryNavigation = TrajectoryNavigation
-NuPlanTrajectoryNavigation = TrajectoryNavigation

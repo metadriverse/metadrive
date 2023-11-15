@@ -5,9 +5,7 @@ from typing import Optional, Union, Iterable
 
 import numpy as np
 
-from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.component.map.scenario_map import ScenarioMap
-from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, TARGET_VEHICLES
 from metadrive.constants import TopDownSemanticColor, MetaDriveType, PGDrivableAreaProperty
 from metadrive.obs.top_down_obs_impl import WorldSurface, ObjectGraphics, LaneGraphics, history_object
@@ -98,18 +96,6 @@ def draw_top_down_map(
                 LaneGraphics.display_scenario_line(
                     data["polyline"], data["type"], surface, line_sample_interval=line_sample_interval
                 )
-
-        elif isinstance(map, NuPlanMap):
-            raise DeprecationWarning("We are using unifed ScenarioDescription Now!")
-            if semantic_map:
-                for lane_info in map.road_network.graph.values():
-                    LaneGraphics.draw_drivable_area(lane_info.lane, surface)
-            else:
-                for block in map.attached_blocks + [map.boundary_block]:
-                    for boundary in block.lines.values():
-                        line = InterpolatingLine(boundary.points)
-                        LaneGraphics.display_nuplan(line, boundary.type, boundary.color, surface)
-
         else:
             for _from in map.road_network.graph.keys():
                 decoration = True if _from == Decoration.start else False

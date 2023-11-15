@@ -544,4 +544,3 @@ class _EgoWaymoIDMPolicy(IDMPolicy):
 EgoWaymoIDMPolicy = TrajectoryIDMPOlicy
 WaymoIDMPolicy = TrajectoryIDMPOlicy
 ScenarioIDMPolicy = TrajectoryIDMPOlicy
-NuPlanIDMPolicy = TrajectoryIDMPOlicy
