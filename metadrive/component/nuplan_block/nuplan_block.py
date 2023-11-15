@@ -118,7 +118,7 @@ class NuPlanBlock(BaseBlock):
         graph = self.block_network.graph
         for id, lane_info in graph.items():
             lane = lane_info.lane
-            lane._construct_lane_in_block(self, lane_index=id)
+            lane._construct_lane(self, lane_index=id)
 
         for line_prop in self.lines.values():
             if line_prop.type == PGLineType.CONTINUOUS:

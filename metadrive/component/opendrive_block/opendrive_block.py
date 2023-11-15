@@ -27,7 +27,7 @@ class OpenDriveBlock(BaseBlock):
         graph = self.block_network.graph
         for id, lane_info in graph.items():
             lane = lane_info.lane
-            self._construct_lane_in_block(lane, lane_index=id)
+            self._construct_lane(lane, lane_index=id)
 
     @property
     def block_network_type(self):

@@ -3,10 +3,14 @@ import math
 from abc import ABC
 from typing import Dict
 
+import numpy as np
 from panda3d.bullet import BulletBoxShape, BulletGhostNode
+from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletTriangleMeshShape, BulletTriangleMesh
+from panda3d.core import LPoint3f
 from panda3d.core import Vec3, LQuaternionf, RigidBodyCombiner, \
     SamplerState, NodePath, Texture
+from panda3d.core import Vec4
 
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
@@ -16,6 +20,7 @@ from metadrive.constants import MetaDriveType, CamMask, PGLineType, PGLineColor,
 from metadrive.constants import Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.engine.physics_node import BulletRigidBodyNode
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math import norm
@@ -317,7 +322,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     def bounding_box(self):
         return self._bounding_box
 
-    def construct_sidewalk(self):
+    def _construct_sidewalk(self):
         """
         Construct the sidewalk with collision shape
         """
@@ -351,7 +356,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 body_node.setIntoCollideMask(CollisionGroup.Sidewalk)
                 self._node_path_list.append(np)
 
-    def construct_crosswalk(self):
+    def _construct_crosswalk(self):
         """
         Construct the crosswalk for semantic Cam
         """
@@ -379,3 +384,78 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 self.static_nodes.append(body_node)
                 body_node.setIntoCollideMask(CollisionGroup.Crosswalk)
                 self._node_path_list.append(np)
+
+    def _construct_lane(self, lane, lane_index):
+        """
+        Modified from base class, the width is set to 6.5
+        """
+        if lane_index is not None:
+            lane.index = lane_index
+        assert lane.polygon is not None, "Polygon is required for building lane"
+        # build physics contact
+        if lane.need_lane_localization:
+            # It might be Lane surface intersection
+            n = BaseRigidBodyNode(lane.id, lane.metadrive_type)
+            segment_np = NodePath(n)
+
+            self._node_path_list.append(segment_np)
+            self._node_path_list.append(n)
+
+            segment_node = segment_np.node()
+            segment_node.set_active(False)
+            segment_node.setKinematic(False)
+            segment_node.setStatic(True)
+            shape = BulletConvexHullShape()
+            for point in lane.polygon:
+                # Panda coordinate is different from metadrive coordinate
+                point_up = LPoint3f(*point, 0.0)
+                shape.addPoint(LPoint3f(*point_up))
+                point_down = LPoint3f(*point, -0.1)
+                shape.addPoint(LPoint3f(*point_down))
+            segment_node.addShape(shape)
+            self.static_nodes.append(segment_node)
+            segment_np.reparentTo(self.lane_node_path)
+
+    def _construct_lane_line_segment(self, start_point, end_point, line_color: Vec4, line_type: PGLineType):
+        node_path_list = []
+
+        if not isinstance(start_point, np.ndarray):
+            start_point = np.array(start_point)
+        if not isinstance(end_point, np.ndarray):
+            end_point = np.array(end_point)
+
+        length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
+        middle = (start_point + end_point) / 2
+        parent_np = self.lane_line_node_path
+        if length <= 0:
+            return []
+        if PGLineType.prohibit(line_type):
+            node_name = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
+        else:
+            node_name = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
+
+        # add bullet body for it
+        body_node = BulletGhostNode(node_name)
+        body_node.setActive(False)
+        body_node.setKinematic(False)
+        body_node.setStatic(True)
+        body_np = parent_np.attachNewNode(body_node)
+        node_path_list.append(body_np)
+        node_path_list.append(body_node)
+
+        # its scale will change by setScale
+        body_height = PGDrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
+        shape = BulletBoxShape(Vec3(length / 2, PGDrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
+        body_np.node().addShape(shape)
+        mask = PGDrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN else PGDrivableAreaProperty.BROKEN_COLLISION_MASK
+        body_np.node().setIntoCollideMask(mask)
+        self.static_nodes.append(body_np.node())
+
+        # position and heading
+        body_np.setPos(panda_vector(middle, PGDrivableAreaProperty.LANE_LINE_GHOST_HEIGHT / 2))
+        direction_v = end_point - start_point
+        # theta = -numpy.arctan2(direction_v[1], direction_v[0])
+        theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
+        body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
+
+        return node_path_list

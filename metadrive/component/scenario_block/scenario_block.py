@@ -56,9 +56,7 @@ class ScenarioBlock(BaseBlock):
         graph = self.block_network.graph
         for id, lane_info in graph.items():
             lane = lane_info.lane
-            lane.construct_lane_in_block(self, lane_index=id)
-            # lane.construct_lane_line_in_block(self, [True if len(lane.left_lanes) == 0 else False,
-            #                                          True if len(lane.right_lanes) == 0 else False, ])
+            self._construct_lane(lane, lane_index=id)
         # draw
         for lane_id, data in self.map_data.items():
             type = data.get("type", None)
@@ -77,8 +75,8 @@ class ScenarioBlock(BaseBlock):
                     )
             elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
-        self.construct_sidewalk()
-        self.construct_crosswalk()
+        self._construct_sidewalk()
+        self._construct_crosswalk()
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -94,7 +92,7 @@ class ScenarioBlock(BaseBlock):
                 end = line.get_point(line.length)
             else:
                 end = line.get_point((segment + 1) * PGDrivableAreaProperty.STRIPE_LENGTH)
-            node_path_list = ScenarioLane.construct_lane_line_segment(self, start, end, color, PGLineType.CONTINUOUS)
+            node_path_list = self._construct_lane_line_segment(start, end, color, PGLineType.CONTINUOUS)
             self._node_path_list.extend(node_path_list)
 
     def construct_broken_line(self, polyline, color):
@@ -111,7 +109,7 @@ class ScenarioBlock(BaseBlock):
             )
             if segment == segment_num - 1:
                 end = line.get_point(line.length - PGDrivableAreaProperty.STRIPE_LENGTH)
-            node_path_list = ScenarioLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)
+            node_path_list = self._construct_lane_line_segment(start, end, color, PGLineType.BROKEN)
             self._node_path_list.extend(node_path_list)
 
     @property
