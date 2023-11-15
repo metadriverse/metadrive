@@ -63,6 +63,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    :caption: Debugging
 
    points_and_lines.ipynb
+   debug_mode.ipynb
 
 .. toctree::
    :hidden:

@@ -579,10 +579,10 @@ class BaseEnv(gym.Env):
     def close(self):
         if self.engine is not None:
             close_engine()
-        if self.logger is not None:
-            self.logger.handlers.clear()
-            del self.logger
-        self.logger = None
+        # if self.logger is not None:
+        #     self.logger.handlers.clear()
+        #     del self.logger
+        # self.logger = None
 
     def force_close(self):
         print("Closing environment ... Please wait")
