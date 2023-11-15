@@ -78,6 +78,7 @@ class ScenarioBlock(BaseBlock):
             elif MetaDriveType.is_road_boundary_line(type):
                 self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
         self.construct_sidewalk()
+        self.construct_crosswalk()
 
     def construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
@@ -112,21 +113,6 @@ class ScenarioBlock(BaseBlock):
                 end = line.get_point(line.length - PGDrivableAreaProperty.STRIPE_LENGTH)
             node_path_list = ScenarioLane.construct_lane_line_segment(self, start, end, color, PGLineType.BROKEN)
             self._node_path_list.extend(node_path_list)
-
-    def construct_crosswalk(self):
-        """
-        Construct the crosswalk
-        """
-        raise DeprecationWarning("The Crosswalk is built on terrain now")
-        if self.engine.global_config["show_crosswalk"] and not self.engine.use_render_pipeline:
-            for sidewalk in self.crosswalks.values():
-                polygon = sidewalk["polygon"]
-                np = make_polygon_model(polygon, 0.0)
-                np.reparentTo(self.sidewalk_node_path)
-                np.setPos(0, 0, -0.05)
-                np.setTexture(self.side_texture)
-                # np.setTexture(self.ts_normal, self.side_normal)
-                self._node_path_list.append(np)
 
     @property
     def block_network_type(self):

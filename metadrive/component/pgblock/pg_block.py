@@ -234,3 +234,4 @@ class PGBlock(BaseBlock):
                     pos_road = not Road(_from, _to).is_negative_road()
                     lane.construct_lane_line_in_block(self, [True, True] if _id == 0 and pos_road else [False, True])
         self.construct_sidewalk()
+        self.construct_crosswalk()

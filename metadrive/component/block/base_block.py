@@ -33,7 +33,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     ID = "B"
 
     def __init__(
-        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+            self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -82,12 +82,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True,
-        attach_to_world=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True,
+            attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -177,10 +177,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         self.lane_line_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_line"))
         self.sidewalk_node_path = NodePath(RigidBodyCombiner(self.name + "_sidewalk"))
+        self.crosswalk_node_path = NodePath(RigidBodyCombiner(self.name + "_crosswalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
         self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
 
         self.sidewalk_node_path.setTag("type", Semantics.SIDEWALK.label)
+        self.crosswalk_node_path.setTag("type", Semantics.CROSSWALK.label)
         self.lane_vis_node_path.setTag("type", Semantics.ROAD.label)
         self.lane_line_node_path.setTag("type", Semantics.LANE_LINE.label)
 
@@ -196,6 +198,11 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.sidewalk_node_path.node().collect()
         self.sidewalk_node_path.hide(CamMask.ScreenshotCam | CamMask.Shadow)
 
+        self.crosswalk_node_path.flattenStrong()
+        self.crosswalk_node_path.node().collect()
+        self.crosswalk_node_path.hide(CamMask.AllOn)
+        self.crosswalk_node_path.show(CamMask.SemanticCam)
+
         # only bodies reparent to this node
         self.lane_node_path.flattenStrong()
         self.lane_node_path.node().collect()
@@ -207,6 +214,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.origin.hide(CamMask.Shadow)
 
         self.sidewalk_node_path.reparentTo(self.origin)
+        self.crosswalk_node_path.reparentTo(self.origin)
         self.lane_line_node_path.reparentTo(self.origin)
         self.lane_node_path.reparentTo(self.origin)
 
@@ -218,6 +226,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             self._bounding_box = None, None, None, None
 
         self._node_path_list.append(self.sidewalk_node_path)
+        self._node_path_list.append(self.crosswalk_node_path)
         self._node_path_list.append(self.lane_line_node_path)
         self._node_path_list.append(self.lane_node_path)
         self._node_path_list.append(self.lane_vis_node_path)
@@ -340,4 +349,32 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 else:
                     self.static_nodes.append(body_node)
                 body_node.setIntoCollideMask(CollisionGroup.Sidewalk)
+                self._node_path_list.append(np)
+
+    def construct_crosswalk(self):
+        """
+        Construct the crosswalk for semantic Cam
+        """
+        if self.engine is None or (self.engine.global_config["show_crosswalk"] and not self.engine.use_render_pipeline):
+            for sidewalk in self.crosswalks.values():
+                polygon = sidewalk["polygon"]
+                np = make_polygon_model(polygon, 0.0)
+                np.reparentTo(self.crosswalk_node_path)
+                np.setPos(0, 0, -0.05)
+
+                body_node = BulletRigidBodyNode(MetaDriveType.CROSSWALK)
+                body_node.setKinematic(False)
+                body_node.setStatic(True)
+                body_np = self.crosswalk_node_path.attachNewNode(body_node)
+                body_np.setPos(0, 0, -0.05)
+                self._node_path_list.append(body_np)
+
+                geom = np.node().getGeom(0)
+                mesh = BulletTriangleMesh()
+                mesh.addGeom(geom)
+                shape = BulletTriangleMeshShape(mesh, dynamic=False)
+
+                body_node.addShape(shape)
+                self.static_nodes.append(body_node)
+                body_node.setIntoCollideMask(CollisionGroup.CROSSWALK)
                 self._node_path_list.append(np)
