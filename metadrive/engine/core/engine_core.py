@@ -447,7 +447,6 @@ class EngineCore(ShowBase.ShowBase):
             return task.cont
 
     def _draw_line_3d(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
-        assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
         start_p = [*start_p]
         end_p = [*end_p]
         start_p[1] *= 1
@@ -462,14 +461,12 @@ class EngineCore(ShowBase.ShowBase):
         return np
 
     def make_line_drawer(self, parent_node=None, thickness=1.0):
-        assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
         if parent_node is None:
             parent_node = self.render
         drawer = ColorLineNodePath(parent_node, thickness=thickness)
         return drawer
 
     def make_point_drawer(self, parent_node=None, scale=1.0):
-        assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
         if parent_node is None:
             parent_node = self.render
         drawer = ColorSphereNodePath(parent_node, scale=scale)
