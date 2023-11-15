@@ -285,7 +285,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          cd metadrive/documentation
+          cd documentation
           pip install nbmake pytest-xdist
           TEST_DOC=1 pytest --nbmake -n=auto ./source
 
