@@ -62,8 +62,9 @@ Please feel free to contact us if you have any suggestions or ideas!
    :maxdepth: 2
    :caption: Debugging
 
-   points_and_lines.ipynb
    debug_mode.ipynb
+   points_and_lines.ipynb
+   log_msg.ipynb
 
 .. toctree::
    :hidden:
