@@ -43,7 +43,7 @@ class RacingMap(PGMap):
             # self.blocks.append(block_s1)
 
             block_s1 = Straight(1, init_block.get_socket(0),  self.road_network, 1)
-            block_s1.has_Guardrail = True
+            # block_s1.has_Guardrail = True
             block_s1.construct_from_config(
                 {
                     Parameter.length: 100
@@ -52,7 +52,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_s1)
 
             block_c1 = Curve(2, block_s1.get_socket(0),  self.road_network, 1)
-            block_c1.has_guardrail = True
+            # block_c1.has_guardrail = True
             block_c1.construct_from_config({
                 Parameter.length: 200,
                 Parameter.radius: 100,
@@ -62,7 +62,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c1)
 
             block_s2 = Straight(3, block_c1.get_socket(0),  self.road_network, 1)
-            block_s2.has_Guardrail = True
+            # block_s2.has_Guardrail = True
             block_s2.construct_from_config(
                 {
                     Parameter.length: 100,
@@ -71,7 +71,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_s2)
 
             block_c2 = Curve(4, block_s2.get_socket(0),  self.road_network, 1)
-            block_c2.has_guardrail = True
+            # block_c2.has_guardrail = True
             block_c2.construct_from_config({
                 Parameter.length: 100,
                 Parameter.radius: 60,
@@ -81,7 +81,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c2)
 
             block_c3 = Curve(5, block_c2.get_socket(0),  self.road_network, 1)
-            block_c3.has_guardrail = True
+            # block_c3.has_guardrail = True
             block_c3.construct_from_config({
                 Parameter.length: 100,
                 Parameter.radius: 60,
@@ -91,7 +91,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c3)
 
             block_s3 = Straight(6, block_c3.get_socket(0),  self.road_network, 1)
-            block_s3.has_Guardrail = True
+            # block_s3.has_Guardrail = True
             block_s3.construct_from_config(
                 {
                     Parameter.length: 200,
@@ -100,7 +100,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_s3)
 
             block_c4 = Curve(7, block_s3.get_socket(0),  self.road_network, 1)
-            block_c4.has_guardrail = True
+            # block_c4.has_guardrail = True
             block_c4.construct_from_config({
                 Parameter.length: 80,
                 Parameter.radius: 40,
@@ -110,7 +110,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c4)
 
             block_c5 = Curve(8, block_c4.get_socket(0),  self.road_network, 1)
-            block_c5.has_guardrail = True
+            # block_c5.has_guardrail = True
             block_c5.construct_from_config({
                 Parameter.length: 40,
                 Parameter.radius: 50,
@@ -120,7 +120,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c5)
 
             block_c6 = Curve(9, block_c5.get_socket(0), self.road_network, 1)
-            block_c6.has_guardrail = True
+            # block_c6.has_guardrail = True
             block_c6.construct_from_config({
                 Parameter.length: 40,
                 Parameter.radius: 50,
@@ -130,7 +130,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c6)
 
             block_c7 = Curve(10, block_c6.get_socket(0), self.road_network, 1)
-            block_c7.has_guardrail = True
+            # block_c7.has_guardrail = True
             block_c7.construct_from_config({
                 Parameter.length: 40,
                 Parameter.radius: 20,
@@ -140,14 +140,14 @@ class RacingMap(PGMap):
             self.blocks.append(block_c7)
 
             block_s4 = Straight(11, block_c7.get_socket(0), self.road_network, 1)
-            block_s4.has_Guardrail = True
+            # block_s4.has_Guardrail = True
             block_s4.construct_from_config({
                 Parameter.length: 100,
             }, parent_node_path, physics_world)
             self.blocks.append(block_s4)
 
             block_c8 = Curve(12, block_s4.get_socket(0), self.road_network, 1)
-            block_c8.has_guardrail = True
+            # block_c8.has_guardrail = True
             block_c8.construct_from_config({
                 Parameter.length: 100,
                 Parameter.radius: 40,
@@ -175,11 +175,13 @@ class RacingMap(PGMap):
             # )
             # self.blocks.append(block_s1)
             import random
-            curve_direction = random.randint(0, 1)
-            curve_len = random.randint(50, 80)
+            # curve_direction = random.randint(0, 1)
+            curve_direction = 0
+            # curve_len = random.randint(50, 80)
+            curve_len = 60
 
             block_c1 = Curve(1, init_block.get_socket(0), self.road_network, 1)
-            block_c1.has_guardrail = True
+            # block_c1.has_guardrail = True
             block_c1.construct_from_config({
                 Parameter.length: curve_len,
                 Parameter.radius: 50,
@@ -189,7 +191,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c1)
 
             block_s2 = Straight(2, block_c1.get_socket(0), self.road_network, 1)
-            block_s2.has_Guardrail = True
+            # block_s2.has_Guardrail = True
             block_s2.construct_from_config(
                 {
                     Parameter.length: 5,
@@ -198,7 +200,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_s2)
 
             block_c2 = Curve(3, block_s2.get_socket(0), self.road_network, 1)
-            block_c2.has_guardrail = True
+            # block_c2.has_guardrail = True
             block_c2.construct_from_config({
                 Parameter.length: curve_len,
                 Parameter.radius: 50,
@@ -208,7 +210,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c2)
 
             block_c3 = Curve(4, block_c2.get_socket(0), self.road_network, 1)
-            block_c3.has_guardrail = True
+            # block_c3.has_guardrail = True
             block_c3.construct_from_config({
                 Parameter.length: curve_len,
                 Parameter.radius: 50,
@@ -218,7 +220,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_c3)
 
             block_s3 = Straight(5, block_c3.get_socket(0), self.road_network, 1)
-            block_s3.has_Guardrail = True
+            # block_s3.has_Guardrail = True
             block_s3.construct_from_config(
                 {
                     Parameter.length: 5,
@@ -227,7 +229,7 @@ class RacingMap(PGMap):
             self.blocks.append(block_s3)
 
             block_c4 = Curve(6, block_s3.get_socket(0), self.road_network, 1)
-            block_c4.has_guardrail = True
+            # block_c4.has_guardrail = True
             block_c4.construct_from_config({
                 Parameter.length: curve_len - 2,
                 Parameter.radius: 50,
@@ -272,7 +274,23 @@ class RacingEnv(MetaDriveEnv):
     #     return MultiAgentMetaDrive.default_config().update(MARoundaboutConfig, allow_add_new_key=True)
     def __init__(self, config: Union[dict, None] = None, map_type = None):
         super(RacingEnv, self).__init__(config)
-        self.map_type = map_type
+        self.map_type = "train"
+
+    def setup_engine(self):
+        super(RacingEnv, self).setup_engine()
+        # self.engine.update_manager("spawn_manager", RoundaboutSpawnManager())
+        map_manager = RacingMapManager(map_type=self.map_type)
+        # map_manager.map_type = self.map_type
+        self.engine.update_manager("map_manager", map_manager)
+
+
+class RacingTrounamentEnv(MetaDriveEnv):
+    # @staticmethod
+    # def default_config() -> Config:
+    #     return MultiAgentMetaDrive.default_config().update(MARoundaboutConfig, allow_add_new_key=True)
+    def __init__(self, config: Union[dict, None] = None, map_type = None):
+        super(RacingEnv, self).__init__(config)
+        self.map_type = "tournament"
 
     def setup_engine(self):
         super(RacingEnv, self).setup_engine()
@@ -292,7 +310,7 @@ if __name__ == "__main__":
         # num_agents=2,
         use_render=False,
         manual_control=True,
-        traffic_density=0,
+        traffic_density=0.1,
         num_scenarios=10000,
         random_agent_model=False,
         top_down_camera_initial_x=95,
@@ -323,7 +341,7 @@ if __name__ == "__main__":
     # )
     parser = argparse.ArgumentParser()
     args = parser.parse_args()
-    env = RacingEnv(config=Racing_config, map_type="tournament")
+    env = RacingEnv(config=Racing_config, map_type="train")
 
     try:
         o, _ = env.reset()
@@ -338,6 +356,7 @@ if __name__ == "__main__":
                 env.reset(env.current_seed + 1)
                 env.current_track_vehicle.expert_takeover = True
                 print(g)
+                exit()
     except Exception as e:
         raise e
     finally:

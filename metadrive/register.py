@@ -27,6 +27,10 @@ metadrive_environment_dict = {
             "start_seed": 1000,
             "num_scenarios": 1
         },
+    "MetaDrive-racing-tournament-v0": {
+        "start_seed": 1000,
+        "num_scenarios": 1
+    },
     # "MetaDrive-test-v0": {
     #     "start_seed": 0,
     #     "num_scenarios": 200
