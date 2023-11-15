@@ -6,7 +6,7 @@ import numpy as np
 
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.envs.real_data_envs.nuscenes_env import NuScenesEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -215,7 +215,7 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
 
 
 def test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, render_load_env=False):
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         dict(
             data_directory=AssetLoader.file_path("nuscenes", unix_style=False),
             agent_policy=ReplayEgoCarPolicy,
@@ -239,7 +239,7 @@ def test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, rend
 
     try:
         print("===== Start restoring =====")
-        env = NuScenesEnv(
+        env = ScenarioEnv(
             dict(
                 agent_policy=ReplayEgoCarPolicy,
                 data_directory=dir,
@@ -371,7 +371,7 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
 
 def test_nuscenes_export_and_original_consistency(num_scenarios=7, render_export_env=False):
     assert num_scenarios <= 7
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         dict(
             data_directory=AssetLoader.file_path("nuscenes", unix_style=False),
             agent_policy=ReplayEgoCarPolicy,

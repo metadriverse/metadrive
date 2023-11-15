@@ -1,7 +1,7 @@
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.envs.real_data_envs.nuscenes_env import NuScenesEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 
 if __name__ == "__main__":
 
@@ -15,7 +15,7 @@ if __name__ == "__main__":
         # rgb_cam.save_image(env.vehicle, "rgb_{}.jpg".format(h))
         # env.engine.screenshot()
 
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         {
             "use_render": True,
             "image_observation": False,
