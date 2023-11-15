@@ -23,18 +23,18 @@ class ColorLineNodePath(LineNodePath):
                 self.moveTo(*pointList[0])
                 for point, seg_color, in zip(pointList[1:], lineColor):
                     assert len(seg_color) == 4, "color vector should have 4 component, get {} instead".format(
-                        len(seg_color))
+                        len(seg_color)
+                    )
                     self.setColor(LVecBase4f(*seg_color))
                     self.drawTo(*point)
         self.create()
 
 
 class ColorSphereNodePath:
-
     def __init__(self, parent=None, scale=1):
-        scale/=10
+        scale /= 10
         from metadrive.engine.engine_utils import get_engine
-        self.scale=scale
+        self.scale = scale
         self.engine = get_engine()
         self.origin = NodePath("Point Debugger")
         self.origin.hide(CamMask.Shadow)
@@ -75,4 +75,3 @@ class ColorSphereNodePath:
         for np in self._existing_points:
             np.detachNode()
             self._dying_points.append(np)
-

@@ -11,7 +11,6 @@ class ObservationBase(ABC):
     """
     BaseObservation Class. Observation should implement all abstracted methods
     """
-
     def __init__(self, config):
         # assert not engine_initialized(), "Observations can not be created after initializing the simulation"
         self.config = deepcopy(config)
@@ -43,7 +42,7 @@ class DummyObservation(ObservationBase):
 
     @property
     def observation_space(self):
-        return gym.spaces.Box(-0.0, 1.0, shape=(1,), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(1, ), dtype=np.float32)
 
     def observe(self, *args, **kwargs):
         return np.array([0])

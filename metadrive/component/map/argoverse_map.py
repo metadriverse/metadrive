@@ -161,13 +161,7 @@ if __name__ == "__main__":
     xmax = xcenter + 80  # 150
     ymin = ycenter - 80  # 150
     ymax = ycenter + 80  # 150
-    map = ArgoverseMap(
-        {
-            "city": "PIT",
-            "center": ArgoverseMap.metadrive_vector([xcenter, ycenter]),
-            "radius": 100
-        }
-    )
+    map = ArgoverseMap({"city": "PIT", "center": ArgoverseMap.metadrive_vector([xcenter, ycenter]), "radius": 100})
     engine.map_manager.load_map(map)
     engine.enableMouse()
 
