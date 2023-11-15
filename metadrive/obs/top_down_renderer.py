@@ -26,7 +26,7 @@ def draw_top_down_map(
     resolution: Iterable = (512, 512),
     semantic_map=True,
     return_surface=False,
-    film_size=None,
+    film_size=(2000, 2000),
     scaling=None,
     semantic_broken_line=True
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
