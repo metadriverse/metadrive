@@ -3,6 +3,7 @@ import time
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.component.sensors.semantic_camera import SemanticCamera
 
 NuScenesEnv = ScenarioEnv
 
@@ -12,7 +13,7 @@ if __name__ == "__main__":
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": True,
-            "show_interface": False,
+            "show_interface": True,
             # "need_lane_localization": False,
             # "image_observation": True,
             "show_logo": False,
@@ -26,14 +27,16 @@ if __name__ == "__main__":
             "show_fps": True,
             "show_sidewalk": True,
             "show_crosswalk": True,
+            "sensors": {"semantic": (SemanticCamera, 200, 100)},
             # "pstats": True,
             # "use_mesh_terrain": True,
-            # "debug": True,
+            "debug": True,
             "no_static_vehicles": False,
             # "pstats": True,
-            "render_pipeline": True,
+            # "render_pipeline": True,
             "window_size": (1600, 900),
             "camera_dist": 9,
+            "interface_panel": ["semantic"],
             "start_scenario_index": 0,
             "num_scenarios": 10,
             # "force_reuse_object_name": True,

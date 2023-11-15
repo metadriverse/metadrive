@@ -133,7 +133,7 @@ class CollisionGroup(Mask):
     InvisibleWall = BitMask32.bit(8)
     LidarBroadDetector = BitMask32.bit(9)
     TrafficParticipants = BitMask32.bit(10)
-    CROSSWALK = BitMask32.bit(11)
+    Crosswalk = BitMask32.bit(11)
 
     @classmethod
     def collision_rules(cls):
@@ -152,7 +152,7 @@ class CollisionGroup(Mask):
             (cls.Terrain, cls.LidarBroadDetector, False),
             (cls.Terrain, cls.TrafficObject, True),
             (cls.Terrain, cls.TrafficParticipants, True),
-            (cls.Terrain, cls.CROSSWALK, False),
+            (cls.Terrain, cls.Crosswalk, False),
 
             # block collision
             (cls.BrokenLaneLine, cls.BrokenLaneLine, False),
@@ -165,7 +165,7 @@ class CollisionGroup(Mask):
             (cls.BrokenLaneLine, cls.LidarBroadDetector, False),
             (cls.BrokenLaneLine, cls.TrafficObject, True),
             (cls.BrokenLaneLine, cls.TrafficParticipants, True),
-            (cls.BrokenLaneLine, cls.CROSSWALK, False),
+            (cls.BrokenLaneLine, cls.Crosswalk, False),
 
             # vehicle collision
             (cls.Vehicle, cls.Vehicle, True),
@@ -176,7 +176,7 @@ class CollisionGroup(Mask):
             (cls.Vehicle, cls.LidarBroadDetector, True),
             (cls.Vehicle, cls.TrafficObject, True),
             (cls.Vehicle, cls.TrafficParticipants, True),
-            (cls.Vehicle, cls.CROSSWALK, True),
+            (cls.Vehicle, cls.Crosswalk, True),
 
             # lane surface
             (cls.LaneSurface, cls.LaneSurface, False),
@@ -186,7 +186,7 @@ class CollisionGroup(Mask):
             (cls.LaneSurface, cls.LidarBroadDetector, False),
             (cls.LaneSurface, cls.TrafficObject, True),
             (cls.LaneSurface, cls.TrafficParticipants, True),
-            (cls.LaneSurface, cls.CROSSWALK, False),
+            (cls.LaneSurface, cls.Crosswalk, False),
 
             # continuous lane line
             (cls.ContinuousLaneLine, cls.ContinuousLaneLine, False),
@@ -195,7 +195,7 @@ class CollisionGroup(Mask):
             (cls.ContinuousLaneLine, cls.LidarBroadDetector, False),
             (cls.ContinuousLaneLine, cls.TrafficObject, False),
             (cls.ContinuousLaneLine, cls.TrafficParticipants, True),
-            (cls.ContinuousLaneLine, cls.CROSSWALK, False),
+            (cls.ContinuousLaneLine, cls.Crosswalk, False),
 
             # invisible wall
             (cls.InvisibleWall, cls.InvisibleWall, False),
@@ -203,29 +203,29 @@ class CollisionGroup(Mask):
             (cls.InvisibleWall, cls.LidarBroadDetector, True),
             (cls.InvisibleWall, cls.TrafficObject, False),
             (cls.InvisibleWall, cls.TrafficParticipants, True),
-            (cls.InvisibleWall, cls.CROSSWALK, False),
+            (cls.InvisibleWall, cls.Crosswalk, False),
 
             # side walk
             (cls.Sidewalk, cls.Sidewalk, False),
             (cls.Sidewalk, cls.LidarBroadDetector, False),
             (cls.Sidewalk, cls.TrafficObject, True),
             (cls.Sidewalk, cls.TrafficParticipants, True),  # don't allow sidewalk contact
-            (cls.Sidewalk, cls.CROSSWALK, False),  # don't allow sidewalk contact
+            (cls.Sidewalk, cls.Crosswalk, False),  # don't allow sidewalk contact
 
             # LidarBroadDetector
             (cls.LidarBroadDetector, cls.LidarBroadDetector, False),
             (cls.LidarBroadDetector, cls.TrafficObject, True),
             (cls.LidarBroadDetector, cls.TrafficParticipants, True),
-            (cls.LidarBroadDetector, cls.CROSSWALK, False),
+            (cls.LidarBroadDetector, cls.Crosswalk, False),
 
             # TrafficObject
             (cls.TrafficObject, cls.TrafficObject, True),
             (cls.TrafficObject, cls.TrafficParticipants, True),
-            (cls.TrafficObject, cls.CROSSWALK, False),
+            (cls.TrafficObject, cls.Crosswalk, False),
 
             # TrafficParticipant
             (cls.TrafficParticipants, cls.TrafficParticipants, True),
-            (cls.TrafficParticipants, cls.CROSSWALK, True)
+            (cls.TrafficParticipants, cls.Crosswalk, True)
         ]
 
     @classmethod

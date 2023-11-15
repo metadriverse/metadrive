@@ -362,11 +362,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 np.reparentTo(self.crosswalk_node_path)
                 np.setPos(0, 0, -0.05)
 
-                body_node = BulletRigidBodyNode(MetaDriveType.CROSSWALK)
+                body_node = BulletGhostNode(MetaDriveType.CROSSWALK)
                 body_node.setKinematic(False)
                 body_node.setStatic(True)
                 body_np = self.crosswalk_node_path.attachNewNode(body_node)
-                body_np.setPos(0, 0, -0.05)
+                # A trick allowing collision with sidewalk
+                body_np.setPos(0, 0, 0.5)
                 self._node_path_list.append(body_np)
 
                 geom = np.node().getGeom(0)
@@ -376,5 +377,5 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
                 body_node.addShape(shape)
                 self.static_nodes.append(body_node)
-                body_node.setIntoCollideMask(CollisionGroup.CROSSWALK)
+                body_node.setIntoCollideMask(CollisionGroup.Crosswalk)
                 self._node_path_list.append(np)
