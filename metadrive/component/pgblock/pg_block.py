@@ -21,7 +21,6 @@ class PGBlockSocket:
     Positive_road is right road, and Negative road is left road on which cars drive in reverse direction
     BlockSocket is a part of block used to connect other blocks
     """
-
     def __init__(self, positive_road: Road, negative_road: Road = None):
         self.positive_road = positive_road
         self.negative_road = negative_road if negative_road else None
@@ -74,14 +73,13 @@ class PGBlock(BaseBlock):
     When single-direction block created, road_2 in block socket is useless.
     But it's helpful when a town is created.
     """
-
     def __init__(
-            self,
-            block_index: int,
-            pre_block_socket: PGBlockSocket,
-            global_network: NodeRoadNetwork,
-            random_seed,
-            ignore_intersection_checking=False
+        self,
+        block_index: int,
+        pre_block_socket: PGBlockSocket,
+        global_network: NodeRoadNetwork,
+        random_seed,
+        ignore_intersection_checking=False
     ):
 
         self.name = str(block_index) + self.ID
@@ -332,4 +330,5 @@ class PGBlock(BaseBlock):
             else:
                 raise ValueError(
                     "You have to modify this function and implement a constructing method for line type: {}".
-                    format(line_type))
+                    format(line_type)
+                )

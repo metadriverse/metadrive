@@ -89,12 +89,6 @@ class AbstractLane(MetaDriveType):
         return False
 
     def destroy(self):
-        try:
-            from metadrive.base_class.base_object import clear_node_list
-        except ImportError:
-            self._node_path_list.clear()
-        else:
-            clear_node_list(self._node_path_list)
         self._polygon = None
         self._shapely_polygon = None
 

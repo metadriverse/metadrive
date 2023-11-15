@@ -27,7 +27,9 @@ if __name__ == "__main__":
             "show_fps": True,
             "show_sidewalk": True,
             "show_crosswalk": True,
-            "sensors": {"semantic": (SemanticCamera, 200, 100)},
+            "sensors": {
+                "semantic": (SemanticCamera, 200, 100)
+            },
             # "pstats": True,
             # "use_mesh_terrain": True,
             "debug": True,

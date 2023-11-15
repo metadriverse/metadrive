@@ -1,6 +1,6 @@
 import copy
 
-from typing import Union, Any
+from typing import Union, Any, Dict
 
 import numpy as np
 
@@ -221,18 +221,18 @@ class MultiAgentEnvironment(gymnasium.Env):
         self.steps = 0
         self.reward_source = gymnasium.spaces.Box(0, 100, dtype=np.float32)
 
-    def _generate_observations(self) -> dict[str, np.ndarray]:
+    def _generate_observations(self) -> Dict[str, np.ndarray]:
         return {agent: self.observation_space.sample() for agent in sorted(self.agents)}
 
-    def _generate_rewards(self) -> dict[str, float]:
+    def _generate_rewards(self) -> Dict[str, float]:
         return {agent: float(self.reward_source.sample().item()) for agent in sorted(self.agents)}
 
-    def _validate_actions(self, actions: dict[str, np.ndarray]) -> bool:
+    def _validate_actions(self, actions: Dict[str, np.ndarray]) -> bool:
         if set(actions.keys()) != self.agents:
             return False
         return all(self.action_space.contains(action) for action in actions.values())
 
-    def step(self, action: dict[str, np.ndarray]):
+    def step(self, action: Dict[str, np.ndarray]):
         assert len(self.agents) > 0
         assert self._validate_actions(action)
 
@@ -264,7 +264,7 @@ class MultiAgentEnvironment(gymnasium.Env):
         return self._generate_observations(), {agent: {} for agent in self.agents}
 
 
-def assert_allclose_dict(a: dict[str, np.ndarray], b: dict[str, np.ndarray]):
+def assert_allclose_dict(a: Dict[str, np.ndarray], b: Dict[str, np.ndarray]):
     a_keys = sorted(a.keys())
     b_keys = sorted(b.keys())
 
