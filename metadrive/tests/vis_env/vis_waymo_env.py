@@ -3,7 +3,7 @@ This script demonstrates how to use the environment where traffic and road map a
 """
 import random
 
-from metadrive.component.vehicle_navigation_module.trajectory_navigation import WaymoTrajectoryNavigation
+from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             "crash_vehicle_done": False,
             "crash_vehicle_penalty": 0,
             "vehicle_config": {
-                "navigation_module": WaymoTrajectoryNavigation,
+                "navigation_module": TrajectoryNavigation,
                 "show_side_detector": True,
                 "show_lane_line_detector": True,
             }

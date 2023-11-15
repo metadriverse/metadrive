@@ -12,9 +12,9 @@ from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.manager.traffic_manager import PGTrafficManager
 from metadrive.manager.traffic_manager import TrafficMode
-from metadrive.manager.waymo_data_manager import WaymoDataManager
-from metadrive.manager.waymo_map_manager import WaymoMapManager
-from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
+from metadrive.manager.scenario_data_manager import ScenarioDataManager
+from metadrive.manager.scenario_map_manager import ScenarioMapManager
+from metadrive.manager.scenario_traffic_manager import ScenarioTrafficManager
 from metadrive.utils import get_np_random
 
 MIX_WAYMO_PG_ENV_CONFIG = dict(
@@ -94,8 +94,8 @@ class MixWaymoPGEnv(WaymoEnv):
 
     def setup_engine(self):
         # Initialize all managers
-        self.waymo_map_manager = WaymoMapManager()
-        self.waymo_traffic_manager = WaymoTrafficManager()
+        self.waymo_map_manager = ScenarioMapManager()
+        self.waymo_traffic_manager = ScenarioTrafficManager()
 
         self.pg_map_manager = PGMapManager()
         self.pg_traffic_manager = PGTrafficManager()
@@ -103,7 +103,7 @@ class MixWaymoPGEnv(WaymoEnv):
         super(WaymoEnv, self).setup_engine()
         if self.real_data_ratio > 0:
             self.is_current_real_data = True
-            self.engine.register_manager("data_manager", WaymoDataManager())
+            self.engine.register_manager("data_manager", ScenarioDataManager())
             self.engine.register_manager("map_manager", self.waymo_map_manager)
             if not self.config["no_traffic"]:
                 self.engine.register_manager("traffic_manager", self.waymo_traffic_manager)

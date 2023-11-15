@@ -4,7 +4,7 @@ from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import initialize_engine, close_engine
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-from metadrive.manager.waymo_data_manager import WaymoDataManager
+from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
 
 
@@ -45,7 +45,7 @@ def test_waymo_map_memory_leak():
 
         lt = time.time()
 
-        engine.data_manager = WaymoDataManager()
+        engine.data_manager = ScenarioDataManager()
         engine.seed(0)
 
         lm = process_memory()

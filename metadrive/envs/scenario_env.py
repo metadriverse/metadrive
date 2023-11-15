@@ -11,7 +11,7 @@ from metadrive.manager.scenario_curriculum_manager import ScenarioCurriculumMana
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
-from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
+from metadrive.manager.scenario_traffic_manager import ScenarioTrafficManager
 from metadrive.obs.image_obs import ImageStateObservation
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -151,7 +151,7 @@ class ScenarioEnv(BaseEnv):
         self.engine.register_manager("data_manager", ScenarioDataManager())
         self.engine.register_manager("map_manager", ScenarioMapManager())
         if not self.config["no_traffic"]:
-            self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+            self.engine.register_manager("traffic_manager", ScenarioTrafficManager())
         if not self.config["no_light"]:
             self.engine.register_manager("light_manager", ScenarioLightManager())
         self.engine.register_manager("curriculum_manager", ScenarioCurriculumManager())

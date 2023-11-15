@@ -225,6 +225,3 @@ class TrajectoryNavigation(BaseNavigation):
     @property
     def current_heading_theta_at_long(self):
         return self.last_current_heading_theta_at_long[1]
-
-
-WaymoTrajectoryNavigation = TrajectoryNavigation
