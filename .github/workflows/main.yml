@@ -269,6 +269,26 @@ jobs:
           cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/test_ipynb/
           pytest --nbmake -n=auto ./tests/test_ipynb/
 
+  test_doc_code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Blackbox tests
+        run: |
+          pip install cython
+          pip install numpy
+          pip install -e .
+          python -m metadrive.pull_asset
+          pip install pytest
+          pip install pytest-cov
+          cd metadrive/documentation
+          pip install nbmake pytest-xdist
+          TEST_DOC=1 pytest --nbmake -n=auto ./source
+
   test_ros:
     runs-on: ubuntu-22.04
     steps:
