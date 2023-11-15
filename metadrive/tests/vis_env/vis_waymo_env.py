@@ -6,7 +6,7 @@ import random
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
 class DemoWaymoEnv(WaymoEnv):
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     env = DemoWaymoEnv(
         {
             "manual_control": False,
-            "agent_policy": WaymoReplayEgoCarPolicy,
+            "agent_policy": ReplayEgoCarPolicy,
             "use_render": True,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
             "num_scenarios": 3,

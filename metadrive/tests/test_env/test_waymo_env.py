@@ -4,10 +4,10 @@ import numpy as np
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import WaymoIDMPolicy
-from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
-@pytest.mark.parametrize("policy", [WaymoIDMPolicy, WaymoReplayEgoCarPolicy])
+@pytest.mark.parametrize("policy", [WaymoIDMPolicy, ReplayEgoCarPolicy])
 def test_waymo_env(policy, render=False, num_scenarios=3):
     WaymoIDMPolicy.NORMAL_SPEED = 30
     asset_path = AssetLoader.asset_path
@@ -47,7 +47,7 @@ def test_store_map_memory_leakage(render=False):
             "no_traffic": False,
             "store_map": True,
             "use_render": render,
-            "agent_policy": WaymoReplayEgoCarPolicy,
+            "agent_policy": ReplayEgoCarPolicy,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
             "num_scenarios": 3
         }

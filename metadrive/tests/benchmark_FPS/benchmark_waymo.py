@@ -1,7 +1,7 @@
 import time
 
 from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
 def process_memory():
@@ -17,7 +17,7 @@ def benchmark_fps():
     env = WaymoEnv(
         {
             "use_render": False,
-            "agent_policy": WaymoReplayEgoCarPolicy,
+            "agent_policy": ReplayEgoCarPolicy,
             "no_traffic": False,
             "window_size": (1200, 800),
             "horizon": 1000,

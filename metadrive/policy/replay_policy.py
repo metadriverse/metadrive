@@ -67,10 +67,6 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
         return None  # Return None action so the base vehicle will not overwrite the steering & throttle
 
 
-WaymoReplayTrafficParticipantPolicy = ReplayTrafficParticipantPolicy
-ScenarioReplayTrafficParticipantPolicy = ReplayTrafficParticipantPolicy
-
-
 class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
     def get_trajectory_info(self, trajectory):
         # Directly get trajectory from data manager
@@ -83,7 +79,3 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
                 i,
             ))
         return ret
-
-
-WaymoReplayEgoCarPolicy = ReplayEgoCarPolicy
-ScenarioReplayEgoCarPolicy = ReplayEgoCarPolicy
