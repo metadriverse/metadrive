@@ -16,7 +16,7 @@ from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
 from metadrive.constants import TerminationState
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
-from metadrive.engine.logger import get_logger
+from metadrive.engine.logger import get_logger, set_log_level
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
@@ -149,7 +149,7 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
     # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
     auto_resize_window=True,
@@ -245,7 +245,8 @@ class BaseEnv(gym.Env):
     def __init__(self, config: dict = None):
         if config is None:
             config = {}
-        self.logger = get_logger(config.get("log_level", logging.DEBUG if config.get("debug", False) else logging.INFO))
+        self.logger = get_logger()
+        set_log_level(config.get("log_level", logging.DEBUG if config.get("debug", False) else logging.INFO))
         merged_config = self.default_config().update(config, False, ["target_vehicle_configs", "sensors"])
         global_config = self._post_process_config(merged_config)
         global_config["vehicle_config"]["main_camera"] = global_config["window_size"]
@@ -303,7 +304,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -484,9 +485,9 @@ class BaseEnv(gym.Env):
         :return: None
         """
         if self.logger is None:
-            self.logger = get_logger(
-                self.config.get("log_level", logging.DEBUG if self.config.get("debug", False) else logging.INFO)
-            )
+            self.logger = get_logger()
+            log_level = self.config.get("log_level", logging.DEBUG if self.config.get("debug", False) else logging.INFO)
+            set_log_level(log_level)
         self.lazy_init()  # it only works the first time when reset() is called to avoid the error when render
         self._reset_global_seed(seed)
         if self.engine is None:
@@ -719,19 +720,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

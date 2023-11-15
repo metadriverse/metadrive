@@ -1,4 +1,5 @@
 import logging
+from metadrive.engine.logger import get_logger
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -24,6 +25,8 @@ from metadrive.engine.core.pssm import PSSM
 from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
 from metadrive.utils.utils import is_mac, setup_logger
+
+logger = get_logger()
 
 
 def _suppress_warning():
@@ -172,6 +175,7 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
 
         super(EngineCore, self).__init__(windowType=self.mode)
+        self._all_panda_tasks = self.taskMgr.getAllTasks()
         if self.use_render_pipeline and self.mode != RENDER_MODE_NONE:
             self.render_pipeline.create(self)
 
@@ -188,7 +192,7 @@ class EngineCore(ShowBase.ShowBase):
                 props = WindowProperties()
                 props.setSize(self.global_config["window_size"][0], self.global_config["window_size"][1])
                 self.win.requestProperties(props)
-                logging.warning(
+                logger.warning(
                     "Since your screen is too small ({}, {}), we resize the window to {}.".format(
                         w, h, self.global_config["window_size"]
                     )
@@ -327,6 +331,7 @@ class EngineCore(ShowBase.ShowBase):
         # task manager
         self.taskMgr.remove("audioLoop")
 
+        # show coordinate
         self.coordinate_line = []
         if self.global_config["show_coordinates"]:
             self.show_coordinates()
@@ -378,20 +383,20 @@ class EngineCore(ShowBase.ShowBase):
             self.debug_node.hide()
 
     def report_body_nums(self, task):
-        logging.debug(self.physics_world.report_bodies())
+        logger.debug(self.physics_world.report_bodies())
         return task.done
 
     def close_world(self):
         self.taskMgr.stop()
-        # It will report a warning said AsynTaskChain is created when taskMgr.destroy() is called but a new showbase is
-        # created.
-        logging.debug(
+        logger.debug(
             "Before del taskMgr: task_chain_num={}, all_tasks={}".format(
                 self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
             )
         )
-        self.taskMgr.destroy()
-        logging.debug(
+        for tsk in self.taskMgr.getAllTasks():
+            if tsk not in self._all_panda_tasks:
+                self.taskMgr.remove(tsk)
+        logger.debug(
             "After del taskMgr: task_chain_num={}, all_tasks={}".format(
                 self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
             )
