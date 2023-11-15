@@ -1,12 +1,11 @@
 import math
 from abc import ABCMeta, abstractmethod
-from typing import Tuple
+from typing import Tuple, Union, AnyStr
 
 import numpy as np
 from shapely import geometry
 
 from metadrive.constants import MetaDriveType
-from metadrive.constants import PGLineType, PGLineColor
 from metadrive.utils import norm
 
 
@@ -14,14 +13,14 @@ class AbstractLane(MetaDriveType):
     """A lane on the road, described by its central curve."""
 
     metaclass__ = ABCMeta
-    length = 0  # lane length
-    start = None  # lane start position
-    end = None  # lane end position
+    length: float  # lane length
+    start: Tuple[float, float]  # lane start position
+    end: Tuple[float, float]  # lane end position
+    index: Union[Tuple, AnyStr]
 
     def __init__(self, type=MetaDriveType.LANE_SURFACE_STREET):
         super(AbstractLane, self).__init__(type)
         self.speed_limit = 1000  # should be set manually
-        self.index = None
         self._polygon = None
         self._shapely_polygon = None
         self.need_lane_localization = True
