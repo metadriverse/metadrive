@@ -16,11 +16,11 @@ class AbstractLane(MetaDriveType):
     length: float  # lane length
     start: Tuple[float, float]  # lane start position
     end: Tuple[float, float]  # lane end position
-    index: Union[Tuple, AnyStr]
 
     def __init__(self, type=MetaDriveType.LANE_SURFACE_STREET):
         super(AbstractLane, self).__init__(type)
         self.speed_limit = 1000  # should be set manually
+        self.index: Union[Tuple, AnyStr, None] = None
         self._polygon = None
         self._shapely_polygon = None
         self.need_lane_localization = True
