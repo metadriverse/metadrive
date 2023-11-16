@@ -50,7 +50,7 @@ class PGLane(AbstractLane):
             node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
             self._node_path_list.extend(node_path_list)
 
-    def construct_sidewalk(self, block, sidewalk_height=None):
+    def construct_sidewalk(self, block, sidewalk_height=None, line_index=1):
         """
         Construct the sidewalk for this lane
 
@@ -75,6 +75,8 @@ class PGLane(AbstractLane):
         )
         start_lat = +self.width_at(0) / 2 + 0.2
         side_lat = start_lat + PGDrivableAreaProperty.SIDEWALK_WIDTH
+        start_lat *= line_index
+        side_lat *= line_index
         if self.radius != 0 and side_lat > self.radius:
             raise ValueError(
                 "The sidewalk width ({}) is too large."
@@ -119,7 +121,7 @@ class PGLane(AbstractLane):
                 self.construct_sidewalk(block)
             elif line_type == PGLineType.BARRIER:
                 self.construct_continuous_line(block, lateral, line_color, line_type)
-                self.construct_sidewalk(block, sidewalk_height=PGDrivableAreaProperty.BARRIER_THICKNESS)
+                self.construct_sidewalk(block, sidewalk_height=PGDrivableAreaProperty.BARRIER_THICKNESS, line_index=idx)
             elif line_type == PGLineType.NONE:
                 continue
             else:
