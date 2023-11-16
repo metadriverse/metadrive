@@ -45,7 +45,6 @@ Please feel free to contact us if you have any suggestions or ideas!
    reward_cost_and_termination_function.rst
    action_and_dynamics.rst
    config_system.rst
-   read_data_from_dataset.rst
    training_with_rllib.rst
 
 .. toctree::
