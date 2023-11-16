@@ -47,6 +47,8 @@ class ScenarioBlock(BaseBlock):
                     ScenarioDescription.TYPE: MetaDriveType.CROSSWALK,
                     ScenarioDescription.POLYGON: data[ScenarioDescription.POLYGON]
                 }
+            else:
+                pass
         return True
 
     def create_in_world(self):

@@ -7,7 +7,6 @@ import numpy as np
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.scenario_env import ScenarioEnv
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.scenario.utils import NP_ARRAY_DECIMAL
@@ -71,7 +70,7 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
         # pass
 
     # ===== Save data of the restoring environment =====
-    env = WaymoEnv(
+    env = ScenarioEnv(
         dict(
             agent_policy=ReplayEgoCarPolicy,
             data_directory=dir1,
@@ -130,7 +129,7 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
         # pass
 
     # ===== Save data of the restoring environment =====
-    env = WaymoEnv(
+    env = ScenarioEnv(
         dict(
             agent_policy=ReplayEgoCarPolicy,
             data_directory=dir1,
@@ -164,11 +163,12 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
 
 
 def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False):
-    env = WaymoEnv(
+    env = ScenarioEnv(
         dict(
             agent_policy=ReplayEgoCarPolicy,
             use_render=render_export_env,
             start_scenario_index=0,
+            data_directory=AssetLoader.file_path("waymo", unix_style=False),
             num_scenarios=num_scenarios
         )
     )
@@ -188,7 +188,7 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
 
     try:
         print("===== Start restoring =====")
-        env = WaymoEnv(
+        env = ScenarioEnv(
             dict(
                 agent_policy=ReplayEgoCarPolicy,
                 data_directory=dir,
@@ -267,7 +267,7 @@ def test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, rend
         #     shutil.rmtree(dir)
 
 
-def compare_exported_scenario_with_origin(scenarios, data_manager, data_dir="waymo"):
+def compare_exported_scenario_with_origin(scenarios, data_manager, data_dir="waymo", compare_map=False):
     _, _, mapping = read_dataset_summary(AssetLoader.file_path(data_dir, unix_style=False))
     for index, scenario in scenarios.items():
         file_name = data_manager.summary_lookup[index]
@@ -276,6 +276,13 @@ def compare_exported_scenario_with_origin(scenarios, data_manager, data_dir="way
             origin_data = pickle.load(file)
         export_data = scenario
         new_tracks = export_data["tracks"]
+
+        for data in export_data["map_features"].values():
+            assert "type" in data and ("polygon" in data or "polyline" in data)
+
+        if compare_map:
+            assert len(origin_data["map_features"]) == len(export_data["map_features"])
+
         original_ids = [new_tracks[obj_name]["metadata"]["original_id"] for obj_name in new_tracks.keys()]
         # assert len(set(original_ids)) == len(origin_data["tracks"]), "Object Num mismatch!"
         for obj_id, track in new_tracks.items():
@@ -349,12 +356,13 @@ def compare_exported_scenario_with_origin(scenarios, data_manager, data_dir="way
 
 
 def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False):
-    env = WaymoEnv(
+    env = ScenarioEnv(
         dict(
             agent_policy=ReplayEgoCarPolicy,
             use_render=render_export_env,
             start_scenario_index=0,
             num_scenarios=num_scenarios,
+            data_directory=AssetLoader.file_path("waymo", unix_style=False),
             # force_reuse_object_name=True, # Don't allow discontinuous trajectory in our system
         )
     )
@@ -386,16 +394,16 @@ def test_nuscenes_export_and_original_consistency(num_scenarios=7, render_export
         scenarios, done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(3, 3 + num_scenarios)], verbose=True
         )
-        compare_exported_scenario_with_origin(scenarios, env.engine.data_manager, data_dir="nuscenes")
+        compare_exported_scenario_with_origin(scenarios, env.engine.data_manager, data_dir="nuscenes", compare_map=True)
     finally:
         env.close()
 
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
-    test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
+    # test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False)
     # test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)
     # test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, render_load_env=False)
-    # test_nuscenes_export_and_original_consistency()
+    test_nuscenes_export_and_original_consistency()
