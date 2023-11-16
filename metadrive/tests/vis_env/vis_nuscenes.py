@@ -64,36 +64,39 @@ if __name__ == "__main__":
     start = time.time()
     reset_used_time = 0
     s = 0
-    while True:
-        # for i in range(10):
-        start_reset = time.time()
-        env.reset(seed=0)
+    # while True:
+    # for i in range(10):
+    start_reset = time.time()
+    env.reset(seed=0)
 
-        reset_used_time += time.time() - start_reset
-        reset_num += 1
-        for t in range(10000):
-            o, r, tm, tc, info = env.step([1, 0.88])
-            assert env.observation_space.contains(o)
-            s += 1
-            if env.config["use_render"]:
-                env.render(
-                    text={
-                        "seed": env.current_seed,
-                        "num_map": info["num_stored_maps"],
-                        "data_coverage": info["data_coverage"],
-                        "reward": r,
-                        "heading_r": info["step_reward_heading"],
-                        "lateral_r": info["step_reward_lateral"],
-                        "smooth_action_r": info["step_reward_action_smooth"]
-                    },
-                    # mode="topdown"
-                )
-            # if tm or tc:
-            #     print(
-            #         "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
-            #             time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num
-            #         )
-            #     )
-            #     print("seed:{}, success".format(env.engine.global_random_seed))
-            #     print(list(env.engine.curriculum_manager.recent_success.dict.values()))
-            #     break
+    reset_used_time += time.time() - start_reset
+    reset_num += 1
+    for t in range(10000):
+        o, r, tm, tc, info = env.step([1, 0.88])
+        if t==20:
+            env.close()
+            break
+        assert env.observation_space.contains(o)
+        s += 1
+        if env.config["use_render"]:
+            env.render(
+                text={
+                    "seed": env.current_seed,
+                    "num_map": info["num_stored_maps"],
+                    "data_coverage": info["data_coverage"],
+                    "reward": r,
+                    "heading_r": info["step_reward_heading"],
+                    "lateral_r": info["step_reward_lateral"],
+                    "smooth_action_r": info["step_reward_action_smooth"]
+                },
+                # mode="topdown"
+            )
+        # if tm or tc:
+        #     print(
+        #         "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
+        #             time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num
+        #         )
+        #     )
+        #     print("seed:{}, success".format(env.engine.global_random_seed))
+        #     print(list(env.engine.curriculum_manager.recent_success.dict.values()))
+        #     break

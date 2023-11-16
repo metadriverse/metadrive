@@ -37,8 +37,6 @@ def _clean_a_node_path(node_path):
 
 
 def clear_node_list(node_path_list):
-    from metadrive.engine.engine_utils import get_engine
-    engine = get_engine()
     for node_path in node_path_list:
         if isinstance(node_path, NodePath):
             _clean_a_node_path(node_path)
@@ -56,19 +54,12 @@ def clear_node_list(node_path_list):
             # It saves Waymo env!!!
             node_path.destroy()
 
-        elif isinstance(node_path, BulletBodyNode):
-            pass
-
         elif isinstance(node_path, PandaNode):
             node_path.removeAllChildren()
             node_path.clearPythonTag(node_path.getName())
 
         else:
             raise ValueError(node_path)
-
-        if engine is not None:
-            engine.physics_world.static_world.remove(node_path)
-            engine.physics_world.dynamic_world.remove(node_path)
 
 
 class PhysicsNodeList(list):
@@ -102,9 +93,12 @@ class PhysicsNodeList(list):
                 break
         self.attached = False
 
-    def destroy_node_list(self, bullet_world: BulletWorld):
+    def destroy_node_list(self):
         for node in self:
-            bullet_world.remove(node)
+            if isinstance(node, BaseGhostBodyNode) or isinstance(node, BaseRigidBodyNode):
+                node.destroy()
+            if isinstance(node, BulletBodyNode):
+                node.removeAllChildren()
         self.clear()
 
 
@@ -265,14 +259,15 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         else:
             engine = get_engine()
             if engine is not None:
-                self.detach_from_world(engine.physics_world)
+                if self.is_attached():
+                    self.detach_from_world(engine.physics_world)
                 if self._body is not None and hasattr(self.body, "object"):
                     self.body.generated_object = None
                 if self.origin is not None:
                     self.origin.removeNode()
 
-                self.dynamic_nodes.destroy_node_list(bullet_world=engine.physics_world.dynamic_world)
-                self.static_nodes.destroy_node_list(bullet_world=engine.physics_world.static_world)
+                self.dynamic_nodes.destroy_node_list()
+                self.static_nodes.destroy_node_list()
 
             clear_node_list(self._node_path_list)
 

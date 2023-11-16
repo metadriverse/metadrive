@@ -360,7 +360,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         Construct the crosswalk for semantic Cam
         """
         if self.engine is None or (self.engine.global_config["show_crosswalk"] and not self.engine.use_render_pipeline):
-            for cross_id, crosswalk in self.crosswalks.values():
+            for cross_id, crosswalk in self.crosswalks.items():
                 polygon = crosswalk["polygon"]
                 np = make_polygon_model(polygon, 0.0)
                 np.reparentTo(self.crosswalk_node_path)
