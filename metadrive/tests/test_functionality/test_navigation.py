@@ -2,6 +2,7 @@ from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.component.vehicle.PID_controller import PIDController
 from metadrive.envs.metadrive_env import MetaDriveEnv
+from metadrive.constants import DEFAULT_AGENT
 
 
 class Target:
@@ -51,7 +52,7 @@ def test_navigation(vis=False):
     steering_error = o[0] - target.lateral
     steering = steering_controller.get_result(steering_error)
 
-    acc_error = env.vehicles[env.DEFAULT_AGENT].speed_km_h - target.speed_km_h
+    acc_error = env.vehicles[DEFAULT_AGENT].speed_km_h - target.speed_km_h
     acc = acc_controller.get_result(acc_error)
     for i in range(1, 1000000 if vis else 2000):
         o, r, tm, tc, info = env.step([-steering, acc])
@@ -61,7 +62,7 @@ def test_navigation(vis=False):
         steering = steering_controller.get_result(steering_error)
 
         t_speed = target.speed_km_h if abs(o[12] - 0.5) < 0.01 else target.speed_km_h - 10
-        acc_error = env.vehicles[env.DEFAULT_AGENT].speed_km_h - t_speed
+        acc_error = env.vehicles[DEFAULT_AGENT].speed_km_h - t_speed
         acc = acc_controller.get_result(acc_error)
         if vis:
             if i < 700:
@@ -86,7 +87,7 @@ def test_navigation(vis=False):
             steering = steering_controller.get_result(steering_error, o[11])
 
             acc_controller.reset()
-            acc_error = env.vehicles[env.DEFAULT_AGENT].speed_km_h - target.speed_km_h
+            acc_error = env.vehicles[DEFAULT_AGENT].speed_km_h - target.speed_km_h
             acc = acc_controller.get_result(acc_error)
     env.close()
 
