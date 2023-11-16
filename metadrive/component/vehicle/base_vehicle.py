@@ -753,7 +753,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.crash_sidewalk = True
             contacts.add(MetaDriveType.BOUNDARY_LINE)
 
-        elif res.hasHit() and res.getNode().getName() == MetaDriveType.BOUNDARY_SIDEWALK:
+        elif res.hasHit() and (
+                res.getNode().getName() == MetaDriveType.BOUNDARY_SIDEWALK or
+                res.getNode().getName() == MetaDriveType.BARRIER
+        ):
             self.crash_sidewalk = True
             contacts.add(MetaDriveType.BOUNDARY_SIDEWALK)
 

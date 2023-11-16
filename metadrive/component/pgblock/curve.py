@@ -110,6 +110,7 @@ class CurveWithGuardrail(Curve):
             self.block_network,
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking,
+            center_line_type=PGLineType.BARRIER,
             side_lane_line_type=PGLineType.BARRIER
         )
 
@@ -126,7 +127,8 @@ class CurveWithGuardrail(Curve):
             self.block_network,
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking,
-            side_lane_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
         ) and no_cross
 
         # common properties

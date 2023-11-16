@@ -73,7 +73,8 @@ class StraightWithGuardrail(Straight):
             self.block_network,
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking,
-            side_lane_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
         )
         self.add_sockets(PGBlockSocket(socket, _socket))
         return no_cross

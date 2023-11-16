@@ -69,6 +69,7 @@ class PGLane(AbstractLane):
         if str(self.index) in block.sidewalks:
             return
         polygon = []
+        polygon2 = []
         longs = np.arange(
             0, self.length + PGDrivableAreaProperty.SIDEWALK_LENGTH, PGDrivableAreaProperty.SIDEWALK_LENGTH
         )
@@ -86,10 +87,20 @@ class PGLane(AbstractLane):
                 longitude = min(self.length + 0.1, longitude)
                 point = self.position(longitude, lateral)
                 polygon.append([point[0], point[1]])
+
+        for k, lateral in enumerate([start_lat, side_lat]):
+            if k == 1:
+                longs = longs[::-1]
+            for longitude in longs:
+                longitude = min(self.length + 0.1, longitude)
+                point = self.position(longitude, -lateral)
+                polygon2.append([point[0], point[1]])
+
                 # draw_lists[k].append([point[0], point[1], 1])
         # cloud_points_vis.drawLines(draw_lists)
         # cloud_points_vis.create()
         block.sidewalks[str(self.index)] = {"polygon": polygon, "height": sidewalk_height}
+        # block.sidewalks[str(self.index)] = {"polygon": polygon2, "height": sidewalk_height}
 
     def construct_lane_line_in_block(self, block, construct_left_right=(True, True)):
         """

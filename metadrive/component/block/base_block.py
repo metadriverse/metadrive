@@ -320,7 +320,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                     height = PGDrivableAreaProperty.SIDEWALK_THICKNESS
                 np = make_polygon_model(polygon, height)
                 np.reparentTo(self.sidewalk_node_path)
-                np.setPos(0, 0, PGDrivableAreaProperty.SIDEWALK_THICKNESS / 2)
+                np.setPos(0, 0, height / 2)
                 if self.render:
                     np.setTexture(self.side_texture)
                 # np.setTexture(self.ts_normal, self.side_normal)
