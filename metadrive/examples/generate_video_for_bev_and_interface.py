@@ -34,7 +34,7 @@ if __name__ == '__main__':
             start_seed=start_seed,
             random_traffic=False,
             use_render=True,
-            window_size=(1200, 800),
+            window_size=(900, 600),
             crash_vehicle_done=False,
             manual_control=True,  # For using expert policy. You don't need to control it.
             horizon=100,
