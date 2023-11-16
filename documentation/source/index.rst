@@ -71,7 +71,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    :maxdepth: 2
    :caption: Ecosystem
 
-   known_issues.rst
+   scenarionet.rst
 
 
 .. toctree::
