@@ -221,11 +221,9 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         """
         Load to world from memory
         """
-        if not self.origin.hasParent():
-            if self.render:
-                # double check :-)
-                assert isinstance(self.origin, NodePath), "No render model on node_path in this Element"
-                self.origin.reparentTo(parent_node_path)
+        if not self.is_attached():
+            assert isinstance(self.origin, NodePath), "No render model on node_path in this Element"
+            self.origin.reparentTo(parent_node_path)
             self.dynamic_nodes.attach_to_physics_world(physics_world.dynamic_world)
             self.static_nodes.attach_to_physics_world(physics_world.static_world)
             logger.debug("{} is attached to the world.".format(self.class_name))
@@ -236,7 +234,7 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         """
         It is not fully remove, it will be left in memory. if this element is useless in the future, call Func delete()
         """
-        if self.origin is not None and self.origin.hasParent():
+        if self.is_attached():
             self.origin.detachNode()
             self.dynamic_nodes.detach_from_physics_world(physics_world.dynamic_world)
             self.static_nodes.detach_from_physics_world(physics_world.static_world)
