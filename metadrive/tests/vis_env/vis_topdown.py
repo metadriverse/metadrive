@@ -13,7 +13,6 @@ if __name__ == "__main__":
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             # "debug_static_world":True,
-            "cull_scene": False,
             # "image_observation": True,
             # "controller": "joystick",
             # "manual_control": True,

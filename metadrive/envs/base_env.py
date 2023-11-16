@@ -31,7 +31,6 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
     random_agent_model=False,
-    agent_policy=EnvInputPolicy,
 
     # ===== multi-agent =====
     num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
@@ -42,9 +41,9 @@ BASE_DEFAULT_CONFIG = dict(
     return_single_space=False,
 
     # ===== Action =====
-    manual_control=False,
+    manual_control=False,  # if set to True, agent policy will be Manual Control policy
     controller="keyboard",  # "joystick" or "keyboard"
-    decision_repeat=5,
+    agent_policy=EnvInputPolicy,
     discrete_action=False,
     discrete_steering_dim=5,
     discrete_throttle_dim=5,
@@ -58,11 +57,7 @@ BASE_DEFAULT_CONFIG = dict(
     stack_size=3,  # the number of timesteps for stacking image observation
     image_observation=False,  # use image observation or lidar
 
-    # ===== Rendering =====
-    use_render=False,  # if true pop a window to render
-    debug=False,
-    disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
-    cull_scene=True,  # only for debug use
+    # ===== Main Camera =====
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
     camera_height=2.2,
     camera_dist=7.5,
@@ -73,7 +68,6 @@ BASE_DEFAULT_CONFIG = dict(
     top_down_camera_initial_x=0,
     top_down_camera_initial_y=0,
     top_down_camera_initial_z=200,  # height
-    show_logo=True,
 
     # ===== Vehicle =====
     vehicle_config=dict(
@@ -149,31 +143,28 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
-
-    # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
-    auto_resize_window=True,
+    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
+    _disable_detector_mask=False,  # accelerate the lidar perception
 
     # ===== Agent config =====
     target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
 
     # ===== Engine Core config =====
+    use_render=False,  # if true pop a window to render
     window_size=(1200, 900),  # or (width, height), if set to None, it will be automatically determined
+    # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
+    auto_resize_window=True,
+    # physics world step 0.02s * decision_repeat per env.step,
     physics_world_step_size=2e-2,
-    show_fps=True,
+    decision_repeat=5,
     # only render physics world without model, a special debug option
     debug_physics_world=False,
     # debug static world
     debug_static_world=False,
-    # (Deprecated) set to true only when on headless machine and use rgb image!!!!!!
-    # turn on to profile the efficiency
-    pstats=False,
     # this is an advanced feature for accessing image with moving them to ram!
     image_on_cuda=False,
     # We will determine the render mode automatically, it runs at physics-only mode by default
     _render_mode=RENDER_MODE_NONE,
-    # accelerate the lidar perception
-    _disable_detector_mask=False,
     # None: unlimited, number: fps
     force_render_fps=None,
     # if set to True all objects will be force destroyed when call clear()
@@ -187,8 +178,6 @@ BASE_DEFAULT_CONFIG = dict(
     render_pipeline=False,
     # daytime is only available when using render-pipeline
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
-    # debug panda3d
-    debug_panda3d=False,
     # global light
     shadow_range=32,
 
@@ -207,11 +196,13 @@ BASE_DEFAULT_CONFIG = dict(
     show_sidewalk=True,
 
     # ===== Others =====
-    # Force to generate objects in the left lane.
-    _debug_crash_object=False,
+    pstats=False,  # turn on to profile the efficiency
+    debug_panda3d=False,  # debug panda3d
     horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
     max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
     show_interface_navi_mark=True,
+    show_fps=True,
+    show_logo=True,
     show_mouse=True,
     show_skybox=True,
     show_terrain=True,
@@ -223,8 +214,10 @@ BASE_DEFAULT_CONFIG = dict(
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
     preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
     log_level=logging.INFO,
+    debug=False,
+    disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
 
-    # record/replay metadata
+    # ===== record/replay metadata =====
     record_episode=False,  # when replay_episode is not None ,this option will be useless
     replay_episode=None,  # set the replay file to enable replay
     only_reset_when_replay=False,  # Scenario will only be initialized, while future trajectories will not be replayed
@@ -304,7 +297,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -720,19 +713,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

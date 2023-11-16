@@ -10,7 +10,6 @@ def test_pedestrian(render=False):
             "traffic_mode": "hybrid",
             "start_seed": 22,
             "debug": False,
-            "cull_scene": False,
             "manual_control": False,
             "use_render": render,
             "decision_repeat": 5,

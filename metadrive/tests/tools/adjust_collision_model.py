@@ -16,7 +16,6 @@ if __name__ == "__main__":
             "traffic_mode": "hybrid",
             "start_seed": 22,
             "debug": True,
-            "cull_scene": False,
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,

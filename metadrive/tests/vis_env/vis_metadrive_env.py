@@ -16,7 +16,6 @@ if __name__ == "__main__":
             "static_traffic_object": False,
             "show_interface": True,
             "random_agent_model": True,
-            "cull_scene": False,
             "random_spawn_lane_index": False,
             "random_lane_width": False,
             # "image_observation": True,

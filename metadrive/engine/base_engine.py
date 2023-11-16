@@ -71,9 +71,6 @@ class BaseEngine(EngineCore, Randomizable):
         self.only_reset_when_replay = False
         # self.accept("s", self._stop_replay)
 
-        # cull scene
-        self.cull_scene = self.global_config["cull_scene"]
-
         # add camera or not
         self.main_camera = self.setup_main_camera()
 
@@ -524,8 +521,6 @@ class BaseEngine(EngineCore, Randomizable):
 
         # cull distant blocks
         # poses = [v.position for v in self.agent_manager.active_agents.values()]
-        # if self.cull_scene and False:
-        #     SceneCull.cull_distant_blocks(self, self.current_map.blocks, poses, self.global_config["max_distance"])
         return step_infos
 
     def dump_episode(self, pkl_file_name=None) -> None:

@@ -52,7 +52,6 @@ if __name__ == "__main__":
             # "out_of_road_cost": 1,
             # "debug": True,
             # "map": "X",
-            # # "cull_scene": True,
             # "cost_to_reward":True,
             "vehicle_config": {
                 "spawn_lane_index": (FirstPGBlock.NODE_2, FirstPGBlock.NODE_3, 2),
