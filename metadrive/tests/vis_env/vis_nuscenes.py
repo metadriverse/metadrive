@@ -14,6 +14,7 @@ if __name__ == "__main__":
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": True,
             "show_interface": True,
+            "debug_static_world": True,
             # "need_lane_localization": False,
             # "image_observation": True,
             "show_logo": False,
@@ -73,9 +74,6 @@ if __name__ == "__main__":
     reset_num += 1
     for t in range(10000):
         o, r, tm, tc, info = env.step([1, 0.88])
-        if t==20:
-            env.close()
-            break
         assert env.observation_space.contains(o)
         s += 1
         if env.config["use_render"]:

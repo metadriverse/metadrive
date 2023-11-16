@@ -335,7 +335,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                     np.setTexture(self.side_texture)
                 # np.setTexture(self.ts_normal, self.side_normal)
 
-                body_node = BaseRigidBodyNode(sidewalk_id, MetaDriveType.BOUNDARY_SIDEWALK)
+                body_node = BaseRigidBodyNode(None, MetaDriveType.BOUNDARY_SIDEWALK)
                 body_node.setKinematic(False)
                 body_node.setStatic(True)
                 body_np = self.sidewalk_node_path.attachNewNode(body_node)
@@ -394,7 +394,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         # build physics contact
         if lane.need_lane_localization:
             # It might be Lane surface intersection
-            n = BaseRigidBodyNode(lane.id, lane.metadrive_type)
+            n = BaseRigidBodyNode(None, lane.metadrive_type)
             segment_np = NodePath(n)
 
             self._node_path_list.append(segment_np)
@@ -429,12 +429,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         if length <= 0:
             return []
         if PGLineType.prohibit(line_type):
-            node_name = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
+            liane_type = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
         else:
-            node_name = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
+            liane_type = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
 
         # add bullet body for it
-        body_node = BaseGhostBodyNode(node_name)
+        body_node = BaseGhostBodyNode(None, liane_type)
         body_node.setActive(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
