@@ -394,7 +394,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         # build physics contact
         if lane.need_lane_localization:
             # It might be Lane surface intersection
-            n = BaseRigidBodyNode(None, lane.metadrive_type)
+            n = BaseRigidBodyNode(lane_index, lane.metadrive_type)
             segment_np = NodePath(n)
 
             self._node_path_list.append(segment_np)
