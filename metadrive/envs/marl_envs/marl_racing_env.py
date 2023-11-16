@@ -7,6 +7,7 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.straight import StraightWithGuardrail
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
 
 RACING_CONFIG = dict(
@@ -39,7 +40,7 @@ RACING_CONFIG = dict(
     horizon=5_000,
 
     # Debug setting
-    # agent_policy=IDMPolicy,
+    agent_policy=IDMPolicy,
 )
 
 
