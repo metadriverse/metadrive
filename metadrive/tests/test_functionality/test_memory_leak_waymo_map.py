@@ -1,5 +1,6 @@
+import logging
 import time
-
+from metadrive.engine.logger import set_log_level
 from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import initialize_engine, close_engine
@@ -38,6 +39,7 @@ def test_waymo_env_memory_leak(num_reset=100):
 
 
 def test_waymo_map_memory_leak():
+    set_log_level(logging.DEBUG)
     default_config = ScenarioEnv.default_config()
     default_config["data_directory"] = AssetLoader.file_path("waymo", unix_style=False)
     default_config["num_scenarios"] = 1
@@ -63,7 +65,8 @@ def test_waymo_map_memory_leak():
             lt = time.time()
 
             map = ScenarioMap(map_index=0)
-            del map
+            map.attach_to_world(engine.render, engine.physics_world)
+            map.destroy()
 
             # map.play()
 
@@ -77,8 +80,9 @@ def test_waymo_map_memory_leak():
             # if t > 5:
             #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
             last_mem = lm - cm
-
-        assert (lm - cm) / 1024 / 1024 < 40, "We expect will cause ~33MB memory leak."
+        cost = (lm - cm) / 1024 / 1024
+        print("Process takes {} MB".format(cost))
+        assert cost < 40, "We expect will cause ~33MB memory leak."
 
     finally:
         close_engine()
@@ -111,7 +115,7 @@ if __name__ == "__main__":
     # gc.enable()
     # gc.set_debug(gc.DEBUG_LEAK)
 
-    test_waymo_env_memory_leak(num_reset=300)
+    # test_waymo_env_memory_leak(num_reset=300)
 
     test_waymo_map_memory_leak()
 
