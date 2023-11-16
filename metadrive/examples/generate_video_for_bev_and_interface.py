@@ -37,7 +37,6 @@ if __name__ == '__main__':
             window_size=(1600, 1200),
             crash_vehicle_done=False,
             manual_control=True,  # For using expert policy. You don't need to control it.
-
             horizon=10,
         )
     )
