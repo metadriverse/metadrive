@@ -329,7 +329,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 body_node.setKinematic(False)
                 body_node.setStatic(True)
                 body_np = self.sidewalk_node_path.attachNewNode(body_node)
-                body_np.setPos(0, 0, 0.1)
+                body_np.setPos(0, 0, height / 2)
                 self._node_path_list.append(body_np)
 
                 geom = np.node().getGeom(0)

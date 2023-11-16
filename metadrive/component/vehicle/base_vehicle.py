@@ -99,7 +99,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     SUSPENSION_STIFFNESS = 40
 
     # for random color choosing
-    MATERIAL_COLOR_COEFF = 2  # to resist other factors, since other setting may make color dark
+    MATERIAL_COLOR_COEFF = 1.6  # to resist other factors, since other setting may make color dark
     MATERIAL_METAL_COEFF = 0.1  # 0-1
     MATERIAL_ROUGHNESS = 0.8  # smaller to make it more smooth, and reflect more light
     MATERIAL_SHININESS = 128  # 0-128 smaller to make it more smooth, and reflect more light
@@ -611,7 +611,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     (
                         self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
                         self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
-                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.2
+                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF,
+                        0.
                     )
                 )
                 material.setMetallic(self.MATERIAL_METAL_COEFF)
@@ -753,12 +754,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             self.crash_sidewalk = True
             contacts.add(MetaDriveType.BOUNDARY_LINE)
 
-        elif res.hasHit() and (
-                res.getNode().getName() == MetaDriveType.BOUNDARY_SIDEWALK or
-                res.getNode().getName() == MetaDriveType.BARRIER
-        ):
+        elif res.hasHit() and res.getNode().getName() == MetaDriveType.BOUNDARY_SIDEWALK:
             self.crash_sidewalk = True
             contacts.add(MetaDriveType.BOUNDARY_SIDEWALK)
+
+        elif res.hasHit() and res.getNode().getName() == MetaDriveType.BARRIER:
+            self.crash_sidewalk = True
+            contacts.add(MetaDriveType.BARRIER)
 
         # only for visualization detection
         if self.render:

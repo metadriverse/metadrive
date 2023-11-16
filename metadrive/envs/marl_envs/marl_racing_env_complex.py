@@ -49,6 +49,8 @@ RACING_CONFIG = dict(
     camera_dist=10,
     camera_pitch=15,
     camera_height=6,
+
+    # debug=True,
 )
 
 
@@ -259,23 +261,23 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
     def fake_destination(self):
         return list(self.current_map.road_network.graph.keys())[-2]
 
-    def _is_arrive_destination(self, vehicle):
-        """
-        Args:
-            vehicle: The BaseVehicle instance.
-
-        Returns:
-            flag: Whether this vehicle arrives its destination.
-        """
-        flag = super()._is_arrive_destination(vehicle)
-        if flag:
-            if vehicle.config["destination"] == self.fake_destination:
-                vehicle.config["destination"] = self.real_destination
-            else:
-                vehicle.config["destination"] = self.fake_destination
-            vehicle.reset_navigation()
-            flag = False
-        return flag
+    # def _is_arrive_destination(self, vehicle):
+    #     """
+    #     Args:
+    #         vehicle: The BaseVehicle instance.
+    #
+    #     Returns:
+    #         flag: Whether this vehicle arrives its destination.
+    #     """
+    #     flag = super()._is_arrive_destination(vehicle)
+    #     if flag:
+    #         if vehicle.config["destination"] == self.fake_destination:
+    #             vehicle.config["destination"] = self.real_destination
+    #         else:
+    #             vehicle.config["destination"] = self.fake_destination
+    #         vehicle.reset_navigation()
+    #         flag = False
+    #     return flag
 
     def reward_function(self, vehicle_id: str):
         """
@@ -320,6 +322,8 @@ def _vis(generate_video=False):
         window_size=(1600, 1200),
         max_step_per_agent=3_000,
         horizon=3_000,
+
+        debug=True
     ))
     o, _ = env.reset()
     env.engine.force_fps.disable()

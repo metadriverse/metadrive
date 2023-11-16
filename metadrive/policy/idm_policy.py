@@ -224,9 +224,9 @@ class IDMPolicy(BasePolicy):
     def __init__(self, control_object, random_seed):
         super(IDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
 
-        self.NORMAL_SPEED = np.random.normal(40, 5) if np.random.uniform() < 0.8 else 80
-        self.CREEP_SPEED = np.random.normal(10, 5)
-        self.DEACC_FACTOR = -5
+        self.NORMAL_SPEED = 60 if np.random.uniform() < 0.5 else 70
+        self.CREEP_SPEED = 20
+        self.DEACC_FACTOR = -6
         self.ACC_FACTOR = 1.2
 
         self.target_speed = self.NORMAL_SPEED
@@ -236,8 +236,7 @@ class IDMPolicy(BasePolicy):
         self.enable_lane_change = self.engine.global_config.get("enable_idm_lane_change", True)
         self.disable_idm_deceleration = self.engine.global_config.get("disable_idm_deceleration", False)
         self.heading_pid = PIDController(1.7, 0.01, 3.5)
-        # self.lateral_pid = PIDController(0.3, .002, 0.05)
-        self.lateral_pid = PIDController(0.15, .002, 0.05)  # FIXME
+        self.lateral_pid = PIDController(0.3, .002, 0.05)
 
     def act(self, *args, **kwargs):
         # concat lane
