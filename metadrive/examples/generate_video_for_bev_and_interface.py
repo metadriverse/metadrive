@@ -24,7 +24,7 @@ if __name__ == '__main__':
     start_seed = 100
     generate_video = True
 
-    folder_name = "example_video_{}".format(datetime.now().strftime("%Y-$m-%d_%H-%M-%S"))
+    folder_name = "example_video_{}".format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
     video_bev = []
     video_interface = []
 
