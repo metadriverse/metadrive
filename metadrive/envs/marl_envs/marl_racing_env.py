@@ -39,7 +39,6 @@ RACING_CONFIG = dict(
     out_of_route_done=False,
     crash_done=False,
     max_step_per_agent=5_000,
-    horizon=5_000,
 
     # Debug setting
     agent_policy=IDMPolicy,
@@ -61,7 +60,8 @@ class RacingMap(PGMap):
         )
         self.blocks.append(init_block)
 
-        curve_direction = 1
+        curve_direction = 0
+        ANGLE = 90
 
         first_straight_length = np.random.normal(100, 20)
         second_straight_length = np.random.normal(100, 20)
@@ -71,7 +71,7 @@ class RacingMap(PGMap):
             {
                 Parameter.length: first_straight_length,
                 Parameter.radius: 50,
-                Parameter.angle: 90,
+                Parameter.angle: ANGLE,
                 Parameter.dir: curve_direction,
             }, parent_node_path, physics_world
         )
@@ -93,7 +93,7 @@ class RacingMap(PGMap):
             {
                 Parameter.length: second_straight_length,
                 Parameter.radius: 50,
-                Parameter.angle: 90,
+                Parameter.angle: ANGLE,
                 Parameter.dir: curve_direction,
             }, parent_node_path, physics_world
         )
@@ -104,7 +104,7 @@ class RacingMap(PGMap):
             {
                 Parameter.length: first_straight_length,
                 Parameter.radius: 50,
-                Parameter.angle: 90,
+                Parameter.angle: ANGLE,
                 Parameter.dir: curve_direction,
             }, parent_node_path, physics_world
         )
@@ -121,7 +121,7 @@ class RacingMap(PGMap):
             {
                 Parameter.length: second_straight_length,
                 Parameter.radius: 50,
-                Parameter.angle: 90,
+                Parameter.angle: ANGLE,
                 Parameter.dir: curve_direction,
             }, parent_node_path, physics_world
         )
@@ -220,17 +220,49 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         return reward, step_info
 
 
-def _vis():
-    env = MultiAgentRacingEnv()
+def _vis(generate_video=False):
+    FPS = 60
+
+    env = MultiAgentRacingEnv(dict(
+        use_render=True,
+        window_size=(1600, 1200),
+        max_step_per_agent=800,
+        horizon=800,
+    ))
     o, _ = env.reset()
     total_r = 0
     ep_s = 0
+    video_bev = []
+    video_interface = []
+
+    import pygame
+    import mediapy
+
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step({k: [-0.05, 1.0] for k in env.vehicles.keys()})
         for r_ in r.values():
             total_r += r_
         ep_s += 1
-        env.render(mode="topdown")
+
+        # env.render(mode="topdown")
+
+        img_interface = env.render(mode="rgb_array")
+        img_bev = env.render(
+            mode="topdown",
+            show_agent_name=False,
+            target_vehicle_heading_up=False,
+            draw_target_vehicle_trajectory=False,
+            film_size=(2000, 2000),
+            screen_size=(2000, 2000),
+            crash_vehicle_done=False,
+        )
+        if generate_video:
+            img_bev = pygame.surfarray.array3d(img_bev)
+            img_bev = img_bev.swapaxes(0, 1)
+            img_bev = img_bev[::-1]
+            video_bev.append(img_bev)
+            video_interface.append(img_interface)
+
         if tm["__all__"]:
             print(
                 "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
@@ -239,9 +271,29 @@ def _vis():
             )
             total_r = 0
             print("Reset")
-            env.reset()
+            # env.reset()
+            break
+
     env.close()
+
+    if generate_video:
+        import datetime
+        import os
+
+        folder_name = "marl_racing_video_{}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+        os.makedirs(folder_name, exist_ok=True)
+
+        video_base_name = f"{folder_name}/video"
+
+        # video_base_name = "{}/{}".format(folder_name, ep_count)
+        video_name_bev = video_base_name + "_bev.mp4"
+        print("BEV video should be saved at: ", video_name_bev)
+        mediapy.write_video(video_name_bev, video_bev, fps=FPS)
+
+        video_name_interface = video_base_name + "_interface.mp4"
+        print("Interface video should be saved at: ", video_name_interface)
+        mediapy.write_video(video_name_interface, video_interface, fps=FPS)
 
 
 if __name__ == "__main__":
-    _vis()
+    _vis(generate_video=True)
