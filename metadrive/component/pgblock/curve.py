@@ -93,7 +93,12 @@ class CurveWithGuardrail(Curve):
         angle = parameters[Parameter.angle]
         radius = parameters[Parameter.radius]
         curve, straight = create_bend_straight(
-            basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
+            basic_lane,
+            length,
+            radius,
+            np.deg2rad(angle),
+            direction,
+            basic_lane.width,
             (PGLineType.BROKEN, PGLineType.BARRIER)  # <<< Using BARRIER here
         )
 

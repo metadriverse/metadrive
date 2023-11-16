@@ -26,16 +26,12 @@ RACING_CONFIG = dict(
     cross_yellow_line_done=True,
     use_lateral=False,
     on_continuous_line_done=False,
-
     out_of_route_done=False,
     crash_done=False,
-
     num_loops=3,
     allow_respawn=False,
-
     max_step_per_agent=10_000,
     horizon=10_000,
-
     vehicle_config=dict(show_lidar=False, show_navi_mark=False),
     agent_policy=IDMPolicy,
 )
@@ -64,7 +60,12 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c1)
 
-        block_s2 = StraightWithGuardrail(2, block_c1.get_socket(0), self.road_network, 1, )
+        block_s2 = StraightWithGuardrail(
+            2,
+            block_c1.get_socket(0),
+            self.road_network,
+            1,
+        )
         block_s2.construct_from_config({
             Parameter.length: 5,
         }, parent_node_path, physics_world)
