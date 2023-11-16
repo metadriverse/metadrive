@@ -34,6 +34,7 @@ Please feel free to contact us if you have any suggestions or ideas!
 
    install.rst
    get_start.rst
+   before_reading.ipynb
 
 .. toctree::
    :hidden:
