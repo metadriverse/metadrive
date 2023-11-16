@@ -304,6 +304,8 @@ class PGDrivableAreaProperty:
     SIDEWALK_WIDTH = 2
     SIDEWALK_LINE_DIST = 0.6
 
+    BARRIER_THICKNESS = 5
+
     # visualization color property
     LAND_COLOR = (0.4, 0.4, 0.4, 1)
     NAVI_COLOR = (0.709, 0.09, 0, 1)

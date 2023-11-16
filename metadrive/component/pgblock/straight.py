@@ -50,16 +50,16 @@ class Straight(PGBlock):
 
 
 class StraightWithGuardrail(Straight):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, remove_negative_lanes=True, **kwargs)
+
     def _try_plug_into_previous_block(self) -> bool:
         self.set_part_idx(0)  # only one part in simple block like straight, and curve
         para = self.get_config()
         length = para[Parameter.length]
         basic_lane = self.positive_basic_lane
         assert isinstance(basic_lane, StraightLane), "Straight road can only connect straight type"
-        if not self.has_Guardrail:
-            new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.SIDE])
-        else:
-            new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.BARRIER])
+        new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.BARRIER])
         start = self.pre_block_socket.positive_road.end_node
         end = self.add_road_node()
         socket = Road(start, end)

@@ -315,7 +315,10 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
             for sidewalk in self.sidewalks.values():
                 polygon = sidewalk["polygon"]
-                np = make_polygon_model(polygon, PGDrivableAreaProperty.SIDEWALK_THICKNESS)
+                height = sidewalk.get("height", None)
+                if height is None:
+                    height = PGDrivableAreaProperty.SIDEWALK_THICKNESS
+                np = make_polygon_model(polygon, height)
                 np.reparentTo(self.sidewalk_node_path)
                 np.setPos(0, 0, PGDrivableAreaProperty.SIDEWALK_THICKNESS / 2)
                 if self.render:

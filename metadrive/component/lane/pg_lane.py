@@ -50,14 +50,16 @@ class PGLane(AbstractLane):
             node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
             self._node_path_list.extend(node_path_list)
 
-    def construct_sidewalk(self, block):
+    def construct_sidewalk(self, block, sidewalk_height=None):
         """
         Construct the sidewalk for this lane
+
         Args:
-            block:
+            block: Current block.
+            sidewalk_height: The height of sidewalk. Default to None and PGDrivableAreaProperty.SIDEWALK_THICKNESS will
+            be used.
 
-        Returns:
-
+        Returns: None
         """
         # engine = get_engine()
         # cloud_points_vis = ColorLineNodePath(
@@ -87,7 +89,7 @@ class PGLane(AbstractLane):
                 # draw_lists[k].append([point[0], point[1], 1])
         # cloud_points_vis.drawLines(draw_lists)
         # cloud_points_vis.create()
-        block.sidewalks[str(self.index)] = {"polygon": polygon}
+        block.sidewalks[str(self.index)] = {"polygon": polygon, "height": sidewalk_height}
 
     def construct_lane_line_in_block(self, block, construct_left_right=(True, True)):
         """
@@ -104,6 +106,9 @@ class PGLane(AbstractLane):
             elif line_type == PGLineType.SIDE:
                 self.construct_continuous_line(block, lateral, line_color, line_type)
                 self.construct_sidewalk(block)
+            elif line_type == PGLineType.BARRIER:
+                self.construct_continuous_line(block, lateral, line_color, line_type)
+                self.construct_sidewalk(block, sidewalk_height=PGDrivableAreaProperty.BARRIER_THICKNESS)
             elif line_type == PGLineType.NONE:
                 continue
             else:

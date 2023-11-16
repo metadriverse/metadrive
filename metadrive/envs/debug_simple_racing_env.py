@@ -40,7 +40,7 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c1)
 
-        block_s2 = StraightWithGuardrail(2, block_c1.get_socket(0), self.road_network, 1)
+        block_s2 = StraightWithGuardrail(2, block_c1.get_socket(0), self.road_network, 1, )
         block_s2.construct_from_config({
             Parameter.length: 5,
         }, parent_node_path, physics_world)

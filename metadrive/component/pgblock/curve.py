@@ -1,4 +1,5 @@
 import numpy as np
+
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
 from metadrive.component.pgblock.pg_block import PGBlock
@@ -75,6 +76,9 @@ class Curve(PGBlock):
 
 
 class CurveWithGuardrail(Curve):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, remove_negative_lanes=True, **kwargs)
+
     def _try_plug_into_previous_block(self) -> bool:
         parameters = self.get_config()
         basic_lane = self.positive_basic_lane
@@ -90,7 +94,7 @@ class CurveWithGuardrail(Curve):
         radius = parameters[Parameter.radius]
         curve, straight = create_bend_straight(
             basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
-            (PGLineType.BROKEN, PGLineType.BARRIER if self.HAS_GUARDRAIL else PGLineType.SIDE)
+            (PGLineType.BROKEN, PGLineType.BARRIER)  # <<< Using BARRIER here
         )
 
         # We don't create adverse road
