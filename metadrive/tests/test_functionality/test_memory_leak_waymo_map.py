@@ -78,7 +78,7 @@ def test_waymo_map_memory_leak():
             #     assert abs((lm - cm) - last_mem) < 1024  # Memory should not have change > 1KB
             last_mem = lm - cm
 
-        assert lm - cm < 1024 * 1024 * 40, "We expect will cause ~33MB memory leak."
+        assert (lm - cm) / 1024 / 1024 < 40, "We expect will cause ~33MB memory leak."
 
     finally:
         close_engine()
