@@ -30,7 +30,8 @@ class FirstPGBlock(PGBlock):
         render_root_np: NodePath,
         physics_world: PhysicsWorld,
         length: float = 30,
-        ignore_intersection_checking=False
+        ignore_intersection_checking=False,
+        ignore_adverse_road=False
     ):
         place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstPGBlock, self).__init__(
@@ -51,12 +52,13 @@ class FirstPGBlock(PGBlock):
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking
         )
-        CreateAdverseRoad(
-            ego_v_spawn_road,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        )
+        if not ignore_adverse_road:
+            CreateAdverseRoad(
+                ego_v_spawn_road,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
 
         next_lane = ExtendStraightLane(basic_lane, length - self.ENTRANCE_LENGTH, [PGLineType.BROKEN, PGLineType.SIDE])
         other_v_spawn_road = Road(self.NODE_2, self.NODE_3)
@@ -68,12 +70,13 @@ class FirstPGBlock(PGBlock):
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking
         )
-        CreateAdverseRoad(
-            other_v_spawn_road,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        )
+        if not ignore_adverse_road:
+            CreateAdverseRoad(
+                other_v_spawn_road,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
 
         self._create_in_world()
 
