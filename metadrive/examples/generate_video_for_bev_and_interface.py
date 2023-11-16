@@ -9,7 +9,7 @@ This file demonstrates how to use API to generate high-resolution & temporal ali
 Dependencies:
     pip install mediapy
     conda install ffmpeg
-    https://itsfoss.com/install-h-264-decoder-ubuntu/  (h264 decoder in Linux)
+    https://itsfoss.com/install-h-264-decoder-ubuntu/  (h264 decoder in Linux, or you can install VLC)
 """
 import os
 from datetime import datetime
