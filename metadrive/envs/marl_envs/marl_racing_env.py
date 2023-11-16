@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+import numpy as np
+
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import CurveWithGuardrail
@@ -49,8 +51,6 @@ class RacingMap(PGMap):
         parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
-        # FIRST_BLOCK_LENGTH = 100
-
         init_block = FirstPGBlock(
             self.road_network,
             lane_width=self.config[PGMap.LANE_WIDTH],
@@ -62,12 +62,14 @@ class RacingMap(PGMap):
         self.blocks.append(init_block)
 
         curve_direction = 1
-        curve_len = 100
+
+        first_straight_length = np.random.normal(100, 20)
+        second_straight_length = np.random.normal(100, 20)
 
         block_c1 = CurveWithGuardrail(1, init_block.get_socket(0), self.road_network, random_seed=1)
         block_c1.construct_from_config(
             {
-                Parameter.length: curve_len,
+                Parameter.length: first_straight_length,
                 Parameter.radius: 50,
                 Parameter.angle: 90,
                 Parameter.dir: curve_direction,
@@ -89,7 +91,7 @@ class RacingMap(PGMap):
         block_c2 = CurveWithGuardrail(3, block_s2.get_socket(0), self.road_network, random_seed=1)
         block_c2.construct_from_config(
             {
-                Parameter.length: curve_len,
+                Parameter.length: second_straight_length,
                 Parameter.radius: 50,
                 Parameter.angle: 90,
                 Parameter.dir: curve_direction,
@@ -100,7 +102,7 @@ class RacingMap(PGMap):
         block_c3 = CurveWithGuardrail(4, block_c2.get_socket(0), self.road_network, random_seed=1)
         block_c3.construct_from_config(
             {
-                Parameter.length: curve_len,
+                Parameter.length: first_straight_length,
                 Parameter.radius: 50,
                 Parameter.angle: 90,
                 Parameter.dir: curve_direction,
@@ -117,7 +119,7 @@ class RacingMap(PGMap):
         block_c4 = CurveWithGuardrail(6, block_s3.get_socket(0), self.road_network, random_seed=1)
         block_c4.construct_from_config(
             {
-                Parameter.length: curve_len,
+                Parameter.length: second_straight_length,
                 Parameter.radius: 50,
                 Parameter.angle: 90,
                 Parameter.dir: curve_direction,
