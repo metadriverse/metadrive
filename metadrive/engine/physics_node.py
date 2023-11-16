@@ -10,10 +10,9 @@ from panda3d.bullet import BulletRigidBodyNode, BulletGhostNode
 
 class BaseRigidBodyNode(BulletRigidBodyNode):
     def __init__(self, base_object_name, type_name):
-        base_object_name = base_object_name or ""
         self.type_name = type_name
-        super(BaseRigidBodyNode, self).__init__(base_object_name)
-        self.setPythonTag(base_object_name, self)
+        super(BaseRigidBodyNode, self).__init__(type_name)
+        self.setPythonTag(type_name, self)
         self.base_object_name = base_object_name
         self._clear_python_tag = False
 
@@ -35,10 +34,9 @@ class BaseGhostBodyNode(BulletGhostNode):
     Ghost node will not collide with any bodies, while contact information can still be accessed
     """
     def __init__(self, base_object_name, type_name):
-        base_object_name = base_object_name or ""
         self.type_name = type_name
-        super(BaseGhostBodyNode, self).__init__(base_object_name)
-        self.setPythonTag(base_object_name, self)
+        super(BaseGhostBodyNode, self).__init__(type_name)
+        self.setPythonTag(type_name, self)
         self.base_object_name = base_object_name
         self._clear_python_tag = False
 
