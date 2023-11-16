@@ -236,6 +236,13 @@ class MetaDriveEnv(BaseEnv):
         return step_info['cost'], step_info
 
     def _is_arrive_destination(self, vehicle):
+        """
+        Args:
+            vehicle: The BaseVehicle instance.
+
+        Returns:
+            flag: Whether this vehicle arrives its destination.
+        """
         long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
         flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
             vehicle.navigation.get_current_lane_width() / 2 >= lat >=

@@ -1,4 +1,3 @@
-import copy
 from collections import defaultdict
 
 from metadrive.component.map.pg_map import PGMap
@@ -6,7 +5,6 @@ from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import CurveWithGuardrail
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.straight import StraightWithGuardrail
-from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.policy.idm_policy import IDMPolicy
@@ -14,7 +12,7 @@ from metadrive.utils import Config
 
 RACING_CONFIG = dict(
     # controller="joystick",
-    num_agents=2,
+    num_agents=-1,
     use_render=False,
     manual_control=False,
     traffic_density=0,
@@ -31,6 +29,12 @@ RACING_CONFIG = dict(
 
     out_of_route_done=False,
     crash_done=False,
+
+    num_loops=3,
+    allow_respawn=False,
+
+    max_step_per_agent=10_000,
+    horizon=10_000,
 
     vehicle_config=dict(show_lidar=False, show_navi_mark=False),
     agent_policy=IDMPolicy,
@@ -125,8 +129,6 @@ class RacingMapManager(PGMapManager):
 
 
 class MultiAgentRacingEnv(MultiAgentMetaDrive):
-    NUM_LOOPS = 3  # TODO: Remove to config
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._completed_loop_count = defaultdict(int)
@@ -165,82 +167,74 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         #     pass
         return o, r, terminated, truncated, i
 
-    def done_function(self, vehicle_id):
-        """
-        In this environment, the termination can only happen in two cases: out of road, or success.
+    # def done_function(self, vehicle_id):
+    #     """
+    #     In this environment, the termination can only happen in two cases: out of road, or success.
+    #
+    #     Args:
+    #         vehicle_id: (str) representing the vehicle's ID.
+    #
+    #     Returns:
+    #         done: (bool) whether we should terminate this agent.
+    #     """
+    #
+    #     # The single agent environment will investigate whether this agent is successful, out of road or crashing into
+    #     # others.
+    #     done, done_info = super(MultiAgentMetaDrive, self).done_function(vehicle_id)
+    #
+    #     return done, done_info
 
-        Args:
-            vehicle_id: (str) representing the vehicle's ID.
+    @property
+    def real_destination(self):
+        return list(self.current_map.road_network.graph.keys())[-1]
 
-        Returns:
-            done: (bool) whether we should terminate this agent.
-        """
+    @property
+    def fake_destination(self):
+        return list(self.current_map.road_network.graph.keys())[-2]
 
-        # The single agent environment will investigate whether this agent is successful, out of road or crashing into
-        # others.
-        done, done_info = super(MultiAgentMetaDrive, self).done_function(vehicle_id)
-
-        # We hack in the done_function to reset the navigation system of each vehicle if necessary.
-        # This is helpful because this particular environment contains a cyclic map.
-        vehicle = self.vehicles[vehicle_id]
-        current_lane_index = vehicle.lane_index[1]
-
-        checkpoints = vehicle.navigation.checkpoints
-
-        current_checkpoint_index = checkpoints.index(current_lane_index)
-        total_checkpoint = len(checkpoints)
-
-        # If the vehicle is reaching the fake destination, we reset the destination to the real destination.
-        if current_checkpoint_index + 1 >= total_checkpoint - 3:
-            # Say you have 10 checkpoints, the real destination is the 10th checkpoint and the fake destination
-            # is the 9th checkpoint. If current checkpoint is the 7th or 8th checkpoint, then
-            # you are reaching the fake checkpoint.
-            # In this case, we need to reset the destination to the real destination.
-            vehicle.config["destination"] = self.real_destination
-            vehicle.navigation.reset(vehicle)
-            print(111)
-
-        # If the vehicle reached the real destination, but it hasn't finished enough loops, we reset
-        # the destination to the fake destination again.
-        if done_info[TerminationState.SUCCESS]:
-            if self._completed_loop_count[vehicle_id] < self.NUM_LOOPS:
-                self._completed_loop_count[vehicle_id] += 1
-                done_info[TerminationState.SUCCESS] = False
-                done = False
-                vehicle.config["destination"] = self.fake_destination
-                vehicle.navigation.reset(vehicle)
-            else:
-                assert done
-
-        return done, done_info
-
-    def reset(self, seed=None):
-        ret = super().reset(seed=seed)
-        self.real_destination = list(self.current_map.road_network.graph.keys())[-1]
-        self.fake_destination = list(self.current_map.road_network.graph.keys())[-2]
-
-        # vehicle = self.vehicles["agent0"]
-        # self.default_checkpoints = copy.deepcopy(vehicle.navigation.checkpoints)
-
-        self.loop_counter = defaultdict(int)
-        for vid, v in self.vehicles.items():
-            v.config["destination"] = self.fake_destination
-            v.reset_navigation()
-        return ret
+    # def reset(self, seed=None):
+    #     ret = super().reset(seed=seed)
+    #     #
+    #     # # vehicle = self.vehicles["agent0"]
+    #     # self.default_checkpoints = copy.deepcopy(vehicle.navigation.checkpoints)
+    #     #
+    #     # self.loop_counter = defaultdict(int)
+    #     # for vid, v in self.vehicles.items():
+    #     #     v.config["destination"] = self.fake_destination
+    #     #     v.reset_navigation()
+    #     return ret
 
     def _is_arrive_destination(self, vehicle):
-        ret = super()._is_arrive_destination(vehicle)
-        if ret:
-            vid = vehicle.id
+        """
+        Args:
+            vehicle: The BaseVehicle instance.
 
-            # Reset the navigation
-            vehicle.config["destination"] = list(self.current_map.road_network.graph.keys())[-2]
-            vehicle.navigation.reset(vehicle)
+        Returns:
+            flag: Whether this vehicle arrives its destination.
+        """
+        flag = super()._is_arrive_destination(vehicle)
+        if flag:
+            if vehicle.config["destination"] == self.fake_destination:
+                vehicle.config["destination"] = self.real_destination
+            else:
+                vehicle.config["destination"] = self.fake_destination
+            vehicle.reset_navigation()
+            flag = False
+        return flag
 
-            self._completed_loop_count[vid] += 1
-            if self._completed_loop_count[vid] >= self.NUM_LOOPS:
-                return True
-        return False
+    # def _is_arrive_destination(self, vehicle):
+    #     ret = super()._is_arrive_destination(vehicle)
+    #     if ret:
+    #         vid = vehicle.id
+    #
+    #         # Reset the navigation
+    #         vehicle.config["destination"] = list(self.current_map.road_network.graph.keys())[-2]
+    #         vehicle.navigation.reset(vehicle)
+    #
+    #         self._completed_loop_count[vid] += 1
+    #         if self._completed_loop_count[vid] >= self.NUM_LOOPS:
+    #             return True
+    #     return False
 
     # def reward_function(self, vehicle_id: str):
     #     """
