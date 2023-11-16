@@ -234,10 +234,10 @@ class IDMPolicy(BasePolicy):
 
     def act(self, *args, **kwargs):
         # concat lane
-        sucess = self.move_to_next_road()
+        success = self.move_to_next_road()
         all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
         try:
-            if sucess and self.enable_lane_change:
+            if success and self.enable_lane_change:
                 # perform lane change due to routing
                 acc_front_obj, acc_front_dist, steering_target_lane = self.lane_change_policy(all_objects)
             else:
