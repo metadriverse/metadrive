@@ -3,13 +3,14 @@ import time
 from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import initialize_engine, close_engine
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
 
 
 def test_waymo_env_memory_leak(num_reset=100):
-    env = WaymoEnv(dict(num_scenarios=2, sequential_seed=True, store_map=True))
+    env = ScenarioEnv(dict(num_scenarios=2, sequential_seed=True, store_map=True,
+                        data_directory=AssetLoader.file_path("waymo", unix_style=False), ))
 
     try:
         ct = time.time()
@@ -31,7 +32,7 @@ def test_waymo_env_memory_leak(num_reset=100):
 
 
 def test_waymo_map_memory_leak():
-    default_config = WaymoEnv.default_config()
+    default_config = ScenarioEnv.default_config()
     default_config["data_directory"] = AssetLoader.file_path("waymo", unix_style=False)
     default_config["num_scenarios"] = 1
 
@@ -78,7 +79,6 @@ def test_waymo_map_memory_leak():
 
 
 if __name__ == "__main__":
-
     # https://code.activestate.com/recipes/65333/
 
     # import gc

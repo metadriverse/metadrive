@@ -7,7 +7,7 @@ import shutil
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
@@ -43,7 +43,7 @@ def test_search_path(render_export_env=False, render_load_env=False):
         env.close()
 
         # Loaded Data
-        env = WaymoEnv(
+        env = ScenarioEnv(
             dict(agent_policy=ReplayEgoCarPolicy, data_directory=dir, use_render=render_load_env, num_scenarios=1)
         )
         scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(1)])
@@ -55,7 +55,7 @@ def test_search_path(render_export_env=False, render_load_env=False):
         env.close()
 
         # reload
-        env = WaymoEnv(
+        env = ScenarioEnv(
             dict(agent_policy=ReplayEgoCarPolicy, data_directory=dir, use_render=render_load_env, num_scenarios=1)
         )
         for index in range(1):

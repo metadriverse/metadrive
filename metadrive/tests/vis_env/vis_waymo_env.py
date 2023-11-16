@@ -9,18 +9,18 @@ from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
-class DemoWaymoEnv(ScenarioEnv):
+class DemoScenarioEnv(ScenarioEnv):
     def reset(self, seed=None):
         if self.engine is not None and seed is None:
             seeds = [i for i in range(self.config["num_scenarios"])]
             seeds.remove(self.current_seed)
             seed = random.choice(seeds)
-        return super(DemoWaymoEnv, self).reset(seed=seed)
+        return super(DemoScenarioEnv, self).reset(seed=seed)
 
 
 if __name__ == "__main__":
     asset_path = AssetLoader.asset_path
-    env = DemoWaymoEnv(
+    env = DemoScenarioEnv(
         {
             "manual_control": False,
             "agent_policy": ReplayEgoCarPolicy,

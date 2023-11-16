@@ -3,7 +3,7 @@ import pickle
 import shutil
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv, AssetLoader
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
@@ -24,7 +24,7 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
                 pickle.dump(data, file)
         env.close()
 
-        env = WaymoEnv(
+        env = ScenarioEnv(
             dict(
                 agent_policy=ReplayEgoCarPolicy,
                 data_directory=dir,
@@ -45,10 +45,11 @@ def test_export_metadrive_scenario(render_export_env=False, render_load_env=Fals
 
 
 def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False):
-    env = WaymoEnv(
+    env = ScenarioEnv(
         dict(
             agent_policy=ReplayEgoCarPolicy,
             use_render=render_export_env,
+            data_directory=AssetLoader.file_path("waymo", unix_style=False),
             start_scenario_index=0,
             num_scenarios=num_scenarios
         )
@@ -67,7 +68,7 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
         env.close()
 
         print("===== Start restoring =====")
-        env = WaymoEnv(
+        env = ScenarioEnv(
             dict(
                 agent_policy=ReplayEgoCarPolicy,
                 data_directory=dir,

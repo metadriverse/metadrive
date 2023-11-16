@@ -1,14 +1,14 @@
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.scenario.utils import draw_map
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.idm_policy import WaymoIDMPolicy
 
 
 def test_export_waymo_map(render=False):
     WaymoIDMPolicy.NORMAL_SPEED = 30
     asset_path = AssetLoader.asset_path
-    env = WaymoEnv(
+    env = ScenarioEnv(
         {
             "manual_control": False,
             "no_traffic": True,

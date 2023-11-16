@@ -9,7 +9,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 
 
-class DemoWaymoEnv(ScenarioEnv):
+class DemoScenarioEnv(ScenarioEnv):
     """
     Make sure non-repetitive scenes are showed
     """
@@ -18,7 +18,7 @@ class DemoWaymoEnv(ScenarioEnv):
             seeds = [i for i in range(self.config["num_scenarios"])]
             seeds.remove(self.current_seed)
             seed = random.choice(seeds)
-        return super(DemoWaymoEnv, self).reset(seed=seed)
+        return super(DemoScenarioEnv, self).reset(seed=seed)
 
 
 RENDER_MESSAGE = {
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     asset_path = AssetLoader.asset_path
     print(HELP_MESSAGE)
     try:
-        env = DemoWaymoEnv(
+        env = DemoScenarioEnv(
             {
                 "manual_control": True,
                 "reactive_traffic": True if args.reactive_traffic else False,

@@ -4,7 +4,7 @@ import sys
 
 from tqdm import tqdm
 
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.idm_policy import WaymoIDMPolicy
 
 try:
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     max_step = 1500
     min_step = 50
 
-    env = WaymoEnv(
+    env = ScenarioEnv(
         {
             "use_render": False,
             "agent_policy": WaymoIDMPolicy,
