@@ -332,8 +332,6 @@ def _vis(generate_video=False):
     video_bev = []
     video_interface = []
 
-    import mediapy
-    import pygame
     try:
         for i in range(1, 100000):
             o, r, tm, tc, info = env.step({k: [-0.05, 1.0] for k in env.vehicles.keys()})
@@ -344,6 +342,8 @@ def _vis(generate_video=False):
             env.render(mode="topdown")
 
             if generate_video:
+                import mediapy
+                import pygame
                 img_interface = env.render(mode="rgb_array")
                 img_bev = env.render(
                     mode="topdown",
