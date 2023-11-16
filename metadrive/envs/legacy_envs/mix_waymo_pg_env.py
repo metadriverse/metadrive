@@ -8,7 +8,7 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import engine_initialized
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.manager.traffic_manager import PGTrafficManager
 from metadrive.manager.traffic_manager import TrafficMode
@@ -60,7 +60,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 )
 
 
-class MixWaymoPGEnv(WaymoEnv):
+class MixWaymoPGEnv(ScenarioEnv):
     raise DeprecationWarning("Navigation error exists in this env, fix it")
 
     @classmethod
@@ -100,7 +100,7 @@ class MixWaymoPGEnv(WaymoEnv):
         self.pg_map_manager = PGMapManager()
         self.pg_traffic_manager = PGTrafficManager()
 
-        super(WaymoEnv, self).setup_engine()
+        super(ScenarioEnv, self).setup_engine()
         if self.real_data_ratio > 0:
             self.is_current_real_data = True
             self.engine.register_manager("data_manager", ScenarioDataManager())

@@ -5,11 +5,11 @@ import random
 
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
-class DemoWaymoEnv(WaymoEnv):
+class DemoWaymoEnv(ScenarioEnv):
     def reset(self, seed=None):
         if self.engine is not None and seed is None:
             seeds = [i for i in range(self.config["num_scenarios"])]

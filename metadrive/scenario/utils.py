@@ -513,7 +513,7 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, check_
         assert set(old_scene[SD.MAP_FEATURES].keys()).issuperset(set(new_scene[SD.MAP_FEATURES].keys()))
         assert set(old_scene[SD.DYNAMIC_MAP_STATES].keys()) == set(new_scene[SD.DYNAMIC_MAP_STATES].keys())
 
-        for map_id, map_feat in new_scene[SD.MAP_FEATURES].items():
+        for map_id, map_feat in old_scene[SD.MAP_FEATURES].items():
             # It is possible that some line are not included in new scene but exist in old scene.
             # old_scene_polyline = map_feat["polyline"]
             # if coordinate_transform:

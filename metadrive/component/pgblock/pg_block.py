@@ -1,4 +1,5 @@
 import copy
+from metadrive.constants import MetaDriveType
 from metadrive.engine.logger import get_logger
 import logging
 from collections import OrderedDict
@@ -308,7 +309,7 @@ class PGBlock(BaseBlock):
                 longitude = min(lane.length + 0.1, longitude)
                 point = lane.position(longitude, lateral)
                 polygon.append([point[0], point[1]])
-        self.sidewalks[str(lane.index)] = {"polygon": polygon}
+        self.sidewalks[str(lane.index)] = {"type": MetaDriveType.BOUNDARY_SIDEWALK, "polygon": polygon}
 
     def _construct_lane_line_in_block(self, lane, construct_left_right=(True, True)):
         """

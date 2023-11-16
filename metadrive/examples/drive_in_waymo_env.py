@@ -6,10 +6,10 @@ import random
 
 from metadrive.constants import HELP_MESSAGE
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 
 
-class DemoWaymoEnv(WaymoEnv):
+class DemoWaymoEnv(ScenarioEnv):
     """
     Make sure non-repetitive scenes are showed
     """
