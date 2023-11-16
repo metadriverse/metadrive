@@ -40,7 +40,7 @@ BASE_DEFAULT_CONFIG = dict(
     # Whether only return single agent-like observation and action space
     return_single_space=False,
 
-    # ===== Action =====
+    # ===== Action/Control =====
     manual_control=False,  # if set to True, agent policy will be Manual Control policy
     controller="keyboard",  # "joystick" or "keyboard"
     agent_policy=EnvInputPolicy,
