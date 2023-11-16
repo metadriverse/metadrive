@@ -40,7 +40,6 @@ RACING_CONFIG = dict(
 
     # Debug setting
     # agent_policy=IDMPolicy,
-
 )
 
 
