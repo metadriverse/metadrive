@@ -488,10 +488,10 @@ class EngineCore(ShowBase.ShowBase):
         np_y.reparentTo(self.render)
 
         np_y.hide(CamMask.AllOn)
-        np_y.coordinates_debug_np.show(CamMask.MainCam)
+        np_y.show(CamMask.MainCam)
 
         np_x.hide(CamMask.AllOn)
-        np_x.coordinates_debug_np.show(CamMask.MainCam)
+        np_x.show(CamMask.MainCam)
 
         self.coordinate_line.append(np_x)
         self.coordinate_line.append(np_y)
