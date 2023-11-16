@@ -108,6 +108,6 @@ class PGLane(AbstractLane):
                 continue
             else:
                 raise ValueError(
-                    "You have to modify this cuntion and implement a constructing method for line type: {}".
+                    "You have to modify this function and implement a constructing method for line type: {}".
                     format(line_type)
                 )

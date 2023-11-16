@@ -40,6 +40,7 @@ class MetaDriveType:
     CROSSWALK = "CROSSWALK"
     SPEED_BUMP = "SPEED_BUMP"
     DRIVEWAY = "DRIVEWAY"
+    BARRIER = "BARRIER"
 
     # ===== Traffic Light =====
     LANE_STATE_UNKNOWN = "LANE_STATE_UNKNOWN"

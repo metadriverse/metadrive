@@ -270,6 +270,7 @@ class PGLineType:
     BROKEN = MetaDriveType.LINE_BROKEN_SINGLE_WHITE
     CONTINUOUS = MetaDriveType.LINE_SOLID_SINGLE_WHITE
     SIDE = MetaDriveType.BOUNDARY_LINE
+    BARRIER = MetaDriveType.BARRIER
 
     @staticmethod
     def prohibit(line_type) -> bool:
