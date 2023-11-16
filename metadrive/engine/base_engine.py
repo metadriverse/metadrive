@@ -1,4 +1,5 @@
 from metadrive.engine.logger import get_logger, reset_logger
+from metadrive.constants import CamMask
 
 from metadrive.version import VERSION, asset_version
 import os
@@ -782,6 +783,8 @@ class BaseEngine(EngineCore, Randomizable):
             self.lane_coordinates_debug_node.removeNode()
 
         self.lane_coordinates_debug_node = NodePath("Lane Coordinates debug")
+        self.lane_coordinates_debug_node.hide(CamMask.AllOn)
+        self.lane_coordinates_debug_node.coordinates_debug_np.show(CamMask.MainCam)
         for lane in lanes:
             long_start = lateral_start = lane.position(0, 0)
             lateral_end = lane.position(0, 2)

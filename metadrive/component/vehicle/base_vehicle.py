@@ -1,4 +1,5 @@
 import math
+from metadrive.constants import CamMask
 from metadrive.engine.logger import get_logger
 import os
 from collections import deque
@@ -1016,6 +1017,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             return
         height = self.HEIGHT + 0.2
         self.coordinates_debug_np = NodePath("debug coordinate")
+        self.coordinates_debug_np.hide(CamMask.AllOn)
+        self.coordinates_debug_np.show(CamMask.MainCam)
         # 90 degrees offset
         x = self.engine._draw_line_3d([0, 0, height], [0, 2, height], [1, 1, 1, 1], 2)
         y = self.engine._draw_line_3d([0, 0, height], [-1, 0, height], [1, 1, 1, 1], 2)

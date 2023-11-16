@@ -486,6 +486,13 @@ class EngineCore(ShowBase.ShowBase):
         # y direction = blue
         np_y = self._draw_line_3d(Vec3(0, 0, 0.1), Vec3(0, 50, 0.1), color=[0, 1, 0, 1], thickness=2)
         np_y.reparentTo(self.render)
+
+        np_y.hide(CamMask.AllOn)
+        np_y.coordinates_debug_np.show(CamMask.MainCam)
+
+        np_x.hide(CamMask.AllOn)
+        np_x.coordinates_debug_np.show(CamMask.MainCam)
+
         self.coordinate_line.append(np_x)
         self.coordinate_line.append(np_y)
 

@@ -1,4 +1,5 @@
 from typing import Sequence, Tuple
+from metadrive.constants import CamMask
 from metadrive.type import MetaDriveType
 
 from panda3d.core import NodePath
@@ -30,6 +31,8 @@ class BaseStaticObject(BaseObject):
             return
         height = self.HEIGHT
         self.coordinates_debug_np = NodePath("debug coordinate")
+        self.coordinates_debug_np.hide(CamMask.AllOn)
+        self.coordinates_debug_np.show(CamMask.MainCam)
         x = self.engine._draw_line_3d([0, 0, height], [2, 0, height], [1, 0, 0, 1], 1)
         y = self.engine._draw_line_3d([0, 0, height], [0, 1, height], [1, 0, 0, 1], 1)
         z = self.engine._draw_line_3d([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 2)
