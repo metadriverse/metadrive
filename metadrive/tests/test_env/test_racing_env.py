@@ -5,7 +5,7 @@ from metadrive.envs.racing_env import RacingEnv
 
 def test_racing_env_idm(render=False):
 
-    racing_config =  dict(
+    racing_config = dict(
         # controller="joystick",
         # num_agents=2,
         use_render=False,
@@ -40,7 +40,6 @@ def test_racing_env_idm(render=False):
     finally:
         env.close()
         assert pass_test
-
 
 
 if __name__ == "__main__":

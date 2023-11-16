@@ -18,7 +18,6 @@ from metadrive.manager.spawn_manager import SpawnManager
 from metadrive.utils import Config
 from typing import Union
 
-
 import argparse
 import cv2
 import numpy as np
@@ -28,9 +27,7 @@ from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.constants import HELP_MESSAGE
 
 
-
 class RacingMap(PGMap):
-
     def __init__(self, map_config: dict = None, random_seed=None, map_type=None):
 
         super(RacingMap, self).__init__(map_config=map_config, random_seed=random_seed)
@@ -58,88 +55,86 @@ class RacingMap(PGMap):
         curve_direction = 1
         curve_len = 50
 
-
         block_c1 = Curve(1, init_block.get_socket(0), self.road_network, 1)
         block_c1.has_guardrail = True
-        block_c1.construct_from_config({
-            Parameter.length: curve_len,
-            Parameter.radius: 50,
-            Parameter.angle: 90,
-            Parameter.dir: curve_direction,
-        }, parent_node_path, physics_world)
+        block_c1.construct_from_config(
+            {
+                Parameter.length: curve_len,
+                Parameter.radius: 50,
+                Parameter.angle: 90,
+                Parameter.dir: curve_direction,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c1)
 
         block_s2 = Straight(2, block_c1.get_socket(0), self.road_network, 1)
         block_s2.has_Guardrail = True
-        block_s2.construct_from_config(
-            {
-                Parameter.length: 5,
-            }, parent_node_path, physics_world
-        )
+        block_s2.construct_from_config({
+            Parameter.length: 5,
+        }, parent_node_path, physics_world)
         self.blocks.append(block_s2)
-
-
 
         block_c2 = Curve(3, block_s2.get_socket(0), self.road_network, 1)
         block_c2.has_guardrail = True
-        block_c2.construct_from_config({
-            Parameter.length: curve_len,
-            Parameter.radius: 50,
-            Parameter.angle: 90,
-            Parameter.dir: curve_direction,
-        }, parent_node_path, physics_world)
+        block_c2.construct_from_config(
+            {
+                Parameter.length: curve_len,
+                Parameter.radius: 50,
+                Parameter.angle: 90,
+                Parameter.dir: curve_direction,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c2)
 
         block_c3 = Curve(4, block_c2.get_socket(0), self.road_network, 1)
         block_c3.has_guardrail = True
-        block_c3.construct_from_config({
-            Parameter.length: curve_len,
-            Parameter.radius: 50,
-            Parameter.angle: 90,
-            Parameter.dir: curve_direction,
-        }, parent_node_path, physics_world)
+        block_c3.construct_from_config(
+            {
+                Parameter.length: curve_len,
+                Parameter.radius: 50,
+                Parameter.angle: 90,
+                Parameter.dir: curve_direction,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c3)
 
         block_s3 = Straight(5, block_c3.get_socket(0), self.road_network, 1)
         block_s3.has_Guardrail = True
-        block_s3.construct_from_config(
-            {
-                Parameter.length: 5,
-            }, parent_node_path, physics_world
-        )
+        block_s3.construct_from_config({
+            Parameter.length: 5,
+        }, parent_node_path, physics_world)
         self.blocks.append(block_s3)
-
 
         block_c4 = Curve(6, block_s3.get_socket(0), self.road_network, 1)
         block_c4.has_guardrail = True
-        block_c4.construct_from_config({
-            Parameter.length: curve_len,
-            Parameter.radius: 50,
-            Parameter.angle: 90,
-            Parameter.dir: curve_direction,
-        }, parent_node_path, physics_world)
+        block_c4.construct_from_config(
+            {
+                Parameter.length: curve_len,
+                Parameter.radius: 50,
+                Parameter.angle: 90,
+                Parameter.dir: curve_direction,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c4)
-
-
 
         pos_from_node = list(self.road_network.graph.keys())[-1]
         pos_to_node = list(self.road_network.graph[pos_from_node].keys())[-1]
-        self.road_network.graph[pos_to_node] = {
-            '>': self.road_network.graph[pos_from_node][pos_to_node]
-        }
+        self.road_network.graph[pos_to_node] = {'>': self.road_network.graph[pos_from_node][pos_to_node]}
 
         # self.vehicle
-
 
 
 class RacingMapManager(PGMapManager):
     def __init__(self, map_type=None):
         super(RacingMapManager, self).__init__()
         self.map_type = map_type
+
     def reset(self):
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
-            _map = self.spawn_object(RacingMap, map_config=config["map_config"], random_seed=None, map_type=self.map_type)
+            _map = self.spawn_object(
+                RacingMap, map_config=config["map_config"], random_seed=None, map_type=self.map_type
+            )
         else:
             assert len(self.spawned_objects) == 1, "It is supposed to contain one map in this manager"
             _map = self.spawned_objects.values()[0]
@@ -147,15 +142,12 @@ class RacingMapManager(PGMapManager):
         # self.current_map.spawn_roads = config["spawn_roads"]
 
 
-
-
-
 class RacingEnv(MetaDriveEnv):
     # @staticmethod
     # def default_config() -> Config:
     #     return MultiAgentMetaDrive.default_config().update(MARoundaboutConfig, allow_add_new_key=True)
 
-    def __init__(self, config: Union[dict, None] = None, map_type = None):
+    def __init__(self, config: Union[dict, None] = None, map_type=None):
         super(RacingEnv, self).__init__(config)
         self.map_type = map_type
 
@@ -168,14 +160,11 @@ class RacingEnv(MetaDriveEnv):
 
         self.engine.update_manager("map_manager", map_manager)
 
-
     def initial_setup_circular_tracks(self):
         complete_checkpoints = self.vehicle.navigation.checkpoints
         real_destination = list(self.current_map.road_network.graph.keys())[-1]
         self.vehicle.config["destination"] = list(self.current_map.road_network.graph.keys())[-2]
         self.vehicle.navigation.reset(self.vehicle)
-
-
 
 
 if __name__ == "__main__":
@@ -238,11 +227,11 @@ if __name__ == "__main__":
             o, r, tm, tc, info = env.step([0, 0])
             g += r
 
-
             current_lane_index = env.vehicle.lane_index[1]
             lane, lane_index, on_lane = env.vehicle.navigation._get_current_lane(env.vehicle)
 
-            if ( len(complete_checkpoints) - 1 > complete_checkpoints.index(current_lane_index) >= len(complete_checkpoints) - 3) and not changed_dest:
+            if (len(complete_checkpoints) - 1 > complete_checkpoints.index(current_lane_index) >=
+                    len(complete_checkpoints) - 3) and not changed_dest:
                 env.vehicle.config["destination"] = real_destination
                 env.vehicle.navigation.reset(env.vehicle)
                 changed_dest = True
@@ -272,10 +261,6 @@ if __name__ == "__main__":
                     env.vehicle.config["destination"] = list(env.current_map.road_network.graph.keys())[-2]
                     env.vehicle.navigation.reset(env.vehicle)
                     changed_dest = False
-
-
-
-
 
     except Exception as e:
         raise e

@@ -21,7 +21,10 @@ if __name__ == "__main__":
         on_continuous_line_done=False,
         out_of_route_done=True,
         vehicle_config=dict(show_lidar=False, show_navi_mark=False),
-        map_config={"config": "CCC", "type": "block_sequence"},
+        map_config={
+            "config": "CCC",
+            "type": "block_sequence"
+        },
         start_seed=10,
     )
     parser = argparse.ArgumentParser()

@@ -78,7 +78,6 @@ class Curve(PGBlock):
             #     side_lane_line_type=PGLineType.BARRIER
             # ) and no_cross
 
-
         # part 2
         start_node = end_node
         end_node = self.add_road_node()

@@ -33,7 +33,6 @@ class Straight(PGBlock):
         socket = Road(start, end)
         _socket = -socket
 
-
         if not self.has_Guardrail:
             # create positive road
             no_cross = CreateRoadFrom(
@@ -52,7 +51,7 @@ class Straight(PGBlock):
                 ignore_intersection_checking=self.ignore_intersection_checking
             ) and no_cross
 
-        else: # if we need guardian at the side instead of normal sidewalk
+        else:  # if we need guardian at the side instead of normal sidewalk
             no_cross = CreateRoadFrom(
                 new_lane,
                 self.positive_lane_num,

@@ -322,7 +322,9 @@ class AbstractLane(MetaDriveType):
         return node_path_list
 
     @staticmethod
-    def construct_sidewalk_segment(block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0, guardrail_height=1/2):
+    def construct_sidewalk_segment(
+        block, lane_start, lane_end, length_multiply=1, extra_thrust=0, width=0, guardrail_height=1 / 2
+    ):
         node_path_list = []
 
         direction_v = lane_end - lane_start
@@ -341,7 +343,7 @@ class AbstractLane(MetaDriveType):
         body_node.addShape(shape)
         body_node.setIntoCollideMask(block.SIDEWALK_COLLISION_MASK)
         # if block.render:
-            # a trick to acc off-rendering training
+        # a trick to acc off-rendering training
         block.dynamic_nodes.append(body_node)
         # else:
         #     block.static_nodes.append(body_node)

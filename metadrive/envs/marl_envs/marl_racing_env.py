@@ -1,28 +1,11 @@
-
-
-from metadrive.policy.idm_policy import IDMPolicy
-
-
-
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.roundabout import Roundabout
 from metadrive.component.pgblock.straight import Straight
-from metadrive.component.road_network import Road
-from metadrive.manager.pg_map_manager import PGMapManager
-import copy
-from metadrive import MetaDriveEnv
-from metadrive.component.map.pg_map import PGMap
-from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.roundabout import Roundabout
-from metadrive.component.road_network import Road
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
-from metadrive.manager.spawn_manager import SpawnManager
-from metadrive.utils import Config
-
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
 from metadrive.utils.math import clip
 
@@ -40,13 +23,11 @@ Racing_config = dict(
     # random_lane_width=True,
     # random_lane_num=True,
     cross_yellow_line_done=True,
-    use_lateral = False,
-
+    use_lateral=False,
     on_continuous_line_done=False,
     out_of_route_done=True,
     vehicle_config=dict(show_lidar=False, show_navi_mark=False),
     agent_policy=IDMPolicy,
-
 )
 
 
@@ -71,91 +52,97 @@ class MultiAgentRacingMap(PGMap):
         # )
         # self.blocks.append(block_s1)
 
-        block_s1 = Straight(1, init_block.get_socket(0),  self.road_network, 1)
-        block_s1.construct_from_config(
-            {
-                Parameter.length: 100
-            },parent_node_path, physics_world
-        )
+        block_s1 = Straight(1, init_block.get_socket(0), self.road_network, 1)
+        block_s1.construct_from_config({Parameter.length: 100}, parent_node_path, physics_world)
         self.blocks.append(block_s1)
 
-        block_c1 = Curve(2, block_s1.get_socket(0),  self.road_network, 1)
-        block_c1.construct_from_config({
-            Parameter.length: 200,
-            Parameter.radius: 100,
-            Parameter.angle: 90,
-            Parameter.dir: 1,
-        }, parent_node_path, physics_world)
-        self.blocks.append(block_c1)
-
-        block_s2 = Straight(3, block_c1.get_socket(0),  self.road_network, 1)
-        block_s2.construct_from_config(
-            {
-                Parameter.length: 100,
-            },parent_node_path, physics_world
-        )
-        self.blocks.append(block_s2)
-
-        block_c2 = Curve(4, block_s2.get_socket(0),  self.road_network, 1)
-        block_c2.construct_from_config({
-            Parameter.length: 100,
-            Parameter.radius: 60,
-            Parameter.angle: 90,
-            Parameter.dir: 1,
-        }, parent_node_path, physics_world)
-        self.blocks.append(block_c2)
-
-        block_c3 = Curve(5, block_c2.get_socket(0),  self.road_network, 1)
-        block_c3.construct_from_config({
-            Parameter.length: 100,
-            Parameter.radius: 60,
-            Parameter.angle: 90,
-            Parameter.dir: 1,
-        }, parent_node_path, physics_world)
-        self.blocks.append(block_c3)
-
-        block_s3 = Straight(6, block_c3.get_socket(0),  self.road_network, 1)
-        block_s3.construct_from_config(
+        block_c1 = Curve(2, block_s1.get_socket(0), self.road_network, 1)
+        block_c1.construct_from_config(
             {
                 Parameter.length: 200,
+                Parameter.radius: 100,
+                Parameter.angle: 90,
+                Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
+        self.blocks.append(block_c1)
+
+        block_s2 = Straight(3, block_c1.get_socket(0), self.road_network, 1)
+        block_s2.construct_from_config({
+            Parameter.length: 100,
+        }, parent_node_path, physics_world)
+        self.blocks.append(block_s2)
+
+        block_c2 = Curve(4, block_s2.get_socket(0), self.road_network, 1)
+        block_c2.construct_from_config(
+            {
+                Parameter.length: 100,
+                Parameter.radius: 60,
+                Parameter.angle: 90,
+                Parameter.dir: 1,
+            }, parent_node_path, physics_world
+        )
+        self.blocks.append(block_c2)
+
+        block_c3 = Curve(5, block_c2.get_socket(0), self.road_network, 1)
+        block_c3.construct_from_config(
+            {
+                Parameter.length: 100,
+                Parameter.radius: 60,
+                Parameter.angle: 90,
+                Parameter.dir: 1,
+            }, parent_node_path, physics_world
+        )
+        self.blocks.append(block_c3)
+
+        block_s3 = Straight(6, block_c3.get_socket(0), self.road_network, 1)
+        block_s3.construct_from_config({
+            Parameter.length: 200,
+        }, parent_node_path, physics_world)
         self.blocks.append(block_s3)
 
-        block_c4 = Curve(7, block_s3.get_socket(0),  self.road_network, 1)
-        block_c4.construct_from_config({
-            Parameter.length: 80,
-            Parameter.radius: 40,
-            Parameter.angle: 90,
-            Parameter.dir: 1,
-        }, parent_node_path, physics_world)
+        block_c4 = Curve(7, block_s3.get_socket(0), self.road_network, 1)
+        block_c4.construct_from_config(
+            {
+                Parameter.length: 80,
+                Parameter.radius: 40,
+                Parameter.angle: 90,
+                Parameter.dir: 1,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c4)
 
-        block_c5 = Curve(8, block_c4.get_socket(0),  self.road_network, 1)
-        block_c5.construct_from_config({
-            Parameter.length: 40,
-            Parameter.radius: 50,
-            Parameter.angle: 180,
-            Parameter.dir: 1,
-        }, parent_node_path, physics_world)
+        block_c5 = Curve(8, block_c4.get_socket(0), self.road_network, 1)
+        block_c5.construct_from_config(
+            {
+                Parameter.length: 40,
+                Parameter.radius: 50,
+                Parameter.angle: 180,
+                Parameter.dir: 1,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c5)
 
         block_c6 = Curve(9, block_c5.get_socket(0), self.road_network, 1)
-        block_c6.construct_from_config({
-            Parameter.length: 40,
-            Parameter.radius: 50,
-            Parameter.angle: 220,
-            Parameter.dir: 0,
-        }, parent_node_path, physics_world)
+        block_c6.construct_from_config(
+            {
+                Parameter.length: 40,
+                Parameter.radius: 50,
+                Parameter.angle: 220,
+                Parameter.dir: 0,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c6)
 
         block_c7 = Curve(10, block_c6.get_socket(0), self.road_network, 1)
-        block_c7.construct_from_config({
-            Parameter.length: 40,
-            Parameter.radius: 20,
-            Parameter.angle: 180,
-            Parameter.dir: 1,
-        }, parent_node_path, physics_world)
+        block_c7.construct_from_config(
+            {
+                Parameter.length: 40,
+                Parameter.radius: 20,
+                Parameter.angle: 180,
+                Parameter.dir: 1,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c7)
 
         block_s4 = Straight(11, block_c7.get_socket(0), self.road_network, 1)
@@ -165,12 +152,14 @@ class MultiAgentRacingMap(PGMap):
         self.blocks.append(block_s4)
 
         block_c8 = Curve(12, block_s4.get_socket(0), self.road_network, 1)
-        block_c8.construct_from_config({
-            Parameter.length: 100,
-            Parameter.radius: 40,
-            Parameter.angle: 140,
-            Parameter.dir: 0,
-        }, parent_node_path, physics_world)
+        block_c8.construct_from_config(
+            {
+                Parameter.length: 100,
+                Parameter.radius: 40,
+                Parameter.angle: 140,
+                Parameter.dir: 0,
+            }, parent_node_path, physics_world
+        )
         self.blocks.append(block_c8)
 
         # # to connect last road and the first
@@ -181,9 +170,6 @@ class MultiAgentRacingMap(PGMap):
         # }
 
 
-
-
-
 # class RoundaboutSpawnManager(SpawnManager):
 #     def update_destination_for(self, vehicle_id, vehicle_config):
 #         end_roads = copy.deepcopy(self.engine.global_config["spawn_roads"])
@@ -191,7 +177,6 @@ class MultiAgentRacingMap(PGMap):
 #         vehicle_config["destination"] = end_road.end_node
 #         return vehicle_config
 #
-
 
 
 class MultiAgentRacingMapManager(PGMapManager):
@@ -206,18 +191,13 @@ class MultiAgentRacingMapManager(PGMapManager):
         # self.current_map.spawn_roads = config["spawn_roads"]
 
 
-
-
-
 class MultiAgentRacingEnv(MultiAgentMetaDrive):
-
     @staticmethod
     def default_config() -> Config:
         # assert MABidirectionConfig["vehicle_config"]["side_detector"]["num_lasers"] > 2
         # assert MABidirectionConfig["vehicle_config"]["lane_line_detector"]["num_lasers"] > 2
         # MABidirectionConfig["map_config"]["lane_num"] = MABidirectionConfig["map_config"]["bottle_lane_num"]
         return MultiAgentMetaDrive.default_config().update(Racing_config, allow_add_new_key=True)
-
 
     def reward_function(self, vehicle_id: str):
         """
@@ -274,8 +254,6 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         self.engine.update_manager("map_manager", MultiAgentRacingMapManager())
 
 
-
-
 def _vis():
     env = MultiAgentRacingEnv(
         {
@@ -292,7 +270,7 @@ def _vis():
             # "debug": True,
             "manual_control": False,
             "num_agents": 2,
-            "agent_policy":IDMPolicy
+            "agent_policy": IDMPolicy
         }
     )
     o, _ = env.reset()
@@ -300,8 +278,6 @@ def _vis():
     ep_s = 0
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step({k: [1.0, .0] for k in env.vehicles.keys()})
-
-
 
         for r_ in r.values():
             total_r += r_
@@ -321,17 +297,5 @@ def _vis():
     env.close()
 
 
-
-
-
 if __name__ == "__main__":
     _vis()
-
-
-
-
-
-
-
-
-
