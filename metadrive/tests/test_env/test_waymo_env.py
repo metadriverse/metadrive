@@ -3,19 +3,19 @@ import numpy as np
 
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
-from metadrive.policy.idm_policy import WaymoIDMPolicy
+from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
-@pytest.mark.parametrize("policy", [WaymoIDMPolicy, ReplayEgoCarPolicy])
+@pytest.mark.parametrize("policy", [TrajectoryIDMPolicy, ReplayEgoCarPolicy])
 def test_waymo_env(policy, render=False, num_scenarios=3):
-    WaymoIDMPolicy.NORMAL_SPEED = 30
+    TrajectoryIDMPolicy.NORMAL_SPEED = 30
     asset_path = AssetLoader.asset_path
     try:
         env = ScenarioEnv(
             {
                 "manual_control": False,
-                "no_traffic": True if policy == WaymoIDMPolicy else False,
+                "no_traffic": True if policy == TrajectoryIDMPolicy else False,
                 "use_render": render,
                 "agent_policy": policy,
                 "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
@@ -39,7 +39,7 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
 
 
 def test_store_map_memory_leakage(render=False):
-    WaymoIDMPolicy.NORMAL_SPEED = 30
+    TrajectoryIDMPolicy.NORMAL_SPEED = 30
     asset_path = AssetLoader.asset_path
     env = ScenarioEnv(
         {
@@ -84,4 +84,4 @@ def test_store_map_memory_leakage(render=False):
 
 if __name__ == "__main__":
     test_store_map_memory_leakage(render=True)
-    # test_waymo_env(policy=WaymoIDMPolicy, render=True)
+    # test_waymo_env(policy=TrajectoryIDMPolicy, render=True)

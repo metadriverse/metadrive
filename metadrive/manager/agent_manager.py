@@ -1,7 +1,7 @@
 import copy
 import logging
 
-from metadrive.policy.idm_policy import TrajectoryIDMPOlicy
+from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from typing import Dict
 
 from gymnasium.spaces import Box, Dict, MultiDiscrete, Discrete
@@ -74,7 +74,7 @@ class AgentManager(BaseManager):
             ret[agent_id] = obj
             policy_cls = self.agent_policy
             args = [obj, self.generate_seed()]
-            if policy_cls == TrajectoryIDMPOlicy or issubclass(policy_cls, TrajectoryIDMPOlicy):
+            if policy_cls == TrajectoryIDMPolicy or issubclass(policy_cls, TrajectoryIDMPolicy):
                 args.append(self.engine.map_manager.current_sdc_route)
             self.add_policy(obj.id, policy_cls, *args)
         return ret

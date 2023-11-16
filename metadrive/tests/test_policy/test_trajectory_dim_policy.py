@@ -4,14 +4,14 @@ import numpy as np
 
 from metadrive.component.vehicle.vehicle_type import SVehicle
 from metadrive.envs.scenario_env import ScenarioEnv, AssetLoader
-from metadrive.policy.idm_policy import TrajectoryIDMPOlicy
+from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 
 
 def test_trajectory_idm(render=False):
     env = ScenarioEnv(
         {
             "use_render": render,
-            "agent_policy": TrajectoryIDMPOlicy,
+            "agent_policy": TrajectoryIDMPolicy,
             "data_directory": AssetLoader.file_path("waymo", unix_style=False),
             "start_scenario_index": 0,
             # "show_coordinates": True,

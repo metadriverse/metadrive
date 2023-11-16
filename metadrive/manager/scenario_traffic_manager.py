@@ -10,7 +10,7 @@ from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import get_vehicle_type, reset_vehicle_type_count
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.policy.idm_policy import ScenarioIDMPolicy
+from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
@@ -66,7 +66,7 @@ class ScenarioTrafficManager(BaseManager):
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
         for v in self.spawned_objects.values():
-            if self.engine.has_policy(v.id, ScenarioIDMPolicy):
+            if self.engine.has_policy(v.id, TrajectoryIDMPolicy):
                 p = self.engine.get_policy(v.name)
                 if p.arrive_destination:
                     self._obj_to_clean_this_frame.append(self._obj_id_to_scenario_id[v.id])
@@ -228,7 +228,7 @@ class ScenarioTrafficManager(BaseManager):
             idm_route = get_idm_route(track["state"]["position"][start_index:end_index][..., :2])
             # only not static and behind ego car, it can get reactive policy
             self.add_policy(
-                v.name, ScenarioIDMPolicy, v, self.generate_seed(), idm_route,
+                v.name, TrajectoryIDMPolicy, v, self.generate_seed(), idm_route,
                 self.idm_policy_count % self.IDM_ACT_BATCH_SIZE
             )
             # no act() is required for IDMPolicy
