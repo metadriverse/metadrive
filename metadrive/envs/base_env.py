@@ -8,9 +8,9 @@ import numpy as np
 from panda3d.core import PNMImage
 
 from metadrive.component.sensors.base_camera import BaseCamera
+from metadrive.component.sensors.dashboard import DashBoard
 from metadrive.component.sensors.distance_detector import LaneLineDetector, SideDetector
 from metadrive.component.sensors.lidar import Lidar
-from metadrive.component.sensors.dashboard import DashBoard
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
 from metadrive.constants import TerminationState
@@ -20,9 +20,8 @@ from metadrive.engine.logger import get_logger
 from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
-from metadrive.obs.image_obs import ImageStateObservation
+from metadrive.obs.observation_base import DummyObservation
 from metadrive.obs.observation_base import ObservationBase
-from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.scenario.utils import convert_recorded_scenario_exported
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
@@ -203,6 +202,10 @@ BASE_DEFAULT_CONFIG = dict(
     use_mesh_terrain=False,
     # use full-size mesh terrain
     full_size_mesh=True,
+    # show crosswalk
+    show_crosswalk=False,
+    # show sidewalk
+    show_sidewalk=True,
 
     # ===== Others =====
     # Force to generate objects in the left lane.
@@ -343,7 +346,7 @@ class BaseEnv(gym.Env):
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
-        raise NotImplementedError()
+        return {DEFAULT_AGENT: self.get_single_observation()}
 
     def _get_observation_space(self):
         return {v_id: obs.observation_space for v_id, obs in self.observations.items()}
@@ -425,13 +428,16 @@ class BaseEnv(gym.Env):
         :param vehicle_id: name of this base vehicle
         :return: reward, reward info
         """
-        raise NotImplementedError()
+        self.logger.warning("Reward function is not implemented. Return reward = 0", extra={"log_once": True})
+        return 0, {}
 
     def cost_function(self, vehicle_id: str) -> Tuple[float, Dict]:
-        raise NotImplementedError()
+        self.logger.warning("Cost function is not implemented. Return cost = 0", extra={"log_once": True})
+        return 0, {}
 
     def done_function(self, vehicle_id: str) -> Tuple[bool, Dict]:
-        raise NotImplementedError()
+        self.logger.warning("Done function is not implemented. Return Done = False", extra={"log_once": True})
+        return False, {}
 
     def render(self,
                text: Optional[Union[dict, str]] = None,
@@ -608,10 +614,7 @@ class BaseEnv(gym.Env):
         return ego_v
 
     def get_single_observation(self):
-        if self.config["image_observation"]:
-            o = ImageStateObservation(self.config)
-        else:
-            o = LidarStateObservation(self.config)
+        o = DummyObservation({})
         return o
 
     def _wrap_as_single_agent(self, data):
@@ -790,3 +793,11 @@ class BaseEnv(gym.Env):
     @property
     def logger_name(self):
         return self.__class__.__name__
+
+
+if __name__ == '__main__':
+    cfg = {"use_render": True}
+    env = BaseEnv(cfg)
+    env.reset()
+    while True:
+        env.step(env.action_space.sample())

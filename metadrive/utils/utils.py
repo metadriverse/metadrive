@@ -229,3 +229,98 @@ def time_me(fn):
         return ret
 
     return _wrapper
+
+
+def create_rectangle_from_midpoints(p1, p2, width, length_factor=1.0):
+    """
+    Create the vertices of a rectangle given two midpoints on opposite sides, the width of the rectangle,
+    and an optional factor to scale the length of the rectangle.
+
+    This function calculates the four vertices of a rectangle in 2D space. The rectangle's length is the distance
+    between two provided midpoints (p1 and p2) scaled by the 'length_factor', and its width is specified by the
+    'width' parameter. The rectangle is aligned with the line segment connecting p1 and p2.
+
+    Parameters:
+    p1 (list or tuple): The first midpoint on the rectangle's width edge (x, y).
+    p2 (list or tuple): The second midpoint on the rectangle's width edge (x, y).
+    width (float): The width of the rectangle.
+    length_factor (float, optional): The factor by which to scale the length of the rectangle. Default is 1.0.
+
+    Returns:
+    numpy.ndarray: A 2D array containing four vertices of the rectangle, in the order
+                   [bottom_left, top_left, top_right, bottom_right].
+
+    Example:
+    p1 = [1, 1]
+    p2 = [4, 4]
+    width = 2
+    length_factor = 1.5
+    create_rectangle_from_midpoints(p1, p2, width, length_factor)
+    array([[ some array ]])
+    """
+    # Calculate the vector from point 1 to point 2 and its length
+    v = np.array(p2) - np.array(p1)
+
+    # Scale the vector by length_factor
+    v_scaled = v * length_factor
+
+    # Calculate the scaled midpoints
+    midpoint = (np.array(p1) + np.array(p2)) / 2
+    p1_scaled = midpoint - v_scaled / 2
+    p2_scaled = midpoint + v_scaled / 2
+
+    # Normalize the vector
+    v_norm = v_scaled / np.linalg.norm(v_scaled)
+
+    # Rotate 90 degrees to get the perpendicular vector
+    perp_v = np.array([-v_norm[1], v_norm[0]])
+
+    # Calculate the half width
+    half_width = width / 2
+
+    # Calculate the 4 corners of the rectangle
+    p3 = p1_scaled + perp_v * half_width
+    p4 = p1_scaled - perp_v * half_width
+    p5 = p2_scaled + perp_v * half_width
+    p6 = p2_scaled - perp_v * half_width
+
+    # Return the 4 corners in order
+    return np.array([p4, p3, p5, p6])
+
+
+def draw_polygon(polygon):
+    """
+    Visualize the polygon with matplot lib
+    Args:
+        polygon: a list of 2D points
+
+    Returns: None
+
+    """
+    import matplotlib.pyplot as plt
+
+    # Create the rectangle
+    rectangle_points = np.array(polygon)
+    # Extract the points for easier plotting
+    x_rect, y_rect = rectangle_points.T
+
+    # Extract the original midpoints
+
+    # Plot the rectangle
+    plt.figure(figsize=(8, 8))
+    plt.plot(*zip(*np.append(rectangle_points, [rectangle_points[0]], axis=0)), marker='o', label='Rectangle Vertices')
+    plt.fill(
+        *zip(*np.append(rectangle_points, [rectangle_points[0]], axis=0)), alpha=0.3
+    )  # Fill the rectangle with light opacity
+
+    # Plot the original midpoints
+    # plt.scatter(x_mid, y_mid, color='red', zorder=5, label='Midpoints')
+
+    # Set equal scaling and labels
+    plt.axis('equal')
+    plt.xlabel('X-coordinate')
+    plt.ylabel('Y-coordinate')
+    plt.title('Visualization of the Rectangle and Input Points')
+    plt.legend()
+    plt.grid(True)
+    plt.show()

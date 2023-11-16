@@ -1,20 +1,19 @@
 import logging
-import geopandas as gpd
-from shapely.ops import unary_union
-from metadrive.utils.utils import time_me
 import math
+from abc import ABC
 
 import cv2
 import numpy as np
+
 from metadrive.base_class.base_runnable import BaseRunnable
-from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, DrivableAreaProperty
+from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, PGDrivableAreaProperty
 from metadrive.engine.engine_utils import get_global_config
-from shapely.geometry import Polygon, MultiPolygon
+from metadrive.utils.shapely_utils.geom import find_longest_edge
 
 logger = logging.getLogger(__name__)
 
 
-class BaseMap(BaseRunnable):
+class BaseMap(BaseRunnable, ABC):
     """
     Base class for Map generation!
     """
@@ -135,6 +134,14 @@ class BaseMap(BaseRunnable):
         pass
 
     def get_map_features(self, interval=2):
+        """
+        Get the map features represented by a set of point lists or polygons
+        Args:
+            interval: Sampling rate
+
+        Returns: None
+
+        """
         map_features = self.road_network.get_map_features(interval)
         boundary_line_vector = self.get_boundary_line_vector(interval)
         map_features.update(boundary_line_vector)
@@ -170,7 +177,7 @@ class BaseMap(BaseRunnable):
             polygons = []
             polylines = []
 
-            points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval)
+            points_to_skip = math.floor(PGDrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval)
             for obj in all_lanes.values():
                 if MetaDriveType.is_lane(obj["type"]) and "lane" in layer:
                     polygons.append((obj["polygon"], MapTerrainSemanticColor.get_color(obj["type"])))
@@ -210,6 +217,29 @@ class BaseMap(BaseRunnable):
                     ] for p in line
                 ]
                 cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, polyline_thickness)
+
+            if "crosswalk" in layer:
+                for id, sidewalk in self.crosswalks.items():
+                    polygon = sidewalk["polygon"]
+                    points = [
+                        [
+                            int((x - center_p[0]) * pixels_per_meter + size / 2),
+                            int((y - center_p[1]) * pixels_per_meter) + size / 2
+                        ] for x, y in polygon
+                    ]
+                    # edges = find_longest_parallel_edges(polygon)
+                    # p_1, p_2 = edges[0]
+                    p_1, p_2 = find_longest_edge(polygon)[0]
+                    dir = (
+                        p_2[0] - p_1[0],
+                        p_2[1] - p_1[1],
+                    )
+                    # 0-2pi
+                    angle = np.arctan2(*dir) / np.pi * 180 + 180
+                    # normalize to 0.4-0.714
+                    angle = angle / 1000 + MapTerrainSemanticColor.get_color(MetaDriveType.CROSSWALK)
+                    cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=angle)
+
             self._semantic_map = mask
         return self._semantic_map
 
@@ -243,6 +273,10 @@ class BaseMap(BaseRunnable):
 
             center_p = self.get_center_point()
             need_scale = abs(extension - 1) > 1e-1
+
+            for sidewalk in self.sidewalks.values():
+                polygons.append(sidewalk["polygon"])
+
             for polygon in polygons:
                 points = [
                     [

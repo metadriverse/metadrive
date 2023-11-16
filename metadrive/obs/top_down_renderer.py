@@ -9,7 +9,7 @@ from metadrive.component.map.nuplan_map import NuPlanMap
 from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, TARGET_VEHICLES
-from metadrive.constants import TopDownSemanticColor, MetaDriveType, DrivableAreaProperty
+from metadrive.constants import TopDownSemanticColor, MetaDriveType, PGDrivableAreaProperty
 from metadrive.obs.top_down_obs_impl import WorldSurface, ObjectGraphics, LaneGraphics, history_object
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.interpolating_line import InterpolatingLine
@@ -59,7 +59,7 @@ def draw_top_down_map(
 
             elif MetaDriveType.is_road_line(obj["type"]) or MetaDriveType.is_road_boundary_line(obj["type"]):
                 if semantic_broken_line and MetaDriveType.is_broken_line(obj["type"]):
-                    points_to_skip = math.floor(DrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
+                    points_to_skip = math.floor(PGDrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
                 else:
                     points_to_skip = 1
                 for index in range(0, len(obj["polyline"]) - 1, points_to_skip):
@@ -72,7 +72,7 @@ def draw_top_down_map(
                             surface.vec2pix([s_p[0], s_p[1]]),
                             surface.vec2pix([e_p[0], e_p[1]]),
                             # max(surface.pix(LaneGraphics.STRIPE_WIDTH),
-                            surface.pix(DrivableAreaProperty.LANE_LINE_WIDTH) * 2
+                            surface.pix(PGDrivableAreaProperty.LANE_LINE_WIDTH) * 2
                         )
     else:
         if isinstance(map, ScenarioMap):

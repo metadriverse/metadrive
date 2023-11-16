@@ -67,9 +67,9 @@ def test_base_vehicle():
                 assert _get_heading_deg(v.heading_theta) == _get_heading_deg(state["heading_theta"])
                 np.testing.assert_almost_equal(v.position, metadrive_vector(state["position"]))
                 v.convert_to_local_coordinates([a_x, a_y], 0.0)
-
+        env.engine.clear_objects([v.id])
         _nan_speed(env)
-
+        v = engine.spawn_object(DefaultVehicle, vehicle_config=v_config, random_seed=0)
         v.reset(position=np.array([10, 0]))
         v.set_heading_theta(np.pi / 2)
         bounding_box = np.asarray(v.bounding_box)

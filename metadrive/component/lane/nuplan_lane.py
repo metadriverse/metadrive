@@ -76,7 +76,7 @@ class NuPlanLane(PointLane):
 
 if __name__ == "__main__":
     raise ValueError("Can not be run")
-    file_path = AssetLoader.file_path("waymo", "test.pkl", return_raw_style=False)
+    file_path = AssetLoader.file_path("waymo", "test.pkl", unix_style=False)
     data = read_waymo_data(file_path)
     print(data)
     lane = NuPlanLane(108, data["map"])

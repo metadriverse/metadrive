@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     # load map
     initialize_asset_loader(engine)
-    map = load_opendrive_map(AssetLoader.file_path("carla", "CARLA_town01.xodr", return_raw_style=False))
+    map = load_opendrive_map(AssetLoader.file_path("carla", "CARLA_town01.xodr", unix_style=False))
     global_network = OpenDriveRoadNetwork()
     i = 0
     blocks = []

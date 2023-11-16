@@ -93,9 +93,6 @@ class NuPlanEnv(BaseEnv):
     def __init__(self, config=None):
         super(NuPlanEnv, self).__init__(config)
 
-    def _get_observations(self):
-        return {self.DEFAULT_AGENT: self.get_single_observation()}
-
     def get_single_observation(self):
         if self.config["use_nuplan_observation"]:
             o = NuPlanObservation(self.config)

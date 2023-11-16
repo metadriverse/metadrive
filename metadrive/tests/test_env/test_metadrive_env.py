@@ -54,7 +54,9 @@ def _act(env, action):
 
 @pytest.mark.parametrize("config", list(blackbox_test_configs.values()), ids=list(blackbox_test_configs.keys()))
 def test_pgdrive_env_blackbox(config):
-    env = MetaDriveEnv(config=copy.deepcopy(config))
+    cfg = copy.deepcopy(config)
+    cfg["log_level"] = 50
+    env = MetaDriveEnv(config=cfg)
     try:
         obs, _ = env.reset()
         assert env.observation_space.contains(obs)

@@ -217,7 +217,7 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
 def test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, render_load_env=False):
     env = NuScenesEnv(
         dict(
-            data_directory=AssetLoader.file_path("nuscenes", return_raw_style=False),
+            data_directory=AssetLoader.file_path("nuscenes", unix_style=False),
             agent_policy=ReplayEgoCarPolicy,
             use_render=render_export_env,
             start_scenario_index=0,
@@ -268,10 +268,10 @@ def test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, rend
 
 
 def compare_exported_scenario_with_origin(scenarios, data_manager, data_dir="waymo"):
-    _, _, mapping = read_dataset_summary(AssetLoader.file_path(data_dir, return_raw_style=False))
+    _, _, mapping = read_dataset_summary(AssetLoader.file_path(data_dir, unix_style=False))
     for index, scenario in scenarios.items():
         file_name = data_manager.summary_lookup[index]
-        file_path = AssetLoader.file_path(data_dir, mapping[file_name], file_name, return_raw_style=False)
+        file_path = AssetLoader.file_path(data_dir, mapping[file_name], file_name, unix_style=False)
         with open(file_path, "rb+") as file:
             origin_data = pickle.load(file)
         export_data = scenario
@@ -373,7 +373,7 @@ def test_nuscenes_export_and_original_consistency(num_scenarios=7, render_export
     assert num_scenarios <= 7
     env = NuScenesEnv(
         dict(
-            data_directory=AssetLoader.file_path("nuscenes", return_raw_style=False),
+            data_directory=AssetLoader.file_path("nuscenes", unix_style=False),
             agent_policy=ReplayEgoCarPolicy,
             use_render=render_export_env,
             start_scenario_index=3,

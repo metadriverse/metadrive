@@ -1,5 +1,5 @@
 from typing import Tuple, Sequence, Union
-from metadrive.constants import MetaDriveType
+from metadrive.constants import MetaDriveType, PGDrivableAreaProperty
 
 import math
 import numpy as np
@@ -46,6 +46,11 @@ class StraightLane(PGLane):
         self.direction_lateral = np.array([self.direction[1], -self.direction[0]])
 
     def update_properties(self):
+        """
+        Recalculate static properties, after changing related ones
+        Returns: None
+
+        """
         super(StraightLane, self).__init__(self.metadrive_type)
         self.length = norm((self.end - self.start)[0], (self.end - self.start)[1])
         self.heading = math.atan2(self.end[1] - self.start[1], self.end[0] - self.start[0])
@@ -73,17 +78,6 @@ class StraightLane(PGLane):
         self.start = start
         self.end = end
         self.update_properties()
-
-    def construct_lane_in_block(self, block, lane_index):
-        """
-        Straight lane can be represented by one segment
-        """
-        middle = self.position(self.length / 2, 0)
-        end = self.position(self.length, 0)
-        direction_v = end - middle
-        theta = math.atan2(direction_v[1], direction_v[0])
-        width = self.width_at(0) + block.SIDEWALK_LINE_DIST * 2
-        self.construct_lane_segment(block, middle, width, self.length, theta, lane_index)
 
     @property
     def polygon(self):

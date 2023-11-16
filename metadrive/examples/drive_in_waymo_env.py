@@ -42,7 +42,7 @@ if __name__ == "__main__":
                 "manual_control": True,
                 "reactive_traffic": True if args.reactive_traffic else False,
                 "use_render": True if not args.top_down else False,
-                "data_directory": AssetLoader.file_path(asset_path, "waymo", return_raw_style=False),
+                "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
                 "num_scenarios": 3
             }
         )

@@ -9,10 +9,9 @@ NuScenesEnv = ScenarioEnv
 if __name__ == "__main__":
     env = NuScenesEnv(
         {
-            "use_render": False,
-            "no_map": False,
+            "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            # "manual_control": True,
+            "manual_control": True,
             "show_interface": False,
             # "need_lane_localization": False,
             # "image_observation": True,
@@ -24,33 +23,21 @@ if __name__ == "__main__":
             # "sequential_seed": True,
             "reactive_traffic": True,
             "curriculum_level": 1,
-            "show_fps": False,
+            "show_fps": True,
+            "show_sidewalk": True,
+            "show_crosswalk": True,
+            # "pstats": True,
+            # "use_mesh_terrain": True,
             # "debug": True,
             "no_static_vehicles": False,
             # "pstats": True,
             "render_pipeline": True,
-            # "daytime": "22:01",
-            # "no_traffic": True,
-            # "no_light": False,
-            # "debug":True,
-            # Make video
-            # "episodes_to_evaluate_curriculum": 5,
             "window_size": (1600, 900),
             "camera_dist": 9,
-            # "camera_height": 0.5,
-            # "camera_pitch": np.pi / 3,
-            # "camera_fov": 60,
-            # "force_render_fps": 10,
             "start_scenario_index": 0,
             "num_scenarios": 10,
             # "force_reuse_object_name": True,
-            # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
-            # "no_static_vehicles": True,
-            # "show_policy_mark": True,
-            # "show_coordinates": True,
-            # "force_destroy": True,
-            # "default_vehicle_in_traffic": True,
             "vehicle_config": dict(
                 # light=True,
                 # random_color=True,
@@ -60,7 +47,8 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=0, distance=50),
                 side_detector=dict(num_lasers=12, distance=50)
             ),
-            "data_directory": "/home/shady/data/scenarionet/dataset/nuscenes"
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
+            # "drivable_area_extension": 0,
         }
     )
 
@@ -95,12 +83,12 @@ if __name__ == "__main__":
                     },
                     # mode="topdown"
                 )
-            if tm or tc:
-                print(
-                    "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
-                        time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num
-                    )
-                )
-                print("seed:{}, success".format(env.engine.global_random_seed))
-                print(list(env.engine.curriculum_manager.recent_success.dict.values()))
-                break
+            # if tm or tc:
+            #     print(
+            #         "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
+            #             time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num
+            #         )
+            #     )
+            #     print("seed:{}, success".format(env.engine.global_random_seed))
+            #     print(list(env.engine.curriculum_manager.recent_success.dict.values()))
+            #     break

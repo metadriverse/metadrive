@@ -12,6 +12,15 @@ import numpy as np
 
 
 def get_np_random(seed=None, return_seed=False):
+    """
+    Generating a numpy.RandomState give a seed
+    Args:
+        seed: seed for thr random number generator (rng)
+        return_seed: return the seed for seeding the rgg
+
+    Returns: rng (with seed)
+
+    """
     if seed is not None and not (isinstance(seed, int) and 0 <= seed):
         raise logging.error('Seed must be a non-negative integer or omitted, not {}'.format(seed))
 

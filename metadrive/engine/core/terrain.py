@@ -1,13 +1,11 @@
-# import numpy
+# import numpyf
+import math
 import pathlib
 import sys
-import os.path
-from metadrive.engine.asset_loader import AssetLoader
+
 #
 #
 import cv2
-import math
-from metadrive.utils.utils import time_me
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.bullet import ZUp, BulletHeightfieldShape
@@ -18,8 +16,11 @@ from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask, Semantics
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
+from metadrive.engine.logger import get_logger
 from metadrive.third_party.diamond_square import diamond_square
 from metadrive.utils.utils import is_win
+
+logger = get_logger()
 
 
 class Terrain(BaseObject):
@@ -75,24 +76,28 @@ class Terrain(BaseObject):
         if self.use_mesh_terrain or self.render:
             self._load_height_field_image(engine)
 
-    # @time_me
-    def reset(self, center_position):
+    def before_reset(self):
         """
-        Update terrain according to current map
+        Clear existing terrain
+        Returns: None
+
         """
         # detach current map
         assert self.engine is not None, "Can not call this without initializing engine"
         self.detach_from_world(self.engine.physics_world)
 
+    # @time_me
+    def reset(self, center_position):
+        """
+        Update terrain according to current map
+        """
         if not self.use_mesh_terrain and self.plane_collision_terrain is None:
             # only generate once if plane terrain
             self.generate_plane_collision_terrain()
 
         if self.render or self.use_mesh_terrain:
             # modify default height image
-            drivable_region = self.engine.current_map.get_height_map(
-                self._heightmap_size, 1, self._drivable_area_extension
-            )
+            drivable_region = self.get_drivable_region()
 
             # embed to the original height image
             start = self._heightfield_start
@@ -117,13 +122,7 @@ class Terrain(BaseObject):
 
             if self.render:
                 # Make semantics for shader terrain
-                assert self.engine.current_map is not None, "Can not find current map"
-                semantics = self.engine.current_map.get_semantic_map(
-                    size=self._semantic_map_size,
-                    pixels_per_meter=self._semantic_map_pixel_per_meter,
-                    polyline_thickness=int(1024 / self._semantic_map_size),
-                    layer=["lane", "lane_line"]
-                )
+                semantics = self.get_terrain_semantics()
                 semantic_tex = Texture()
                 semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
                 semantic_tex.setRamImage(semantics)
@@ -231,6 +230,10 @@ class Terrain(BaseObject):
             self._mesh_terrain.set_shader_input("grass_normal", self.grass_normal)
             self._mesh_terrain.set_shader_input("grass_rough", self.grass_rough)
             self._mesh_terrain.set_shader_input("grass_tex_ratio", self.grass_tex_ratio)
+            #
+            # # side
+            # self._mesh_terrain.set_shader_input("side_tex", self.side_tex)
+            # self._mesh_terrain.set_shader_input("side_normal", self.side_normal)
 
             # road
             self._mesh_terrain.set_shader_input("rock_tex", self.rock_tex)
@@ -243,6 +246,9 @@ class Terrain(BaseObject):
             self._mesh_terrain.set_shader_input("road_normal", self.road_texture_normal)
             self._mesh_terrain.set_shader_input("road_rough", self.road_texture_rough)
             self._mesh_terrain.set_shader_input("elevation_texture_ratio", self._elevation_texture_ratio)
+
+            # crosswalk
+            self._mesh_terrain.set_shader_input("crosswalk_tex", self.crosswalk_tex)
             self._terrain_shader_set = True
         self._mesh_terrain.set_shader_input("attribute_tex", attribute_tex)
 
@@ -275,7 +281,8 @@ class Terrain(BaseObject):
         mesh = np.flipud(mesh)
         mesh = cv2.resize(mesh, (mesh.shape[0] + 1, mesh.shape[1] + 1))
         path_to_store = self.PATH.joinpath("run_time_map_mesh.png")
-        cv2.imwrite(str(path_to_store), mesh)
+        cv2.imencode('.png', mesh)[1].tofile(path_to_store)
+        # cv2.imwrite(str(path_to_store), mesh)
         if sys.platform.startswith("win"):
             path_to_store = AssetLoader.windows_style2unix_style(path_to_store)
         p = PNMImage(Filename(str(path_to_store)))
@@ -422,6 +429,20 @@ class Terrain(BaseObject):
             tex.setMagfilter(filter_type)
             tex.setAnisotropicDegree(anisotropic_degree)
 
+        # # sidewalk
+        # self.side_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
+        # self.side_normal = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "normal.png"))
+        #
+        # v_wrap = Texture.WMRepeat
+        # u_warp = Texture.WMMirror
+        #
+        # for tex in [self.side_tex, self.side_normal]:
+        #     tex.set_wrap_u(u_warp)
+        #     tex.set_wrap_v(v_wrap)
+        #     tex.setMinfilter(filter_type)
+        #     tex.setMagfilter(filter_type)
+        #     tex.setAnisotropicDegree(anisotropic_degree)
+
         # Road surface
         # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
         self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "diff_2k.png"))
@@ -453,6 +474,18 @@ class Terrain(BaseObject):
         yellow_lane_line.fill(*(255 / 255, 200 / 255, 0 / 255))
         self.yellow_lane_line = Texture("white lane line")
         self.yellow_lane_line.load(yellow_lane_line)
+
+        # crosswalk
+        tex = np.frombuffer(self.road_texture.getRamImage().getData(), dtype=np.uint8)
+        tex = tex.copy()
+        tex = tex.reshape((self.road_texture.getYSize(), self.road_texture.getXSize(), 3))
+        step_size = 64
+        for x in range(0, 2048, step_size * 2):
+            tex[x:x + step_size, ...] = 220
+        self.crosswalk_tex = Texture()
+        self.crosswalk_tex.setup2dTexture(*tex.shape[:2], Texture.TUnsignedByte, Texture.F_rgb)
+        self.crosswalk_tex.setRamImage(tex)
+        # self.crosswalk_tex.write("test_crosswalk.png")
 
     def _make_random_terrain(self, texture_size, terrain_size, heightfield):
         """
@@ -502,6 +535,42 @@ class Terrain(BaseObject):
 
         """
         return self._mesh_terrain
+
+    def get_drivable_region(self):
+        """
+        Get drivable area, consisting of all roads in map
+        Returns: drivable area
+
+        """
+        if self.engine.current_map:
+            drivable_region = self.engine.current_map.get_height_map(
+                self._heightmap_size, 1, self._drivable_area_extension
+            )
+        else:
+            drivable_region = np.ones((self._heightmap_size, self._heightmap_size, 1))
+        return drivable_region
+
+    def get_terrain_semantics(self):
+        """
+        Return semantic maps indicating the property of the terrain for specific region
+        Returns:
+
+        """
+        layer = ["lane", "lane_line"]
+        if self.engine.global_config["show_crosswalk"]:
+            layer.append("crosswalk")
+        if self.engine.current_map:
+            semantics = self.engine.current_map.get_semantic_map(
+                size=self._semantic_map_size,
+                pixels_per_meter=self._semantic_map_pixel_per_meter,
+                polyline_thickness=int(1024 / self._semantic_map_size),
+                layer=layer
+            )
+        else:
+            logger.warning("Can not find map. Generate a square terrain")
+            size = self._semantic_map_size * self._semantic_map_pixel_per_meter
+            semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
+        return semantics
 
 
 # Some useful threads

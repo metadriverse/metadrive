@@ -81,6 +81,7 @@ COLOR = {
     MetaDriveType.LIGHT_RED: "red",
     MetaDriveType.LIGHT_YELLOW: "orange",
     MetaDriveType.LIGHT_GREEN: "green",
+    MetaDriveType.UNSET: "orange",
 }
 
 
@@ -200,7 +201,7 @@ class CollisionGroup(Mask):
             (cls.Sidewalk, cls.Sidewalk, False),
             (cls.Sidewalk, cls.LidarBroadDetector, False),
             (cls.Sidewalk, cls.TrafficObject, True),
-            (cls.Sidewalk, cls.TrafficParticipants, False),  # don't allow sidewalk contact
+            (cls.Sidewalk, cls.TrafficParticipants, True),  # don't allow sidewalk contact
 
             # LidarBroadDetector
             (cls.LidarBroadDetector, cls.LidarBroadDetector, False),
@@ -265,11 +266,10 @@ BKG_COLOR = Vec3(1, 1, 1)
 class PGLineType:
     """A lane side line type."""
 
-    NONE = "none"
-    BROKEN = "broken"
-    CONTINUOUS = "continuous"
-    SIDE = "side"
-    BARRIER = "barrier"
+    NONE = MetaDriveType.LINE_UNKNOWN
+    BROKEN = MetaDriveType.LINE_BROKEN_SINGLE_WHITE
+    CONTINUOUS = MetaDriveType.LINE_SOLID_SINGLE_WHITE
+    SIDE = MetaDriveType.BOUNDARY_LINE
 
     @staticmethod
     def prohibit(line_type) -> bool:
@@ -284,7 +284,10 @@ class PGLineColor:
     YELLOW = (255 / 255, 200 / 255, 0 / 255, 1)
 
 
-class DrivableAreaProperty:
+class PGDrivableAreaProperty:
+    """
+    Defining some properties for creating PGMap
+    """
     # road network property
     ID = None  # each block must have a unique ID
     SOCKET_NUM = None
@@ -295,9 +298,9 @@ class DrivableAreaProperty:
     LANE_LINE_WIDTH = 0.15
     LANE_LINE_THICKNESS = 0.016
 
-    SIDEWALK_THICKNESS = 0.4
+    SIDEWALK_THICKNESS = 0.3
     SIDEWALK_LENGTH = 3
-    SIDEWALK_WIDTH = 3
+    SIDEWALK_WIDTH = 2
     SIDEWALK_LINE_DIST = 0.6
 
     # visualization color property
@@ -400,6 +403,11 @@ class MapTerrainSemanticColor:
         elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
             # return (0, 0, 0, 1)
             return 0.3
+        elif type == MetaDriveType.CROSSWALK:
+            # The range of crosswalk value is 0.4 <= value < 0.76,
+            # so people can save the angle (degree) of the crosswalk in attribute map
+            # the value * 10 = angle of crosswalk. It is a trick for saving memory.
+            return 0.4  # this value can be overwritten latter
         else:
             raise ValueError("Unsupported type: {}".format(type))
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

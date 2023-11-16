@@ -38,7 +38,7 @@ if __name__ == '__main__':
         if len(new_summary) >= 3:
             break
 
-    file_path = AssetLoader.file_path("waymo", ScenarioDescription.DATASET.SUMMARY_FILE, return_raw_style=False)
+    file_path = AssetLoader.file_path("waymo", ScenarioDescription.DATASET.SUMMARY_FILE, unix_style=False)
     with open(file_path, "wb") as f:
         pickle.dump(new_summary, f)
 

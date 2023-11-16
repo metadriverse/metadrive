@@ -6,14 +6,13 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 10,
-            "traffic_density": 0,
+            "traffic_density": 1,
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": False,
+            "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
-            "pstats": True,
             "static_traffic_object": False,
             "show_interface": True,
             "random_agent_model": True,
@@ -24,16 +23,17 @@ if __name__ == "__main__":
             # "controller": "joystick",
             # "show_coordinates": True,
             # "random_agent_model": False,
+            "debug_static_world": True,
             "manual_control": True,
             "use_render": True,
             "use_mesh_terrain": False,
-            "accident_prob": 1,
+            "accident_prob": 0,
             "decision_repeat": 5,
             "daytime": "19:00",
             "interface_panel": [],
             "need_inverse_traffic": False,
             "rgb_clip": True,
-            "map": "CX",
+            "map": "SSS",
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
             # "random_lane_width": True,
@@ -42,8 +42,8 @@ if __name__ == "__main__":
             "force_destroy": False,
             # "show_terrain"
             # "show_skybox": False,
-            "show_fps": False,
-            "render_pipeline": True,
+            "show_fps": True,
+            # "render_pipeline": True,
             # "camera_dist": 8,
             "window_size": (1200, 800),
             "camera_dist": 13,
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o, _ = env.reset()
+    o, _ = env.reset(seed=74)
     env.engine.accept("~", env.engine.terrain.reload_terrain_shader)
     if env.config["render_pipeline"]:
         env.engine.accept("5", env.engine.render_pipeline.reload_shaders)

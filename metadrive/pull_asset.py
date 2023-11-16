@@ -54,18 +54,13 @@ def pull_asset(update):
     try:
         with lock.acquire():
             # Fetch the zip file
-            logger.info("Pull assets from {}".format(ASSET_URL))
+            logger.info("Pull assets from {} to {}".format(ASSET_URL, zip_path))
             urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(TARGET_DIR)
             logger.info(
                 "Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION)
             )
-            # Remove the downloaded zip file (optional)
-        if os.path.exists(zip_path):
-            os.remove(zip_path)
-        if os.path.exists(zip_lock):
-            os.remove(zip_lock)
 
     except Timeout:
         logger.info(
@@ -77,6 +72,13 @@ def pull_asset(update):
             time.sleep(10)
 
         logger.info("Assets are now available.")
+
+    finally:
+        # Remove the downloaded zip file (optional)
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
+        if os.path.exists(zip_lock):
+            os.remove(zip_lock)
 
 
 if __name__ == '__main__':

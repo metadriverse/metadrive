@@ -1,4 +1,6 @@
 import copy
+from abc import ABC
+
 from metadrive.type import MetaDriveType
 
 import logging
@@ -7,7 +9,7 @@ from typing import Dict
 
 import numpy as np
 import seaborn as sns
-from panda3d.bullet import BulletWorld, BulletBodyNode
+from panda3d.bullet import BulletWorld, BulletBodyNode, BulletVehicle
 from panda3d.core import LVector3, NodePath, PandaNode
 from metadrive.constants import Semantics
 from metadrive.base_class.base_runnable import BaseRunnable
@@ -96,6 +98,8 @@ class PhysicsNodeList(list):
             return
         for node in self:
             bullet_world.remove(node)
+            if isinstance(node, BulletVehicle):
+                break
         self.attached = False
 
     def destroy_node_list(self, bullet_world: BulletWorld):
@@ -104,7 +108,7 @@ class PhysicsNodeList(list):
         self.clear()
 
 
-class BaseObject(BaseRunnable, MetaDriveType):
+class BaseObject(BaseRunnable, MetaDriveType, ABC):
     """
     BaseObject is something interacting with game engine. If something is expected to have a body in the world or have
     appearance in the world, it must be a subclass of BaseObject.
@@ -276,6 +280,7 @@ class BaseObject(BaseRunnable, MetaDriveType):
         """
         Set this object to a place, the default value is the regular height for red car
         :param position: 2d array or list
+        :param height: give a fixed height
         """
         assert len(position) == 2 or len(position) == 3
         if len(position) == 3:
