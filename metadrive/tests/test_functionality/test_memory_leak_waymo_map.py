@@ -9,8 +9,14 @@ from metadrive.tests.test_functionality.test_memory_leak_engine import process_m
 
 
 def test_waymo_env_memory_leak(num_reset=100):
-    env = ScenarioEnv(dict(num_scenarios=2, sequential_seed=True, store_map=True,
-                        data_directory=AssetLoader.file_path("waymo", unix_style=False), ))
+    env = ScenarioEnv(
+        dict(
+            num_scenarios=2,
+            sequential_seed=True,
+            store_map=True,
+            data_directory=AssetLoader.file_path("waymo", unix_style=False),
+        )
+    )
 
     try:
         ct = time.time()

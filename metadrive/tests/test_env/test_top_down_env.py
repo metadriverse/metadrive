@@ -5,16 +5,25 @@ from metadrive.envs.top_down_env import TopDownSingleFrameMetaDriveEnv, TopDownM
 
 def test_top_down_rendering():
     for env in [
-        TopDownSingleFrameMetaDriveEnv(dict(num_scenarios=5, map="C", traffic_density=1.0)),
-        TopDownMetaDrive(dict(num_scenarios=5, map="C", traffic_density=1.0)),
-        TopDownMetaDrive(dict(num_scenarios=5, map="C", frame_stack=1, post_stack=2)),
-        TopDownMetaDriveEnvV2(dict(num_scenarios=5, map="C", frame_stack=1, post_stack=2)),
-        ScenarioEnv(dict(num_scenarios=1, start_scenario_index=0,
-                         data_directory=AssetLoader.file_path("waymo", unix_style=False), )),
-        ScenarioEnv(dict(num_scenarios=1, start_scenario_index=1,
-                         data_directory=AssetLoader.file_path("waymo", unix_style=False), )),
-        ScenarioEnv(dict(num_scenarios=1, start_scenario_index=2,
-                         data_directory=AssetLoader.file_path("waymo", unix_style=False), )),
+            TopDownSingleFrameMetaDriveEnv(dict(num_scenarios=5, map="C", traffic_density=1.0)),
+            TopDownMetaDrive(dict(num_scenarios=5, map="C", traffic_density=1.0)),
+            TopDownMetaDrive(dict(num_scenarios=5, map="C", frame_stack=1, post_stack=2)),
+            TopDownMetaDriveEnvV2(dict(num_scenarios=5, map="C", frame_stack=1, post_stack=2)),
+            ScenarioEnv(dict(
+                num_scenarios=1,
+                start_scenario_index=0,
+                data_directory=AssetLoader.file_path("waymo", unix_style=False),
+            )),
+            ScenarioEnv(dict(
+                num_scenarios=1,
+                start_scenario_index=1,
+                data_directory=AssetLoader.file_path("waymo", unix_style=False),
+            )),
+            ScenarioEnv(dict(
+                num_scenarios=1,
+                start_scenario_index=2,
+                data_directory=AssetLoader.file_path("waymo", unix_style=False),
+            )),
     ]:
         try:
             for _ in range(5):
