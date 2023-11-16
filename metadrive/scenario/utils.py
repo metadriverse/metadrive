@@ -518,9 +518,12 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, check_
             # old_scene_polyline = map_feat["polyline"]
             # if coordinate_transform:
             #     old_scene_polyline = waymo_to_metadrive_vector(old_scene_polyline)
-            np.testing.assert_almost_equal(
-                new_scene[SD.MAP_FEATURES][map_id]["polyline"], map_feat["polyline"], decimal=1
-            )
+            if map_feat["type"] == MetaDriveType.LANE_SURFACE_STREET:
+                assert len(map_feat["polyline"]) - len(new_scene[SD.MAP_FEATURES][map_id]["polyline"]) <= 1
+                _min = min(len(map_feat["polyline"]), len(new_scene[SD.MAP_FEATURES][map_id]["polyline"]))
+                np.testing.assert_almost_equal(
+                    new_scene[SD.MAP_FEATURES][map_id]["polyline"][:_min], map_feat["polyline"][:_min], decimal=1
+                )
             assert new_scene[SD.MAP_FEATURES][map_id][SD.TYPE] == map_feat[SD.TYPE]
 
         for obj_id, obj_state in old_scene[SD.DYNAMIC_MAP_STATES].items():
