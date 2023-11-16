@@ -37,7 +37,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     ID = "B"
 
     def __init__(
-        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+            self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -86,12 +86,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True,
-        attach_to_world=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True,
+            attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -121,6 +121,35 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             self.detach_from_world(physics_world)
 
         return success
+
+    def detach_from_world(self, physics_world: PhysicsWorld):
+        """
+        Detach the object from the scene graph but store it in the memory
+        Args:
+            physics_world: PhysicsWorld, engine.physics_world
+
+        Returns: None
+
+        """
+        if self.is_attached():
+            for obj in self._block_objects:
+                obj.detach_from_world(physics_world)
+        super(BaseBlock, self).detach_from_world(physics_world)
+
+    def attach_to_world(self, parent_node_path: NodePath, physics_world: PhysicsWorld):
+        """
+        Attach the object to the scene graph
+        Args:
+            parent_node_path: which parent node to attach
+            physics_world: PhysicsWorld, engine.physics_world
+
+        Returns: None
+
+        """
+        if not self.is_attached():
+            for obj in self._block_objects:
+                obj.attach_to_world(parent_node_path, physics_world)
+        super(BaseBlock, self).attach_to_world(parent_node_path, physics_world)
 
     def destruct_block(self, physics_world: PhysicsWorld):
         self._clear_topology()

@@ -219,7 +219,13 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
 
     def attach_to_world(self, parent_node_path: NodePath, physics_world: PhysicsWorld):
         """
-        Load to world from memory
+        Load the object to the world from memory, attach the object to the scene graph.
+        Args:
+            parent_node_path: which parent node to attach
+            physics_world: PhysicsWorld, engine.physics_world
+
+        Returns: None
+
         """
         if not self.is_attached():
             assert isinstance(self.origin, NodePath), "No render model on node_path in this Element"
@@ -232,7 +238,13 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
 
     def detach_from_world(self, physics_world: PhysicsWorld):
         """
-        It is not fully remove, it will be left in memory. if this element is useless in the future, call Func delete()
+        It is not fully remove, it will be left in memory. if this element is useless in the future, call Func destroy()
+        Detach the object from the scene graph but store it in the memory
+        Args:
+            physics_world: PhysicsWorld, engine.physics_world
+
+        Returns: None
+
         """
         if self.is_attached():
             self.origin.detachNode()
