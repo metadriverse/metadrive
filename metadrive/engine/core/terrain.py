@@ -84,7 +84,8 @@ class Terrain(BaseObject):
         """
         # detach current map
         assert self.engine is not None, "Can not call this without initializing engine"
-        self.detach_from_world(self.engine.physics_world)
+        if self.is_attached():
+            self.detach_from_world(self.engine.physics_world)
 
     # @time_me
     def reset(self, center_position):

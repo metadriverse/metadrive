@@ -1,6 +1,6 @@
 import copy
 from abc import ABC
-
+from metadrive.engine.logger import get_logger
 from metadrive.type import MetaDriveType
 
 import logging
@@ -25,7 +25,7 @@ from metadrive.utils.math import clip
 from metadrive.utils.math import norm
 from metadrive.utils.math import wrap_to_pi
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 def _clean_a_node_path(node_path):
@@ -227,13 +227,16 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         """
         Load to world from memory
         """
-        if self.render:
-            # double check :-)
-            assert isinstance(self.origin, NodePath), "No render model on node_path in this Element"
-            self.origin.reparentTo(parent_node_path)
-        self.dynamic_nodes.attach_to_physics_world(physics_world.dynamic_world)
-        self.static_nodes.attach_to_physics_world(physics_world.static_world)
-        logger.debug("{} is attached to the world.".format(type(self)))
+        if not self.origin.hasParent():
+            if self.render:
+                # double check :-)
+                assert isinstance(self.origin, NodePath), "No render model on node_path in this Element"
+                self.origin.reparentTo(parent_node_path)
+            self.dynamic_nodes.attach_to_physics_world(physics_world.dynamic_world)
+            self.static_nodes.attach_to_physics_world(physics_world.static_world)
+            logger.debug("{} is attached to the world.".format(self.class_name))
+        else:
+            logger.warning("Can not attach object {} to world, as it is already attached!".format(self.class_name))
 
     def detach_from_world(self, physics_world: PhysicsWorld):
         """
@@ -241,9 +244,14 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         """
         if self.origin is not None and self.origin.hasParent():
             self.origin.detachNode()
-        self.dynamic_nodes.detach_from_physics_world(physics_world.dynamic_world)
-        self.static_nodes.detach_from_physics_world(physics_world.static_world)
-        logger.debug("{} is detached from the world.".format(type(self)))
+            self.dynamic_nodes.detach_from_physics_world(physics_world.dynamic_world)
+            self.static_nodes.detach_from_physics_world(physics_world.static_world)
+            logger.debug("{} is detached from the world.".format(self.class_name))
+        else:
+            logger.warning("Object {} is already detached from the world. Can not detach again".format(self.class_name))
+
+    def is_attached(self):
+        return self.origin is not None and self.origin.hasParent()
 
     def destroy(self):
         """
@@ -268,7 +276,7 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
 
             clear_node_list(self._node_path_list)
 
-            logger.debug("Finish cleaning {} node path.".format(len(self._node_path_list)))
+            logger.debug("Finish cleaning {} node path for {}.".format(len(self._node_path_list), self.class_name))
             self._node_path_list.clear()
             self._node_path_list = []
 

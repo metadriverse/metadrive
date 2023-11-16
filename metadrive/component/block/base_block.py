@@ -4,7 +4,7 @@ from abc import ABC
 from typing import Dict
 
 import numpy as np
-from panda3d.bullet import BulletBoxShape, BulletGhostNode
+from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletTriangleMeshShape, BulletTriangleMesh
 from panda3d.core import LPoint3f
@@ -20,8 +20,7 @@ from metadrive.constants import MetaDriveType, CamMask, PGLineType, PGLineColor,
 from metadrive.constants import Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.engine.physics_node import BaseRigidBodyNode
-from metadrive.engine.physics_node import BulletRigidBodyNode
+from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math import norm
 from metadrive.utils.vertex import make_polygon_model
@@ -38,7 +37,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     ID = "B"
 
     def __init__(
-        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+            self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -87,12 +86,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True,
-        attach_to_world=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True,
+            attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -327,7 +326,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         Construct the sidewalk with collision shape
         """
         if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
-            for sidewalk in self.sidewalks.values():
+            for sidewalk_id, sidewalk in self.sidewalks.items():
                 polygon = sidewalk["polygon"]
                 np = make_polygon_model(polygon, PGDrivableAreaProperty.SIDEWALK_THICKNESS)
                 np.reparentTo(self.sidewalk_node_path)
@@ -336,7 +335,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                     np.setTexture(self.side_texture)
                 # np.setTexture(self.ts_normal, self.side_normal)
 
-                body_node = BulletRigidBodyNode(MetaDriveType.BOUNDARY_SIDEWALK)
+                body_node = BaseRigidBodyNode(sidewalk_id, MetaDriveType.BOUNDARY_SIDEWALK)
                 body_node.setKinematic(False)
                 body_node.setStatic(True)
                 body_np = self.sidewalk_node_path.attachNewNode(body_node)
@@ -361,13 +360,13 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         Construct the crosswalk for semantic Cam
         """
         if self.engine is None or (self.engine.global_config["show_crosswalk"] and not self.engine.use_render_pipeline):
-            for sidewalk in self.crosswalks.values():
-                polygon = sidewalk["polygon"]
+            for cross_id, crosswalk in self.crosswalks.values():
+                polygon = crosswalk["polygon"]
                 np = make_polygon_model(polygon, 0.0)
                 np.reparentTo(self.crosswalk_node_path)
                 np.setPos(0, 0, -0.05)
 
-                body_node = BulletGhostNode(MetaDriveType.CROSSWALK)
+                body_node = BaseGhostBodyNode(cross_id, MetaDriveType.CROSSWALK)
                 body_node.setKinematic(False)
                 body_node.setStatic(True)
                 body_np = self.crosswalk_node_path.attachNewNode(body_node)
@@ -435,7 +434,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             node_name = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
 
         # add bullet body for it
-        body_node = BulletGhostNode(node_name)
+        body_node = BaseGhostBodyNode(node_name)
         body_node.setActive(False)
         body_node.setKinematic(False)
         body_node.setStatic(True)
