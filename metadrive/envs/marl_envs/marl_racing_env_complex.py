@@ -2,13 +2,12 @@ from collections import defaultdict
 
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pg_space import Parameter
-from metadrive.component.pgblock.bottleneck import Merge, Split
 from metadrive.component.pgblock.curve import CurveWithGuardrail
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.straight import StraightWithGuardrail
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
-from metadrive.policy import IDMPolicy
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
 
 RACING_CONFIG = dict(
@@ -25,15 +24,15 @@ RACING_CONFIG = dict(
     vehicle_config=dict(show_lidar=False, show_navi_mark=False),
 
     # Number of agents and map setting.
-    num_agents=8,
-    map_config=dict(lane_num=8, exit_length=20, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
+    num_agents=9,
+    map_config=dict(lane_num=3, exit_length=40, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
 
     # Reward setting
     use_lateral=False,
 
     # Termination condition
-    cross_yellow_line_done=True,
-    out_of_road_done=True,
+    cross_yellow_line_done=False,
+    out_of_road_done=False,
     on_continuous_line_done=False,
     out_of_route_done=False,
     crash_done=False,
@@ -46,6 +45,10 @@ RACING_CONFIG = dict(
     camera_smooth_buffer_size=100,
 
     show_interface=False,
+
+    camera_dist=10,
+    camera_pitch=15,
+    camera_height=6,
 )
 
 
@@ -330,6 +333,7 @@ def _vis(generate_video=False):
     video_interface = []
 
     import mediapy
+    import pygame
     try:
         for i in range(1, 100000):
             o, r, tm, tc, info = env.step({k: [-0.05, 1.0] for k in env.vehicles.keys()})
@@ -341,28 +345,26 @@ def _vis(generate_video=False):
 
             if generate_video:
                 img_interface = env.render(mode="rgb_array")
-                # img_bev = env.render(
-                #     mode="topdown",
-                #     show_agent_name=False,
-                #     target_vehicle_heading_up=False,
-                #     draw_target_vehicle_trajectory=False,
-                #     film_size=(2000, 2000),
-                #     screen_size=(2000, 2000),
-                #     crash_vehicle_done=False,
-                # )
-                # img_bev = pygame.surfarray.array3d(img_bev)
-                # img_bev = img_bev.swapaxes(0, 1)
-                # img_bev = img_bev[::-1]
-                # video_bev.append(img_bev)
+                img_bev = env.render(
+                    mode="topdown",
+                    show_agent_name=False,
+                    target_vehicle_heading_up=False,
+                    draw_target_vehicle_trajectory=False,
+                    film_size=(2000, 2000),
+                    screen_size=(2000, 2000),
+                    crash_vehicle_done=False,
+                )
+                img_bev = pygame.surfarray.array3d(img_bev)
+                img_bev = img_bev.swapaxes(0, 1)
+                img_bev = img_bev[::-1]
+                video_bev.append(img_bev)
                 video_interface.append(img_interface)
 
             if tm["__all__"]:
                 print(
-                    "Finish! Current step {}. Group Reward: {}. Average reward: {}".format(
-                        i, total_r, total_r / env.agent_manager.next_agent_count
-                    )
+                    f"Finish! Current step {i}. Group Reward: {total_r}. Average reward: {total_r / env.agent_manager.next_agent_count}"
                 )
-                total_r = 0
+                # total_r = 0
                 print("Reset")
                 # env.reset()
                 break
@@ -377,11 +379,9 @@ def _vis(generate_video=False):
         os.makedirs(folder_name, exist_ok=True)
 
         video_base_name = f"{folder_name}/video"
-
-        # video_base_name = "{}/{}".format(folder_name, ep_count)
-        # video_name_bev = video_base_name + "_bev.mp4"
-        # print("BEV video should be saved at: ", video_name_bev)
-        # mediapy.write_video(video_name_bev, video_bev, fps=FPS)
+        video_name_bev = video_base_name + "_bev.mp4"
+        print("BEV video should be saved at: ", video_name_bev)
+        mediapy.write_video(video_name_bev, video_bev, fps=FPS)
 
         video_name_interface = video_base_name + "_interface.mp4"
         print("Interface video should be saved at: ", video_name_interface)
@@ -389,4 +389,4 @@ def _vis(generate_video=False):
 
 
 if __name__ == "__main__":
-    _vis(generate_video=False)
+    _vis(generate_video=True)
