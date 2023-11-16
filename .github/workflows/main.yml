@@ -218,6 +218,8 @@ jobs:
         run: |
           pip install cython
           pip install numpy
+          pip install mediapy
+          conda install ffmpeg
           pip install -e .
           python -m metadrive.pull_asset
           pip install pytest
