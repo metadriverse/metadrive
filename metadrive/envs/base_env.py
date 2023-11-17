@@ -215,7 +215,6 @@ BASE_DEFAULT_CONFIG = dict(
     max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
     show_interface_navi_mark=True,
     show_mouse=True,
-    disable_mouse=False,  # Set to True then the mouse behavior will not be recorded.
     show_skybox=True,
     show_terrain=True,
     show_interface=True,
