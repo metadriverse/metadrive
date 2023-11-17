@@ -72,6 +72,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    :caption: Ecosystem
 
    scenarionet.rst
+   ros.rst
 
 
 .. toctree::
