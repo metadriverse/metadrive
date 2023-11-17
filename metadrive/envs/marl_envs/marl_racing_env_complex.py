@@ -74,8 +74,7 @@ class RacingMap(PGMap):
             lane_num=LANE_NUM,
             render_root_np=parent_node_path,
             physics_world=physics_world,
-            # length=1,
-            ignore_adverse_road=True,
+            remove_negative_lanes=True,
         )
         self.blocks.append(init_block)
 
