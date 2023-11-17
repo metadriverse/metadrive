@@ -3,8 +3,6 @@ import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import PGLineType
-from metadrive.engine.core.draw_line import ColorLineNodePath
-from metadrive.engine.engine_utils import get_engine
 from metadrive.type import MetaDriveType
 
 
@@ -50,14 +48,18 @@ class PGLane(AbstractLane):
             node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
             self._node_path_list.extend(node_path_list)
 
-    def construct_sidewalk(self, block, sidewalk_height=None, line_index=1):
+    def construct_sidewalk(self, block, sidewalk_height=None, lateral_direction=1):
         """
         Construct the sidewalk for this lane
 
         Args:
             block: Current block.
             sidewalk_height: The height of sidewalk. Default to None and PGDrivableAreaProperty.SIDEWALK_THICKNESS will
-            be used.
+                be used.
+            lateral_direction: Whether to extend the sidewalk outward (to the right of the road) or inward (to the left
+                of the road). It's useful if we want to put sidewalk to the center of the road, e.g. in the scenario
+                where we only have "positive road" and there is no roads in opposite direction. Should be either -1 or
+                +1.
 
         Returns: None
         """
@@ -69,14 +71,14 @@ class PGLane(AbstractLane):
         if str(self.index) in block.sidewalks:
             return
         polygon = []
-        polygon2 = []
         longs = np.arange(
             0, self.length + PGDrivableAreaProperty.SIDEWALK_LENGTH, PGDrivableAreaProperty.SIDEWALK_LENGTH
         )
         start_lat = +self.width_at(0) / 2 + 0.2
         side_lat = start_lat + PGDrivableAreaProperty.SIDEWALK_WIDTH
-        start_lat *= line_index
-        side_lat *= line_index
+        assert lateral_direction == -1 or lateral_direction == 1
+        start_lat *= lateral_direction
+        side_lat *= lateral_direction
         if self.radius != 0 and side_lat > self.radius:
             raise ValueError(
                 "The sidewalk width ({}) is too large."
@@ -89,20 +91,10 @@ class PGLane(AbstractLane):
                 longitude = min(self.length + 0.1, longitude)
                 point = self.position(longitude, lateral)
                 polygon.append([point[0], point[1]])
-
-        for k, lateral in enumerate([start_lat, side_lat]):
-            if k == 1:
-                longs = longs[::-1]
-            for longitude in longs:
-                longitude = min(self.length + 0.1, longitude)
-                point = self.position(longitude, -lateral)
-                polygon2.append([point[0], point[1]])
-
                 # draw_lists[k].append([point[0], point[1], 1])
         # cloud_points_vis.drawLines(draw_lists)
         # cloud_points_vis.create()
         block.sidewalks[str(self.index)] = {"polygon": polygon, "height": sidewalk_height}
-        # block.sidewalks[str(self.index)] = {"polygon": polygon2, "height": sidewalk_height}
 
     def construct_lane_line_in_block(self, block, construct_left_right=(True, True)):
         """
