@@ -1,8 +1,7 @@
 import copy
-from metadrive.type import MetaDriveType
+import math
 from typing import Tuple, Union, List
 
-import math
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
@@ -11,6 +10,7 @@ from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import PGLineType, PGLineColor, PGDrivableAreaProperty
+from metadrive.type import MetaDriveType
 from metadrive.utils.math import get_vertical_vector
 from metadrive.utils.pg.utils import check_lane_on_road
 
@@ -55,10 +55,10 @@ def CreateRoadFrom(
     toward_smaller_lane_index: bool = True,
     ignore_start: str = None,
     ignore_end: str = None,
-    center_line_type=PGLineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
+    center_line_type=None,  # Identical to Block.CENTER_LINE_TYPE
     detect_one_side=True,
-    side_lane_line_type=PGLineType.SIDE,
-    inner_lane_line_type=PGLineType.BROKEN,
+    side_lane_line_type=None,
+    inner_lane_line_type=None,
     center_line_color=PGLineColor.YELLOW,
     ignore_intersection_checking=None,
     metadrive_lane_type=None,
@@ -72,6 +72,11 @@ def CreateRoadFrom(
     Usage: give the far left lane, then create lane_num lanes including itself
     :return if the lanes created cross other lanes
     """
+    center_line_type = center_line_type or PGLineType.CONTINUOUS
+    side_lane_line_type = side_lane_line_type or PGLineType.SIDE
+    side_lane_line_type = side_lane_line_type or PGLineType.SIDE
+    inner_lane_line_type = inner_lane_line_type or PGLineType.BROKEN
+
     lane_num -= 1  # include lane itself
     origin_lane = lane
     lanes = []
@@ -180,13 +185,17 @@ def CreateAdverseRoad(
     roadnet_to_check_cross: "NodeRoadNetwork",  # mostly, previous global network
     ignore_start: str = None,
     ignore_end: str = None,
-    center_line_type=PGLineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
-    side_lane_line_type=PGLineType.SIDE,
-    inner_lane_line_type=PGLineType.BROKEN,
+    center_line_type=None,  # Identical to Block.CENTER_LINE_TYPE
+    side_lane_line_type=None,
+    inner_lane_line_type=None,
     center_line_color=PGLineColor.YELLOW,
     ignore_intersection_checking=None,
     metadrive_lane_type=None
 ) -> bool:
+    center_line_type = center_line_type or PGLineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
+    side_lane_line_type = side_lane_line_type or PGLineType.SIDE,
+    inner_lane_line_type = inner_lane_line_type or PGLineType.BROKEN,
+
     adverse_road = -positive_road
     lanes = get_lanes_on_road(positive_road, roadnet_to_get_road)
     reference_lane = lanes[-1]

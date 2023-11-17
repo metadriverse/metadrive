@@ -36,45 +36,20 @@ class Straight(PGBlock):
             socket,
             self.block_network,
             self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        )
-        # create negative road
-        no_cross = CreateAdverseRoad(
-            socket,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        ) and no_cross
-        self.add_sockets(PGBlockSocket(socket, _socket))
-        return no_cross
-
-
-class StraightWithGuardrail(Straight):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, remove_negative_lanes=True, **kwargs)
-
-    def _try_plug_into_previous_block(self) -> bool:
-        self.set_part_idx(0)  # only one part in simple block like straight, and curve
-        para = self.get_config()
-        length = para[Parameter.length]
-        basic_lane = self.positive_basic_lane
-        assert isinstance(basic_lane, StraightLane), "Straight road can only connect straight type"
-        new_lane = ExtendStraightLane(basic_lane, length, [PGLineType.BROKEN, PGLineType.BARRIER])
-        start = self.pre_block_socket.positive_road.end_node
-        end = self.add_road_node()
-        socket = Road(start, end)
-        _socket = -socket
-
-        # if we need guardian at the side instead of normal sidewalk
-        no_cross = CreateRoadFrom(
-            new_lane,
-            self.positive_lane_num,
-            socket,
-            self.block_network,
-            self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=self.side_lane_line_type,
+            center_line_type=self.center_line_type
         )
+        if not self.remove_negative_lanes:
+            # create negative road
+            no_cross = CreateAdverseRoad(
+                socket,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking,
+                side_lane_line_type=self.side_lane_line_type,
+                center_line_type=self.center_line_type
+            ) and no_cross
+
         self.add_sockets(PGBlockSocket(socket, _socket))
         return no_cross

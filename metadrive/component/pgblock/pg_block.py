@@ -73,12 +73,19 @@ class PGBlock(BaseBlock):
         global_network: NodeRoadNetwork,
         random_seed,
         ignore_intersection_checking=False,
-        remove_negative_lanes=False
+        remove_negative_lanes=False,
+        *args,
+        **kwargs
     ):
 
         self.name = str(block_index) + self.ID
         super(PGBlock, self).__init__(
-            block_index, global_network, random_seed, ignore_intersection_checking=ignore_intersection_checking
+            block_index,
+            global_network,
+            random_seed,
+            *args,
+            ignore_intersection_checking=ignore_intersection_checking,
+            **kwargs
         )
         # block information
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
@@ -97,6 +104,7 @@ class PGBlock(BaseBlock):
         self.pre_block_socket_index = pre_block_socket.index
 
         # used to create this block, but for first block it is nonsense
+        self.remove_negative_lanes = remove_negative_lanes
         if block_index != 0:
             self.positive_lanes = self.pre_block_socket.get_positive_lanes(self._global_network)
             self.positive_lane_num = len(self.positive_lanes)

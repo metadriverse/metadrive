@@ -33,7 +33,13 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     ID = "B"
 
     def __init__(
-        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+        self,
+        block_index: int,
+        global_network: NodeRoadNetwork,
+        random_seed,
+        ignore_intersection_checking=False,
+        side_lane_line_type=None,
+        center_line_type=None
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -42,6 +48,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.block_index = block_index
         self.ignore_intersection_checking = ignore_intersection_checking
+        self.side_lane_line_type = side_lane_line_type
+        self.center_line_type = center_line_type
 
         # each block contains its own road network and a global network
         self._global_network = global_network

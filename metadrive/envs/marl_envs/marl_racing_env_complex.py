@@ -4,7 +4,8 @@ from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import CurveWithGuardrail
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.pgblock.straight import StraightWithGuardrail
+from metadrive.component.pgblock.straight import Straight
+from metadrive.constants import PGLineType
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.policy.idm_policy import IDMPolicy
@@ -84,7 +85,15 @@ class RacingMap(PGMap):
         # )
         # self.blocks.append(block_s1)
 
-        block_s1 = StraightWithGuardrail(1, init_block.get_socket(0), self.road_network, 1)
+        block_s1 = Straight(
+            1,
+            init_block.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_s1.construct_from_config({Parameter.length: 100}, parent_node_path, physics_world)
         self.blocks.append(block_s1)
 
@@ -99,7 +108,15 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c1)
 
-        block_s2 = StraightWithGuardrail(3, block_c1.get_socket(0), self.road_network, 1)
+        block_s2 = Straight(
+            3,
+            block_c1.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_s2.construct_from_config({
             Parameter.length: 100,
         }, parent_node_path, physics_world)
@@ -127,39 +144,19 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c3)
 
-        block_s3 = StraightWithGuardrail(6, block_c3.get_socket(0), self.road_network, 1)
+        block_s3 = Straight(
+            6,
+            block_c3.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_s3.construct_from_config({
             Parameter.length: 200,
         }, parent_node_path, physics_world)
         self.blocks.append(block_s3)
-
-        # last_block = block_c3
-
-        # Build Bottleneck
-        # merge = Merge(
-        #     1, last_block.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False,
-        #     remove_negative_lanes=True
-        # )
-        # merge.construct_from_config(
-        #     dict(
-        #         lane_num=self.config["bottle_lane_num"] - self.config["neck_lane_num"],
-        #         length=self.config["neck_length"]
-        #     ), parent_node_path, physics_world
-        # )
-        # self.blocks.append(merge)
-        # split = Split(
-        #     2, merge.get_socket(index=0), self.road_network, random_seed=1, ignore_intersection_checking=False,
-        #     remove_negative_lanes=True
-        # )
-        # split.construct_from_config(
-        #     {
-        #         "length": 100,
-        #         "lane_num": LANE_NUM
-        #     }, parent_node_path, physics_world
-        # )
-        # self.blocks.append(split)
-
-        # block_s3 = split
 
         block_c4 = CurveWithGuardrail(7, block_s3.get_socket(0), self.road_network, 1)
         block_c4.construct_from_config(
@@ -205,7 +202,15 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c7)
 
-        block_s4 = StraightWithGuardrail(11, block_c7.get_socket(0), self.road_network, 1)
+        block_s4 = Straight(
+            11,
+            block_c7.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_s4.construct_from_config({
             Parameter.length: 100,
         }, parent_node_path, physics_world)
