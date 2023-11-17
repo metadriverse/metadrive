@@ -30,12 +30,7 @@ class MainCamera(BaseSensor):
     main image buffer (main window). It is also a sensor, so perceive() can be called to access the rendered image.
     """
 
-    # queue_length = 3
-
-    # FIXME
-    queue_length = 5
-
-
+    queue_length = 3
     CHASE_TASK_NAME = "update main chase camera"
     TOP_DOWN_TASK_NAME = "update main bird camera"
     FOLLOW_LANE = False
@@ -405,8 +400,6 @@ class MainCamera(BaseSensor):
 
     @property
     def has_mouse(self):
-        if self.engine.global_config["disable_mouse"]:
-            return False
         if self.engine.mouseWatcherNode is None:
             return False
         return True if self.engine.mouseWatcherNode.hasMouse() else False
