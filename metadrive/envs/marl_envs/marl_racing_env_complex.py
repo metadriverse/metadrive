@@ -43,9 +43,7 @@ RACING_CONFIG = dict(
     show_fps=False,
     use_chase_camera_follow_lane=True,
     camera_smooth_buffer_size=100,
-
     show_interface=False,
-
     camera_dist=10,
     camera_pitch=15,
     camera_height=6,
@@ -316,17 +314,17 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
 def _vis(generate_video=False):
     FPS = 60
 
-    env = MultiAgentRacingEnv(dict(
-        use_render=generate_video,
-        window_size=(1600, 1200),
-        max_step_per_agent=3_000,
-        horizon=3_000,
+    env = MultiAgentRacingEnv(
+        dict(
+            use_render=generate_video,
+            window_size=(1600, 1200),
+            max_step_per_agent=3_000,
+            horizon=3_000,
+            num_agents=12,
 
-        num_agents=12,
-
-
-        # debug=True
-    ))
+            # debug=True
+        )
+    )
     o, _ = env.reset()
 
     # env.engine.force_fps.disable()

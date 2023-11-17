@@ -113,8 +113,9 @@ class PGLane(AbstractLane):
                 self.construct_sidewalk(block)
             elif line_type == PGLineType.BARRIER:
                 self.construct_continuous_line(block, lateral, line_color, line_type)
-                self.construct_sidewalk(block, sidewalk_height=PGDrivableAreaProperty.BARRIER_THICKNESS,
-                                        lateral_direction=idx)
+                self.construct_sidewalk(
+                    block, sidewalk_height=PGDrivableAreaProperty.BARRIER_THICKNESS, lateral_direction=idx
+                )
             elif line_type == PGLineType.NONE:
                 continue
             else:
