@@ -400,40 +400,40 @@ class TopDownSemanticColor:
         if MetaDriveType.is_lane(type):
             # intersection and others
             if type == MetaDriveType.LANE_SURFACE_UNSTRUCTURE:
-                ret = np.array([186, 186, 186])
-                # ret = np.array([1, 0, 0])
+                # ret = np.array([186, 186, 186])
+                ret = np.array([1, 0, 0])
             # a set of lanes
             else:
-                ret = np.array([210, 210, 210])
-                # ret = np.array([2, 0, 0])
+                # ret = np.array([210, 210, 210])
+                ret = np.array([2, 0, 0])
         # road divider
         elif MetaDriveType.is_yellow_line(type):
-            # ret = np.array([3, 0, 0])
-            ret = np.array([20, 20, 20])
+            ret = np.array([3, 0, 0])
+            # ret = np.array([20, 20, 20])
         # lane divider
         elif MetaDriveType.is_road_boundary_line(type) or MetaDriveType.is_white_line(type):
-            ret = np.array([140, 140, 140])
-            # ret = np.array([4, 0, 0])
+            # ret = np.array([140, 140, 140])
+            ret = np.array([4, 0, 0])
 
         # vehicle
         elif MetaDriveType.is_vehicle(type):
-            # ret = np.array([5, 0, 0])
-            ret = np.array([224, 177, 67])
+            ret = np.array([5, 0, 0])
+            # ret = np.array([224, 177, 67])
         # construction object
         elif MetaDriveType.is_traffic_object(type):
-            # ret = np.array([6, 0, 0])
-            ret = np.array([67, 143, 224])
+            ret = np.array([6, 0, 0])
+            # ret = np.array([67, 143, 224])
         # human
         elif type == MetaDriveType.PEDESTRIAN:
-            # ret = np.array([7, 0, 0])
-            ret = np.array([224, 67, 67])
+            ret = np.array([7, 0, 0])
+            # ret = np.array([224, 67, 67])
         # cyclist and motorcycle
         elif type == MetaDriveType.CYCLIST:
-            # ret = np.array([8, 0, 0])
-            ret = np.array([75, 224, 67])
+            ret = np.array([8, 0, 0])
+            # ret = np.array([75, 224, 67])
         else:
-            # ret = np.array([9, 0, 0])
-            ret = np.array([125, 67, 224])
+            ret = np.array([9, 0, 0])
+            # ret = np.array([125, 67, 224])
         # else:
         #     raise ValueError("Unsupported type: {}".format(type))
         return ret
