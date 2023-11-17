@@ -305,32 +305,6 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
     def default_config() -> Config:
         return MultiAgentMetaDrive.default_config().update(RACING_CONFIG, allow_add_new_key=True)
 
-    @property
-    def real_destination(self):
-        return list(self.current_map.road_network.graph.keys())[-1]
-
-    @property
-    def fake_destination(self):
-        return list(self.current_map.road_network.graph.keys())[-2]
-
-    # def _is_arrive_destination(self, vehicle):
-    #     """
-    #     Args:
-    #         vehicle: The BaseVehicle instance.
-    #
-    #     Returns:
-    #         flag: Whether this vehicle arrives its destination.
-    #     """
-    #     flag = super()._is_arrive_destination(vehicle)
-    #     if flag:
-    #         if vehicle.config["destination"] == self.fake_destination:
-    #             vehicle.config["destination"] = self.real_destination
-    #         else:
-    #             vehicle.config["destination"] = self.fake_destination
-    #         vehicle.reset_navigation()
-    #         flag = False
-    #     return flag
-
     def reward_function(self, vehicle_id: str):
         """
         Override this func to get a new reward function
@@ -376,16 +350,12 @@ def _vis(generate_video=False):
             max_step_per_agent=3_000,
             horizon=3_000,
             num_agents=12,
-
             # debug=True
         )
     )
     o, _ = env.reset()
 
     # env.engine.force_fps.disable()
-
-    # for v in env.vehicles.values():
-    #     v.expert_takeover = True
 
     total_r = 0
     ep_s = 0
@@ -400,7 +370,6 @@ def _vis(generate_video=False):
             ep_s += 1
 
             if generate_video:
-                import mediapy
                 import pygame
                 img_interface = env.render(mode="rgb_array")
                 img_bev = env.render(
@@ -422,7 +391,7 @@ def _vis(generate_video=False):
                 print(
                     f"Finish! Current step {i}. Group Reward: {total_r}. Average reward: {total_r / env.agent_manager.next_agent_count}"
                 )
-                # total_r = 0
+                total_r = 0
                 print("Reset")
                 # env.reset()
                 break
@@ -432,6 +401,7 @@ def _vis(generate_video=False):
     if generate_video:
         import datetime
         import os
+        import mediapy
 
         folder_name = "marl_racing_video_{}".format(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
         os.makedirs(folder_name, exist_ok=True)
