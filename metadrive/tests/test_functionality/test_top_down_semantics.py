@@ -37,14 +37,14 @@ def test_top_down_semantics(render=False):
             env.reset(seed=seed)
             for i in range(1, 10):
                 o, r, tm, tc, info = env.step([1.0, 0.])
-            if render:
-                this_frame_fig = env.render(
-                    mode="top_down",
-                    semantic_map=True,
-                    film_size=(8000, 8000),
-                    num_stack=1,
-                    scaling=10,
-                )
+                if render:
+                    this_frame_fig = env.render(
+                        mode="top_down",
+                        semantic_map=True,
+                        film_size=(8000, 8000),
+                        num_stack=1,
+                        scaling=10,
+                    )
                 # pygame.image.save(this_frame_fig, "{}.png".format(seed))
     finally:
         env.close()
