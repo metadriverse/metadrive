@@ -25,7 +25,7 @@ RACING_CONFIG = dict(
 
     # Number of agents and map setting.
     num_agents=9,
-    map_config=dict(lane_num=3, exit_length=40, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
+    map_config=dict(lane_num=2, exit_length=60, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
 
     # Reward setting
     use_lateral=False,
@@ -323,13 +323,17 @@ def _vis(generate_video=False):
         max_step_per_agent=3_000,
         horizon=3_000,
 
-        debug=True
+        num_agents=12,
+
+
+        # debug=True
     ))
     o, _ = env.reset()
-    env.engine.force_fps.disable()
 
-    for v in env.vehicles.values():
-        v.expert_takeover = True
+    # env.engine.force_fps.disable()
+
+    # for v in env.vehicles.values():
+    #     v.expert_takeover = True
 
     total_r = 0
     ep_s = 0
@@ -343,8 +347,6 @@ def _vis(generate_video=False):
                 total_r += r_
             ep_s += 1
 
-            env.render(mode="topdown")
-
             if generate_video:
                 import mediapy
                 import pygame
@@ -354,8 +356,8 @@ def _vis(generate_video=False):
                     show_agent_name=False,
                     target_vehicle_heading_up=False,
                     draw_target_vehicle_trajectory=False,
-                    film_size=(2000, 2000),
-                    screen_size=(2000, 2000),
+                    film_size=(3000, 3000),
+                    screen_size=(1000, 1000),
                     crash_vehicle_done=False,
                 )
                 img_bev = pygame.surfarray.array3d(img_bev)

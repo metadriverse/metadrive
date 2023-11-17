@@ -224,7 +224,14 @@ class IDMPolicy(BasePolicy):
     def __init__(self, control_object, random_seed):
         super(IDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
 
-        self.NORMAL_SPEED = 60 if np.random.uniform() < 0.5 else 70
+        rand = np.random.uniform()
+        if rand < 0.3:
+            self.NORMAL_SPEED = 120
+        elif rand < 0.6:
+            self.NORMAL_SPEED = 80
+        else:
+            self.NORMAL_SPEED = 60
+
         self.CREEP_SPEED = 20
         self.DEACC_FACTOR = -6
         self.ACC_FACTOR = 1.2
