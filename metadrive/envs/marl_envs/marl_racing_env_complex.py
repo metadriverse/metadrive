@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pg_space import Parameter
-from metadrive.component.pgblock.curve import CurveWithGuardrail
+from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.straight import Straight
 from metadrive.constants import PGLineType
@@ -60,12 +60,6 @@ class RacingMap(PGMap):
 
         LANE_NUM = self.config["lane_num"]
         LANE_WIDTH = self.config["lane_width"]
-        # self.config.update({"bottle_lane_num", 4})
-
-        # test = TestBlock(False)
-        # initialize_asset_loader(engine=test)
-        # global_network = NodeRoadNetwork()
-        blocks = []
 
         init_block = FirstPGBlock(
             self.road_network,
@@ -76,14 +70,6 @@ class RacingMap(PGMap):
             remove_negative_lanes=True,
         )
         self.blocks.append(init_block)
-
-        # block_s1 = StraightWithGuardrail(1, init_block.get_socket(0), self.road_network, 1)
-        # block_s1.construct_from_config(
-        #     {
-        #         Parameter.length: 100
-        #     }, parent_node_path, physics_world
-        # )
-        # self.blocks.append(block_s1)
 
         block_s1 = Straight(
             1,
@@ -97,7 +83,15 @@ class RacingMap(PGMap):
         block_s1.construct_from_config({Parameter.length: 100}, parent_node_path, physics_world)
         self.blocks.append(block_s1)
 
-        block_c1 = CurveWithGuardrail(2, block_s1.get_socket(0), self.road_network, 1)
+        block_c1 = Curve(
+            2,
+            block_s1.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_c1.construct_from_config(
             {
                 Parameter.length: 200,
@@ -122,7 +116,15 @@ class RacingMap(PGMap):
         }, parent_node_path, physics_world)
         self.blocks.append(block_s2)
 
-        block_c2 = CurveWithGuardrail(4, block_s2.get_socket(0), self.road_network, 1)
+        block_c2 = Curve(
+            4,
+            block_s2.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_c2.construct_from_config(
             {
                 Parameter.length: 100,
@@ -133,7 +135,15 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c2)
 
-        block_c3 = CurveWithGuardrail(5, block_c2.get_socket(0), self.road_network, 1)
+        block_c3 = Curve(
+            5,
+            block_c2.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_c3.construct_from_config(
             {
                 Parameter.length: 100,
@@ -158,7 +168,15 @@ class RacingMap(PGMap):
         }, parent_node_path, physics_world)
         self.blocks.append(block_s3)
 
-        block_c4 = CurveWithGuardrail(7, block_s3.get_socket(0), self.road_network, 1)
+        block_c4 = Curve(
+            7,
+            block_s3.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_c4.construct_from_config(
             {
                 Parameter.length: 80,
@@ -169,7 +187,15 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c4)
 
-        block_c5 = CurveWithGuardrail(8, block_c4.get_socket(0), self.road_network, 1)
+        block_c5 = Curve(
+            8,
+            block_c4.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_c5.construct_from_config(
             {
                 Parameter.length: 40,
@@ -180,7 +206,15 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c5)
 
-        block_c6 = CurveWithGuardrail(9, block_c5.get_socket(0), self.road_network, 1)
+        block_c6 = Curve(
+            9,
+            block_c5.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_c6.construct_from_config(
             {
                 Parameter.length: 40,
@@ -191,7 +225,15 @@ class RacingMap(PGMap):
         )
         self.blocks.append(block_c6)
 
-        block_c7 = CurveWithGuardrail(10, block_c6.get_socket(0), self.road_network, 1)
+        block_c7 = Curve(
+            10,
+            block_c6.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_c7.construct_from_config(
             {
                 Parameter.length: 40,
@@ -216,7 +258,15 @@ class RacingMap(PGMap):
         }, parent_node_path, physics_world)
         self.blocks.append(block_s4)
 
-        block_c8 = CurveWithGuardrail(12, block_s4.get_socket(0), self.road_network, 1)
+        block_c8 = Curve(
+            12,
+            block_s4.get_socket(0),
+            self.road_network,
+            1,
+            remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.BARRIER,
+            center_line_type=PGLineType.BARRIER
+        )
         block_c8.construct_from_config(
             {
                 Parameter.length: 100,
