@@ -318,9 +318,10 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 height = sidewalk.get("height", None)
                 if height is None:
                     height = PGDrivableAreaProperty.SIDEWALK_THICKNESS
+                z_pos = height / 2
                 np = make_polygon_model(polygon, height)
                 np.reparentTo(self.sidewalk_node_path)
-                np.setPos(0, 0, height / 2)
+                np.setPos(0, 0, z_pos)
                 if self.render:
                     np.setTexture(self.side_texture)
                 # np.setTexture(self.ts_normal, self.side_normal)
@@ -329,7 +330,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 body_node.setKinematic(False)
                 body_node.setStatic(True)
                 body_np = self.sidewalk_node_path.attachNewNode(body_node)
-                body_np.setPos(0, 0, height / 2)
+                body_np.setPos(0, 0, z_pos)
                 self._node_path_list.append(body_np)
 
                 geom = np.node().getGeom(0)
