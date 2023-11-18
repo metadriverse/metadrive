@@ -1,6 +1,7 @@
 import numpy as np
 
 from metadrive import MetaDriveEnv
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.envs.base_env import BASE_DEFAULT_CONFIG
 from metadrive.envs.metadrive_env import METADRIVE_DEFAULT_CONFIG
@@ -33,6 +34,7 @@ def test_base_vehicle():
 
         # v_config = BaseVehicle.get_vehicle_config(dict())
         v_config = Config(BASE_DEFAULT_CONFIG["vehicle_config"]).update(METADRIVE_DEFAULT_CONFIG["vehicle_config"])
+        v_config["spawn_lane_index"] = (FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
         v = engine.spawn_object(DefaultVehicle, vehicle_config=v_config, random_seed=0)
 
         v.add_navigation()

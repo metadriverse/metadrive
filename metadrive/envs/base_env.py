@@ -268,8 +268,8 @@ class BaseEnv(gym.Env):
         self.in_stop = False
 
         # scenarios
-        self.start_index = None
-        self.num_scenarios = None
+        self.start_index = 0
+        self.num_scenarios = 1
 
     def _post_process_config(self, config):
         """Add more special process to merged config"""

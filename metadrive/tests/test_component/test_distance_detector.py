@@ -1,4 +1,5 @@
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.constants import MetaDriveType
 from metadrive.constants import DEFAULT_AGENT
@@ -29,14 +30,15 @@ def test_original_lidar(render=False):
         v_config = env.config["vehicle_config"]
         v_config["spawn_longitude"] = 0
         v_config["spawn_lateral"] = 7.5
+        v_config["spawn_lane_index"] = (FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
         another_v = DefaultVehicle(v_config, random_seed=0)
         another_v.reset()
-        objs =env.engine.get_sensor("side_detector").perceive(env.vehicle,
-                                                  env.vehicle.engine.physics_world.static_world,
-                                                  num_lasers=2,
-                                                  distance=50
-                                                  ).detected_objects + \
-              env.engine.get_sensor("lane_line_detector").perceive(
+        objs = env.engine.get_sensor("side_detector").perceive(env.vehicle,
+                                                               env.vehicle.engine.physics_world.static_world,
+                                                               num_lasers=2,
+                                                               distance=50
+                                                               ).detected_objects + \
+               env.engine.get_sensor("lane_line_detector").perceive(
                    env.vehicle,
                    env.vehicle.engine.physics_world.static_world,
                    num_lasers=2,
@@ -86,14 +88,15 @@ def test_lidar_with_mask(render=False):
         v_config = env.config["vehicle_config"]
         v_config["spawn_longitude"] = 0
         v_config["spawn_lateral"] = 7.5
+        v_config["spawn_lane_index"] = (FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
         another_v = DefaultVehicle(v_config, random_seed=0)
         another_v.reset()
         # for test
         objs = env.engine.get_sensor("side_detector").perceive(env.vehicle,
-                                                  env.vehicle.engine.physics_world.static_world,
-                                                  num_lasers=2,
-                                                  distance=50
-                                                  ).detected_objects + \
+                                                               env.vehicle.engine.physics_world.static_world,
+                                                               num_lasers=2,
+                                                               distance=50
+                                                               ).detected_objects + \
                env.engine.get_sensor("lane_line_detector").perceive(
                    env.vehicle,
                    env.vehicle.engine.physics_world.static_world,

@@ -1,4 +1,5 @@
 from metadrive import MetaDriveEnv
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle.vehicle_type import VaryingDynamicsVehicle, DefaultVehicle
 from metadrive.engine import initialize_engine, close_engine
 
@@ -14,6 +15,7 @@ def test_varying_dynamics_vehicle():
         # initialize_engine(default_config)
 
         v_config = default_config.copy()["vehicle_config"]
+        v_config["spawn_lane_index"] = (FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
 
         v_config["navigation_module"] = None
 
