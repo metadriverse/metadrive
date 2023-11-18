@@ -332,9 +332,10 @@ class BaseEnv(gym.Env):
                     break
         self.logger.info("Render Mode: {}".format(config["_render_mode"]))
         if config["is_multi_agent"]:
-            self.logger.info("Max step per agent (horizon): {}".format(config["max_step_per_agent"]))
+            self.logger.info("Max step per agent: {}".format(config["max_step_per_agent"]))
         else:
-            self.logger.info("Horizon: {}".format(config["horizon"]))
+            self.logger.info("Horizon (Max step per agent): "
+                             "{}".format(config["horizon"] or config["max_step_per_agent"]))
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
