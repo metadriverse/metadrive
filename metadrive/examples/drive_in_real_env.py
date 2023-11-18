@@ -8,19 +8,6 @@ from metadrive.constants import HELP_MESSAGE
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 
-
-class DemoScenarioEnv(ScenarioEnv):
-    """
-    Make sure non-repetitive scenes are showed
-    """
-    def reset(self, seed=None):
-        if self.engine is not None:
-            seeds = [i for i in range(self.config["num_scenarios"])]
-            seeds.remove(self.current_seed)
-            seed = random.choice(seeds)
-        return super(DemoScenarioEnv, self).reset(seed=seed)
-
-
 RENDER_MESSAGE = {
     "Quit": "ESC",
     "Switch perspective": "Q or B",
@@ -32,18 +19,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--reactive_traffic", action="store_true")
     parser.add_argument("--top_down", "--topdown", action="store_true")
+    parser.add_argument("--waymo", action="store_true")
     args = parser.parse_args()
     extra_args = dict(film_size=(2000, 2000)) if args.top_down else {}
     asset_path = AssetLoader.asset_path
+    use_waymo = args.waymo
     print(HELP_MESSAGE)
     try:
-        env = DemoScenarioEnv(
+        env = ScenarioEnv(
             {
                 "manual_control": True,
+                "sequential_seed": True,
                 "reactive_traffic": True if args.reactive_traffic else False,
                 "use_render": True if not args.top_down else False,
-                "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
-                "num_scenarios": 3
+                "data_directory": AssetLoader.file_path(asset_path, "waymo" if use_waymo else "nuscenes",
+                                                        unix_style=False),
+                "num_scenarios": 3 if use_waymo else 10
             }
         )
         o, _ = env.reset()

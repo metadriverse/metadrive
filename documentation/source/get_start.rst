@@ -42,7 +42,7 @@ We provide the examples for those suites as follow:
     python -m metadrive.examples.drive_in_single_agent_env
 
     # ===== Real-world Environments =====
-    python -m metadrive.examples.drive_in_waymo_env
+    python -m metadrive.examples.drive_in_real_env
 
     # ===== Safe RL Environments =====
     python -m metadrive.examples.drive_in_safe_metadrive_env
