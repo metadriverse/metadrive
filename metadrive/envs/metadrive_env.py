@@ -19,9 +19,8 @@ METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
     start_seed=0,
     num_scenarios=1,
-    environment_num=-1,  # This key is deprecated, use num_scenarios instead!
 
-    # ===== Map Config =====
+    # ===== PG Map Config =====
     map=3,  # int or string: an easy way to fill map_config
     block_dist_config=PGBlockDistConfig,
     random_lane_width=False,
@@ -57,8 +56,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Others =====
     use_AI_protector=False,
     save_level=0.5,
-    is_multi_agent=False,
-    vehicle_config=dict(spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)),
 
     # ===== Agent =====
     random_spawn_lane_index=True,
@@ -117,10 +114,6 @@ class MetaDriveEnv(BaseEnv):
                 "You have set rgb_clip = False, which means the observation will be uint8 values in [0, 255]. "
                 "Please make sure you have parsed them later before feeding them to network!"
             )
-        if config["environment_num"] != -1:
-            self.logger.warning("environment_num is deprecated. Use num_scenarios instead!")
-            assert config["num_scenarios"] == 1
-            config["num_scenarios"] = config["environment_num"]
 
         config["map_config"] = parse_map_config(
             easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy
