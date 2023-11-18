@@ -14,6 +14,7 @@ class PGBlockSocket:
     Positive_road is right road, and Negative road is left road on which cars drive in reverse direction
     BlockSocket is a part of block used to connect other blocks
     """
+
     def __init__(self, positive_road: Road, negative_road: Road = None):
         self.positive_road = positive_road
         self.negative_road = negative_road if negative_road else None
@@ -66,16 +67,17 @@ class PGBlock(BaseBlock):
     When single-direction block created, road_2 in block socket is useless.
     But it's helpful when a town is created.
     """
+
     def __init__(
-        self,
-        block_index: int,
-        pre_block_socket: PGBlockSocket,
-        global_network: NodeRoadNetwork,
-        random_seed,
-        ignore_intersection_checking=False,
-        remove_negative_lanes=False,
-        *args,
-        **kwargs
+            self,
+            block_index: int,
+            pre_block_socket: PGBlockSocket,
+            global_network: NodeRoadNetwork,
+            random_seed,
+            ignore_intersection_checking=False,
+            remove_negative_lanes=False,
+            side_lane_line_type=None,
+            center_line_type=None,
     ):
 
         self.name = str(block_index) + self.ID
@@ -83,9 +85,7 @@ class PGBlock(BaseBlock):
             block_index,
             global_network,
             random_seed,
-            *args,
             ignore_intersection_checking=ignore_intersection_checking,
-            **kwargs
         )
         # block information
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
@@ -102,6 +102,10 @@ class PGBlock(BaseBlock):
         # used to connect previous blocks, save its info here
         self.pre_block_socket = pre_block_socket
         self.pre_block_socket_index = pre_block_socket.index
+
+        # Specify the lane line type
+        self.side_lane_line_type = side_lane_line_type
+        self.center_line_type = center_line_type
 
         # used to create this block, but for first block it is nonsense
         self.remove_negative_lanes = remove_negative_lanes
