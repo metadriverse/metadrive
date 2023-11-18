@@ -286,13 +286,13 @@ class LaneGraphics:
             elif lane.line_types[side] == PGLineType.CONTINUOUS and isinstance(lane, CircularLane):
                 cls.continuous_curve(lane, surface, stripes_count, s0, side, color=color)
             elif (lane.line_types[side] == PGLineType.SIDE
-                  or lane.line_types[side] == PGLineType.BARRIER) and isinstance(lane, CircularLane):
+                  or lane.line_types[side] == PGLineType.GUARDRAIL) and isinstance(lane, CircularLane):
                 cls.continuous_curve(lane, surface, stripes_count, s0, side, color=color)
             # the line of continuous straight and side straight is same now
             elif (lane.line_types[side] == PGLineType.CONTINUOUS) and isinstance(lane, StraightLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
             elif (lane.line_types[side] == PGLineType.SIDE
-                  or lane.line_types[side] == PGLineType.BARRIER) and isinstance(lane, StraightLane):
+                  or lane.line_types[side] == PGLineType.GUARDRAIL) and isinstance(lane, StraightLane):
                 cls.continuous_line(lane, surface, stripes_count, s0, side, color=color)
             # special scenario
             elif lane.line_types[side] == PGLineType.NONE:

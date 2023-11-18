@@ -40,7 +40,7 @@ class MetaDriveType:
     CROSSWALK = "CROSSWALK"
     SPEED_BUMP = "SPEED_BUMP"
     DRIVEWAY = "DRIVEWAY"
-    BARRIER = "BARRIER"
+    GUARDRAIL = "GUARDRAIL"  # A thickened sidewalk that doesn't allow object to penetrate.
 
     # ===== Traffic Light =====
     LANE_STATE_UNKNOWN = "LANE_STATE_UNKNOWN"

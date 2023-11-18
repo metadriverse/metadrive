@@ -77,8 +77,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_s1.construct_from_config({Parameter.length: 100}, parent_node_path, physics_world)
         self.blocks.append(block_s1)
@@ -89,8 +89,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_c1.construct_from_config(
             {
@@ -108,8 +108,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_s2.construct_from_config({
             Parameter.length: 100,
@@ -122,8 +122,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_c2.construct_from_config(
             {
@@ -141,8 +141,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_c3.construct_from_config(
             {
@@ -160,8 +160,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_s3.construct_from_config({
             Parameter.length: 200,
@@ -174,8 +174,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_c4.construct_from_config(
             {
@@ -193,8 +193,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_c5.construct_from_config(
             {
@@ -212,8 +212,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_c6.construct_from_config(
             {
@@ -231,8 +231,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_c7.construct_from_config(
             {
@@ -250,8 +250,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_s4.construct_from_config({
             Parameter.length: 100,
@@ -264,8 +264,8 @@ class RacingMap(PGMap):
             self.road_network,
             1,
             remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.BARRIER,
-            center_line_type=PGLineType.BARRIER
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         block_c8.construct_from_config(
             {
