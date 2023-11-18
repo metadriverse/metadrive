@@ -5,7 +5,7 @@ This environment can load all scenarios exported from other environments via env
 import numpy as np
 
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
+from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader

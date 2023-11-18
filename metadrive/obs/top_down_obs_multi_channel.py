@@ -15,9 +15,9 @@ from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, ObjectGra
 from metadrive.utils import import_pygame, clip
 
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
-from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
-from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
+from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
+from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
+from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
 
 pygame, gfxdraw = import_pygame()
 COLOR_WHITE = pygame.Color("white")

@@ -4,7 +4,7 @@ from metadrive.constants import CamMask
 import numpy as np
 from panda3d.core import NodePath, Material
 from metadrive.engine.logger import get_logger
-from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
+from metadrive.component.navigation_module.base_navigation import BaseNavigation
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math import norm, clip

@@ -19,8 +19,8 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
-from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
+from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
+from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import get_engine, engine_initialized
@@ -668,9 +668,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if self.navigation is not None or self.config["navigation_module"] is None or self.engine.current_map is None:
             return
         navi = self.config["navigation_module"]
-        if navi is None:
-            navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
-                else EdgeNetworkNavigation
         self.navigation = navi(
             # self.engine,
             show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],

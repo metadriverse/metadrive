@@ -1,4 +1,5 @@
 import copy
+from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from typing import Union
 
 import numpy as np
@@ -59,6 +60,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     target_vehicle_configs={
         DEFAULT_AGENT: dict(
             use_special_color=True,
+            navigation_module=NodeNetworkNavigation,
             spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
         )
     },

@@ -3,7 +3,7 @@ import numpy as np
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.pg_space import Parameter, BlockParameterSpace
 from metadrive.component.road_network.edge_road_network import EdgeRoadNetwork
-from metadrive.component.vehicle_navigation_module.base_navigation import BaseNavigation
+from metadrive.component.navigation_module.base_navigation import BaseNavigation
 from metadrive.utils import clip, norm
 from metadrive.utils.math import panda_vector
 from metadrive.utils.pg.utils import ray_localization

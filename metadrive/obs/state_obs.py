@@ -1,7 +1,7 @@
 import gymnasium as gym
 import numpy as np
 
-from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
+from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.obs.observation_base import ObservationBase
 from metadrive.utils.math import clip, norm
 

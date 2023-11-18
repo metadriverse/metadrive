@@ -3,7 +3,7 @@ This script demonstrates how to use the environment where traffic and road map a
 """
 import random
 
-from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
+from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
