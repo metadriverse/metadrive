@@ -86,7 +86,7 @@ class BaseEngine(EngineCore, Randomizable):
         self.external_actions = None
 
         # topdown renderer
-        self._top_down_renderer = None
+        self.top_down_renderer = None
 
         # lanes debug
         self.lane_coordinates_debug_node = None
@@ -561,10 +561,10 @@ class BaseEngine(EngineCore, Randomizable):
         self.interface.destroy()
         self.close_world()
 
-        if self._top_down_renderer is not None:
-            self._top_down_renderer.close()
-            del self._top_down_renderer
-            self._top_down_renderer = None
+        if self.top_down_renderer is not None:
+            self.top_down_renderer.close()
+            del self.top_down_renderer
+            self.top_down_renderer = None
 
     def __del__(self):
         logger.debug("{} is destroyed".format(self.__class__.__name__))
@@ -748,10 +748,10 @@ class BaseEngine(EngineCore, Randomizable):
             return self.agent_manager.agent_to_object(agent_name)
 
     def render_topdown(self, text, *args, **kwargs):
-        if self._top_down_renderer is None:
+        if self.top_down_renderer is None:
             from metadrive.obs.top_down_renderer import TopDownRenderer
-            self._top_down_renderer = TopDownRenderer(*args, **kwargs)
-        return self._top_down_renderer.render(text, *args, **kwargs)
+            self.top_down_renderer = TopDownRenderer(*args, **kwargs)
+        return self.top_down_renderer.render(text, *args, **kwargs)
 
     def get_window_image(self, return_bytes=False):
         window_count = self.graphicsEngine.getNumWindows() - 1

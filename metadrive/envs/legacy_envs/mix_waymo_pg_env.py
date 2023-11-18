@@ -152,8 +152,8 @@ class MixWaymoPGEnv(ScenarioEnv):
                 "singleton of MetaDrive and restart your program."
             )
         self.engine.reset()
-        if self._top_down_renderer is not None:
-            self._top_down_renderer.reset(self.current_map)
+        if self.top_down_renderer is not None:
+            self.top_down_renderer.reset(self.current_map)
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_rewards = defaultdict(float)

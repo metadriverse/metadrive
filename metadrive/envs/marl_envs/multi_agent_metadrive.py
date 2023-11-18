@@ -337,7 +337,7 @@ def pygame_replay(
         env.render(mode="top_down", num_stack=50, film_size=film_size, history_smooth=0)
         if save:
             pygame.image.save(
-                env._top_down_renderer._runtime_canvas,
+                env.top_down_renderer._runtime_canvas,
                 "{}_{}.png".format(name, frame_count),
             )
         frame_count += 1
@@ -363,7 +363,7 @@ def panda_replay(name, env_class, save=False, other_traj=None, extra_config={}):
         env.engine.force_fps.toggle()
         if save:
             pygame.image.save(
-                env._top_down_renderer._runtime_canvas,
+                env.top_down_renderer._runtime_canvas,
                 "{}_{}.png".format(name, frame_count),
             )
         frame_count += 1

@@ -491,8 +491,8 @@ class BaseEnv(gym.Env):
                 "singleton of MetaDrive and restart your program."
             )
         self.engine.reset()
-        if self._top_down_renderer is not None:
-            self._top_down_renderer.reset(self.current_map)
+        if self.top_down_renderer is not None:
+            self.top_down_renderer.reset(self.current_map)
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_rewards = defaultdict(float)
@@ -661,15 +661,15 @@ class BaseEnv(gym.Env):
         """
         return self.agent_manager.active_agents
 
-    @property
-    def vehicles_including_just_terminated(self):
-        """
-        Return all vehicles that occupy some space in current environments
-        :return: Dict[agent_id:vehicle]
-        """
-        ret = self.agent_manager.active_agents
-        ret.update(self.agent_manager.just_terminated_agents)
-        return ret
+    # @property
+    # def vehicles_including_just_terminated(self):
+    #     """
+    #     Return all vehicles that occupy some space in current environments
+    #     :return: Dict[agent_id:vehicle]
+    #     """
+    #     ret = self.agent_manager.active_agents
+    #     ret.update(self.agent_manager.just_terminated_agents)
+    #     return ret
 
     def setup_engine(self):
         """
@@ -705,8 +705,8 @@ class BaseEnv(gym.Env):
         return self.engine.current_track_vehicle
 
     @property
-    def _top_down_renderer(self):
-        return self.engine._top_down_renderer
+    def top_down_renderer(self):
+        return self.engine.top_down_renderer
 
     @property
     def episode_step(self):
@@ -775,19 +775,6 @@ class BaseEnv(gym.Env):
             return scenarios_to_export, done_info
         else:
             return scenarios_to_export
-
-    def export_single_scenario(self):
-        """
-        Similar export_scenarios, this function transform the internal recorded frames to a standard
-        scenario description.
-        """
-        episode = self.engine.dump_episode()
-        return convert_recorded_scenario_exported(episode)
-
-    @property
-    def logger_name(self):
-        return self.__class__.__name__
-
 
 if __name__ == '__main__':
     cfg = {"use_render": True}
