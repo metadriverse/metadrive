@@ -10,7 +10,7 @@ if __name__ == "__main__":
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            "debug": True,
+            # "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
             "static_traffic_object": False,

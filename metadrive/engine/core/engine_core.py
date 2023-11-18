@@ -1,4 +1,5 @@
 import logging
+from panda3d.core import GraphicsPipeSelection
 from metadrive.engine.logger import get_logger
 import sys
 import time
@@ -83,6 +84,7 @@ class EngineCore(ShowBase.ShowBase):
     # loadPrcFileData("", "transform-cache 0")
     # loadPrcFileData("", "state-cache 0")
     loadPrcFileData("", "garbage-collect-states 0")
+    loadPrcFileData("", "print-pipe-types 0")
 
     # loadPrcFileData("", "allow-incomplete-render #t")
     # loadPrcFileData("", "# even-animation #t")
@@ -175,6 +177,8 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
 
         super(EngineCore, self).__init__(windowType=self.mode)
+        logger.info("Known Pipes: {}".format(*GraphicsPipeSelection.getGlobalPtr().getPipeTypes()))
+
         self._all_panda_tasks = self.taskMgr.getAllTasks()
         if self.use_render_pipeline and self.mode != RENDER_MODE_NONE:
             self.render_pipeline.create(self)
