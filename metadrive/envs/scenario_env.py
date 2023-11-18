@@ -93,6 +93,7 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== others =====
     allowed_more_steps=None,  # None=infinite
+    top_down_show_real_size=False
 )
 
 
