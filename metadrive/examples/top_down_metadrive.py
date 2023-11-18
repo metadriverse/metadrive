@@ -35,7 +35,7 @@ def draw_multi_channels_top_down_observation(obs, show_time=4):
     def close_event():
         plt.close()  # timer calls this function after 3 seconds and closes the window
 
-    timer = fig.canvas.new_timer(
+    timer = fig.screen_canvas.new_timer(
         interval=show_time * 1000
     )  # creating a timer object and setting an interval of 3000 milliseconds
     timer.add_callback(close_event)

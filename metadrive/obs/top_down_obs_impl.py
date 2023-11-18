@@ -136,12 +136,13 @@ class WorldSurface(pygame.Surface):
     def pos2pix(self, x: float, y: float) -> Tuple[int, int]:
         """
         Convert two world coordinates [m] into a position in the surface [px]
+        The coordinates is changed to right-handed as well
 
         :param x: x world coordinate [m]
         :param y: y world coordinate [m]
         :return: the coordinates of the corresponding pixel [px]
         """
-        return self.pix(x - self.origin[0]), self.pix(y - self.origin[1])
+        return self.pix(x - self.origin[0]), self.raw_size[-1] - self.pix(y - self.origin[1])
 
     def vec2pix(self, vec: PositionType) -> Tuple[int, int]:
         """
@@ -197,14 +198,14 @@ class ObjectGraphics:
 
     @classmethod
     def display(
-        cls,
-        object: history_object,
-        surface,
-        color,
-        heading,
-        label: bool = False,
-        draw_contour=False,
-        contour_width=1
+            cls,
+            object: history_object,
+            surface,
+            color,
+            heading,
+            label: bool = False,
+            draw_contour=False,
+            contour_width=1
     ) -> None:
         """
         Display a vehicle on a pygame surface.

@@ -220,23 +220,23 @@ class TopDownRenderer:
         )
         # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
         # and our vehicles can draw on this large canvas.
-        self._runtime_canvas = self._background_canvas.copy()
+        self._frame_canvas = self._background_canvas.copy()
 
         # (3) it is only used for track vehicle
         self.receptive_field_double = (
-            int(self._runtime_canvas.pix(100 * np.sqrt(2))) * 2, int(self._runtime_canvas.pix(100 * np.sqrt(2))) * 2
+            int(self._frame_canvas.pix(100 * np.sqrt(2))) * 2, int(self._frame_canvas.pix(100 * np.sqrt(2))) * 2
         )
         self.canvas_rotate = pygame.Surface(self.receptive_field_double)
         # self._runtime_output = self._background_canvas.copy()  # TODO(pzh) what is this?
 
         # Setup some runtime variables
-        self._render_size = screen_size
+        self._screen_size = screen_size
 
         # screen and canvas are a regional surface where only part of the super large background will draw.
         # (3) screen is the popup window and canvas is a wrapper to screen but with more features
-        self._render_canvas = pygame.display.set_mode(self._render_size)
-        self._render_canvas.set_alpha(None)
-        self._render_canvas.fill(color_white)
+        self._screen_canvas = pygame.display.set_mode(self._screen_size)
+        self._screen_canvas.set_alpha(None)
+        self._screen_canvas.fill(color_white)
 
         # Draw
         self.blit()
@@ -246,12 +246,12 @@ class TopDownRenderer:
         self.need_reset = False
 
     @property
-    def canvas(self):
-        return self._render_canvas
+    def screen_canvas(self):
+        return self._screen_canvas
 
     def refresh(self):
-        self._runtime_canvas.blit(self._background_canvas, (0, 0))
-        self.canvas.fill(color_white)
+        self._frame_canvas.blit(self._background_canvas, (0, 0))
+        self.screen_canvas.fill(color_white)
 
     def render(self, text, *args, **kwargs):
         self.need_reset = False
@@ -283,7 +283,7 @@ class TopDownRenderer:
         self._draw(*args, **kwargs)
         self._add_text(text)
         self.blit()
-        ret = self.canvas.copy()
+        ret = self.screen_canvas.copy()
         ret = ret.convert(24)
         return ret
 
@@ -300,11 +300,10 @@ class TopDownRenderer:
             img2 = font2.render(line, True, (0, 0, 0))
             this_line_pos = copy.copy(self._text_render_pos)
             this_line_pos[-1] += count * self._text_render_interval
-            self._render_canvas.blit(img2, this_line_pos)
+            self._screen_canvas.blit(img2, this_line_pos)
             count += 1
 
     def blit(self):
-        # self._render_canvas.blit(self._runtime_canvas, (0, 0))
         pygame.display.update()
 
     def close(self):
@@ -322,10 +321,10 @@ class TopDownRenderer:
         )
 
         # Reset several useful variables.
-        # self._render_size = self._background_canvas.get_size()
+        # self._screen_size = self._background_canvas.get_size()
         # Maybe we can optimize here! We don't need to copy but just blit new background on it.
 
-        self._runtime_canvas = self._background_canvas.copy()
+        self._frame_canvas = self._background_canvas.copy()
         self.canvas_rotate = pygame.Surface(self.receptive_field_double)
 
         self.history_objects.clear()
@@ -384,7 +383,7 @@ class TopDownRenderer:
                     c = TopDownSemanticColor.get_color(v.type) * (1 - alpha_f) + alpha_f * 255
                 else:
                     c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
-                ObjectGraphics.display(object=v, surface=self._runtime_canvas, heading=h, color=c, draw_contour=False)
+                ObjectGraphics.display(object=v, surface=self._frame_canvas, heading=h, color=c, draw_contour=False)
 
         # Draw the whole trajectory of ego vehicle with no gradient colors:
         if self.draw_target_vehicle_trajectory:
@@ -400,7 +399,7 @@ class TopDownRenderer:
                 # alpha_f = 0
                 ObjectGraphics.display(
                     object=v,
-                    surface=self._runtime_canvas,
+                    surface=self._frame_canvas,
                     heading=h,
                     color=(c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2])),
                     draw_contour=False
@@ -421,7 +420,7 @@ class TopDownRenderer:
             else:
                 c = (c[0] + alpha_f * (255 - c[0]), c[1] + alpha_f * (255 - c[1]), c[2] + alpha_f * (255 - c[2]))
             ObjectGraphics.display(
-                object=v, surface=self._runtime_canvas, heading=h, color=c, draw_contour=self.contour, contour_width=2
+                object=v, surface=self._frame_canvas, heading=h, color=c, draw_contour=self.contour, contour_width=2
             )
 
         if not hasattr(self, "_deads"):
@@ -429,35 +428,35 @@ class TopDownRenderer:
 
         for v in self._deads:
             pygame.draw.circle(
-                surface=self._runtime_canvas,
+                surface=self._frame_canvas,
                 color=(255, 0, 0),
-                center=self._runtime_canvas.pos2pix(v.position[0], v.position[1]),
+                center=self._frame_canvas.pos2pix(v.position[0], v.position[1]),
                 radius=5
             )
 
         for v in self.history_objects[i]:
             if v.done:
                 pygame.draw.circle(
-                    surface=self._runtime_canvas,
+                    surface=self._frame_canvas,
                     color=(255, 0, 0),
-                    center=self._runtime_canvas.pos2pix(v.position[0], v.position[1]),
+                    center=self._frame_canvas.pos2pix(v.position[0], v.position[1]),
                     radius=5
                 )
                 self._deads.append(v)
 
         v = self.current_track_vehicle
-        canvas = self._runtime_canvas
-        field = self._render_canvas.get_size()
+        canvas = self._frame_canvas
+        field = self._screen_canvas.get_size()
         if not self.target_vehicle_heading_up:
             if self.position is not None or v is not None:
                 cam_pos = (self.position or v.position)
-                position = self._runtime_canvas.pos2pix(*cam_pos)
+                position = self._frame_canvas.pos2pix(*cam_pos)
             else:
                 position = (field[0] / 2, field[1] / 2)
             off = (position[0] - field[0] / 2, position[1] - field[1] / 2)
-            self.canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field[0], field[1]))
+            self.screen_canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field[0], field[1]))
         else:
-            position = self._runtime_canvas.pos2pix(*v.position)
+            position = self._frame_canvas.pos2pix(*v.position)
             self.canvas_rotate.blit(
                 canvas, (0, 0), (
                     position[0] - self.receptive_field_double[0] / 2, position[1] - self.receptive_field_double[1] / 2,
@@ -468,8 +467,8 @@ class TopDownRenderer:
             rotation = np.rad2deg(v.heading_theta) + 90
             new_canvas = pygame.transform.rotozoom(self.canvas_rotate, rotation, 1)
 
-            size = self._render_canvas.get_size()
-            self._render_canvas.blit(
+            size = self._screen_canvas.get_size()
+            self._screen_canvas.blit(
                 new_canvas,
                 (0, 0),
                 (
@@ -488,7 +487,7 @@ class TopDownRenderer:
             agents = [agent.name for agent in list(self.engine.agents.values())]
             for v in self.history_objects[i]:
                 if v.name in agents:
-                    position = self._runtime_canvas.pos2pix(*v.position)
+                    position = self._frame_canvas.pos2pix(*v.position)
                     new_position = (position[0] - off[0], position[1] - off[1])
                     img = self.pygame_font.render(
                         text=self.engine.object_to_agent(v.name),
@@ -496,7 +495,7 @@ class TopDownRenderer:
                         color=(0, 0, 0, 128),
                     )
                     # img.set_alpha(None)
-                    self.canvas.blit(
+                    self.screen_canvas.blit(
                         source=img,
                         dest=(new_position[0] - img.get_width() / 2, new_position[1] - img.get_height() / 2),
                         # special_flags=pygame.BLEND_RGBA_MULT
