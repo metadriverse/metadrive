@@ -6,9 +6,9 @@ import pytest
 
 examples = [
     "draw_maps.py", "drive_in_multi_agent_env.py --top_down", "drive_in_real_env.py --top_down",
-    "drive_in_real_env.py --top_down --waymo",
-    "drive_in_real_env.py --reactive_traffic", "drive_in_safe_metadrive_env.py", "drive_in_single_agent_env.py",
-    "procedural_generation.py", "profile_metadrive.py", "profile_metadrive_marl.py", "top_down_metadrive.py",
+    "drive_in_real_env.py --top_down --waymo", "drive_in_real_env.py --reactive_traffic",
+    "drive_in_safe_metadrive_env.py", "drive_in_single_agent_env.py", "procedural_generation.py",
+    "profile_metadrive.py", "profile_metadrive_marl.py", "top_down_metadrive.py",
     "generate_video_for_bev_and_interface.py", "verify_headless_installation.py", "verify_image_observation.py"
 ]
 examples_dir_path = os.path.join(MetaDrive_PACKAGE_DIR, "examples")
