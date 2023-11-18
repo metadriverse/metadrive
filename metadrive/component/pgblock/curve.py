@@ -1,10 +1,10 @@
 import numpy as np
 
+from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 from metadrive.component.pgblock.create_pg_block_utils import CreateAdverseRoad, CreateRoadFrom, create_bend_straight
 from metadrive.component.pgblock.pg_block import PGBlock
 from metadrive.component.road_network import Road
 from metadrive.constants import PGLineType
-from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 
 class Curve(PGBlock):
@@ -33,8 +33,13 @@ class Curve(PGBlock):
         angle = parameters[Parameter.angle]
         radius = parameters[Parameter.radius]
         curve, straight = create_bend_straight(
-            basic_lane, length, radius, np.deg2rad(angle), direction, basic_lane.width,
-            (PGLineType.BROKEN, PGLineType.SIDE)
+            basic_lane,
+            length,
+            radius,
+            np.deg2rad(angle),
+            direction,
+            width=basic_lane.width,
+            line_types=(PGLineType.BROKEN, self.side_lane_line_type)
         )
         no_cross = CreateRoadFrom(
             curve,
@@ -42,14 +47,19 @@ class Curve(PGBlock):
             positive_road,
             self.block_network,
             self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
+            ignore_intersection_checking=self.ignore_intersection_checking,
+            side_lane_line_type=self.side_lane_line_type,
+            center_line_type=self.center_line_type
         )
-        no_cross = CreateAdverseRoad(
-            positive_road,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        ) and no_cross
+        if not self.remove_negative_lanes:
+            no_cross = CreateAdverseRoad(
+                positive_road,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking,
+                side_lane_line_type=self.side_lane_line_type,
+                center_line_type=self.center_line_type
+            ) and no_cross
 
         # part 2
         start_node = end_node
@@ -61,14 +71,19 @@ class Curve(PGBlock):
             positive_road,
             self.block_network,
             self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
+            ignore_intersection_checking=self.ignore_intersection_checking,
+            side_lane_line_type=self.side_lane_line_type,
+            center_line_type=self.center_line_type
         ) and no_cross
-        no_cross = CreateAdverseRoad(
-            positive_road,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        ) and no_cross
+        if not self.remove_negative_lanes:
+            no_cross = CreateAdverseRoad(
+                positive_road,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking,
+                side_lane_line_type=self.side_lane_line_type,
+                center_line_type=self.center_line_type
+            ) and no_cross
 
         # common properties
         self.add_sockets(self.create_socket_from_positive_road(positive_road))

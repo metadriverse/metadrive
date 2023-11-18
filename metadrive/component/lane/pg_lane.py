@@ -3,8 +3,6 @@ import numpy as np
 from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import PGLineType
-from metadrive.engine.core.draw_line import ColorLineNodePath
-from metadrive.engine.engine_utils import get_engine
 from metadrive.type import MetaDriveType
 
 
@@ -50,14 +48,20 @@ class PGLane(AbstractLane):
             node_path_list = self.construct_lane_line_segment(block, start, end, line_color, line_type)
             self._node_path_list.extend(node_path_list)
 
-    def construct_sidewalk(self, block):
+    def construct_sidewalk(self, block, sidewalk_height=None, lateral_direction=1):
         """
         Construct the sidewalk for this lane
+
         Args:
-            block:
+            block: Current block.
+            sidewalk_height: The height of sidewalk. Default to None and PGDrivableAreaProperty.SIDEWALK_THICKNESS will
+                be used.
+            lateral_direction: Whether to extend the sidewalk outward (to the right of the road) or inward (to the left
+                of the road). It's useful if we want to put sidewalk to the center of the road, e.g. in the scenario
+                where we only have "positive road" and there is no roads in opposite direction. Should be either -1 or
+                +1.
 
-        Returns:
-
+        Returns: None
         """
         # engine = get_engine()
         # cloud_points_vis = ColorLineNodePath(
@@ -72,6 +76,9 @@ class PGLane(AbstractLane):
         )
         start_lat = +self.width_at(0) / 2 + 0.2
         side_lat = start_lat + PGDrivableAreaProperty.SIDEWALK_WIDTH
+        assert lateral_direction == -1 or lateral_direction == 1
+        start_lat *= lateral_direction
+        side_lat *= lateral_direction
         if self.radius != 0 and side_lat > self.radius:
             raise ValueError(
                 "The sidewalk width ({}) is too large."
@@ -87,7 +94,7 @@ class PGLane(AbstractLane):
                 # draw_lists[k].append([point[0], point[1], 1])
         # cloud_points_vis.drawLines(draw_lists)
         # cloud_points_vis.create()
-        block.sidewalks[str(self.index)] = {"polygon": polygon}
+        block.sidewalks[str(self.index)] = {"polygon": polygon, "height": sidewalk_height}
 
     def construct_lane_line_in_block(self, block, construct_left_right=(True, True)):
         """
@@ -104,10 +111,15 @@ class PGLane(AbstractLane):
             elif line_type == PGLineType.SIDE:
                 self.construct_continuous_line(block, lateral, line_color, line_type)
                 self.construct_sidewalk(block)
+            elif line_type == PGLineType.GUARDRAIL:
+                self.construct_continuous_line(block, lateral, line_color, line_type)
+                self.construct_sidewalk(
+                    block, sidewalk_height=PGDrivableAreaProperty.GUARDRAIL_HEIGHT, lateral_direction=idx
+                )
             elif line_type == PGLineType.NONE:
                 continue
             else:
                 raise ValueError(
-                    "You have to modify this cuntion and implement a constructing method for line type: {}".
+                    "You have to modify this function and implement a constructing method for line type: {}".
                     format(line_type)
                 )

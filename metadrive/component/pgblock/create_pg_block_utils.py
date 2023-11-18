@@ -1,8 +1,7 @@
 import copy
-from metadrive.type import MetaDriveType
+import math
 from typing import Tuple, Union, List
 
-import math
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
@@ -11,6 +10,7 @@ from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import PGLineType, PGLineColor, PGDrivableAreaProperty
+from metadrive.type import MetaDriveType
 from metadrive.utils.math import get_vertical_vector
 from metadrive.utils.pg.utils import check_lane_on_road
 
@@ -55,23 +55,47 @@ def CreateRoadFrom(
     toward_smaller_lane_index: bool = True,
     ignore_start: str = None,
     ignore_end: str = None,
-    center_line_type=PGLineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
+    center_line_type=None,  # Identical to Block.CENTER_LINE_TYPE
     detect_one_side=True,
-    side_lane_line_type=PGLineType.SIDE,
-    inner_lane_line_type=PGLineType.BROKEN,
-    center_line_color=PGLineColor.YELLOW,
+    side_lane_line_type=None,
+    inner_lane_line_type=None,
+    center_line_color=None,
     ignore_intersection_checking=None,
     metadrive_lane_type=None,
 ) -> bool:
     """
+    Give the far left lane, then create lane_num lanes including the far left lane itself.
         | | | |
         | | | |
         | | | |
         | | | |
-    <-----smaller direction = inside direction
-    Usage: give the far left lane, then create lane_num lanes including itself
-    :return if the lanes created cross other lanes
+
+    Args:
+        lane:
+        lane_num:
+        road:
+        roadnet_to_add_lanes: The block network
+        roadnet_to_check_cross: Existing global network
+        toward_smaller_lane_index:
+        ignore_start:
+        ignore_end:
+        center_line_type:
+        detect_one_side:
+        side_lane_line_type:
+        inner_lane_line_type:
+        center_line_color:
+        ignore_intersection_checking:
+        metadrive_lane_type:
+
+    Return:
+        A Boolean indicator saying whether the road is constructed successfully.
     """
+    center_line_type = center_line_type or PGLineType.CONTINUOUS
+    side_lane_line_type = side_lane_line_type or PGLineType.SIDE
+    side_lane_line_type = side_lane_line_type or PGLineType.SIDE
+    inner_lane_line_type = inner_lane_line_type or PGLineType.BROKEN
+    center_line_color = center_line_color or PGLineColor.YELLOW
+
     lane_num -= 1  # include lane itself
     origin_lane = lane
     lanes = []
@@ -180,13 +204,37 @@ def CreateAdverseRoad(
     roadnet_to_check_cross: "NodeRoadNetwork",  # mostly, previous global network
     ignore_start: str = None,
     ignore_end: str = None,
-    center_line_type=PGLineType.CONTINUOUS,  # Identical to Block.CENTER_LINE_TYPE
-    side_lane_line_type=PGLineType.SIDE,
-    inner_lane_line_type=PGLineType.BROKEN,
-    center_line_color=PGLineColor.YELLOW,
+    center_line_type=None,
+    side_lane_line_type=None,
+    inner_lane_line_type=None,
+    center_line_color=None,
     ignore_intersection_checking=None,
     metadrive_lane_type=None
 ) -> bool:
+    """
+    Create the adverse road given the road network.
+
+    Args:
+        positive_road:
+        roadnet_to_get_road: The block network
+        roadnet_to_check_cross: The existing global network
+        ignore_start:
+        ignore_end:
+        center_line_type:
+        side_lane_line_type:
+        inner_lane_line_type:
+        center_line_color:
+        ignore_intersection_checking:
+        metadrive_lane_type:
+
+    Returns:
+        A Boolean indicator saying whether the road is constructed successfully.
+    """
+    center_line_type = center_line_type or PGLineType.CONTINUOUS  # Identical to Block.CENTER_LINE_TYPE
+    side_lane_line_type = side_lane_line_type or PGLineType.SIDE
+    inner_lane_line_type = inner_lane_line_type or PGLineType.BROKEN
+    center_line_color = center_line_color or PGLineColor.YELLOW
+
     adverse_road = -positive_road
     lanes = get_lanes_on_road(positive_road, roadnet_to_get_road)
     reference_lane = lanes[-1]

@@ -270,6 +270,7 @@ class PGLineType:
     BROKEN = MetaDriveType.LINE_BROKEN_SINGLE_WHITE
     CONTINUOUS = MetaDriveType.LINE_SOLID_SINGLE_WHITE
     SIDE = MetaDriveType.BOUNDARY_LINE
+    GUARDRAIL = MetaDriveType.GUARDRAIL
 
     @staticmethod
     def prohibit(line_type) -> bool:
@@ -302,6 +303,8 @@ class PGDrivableAreaProperty:
     SIDEWALK_LENGTH = 3
     SIDEWALK_WIDTH = 2
     SIDEWALK_LINE_DIST = 0.6
+
+    GUARDRAIL_HEIGHT = 2.5
 
     # visualization color property
     LAND_COLOR = (0.4, 0.4, 0.4, 1)
