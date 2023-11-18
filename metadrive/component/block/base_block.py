@@ -37,7 +37,11 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     ID = "B"
 
     def __init__(
-        self, block_index: int, global_network: NodeRoadNetwork, random_seed, ignore_intersection_checking=False
+        self,
+        block_index: int,
+        global_network: NodeRoadNetwork,
+        random_seed,
+        ignore_intersection_checking=False,
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -357,9 +361,13 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
             for sidewalk_id, sidewalk in self.sidewalks.items():
                 polygon = sidewalk["polygon"]
-                np = make_polygon_model(polygon, PGDrivableAreaProperty.SIDEWALK_THICKNESS)
+                height = sidewalk.get("height", None)
+                if height is None:
+                    height = PGDrivableAreaProperty.SIDEWALK_THICKNESS
+                z_pos = height / 2
+                np = make_polygon_model(polygon, height)
                 np.reparentTo(self.sidewalk_node_path)
-                np.setPos(0, 0, PGDrivableAreaProperty.SIDEWALK_THICKNESS / 2)
+                np.setPos(0, 0, z_pos)
                 if self.render:
                     np.setTexture(self.side_texture)
                 # np.setTexture(self.ts_normal, self.side_normal)
@@ -368,7 +376,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 body_node.setKinematic(False)
                 body_node.setStatic(True)
                 body_np = self.sidewalk_node_path.attachNewNode(body_node)
-                body_np.setPos(0, 0, 0.1)
+                body_np.setPos(0, 0, z_pos)
                 self._node_path_list.append(body_np)
 
                 geom = np.node().getGeom(0)

@@ -80,12 +80,22 @@ class PGBlock(BaseBlock):
         pre_block_socket: PGBlockSocket,
         global_network: NodeRoadNetwork,
         random_seed,
-        ignore_intersection_checking=False
+        ignore_intersection_checking=False,
+        remove_negative_lanes=False,
+        side_lane_line_type=None,
+        center_line_type=None,
     ):
+
+        # Specify the lane line type
+        self.side_lane_line_type = side_lane_line_type
+        self.center_line_type = center_line_type
 
         self.name = str(block_index) + self.ID
         super(PGBlock, self).__init__(
-            block_index, global_network, random_seed, ignore_intersection_checking=ignore_intersection_checking
+            block_index,
+            global_network,
+            random_seed,
+            ignore_intersection_checking=ignore_intersection_checking,
         )
         # block information
         assert self.SOCKET_NUM is not None, "The number of Socket should be specified when define a new block"
@@ -104,14 +114,16 @@ class PGBlock(BaseBlock):
         self.pre_block_socket_index = pre_block_socket.index
 
         # used to create this block, but for first block it is nonsense
+        self.remove_negative_lanes = remove_negative_lanes
         if block_index != 0:
             self.positive_lanes = self.pre_block_socket.get_positive_lanes(self._global_network)
-            self.negative_lanes = self.pre_block_socket.get_negative_lanes(self._global_network)
             self.positive_lane_num = len(self.positive_lanes)
-            self.negative_lane_num = len(self.negative_lanes)
             self.positive_basic_lane = self.positive_lanes[-1]  # most right or outside lane is the basic lane
-            self.negative_basic_lane = self.negative_lanes[-1]  # most right or outside lane is the basic lane
             self.lane_width = self.positive_basic_lane.width_at(0)
+            if not remove_negative_lanes:
+                self.negative_lanes = self.pre_block_socket.get_negative_lanes(self._global_network)
+                self.negative_lane_num = len(self.negative_lanes)
+                self.negative_basic_lane = self.negative_lanes[-1]  # most right or outside lane is the basic lane
 
     def _sample_topology(self) -> bool:
         """

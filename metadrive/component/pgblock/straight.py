@@ -1,9 +1,9 @@
 from metadrive.component.lane.straight_lane import StraightLane
+from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 from metadrive.component.pgblock.create_pg_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
 from metadrive.constants import PGLineType
-from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
 
 class Straight(PGBlock):
@@ -36,14 +36,20 @@ class Straight(PGBlock):
             socket,
             self.block_network,
             self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
+            ignore_intersection_checking=self.ignore_intersection_checking,
+            side_lane_line_type=self.side_lane_line_type,
+            center_line_type=self.center_line_type
         )
-        # create negative road
-        no_cross = CreateAdverseRoad(
-            socket,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        ) and no_cross
+        if not self.remove_negative_lanes:
+            # create negative road
+            no_cross = CreateAdverseRoad(
+                socket,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking,
+                side_lane_line_type=self.side_lane_line_type,
+                center_line_type=self.center_line_type
+            ) and no_cross
+
         self.add_sockets(PGBlockSocket(socket, _socket))
         return no_cross

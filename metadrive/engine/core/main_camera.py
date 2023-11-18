@@ -54,7 +54,8 @@ class MainCamera(BaseSensor):
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
                                                                                           ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
-        self.direction_running_mean = deque(maxlen=20 if self.camera_smooth else 1)
+        self.camera_smooth_buffer_size = engine.global_config["camera_smooth_buffer_size"]
+        self.direction_running_mean = deque(maxlen=self.camera_smooth_buffer_size if self.camera_smooth else 1)
         self.world_light = engine.world_light  # light chases the chase camera, when not using global light
         self.inputs = InputState()
         self.current_track_vehicle = None

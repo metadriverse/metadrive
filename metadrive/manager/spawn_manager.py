@@ -125,7 +125,7 @@ class SpawnManager(BaseManager):
             assert self.num_agents <= self.max_capacity(
                 spawn_roads, self.exit_length + FirstPGBlock.ENTRANCE_LENGTH, self.lane_num
             ), (
-                "Too many agents! We only accepet {} agents, but you have {} agents!".format(
+                "Too many agents! We only accept {} agents, but you have {} agents!".format(
                     self.lane_num * len(spawn_roads) * num_slots, self.num_agents
                 )
             )

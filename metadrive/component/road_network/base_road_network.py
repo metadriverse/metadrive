@@ -97,7 +97,10 @@ class BaseRoadNetwork:
         """
         Return True if lane 1 is the previous lane of lane 2
         """
-        return True if lane_index_2[1] in self.graph[lane_index_1[1]] else False
+        if lane_index_1[1] in self.graph:
+            if lane_index_2[1] in self.graph[lane_index_1[1]]:
+                return True
+        return False
 
     def get_map_features(self, interval=2):
         raise NotImplementedError

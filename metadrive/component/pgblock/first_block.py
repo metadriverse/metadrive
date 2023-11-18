@@ -1,13 +1,13 @@
 from panda3d.core import NodePath
 
 from metadrive.component.lane.straight_lane import StraightLane
+from metadrive.component.pg_space import ParameterSpace
 from metadrive.component.pgblock.create_pg_block_utils import CreateRoadFrom, CreateAdverseRoad, ExtendStraightLane
 from metadrive.component.pgblock.pg_block import PGBlock, PGBlockSocket
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import Decoration, PGLineType
 from metadrive.engine.core.physics_world import PhysicsWorld
-from metadrive.component.pg_space import ParameterSpace
 
 
 class FirstPGBlock(PGBlock):
@@ -30,11 +30,17 @@ class FirstPGBlock(PGBlock):
         render_root_np: NodePath,
         physics_world: PhysicsWorld,
         length: float = 30,
-        ignore_intersection_checking=False
+        ignore_intersection_checking=False,
+        remove_negative_lanes=False
     ):
         place_holder = PGBlockSocket(Road(Decoration.start, Decoration.end), Road(Decoration.start, Decoration.end))
         super(FirstPGBlock, self).__init__(
-            0, place_holder, global_network, random_seed=0, ignore_intersection_checking=ignore_intersection_checking
+            0,
+            place_holder,
+            global_network,
+            random_seed=0,
+            ignore_intersection_checking=ignore_intersection_checking,
+            remove_negative_lanes=remove_negative_lanes
         )
         if length < self.ENTRANCE_LENGTH:
             print("Warning: first block length is two small", length, "<", self.ENTRANCE_LENGTH)
@@ -51,12 +57,13 @@ class FirstPGBlock(PGBlock):
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking
         )
-        CreateAdverseRoad(
-            ego_v_spawn_road,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        )
+        if not remove_negative_lanes:
+            CreateAdverseRoad(
+                ego_v_spawn_road,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
 
         next_lane = ExtendStraightLane(basic_lane, length - self.ENTRANCE_LENGTH, [PGLineType.BROKEN, PGLineType.SIDE])
         other_v_spawn_road = Road(self.NODE_2, self.NODE_3)
@@ -68,12 +75,13 @@ class FirstPGBlock(PGBlock):
             self._global_network,
             ignore_intersection_checking=self.ignore_intersection_checking
         )
-        CreateAdverseRoad(
-            other_v_spawn_road,
-            self.block_network,
-            self._global_network,
-            ignore_intersection_checking=self.ignore_intersection_checking
-        )
+        if not remove_negative_lanes:
+            CreateAdverseRoad(
+                other_v_spawn_road,
+                self.block_network,
+                self._global_network,
+                ignore_intersection_checking=self.ignore_intersection_checking
+            )
 
         self._create_in_world()
 
