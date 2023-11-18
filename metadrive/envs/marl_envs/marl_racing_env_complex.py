@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import Curve
@@ -54,7 +52,14 @@ RACING_CONFIG = dict(
 
 
 class RacingMap(PGMap):
+    """Create a complex racing map by manually design the topology."""
+
     def _generate(self):
+        """ Generate the racing map.
+
+        Returns:
+            None
+        """
         parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
 
@@ -279,10 +284,13 @@ class RacingMap(PGMap):
 
 
 class RacingMapManager(PGMapManager):
+    """This map manager load the racing map directly, without the burden to manage multiple maps."""
+
     def __init__(self):
         super(RacingMapManager, self).__init__()
 
     def reset(self):
+        """Only initialize the RacingMap once."""
         config = self.engine.global_config
         if len(self.spawned_objects) == 0:
             _map = self.spawn_object(RacingMap, map_config=config["map_config"], random_seed=None)
@@ -293,54 +301,28 @@ class RacingMapManager(PGMapManager):
 
 
 class MultiAgentRacingEnv(MultiAgentMetaDrive):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._completed_loop_count = defaultdict(int)
+    """The Multi-agent Racing Environment"""
 
     def setup_engine(self):
+        """Using the RacingMapManager as the map_manager."""
         super(MultiAgentRacingEnv, self).setup_engine()
         self.engine.update_manager("map_manager", RacingMapManager())
 
     @staticmethod
     def default_config() -> Config:
+        """Use the RACING_CONFIG as the default config."""
         return MultiAgentMetaDrive.default_config().update(RACING_CONFIG, allow_add_new_key=True)
-
-    def reward_function(self, vehicle_id: str):
-        """
-        Override this func to get a new reward function
-        :param vehicle_id: id of BaseVehicle
-        :return: reward
-        """
-        vehicle = self.vehicles[vehicle_id]
-        step_info = dict()
-
-        # Reward for moving forward in current lane
-        if vehicle.lane in vehicle.navigation.current_ref_lanes:
-            current_lane = vehicle.lane
-        else:
-            current_lane = vehicle.navigation.current_ref_lanes[0]
-        long_last, _ = current_lane.local_coordinates(vehicle.last_position)
-        long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
-
-        # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
-        reward = 0.0
-        reward += self.config["driving_reward"] * (long_now - long_last)
-        reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h)
-
-        step_info["step_reward"] = reward
-
-        if self._is_arrive_destination(vehicle):
-            reward = +self.config["success_reward"]
-        elif self._is_out_of_road(vehicle):
-            reward = -self.config["out_of_road_penalty"]
-        elif vehicle.crash_vehicle:
-            reward = -self.config["crash_vehicle_penalty"]
-        elif vehicle.crash_object:
-            reward = -self.config["crash_object_penalty"]
-        return reward, step_info
 
 
 def _vis(generate_video=False):
+    """ This function visualize and generate the video for this environment.
+
+    Args:
+        generate_video: Whether to generate the videos, in both the top-down view and the third-person view.
+
+    Returns:
+        None
+    """
     FPS = 60
 
     env = MultiAgentRacingEnv(

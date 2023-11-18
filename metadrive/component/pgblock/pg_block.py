@@ -78,6 +78,10 @@ class PGBlock(BaseBlock):
         center_line_type=None,
     ):
 
+        # Specify the lane line type
+        self.side_lane_line_type = side_lane_line_type
+        self.center_line_type = center_line_type
+
         self.name = str(block_index) + self.ID
         super(PGBlock, self).__init__(
             block_index,
@@ -100,10 +104,6 @@ class PGBlock(BaseBlock):
         # used to connect previous blocks, save its info here
         self.pre_block_socket = pre_block_socket
         self.pre_block_socket_index = pre_block_socket.index
-
-        # Specify the lane line type
-        self.side_lane_line_type = side_lane_line_type
-        self.center_line_type = center_line_type
 
         # used to create this block, but for first block it is nonsense
         self.remove_negative_lanes = remove_negative_lanes
