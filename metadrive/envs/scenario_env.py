@@ -1,8 +1,12 @@
 """
 This environment can load all scenarios exported from other environments via env.export_scenarios()
 """
+
 import numpy as np
+
+from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
@@ -35,7 +39,7 @@ SCENARIO_ENV_CONFIG = dict(
     need_lane_localization=True,
     no_map=False,
 
-    # ===== Traffic =====
+    # ===== Scenario =====
     no_traffic=False,  # nothing will be generated including objects/pedestrian/vehicles
     no_static_vehicles=False,  # static vehicle will be removed
     no_light=False,  # no traffic light
@@ -48,13 +52,16 @@ SCENARIO_ENV_CONFIG = dict(
     show_sidewalk=False,
 
     # ===== Agent config =====
-    vehicle_config=dict(
-        lidar=dict(num_lasers=120, distance=50),
-        lane_line_detector=dict(num_lasers=0, distance=50),
-        side_detector=dict(num_lasers=12, distance=50),
-        show_dest_mark=True,
-        navigation_module=TrajectoryNavigation,
-    ),
+    target_vehicle_configs={
+        DEFAULT_AGENT: dict(
+            use_special_color=True,
+            lidar=dict(num_lasers=120, distance=50),
+            lane_line_detector=dict(num_lasers=0, distance=50),
+            side_detector=dict(num_lasers=12, distance=50),
+            show_dest_mark=True,
+            navigation_module=TrajectoryNavigation,
+        )
+    },
 
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
@@ -85,10 +92,7 @@ SCENARIO_ENV_CONFIG = dict(
     relax_out_of_road_done=True,
 
     # ===== others =====
-    interface_panel=["dashboard"],  # for boosting efficiency
-    horizon=None,
     allowed_more_steps=None,  # None=infinite
-    top_down_show_real_size=False
 )
 
 
