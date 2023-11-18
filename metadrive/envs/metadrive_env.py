@@ -105,7 +105,6 @@ class MetaDriveEnv(BaseEnv):
         # map setting
         self.start_seed = self.config["start_seed"]
         self.env_num = self.config["num_scenarios"]
-        self.in_stop = False
 
     def _post_process_config(self, config):
         config = super(MetaDriveEnv, self)._post_process_config(config)
@@ -319,15 +318,6 @@ class MetaDriveEnv(BaseEnv):
     def switch_to_top_down_view(self):
         self.main_camera.stop_track()
 
-    def stop(self):
-        self.in_stop = not self.in_stop
-
-    def step(self, *args, **kwargs):
-        ret = super(MetaDriveEnv, self).step(*args, **kwargs)
-        while self.in_stop:
-            self.engine.taskMgr.step()
-        return ret
-
     def next_seed_reset(self):
         if self.current_seed + 1 < self.start_seed + self.env_num:
             self.reset(self.current_seed + 1)
@@ -346,7 +336,6 @@ class MetaDriveEnv(BaseEnv):
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("]", self.next_seed_reset)
         self.engine.accept("[", self.last_seed_reset)
-        self.engine.accept("p", self.stop)
         from metadrive.manager.traffic_manager import PGTrafficManager
         from metadrive.manager.pg_map_manager import PGMapManager
         from metadrive.manager.object_manager import TrafficObjectManager

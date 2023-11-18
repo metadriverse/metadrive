@@ -261,6 +261,9 @@ class BaseEnv(gym.Env):
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
+        # press p to stop
+        self.in_stop = False
+
     def _post_process_config(self, config):
         """Add more special process to merged config"""
         # Cancel interface panel
@@ -382,6 +385,8 @@ class BaseEnv(gym.Env):
     def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]):
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
+        while self.in_stop:
+            self.engine.taskMgr.step()
         return self._get_step_return(actions, engine_info=engine_info)
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]) \
@@ -677,6 +682,7 @@ class BaseEnv(gym.Env):
         """
         self.engine.accept("r", self.reset)
         self.engine.accept("c", self.capture)
+        self.engine.accept("p", self.stop)
         self.engine.register_manager("agent_manager", self.agent_manager)
         self.engine.register_manager("record_manager", RecordManager())
         self.engine.register_manager("replay_manager", ReplayManager())
@@ -775,6 +781,10 @@ class BaseEnv(gym.Env):
             return scenarios_to_export, done_info
         else:
             return scenarios_to_export
+
+    def stop(self):
+        self.in_stop = not self.in_stop
+
 
 if __name__ == '__main__':
     cfg = {"use_render": True}

@@ -146,7 +146,6 @@ class ScenarioEnv(BaseEnv):
         return
 
     def setup_engine(self):
-        self.in_stop = False
         super(ScenarioEnv, self).setup_engine()
         self.engine.register_manager("data_manager", ScenarioDataManager())
         self.engine.register_manager("map_manager", ScenarioMapManager())
@@ -155,7 +154,6 @@ class ScenarioEnv(BaseEnv):
         if not self.config["no_light"]:
             self.engine.register_manager("light_manager", ScenarioLightManager())
         self.engine.register_manager("curriculum_manager", ScenarioCurriculumManager())
-        self.engine.accept("p", self.stop)
         self.engine.accept("q", self.switch_to_third_person_view)
         self.engine.accept("b", self.switch_to_top_down_view)
         self.engine.accept("]", self.next_seed_reset)
@@ -172,12 +170,6 @@ class ScenarioEnv(BaseEnv):
             self.reset(self.current_seed - 1)
         else:
             self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
-
-    def step(self, actions):
-        ret = super(ScenarioEnv, self).step(actions)
-        while self.in_stop:
-            self.engine.taskMgr.step()
-        return ret
 
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
@@ -435,9 +427,6 @@ class ScenarioEnv(BaseEnv):
             current_seed, self.config["start_scenario_index"],
             self.config["start_scenario_index"] + self.config["num_scenarios"])
         self.seed(current_seed)
-
-    def stop(self):
-        self.in_stop = not self.in_stop
 
 
 if __name__ == "__main__":
