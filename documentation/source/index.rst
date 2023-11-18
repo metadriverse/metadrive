@@ -74,7 +74,8 @@ Please feel free to contact us if you have any suggestions or ideas!
    scenarionet.rst
    ros.rst
    di_drive.rst
-
+   sumo.rst
+   opendrive.rst
 
 .. toctree::
    :hidden:
