@@ -34,7 +34,7 @@ But you can still pull the asset manually by::
 
 .. note:: All ``python -m`` scripts are supposed to be runnable in all places **except** in the working direction that has a sub-folder called :code:`./metadrive`.
 
-Sometimes the assets may be broken or out of data. In this case run the following code to force update the local assets::
+Sometimes the assets may be broken or out of date. In this case run the following code to force update the local assets::
 
  python -m metadrive.pull_asset --update
 
@@ -104,3 +104,10 @@ You can also use ``python verify_image_observation.py --cuda --render`` to visua
 Besides, removing ``--cuda`` flag enables benchmarking the original image collection pipeline as a comparison.
 And ``--camera`` argument is for choosing sensors from [``rgb``, ``depth``, ``semantic``, ``main`` (default)].
 
+
+Known Issues
+######################
+
+
+* We find that Mac with M1 chip is incompatible with Panda3D rendering utilities.
+* Pygame 1.9.6 causes blank visualization window in Mac with M1 chip. Upgrading to pygame==2.0.0 solves.

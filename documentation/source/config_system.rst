@@ -134,7 +134,7 @@ Vehicle Config
 We list the vehicle config here. Observation Space will be adjusted by these config automatically. For example, if you set :code:`config["vehicle_config"]["lidar"]["num_lasers"] = 720`, then the dimension of the Lidar observation will automatically set to 720.
 
     - :code:`vehicle_config` (dict):
-        - :code:`lidar` (dict): the config is related to the :ref:`Lidar-like observation <State Vector>`. This Lidar only scans nearby vehicles.
+        - :code:`lidar` (dict): the config is related to the :ref:`Lidar-like observation <observation:State Vector>`. This Lidar only scans nearby vehicles.
             - :code:`num_lasers` (int = 240): the number of lasers used in Lidar
             - :code:`distance` (float = 50.0): the perception field radius
             - :code:`num_others` (int = 0): if this is greater than 0, MetaDrive will retrieve the states of :code:`num_others`-nearest vehicles as additional information
@@ -199,7 +199,7 @@ Multi-agent Config
     - :code:`is_multi_agent` (bool = False): set this to True if in multi-agent training (default to True in MA)
     - :code:`allow_respawn` (bool = False): whether allow (default to True in MA)
     - :code:`delay_done` (int = 0): how many environmental steps for the agent to stay static as an obstacle after it is terminated (default to 25 in MA)
-    - :code:`horizon` (int = None): The maximum length of each episode. Set to None to remove constraint. (default to 1000 in MA, see :ref:`Multi-agent Environments`)
+    - :code:`horizon` (int = None): The maximum length of each episode. Set to None to remove constraint. (default to 1000 in MA, see :ref:`rl_environments:Multi-agent Environments`)
 
 
 
@@ -208,7 +208,7 @@ Reward, Cost and Termination Function Config
 
 There are a lot of coefficients to describe the reward function and cost function.
 You can adjust the default reward function or design your own functions.
-Please refer to :ref:`Reward Function`, :ref:`Cost Function` and :ref:`Termination Function` for more information.
+Please refer to :ref:`reward_cost_and_termination_function:Reward Function`, :ref:`reward_cost_and_termination_function:Cost Function` and :ref:`reward_cost_and_termination_function:Termination Function` for more information.
 
 
 Engine Config

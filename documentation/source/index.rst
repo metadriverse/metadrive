@@ -77,13 +77,6 @@ Please feel free to contact us if you have any suggestions or ideas!
    sumo.rst
    opendrive.rst
 
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-   :caption: Issues
-
-   known_issues.rst
-
 
 .. raw:: html
 

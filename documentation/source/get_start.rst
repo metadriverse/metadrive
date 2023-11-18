@@ -94,4 +94,4 @@ it compatible with the training framework.
 .. Note:: Please note that each process should only have one single MetaDrive instance due to the limit of the underlying simulation engine.
     Thus the parallelization of training environment should be in process-level instead of thread-level.
 
-You can also try out our example of using RLLib to train RL policies in :ref:`Training with RLLib`.
+You can also try out our example of using RLLib to train RL policies in :ref:`training_with_rllib:Training with RLLib`.

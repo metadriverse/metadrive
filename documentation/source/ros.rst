@@ -42,7 +42,7 @@ To launch the bridge, run the following code::
 Demo Video: https://www.youtube.com/watch?v=WWwdnURnOBM&list=TLGGdRGbC4RGzhAxNzEwMjAyMw
 
 
-Known Issues (ROS)
+Known Issues
 ==================
 
 * If you are using the `conda`, it is very likely that the interpreter will not match the system interpreter and will be incompatible with ROS 2 binaries.
