@@ -31,7 +31,7 @@ RENDER_MESSAGE = {
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--reactive_traffic", action="store_true")
-    parser.add_argument("--top_down", action="store_true")
+    parser.add_argument("--top_down", "--topdown", action="store_true")
     args = parser.parse_args()
     extra_args = dict(film_size=(2000, 2000)) if args.top_down else {}
     asset_path = AssetLoader.asset_path

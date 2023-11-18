@@ -10,7 +10,6 @@ from metadrive.constants import Decoration, TARGET_VEHICLES
 from metadrive.constants import TopDownSemanticColor, MetaDriveType, PGDrivableAreaProperty
 from metadrive.obs.top_down_obs_impl import WorldSurface, ObjectGraphics, LaneGraphics, history_object
 from metadrive.scenario.scenario_description import ScenarioDescription
-from metadrive.utils.interpolating_line import InterpolatingLine
 from metadrive.utils.utils import import_pygame
 from metadrive.utils.utils import is_map_related_instance
 
@@ -20,13 +19,13 @@ color_white = (255, 255, 255)
 
 
 def draw_top_down_map(
-    map,
-    resolution: Iterable = (512, 512),
-    semantic_map=True,
-    return_surface=False,
-    film_size=(2000, 2000),
-    scaling=None,
-    semantic_broken_line=True
+        map,
+        resolution: Iterable = (512, 512),
+        semantic_map=True,
+        return_surface=False,
+        film_size=(2000, 2000),
+        scaling=None,
+        semantic_broken_line=True
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     """
     Draw the top_down map on a pygame surface
@@ -43,11 +42,7 @@ def draw_top_down_map(
 
     """
     import cv2
-    # print(film_size)
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
-    # if reverse_color:
-    #     surface.WHITE, surface.BLACK = surface.BLACK, surface.WHITE
-    #     surface.__init__(film_size, 0, pygame.Surface(film_size))
     b_box = map.road_network.get_bounding_box()
     x_len = b_box[1] - b_box[0]
     y_len = b_box[3] - b_box[2]
@@ -111,7 +106,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -170,21 +165,21 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-        self,
-        film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
-        screen_size=(1000, 1000),
-        num_stack=15,
-        history_smooth=0,
-        show_agent_name=False,
-        camera_position=None,
-        target_vehicle_heading_up=False,
-        draw_target_vehicle_trajectory=False,
-        semantic_map=False,
-        semantic_broken_line=True,
-        scaling=5,  # auto-scale
-        draw_contour=True,
-        **kwargs
-        # current_track_vehicle=None
+            self,
+            film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
+            screen_size=(1000, 1000),
+            num_stack=15,
+            history_smooth=0,
+            show_agent_name=False,
+            camera_position=None,
+            target_vehicle_heading_up=False,
+            draw_target_vehicle_trajectory=False,
+            semantic_map=False,
+            semantic_broken_line=True,
+            scaling=5,  # auto-scale
+            draw_contour=True,
+            **kwargs
+            # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
@@ -197,8 +192,6 @@ class TopDownRenderer:
         if self.show_agent_name:
             pygame.init()
 
-        # self.engine = get_engine()
-        # self._screen_size = screen_size
         self.pygame_font = None
         self.map = self.engine.current_map
         self.stack_frames = deque(maxlen=num_stack)
@@ -238,21 +231,12 @@ class TopDownRenderer:
 
         # Setup some runtime variables
         self._render_size = screen_size
-        # screen_size = self._screen_size or self._render_size
-        # self._blit_size = (int(screen_size[0] * self._zoomin), int(screen_size[1] * self._zoomin))
-        # self._blit_rect = (
-        #     -(self._blit_size[0] - screen_size[0]) / 2, -(self._blit_size[1] - screen_size[1]) / 2, screen_size[0],
-        #     screen_size[1]
-        # )
 
         # screen and canvas are a regional surface where only part of the super large background will draw.
         # (3) screen is the popup window and canvas is a wrapper to screen but with more features
         self._render_canvas = pygame.display.set_mode(self._render_size)
         self._render_canvas.set_alpha(None)
         self._render_canvas.fill(color_white)
-
-        # self.canvas = self._render_canvas
-        # self.canvas = pygame.Surface(self._render_canvas.get_size())
 
         # Draw
         self.blit()
@@ -351,7 +335,16 @@ class TopDownRenderer:
     def current_track_vehicle(self):
         return self.engine.current_track_vehicle
 
-    def _append_frame_objects(self, objects):
+    @staticmethod
+    def _append_frame_objects(objects):
+        """
+        Extract information for drawing objects
+        Args:
+            objects: list of BaseObject
+
+        Returns: list of history_object
+
+        """
         frame_objects = []
         for name, obj in objects.items():
             frame_objects.append(
@@ -487,19 +480,6 @@ class TopDownRenderer:
                 )
             )
 
-        if "traffic_light_msg" in kwargs:
-            raise ValueError("This function is broken")
-            if kwargs["traffic_light_msg"] < 0.5:
-                traffic_light_color = (0, 255, 0)
-            else:
-                traffic_light_color = (255, 0, 0)
-            pygame.draw.circle(
-                surface=self.canvas,
-                color=traffic_light_color,
-                center=(self.canvas.get_size()[0] * 0.1, self.canvas.get_size()[1] * 0.1),
-                radius=20
-            )
-
         if self.show_agent_name:
             raise ValueError("This function is broken")
             # FIXME check this later
@@ -522,7 +502,8 @@ class TopDownRenderer:
                         # special_flags=pygame.BLEND_RGBA_MULT
                     )
 
-    def _handle_event(self) -> None:
+    @staticmethod
+    def _handle_event() -> None:
         """
         Handle pygame events for moving and zooming in the displayed area.
         """
