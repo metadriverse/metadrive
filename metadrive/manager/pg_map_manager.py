@@ -57,16 +57,17 @@ class PGMapManager(BaseManager):
             map_config.update({"seed": current_seed})
             map_config = self.add_random_to_map(map_config)
             map = self.spawn_object(PGMap, map_config=map_config, random_seed=None)
+            self.current_map = map
             if self.engine.global_config["store_map"]:
                 self.maps[current_seed] = map
         else:
             map = self.maps[current_seed]
-        self.load_map(map)
+            self.load_map(map)
 
     def add_random_to_map(self, map_config):
         if self.engine.global_config["random_lane_width"]:
             map_config[PGMap.LANE_WIDTH
-                       ] = self.np_random.rand() * (PGMap.MAX_LANE_WIDTH - PGMap.MIN_LANE_WIDTH) + PGMap.MIN_LANE_WIDTH
+            ] = self.np_random.rand() * (PGMap.MAX_LANE_WIDTH - PGMap.MIN_LANE_WIDTH) + PGMap.MIN_LANE_WIDTH
         if self.engine.global_config["random_lane_num"]:
             map_config[PGMap.LANE_NUM] = self.np_random.randint(PGMap.MIN_LANE_NUM, PGMap.MAX_LANE_NUM + 1)
         return map_config

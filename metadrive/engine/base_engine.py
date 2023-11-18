@@ -589,7 +589,7 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
     def seed(self, random_seed):
-        start_seed = self.gets_start_index()
+        start_seed = self.gets_start_index(self.global_config)
         random_seed = ((random_seed - start_seed) % self._num_scenarios_per_level) + start_seed
         random_seed += self._current_level * self._num_scenarios_per_level
         self.global_random_seed = random_seed
@@ -597,9 +597,10 @@ class BaseEngine(EngineCore, Randomizable):
         for mgr in self._managers.values():
             mgr.seed(random_seed)
 
-    def gets_start_index(self):
-        start_seed = self.global_config.get("start_seed", None)
-        start_scenario_index = self.global_config.get("start_scenario_index", None)
+    @staticmethod
+    def gets_start_index(config):
+        start_seed = config.get("start_seed", None)
+        start_scenario_index = config.get("start_scenario_index", None)
         assert start_seed is None or start_scenario_index is None, \
             "It is not allowed to define `start_seed` and `start_scenario_index`"
         if start_seed is not None:
