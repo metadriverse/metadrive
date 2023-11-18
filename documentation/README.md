@@ -7,5 +7,5 @@ pip install sphinx sphinx_rtd_theme nbsphinx
 pip install sphinx-copybutton
 conda install -c conda-forge pandoc
 cd metadrive/documentation
-make html
+rm -rf build/ && sphinx-build  source build
 ```

@@ -2,6 +2,12 @@
 ROS2
 #####
 
+.. raw:: html
+
+    <div style="text-align: center;">
+    <iframe width="640" height="400" src="https://www.youtube.com/embed/WWwdnURnOBM?si=aRKqMHQzmblrzhr4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+    </div>
+
 ROS is widely used by the robotics community to design and verify planning algorithms.
 We provide an example bridge for connecting MetaDrive and ROS2 using zmq sockets, which publishes messages for camera
 images, LiDAR point clouds, and object 3D bounding boxes.
@@ -36,10 +42,6 @@ To launch the bridge, run the following code::
     ros2 launch metadrive_example_bridge metadrive_example_bridge.launch.py
     # Terminal 2, launch socket server
     python ros_socket_server.py
-
-
-
-Demo Video: https://www.youtube.com/watch?v=WWwdnURnOBM&list=TLGGdRGbC4RGzhAxNzEwMjAyMw
 
 
 Known Issues
