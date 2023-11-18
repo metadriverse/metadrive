@@ -44,14 +44,13 @@ Please feel free to contact us if you have any suggestions or ideas!
    rl_environments.rst
    observation.rst
    reward_cost_and_termination_function.rst
-   action_and_dynamics.rst
    config_system.rst
    training_with_rllib.rst
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Concept and Customization
+   :caption: Concepts and Customization
 
    concept.rst
    development.rst
