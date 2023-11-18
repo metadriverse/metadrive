@@ -49,3 +49,4 @@
 **/tests/**/*.png
 /metadrive/engine/core/run_time_map_mesh.png
 **/**.mp4
+/documentation/jupyter_execute/
