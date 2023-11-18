@@ -31,6 +31,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
     random_agent_model=False,  # randomize the car model for the agent
+    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
 
     # ===== multi-agent =====
     num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
@@ -46,14 +47,17 @@ BASE_DEFAULT_CONFIG = dict(
     discrete_steering_dim=5,
     discrete_throttle_dim=5,
     extra_action_dim=0,  # If you want to control more things besides throttle brake, set extra_action_dim
-    # When discrete_action=True: If True, use MultiDiscrete action space. Otherwise, use Discrete.
-    use_multi_discrete=False,
+    use_multi_discrete=False,  # If True, use MultiDiscrete action space. Otherwise, use Discrete.
     action_check=False,
 
     # ===== Observation =====
     rgb_clip=True,  # clip rgb to (0, 1)
     stack_size=3,  # the number of timesteps for stacking image observation
     image_observation=False,  # use image observation or lidar
+
+    # ===== Termination =====
+    horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
+    max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
 
     # ===== Main Camera =====
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
@@ -139,9 +143,6 @@ BASE_DEFAULT_CONFIG = dict(
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
     sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
-    # ===== Agent config =====
-    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
-
     # ===== Engine Core config =====
     # if true pop a window to render
     use_render=False,
@@ -152,10 +153,6 @@ BASE_DEFAULT_CONFIG = dict(
     # physics world step 0.02s * decision_repeat per env.step,
     physics_world_step_size=2e-2,
     decision_repeat=5,
-    # only render physics world without model, a special debug option
-    debug_physics_world=False,
-    # debug static world
-    debug_static_world=False,
     # this is an advanced feature for accessing image with moving them to ram!
     image_on_cuda=False,
     # We will determine the render mode automatically, it runs at physics-only mode by default
@@ -173,8 +170,14 @@ BASE_DEFAULT_CONFIG = dict(
     render_pipeline=False,
     # daytime is only available when using render-pipeline
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
-    # global light
+    # Shadow
     shadow_range=32,
+    # Multi-thread rendering
+    multi_thread_render=True,
+    multi_thread_render_mode="Cull",  # or "Cull/Draw"
+    # model optimization
+    preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
+    disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
 
     # ===== Mesh Terrain =====
     # road will have a marin whose width is determined by this value, unit: [m]
@@ -190,12 +193,16 @@ BASE_DEFAULT_CONFIG = dict(
     # show sidewalk
     show_sidewalk=True,
 
-    # ===== Others =====
+    # ===== Debug =====
     pstats=False,  # turn on to profile the efficiency
+    debug=False,  # debug, output more messages
     debug_panda3d=False,  # debug panda3d
-    horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
-    max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
-    show_interface_navi_mark=True, # the arrow
+    debug_physics_world=False,  # only render physics world without model, a special debug option
+    debug_static_world=False,  # debug static world
+    log_level=logging.INFO,  # log level. logging.DEBUG/logging.CRITICAL or so on
+    show_coordinates=False,  # show coordinates for maps and objects for debug
+
+    # ===== GUI =====
     show_fps=True,
     show_logo=True,
     show_mouse=True,
@@ -203,16 +210,10 @@ BASE_DEFAULT_CONFIG = dict(
     show_terrain=True,
     show_interface=True,
     show_policy_mark=False,  # show marks for policies for debugging multi-policy setting
-    show_coordinates=False,  # show coordinates for maps and objects for debug
+    show_interface_navi_mark=True,  # the arrow
     interface_panel=["dashboard"],  # a list whose element chosen from sensors.keys() + "dashboard"
-    multi_thread_render=True,
-    multi_thread_render_mode="Cull",  # or "Cull/Draw"
-    preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
-    log_level=logging.INFO,
-    debug=False,
-    disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
 
-    # ===== record/replay metadata =====
+    # ===== Record/Replay Metadata =====
     record_episode=False,  # when replay_episode is not None ,this option will be useless
     replay_episode=None,  # set the replay file to enable replay
     only_reset_when_replay=False,  # Scenario will only be initialized, while future trajectories will not be replayed
