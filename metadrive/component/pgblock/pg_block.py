@@ -22,6 +22,7 @@ class PGBlockSocket:
     Positive_road is right road, and Negative road is left road on which cars drive in reverse direction
     BlockSocket is a part of block used to connect other blocks
     """
+
     def __init__(self, positive_road: Road, negative_road: Road = None):
         self.positive_road = positive_road
         self.negative_road = negative_road if negative_road else None
@@ -74,16 +75,17 @@ class PGBlock(BaseBlock):
     When single-direction block created, road_2 in block socket is useless.
     But it's helpful when a town is created.
     """
+
     def __init__(
-        self,
-        block_index: int,
-        pre_block_socket: PGBlockSocket,
-        global_network: NodeRoadNetwork,
-        random_seed,
-        ignore_intersection_checking=False,
-        remove_negative_lanes=False,
-        side_lane_line_type=None,
-        center_line_type=None,
+            self,
+            block_index: int,
+            pre_block_socket: PGBlockSocket,
+            global_network: NodeRoadNetwork,
+            random_seed,
+            ignore_intersection_checking=False,
+            remove_negative_lanes=False,
+            side_lane_line_type=None,
+            center_line_type=None,
     ):
 
         # Specify the lane line type
@@ -291,7 +293,7 @@ class PGBlock(BaseBlock):
             node_path_list = self._construct_lane_line_segment(start, end, line_color, line_type)
             self._node_path_list.extend(node_path_list)
 
-    def _construct_sidewalk_from_line(self, lane):
+    def _construct_sidewalk_from_line(self, lane, sidewalk_height=None, lateral_direction=1):
         """
         Construct the sidewalk for this lane
         Args:
@@ -309,6 +311,9 @@ class PGBlock(BaseBlock):
         )
         start_lat = +lane.width_at(0) / 2 + 0.2
         side_lat = start_lat + PGDrivableAreaProperty.SIDEWALK_WIDTH
+        assert lateral_direction == -1 or lateral_direction == 1
+        start_lat *= lateral_direction
+        side_lat *= lateral_direction
         if lane.radius != 0 and side_lat > lane.radius:
             raise ValueError(
                 "The sidewalk width ({}) is too large."
@@ -321,7 +326,9 @@ class PGBlock(BaseBlock):
                 longitude = min(lane.length + 0.1, longitude)
                 point = lane.position(longitude, lateral)
                 polygon.append([point[0], point[1]])
-        self.sidewalks[str(lane.index)] = {"type": MetaDriveType.BOUNDARY_SIDEWALK, "polygon": polygon}
+        self.sidewalks[str(lane.index)] = {"type": MetaDriveType.BOUNDARY_SIDEWALK,
+                                           "polygon": polygon,
+                                           "height": sidewalk_height}
 
     def _construct_lane_line_in_block(self, lane, construct_left_right=(True, True)):
         """
@@ -338,6 +345,11 @@ class PGBlock(BaseBlock):
             elif line_type == PGLineType.SIDE:
                 self._construct_continuous_line(lane, lateral, line_color, line_type)
                 self._construct_sidewalk_from_line(lane)
+            elif line_type == PGLineType.GUARDRAIL:
+                self._construct_continuous_line(lane, lateral, line_color, line_type)
+                self._construct_sidewalk_from_line(
+                    lane, sidewalk_height=PGDrivableAreaProperty.GUARDRAIL_HEIGHT, lateral_direction=idx)
+
             elif line_type == PGLineType.NONE:
                 continue
             else:
