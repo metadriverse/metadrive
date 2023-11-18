@@ -42,9 +42,9 @@ To launch the bridge, run the following code::
 Demo Video: https://www.youtube.com/watch?v=WWwdnURnOBM&list=TLGGdRGbC4RGzhAxNzEwMjAyMw
 
 
-Known Issues
-==============
+Known Issues (ROS)
+==================
 
-* If you are using the `conda`, it is very likely that the interpreter will not match the system interpreter
-and will be incompatible with ROS 2 binaries.
+* If you are using the `conda`, it is very likely that the interpreter will not match the system interpreter and will be incompatible with ROS 2 binaries.
 * The ROS bridge is tested under **ROS2 humble**. Some packages may fail to be installed if your ROS is in other versions.
+
