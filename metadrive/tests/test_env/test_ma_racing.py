@@ -97,7 +97,8 @@ def test_ma_racing_env_with_IDM(num_agents):
                 print("Episode finished at step: ", step)
                 print("Episodic return: ", episode_reward_record)
                 print(
-                    f"Max return {max(episode_reward_record.values())}, Min return {min(episode_reward_record.values())}")
+                    f"Max return {max(episode_reward_record.values())}, Min return {min(episode_reward_record.values())}"
+                )
 
                 for k, v in tm.items():
                     assert v

@@ -53,7 +53,6 @@ RACING_CONFIG = dict(
 
 class RacingMap(PGMap):
     """Create a complex racing map by manually design the topology."""
-
     def _generate(self):
         """ Generate the racing map.
 
@@ -285,7 +284,6 @@ class RacingMap(PGMap):
 
 class RacingMapManager(PGMapManager):
     """This map manager load the racing map directly, without the burden to manage multiple maps."""
-
     def __init__(self):
         super(RacingMapManager, self).__init__()
 
@@ -302,7 +300,6 @@ class RacingMapManager(PGMapManager):
 
 class MultiAgentRacingEnv(MultiAgentMetaDrive):
     """The Multi-agent Racing Environment"""
-
     def setup_engine(self):
         """Using the RacingMapManager as the map_manager."""
         super(MultiAgentRacingEnv, self).setup_engine()
@@ -325,14 +322,12 @@ def _vis(generate_video=False):
     """
     FPS = 60
 
-    env = MultiAgentRacingEnv(
-        dict(
-            use_render=generate_video,
-            window_size=(1600, 1200),
-            num_agents=12,
-            # debug=True
-        )
-    )
+    env = MultiAgentRacingEnv(dict(
+        use_render=generate_video,
+        window_size=(1600, 1200),
+        num_agents=12,
+        # debug=True
+    ))
     o, _ = env.reset()
 
     # env.engine.force_fps.disable()
