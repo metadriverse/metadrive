@@ -4,7 +4,7 @@ import pytest
 from gymnasium.spaces import Box, Dict
 
 from metadrive.constants import TerminationState
-from metadrive.envs.marl_envs.marl_racing_env_complex import MultiAgentRacingEnv
+from metadrive.envs.marl_envs.marl_racing_env import MultiAgentRacingEnv
 from metadrive.policy.idm_policy import IDMPolicy
 
 
