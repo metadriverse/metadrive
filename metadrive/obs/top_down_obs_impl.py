@@ -221,7 +221,9 @@ class ObjectGraphics:
         w = surface.pix(object.WIDTH)
         h = surface.pix(object.LENGTH)
         position = [*surface.pos2pix(object.position[0], object.position[1])]
-        angle = np.rad2deg(heading)
+        # As the following rotate code is for left-handed coordinates,
+        # so we plus -1 before the heading to adapt it to right-handed coordinates
+        angle = -np.rad2deg(heading)
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]
         box_rotate = [p.rotate(angle) + position for p in box]
 
