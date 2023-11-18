@@ -141,7 +141,7 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
+    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
 
     # ===== Engine Core config =====
     # if true pop a window to render
@@ -264,6 +264,10 @@ class BaseEnv(gym.Env):
         # press p to stop
         self.in_stop = False
 
+        # scenarios
+        self.start_index = None
+        self.num_scenarios = None
+
     def _post_process_config(self, config):
         """Add more special process to merged config"""
         # Cancel interface panel
@@ -295,7 +299,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard,)
+                    config["sensors"]["dashboard"] = (DashBoard, )
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -337,8 +341,10 @@ class BaseEnv(gym.Env):
         if config["is_multi_agent"]:
             self.logger.info("Max step per agent: {}".format(config["max_step_per_agent"]))
         else:
-            self.logger.info("Horizon (Max step per agent): "
-                             "{}".format(config["horizon"] or config["max_step_per_agent"]))
+            self.logger.info(
+                "Horizon (Max step per agent): "
+                "{}".format(config["horizon"] or config["max_step_per_agent"])
+            )
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
@@ -479,7 +485,7 @@ class BaseEnv(gym.Env):
         """
         Reset the env, scene can be restored and replayed by giving episode_data
         Reset the environment or load an episode from episode data to recover is
-        :param seed: The seed to set the env.
+        :param seed: The seed to set the env. It is actually the scenario index you intend to choose
         :return: None
         """
         if self.logger is None:
@@ -683,6 +689,10 @@ class BaseEnv(gym.Env):
         self.engine.accept("r", self.reset)
         self.engine.accept("c", self.capture)
         self.engine.accept("p", self.stop)
+        self.engine.accept("b", self.switch_to_top_down_view)
+        self.engine.accept("q", self.switch_to_third_person_view)
+        self.engine.accept("]", self.next_seed_reset)
+        self.engine.accept("[", self.last_seed_reset)
         self.engine.register_manager("agent_manager", self.agent_manager)
         self.engine.register_manager("record_manager", RecordManager())
         self.engine.register_manager("replay_manager", ReplayManager())
@@ -719,20 +729,19 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-            self,
-            policies: Union[dict, Callable],
-            scenario_index: Union[list, int],
-            max_episode_length=None,
-            verbose=False,
-            suppress_warning=False,
-            render_topdown=False,
-            return_done_info=True,
-            to_dict=True
+        self,
+        policies: Union[dict, Callable],
+        scenario_index: Union[list, int],
+        max_episode_length=None,
+        verbose=False,
+        suppress_warning=False,
+        render_topdown=False,
+        return_done_info=True,
+        to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
-
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
@@ -784,6 +793,42 @@ class BaseEnv(gym.Env):
 
     def stop(self):
         self.in_stop = not self.in_stop
+
+    def switch_to_top_down_view(self):
+        self.main_camera.stop_track()
+
+    def switch_to_third_person_view(self):
+        if self.main_camera is None:
+            return
+        self.main_camera.reset()
+        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.vehicles.keys():
+            new_v = self.vehicles[self.config["prefer_track_agent"]]
+            current_track_vehicle = new_v
+        else:
+            if self.main_camera.is_bird_view_camera():
+                current_track_vehicle = self.current_track_vehicle
+            else:
+                vehicles = list(self.engine.agents.values())
+                if len(vehicles) <= 1:
+                    return
+                if self.current_track_vehicle in vehicles:
+                    vehicles.remove(self.current_track_vehicle)
+                new_v = get_np_random().choice(vehicles)
+                current_track_vehicle = new_v
+        self.main_camera.track(current_track_vehicle)
+        return
+
+    def next_seed_reset(self):
+        if self.current_seed + 1 < self.start_index + self.num_scenarios:
+            self.reset(self.current_seed + 1)
+        else:
+            self.logger.warning("Can't load next scenario! current seed is already the max scenario index")
+
+    def last_seed_reset(self):
+        if self.current_seed - 1 >= self.start_index:
+            self.reset(self.current_seed - 1)
+        else:
+            self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
 
 
 if __name__ == '__main__':

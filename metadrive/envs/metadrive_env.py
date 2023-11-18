@@ -102,9 +102,9 @@ class MetaDriveEnv(BaseEnv):
         self.default_config_copy = Config(self.default_config(), unchangeable=True)
         super(MetaDriveEnv, self).__init__(config)
 
-        # map setting
-        self.start_seed = self.config["start_seed"]
-        self.env_num = self.config["num_scenarios"]
+        # scenario setting
+        self.start_seed = self.start_index = self.config["start_seed"]
+        self.env_num = self.num_scenarios = self.config["num_scenarios"]
 
     def _post_process_config(self, config):
         config = super(MetaDriveEnv, self)._post_process_config(config)
@@ -227,7 +227,8 @@ class MetaDriveEnv(BaseEnv):
             step_info["cost"] = self.config["crash_object_cost"]
         return step_info['cost'], step_info
 
-    def _is_arrive_destination(self, vehicle):
+    @staticmethod
+    def _is_arrive_destination(vehicle):
         long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
         flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
             vehicle.navigation.get_current_lane_width() / 2 >= lat >=
@@ -294,48 +295,8 @@ class MetaDriveEnv(BaseEnv):
             reward = -self.config["crash_object_penalty"]
         return reward, step_info
 
-    def switch_to_third_person_view(self) -> (str, BaseVehicle):
-        if self.main_camera is None:
-            return
-        self.main_camera.reset()
-        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.vehicles.keys():
-            new_v = self.vehicles[self.config["prefer_track_agent"]]
-            current_track_vehicle = new_v
-        else:
-            if self.main_camera.is_bird_view_camera():
-                current_track_vehicle = self.current_track_vehicle
-            else:
-                vehicles = list(self.engine.agents.values())
-                if self.current_track_vehicle in vehicles:
-                    vehicles.remove(self.current_track_vehicle)
-                if len(vehicles) < 1:
-                    return
-                new_v = get_np_random().choice(vehicles)
-                current_track_vehicle = new_v
-        self.main_camera.track(current_track_vehicle)
-        return
-
-    def switch_to_top_down_view(self):
-        self.main_camera.stop_track()
-
-    def next_seed_reset(self):
-        if self.current_seed + 1 < self.start_seed + self.env_num:
-            self.reset(self.current_seed + 1)
-        else:
-            self.logger.warning("Can't load next scenario! current seed is already the max scenario index")
-
-    def last_seed_reset(self):
-        if self.current_seed - 1 >= self.start_seed:
-            self.reset(self.current_seed - 1)
-        else:
-            self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
-
     def setup_engine(self):
         super(MetaDriveEnv, self).setup_engine()
-        self.engine.accept("b", self.switch_to_top_down_view)
-        self.engine.accept("q", self.switch_to_third_person_view)
-        self.engine.accept("]", self.next_seed_reset)
-        self.engine.accept("[", self.last_seed_reset)
         from metadrive.manager.traffic_manager import PGTrafficManager
         from metadrive.manager.pg_map_manager import PGMapManager
         from metadrive.manager.object_manager import TrafficObjectManager

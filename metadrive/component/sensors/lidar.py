@@ -40,14 +40,14 @@ class Lidar(DistanceDetector):
         self._node_path_list.append(self.broad_detector)
 
     def perceive(
-            self,
-            base_vehicle,
-            physics_world,
-            num_lasers,
-            distance,
-            height=None,
-            detector_mask: np.ndarray = None,
-            show=False
+        self,
+        base_vehicle,
+        physics_world,
+        num_lasers,
+        distance,
+        height=None,
+        detector_mask: np.ndarray = None,
+        show=False
     ):
         res = self._get_lidar_mask(base_vehicle, num_lasers)
         if self.enable_mask:
@@ -93,7 +93,7 @@ class Lidar(DistanceDetector):
         return relative
 
     def get_surrounding_vehicles_info(
-            self, ego_vehicle, detected_objects, perceive_distance, num_others, add_others_navi
+        self, ego_vehicle, detected_objects, perceive_distance, num_others, add_others_navi
     ):
         surrounding_vehicles = list(self.get_surrounding_vehicles(detected_objects))
         surrounding_vehicles.sort(
@@ -143,16 +143,16 @@ class Lidar(DistanceDetector):
         pos1 = vehicle.position
         head1 = vehicle.heading_theta
 
-        mask = np.zeros((num_lasers,), dtype=bool)
+        mask = np.zeros((num_lasers, ), dtype=bool)
         mask.fill(False)
         objs = self.get_surrounding_objects(vehicle)
         for obj in objs:
             pos2 = obj.position
             length = obj.LENGTH if hasattr(obj, "LENGTH") else vehicle.LENGTH
             width = obj.WIDTH if hasattr(obj, "WIDTH") else vehicle.WIDTH
-            half_max_span_square = ((length + width) / 2) ** 2
+            half_max_span_square = ((length + width) / 2)**2
             diff = (pos2[0] - pos1[0], pos2[1] - pos1[1])
-            dist_square = diff[0] ** 2 + diff[1] ** 2
+            dist_square = diff[0]**2 + diff[1]**2
             if dist_square < half_max_span_square:
                 mask.fill(True)
                 continue

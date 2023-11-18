@@ -113,6 +113,8 @@ class ScenarioEnv(BaseEnv):
         if self.config["num_workers"] > 1:
             assert self.config["sequential_seed"], \
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
+        self.start_index = self.config["start_scenario_index"]
+        self.num_scenarios = self.config["num_scenarios"]
 
     def get_single_observation(self):
         if self.config["image_observation"]:
@@ -120,30 +122,6 @@ class ScenarioEnv(BaseEnv):
         else:
             o = LidarStateObservation(self.config)
         return o
-
-    def switch_to_top_down_view(self):
-        self.main_camera.stop_track()
-
-    def switch_to_third_person_view(self):
-        if self.main_camera is None:
-            return
-        self.main_camera.reset()
-        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.vehicles.keys():
-            new_v = self.vehicles[self.config["prefer_track_agent"]]
-            current_track_vehicle = new_v
-        else:
-            if self.main_camera.is_bird_view_camera():
-                current_track_vehicle = self.current_track_vehicle
-            else:
-                vehicles = list(self.engine.agents.values())
-                if len(vehicles) <= 1:
-                    return
-                if self.current_track_vehicle in vehicles:
-                    vehicles.remove(self.current_track_vehicle)
-                new_v = get_np_random().choice(vehicles)
-                current_track_vehicle = new_v
-        self.main_camera.track(current_track_vehicle)
-        return
 
     def setup_engine(self):
         super(ScenarioEnv, self).setup_engine()
@@ -154,22 +132,6 @@ class ScenarioEnv(BaseEnv):
         if not self.config["no_light"]:
             self.engine.register_manager("light_manager", ScenarioLightManager())
         self.engine.register_manager("curriculum_manager", ScenarioCurriculumManager())
-        self.engine.accept("q", self.switch_to_third_person_view)
-        self.engine.accept("b", self.switch_to_top_down_view)
-        self.engine.accept("]", self.next_seed_reset)
-        self.engine.accept("[", self.last_seed_reset)
-
-    def next_seed_reset(self):
-        if self.current_seed + 1 < self.config["start_scenario_index"] + self.config["num_scenarios"]:
-            self.reset(self.current_seed + 1)
-        else:
-            self.logger.warning("Can't load next scenario! current seed is already the max scenario index")
-
-    def last_seed_reset(self):
-        if self.current_seed - 1 >= self.config["start_scenario_index"]:
-            self.reset(self.current_seed - 1)
-        else:
-            self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
 
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
@@ -382,7 +344,8 @@ class ScenarioEnv(BaseEnv):
 
         return reward, step_info
 
-    def _is_arrive_destination(self, vehicle):
+    @staticmethod
+    def _is_arrive_destination(vehicle):
         # Use RC as the only criterion to determine arrival in Scenario env.
         route_completion = vehicle.navigation.route_completion
         if route_completion > 0.95 or vehicle.navigation.reference_trajectory.length < 2:
