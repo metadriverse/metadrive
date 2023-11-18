@@ -57,10 +57,10 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Agent =====
     random_spawn_lane_index=True,
+    vehicle_config=dict(navigation_module=NodeNetworkNavigation),
     target_vehicle_configs={
         DEFAULT_AGENT: dict(
             use_special_color=True,
-            navigation_module=NodeNetworkNavigation,
             spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
         )
     },
@@ -209,8 +209,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -230,8 +230,8 @@ class MetaDriveEnv(BaseEnv):
     def _is_arrive_destination(vehicle):
         long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
         flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
-            vehicle.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
+                vehicle.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
         )
         return flag
 
@@ -306,6 +306,7 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
+
 
     env = MetaDriveEnv()
     try:

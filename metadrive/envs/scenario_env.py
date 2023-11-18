@@ -3,8 +3,7 @@ This environment can load all scenarios exported from other environments via env
 """
 
 import numpy as np
-
-from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import TerminationState
@@ -52,6 +51,7 @@ SCENARIO_ENV_CONFIG = dict(
     show_sidewalk=False,
 
     # ===== Agent config =====
+    vehicle_config=dict(navigation_module=EdgeNetworkNavigation),
     target_vehicle_configs={
         DEFAULT_AGENT: dict(
             use_special_color=True,
@@ -188,8 +188,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
 
         # log data to curriculum manager
