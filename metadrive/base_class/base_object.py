@@ -234,7 +234,7 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
             self.static_nodes.attach_to_physics_world(physics_world.static_world)
             logger.debug("{} is attached to the world.".format(self.class_name))
         else:
-            logger.warning("Can not attach object {} to world, as it is already attached!".format(self.class_name))
+            logger.debug("Can not attach object {} to world, as it is already attached!".format(self.class_name))
 
     def detach_from_world(self, physics_world: PhysicsWorld):
         """
@@ -252,7 +252,7 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
             self.static_nodes.detach_from_physics_world(physics_world.static_world)
             logger.debug("{} is detached from the world.".format(self.class_name))
         else:
-            logger.warning("Object {} is already detached from the world. Can not detach again".format(self.class_name))
+            logger.debug("Object {} is already detached from the world. Can not detach again".format(self.class_name))
 
     def is_attached(self):
         return self.origin is not None and self.origin.hasParent()
