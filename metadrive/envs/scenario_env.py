@@ -2,7 +2,6 @@
 This environment can load all scenarios exported from other environments via env.export_scenarios()
 """
 import numpy as np
-
 from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
@@ -12,8 +11,6 @@ from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.scenario_traffic_manager import ScenarioTrafficManager
-from metadrive.obs.image_obs import ImageStateObservation
-from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.utils import get_np_random
 from metadrive.utils.math import wrap_to_pi
@@ -116,13 +113,6 @@ class ScenarioEnv(BaseEnv):
         self.start_index = self.config["start_scenario_index"]
         self.num_scenarios = self.config["num_scenarios"]
 
-    def get_single_observation(self):
-        if self.config["image_observation"]:
-            o = ImageStateObservation(self.config)
-        else:
-            o = LidarStateObservation(self.config)
-        return o
-
     def setup_engine(self):
         super(ScenarioEnv, self).setup_engine()
         self.engine.register_manager("data_manager", ScenarioDataManager())
@@ -194,8 +184,8 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
 
         # log data to curriculum manager

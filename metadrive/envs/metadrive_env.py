@@ -7,13 +7,10 @@ from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import parse_map_config, MapGenerateMethod
 from metadrive.component.pgblock.first_block import FirstPGBlock
-from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import DEFAULT_AGENT, TerminationState
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.traffic_manager import TrafficMode
-from metadrive.obs.image_obs import ImageStateObservation
-from metadrive.obs.state_obs import LidarStateObservation
-from metadrive.utils import clip, Config, get_np_random
+from metadrive.utils import clip, Config
 
 METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Generalization =====
@@ -210,8 +207,8 @@ class MetaDriveEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING]
         )
         return done, done_info
 
@@ -231,8 +228,8 @@ class MetaDriveEnv(BaseEnv):
     def _is_arrive_destination(vehicle):
         long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
         flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
-            vehicle.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
+                vehicle.navigation.get_current_lane_width() / 2 >= lat >=
+                (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
         )
         return flag
 
@@ -245,13 +242,6 @@ class MetaDriveEnv(BaseEnv):
         elif self.config["on_continuous_line_done"]:
             ret = ret or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
         return ret
-
-    def get_single_observation(self):
-        if self.config["image_observation"]:
-            o = ImageStateObservation(self.config)
-        else:
-            o = LidarStateObservation(self.config)
-        return o
 
     def reward_function(self, vehicle_id: str):
         """
@@ -305,13 +295,6 @@ class MetaDriveEnv(BaseEnv):
         if abs(self.config["accident_prob"] - 0) > 1e-2:
             self.engine.register_manager("object_manager", TrafficObjectManager())
 
-    def _reset_global_seed(self, force_seed=None):
-        current_seed = force_seed if force_seed is not None else \
-            get_np_random(self._DEBUG_RANDOM_SEED).randint(self.start_seed, self.start_seed + self.env_num)
-        assert self.start_seed <= current_seed < self.start_seed + self.env_num, \
-            "scenario_index (seed) should be in [{}:{})".format(self.start_seed, self.start_seed + self.env_num)
-        self.seed(current_seed)
-
 
 if __name__ == '__main__':
 
@@ -321,6 +304,7 @@ if __name__ == '__main__':
         assert env.observation_space.contains(obs)
         assert np.isscalar(reward)
         assert isinstance(info, dict)
+
 
     env = MetaDriveEnv()
     try:

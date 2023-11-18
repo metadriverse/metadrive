@@ -1,4 +1,6 @@
 import logging
+from metadrive.obs.image_obs import ImageStateObservation
+from metadrive.obs.state_obs import LidarStateObservation
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
@@ -141,7 +143,7 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
     # ===== Engine Core config =====
     # if true pop a window to render
@@ -299,7 +301,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -618,7 +620,11 @@ class BaseEnv(gym.Env):
         return ego_v
 
     def get_single_observation(self):
-        o = DummyObservation({})
+        if isinstance(self, BaseEnv):
+            o = DummyObservation({})
+        else:
+            img_obs = self.config["image_observation"]
+            o = ImageStateObservation(self.config) if img_obs else LidarStateObservation(self.config)
         return o
 
     def _wrap_as_single_agent(self, data):
@@ -701,10 +707,6 @@ class BaseEnv(gym.Env):
     def current_map(self):
         return self.engine.current_map
 
-    def _reset_global_seed(self, force_seed=None):
-        current_seed = force_seed if force_seed is not None else get_np_random(None).randint(0, int(1e4))
-        self.seed(current_seed)
-
     @property
     def maps(self):
         return self.engine.map_manager.maps
@@ -729,19 +731,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
@@ -829,6 +832,13 @@ class BaseEnv(gym.Env):
             self.reset(self.current_seed - 1)
         else:
             self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
+
+    def _reset_global_seed(self, force_seed=None):
+        current_seed = force_seed if force_seed is not None else \
+            get_np_random(self._DEBUG_RANDOM_SEED).randint(self.start_index, self.start_index + self.num_scenarios)
+        assert self.start_index <= current_seed < self.start_index + self.num_scenarios, \
+            "scenario_index (seed) should be in [{}:{})".format(self.start_index, self.start_index + self.num_scenarios)
+        self.seed(current_seed)
 
 
 if __name__ == '__main__':
