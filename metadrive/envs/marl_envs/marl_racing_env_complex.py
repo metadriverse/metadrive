@@ -23,7 +23,7 @@ RACING_CONFIG = dict(
     vehicle_config=dict(show_lidar=False, show_navi_mark=False),
 
     # Number of agents and map setting.
-    num_agents=9,
+    num_agents=12,
     map_config=dict(lane_num=2, exit_length=60, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
 
     # Reward setting
@@ -35,10 +35,10 @@ RACING_CONFIG = dict(
     on_continuous_line_done=False,
     out_of_route_done=False,
     crash_done=False,
-    max_step_per_agent=5_000,
+    max_step_per_agent=3_000,
+    horizon=3_000,
 
     # Debug setting
-    agent_policy=IDMPolicy,
     show_fps=False,
     use_chase_camera_follow_lane=True,
     camera_smooth_buffer_size=100,
@@ -329,8 +329,6 @@ def _vis(generate_video=False):
         dict(
             use_render=generate_video,
             window_size=(1600, 1200),
-            max_step_per_agent=3_000,
-            horizon=3_000,
             num_agents=12,
             # debug=True
         )
