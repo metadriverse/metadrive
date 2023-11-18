@@ -13,7 +13,6 @@ if __name__ == "__main__":
             "traffic_mode": "hybrid",
             "start_seed": 22,
             "accident_prob": 1.0,
-            # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "debug": True,
             # "debug_static_world": True,

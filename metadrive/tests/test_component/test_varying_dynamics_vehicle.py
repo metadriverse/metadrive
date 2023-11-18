@@ -15,7 +15,7 @@ def test_varying_dynamics_vehicle():
 
         v_config = default_config.copy()["vehicle_config"]
 
-        v_config["need_navigation"] = False
+        v_config["navigation_module"] = None
 
         v = VaryingDynamicsVehicle(v_config, random_seed=0)
         ref_v = DefaultVehicle(v_config, random_seed=0)

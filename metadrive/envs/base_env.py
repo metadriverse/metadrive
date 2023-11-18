@@ -83,7 +83,6 @@ BASE_DEFAULT_CONFIG = dict(
 
         # ===== vehicle spawn and destination =====
         navigation_module=None,  # a class type for self-defined navigation
-        need_navigation=True,
         spawn_lane_index=None,
         spawn_longitude=5.0,
         spawn_lateral=0.0,
@@ -139,14 +138,15 @@ BASE_DEFAULT_CONFIG = dict(
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
     sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
-    _disable_detector_mask=False,  # accelerate the lidar perception
 
     # ===== Agent config =====
     target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
 
     # ===== Engine Core config =====
-    use_render=False,  # if true pop a window to render
-    window_size=(1200, 900),  # or (width, height), if set to None, it will be automatically determined
+    # if true pop a window to render
+    use_render=False,
+    # or (width, height), if set to None, it will be automatically determined
+    window_size=(1200, 900),
     # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
     auto_resize_window=True,
     # physics world step 0.02s * decision_repeat per env.step,
@@ -195,7 +195,7 @@ BASE_DEFAULT_CONFIG = dict(
     debug_panda3d=False,  # debug panda3d
     horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
     max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
-    show_interface_navi_mark=True,
+    show_interface_navi_mark=True, # the arrow
     show_fps=True,
     show_logo=True,
     show_mouse=True,

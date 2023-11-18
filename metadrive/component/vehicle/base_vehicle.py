@@ -359,7 +359,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
         self.expert_takeover = False
-        if self.config["need_navigation"] and self.engine.current_map is not None:
+        if self.config["navigation_module"] and self.engine.current_map is not None:
             assert self.navigation
 
         if self.config["spawn_velocity"] is not None:
@@ -665,7 +665,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return wheel
 
     def add_navigation(self):
-        if self.navigation is not None or not self.config["need_navigation"] or self.engine.current_map is None:
+        if self.navigation is not None or self.config["navigation_module"] is None or self.engine.current_map is None:
             return
         navi = self.config["navigation_module"]
         if navi is None:
@@ -690,7 +690,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         For the spawn position, if it is not specify in the config["spawn_lane_index"], we will automatically
         select one lane based on the localization results.
         """
-        if self.navigation is not None and self.config["need_navigation"]:
+        if self.navigation is not None and self.config["navigation_module"]:
             self.navigation.reset(self)
             self.navigation.update_localization(self)
 
@@ -921,7 +921,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         super(BaseVehicle, self).detach_from_world(physics_world)
 
     def attach_to_world(self, parent_node_path, physics_world):
-        if self.config["show_navi_mark"] and self.config["need_navigation"] and self.navigation is not None:
+        if self.config["show_navi_mark"] and self.config["navigation_module"] and self.navigation is not None:
             self.navigation.attach_to_world(self.engine)
         super(BaseVehicle, self).attach_to_world(parent_node_path, physics_world)
 

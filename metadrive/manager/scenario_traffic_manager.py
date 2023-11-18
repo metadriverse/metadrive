@@ -320,7 +320,7 @@ class ScenarioTrafficManager(BaseManager):
 
     def get_traffic_v_config(self):
         v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
-        v_config["need_navigation"] = False
+        v_config["navigation_module"] = None
         v_config.update(
             dict(
                 show_navi_mark=False,

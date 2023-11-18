@@ -10,7 +10,6 @@ if __name__ == "__main__":
             "traffic_density": 0,
             "traffic_mode": "trigger",
             "start_seed": 22,
-            # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             # "debug_static_world":True,
             # "image_observation": True,

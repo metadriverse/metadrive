@@ -4,6 +4,7 @@ from metadrive.constants import MetaDriveType
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.utils import setup_logger
+from metadrive.component.sensors.lidar import Lidar
 
 
 def test_original_lidar(render=False):
@@ -19,10 +20,10 @@ def test_original_lidar(render=False):
                 "side_detector": dict(num_lasers=2, distance=50),
                 "lane_line_detector": dict(num_lasers=2, distance=50),
             },
-            "_disable_detector_mask": True,
             "map": "XXX"
         }
     )
+    Lidar._disable_detector_mask = True
     try:
         env.reset()
         v_config = env.config["vehicle_config"]
@@ -77,7 +78,6 @@ def test_lidar_with_mask(render=False):
                 "side_detector": dict(num_lasers=2, distance=50),
                 "lane_line_detector": dict(num_lasers=2, distance=50),
             },
-            "_disable_detector_mask": False,
             "map": "XXX"
         }
     )

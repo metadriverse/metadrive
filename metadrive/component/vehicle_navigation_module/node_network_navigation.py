@@ -41,7 +41,7 @@ class NodeNetworkNavigation(BaseNavigation):
         self.next_road = None
 
     def reset(self, vehicle):
-        if not vehicle.config["need_navigation"]:
+        if vehicle.config["navigation_module"] is None:
             return
         possible_lanes = ray_localization(vehicle.heading, vehicle.spawn_place, self.engine, use_heading_filter=False)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]

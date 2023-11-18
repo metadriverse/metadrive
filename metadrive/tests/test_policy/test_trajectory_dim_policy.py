@@ -37,7 +37,7 @@ def test_trajectory_idm(render=False):
             v_config = copy.deepcopy(env.engine.global_config["vehicle_config"])
             v_config.update(
                 dict(
-                    need_navigation=False,
+                    navigation_module=None,
                     show_navi_mark=False,
                     show_dest_mark=False,
                     enable_reverse=False,
