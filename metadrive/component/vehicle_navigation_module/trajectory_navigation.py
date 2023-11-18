@@ -24,7 +24,6 @@ class TrajectoryNavigation(BaseNavigation):
     def __init__(
         self,
         show_navi_mark: bool = False,
-        random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
         panda_color=None,
@@ -35,7 +34,6 @@ class TrajectoryNavigation(BaseNavigation):
             get_logger().warning("show_dest_mark and show_line_to_dest are not supported in TrajectoryNavigation")
         super(TrajectoryNavigation, self).__init__(
             show_navi_mark=False,
-            random_navi_mark_color=random_navi_mark_color,
             show_dest_mark=False,
             show_line_to_dest=False,
             panda_color=panda_color,

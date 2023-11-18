@@ -10,7 +10,7 @@ if __name__ == "__main__":
                 "stack_size": 5,
                 "rgb_clip": False,
                 "rgb_camera": (800, 500),
-                "rgb_to_grayscale": True
+                # "rgb_to_grayscale": True
             },
             "manual_control": True,
             "use_render": False,

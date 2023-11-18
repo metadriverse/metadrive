@@ -25,7 +25,6 @@ if __name__ == "__main__":
                 rgb_camera=(168 * w_f, 84 * h_f),  # buffer length, width
                 depth_camera=(168 * w_f, 84 * h_f),  # buffer length, width, view_ground
                 show_navi_mark=False,
-                increment_steering=False,
                 wheel_friction=0.6,
                 show_lidar=True
             ),

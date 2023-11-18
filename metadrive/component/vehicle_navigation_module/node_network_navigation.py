@@ -17,7 +17,6 @@ class NodeNetworkNavigation(BaseNavigation):
     def __init__(
         self,
         show_navi_mark: bool = False,
-        random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
         panda_color=None,
@@ -30,7 +29,6 @@ class NodeNetworkNavigation(BaseNavigation):
         """
         super(NodeNetworkNavigation, self).__init__(
             show_navi_mark=show_navi_mark,
-            random_navi_mark_color=random_navi_mark_color,
             show_dest_mark=show_dest_mark,
             show_line_to_dest=show_line_to_dest,
             panda_color=panda_color,

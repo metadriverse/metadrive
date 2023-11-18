@@ -154,7 +154,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.light_name = None
 
         # powertrain config
-        self.increment_steering = self.config["increment_steering"]
         self.enable_reverse = self.config["enable_reverse"]
         self.max_steering = self.config["max_steering"]
 
@@ -226,10 +225,10 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_heading_dir = self.heading
         if action is not None:
             self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
-        if self.increment_steering:
-            self._set_incremental_action(action)
-        else:
-            self._set_action(action)
+        # if self.increment_steering:
+        #     self._set_incremental_action(action)
+        # else:
+        self._set_action(action)
         return step_info
 
     def after_step(self):
@@ -675,7 +674,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.navigation = navi(
             # self.engine,
             show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
-            random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
             show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
             show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"],
             panda_color=self.panda_color,

@@ -27,7 +27,6 @@ class BaseNavigation:
     def __init__(
         self,
         show_navi_mark: bool = False,
-        random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
         panda_color=None,
@@ -57,7 +56,6 @@ class BaseNavigation:
             self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
         )
         self.origin = NodePath("navigation_sign") if self._show_navi_info else None
-        self.navi_mark_color = (0.6, 0.8, 0.5) if not random_navi_mark_color else get_np_random().rand(3)
         if panda_color is not None:
             assert len(panda_color) == 3 and 0 <= panda_color[0] <= 1
             self.navi_mark_color = tuple(panda_color)

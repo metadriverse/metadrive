@@ -30,15 +30,13 @@ from metadrive.version import VERSION
 BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
-    random_agent_model=False,
+    random_agent_model=False,  # randomize the car model for the agent
 
     # ===== multi-agent =====
     num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
     is_multi_agent=False,
     allow_respawn=False,
     delay_done=0,  # How many steps for the agent to stay static at the death place after done.
-    # Whether only return single agent-like observation and action space
-    return_single_space=False,
 
     # ===== Action/Control =====
     manual_control=False,  # if set to True, agent policy will be Manual Control policy
@@ -47,13 +45,13 @@ BASE_DEFAULT_CONFIG = dict(
     discrete_action=False,
     discrete_steering_dim=5,
     discrete_throttle_dim=5,
+    extra_action_dim=0,  # If you want to control more things besides throttle brake, set extra_action_dim
     # When discrete_action=True: If True, use MultiDiscrete action space. Otherwise, use Discrete.
     use_multi_discrete=False,
     action_check=False,
 
     # ===== Observation =====
     rgb_clip=True,  # clip rgb to (0, 1)
-    rgb_to_grayscale=False,  # whether to convert rgb image to grayscale in class ImageObservation
     stack_size=3,  # the number of timesteps for stacking image observation
     image_observation=False,  # use image observation or lidar
 
@@ -71,12 +69,9 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Vehicle =====
     vehicle_config=dict(
-        increment_steering=False,
         vehicle_model="default",
         show_navi_mark=True,
-        extra_action_dim=0,
         enable_reverse=False,
-        random_navi_mark_color=False,
         show_dest_mark=False,
         show_line_to_dest=False,
         show_line_to_navi_mark=False,
@@ -143,7 +138,7 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
     _disable_detector_mask=False,  # accelerate the lidar perception
 
     # ===== Agent config =====
@@ -296,7 +291,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -635,7 +630,7 @@ class BaseEnv(gym.Env):
         :return: Dict
         """
         ret = self.agent_manager.get_observation_spaces()
-        if (not self.is_multi_agent) or self.config["return_single_space"]:
+        if not self.is_multi_agent:
             return next(iter(ret.values()))
         else:
             return gym.spaces.Dict(ret)
@@ -647,7 +642,7 @@ class BaseEnv(gym.Env):
         :return: Dict
         """
         ret = self.agent_manager.get_action_spaces()
-        if (not self.is_multi_agent) or self.config["return_single_space"]:
+        if not self.is_multi_agent:
             return next(iter(ret.values()))
         else:
             return gym.spaces.Dict(ret)
@@ -712,19 +707,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

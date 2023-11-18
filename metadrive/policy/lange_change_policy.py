@@ -48,7 +48,6 @@ class AgentLaneChangePolicy(EnvInputPolicy):
        The Input space is a class attribute
        """
         engine_global_config = get_global_config()
-        extra_action_dim = engine_global_config["vehicle_config"]["extra_action_dim"]
         discrete_action = engine_global_config["discrete_action"]
         assert discrete_action
         discrete_throttle_dim = engine_global_config["discrete_throttle_dim"]

@@ -62,7 +62,7 @@ class EnvInputPolicy(BasePolicy):
         The Input space is a class attribute
         """
         engine_global_config = get_global_config()
-        extra_action_dim = engine_global_config["vehicle_config"]["extra_action_dim"]
+        extra_action_dim = engine_global_config["extra_action_dim"]
         discrete_action = engine_global_config["discrete_action"]
         discrete_steering_dim = engine_global_config["discrete_steering_dim"]
         discrete_throttle_dim = engine_global_config["discrete_throttle_dim"]

@@ -101,7 +101,7 @@ Action Config
     - :code:`use_multi_discrete` (bool = False): whether to MultiDiscrete action space, if `discrete_action=True`
     - :code:`discrete_steering/throttle_dim` (int = 5, 5): how many dimensions used to discrete the action space
     - :code:`decision_repeat` (int): how many times for the simulation engine to repeat the applied action to the vehicles. The minimal simulation interval :code:`physics_world_step_size` is 0.02 s. Therefore each RL step will last :code:`decision_repeat * 0.02 s` in the simulation world.
-
+    - :code:`extra_action_dim` (int = 0): If you want to input more control signal than the default [steering, throttle/brake] in your customized environment, change the default value 0 to the extra number of dimensions.
 
 
 Agent Config
@@ -143,10 +143,8 @@ We list the vehicle config here. Observation Space will be adjusted by these con
         - :code:`side_detector` (dict): This Lidar only scans the side of the road but not vehicles. The config dict has identical keys as :code:`lidar` except :code:`num_others`.
         - :code:`lane_line_detector` (dict): This Lidar only scans the side of current lane but neither vehicles or road boundary. The config dict has identical keys as :code:`lidar` except :code:`num_others`.
         - :code:`show_lidar` (bool = False): whether to show the end of each Lidar laser in the scene
-        - :code:`increment_steering` (bool = False): for keyboard control. When set to True, the steering angle and acceleration is determined by the key pressing time
         - :code:`vehicle_model` (str = "default"): which type of vehicle to use in ego vehicle (s, m, l, xl, default)
         - :code:`enable_reverse` (bool = False): If True and vehicle speed < 0, a brake action (e.g. acceleration = -1) will be parsed as reverse. This is used in the Multi-agent Parking Lot environment.
-        - :code:`extra_action_dim` (int = 0): If you want to input more control signal than the default [steering, throttle/brake] in your customized environment, change the default value 0 to the extra number of dimensions.
         - :code:`random_color` (bool = False): whether to randomize the color of ego vehicles. This is useful in multi-agent environments.
         - :code:`image_source` (str = "rgb_camera"): select in ["rgb_camera", "depth_camera"]. When using image observation, it decides where the image collected. See :ref:`use_native_rendering` for more information.
         - :code:`rgb_camera` (tuple = (84, 84): (camera resolution width (int), camera resolution height (int). We use (84, 84) as the default size so that the RGB observation is compatible to those CNN used in Atari. Please refer to :ref:`use_native_rendering` for more information about using image as observation.
