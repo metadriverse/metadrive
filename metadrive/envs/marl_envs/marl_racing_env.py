@@ -41,7 +41,7 @@ RACING_CONFIG = dict(
     use_lateral=False,
     out_of_road_penalty=5,  # Add little penalty to avoid hitting the wall (guardrail).
     crash_sidewalk_penalty=1,
-    idle_penalty=5,
+    idle_penalty=1,
 
     # Termination condition
     cross_yellow_line_done=False,
@@ -58,6 +58,7 @@ RACING_CONFIG = dict(
     use_chase_camera_follow_lane=True,
     camera_smooth_buffer_size=100,
     show_interface=False,
+show_coordinates=True,
     camera_dist=10,
     camera_pitch=15,
     camera_height=6,
@@ -81,7 +82,7 @@ class RacingMap(PGMap):
         LANE_NUM = self.config["lane_num"]
         LANE_WIDTH = self.config["lane_width"]
 
-        init_block = FirstPGBlock(
+        last_block = FirstPGBlock(
             self.road_network,
             lane_width=LANE_WIDTH,
             lane_num=LANE_NUM,
@@ -91,30 +92,32 @@ class RacingMap(PGMap):
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        self.blocks.append(init_block)
+        self.blocks.append(last_block)
 
-        block_s1 = Straight(
-            1,
-            init_block.get_socket(0),
+        block_index = 1
+        last_block = Straight(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_s1.construct_from_config({Parameter.length: 100}, parent_node_path, physics_world)
-        self.blocks.append(block_s1)
+        last_block.construct_from_config({Parameter.length: 100}, parent_node_path, physics_world)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_c1 = Curve(
-            2,
-            block_s1.get_socket(0),
+        last_block = Curve(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_c1.construct_from_config(
+        last_block.construct_from_config(
             {
                 Parameter.length: 200,
                 Parameter.radius: 100,
@@ -122,32 +125,34 @@ class RacingMap(PGMap):
                 Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
-        self.blocks.append(block_c1)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_s2 = Straight(
-            3,
-            block_c1.get_socket(0),
+        last_block = Straight(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_s2.construct_from_config({
+        last_block.construct_from_config({
             Parameter.length: 100,
         }, parent_node_path, physics_world)
-        self.blocks.append(block_s2)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_c2 = Curve(
-            4,
-            block_s2.get_socket(0),
+        last_block = Curve(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_c2.construct_from_config(
+        last_block.construct_from_config(
             {
                 Parameter.length: 100,
                 Parameter.radius: 60,
@@ -155,18 +160,19 @@ class RacingMap(PGMap):
                 Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
-        self.blocks.append(block_c2)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_c3 = Curve(
-            5,
-            block_c2.get_socket(0),
+        last_block = Curve(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_c3.construct_from_config(
+        last_block.construct_from_config(
             {
                 Parameter.length: 100,
                 Parameter.radius: 60,
@@ -174,32 +180,34 @@ class RacingMap(PGMap):
                 Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
-        self.blocks.append(block_c3)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_s3 = Straight(
-            6,
-            block_c3.get_socket(0),
+        last_block = Straight(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_s3.construct_from_config({
+        last_block.construct_from_config({
             Parameter.length: 200,
         }, parent_node_path, physics_world)
-        self.blocks.append(block_s3)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_c4 = Curve(
-            7,
-            block_s3.get_socket(0),
+        last_block = Curve(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_c4.construct_from_config(
+        last_block.construct_from_config(
             {
                 Parameter.length: 80,
                 Parameter.radius: 40,
@@ -207,18 +215,19 @@ class RacingMap(PGMap):
                 Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
-        self.blocks.append(block_c4)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_c5 = Curve(
-            8,
-            block_c4.get_socket(0),
+        last_block = Curve(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_c5.construct_from_config(
+        last_block.construct_from_config(
             {
                 Parameter.length: 40,
                 Parameter.radius: 50,
@@ -226,18 +235,19 @@ class RacingMap(PGMap):
                 Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
-        self.blocks.append(block_c5)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_c6 = Curve(
-            9,
-            block_c5.get_socket(0),
+        last_block = Curve(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_c6.construct_from_config(
+        last_block.construct_from_config(
             {
                 Parameter.length: 40,
                 Parameter.radius: 50,
@@ -245,51 +255,56 @@ class RacingMap(PGMap):
                 Parameter.dir: 0,
             }, parent_node_path, physics_world
         )
-        self.blocks.append(block_c6)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_c7 = Curve(
-            10,
-            block_c6.get_socket(0),
+        last_block = Curve(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_c7.construct_from_config(
+        last_block.construct_from_config(
             {
                 Parameter.length: 40,
                 Parameter.radius: 20,
-                Parameter.angle: 180,
+                Parameter.angle: 190,
                 Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
-        self.blocks.append(block_c7)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_s4 = Straight(
-            11,
-            block_c7.get_socket(0),
+
+
+        last_block = Straight(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_s4.construct_from_config({
+        last_block.construct_from_config({
             Parameter.length: 100,
         }, parent_node_path, physics_world)
-        self.blocks.append(block_s4)
+        self.blocks.append(last_block)
+        block_index += 1
 
-        block_c8 = Curve(
-            12,
-            block_s4.get_socket(0),
+        last_block = Curve(
+            block_index,
+            last_block.get_socket(0),
             self.road_network,
             1,
             remove_negative_lanes=True,
             side_lane_line_type=PGLineType.GUARDRAIL,
             center_line_type=PGLineType.GUARDRAIL
         )
-        block_c8.construct_from_config(
+        last_block.construct_from_config(
             {
                 Parameter.length: 100,
                 Parameter.radius: 40,
@@ -297,7 +312,8 @@ class RacingMap(PGMap):
                 Parameter.dir: 0,
             }, parent_node_path, physics_world
         )
-        self.blocks.append(block_c8)
+        self.blocks.append(last_block)
+        block_index += 1
 
 
 class RacingMapManager(PGMapManager):
@@ -322,7 +338,7 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
 
     def __init__(self, config):
         super(MultiAgentRacingEnv, self).__init__(config=config)
-        self.movement_between_steps = defaultdict(lambda: deque(maxlen=10))
+        self.movement_between_steps = defaultdict(lambda: deque(maxlen=100))
 
     def setup_engine(self):
         """Using the RacingMapManager as the map_manager."""
@@ -338,12 +354,16 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         """Overwrite this function as we have guardrail in the map."""
         longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
         if longitude < -5:
+            print(111)
+            longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
+            print(222)
             return True
         return False
 
     def done_function(self, vehicle_id):
         done, done_info = super(MultiAgentRacingEnv, self).done_function(vehicle_id)
 
+        done_info[TerminationState.IDLE] = False
         if self.config["idle_done"] and self._is_idle(vehicle_id):
             done = True
             self.logger.info(
@@ -361,9 +381,9 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
 
     def _is_idle(self, vehicle_id):
         movements = self.movement_between_steps[vehicle_id]
-        if len(movements) == 10:
-            movement_in_10_steps = sum(movements)
-            if movement_in_10_steps < 0.1:
+        if len(movements) == 100:
+            movement_in_100_steps = sum(movements)
+            if movement_in_100_steps < 0.1:
                 return True
         return False
 
@@ -388,7 +408,7 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         long_last, _ = current_lane.local_coordinates(vehicle.last_position)
         long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
-        self.movement_between_steps[vehicle_id].append(long_now - long_last)
+        self.movement_between_steps[vehicle_id].append(abs(long_now - long_last))
 
         reward = 0.0
         reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
@@ -454,7 +474,7 @@ def _vis(generate_video=False):
                     target_vehicle_heading_up=False,
                     draw_target_vehicle_trajectory=False,
                     film_size=(3000, 3000),
-                    screen_size=(1000, 1000),
+                    screen_size=(3000, 3000),
                     crash_vehicle_done=False,
                 )
                 img_bev = pygame.surfarray.array3d(img_bev)
