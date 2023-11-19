@@ -12,10 +12,6 @@ A MetaDrive instance accepts a dict as the environmental config. For example, yo
     config = dict(environment_num=200, start_seed=0)
     env = MetaDriveEnv(config)
 
-    # or using gym interface:
-    import gym
-    env = gym.make("MetaDrive-v0", config=config)
-
 In this page, we describe the details of each configurable options.
 
 
