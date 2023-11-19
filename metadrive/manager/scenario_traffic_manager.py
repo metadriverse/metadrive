@@ -319,16 +319,13 @@ class ScenarioTrafficManager(BaseManager):
         return ret
 
     def get_traffic_v_config(self):
-        v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
-        v_config["navigation_module"] = None
-        v_config.update(
-            dict(
-                show_navi_mark=False,
-                show_dest_mark=False,
-                enable_reverse=False,
-                show_lidar=False,
-                show_lane_line_detector=False,
-                show_side_detector=False,
-            )
+        v_config = dict(
+            navigation_module=None,
+            show_navi_mark=False,
+            show_dest_mark=False,
+            enable_reverse=False,
+            show_lidar=False,
+            show_lane_line_detector=False,
+            show_side_detector=False,
         )
         return v_config
