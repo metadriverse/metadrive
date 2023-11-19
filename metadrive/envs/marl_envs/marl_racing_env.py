@@ -8,6 +8,8 @@ from metadrive.constants import PGLineType
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.utils import Config
+from metadrive.constants import TerminationState
+from collections import defaultdict, deque
 
 RACING_CONFIG = dict(
 
@@ -24,7 +26,10 @@ RACING_CONFIG = dict(
     # We still want to use single-agent observation
     vehicle_config=dict(
         lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0,
-                   add_others_navi=False)
+                   add_others_navi=False),
+        enable_reverse=True,  # True
+        random_navi_mark_color=True,
+        show_navi_mark=False,
     ),
     sensors=dict(lidar=(Lidar, 50)),
 
@@ -34,15 +39,19 @@ RACING_CONFIG = dict(
 
     # Reward setting
     use_lateral=False,
+    out_of_road_penalty=5,  # Add little penalty to avoid hitting the wall (guardrail).
+    crash_sidewalk_penalty=1,
+    idle_penalty=5,
 
     # Termination condition
     cross_yellow_line_done=False,
-    out_of_road_done=False,
+    out_of_road_done=True,
     on_continuous_line_done=False,
     out_of_route_done=False,
     crash_done=False,
     max_step_per_agent=3_000,
     horizon=3_000,
+    idle_done=True,
 
     # Debug setting
     show_fps=False,
@@ -79,6 +88,8 @@ class RacingMap(PGMap):
             render_root_np=parent_node_path,
             physics_world=physics_world,
             remove_negative_lanes=True,
+            side_lane_line_type=PGLineType.GUARDRAIL,
+            center_line_type=PGLineType.GUARDRAIL
         )
         self.blocks.append(init_block)
 
@@ -309,6 +320,10 @@ class RacingMapManager(PGMapManager):
 class MultiAgentRacingEnv(MultiAgentMetaDrive):
     """The Multi-agent Racing Environment"""
 
+    def __init__(self, config):
+        super(MultiAgentRacingEnv, self).__init__(config=config)
+        self.movement_between_steps = defaultdict(lambda: deque(maxlen=10))
+
     def setup_engine(self):
         """Using the RacingMapManager as the map_manager."""
         super(MultiAgentRacingEnv, self).setup_engine()
@@ -318,6 +333,83 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
     def default_config() -> Config:
         """Use the RACING_CONFIG as the default config."""
         return MultiAgentMetaDrive.default_config().update(RACING_CONFIG, allow_add_new_key=True)
+
+    def _is_out_of_road(self, vehicle):
+        """Overwrite this function as we have guardrail in the map."""
+        longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
+        if longitude < -5:
+            return True
+        return False
+
+    def done_function(self, vehicle_id):
+        done, done_info = super(MultiAgentRacingEnv, self).done_function(vehicle_id)
+
+        if self.config["idle_done"] and self._is_idle(vehicle_id):
+            done = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: IDLE.".format(self.current_seed),
+                extra={"log_once": True}
+            )
+            done_info[TerminationState.IDLE] = True
+
+        return done, done_info
+
+    def reset(self, seed=None):
+        ret = super(MultiAgentRacingEnv, self).reset(seed=seed)
+        self.movement_between_steps.clear()
+        return ret
+
+    def _is_idle(self, vehicle_id):
+        movements = self.movement_between_steps[vehicle_id]
+        if len(movements) == 10:
+            movement_in_10_steps = sum(movements)
+            if movement_in_10_steps < 0.1:
+                return True
+        return False
+
+
+    def reward_function(self, vehicle_id):
+        """
+        Override this func to get a new reward function
+        :param vehicle_id: id of BaseVehicle
+        :return: reward
+        """
+        vehicle = self.vehicles[vehicle_id]
+        step_info = dict()
+
+        # Reward for moving forward in current lane
+        if vehicle.lane in vehicle.navigation.current_ref_lanes:
+            current_lane = vehicle.lane
+            positive_road = 1
+        else:
+            current_lane = vehicle.navigation.current_ref_lanes[0]
+            current_road = vehicle.navigation.current_road
+            positive_road = 1 if not current_road.is_negative_road() else -1
+        long_last, _ = current_lane.local_coordinates(vehicle.last_position)
+        long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+
+        self.movement_between_steps[vehicle_id].append(long_now - long_last)
+
+        reward = 0.0
+        reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
+        reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
+
+        step_info["step_reward"] = reward
+        step_info["crash_sidewalk"] = False
+        if self._is_arrive_destination(vehicle):
+            reward = +self.config["success_reward"]
+        elif self._is_out_of_road(vehicle):
+            reward = -self.config["out_of_road_penalty"]
+        elif vehicle.crash_vehicle:
+            reward = -self.config["crash_vehicle_penalty"]
+        elif vehicle.crash_sidewalk:
+            reward = -self.config["crash_sidewalk_penalty"]
+            step_info["crash_sidewalk"] = True
+        elif self._is_idle(vehicle_id):
+            reward = -self.config["idle_penalty"]
+
+        return reward, step_info
+
 
 
 def _vis(generate_video=False):
@@ -348,7 +440,7 @@ def _vis(generate_video=False):
 
     try:
         for i in range(1, 100000):
-            o, r, tm, tc, info = env.step({k: [-0.05, 1.0] for k in env.vehicles.keys()})
+            o, r, tm, tc, info = env.step({k: [-0.0, 1] for k in env.vehicles.keys()})
             for r_ in r.values():
                 total_r += r_
             ep_s += 1
