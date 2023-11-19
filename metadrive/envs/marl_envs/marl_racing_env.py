@@ -353,10 +353,11 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
     def _is_out_of_road(self, vehicle):
         """Overwrite this function as we have guardrail in the map."""
         longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
+        print("Current longitude is: ", longitude)
         if longitude < -5:
             print(111)
             longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
-            print("Current longitude is: ", longitude)
+            print(222)
             return True
         return False
 
