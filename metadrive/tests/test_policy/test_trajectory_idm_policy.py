@@ -1,4 +1,5 @@
 import copy
+from metadrive.utils import recursive_equal
 
 import numpy as np
 
@@ -35,23 +36,31 @@ def test_trajectory_idm(render=False):
             o, _ = env.reset(seed=seed)
             sdc_route = env.engine.map_manager.current_sdc_route
             v_config = copy.deepcopy(env.engine.global_config["vehicle_config"])
-            v_config.update(
-                dict(
-                    navigation_module=None,
-                    show_navi_mark=False,
-                    show_dest_mark=False,
-                    enable_reverse=False,
-                    show_lidar=False,
-                    show_lane_line_detector=False,
-                    show_side_detector=False,
-                )
+            overwrite_config = dict(
+                navigation_module=None,
+                show_navi_mark=False,
+                show_dest_mark=False,
+                enable_reverse=False,
+                show_lidar=False,
+                show_lane_line_detector=False,
+                show_side_detector=False,
             )
+            v_config.update(overwrite_config)
+
             v_list = []
             list = [(25, 0, 0)] if seed != 0 else []
             list += [(45, -3, np.pi / 2), (70, 3, -np.pi / 4)]
             for long, lat, heading in list:
                 position = sdc_route.position(long, lat)
-                v = env.engine.spawn_object(SVehicle, vehicle_config=v_config, position=position, heading=heading)
+                v_1 = env.engine.spawn_object(SVehicle,
+                                              vehicle_config=overwrite_config,
+                                              position=position,
+                                              heading=heading,
+                                              random_seed=1)
+                v = env.engine.spawn_object(SVehicle, vehicle_config=v_config, position=position, heading=heading,
+                                            random_seed=1)
+                assert recursive_equal(v.config, v_1.config, need_assert=True)
+                env.engine.clear_objects([v_1.id])
                 v_list.append(v)
 
             for s in range(1000):
@@ -79,5 +88,5 @@ def test_trajectory_idm(render=False):
 
 
 if __name__ == "__main__":
-    test_trajectory_idm(True)
+    test_trajectory_idm(False)
     # test_check_multi_discrete_space()

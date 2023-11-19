@@ -669,9 +669,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         navi = self.config["navigation_module"]
         self.navigation = navi(
             # self.engine,
-            show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
-            show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
-            show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"],
+            show_navi_mark=self.config["show_navi_mark"],
+            show_dest_mark=self.config["show_dest_mark"],
+            show_line_to_dest=self.config["show_line_to_dest"],
             panda_color=self.panda_color,
             name=self.name,
             vehicle_config=self.config
