@@ -38,9 +38,9 @@ def test_trajectory_idm(render=False):
             v_config = copy.deepcopy(env.engine.global_config["vehicle_config"])
             overwrite_config = dict(
                 navigation_module=None,
-                show_navi_mark=False,
+                show_navi_mark=True if seed == 1 else False,
                 show_dest_mark=False,
-                enable_reverse=False,
+                enable_reverse=True if seed == 0 else False,
                 show_lidar=False,
                 show_lane_line_detector=False,
                 show_side_detector=False,
@@ -52,13 +52,12 @@ def test_trajectory_idm(render=False):
             list += [(45, -3, np.pi / 2), (70, 3, -np.pi / 4)]
             for long, lat, heading in list:
                 position = sdc_route.position(long, lat)
-                v_1 = env.engine.spawn_object(SVehicle,
-                                              vehicle_config=overwrite_config,
-                                              position=position,
-                                              heading=heading,
-                                              random_seed=1)
-                v = env.engine.spawn_object(SVehicle, vehicle_config=v_config, position=position, heading=heading,
-                                            random_seed=1)
+                v_1 = env.engine.spawn_object(
+                    SVehicle, vehicle_config=overwrite_config, position=position, heading=heading, random_seed=1
+                )
+                v = env.engine.spawn_object(
+                    SVehicle, vehicle_config=v_config, position=position, heading=heading, random_seed=1
+                )
                 assert recursive_equal(v.config, v_1.config, need_assert=True)
                 env.engine.clear_objects([v_1.id])
                 v_list.append(v)
