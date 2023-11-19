@@ -3,10 +3,10 @@ from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import Curve
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.straight import Straight
+from metadrive.component.sensors.lidar import Lidar
 from metadrive.constants import PGLineType
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
-from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
 
 RACING_CONFIG = dict(
@@ -20,7 +20,13 @@ RACING_CONFIG = dict(
     top_down_camera_initial_y=15,
     top_down_camera_initial_z=120,
     allow_respawn=False,
-    vehicle_config=dict(show_lidar=False, show_navi_mark=False),
+
+    # We still want to use single-agent observation
+    vehicle_config=dict(
+        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0,
+                   add_others_navi=False)
+    ),
+    sensors=dict(lidar=(Lidar, 50)),
 
     # Number of agents and map setting.
     num_agents=12,
@@ -53,6 +59,7 @@ RACING_CONFIG = dict(
 
 class RacingMap(PGMap):
     """Create a complex racing map by manually design the topology."""
+
     def _generate(self):
         """ Generate the racing map.
 
@@ -284,6 +291,7 @@ class RacingMap(PGMap):
 
 class RacingMapManager(PGMapManager):
     """This map manager load the racing map directly, without the burden to manage multiple maps."""
+
     def __init__(self):
         super(RacingMapManager, self).__init__()
 
@@ -300,6 +308,7 @@ class RacingMapManager(PGMapManager):
 
 class MultiAgentRacingEnv(MultiAgentMetaDrive):
     """The Multi-agent Racing Environment"""
+
     def setup_engine(self):
         """Using the RacingMapManager as the map_manager."""
         super(MultiAgentRacingEnv, self).setup_engine()

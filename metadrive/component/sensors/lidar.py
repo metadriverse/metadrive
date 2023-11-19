@@ -60,7 +60,8 @@ class Lidar(DistanceDetector):
                 "This result in errors "
                 "when generating point cloud and sensing surrounding objects."
                 "Please align the two parameters in config "
-                "to get the best Lidar performance".format(error)
+                "to get the best Lidar performance. That is, please align `config['sensors']` and "
+                "`config['vehicle_config']['lidar']['distance']`.".format(error)
             )
         return super(Lidar, self).perceive(
             base_vehicle,
