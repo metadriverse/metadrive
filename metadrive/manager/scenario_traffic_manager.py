@@ -7,7 +7,8 @@ from metadrive.component.static_object.traffic_object import TrafficCone, Traffi
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.component.vehicle.vehicle_type import get_vehicle_type, reset_vehicle_type_count
+from metadrive.component.vehicle.vehicle_type import SVehicle, LVehicle, MVehicle, XLVehicle, \
+    TrafficDefaultVehicle
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
@@ -318,7 +319,8 @@ class ScenarioTrafficManager(BaseManager):
         ret[self.sdc_scenario_id] = self.sdc_object_id
         return ret
 
-    def get_traffic_v_config(self):
+    @staticmethod
+    def get_traffic_v_config():
         v_config = dict(
             navigation_module=None,
             show_navi_mark=False,
@@ -329,3 +331,40 @@ class ScenarioTrafficManager(BaseManager):
             show_side_detector=False,
         )
         return v_config
+
+
+type_count = [0 for i in range(3)]
+
+
+def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
+    if np_random is not None:
+        if length <= 4:
+            return SVehicle
+        elif length <= 5.5:
+            return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
+        else:
+            return [LVehicle, XLVehicle][np_random.randint(2)]
+    else:
+        global type_count
+        # evenly sample
+        if length <= 4:
+            return SVehicle
+        elif length <= 5.5:
+            type_count[1] += 1
+            vs = [LVehicle, MVehicle, SVehicle]
+            # vs = [SVehicle, LVehicle, MVehicle]
+            if need_default_vehicle:
+                vs.append(TrafficDefaultVehicle)
+            return vs[type_count[1] % len(vs)]
+        else:
+            type_count[2] += 1
+            vs = [LVehicle, XLVehicle]
+            return vs[type_count[2] % len(vs)]
+
+
+def reset_vehicle_type_count(np_random=None):
+    global type_count
+    if np_random is None:
+        type_count = [0 for i in range(3)]
+    else:
+        type_count = [np_random.randint(100) for i in range(3)]

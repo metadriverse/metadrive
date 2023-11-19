@@ -42,9 +42,13 @@ def test_trajectory_idm(render=False):
                 show_dest_mark=False,
                 enable_reverse=True if seed == 0 else False,
                 lidar=dict(
-                    num_lasers=240 if seed == 2 else 120, distance=50, num_others=0, gaussian_noise=0.0,
+                    num_lasers=240 if seed == 2 else 120,
+                    distance=50,
+                    num_others=0,
+                    gaussian_noise=0.0,
                     dropout_prob=0.0,
-                    add_others_navi=False),
+                    add_others_navi=False
+                ),
                 show_lidar=False,
                 show_lane_line_detector=False,
                 show_side_detector=False,
@@ -57,7 +61,8 @@ def test_trajectory_idm(render=False):
             for long, lat, heading in list:
                 position = sdc_route.position(long, lat)
                 v_1 = env.engine.spawn_object(
-                    SVehicle, vehicle_config=overwrite_config, position=position, heading=heading)
+                    SVehicle, vehicle_config=overwrite_config, position=position, heading=heading
+                )
                 v = env.engine.spawn_object(
                     SVehicle, vehicle_config=v_config, position=position, heading=heading, random_seed=v_1.random_seed
                 )

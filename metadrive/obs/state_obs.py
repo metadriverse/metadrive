@@ -216,11 +216,8 @@ class LidarStateObservation(ObservationBase):
             )
             if vehicle.config["lidar"]["num_others"] > 0:
                 other_v_info += self.engine.get_sensor("lidar").get_surrounding_vehicles_info(
-                    vehicle,
-                    detected_objects,
-                    vehicle.config["lidar"]["distance"],
-                    vehicle.config["lidar"]["num_others"],
-                    vehicle.config["lidar"]["add_others_navi"]
+                    vehicle, detected_objects, vehicle.config["lidar"]["distance"],
+                    vehicle.config["lidar"]["num_others"], vehicle.config["lidar"]["add_others_navi"]
                 )
             other_v_info += self._add_noise_to_cloud_points(
                 cloud_points,

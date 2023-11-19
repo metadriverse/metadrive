@@ -120,7 +120,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         name: str = None,
         random_seed=None,
         position=None,
-        heading=None
+        heading=None,
+        _calling_reset=True,
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -137,7 +138,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
         self.set_metadrive_type(MetaDriveType.VEHICLE)
-        self.update_config(vehicle_config)
         use_special_color = self.config["use_special_color"]
 
         # build vehicle physics model
@@ -192,7 +192,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.back_vehicles = set()
 
         # if self.engine.current_map is not None:
-        self.reset(position=position, heading=heading)
+        if _calling_reset:
+            self.reset(position=position, heading=heading, vehicle_config=vehicle_config)
 
     def _init_step_info(self):
         # done info will be initialized every frame
@@ -291,8 +292,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             assert isinstance(random_seed, int)
             self.seed(random_seed)
             self.sample_parameters()
+        # restore config
+        self.update_config(self.engine.global_config["vehicle_config"])
         if vehicle_config is not None:
             self.update_config(vehicle_config)
+        from metadrive.component.vehicle.vehicle_type import vehicle_class_to_type
+        self.config["vehicle_model"] = vehicle_class_to_type[self.__class__]
 
         # Update some modules that might not be initialized before
         self.add_navigation()

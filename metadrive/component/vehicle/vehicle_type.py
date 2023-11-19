@@ -1,13 +1,8 @@
-from panda3d.core import VirtualFileSystem, Filename
-from metadrive.engine.asset_loader import AssetLoader
+import platform
+
 from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-import platform
 from metadrive.constants import Semantics
-
-
-def convert_path(pth):
-    return Filename.from_os_specific(pth).get_fullpath()
 
 
 class DefaultVehicle(BaseVehicle):
@@ -250,7 +245,8 @@ class VaryingDynamicsVehicle(DefaultVehicle):
                 name=self.name,
                 random_seed=self.random_seed,
                 position=position,
-                heading=heading
+                heading=heading,
+                _calling_reset=False
             )
 
             # lm = process_memory()
@@ -271,8 +267,18 @@ class VaryingDynamicsVehicle(DefaultVehicle):
 
 
 def random_vehicle_type(np_random, p=None):
-    prob = [1 / len(vehicle_type) for _ in range(len(vehicle_type))] if p is None else p
-    return vehicle_type[np_random.choice(list(vehicle_type.keys()), p=prob)]
+    v_type = {
+        "s": SVehicle,
+        "m": MVehicle,
+        "l": LVehicle,
+        "xl": XLVehicle,
+        "default": DefaultVehicle,
+    }
+    if p:
+        assert len(p) == len(v_type), \
+            "This function only allows to choose a vehicle from 6 types: {}".format(v_type.keys())
+    prob = [1 / len(v_type) for _ in range(len(v_type))] if p is None else p
+    return v_type[np_random.choice(list(v_type.keys()), p=prob)]
 
 
 vehicle_type = {
@@ -281,45 +287,8 @@ vehicle_type = {
     "l": LVehicle,
     "xl": XLVehicle,
     "default": DefaultVehicle,
-    # LQY: do not put them in to vehicle_tye, as it is used to randomize normal cars!
-    # "static_default": StaticDefaultVehicle,
-    # "varying_dynamics": VaryingDynamicsVehicle
+    "static_default": StaticDefaultVehicle,
+    "varying_dynamics": VaryingDynamicsVehicle
 }
 
-VaryingShapeVehicle = VaryingDynamicsVehicle
-
-type_count = [0 for i in range(3)]
-
-
-def reset_vehicle_type_count(np_random=None):
-    global type_count
-    if np_random is None:
-        type_count = [0 for i in range(3)]
-    else:
-        type_count = [np_random.randint(100) for i in range(3)]
-
-
-def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
-    if np_random is not None:
-        if length <= 4:
-            return SVehicle
-        elif length <= 5.5:
-            return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
-        else:
-            return [LVehicle, XLVehicle][np_random.randint(2)]
-    else:
-        global type_count
-        # evenly sample
-        if length <= 4:
-            return SVehicle
-        elif length <= 5.5:
-            type_count[1] += 1
-            vs = [LVehicle, MVehicle, SVehicle]
-            # vs = [SVehicle, LVehicle, MVehicle]
-            if need_default_vehicle:
-                vs.append(TrafficDefaultVehicle)
-            return vs[type_count[1] % len(vs)]
-        else:
-            type_count[2] += 1
-            vs = [LVehicle, XLVehicle]
-            return vs[type_count[2] % len(vs)]
+vehicle_class_to_type = inv_map = {v: k for k, v in vehicle_type.items()}
