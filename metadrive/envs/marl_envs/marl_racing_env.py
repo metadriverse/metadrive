@@ -356,7 +356,7 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         if longitude < -5:
             print(111)
             longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
-            print(222)
+            print("Current longitude is: ", longitude)
             return True
         return False
 
