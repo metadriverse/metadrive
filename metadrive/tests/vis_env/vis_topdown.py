@@ -24,7 +24,6 @@ if __name__ == "__main__":
             # "agent_policy": IDMPolicy,
             "random_traffic": False,
             "random_lane_width": True,
-            # "random_agent_model": True,
             "driving_reward": 1.0,
             "force_destroy": False,
             "vehicle_config": {

@@ -41,7 +41,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    :maxdepth: 2
    :caption: RL Training with MetaDrive
 
-   rl_environments.rst
+   rl_environments.ipynb
    observation.rst
    reward_cost_and_termination_function.rst
    config_system.rst

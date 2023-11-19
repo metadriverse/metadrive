@@ -14,7 +14,6 @@ if __name__ == "__main__":
             # "vehicle_model":"s",
             # "vehicle_model":"m",
             # "vehicle_model":"l",
-            # "vehicle_model":"xl",
         }
     }
     env = MetaDriveEnv(config)

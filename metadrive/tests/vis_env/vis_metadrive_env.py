@@ -21,7 +21,6 @@ if __name__ == "__main__":
             # "image_observation": True,
             # "controller": "joystick",
             # "show_coordinates": True,
-            # "random_agent_model": False,
             "debug_static_world": True,
             "manual_control": True,
             "use_render": True,
@@ -52,7 +51,6 @@ if __name__ == "__main__":
             # "camera_height": -1,
             "vehicle_config": {
                 "enable_reverse": True,
-                # "vehicle_model": "xl",
                 # "rgb_camera": (1024, 1024),
                 # "spawn_velocity": [8.728615581032535, -0.24411703918728195],
                 "spawn_velocity_car_frame": True,

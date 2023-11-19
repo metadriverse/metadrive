@@ -281,8 +281,9 @@ vehicle_type = {
     "l": LVehicle,
     "xl": XLVehicle,
     "default": DefaultVehicle,
-    "static_default": StaticDefaultVehicle,
-    "varying_dynamics": VaryingDynamicsVehicle
+    # LQY: do not put them in to vehicle_tye, as it is used to randomize normal cars!
+    # "static_default": StaticDefaultVehicle,
+    # "varying_dynamics": VaryingDynamicsVehicle
 }
 
 VaryingShapeVehicle = VaryingDynamicsVehicle
