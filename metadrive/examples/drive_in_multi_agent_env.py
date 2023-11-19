@@ -78,7 +78,5 @@ if __name__ == "__main__":
                 env.reset()
                 # if env.current_track_vehicle:
                 #     env.current_track_vehicle.expert_takeover = True
-    except Exception as e:
-        raise e
     finally:
         env.close()

@@ -49,7 +49,5 @@ if __name__ == "__main__":
             )
             if tm or tc:
                 env.reset()
-    except Exception as e:
-        raise e
     finally:
         env.close()
