@@ -16,7 +16,6 @@ def test_varying_dynamics_vehicle():
 
         v_config = default_config.copy()["vehicle_config"]
         v_config["spawn_lane_index"] = (FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
-
         v_config["navigation_module"] = None
 
         v = VaryingDynamicsVehicle(v_config, random_seed=0)
@@ -31,6 +30,7 @@ def test_varying_dynamics_vehicle():
                     for friction in [0.2, 0.8, 1.0, 1.2, 1.5, 2.0]:
                         v.reset(
                             vehicle_config={
+                                "spawn_lane_index": (FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
                                 "width": width,
                                 "height": height,
                                 "length": length,

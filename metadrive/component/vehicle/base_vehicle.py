@@ -182,7 +182,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._init_step_info()
 
         # others
-        self.add_navigation()
         self.takeover = False
         self.expert_takeover = False
         self.energy_consumption = 0
@@ -232,7 +231,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_info
 
     def after_step(self):
-        if self.navigation is not None:
+        if self.navigation and self.config["navigation_module"]:
             self.navigation.update_localization(self)
         self._state_check()
         self.update_dist_to_left_right()
