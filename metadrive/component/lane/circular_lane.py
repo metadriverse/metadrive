@@ -1,13 +1,12 @@
 import math
-from metadrive.constants import MetaDriveType
 from typing import Tuple
 
 import numpy as np
 
 from metadrive.component.lane.pg_lane import PGLane
-from metadrive.constants import PGDrivableAreaProperty
+from metadrive.constants import MetaDriveType
 from metadrive.constants import PGLineType
-from metadrive.utils.math import wrap_to_pi, norm, Vector, difference_between_radians
+from metadrive.utils.math import wrap_to_pi, norm, Vector
 
 
 class CircularLane(PGLane):
@@ -81,19 +80,44 @@ class CircularLane(PGLane):
         """
         delta_x = position[0] - self.center[0]
         delta_y = position[1] - self.center[1]
-        abs_phi = math.atan2(delta_y, delta_x)
+        abs_phase = math.atan2(delta_y, delta_x)
+        abs_phase = wrap_to_pi(abs_phase)
 
-        # We shouldn't wrap angle in [-pi, pi] here because the relative phi can be reverted if the difference > 180
-        # degree. Let's say abs_phi=-91deg, start_phase=90deg, the relative_phi=-181deg. You shouldn't wrap it to 179deg
-        # bc the meaning is completely different!
-        # Now, the output relative phi must in range [0, 2pi].
-        relative_phi = difference_between_radians(abs_phi, self.start_phase, clockwise=self.is_clockwise())
+        # Processing the relative phase (angle) is extremely complex.
+        start_phase = wrap_to_pi(self.start_phase)
+        end_phase = wrap_to_pi(self.end_phase)
 
-        # TODO(pzh): What if the relative_phi is larger than self.angle? In this case the longitudinal is undetermined.
+        diff_to_start_phase = abs(wrap_to_pi(abs_phase - start_phase))
+        diff_to_end_phase = abs(wrap_to_pi(abs_phase - end_phase))
 
+        if diff_to_start_phase > np.pi and diff_to_end_phase > np.pi:
+            raise ValueError(
+                f"Undetermined position. Relative phase of the given point to the start phase is"
+                f" {wrap_to_pi(abs_phase - start_phase)} while the phase to the end phase is "
+                f"{wrap_to_pi(abs_phase - end_phase)}. Both of them are > 180deg. "
+                f"We don't know how to compute the longitudinal in this case."
+            )
+
+        # If the point is closer to the end point
+        if diff_to_start_phase > diff_to_end_phase:
+            if self.is_clockwise():
+                diff = self.end_phase - abs_phase
+            else:
+                diff = abs_phase - self.end_phase
+            relative_phase = wrap_to_pi(diff)
+            longitudinal = relative_phase * self.radius + self.length
+        else:
+            if self.is_clockwise():
+                diff = self.start_phase - abs_phase
+            else:
+                diff = abs_phase - self.start_phase
+            relative_phase = wrap_to_pi(diff)
+            longitudinal = relative_phase * self.radius
+
+        # Compute the lateral
         distance_to_center = norm(delta_x, delta_y)
-        longitudinal = relative_phi * self.radius
         lateral = self.direction * (distance_to_center - self.radius)
+
         return longitudinal, lateral
 
     @property
