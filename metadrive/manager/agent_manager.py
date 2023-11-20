@@ -1,6 +1,5 @@
 import copy
-import logging
-
+from metadrive.engine.logger import get_logger
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from typing import Dict
 
@@ -11,6 +10,8 @@ from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
+
+logger = get_logger()
 
 
 class AgentManager(BaseManager):
@@ -211,7 +212,7 @@ class AgentManager(BaseManager):
         self._agent_to_object[agent_name] = new_v_name
         self._object_to_agent[new_v_name] = agent_name
         # TODO: this may cause error? Sharing observation
-        logging.warning("Test MARL new agent observation to avoid bug!")
+        logger.warning("Test MARL new agent observation to avoid bug!")
         self.observations[new_v_name] = self._init_observations["agent0"]
         self.observations[new_v_name].reset(vehicle)
         self.observation_spaces[new_v_name] = self._init_observation_spaces["agent0"]

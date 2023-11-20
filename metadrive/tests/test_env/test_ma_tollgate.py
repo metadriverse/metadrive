@@ -1,5 +1,6 @@
 import time
 from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
+
 MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 import numpy as np
 from gymnasium.spaces import Box, Dict
@@ -145,7 +146,7 @@ def test_ma_toll_horizon():
                         assert tm[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
 
                 if tm["__all__"]:
                     break
@@ -209,8 +210,8 @@ def test_ma_toll_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                        v.navigation.get_current_lane_width() / 2 >= lat >=
-                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                            v.navigation.get_current_lane_width() / 2 >= lat >=
+                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     # if not env._is_arrive_destination(v):
                     # print('sss')
@@ -298,7 +299,7 @@ def test_ma_toll_reward_done_alignment_1():
                     if ddd and kkk != "__all__" and not tm["__all__"] and not i[kkk]["max_step"]:
                         if r[kkk] != -777:
                             raise ValueError
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
                         assert i[kkk]["out_of_road"]
                         # # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
@@ -350,11 +351,11 @@ def test_ma_toll_reward_done_alignment_1():
                 iii = i[kkk]
                 assert iii["crash_vehicle"]
                 assert iii["crash"]
-                #assert r[kkk] == -1.7777
+                # assert r[kkk] == -1.7777
                 # for kkk, ddd in te.items():
                 ddd = tm[kkk]
                 if ddd and kkk != "__all__":
-                    #assert r[kkk] == -1.7777
+                    # assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
                     # # print('{} done passed!'.format(kkk))
@@ -449,12 +450,12 @@ def test_ma_toll_reward_done_alignment_2():
             if tm["__all__"]:
                 break
             kkk = "agent0"
-            #assert r[kkk] == 999
+            # assert r[kkk] == 999
             assert i[kkk]["arrive_dest"]
             assert tm[kkk]
 
             kkk = "agent1"
-            #assert r[kkk] != 999
+            # assert r[kkk] != 999
             assert not i[kkk]["arrive_dest"]
             assert not tm[kkk]
             break
@@ -468,6 +469,7 @@ def test_ma_toll_reward_sign():
     straight road before coming into toll.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
+
     class TestEnv(MultiAgentTollgateEnv):
         _respawn_count = 0
 
@@ -578,6 +580,8 @@ def test_ma_toll_horizon_termination(vis=False):
     env = MultiAgentTollgateEnv({
         "horizon": 100,
         "num_agents": 8,
+        "use_render": vis,
+        "debug": True,
         "crash_done": False,
     })
     try:
@@ -598,8 +602,8 @@ def test_ma_toll_horizon_termination(vis=False):
                             env.vehicles[v_id].set_static(True)
                 obs, r, tm, tc, i = _act(env, act)
 
-                if vis:
-                    env.render("topdown")
+                # if vis:
+                #     env.render(mode="topdown")
 
                 if step == 0 or step == 1:
                     assert not any(tm.values())
@@ -615,6 +619,11 @@ def test_ma_toll_horizon_termination(vis=False):
                     should_respawn.clear()
 
                 for kkk, ddd in tm.items():
+                    if ddd and kkk in special_agents:
+                        assert i[kkk]["out_of_road"]
+                        assert not i[kkk]["crash"]
+                        assert not i[kkk]["crash_vehicle"]
+
                     if ddd and kkk == "__all__":
                         # print("Current: ", step)
                         continue
