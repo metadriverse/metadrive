@@ -45,7 +45,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
         # results published in papers. See
         # https://github.com/metadriverse/metadrive/issues/161#issuecomment-1080114029
         # for more information
-        vehicle_model="default",
+        vehicle_model="static_default",
     ),
     sensors=dict(lidar=(Lidar, 40)),
     target_vehicle_configs=dict(),
