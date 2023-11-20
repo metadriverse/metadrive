@@ -105,8 +105,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 config.update(ret_config["target_vehicle_configs"][agent_id])
             target_vehicle_configs[agent_id] = config
         ret_config["target_vehicle_configs"] = target_vehicle_configs
-        if ret_config["use_render"] and ret_config["disable_model_compression"]:
-            logging.warning("Turn disable_model_compression=True can decrease the loading time!")
+        # if ret_config["use_render"] and ret_config["disable_model_compression"]:
+        #     logging.warning("Turn disable_model_compression=True can decrease the loading time!")
 
         if "prefer_track_agent" in config and config["prefer_track_agent"]:
             ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["use_special_color"] = True
