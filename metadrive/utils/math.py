@@ -32,6 +32,23 @@ def wrap_to_pi(x: float) -> float:
     angles -= 2 * np.pi * (angles > np.pi)
     return angles
 
+def difference_between_radians(angle1: float, angle2: float) -> float:
+    """Compute the difference of radians (angle1 - angle2) and return in range [-2pi, +2pi].
+
+    Args:
+        angle1: radian, float.
+        angle2: radian, float.
+
+    Returns:
+        difference: radian, float
+    """
+    angle1 = wrap_to_pi(angle1)
+    angle2 = wrap_to_pi(angle2)
+    diff = angle1 - angle2
+    diff %= 4 * np.pi
+    diff -= 4 * np.pi * (diff > 2 * np.pi)
+    return diff
+
 
 def get_vertical_vector(vector: np.array):
     length = norm(vector[0], vector[1])

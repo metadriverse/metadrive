@@ -7,7 +7,7 @@ import numpy as np
 from metadrive.component.lane.pg_lane import PGLane
 from metadrive.constants import PGDrivableAreaProperty
 from metadrive.constants import PGLineType
-from metadrive.utils.math import wrap_to_pi, norm, Vector
+from metadrive.utils.math import wrap_to_pi, norm, Vector, difference_between_radians
 
 
 class CircularLane(PGLane):
@@ -32,22 +32,24 @@ class CircularLane(PGLane):
         self.center = Vector(center)
         self.radius = radius
         self._clock_wise = clockwise
-        self.start_phase = start_phase
-        self.end_phase = self.start_phase + (-angle if self.is_clockwise() else angle)
+        self.start_phase = wrap_to_pi(start_phase)
         self.angle = angle
+        # TODO(pzh): Don't do the wrap_to_pi for self.end_phase because sometime we might want to use self.end_phase
+        #  - self.start_phase to get self.angle (or we probably should eliminate those use cases?)
+        self.end_phase = self.start_phase + (-self.angle if self.is_clockwise() else self.angle)
         self.direction = -1 if clockwise else 1
         self.width = width
         self.line_types = line_types
         self.forbidden = forbidden
         self.priority = priority
 
-        self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
+        self.length = abs(self.radius * (self.end_phase - self.start_phase))
         assert self.length > 0, "end_phase should > (<) start_phase if anti-clockwise (clockwise)"
         self.start = self.position(0, 0)
         self.end = self.position(self.length, 0)
 
     def update_properties(self):
-        self.length = self.radius * (self.end_phase - self.start_phase) * self.direction
+        self.length = abs(self.radius * (self.end_phase - self.start_phase))
         assert self.length > 0, "end_phase should > (<) start_phase if anti-clockwise (clockwise)"
         self.start = self.position(0, 0)
         self.end = self.position(self.length, 0)
@@ -81,10 +83,11 @@ class CircularLane(PGLane):
         delta_y = position[1] - self.center[1]
         abs_phi = math.atan2(delta_y, delta_x)
 
-        # We shouldn't wrap angle here because the relative phi can be reverted if the difference > 180 degree.
-        # Let's say abs_phi=-91deg, start_phase=90deg, the relative_phi=-181deg. You shouldn't wrap it to 179deg bc
-        # the meaning is completely different!
-        relative_phi = abs_phi - self.start_phase
+        # We shouldn't wrap angle in [-pi, pi] here because the relative phi can be reverted if the difference > 180
+        # degree. Let's say abs_phi=-91deg, start_phase=90deg, the relative_phi=-181deg. You shouldn't wrap it to 179deg
+        # bc the meaning is completely different!
+        # But note that we still need to wrap the difference into [-2pi, +2pi].
+        relative_phi = difference_between_radians(abs_phi, self.start_phase)
 
         distance_to_center = norm(delta_x, delta_y)
         longitudinal = self.direction * relative_phi * self.radius

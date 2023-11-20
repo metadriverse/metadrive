@@ -77,6 +77,8 @@ def test_ma_racing_env_with_IDM(num_agents):
     env = MultiAgentRacingEnv(dict(
         num_agents=num_agents,
         agent_policy=IDMPolicy,
+        use_render=True,
+        debug=True
     ))
     try:
         _check_spaces_before_reset(env)
@@ -87,7 +89,7 @@ def test_ma_racing_env_with_IDM(num_agents):
         for step in range(3_000):
             act = {k: [1, 1] for k in env.vehicles.keys()}
             o, r, tm, tc, i = _act(env, act)
-            # env.render(mode="topdown")
+            env.render(mode="topdown")
             if step == 0:
                 assert not any(tm.values())
                 assert not any(tc.values())
