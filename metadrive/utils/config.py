@@ -75,6 +75,7 @@ class Config:
     For these <key, value> items, use Config["your key"] = None to init your PgConfig, then it will not implement
     type check at the first time. key "config" in map.py and key "force_fps" in world.py are good examples.
     """
+
     def __init__(self, config: Union["Config", dict], unchangeable=False):
         self._unchangeable = False
         if isinstance(config, Config):
@@ -290,6 +291,17 @@ class Config:
         self._unchangeable = False
         self[key] = value
         self._unchangeable = True
+
+    def set_unchangeable(self, unchangeable):
+        """
+        Lock the config, it is not allowed to be modified if it is set to True
+        Args:
+            unchangeable: boolean
+
+        Returns: None
+
+        """
+        self._unchangeable = unchangeable
 
 
 def _is_identical(k1, v1, k2, v2):

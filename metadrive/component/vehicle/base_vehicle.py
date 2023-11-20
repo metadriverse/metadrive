@@ -137,6 +137,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # self.engine = get_engine()
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
+        self.update_config(vehicle_config)
         self.set_metadrive_type(MetaDriveType.VEHICLE)
         use_special_color = self.config["use_special_color"]
 
