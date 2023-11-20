@@ -32,8 +32,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # horizon is also this value.
     horizon=1000,
     max_step_per_agent=1000,  # Per agent maximum episode steps
-    # Use to determine what neighborhood means
-    neighbours_distance=10,
+
     # ===== Vehicle Setting =====
     vehicle_config=dict(
         lidar=dict(num_lasers=72, distance=40, num_others=0),
@@ -49,6 +48,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     ),
     sensors=dict(lidar=(Lidar, 40)),
     target_vehicle_configs=dict(),
+
     # ===== New Reward Setting =====
     out_of_road_penalty=10,
     crash_vehicle_penalty=10,
@@ -56,6 +56,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     crash_vehicle_cost=1,
     crash_object_cost=1,
     out_of_road_cost=0,  # Do not count out of road into cost!
+
     # ===== Environmental Setting =====
     traffic_density=0.0,
     camera_height=4,
