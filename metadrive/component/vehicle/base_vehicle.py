@@ -293,8 +293,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             assert isinstance(random_seed, int)
             self.seed(random_seed)
             self.sample_parameters()
-        # restore config
-        self.update_config(self.engine.global_config["vehicle_config"])
+        # restore config LQY: bug MARL
+        # self.update_config(self.engine.global_config["vehicle_config"])
         if vehicle_config is not None:
             self.update_config(vehicle_config)
         from metadrive.component.vehicle.vehicle_type import vehicle_class_to_type

@@ -240,7 +240,6 @@ class BaseEnv(gym.Env):
         set_log_level(config.get("log_level", logging.DEBUG if config.get("debug", False) else logging.INFO))
         merged_config = self.default_config().update(config, False, ["target_vehicle_configs", "sensors"])
         global_config = self._post_process_config(merged_config)
-        global_config["vehicle_config"]["main_camera"] = global_config["window_size"]
 
         self.config = global_config
         initialize_global_config(self.config)
