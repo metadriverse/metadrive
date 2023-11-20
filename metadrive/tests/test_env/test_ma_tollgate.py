@@ -210,8 +210,8 @@ def test_ma_toll_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                            v.navigation.get_current_lane_width() / 2 >= lat >=
-                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                        v.navigation.get_current_lane_width() / 2 >= lat >=
+                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     # if not env._is_arrive_destination(v):
                     # print('sss')
@@ -469,7 +469,6 @@ def test_ma_toll_reward_sign():
     straight road before coming into toll.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
-
     class TestEnv(MultiAgentTollgateEnv):
         _respawn_count = 0
 
@@ -577,13 +576,15 @@ def test_ma_toll_no_short_episode():
 
 def test_ma_toll_horizon_termination(vis=False):
     # test horizon
-    env = MultiAgentTollgateEnv({
-        "horizon": 100,
-        "num_agents": 8,
-        "use_render": vis,
-        "debug": True,
-        "crash_done": False,
-    })
+    env = MultiAgentTollgateEnv(
+        {
+            "horizon": 100,
+            "num_agents": 8,
+            "use_render": vis,
+            "debug": True,
+            "crash_done": False,
+        }
+    )
     try:
         for _ in range(3):  # This function is really easy to break, repeat multiple times!
             _check_spaces_before_reset(env)

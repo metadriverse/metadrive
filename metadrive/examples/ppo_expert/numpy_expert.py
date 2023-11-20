@@ -39,7 +39,8 @@ def expert(vehicle, deterministic=False, need_obs=False):
     global _expert_observation
     obs_cfg = dict(
         lidar=dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0),
-        random_agent_model=False)
+        random_agent_model=False
+    )
 
     if _expert_weights is None:
         _expert_weights = np.load(ckpt_path)
@@ -100,6 +101,7 @@ def value(obs, weights):
     x = np.matmul(x, weights["default_policy/value_out/kernel"]) + weights["default_policy/value_out/bias"]
     ret = x.reshape(-1)
     return ret
+
 
 # if __name__ == '__main__':
 #     for i in range(100):
