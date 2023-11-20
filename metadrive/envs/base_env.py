@@ -273,6 +273,7 @@ class BaseEnv(gym.Env):
     def _post_process_config(self, config):
         """Add more special process to merged config"""
         # Cancel interface panel
+        self.logger.info("Environment: {}".format(self.__class__.__name__))
         self.logger.info("MetaDrive version: {}".format(VERSION))
         if not config["show_interface"]:
             config["interface_panel"] = []
