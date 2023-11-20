@@ -68,14 +68,27 @@ class CircularLane(PGLane):
         return self.width
 
     def local_coordinates(self, position: Tuple[float, float]) -> Tuple[float, float]:
+        """Compute the local coordinates (longitude, lateral) of the given position in this circular lane.
+
+        Args:
+            position: floats in 2D
+
+        Returns:
+            longtidue in float
+            lateral in float
+        """
         delta_x = position[0] - self.center[0]
         delta_y = position[1] - self.center[1]
-        phi = math.atan2(delta_y, delta_x)
-        phi = self.start_phase + wrap_to_pi(phi - self.start_phase)
-        r = norm(delta_x, delta_y)
-        longitudinal = self.direction * (phi - self.start_phase) * self.radius
-        # lateral = self.direction * (self.radius - r)
-        lateral = -self.direction * (self.radius - r)
+        abs_phi = math.atan2(delta_y, delta_x)
+
+        # We shouldn't wrap angle here because the relative phi can be reverted if the difference > 180 degree.
+        # Let's say abs_phi=-91deg, start_phase=90deg, the relative_phi=-181deg. You shouldn't wrap it to 179deg bc
+        # the meaning is completely different!
+        relative_phi = abs_phi - self.start_phase
+
+        distance_to_center = norm(delta_x, delta_y)
+        longitudinal = self.direction * relative_phi * self.radius
+        lateral = self.direction * (distance_to_center - self.radius)
         return longitudinal, lateral
 
     @property
