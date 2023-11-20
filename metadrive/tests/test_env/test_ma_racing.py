@@ -74,12 +74,7 @@ def _act(env, action):
 
 @pytest.mark.parametrize("num_agents", [1, 3, 5, 8, 12])
 def test_ma_racing_env_with_IDM(num_agents):
-    env = MultiAgentRacingEnv(dict(
-        num_agents=num_agents,
-        agent_policy=IDMPolicy,
-        use_render=True,
-        debug=True
-    ))
+    env = MultiAgentRacingEnv(dict(num_agents=num_agents, agent_policy=IDMPolicy, use_render=True, debug=True))
     try:
         _check_spaces_before_reset(env)
         obs, _ = env.reset()

@@ -40,6 +40,7 @@ def wrap_to_pi(x: float) -> float:
     angles -= 2 * np.pi * (angles > np.pi)
     return angles
 
+
 def get_vertical_vector(vector: np.array):
     length = norm(vector[0], vector[1])
     # return (vector[1] / length, -vector[0] / length), (-vector[1] / length, vector[0] / length)

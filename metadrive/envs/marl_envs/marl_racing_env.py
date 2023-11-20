@@ -25,8 +25,9 @@ RACING_CONFIG = dict(
 
     # We still want to use single-agent observation
     vehicle_config=dict(
-        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0,
-                   add_others_navi=False),
+        lidar=dict(
+            num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0, add_others_navi=False
+        ),
         enable_reverse=True,  # True
         random_navi_mark_color=True,
         show_navi_mark=False,
@@ -58,7 +59,7 @@ RACING_CONFIG = dict(
     use_chase_camera_follow_lane=True,
     camera_smooth_buffer_size=100,
     show_interface=False,
-show_coordinates=True,
+    show_coordinates=True,
     camera_dist=10,
     camera_pitch=15,
     camera_height=6,
@@ -69,7 +70,6 @@ show_coordinates=True,
 
 class RacingMap(PGMap):
     """Create a complex racing map by manually design the topology."""
-
     def _generate(self):
         """ Generate the racing map.
 
@@ -278,8 +278,6 @@ class RacingMap(PGMap):
         self.blocks.append(last_block)
         block_index += 1
 
-
-
         last_block = Straight(
             block_index,
             last_block.get_socket(0),
@@ -318,7 +316,6 @@ class RacingMap(PGMap):
 
 class RacingMapManager(PGMapManager):
     """This map manager load the racing map directly, without the burden to manage multiple maps."""
-
     def __init__(self):
         super(RacingMapManager, self).__init__()
 
@@ -335,7 +332,6 @@ class RacingMapManager(PGMapManager):
 
 class MultiAgentRacingEnv(MultiAgentMetaDrive):
     """The Multi-agent Racing Environment"""
-
     def __init__(self, config):
         super(MultiAgentRacingEnv, self).__init__(config=config)
         self.movement_between_steps = defaultdict(lambda: deque(maxlen=100))
@@ -353,7 +349,7 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
     def _is_out_of_road(self, vehicle):
         """Overwrite this function as we have guardrail in the map."""
         longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
-        print("Current longitude is: ", longitude, vehicle.position, vehicle.lane.center if hasattr(vehicle.lane, "center") else None)
+        print(f"{longitude=}, {lateral=}, {vehicle.position=}")
         if longitude < -5:
             print(111)
             longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
@@ -368,8 +364,7 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         if self.config["idle_done"] and self._is_idle(vehicle_id):
             done = True
             self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: IDLE.".format(self.current_seed),
-                extra={"log_once": True}
+                "Episode ended! Scenario Index: {} Reason: IDLE.".format(self.current_seed), extra={"log_once": True}
             )
             done_info[TerminationState.IDLE] = True
 
@@ -387,7 +382,6 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
             if movement_in_100_steps < 0.1:
                 return True
         return False
-
 
     def reward_function(self, vehicle_id):
         """
@@ -429,8 +423,9 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         elif self._is_idle(vehicle_id):
             reward = -self.config["idle_penalty"]
 
-        return reward, step_info
+        print("Reward info: ", step_info)
 
+        return reward, step_info
 
 
 def _vis(generate_video=False):
