@@ -28,7 +28,7 @@ RACING_CONFIG = dict(
         lidar=dict(
             num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0, add_others_navi=False
         ),
-        enable_reverse=True,  # True
+        enable_reverse=False,
         random_navi_mark_color=True,
         show_navi_mark=False,
     ),
@@ -60,9 +60,9 @@ RACING_CONFIG = dict(
     camera_smooth_buffer_size=100,
     show_interface=False,
     show_coordinates=True,
-    camera_dist=10,
-    camera_pitch=15,
-    camera_height=6,
+    camera_dist=16,
+    camera_pitch=20,
+    camera_height=8,
 
     # debug=True,
 )
@@ -349,11 +349,7 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
     def _is_out_of_road(self, vehicle):
         """Overwrite this function as we have guardrail in the map."""
         longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
-        print(f"{longitude=}, {lateral=}, {vehicle.position=}")
         if longitude < -5:
-            print(111)
-            longitude, lateral = vehicle.lane.local_coordinates(vehicle.position)
-            print(222)
             return True
         return False
 
@@ -422,8 +418,6 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
             step_info["crash_sidewalk"] = True
         elif self._is_idle(vehicle_id):
             reward = -self.config["idle_penalty"]
-
-        print("Reward info: ", step_info)
 
         return reward, step_info
 

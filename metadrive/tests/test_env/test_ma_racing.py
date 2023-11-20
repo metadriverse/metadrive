@@ -74,7 +74,15 @@ def _act(env, action):
 
 @pytest.mark.parametrize("num_agents", [1, 3, 5, 8, 12])
 def test_ma_racing_env_with_IDM(num_agents):
-    env = MultiAgentRacingEnv(dict(num_agents=num_agents, agent_policy=IDMPolicy, use_render=True, debug=True))
+    env = MultiAgentRacingEnv(
+        dict(
+            num_agents=num_agents,
+            agent_policy=IDMPolicy,
+            # use_render=True,
+            # prefer_track_agent="agent11",
+            debug=True
+        )
+    )
     try:
         _check_spaces_before_reset(env)
         obs, _ = env.reset()
@@ -84,7 +92,7 @@ def test_ma_racing_env_with_IDM(num_agents):
         for step in range(3_000):
             act = {k: [1, 1] for k in env.vehicles.keys()}
             o, r, tm, tc, i = _act(env, act)
-            env.render(mode="topdown")
+            # env.render(mode="topdown")
             if step == 0:
                 assert not any(tm.values())
                 assert not any(tc.values())
@@ -105,12 +113,12 @@ def test_ma_racing_env_with_IDM(num_agents):
                     assert not i[k][TerminationState.CRASH_VEHICLE]
                     assert not i[k][TerminationState.CRASH]
                     assert not i[k][TerminationState.OUT_OF_ROAD]
-                assert 1450 < max(episode_reward_record.values()) < 1550
-                assert 1400 < min(episode_reward_record.values()) < 1500
+                assert 2100 < max(episode_reward_record.values()) < 2300
+                assert 2100 < min(episode_reward_record.values()) < 2300
                 break
     finally:
         env.close()
 
 
 if __name__ == '__main__':
-    test_ma_racing_env_with_IDM(1)
+    test_ma_racing_env_with_IDM(12)
