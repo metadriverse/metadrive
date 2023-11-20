@@ -32,22 +32,29 @@ def wrap_to_pi(x: float) -> float:
     angles -= 2 * np.pi * (angles > np.pi)
     return angles
 
-def difference_between_radians(angle1: float, angle2: float) -> float:
+
+def difference_between_radians(angle1: float, angle2: float, clockwise: bool) -> float:
     """Compute the difference of radians (angle1 - angle2) and return in range [-2pi, +2pi].
 
     Args:
         angle1: radian, float.
         angle2: radian, float.
+        clockwise: whether compute the difference in clockwise, bool. If clockwise = True, the positive angle difference
+            means angle1 is "smaller" than angle2.
 
     Returns:
-        difference: radian, float
+        difference: radian in range (0, 2pi), float
     """
     angle1 = wrap_to_pi(angle1)
     angle2 = wrap_to_pi(angle2)
-    diff = angle1 - angle2
-    diff %= 4 * np.pi
-    diff -= 4 * np.pi * (diff > 2 * np.pi)
-    return diff
+
+    diff_cw = (angle2 - angle1) % (2 * np.pi)  # Say angle2=30deg, angle1=-30deg, the clockwise diff is 60deg.
+    diff_ccw = (angle1 - angle2) % (2 * np.pi)  # Say angle2=30deg, angle1=-30deg, the counterclockwise diff is 300deg.
+
+    if clockwise:
+        return diff_cw  # must in [0, 2pi]
+    else:
+        return diff_ccw  # must in [0, 2pi]
 
 
 def get_vertical_vector(vector: np.array):

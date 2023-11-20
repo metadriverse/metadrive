@@ -86,11 +86,13 @@ class CircularLane(PGLane):
         # We shouldn't wrap angle in [-pi, pi] here because the relative phi can be reverted if the difference > 180
         # degree. Let's say abs_phi=-91deg, start_phase=90deg, the relative_phi=-181deg. You shouldn't wrap it to 179deg
         # bc the meaning is completely different!
-        # But note that we still need to wrap the difference into [-2pi, +2pi].
-        relative_phi = difference_between_radians(abs_phi, self.start_phase)
+        # Now, the output relative phi must in range [0, 2pi].
+        relative_phi = difference_between_radians(abs_phi, self.start_phase, clockwise=self.is_clockwise())
+
+        # TODO(pzh): What if the relative_phi is larger than self.angle? In this case the longitudinal is undetermined.
 
         distance_to_center = norm(delta_x, delta_y)
-        longitudinal = self.direction * relative_phi * self.radius
+        longitudinal = relative_phi * self.radius
         lateral = self.direction * (distance_to_center - self.radius)
         return longitudinal, lateral
 
