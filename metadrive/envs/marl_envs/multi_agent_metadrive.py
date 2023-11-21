@@ -224,7 +224,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         new_spawn_place_config = new_spawn_place["config"]
         new_spawn_place_config = self.engine.spawn_manager.update_destination_for(new_agent_id, new_spawn_place_config)
         vehicle.config.update(new_spawn_place_config)
-        vehicle.reset()
+        vehicle.reset(vehicle.config.copy())
         after_step_info = vehicle.after_step()
         step_info.update(after_step_info)
         self.dones[new_agent_id] = False  # Put it in the internal dead-tracking dict.

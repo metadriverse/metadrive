@@ -115,13 +115,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None,
-        _calling_reset=True,
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None,
+            _calling_reset=True,
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -272,14 +272,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        vehicle_config=None,
-        name=None,
-        random_seed=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,
-        *args,
-        **kwargs
+            self,
+            vehicle_config=None,
+            name=None,
+            random_seed=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -289,12 +289,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if name is not None:
             self.rename(name)
 
+        # reset fully
+        self.update_config(self.engine.global_config["vehicle_config"])
         if random_seed is not None:
             assert isinstance(random_seed, int)
             self.seed(random_seed)
             self.sample_parameters()
-        # restore config LQY: bug MARL
-        # self.update_config(self.engine.global_config["vehicle_config"])
+
         if vehicle_config is not None:
             self.update_config(vehicle_config)
         from metadrive.component.vehicle.vehicle_type import vehicle_class_to_type
@@ -325,6 +326,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             heading = self.config["spawn_position_heading"][1]
 
         self.spawn_place = position
+        # print("position:", position)
         self.set_heading_theta(heading)
         self.set_static(False)
         # self.set_wheel_friction(self.config["wheel_friction"])
@@ -543,8 +545,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -873,7 +875,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -908,9 +910,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property

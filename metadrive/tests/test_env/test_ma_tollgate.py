@@ -575,20 +575,27 @@ def test_ma_toll_no_short_episode():
 
 
 def test_ma_toll_horizon_termination(vis=False):
+    """
+    It may collide with other cars as well! so assertion may fail.
+    """
     # test horizon
     env = MultiAgentTollgateEnv(
         {
             "horizon": 100,
             "num_agents": 8,
+            "debug_static_world": True,
+            "debug_physics_world": True,
             "use_render": vis,
             "debug": True,
             "crash_done": False,
+            "log_level": 50,
         }
     )
     try:
         for _ in range(3):  # This function is really easy to break, repeat multiple times!
             _check_spaces_before_reset(env)
             obs, _ = env.reset()
+            # env.engine.toggleDebug()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             should_respawn = set()
