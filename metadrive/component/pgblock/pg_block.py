@@ -313,10 +313,11 @@ class PGBlock(BaseBlock):
         start_lat *= lateral_direction
         side_lat *= lateral_direction
         if lane.radius != 0 and side_lat > lane.radius:
-            raise ValueError(
+            logger.warning(
                 "The sidewalk width ({}) is too large."
                 " It should be < radius ({})".format(side_lat, lane.radius)
             )
+            return
         for k, lateral in enumerate([start_lat, side_lat]):
             if k == 1:
                 longs = longs[::-1]
