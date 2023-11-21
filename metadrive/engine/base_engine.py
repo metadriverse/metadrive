@@ -846,6 +846,7 @@ class BaseEngine(EngineCore, Randomizable):
         assert object_id in self._object_tasks, "Can not find the task for object(id: {})".format(object_id)
         return self._object_tasks[object_id]
 
+
 if __name__ == "__main__":
     from metadrive.envs.base_env import BASE_DEFAULT_CONFIG
 
