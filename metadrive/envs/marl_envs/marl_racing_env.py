@@ -269,14 +269,15 @@ class RacingMap(PGMap):
         )
         last_block.construct_from_config(
             {
-                Parameter.length: 40,
+                Parameter.length: 50,
                 Parameter.radius: 20,
-                Parameter.angle: 190,
+                Parameter.angle: 180,
                 Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
         self.blocks.append(last_block)
         block_index += 1
+
 
         last_block = Straight(
             block_index,
