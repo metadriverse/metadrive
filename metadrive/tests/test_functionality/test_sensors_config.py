@@ -6,7 +6,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 def test_sensor_config():
     env = MetaDriveEnv({
         "sensors": {
-            "lidar": (Lidar,)
+            "lidar": (Lidar, )
         },
     })
     try:
@@ -19,19 +19,20 @@ def test_sensor_config():
 
     env = MetaDriveEnv({
         "sensors": {
-            "lidar_new": (Lidar,)
+            "lidar_new": (Lidar, )
         },
     })
     try:
         env.reset()
         assert 50 in env.engine.get_sensor("lidar").broad_detectors
         assert len(env.engine.get_sensor("lidar").broad_detectors) == 1
-        env.engine.get_sensor("lidar_new").perceive(env.vehicle,
-                                                    physics_world=env.engine.physics_world.dynamic_world,
-                                                    num_lasers=env.vehicle.config["lidar"]["num_lasers"],
-                                                    distance=100.5,
-                                                    detector_mask=None
-                                                    )
+        env.engine.get_sensor("lidar_new").perceive(
+            env.vehicle,
+            physics_world=env.engine.physics_world.dynamic_world,
+            num_lasers=env.vehicle.config["lidar"]["num_lasers"],
+            distance=100.5,
+            detector_mask=None
+        )
         assert 100 in env.engine.get_sensor("lidar_new").broad_detectors
         assert 50 not in env.engine.get_sensor("lidar_new").broad_detectors
         assert len(env.engine.get_sensor("lidar_new").broad_detectors) == 1
@@ -44,12 +45,13 @@ def test_sensor_config():
         env.reset()
         assert 50 in env.engine.get_sensor("lidar").broad_detectors
         assert len(env.engine.get_sensor("lidar").broad_detectors) == 1
-        env.engine.get_sensor("lidar_new").perceive(env.vehicle,
-                                                    physics_world=env.engine.physics_world.dynamic_world,
-                                                    num_lasers=env.vehicle.config["lidar"]["num_lasers"],
-                                                    distance=100.5,
-                                                    detector_mask=None
-                                                    )
+        env.engine.get_sensor("lidar_new").perceive(
+            env.vehicle,
+            physics_world=env.engine.physics_world.dynamic_world,
+            num_lasers=env.vehicle.config["lidar"]["num_lasers"],
+            distance=100.5,
+            detector_mask=None
+        )
         assert 100 in env.engine.get_sensor("lidar_new").broad_detectors
         assert 50 not in env.engine.get_sensor("lidar_new").broad_detectors
         assert len(env.engine.get_sensor("lidar_new").broad_detectors) == 1

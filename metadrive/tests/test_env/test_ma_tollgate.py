@@ -576,7 +576,7 @@ def test_ma_toll_no_short_episode():
 
 def test_ma_toll_horizon_termination(vis=False):
     """
-    It may collide with other cars as well! so assertion may fail.
+    Instead of driving out of road, it may collide with other cars as well! so assertion may fail.
     """
     # test horizon
     env = MultiAgentTollgateEnv(
