@@ -1,3 +1,5 @@
+from collections import defaultdict, deque
+
 from metadrive.component.map.pg_map import PGMap
 from metadrive.component.pg_space import Parameter
 from metadrive.component.pgblock.curve import Curve
@@ -5,11 +7,10 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.straight import Straight
 from metadrive.component.sensors.lidar import Lidar
 from metadrive.constants import PGLineType
+from metadrive.constants import TerminationState
 from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.utils import Config
-from metadrive.constants import TerminationState
-from collections import defaultdict, deque
 
 RACING_CONFIG = dict(
 
@@ -26,11 +27,14 @@ RACING_CONFIG = dict(
     # We still want to use single-agent observation
     vehicle_config=dict(
         lidar=dict(
-            num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0, add_others_navi=False
+            num_lasers=72, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0, add_others_navi=False
         ),
+        side_detector=dict(num_lasers=72, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
         enable_reverse=False,
         random_navi_mark_color=True,
-        show_navi_mark=False,
+        # show_navi_mark=True,
+        # show_side_detector=True,
+        # show_lidar=True,
     ),
     sensors=dict(lidar=(Lidar, 50)),
 
@@ -41,8 +45,9 @@ RACING_CONFIG = dict(
     # Reward setting
     use_lateral=False,
     out_of_road_penalty=5,  # Add little penalty to avoid hitting the wall (guardrail).
-    crash_sidewalk_penalty=1,
     idle_penalty=1,
+    success_reward=20,
+    crash_sidewalk_penalty=1,
 
     # Termination condition
     cross_yellow_line_done=False,
@@ -71,7 +76,7 @@ RACING_CONFIG = dict(
 class RacingMap(PGMap):
     """Create a complex racing map by manually design the topology."""
     def _generate(self):
-        """ Generate the racing map.
+        """Generate the racing map.
 
         Returns:
             None
