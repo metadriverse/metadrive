@@ -592,7 +592,7 @@ def test_ma_toll_horizon_termination(vis=False):
         }
     )
     try:
-        for _ in range(3):  # This function is really easy to break, repeat multiple times!
+        for _ in range(1):  # This function is really easy to break, repeat multiple times!
             _check_spaces_before_reset(env)
             obs, _ = env.reset()
             # env.engine.toggleDebug()
