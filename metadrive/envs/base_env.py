@@ -135,7 +135,7 @@ BASE_DEFAULT_CONFIG = dict(
     # }
     # Example:
     # sensors = dict(
-    #           lidar=(Lidar, 50),
+    #           lidar=(Lidar,),
     #           side_detector=(SideDetector,),
     #           lane_line_detector=(LaneLineDetector,)
     #           rgb_camera=(RGBCamera, 84, 84),
