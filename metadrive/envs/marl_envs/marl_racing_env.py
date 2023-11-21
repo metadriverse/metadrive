@@ -55,11 +55,11 @@ RACING_CONFIG = dict(
     idle_done=True,
 
     # Debug setting
-    show_fps=False,
+    show_fps=True,
     use_chase_camera_follow_lane=True,
     camera_smooth_buffer_size=100,
-    show_interface=False,
-    show_coordinates=True,
+    show_interface=True,
+    show_coordinates=False,
     camera_dist=16,
     camera_pitch=20,
     camera_height=8,
