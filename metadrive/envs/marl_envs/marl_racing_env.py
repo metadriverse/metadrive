@@ -236,47 +236,7 @@ class RacingMap(PGMap):
             {
                 Parameter.length: 40,
                 Parameter.radius: 50,
-                Parameter.angle: 180,
-                Parameter.dir: 1,
-            }, parent_node_path, physics_world
-        )
-        self.blocks.append(last_block)
-        block_index += 1
-
-        last_block = Curve(
-            block_index,
-            last_block.get_socket(0),
-            self.road_network,
-            1,
-            remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.GUARDRAIL,
-            center_line_type=PGLineType.GUARDRAIL
-        )
-        last_block.construct_from_config(
-            {
-                Parameter.length: 40,
-                Parameter.radius: 50,
-                Parameter.angle: 220,
-                Parameter.dir: 0,
-            }, parent_node_path, physics_world
-        )
-        self.blocks.append(last_block)
-        block_index += 1
-
-        last_block = Curve(
-            block_index,
-            last_block.get_socket(0),
-            self.road_network,
-            1,
-            remove_negative_lanes=True,
-            side_lane_line_type=PGLineType.GUARDRAIL,
-            center_line_type=PGLineType.GUARDRAIL
-        )
-        last_block.construct_from_config(
-            {
-                Parameter.length: 50,
-                Parameter.radius: 20,
-                Parameter.angle: 180,
+                Parameter.angle: 120,
                 Parameter.dir: 1,
             }, parent_node_path, physics_world
         )
@@ -293,7 +253,7 @@ class RacingMap(PGMap):
             center_line_type=PGLineType.GUARDRAIL
         )
         last_block.construct_from_config({
-            Parameter.length: 100,
+            Parameter.length: 200,
         }, parent_node_path, physics_world)
         self.blocks.append(last_block)
         block_index += 1
@@ -311,7 +271,7 @@ class RacingMap(PGMap):
             {
                 Parameter.length: 100,
                 Parameter.radius: 40,
-                Parameter.angle: 140,
+                Parameter.angle: 120,
                 Parameter.dir: 0,
             }, parent_node_path, physics_world
         )
