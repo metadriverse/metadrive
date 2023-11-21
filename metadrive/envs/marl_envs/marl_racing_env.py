@@ -391,19 +391,20 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         # Reward for moving forward in current lane
         if vehicle.lane in vehicle.navigation.current_ref_lanes:
             current_lane = vehicle.lane
-            positive_road = 1
         else:
             current_lane = vehicle.navigation.current_ref_lanes[0]
             current_road = vehicle.navigation.current_road
-            positive_road = 1 if not current_road.is_negative_road() else -1
-        long_last, _ = current_lane.local_coordinates(vehicle.last_position)
-        long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+        longitudinal_last, _ = current_lane.local_coordinates(vehicle.last_position)
+        longitudinal_now, lateral_now = current_lane.local_coordinates(vehicle.position)
 
-        self.movement_between_steps[vehicle_id].append(abs(long_now - long_last))
+        self.movement_between_steps[vehicle_id].append(abs(longitudinal_now - longitudinal_last))
 
         reward = 0.0
-        reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
-        reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
+        reward += self.config["driving_reward"] * (longitudinal_now - longitudinal_last)
+        reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h)
+
+        step_info["progress"] = (longitudinal_now - longitudinal_last)
+        step_info["speed_km_h"] = vehicle.speed_km_h
 
         step_info["step_reward"] = reward
         step_info["crash_sidewalk"] = False

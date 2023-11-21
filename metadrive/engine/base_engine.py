@@ -361,6 +361,9 @@ class BaseEngine(EngineCore, Randomizable):
 
             cm = process_memory()
 
+        if self.lane_coordinates_debug_node is not None:
+            self.lane_coordinates_debug_node.removeNode()
+
         # reset manager
         for manager_name, manager in self._managers.items():
             # clean all manager
