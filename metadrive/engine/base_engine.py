@@ -570,6 +570,9 @@ class BaseEngine(EngineCore, Randomizable):
             del self._top_down_renderer
             self._top_down_renderer = None
 
+        if self.lane_coordinates_debug_node is not None:
+            self.lane_coordinates_debug_node.removeNode()
+
     def __del__(self):
         logger.debug("{} is destroyed".format(self.__class__.__name__))
 
