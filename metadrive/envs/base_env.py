@@ -144,7 +144,7 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors=dict(lidar=(Lidar, 50), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
 
     # ===== Engine Core config =====
     # if true pop a window to render

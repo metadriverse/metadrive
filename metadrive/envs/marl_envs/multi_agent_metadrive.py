@@ -46,7 +46,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
         # for more information
         vehicle_model="static_default",
     ),
-    sensors=dict(lidar=(Lidar, 40)),
+    sensors=dict(lidar=(Lidar, )),
     target_vehicle_configs=dict(),
 
     # ===== New Reward Setting =====

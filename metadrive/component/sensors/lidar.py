@@ -22,48 +22,46 @@ class Lidar(DistanceDetector):
 
     _disable_detector_mask = False
 
-    def __init__(self, broad_phase_distance, engine):
+    def __init__(self, engine):
         super(Lidar, self).__init__(engine)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
         self.mask = CollisionGroup.can_be_lidar_detected()
-
-        # lidar can calculate the detector mask by itself
-        self.broad_phase_distance = broad_phase_distance
-        self.broad_detector = NodePath(BulletGhostNode("detector_mask"))
-        self.broad_detector.node().addShape(BulletCylinderShape(self.BROAD_PHASE_EXTRA_DIST + broad_phase_distance, 5))
-        self.broad_detector.node().setIntoCollideMask(CollisionGroup.LidarBroadDetector)
-        self.broad_detector.node().setStatic(True)
-        engine = self.engine
-        engine.physics_world.static_world.attach(self.broad_detector.node())
         self.enable_mask = True if not Lidar._disable_detector_mask else False
 
-        self._node_path_list.append(self.broad_detector)
+        # lidar can calculate the detector mask by itself
+        self.broad_detectors = {}
+
+    def get_broad_phase_detector(self, radius):
+        radius = int(radius)
+        if radius in self.broad_detectors:
+            broad_detector = self.broad_detectors[radius]
+        else:
+            broad_phase_distance = int(radius)
+            broad_detector = NodePath(BulletGhostNode("detector_mask"))
+            broad_detector.node().addShape(BulletCylinderShape(self.BROAD_PHASE_EXTRA_DIST + broad_phase_distance, 5))
+            broad_detector.node().setIntoCollideMask(CollisionGroup.LidarBroadDetector)
+            broad_detector.node().setStatic(True)
+            self._node_path_list.append(broad_detector)
+            self.engine.physics_world.static_world.attach(broad_detector.node())
+            self.broad_detectors[broad_phase_distance] = broad_detector
+        return broad_detector
 
     def perceive(
-        self,
-        base_vehicle,
-        physics_world,
-        num_lasers,
-        distance,
-        height=None,
-        detector_mask: np.ndarray = None,
-        show=False
+            self,
+            base_vehicle,
+            physics_world,
+            num_lasers,
+            distance,
+            height=None,
+            detector_mask: np.ndarray = None,
+            show=False
     ):
-        res = self._get_lidar_mask(base_vehicle, num_lasers)
+        res = self._get_lidar_mask(base_vehicle, num_lasers, distance)
         if self.enable_mask:
             lidar_mask = detector_mask or res[0]
         else:
             lidar_mask = None
         detected_objects = res[1]
-        error = self.broad_phase_distance - distance
-        if abs(error) > 1:
-            self.logger.warning(
-                "The radius difference between broad phase detector Lidar laser is too large: {}."
-                "This result in errors "
-                "when generating point cloud and sensing surrounding objects."
-                "Please align the two parameters in config "
-                "to get the best Lidar performance".format(error)
-            )
         return super(Lidar, self).perceive(
             base_vehicle,
             physics_world,
@@ -93,7 +91,7 @@ class Lidar(DistanceDetector):
         return relative
 
     def get_surrounding_vehicles_info(
-        self, ego_vehicle, detected_objects, perceive_distance, num_others, add_others_navi
+            self, ego_vehicle, detected_objects, perceive_distance, num_others, add_others_navi
     ):
         surrounding_vehicles = list(self.get_surrounding_vehicles(detected_objects))
         surrounding_vehicles.sort(
@@ -139,20 +137,20 @@ class Lidar(DistanceDetector):
 
         return res
 
-    def _get_lidar_mask(self, vehicle, num_lasers):
+    def _get_lidar_mask(self, vehicle, num_lasers, radius):
         pos1 = vehicle.position
         head1 = vehicle.heading_theta
 
-        mask = np.zeros((num_lasers, ), dtype=bool)
+        mask = np.zeros((num_lasers,), dtype=bool)
         mask.fill(False)
-        objs = self.get_surrounding_objects(vehicle)
+        objs = self.get_surrounding_objects(vehicle, int(radius))
         for obj in objs:
             pos2 = obj.position
             length = obj.LENGTH if hasattr(obj, "LENGTH") else vehicle.LENGTH
             width = obj.WIDTH if hasattr(obj, "WIDTH") else vehicle.WIDTH
-            half_max_span_square = ((length + width) / 2)**2
+            half_max_span_square = ((length + width) / 2) ** 2
             diff = (pos2[0] - pos1[0], pos2[1] - pos1[1])
-            dist_square = diff[0]**2 + diff[1]**2
+            dist_square = diff[0] ** 2 + diff[1] ** 2
             if dist_square < half_max_span_square:
                 mask.fill(True)
                 continue
@@ -169,16 +167,17 @@ class Lidar(DistanceDetector):
 
         return mask, objs
 
-    def get_surrounding_objects(self, vehicle):
-        self.broad_detector.setPos(panda_vector(vehicle.position))
+    def get_surrounding_objects(self, vehicle, radius=50):
+        broad_detector = self.get_broad_phase_detector(int(radius))
+        broad_detector.setPos(panda_vector(vehicle.position))
         physics_world = vehicle.engine.physics_world.dynamic_world
-        contact_results = physics_world.contactTest(self.broad_detector.node(), True).getContacts()
+        contact_results = physics_world.contactTest(broad_detector.node(), True).getContacts()
         objs = set()
         for contact in contact_results:
             node0 = contact.getNode0()
             node1 = contact.getNode1()
             nodes = [node0, node1]
-            nodes.remove(self.broad_detector.node())
+            nodes.remove(broad_detector.node())
             obj = get_object_from_node(nodes[0])
             if not isinstance(obj, AbstractLane) and obj is not None:
                 objs.add(obj)
@@ -207,6 +206,7 @@ class Lidar(DistanceDetector):
         return mask
 
     def destroy(self):
-        self.engine.physics_world.static_world.remove(self.broad_detector.node())
-        self.broad_detector.removeNode()
+        for detector in self.broad_detectors.values():
+            self.engine.physics_world.static_world.remove(detector.node())
+            detector.removeNode()
         super(Lidar, self).destroy()
