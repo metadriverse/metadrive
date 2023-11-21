@@ -119,6 +119,7 @@ class CamMask(Mask):
     DepthCam = BitMask32.bit(14)
     ScreenshotCam = BitMask32.bit(15)
     SemanticCam = BitMask32.bit(16)
+    LidarCam = BitMask32.bit(17)
 
 
 class CollisionGroup(Mask):
