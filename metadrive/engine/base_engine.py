@@ -107,9 +107,6 @@ class BaseEngine(EngineCore, Randomizable):
             self.record_manager.add_policy_info(object_id, policy_class, *args, **kwargs)
         return policy
 
-    def add_task(self, object_id, task):
-        self._object_tasks[object_id] = task
-
     def get_policy(self, object_id):
         """
         Return policy of specific object with id
@@ -122,15 +119,6 @@ class BaseEngine(EngineCore, Randomizable):
             # print("Can not find the policy for object(id: {})".format(object_id))
             return None
 
-    def get_task(self, object_id):
-        """
-        Return task of specific object with id
-        :param object_id: a filter function, only return objects satisfying this condition
-        :return: task
-        """
-        assert object_id in self._object_tasks, "Can not find the task for object(id: {})".format(object_id)
-        return self._object_tasks[object_id]
-
     def has_policy(self, object_id, policy_cls=None):
         if policy_cls is None:
             return True if object_id in self._object_policies else False
@@ -138,9 +126,6 @@ class BaseEngine(EngineCore, Randomizable):
             return True if object_id in self._object_policies and isinstance(
                 self._object_policies[object_id], policy_cls
             ) else False
-
-    def has_task(self, object_id):
-        return True if object_id in self._object_tasks else False
 
     def spawn_object(
         self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
@@ -174,7 +159,7 @@ class BaseEngine(EngineCore, Randomizable):
         if self.global_config["record_episode"] and not self.replay_episode and record:
             self.record_manager.add_spawn_info(obj, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
-        color = self.pick_color(obj.id)
+        color = self._pick_color(obj.id)
         if color == (-1, -1, -1):
             print("FK!~")
             exit()
@@ -182,7 +167,7 @@ class BaseEngine(EngineCore, Randomizable):
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
 
-    def pick_color(self, id):
+    def _pick_color(self, id):
         """
         Return a color multiplier representing a unique color for an object if some colors are available.
         Return -1,-1,-1 if no color available
@@ -200,7 +185,7 @@ class BaseEngine(EngineCore, Randomizable):
         self.c_id[my_color] = id
         return my_color
 
-    def clean_color(self, id):
+    def _clean_color(self, id):
         """
         Relinquish a color once the object is focibly destroyed
         SideEffect:
@@ -293,7 +278,7 @@ class BaseEngine(EngineCore, Randomizable):
                 policy = self._object_policies.pop(id)
                 policy.destroy()
             if force_destroy_this_obj:
-                self.clean_color(obj.id)
+                self._clean_color(obj.id)
                 obj.destroy()
             else:
                 obj.detach_from_world(self.physics_world)
@@ -308,7 +293,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if len(self._dying_objects[obj.class_name]) < self.global_config["num_buffering_objects"]:
                     self._dying_objects[obj.class_name].append(obj)
                 else:
-                    self.clean_color(obj.id)
+                    self._clean_color(obj.id)
                     obj.destroy()
             if self.global_config["record_episode"] and not self.replay_episode and record:
                 self.record_manager.add_clear_info(obj)
@@ -324,7 +309,7 @@ class BaseEngine(EngineCore, Randomizable):
                 obj in self._dying_objects[obj.class_name]:
             self._dying_objects[obj.class_name].remove(obj)
             if hasattr(obj, "destroy"):
-                self.clean_color(obj.id)
+                self._clean_color(obj.id)
                 obj.destroy()
         del obj
 
@@ -550,11 +535,11 @@ class BaseEngine(EngineCore, Randomizable):
                 self._object_policies.pop(id).destroy()
             if id in self._object_tasks:
                 self._object_tasks.pop(id).destroy()
-            self.clean_color(obj.id)
+            self._clean_color(obj.id)
             obj.destroy()
         for cls, pending_obj in self._dying_objects.items():
             for obj in pending_obj:
-                self.clean_color(obj.id)
+                self._clean_color(obj.id)
                 obj.destroy()
         if self.main_camera is not None:
             self.main_camera.destroy()
@@ -728,14 +713,6 @@ class BaseEngine(EngineCore, Randomizable):
         return {"replay_manager": self.replay_manager} if self.replay_episode and not \
             self.only_reset_when_replay else self._managers
 
-    def change_object_name(self, obj, new_name):
-        raise DeprecationWarning("This function is too dangerous to be used")
-        """
-        Change the name of one object, Note: it may bring some bugs if abusing
-        """
-        obj = self._spawned_objects.pop(obj.name)
-        self._spawned_objects[new_name] = obj
-
     def object_to_agent(self, obj_name):
         if self.replay_episode:
             return self.replay_manager.current_frame.object_to_agent(obj_name)
@@ -754,7 +731,7 @@ class BaseEngine(EngineCore, Randomizable):
             self.top_down_renderer = TopDownRenderer(*args, **kwargs)
         return self.top_down_renderer.render(text, *args, **kwargs)
 
-    def get_window_image(self, return_bytes=False):
+    def _get_window_image(self, return_bytes=False):
         window_count = self.graphicsEngine.getNumWindows() - 1
         texture = self.graphicsEngine.getWindow(window_count).getDisplayRegion(0).getScreenshot()
 
@@ -843,6 +820,31 @@ class BaseEngine(EngineCore, Randomizable):
             else:
                 AssetLoader.logger.info("Assets version: {}".format(VERSION))
 
+    def change_object_name(self, obj, new_name):
+        raise DeprecationWarning("This function is too dangerous to be used")
+        """
+        Change the name of one object, Note: it may bring some bugs if abusing
+        """
+        obj = self._spawned_objects.pop(obj.name)
+        self._spawned_objects[new_name] = obj
+
+    def add_task(self, object_id, task):
+        raise DeprecationWarning
+        self._object_tasks[object_id] = task
+
+    def has_task(self, object_id):
+        raise DeprecationWarning
+        return True if object_id in self._object_tasks else False
+
+    def get_task(self, object_id):
+        """
+        Return task of specific object with id
+        :param object_id: a filter function, only return objects satisfying this condition
+        :return: task
+        """
+        raise DeprecationWarning
+        assert object_id in self._object_tasks, "Can not find the task for object(id: {})".format(object_id)
+        return self._object_tasks[object_id]
 
 if __name__ == "__main__":
     from metadrive.envs.base_env import BASE_DEFAULT_CONFIG

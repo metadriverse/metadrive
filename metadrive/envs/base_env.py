@@ -486,7 +486,7 @@ class BaseEnv(gym.Env):
             # #     raise ValueError("Not implemented yet!")
             # self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT])
             # return self.temporary_img_obs.get_image()
-            return self.engine.get_window_image(return_bytes=return_bytes)
+            return self.engine._get_window_image(return_bytes=return_bytes)
         return None
 
     def reset(self, seed: Union[None, int] = None):
