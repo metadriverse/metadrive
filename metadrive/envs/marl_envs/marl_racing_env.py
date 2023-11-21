@@ -283,7 +283,6 @@ class RacingMap(PGMap):
         self.blocks.append(last_block)
         block_index += 1
 
-
         last_block = Straight(
             block_index,
             last_block.get_socket(0),
