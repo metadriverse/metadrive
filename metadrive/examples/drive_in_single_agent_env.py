@@ -14,6 +14,7 @@ import numpy as np
 
 from metadrive import MetaDriveEnv
 from metadrive.component.sensors.rgb_camera import RGBCamera
+from metadrive.component.sensors.depth_camera import DepthCamera
 from metadrive.constants import HELP_MESSAGE
 
 if __name__ == "__main__":
@@ -41,7 +42,7 @@ if __name__ == "__main__":
         config.update(
             dict(
                 image_observation=True,
-                sensors=dict(rgb_camera=(RGBCamera, 512, 256)),
+                sensors=dict(rgb_camera=(DepthCamera, 512, 256)),
                 interface_panel=["rgb_camera", "dashboard"]
             )
         )
