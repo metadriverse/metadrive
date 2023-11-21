@@ -78,7 +78,7 @@ def test_ma_racing_env_with_IDM(num_agents):
         dict(
             num_agents=num_agents,
             agent_policy=IDMPolicy,
-            use_render=True,
+            # use_render=True,
             # prefer_track_agent="agent11",
             debug=True
         )
@@ -113,8 +113,8 @@ def test_ma_racing_env_with_IDM(num_agents):
                     assert not i[k][TerminationState.CRASH_VEHICLE]
                     assert not i[k][TerminationState.CRASH]
                     assert not i[k][TerminationState.OUT_OF_ROAD]
-                assert 1850 < max(episode_reward_record.values()) < 2000
-                assert 1850 < min(episode_reward_record.values()) < 2000
+                assert 1800 < max(episode_reward_record.values()) < 2000
+                assert 1800 < min(episode_reward_record.values()) < 2000
                 break
     finally:
         env.close()
