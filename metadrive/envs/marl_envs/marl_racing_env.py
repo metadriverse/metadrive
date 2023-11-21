@@ -68,7 +68,6 @@ RACING_CONFIG = dict(
     camera_dist=16,
     camera_pitch=20,
     camera_height=8,
-
     # debug=True,
 )
 
