@@ -101,7 +101,7 @@ def draw_top_down_map(
 
     if return_surface:
         return surface
-    ret = cv2.resize(pygame.surfarray.pixels_red(surface), resolution, interpolation=cv2.INTER_LINEAR)
+    ret = cv2.resize(pygame.surfarray.pixels3d(surface), resolution, interpolation=cv2.INTER_LINEAR)
     return ret
 
 
