@@ -385,10 +385,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 shape = BulletTriangleMeshShape(mesh, dynamic=False)
 
                 body_node.addShape(shape)
-                if self.render:
-                    self.dynamic_nodes.append(body_node)
-                else:
-                    self.static_nodes.append(body_node)
+                self.dynamic_nodes.append(body_node)
                 body_node.setIntoCollideMask(CollisionGroup.Sidewalk)
                 self._node_path_list.append(np)
 

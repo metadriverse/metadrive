@@ -291,7 +291,7 @@ class PGBlock(BaseBlock):
             node_path_list = self._construct_lane_line_segment(start, end, line_color, line_type)
             self._node_path_list.extend(node_path_list)
 
-    def _construct_sidewalk_from_line(self, lane, sidewalk_height=None, lateral_direction=1):
+    def _generate_sidewalk_from_line(self, lane, sidewalk_height=None, lateral_direction=1):
         """
         Construct the sidewalk for this lane
         Args:
@@ -345,10 +345,10 @@ class PGBlock(BaseBlock):
                 self._construct_broken_line(lane, lateral, line_color, line_type)
             elif line_type == PGLineType.SIDE:
                 self._construct_continuous_line(lane, lateral, line_color, line_type)
-                self._construct_sidewalk_from_line(lane)
+                self._generate_sidewalk_from_line(lane)
             elif line_type == PGLineType.GUARDRAIL:
                 self._construct_continuous_line(lane, lateral, line_color, line_type)
-                self._construct_sidewalk_from_line(
+                self._generate_sidewalk_from_line(
                     lane, sidewalk_height=PGDrivableAreaProperty.GUARDRAIL_HEIGHT, lateral_direction=idx
                 )
 
