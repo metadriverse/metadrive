@@ -72,17 +72,20 @@ def _act(env, action):
     return obs, reward, terminated, truncated, info
 
 
-@pytest.mark.parametrize("num_agents", [1, 3, 5, 8, 12])
+@pytest.mark.parametrize("num_agents", [1, 2, 3, 5, 8, 12])
 def test_ma_racing_env_with_IDM(num_agents):
-    env = MultiAgentRacingEnv(
-        dict(
-            num_agents=num_agents,
-            agent_policy=IDMPolicy,
-            # use_render=True,
-            # prefer_track_agent="agent11",
-            debug=True
-        )
+    config = dict(
+        num_agents=num_agents,
+        agent_policy=IDMPolicy,
+        # use_render=True,
+        # prefer_track_agent="agent11",
+        debug=True
     )
+
+    if num_agents > 2:
+        config["map_config"] = {"exit_length": 60}
+
+    env = MultiAgentRacingEnv(config)
     try:
         _check_spaces_before_reset(env)
         obs, _ = env.reset()
@@ -113,15 +116,15 @@ def test_ma_racing_env_with_IDM(num_agents):
                     assert not i[k][TerminationState.CRASH_VEHICLE]
                     assert not i[k][TerminationState.CRASH]
                     assert not i[k][TerminationState.OUT_OF_ROAD]
-                assert 2200 < max(episode_reward_record.values()) < 2300
-                assert 2200 < min(episode_reward_record.values()) < 2300
+                assert 2100 < max(episode_reward_record.values()) < 2300
+                assert 2100 < min(episode_reward_record.values()) < 2300
                 break
     finally:
         env.close()
 
 
 @pytest.mark.parametrize("num_agents", [1, 3, 5, 8, 12])
-def test_guardrail_collision_detection(num_agents):
+def test_guardrail_collision_detection(num_agents, render=False):
     crash_sidewalk_penalty = 7.7
     env = MultiAgentRacingEnv(
         dict(
@@ -129,7 +132,7 @@ def test_guardrail_collision_detection(num_agents):
             crash_sidewalk_done=True,
             crash_sidewalk_penalty=crash_sidewalk_penalty,
             # agent_policy=IDMPolicy,
-            use_render=True,
+            use_render=render,
             # prefer_track_agent="agent11",
             debug=True
         )
@@ -144,7 +147,8 @@ def test_guardrail_collision_detection(num_agents):
             act = {k: [0, 1] for k in env.vehicles.keys()}
             o, r, tm, tc, i = _act(env, act)
             print(i)
-            env.render(mode="topdown")
+            if render:
+                env.render(mode="topdown")
             if step == 0:
                 assert not any(tm.values())
                 assert not any(tc.values())

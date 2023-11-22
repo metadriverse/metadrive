@@ -40,7 +40,7 @@ RACING_CONFIG = dict(
 
     # Number of agents and map setting.
     num_agents=12,
-    map_config=dict(lane_num=2, exit_length=60, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
+    map_config=dict(lane_num=2, exit_length=20, bottle_lane_num=4, neck_lane_num=1, neck_length=20),
 
     # Reward setting
     use_lateral=False,
