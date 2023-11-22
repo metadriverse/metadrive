@@ -120,5 +120,55 @@ def test_ma_racing_env_with_IDM(num_agents):
         env.close()
 
 
+@pytest.mark.parametrize("num_agents", [1, 3, 5, 8, 12])
+def test_guardrail_collision_detection(num_agents):
+    crash_sidewalk_penalty = 7.7
+    env = MultiAgentRacingEnv(
+        dict(
+            num_agents=num_agents,
+            crash_sidewalk_done=True,
+            crash_sidewalk_penalty=crash_sidewalk_penalty,
+            # agent_policy=IDMPolicy,
+            use_render=True,
+            # prefer_track_agent="agent11",
+            debug=True
+        )
+    )
+    try:
+        _check_spaces_before_reset(env)
+        obs, _ = env.reset()
+        _check_spaces_after_reset(env, obs)
+        assert env.observation_space.contains(obs)
+        episode_reward_record = defaultdict(float)
+        for step in range(3_000):
+            act = {k: [0, 1] for k in env.vehicles.keys()}
+            o, r, tm, tc, i = _act(env, act)
+            print(i)
+            env.render(mode="topdown")
+            if step == 0:
+                assert not any(tm.values())
+                assert not any(tc.values())
+            for k in tm.keys():
+                if not tm[k]:
+                    continue
+                assert i[k][TerminationState.CRASH_SIDEWALK]
+                assert not i[k][TerminationState.SUCCESS]
+                assert not i[k][TerminationState.MAX_STEP]
+                assert not i[k][TerminationState.CRASH_VEHICLE]
+                assert not i[k][TerminationState.CRASH]
+                assert not i[k][TerminationState.OUT_OF_ROAD]
+                assert r[k] == -crash_sidewalk_penalty
+            if tm["__all__"]:
+                print("Episode finished at step: ", step)
+                print("Episodic return: ", episode_reward_record)
+                print(
+                    f"Max return {max(episode_reward_record.values())}, Min return {min(episode_reward_record.values())}"
+                )
+                break
+    finally:
+        env.close()
+
+
 if __name__ == '__main__':
-    test_ma_racing_env_with_IDM(12)
+    # test_ma_racing_env_with_IDM(12)
+    test_guardrail_collision_detection(10)

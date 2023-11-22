@@ -58,6 +58,7 @@ RACING_CONFIG = dict(
     max_step_per_agent=3_000,
     horizon=3_000,
     idle_done=True,
+    crash_sidewalk_done=False,
 
     # Debug setting
     show_fps=True,
@@ -367,6 +368,13 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
                 "Episode ended! Scenario Index: {} Reason: IDLE.".format(self.current_seed), extra={"log_once": True}
             )
             done_info[TerminationState.IDLE] = True
+
+        if self.config["crash_sidewalk_done"] and self.vehicles[vehicle_id].crash_sidewalk:
+            done = True
+            done_info[TerminationState.CRASH_SIDEWALK] = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: CRASH_SIDEWALK.".format(self.current_seed), extra={"log_once": True}
+            )
 
         return done, done_info
 
