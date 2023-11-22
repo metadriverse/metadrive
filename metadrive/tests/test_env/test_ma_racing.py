@@ -183,4 +183,4 @@ def test_guardrail_collision_detection(num_agents, render=False):
 
 if __name__ == '__main__':
     # test_ma_racing_env_with_IDM(12)
-    test_guardrail_collision_detection(4,  render=False)
+    test_guardrail_collision_detection(4, render=False)
