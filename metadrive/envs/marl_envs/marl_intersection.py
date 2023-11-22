@@ -351,7 +351,7 @@ def _long_run():
 
 def show_map_and_traj():
     import matplotlib.pyplot as plt
-    from metadrive.obs.top_down_renderer import draw_top_down_map, draw_top_down_trajectory
+    from metadrive.obs.top_down_renderer import draw_top_down_map_native, draw_top_down_trajectory
     import json
     import cv2
     import pygame
@@ -359,7 +359,7 @@ def show_map_and_traj():
     env.reset()
     with open("metasvodist_inter_best.json", "r") as f:
         traj = json.load(f)
-    m = draw_top_down_map(env.current_map, semantic_map=False, return_surface=True)
+    m = draw_top_down_map_native(env.current_map, semantic_map=False, return_surface=True)
     m = draw_top_down_trajectory(
         m, traj, entry_differ_color=True, color_list=[(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)]
     )

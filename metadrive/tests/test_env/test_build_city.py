@@ -3,7 +3,7 @@ import pygame
 from metadrive import MetaDriveEnv
 from metadrive.component.map.city_map import CityMap
 from metadrive.engine.engine_utils import initialize_engine, close_engine
-from metadrive.obs.top_down_renderer import draw_top_down_map
+from metadrive.obs.top_down_renderer import draw_top_down_map_native
 
 
 def _t(num_blocks):
@@ -13,7 +13,7 @@ def _t(num_blocks):
         map_config = default_config["map_config"]
         map_config.update(dict(type="block_num", config=num_blocks))
         map = CityMap(map_config)
-        m = draw_top_down_map(map, return_surface=True)
+        m = draw_top_down_map_native(map, return_surface=True)
         pygame.image.save(m, "test.png".format(num_blocks))
     finally:
         close_engine()

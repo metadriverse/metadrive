@@ -18,14 +18,13 @@ pygame, gfxdraw = import_pygame()
 color_white = (255, 255, 255)
 
 
-def draw_top_down_map(
-    map,
-    resolution: Iterable = (512, 512),
-    semantic_map=True,
-    return_surface=False,
-    film_size=(2000, 2000),
-    scaling=None,
-    semantic_broken_line=True
+def draw_top_down_map_native(
+        map,
+        semantic_map=True,
+        return_surface=False,
+        film_size=(2000, 2000),
+        scaling=None,
+        semantic_broken_line=True
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     """
     Draw the top_down map on a pygame surface
@@ -48,7 +47,7 @@ def draw_top_down_map(
     y_len = b_box[3] - b_box[2]
     max_len = max(x_len, y_len)
     # scaling and center can be easily found by bounding box
-    scaling = scaling if scaling else film_size[1] / max_len - 0.1
+    scaling = scaling if scaling is not None else (film_size[1] / max_len - 0.1)
     surface.scaling = scaling
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
@@ -103,7 +102,7 @@ def draw_top_down_map(
 
 
 def draw_top_down_trajectory(
-    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -162,21 +161,22 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-        self,
-        film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
-        screen_size=(1000, 1000),
-        num_stack=15,
-        history_smooth=0,
-        show_agent_name=False,
-        camera_position=None,
-        target_vehicle_heading_up=False,
-        draw_target_vehicle_trajectory=False,
-        semantic_map=False,
-        semantic_broken_line=True,
-        scaling=5,  # auto-scale
-        draw_contour=True,
-        **kwargs
-        # current_track_vehicle=None
+            self,
+            film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
+            screen_size=(1000, 1000),
+            num_stack=15,
+            history_smooth=0,
+            show_agent_name=False,
+            camera_position=None,
+            target_vehicle_heading_up=False,
+            draw_target_vehicle_trajectory=False,
+            semantic_map=False,
+            semantic_broken_line=True,
+            scaling=5,  # auto-scale
+            draw_contour=True,
+            no_window=False,
+            **kwargs
+            # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
@@ -185,6 +185,7 @@ class TopDownRenderer:
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
         self.contour = draw_contour
         self.semantic_broken_line = semantic_broken_line
+        self.no_window = no_window
 
         if self.show_agent_name:
             pygame.init()
@@ -207,7 +208,7 @@ class TopDownRenderer:
 
         # Setup the canvas
         # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
-        self._background_canvas = draw_top_down_map(
+        self._background_canvas = draw_top_down_map_native(
             self.map,
             scaling=self.scaling,
             semantic_map=self.semantic_map,
@@ -231,7 +232,8 @@ class TopDownRenderer:
 
         # screen and canvas are a regional surface where only part of the super large background will draw.
         # (3) screen is the popup window and canvas is a wrapper to screen but with more features
-        self._screen_canvas = pygame.display.set_mode(self._screen_size)
+        self._screen_canvas = pygame.Surface(self._screen_size) if self.no_window else pygame.display.set_mode(
+            self._screen_size)
         self._screen_canvas.set_alpha(None)
         self._screen_canvas.fill(color_white)
 
@@ -252,9 +254,10 @@ class TopDownRenderer:
 
     def render(self, text, to_image=True, *args, **kwargs):
         self.need_reset = False
-        key_press = pygame.key.get_pressed()
-        if key_press[pygame.K_r]:
-            self.need_reset = True
+        if not self.no_window:
+            key_press = pygame.key.get_pressed()
+            if key_press[pygame.K_r]:
+                self.need_reset = True
 
         # Record current target vehicle
         objects = self.engine.get_objects(lambda obj: not is_map_related_instance(obj))
@@ -280,8 +283,9 @@ class TopDownRenderer:
         self._draw(*args, **kwargs)
         self._add_text(text)
         self.blit()
-        ret = self.screen_canvas.copy()
-        ret = ret.convert(24)
+        ret = self.screen_canvas
+        if not self.no_window:
+            ret = ret.convert(24)
         return WorldSurface.to_cv2_image(ret) if to_image else ret
 
     def _add_text(self, text: dict):
@@ -301,14 +305,15 @@ class TopDownRenderer:
             count += 1
 
     def blit(self):
-        pygame.display.update()
+        if not self.no_window:
+            pygame.display.update()
 
     def close(self):
         pygame.quit()
 
     def reset(self, map):
         # Reset the super large background
-        self._background_canvas = draw_top_down_map(
+        self._background_canvas = draw_top_down_map_native(
             map,
             scaling=self.scaling,
             semantic_map=self.semantic_map,
@@ -498,11 +503,12 @@ class TopDownRenderer:
                         # special_flags=pygame.BLEND_RGBA_MULT
                     )
 
-    @staticmethod
-    def _handle_event() -> None:
+    def _handle_event(self) -> None:
         """
         Handle pygame events for moving and zooming in the displayed area.
         """
+        if self.no_window:
+            return
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.KEYDOWN:
