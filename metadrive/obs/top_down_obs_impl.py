@@ -196,7 +196,7 @@ class WorldSurface(pygame.Surface):
         """
         img_array = np.array(pygame.surfarray.pixels3d(surface))
         image_object = np.transpose(img_array, (1, 0, 2))
-        image_object[:, :, [0, 2]] = image_object[:, :, [2, 0]]
+        # image_object[:, :, [0, 2]] = image_object[:, :, [2, 0]]
         return image_object
 
 
