@@ -126,17 +126,20 @@ def test_ma_racing_env_with_IDM(num_agents):
 @pytest.mark.parametrize("num_agents", [1, 3, 5, 8, 12])
 def test_guardrail_collision_detection(num_agents, render=False):
     crash_sidewalk_penalty = 7.7
-    env = MultiAgentRacingEnv(
-        dict(
-            num_agents=num_agents,
-            crash_sidewalk_done=True,
-            crash_sidewalk_penalty=crash_sidewalk_penalty,
-            # agent_policy=IDMPolicy,
-            use_render=render,
-            # prefer_track_agent="agent11",
-            debug=True
-        )
+    config = dict(
+        num_agents=num_agents,
+        crash_sidewalk_done=True,
+        crash_sidewalk_penalty=crash_sidewalk_penalty,
+        # agent_policy=IDMPolicy,
+        use_render=render,
+        # prefer_track_agent="agent11",
+        debug=True
     )
+
+    if num_agents > 2:
+        config["map_config"] = {"exit_length": 60}
+
+    env = MultiAgentRacingEnv(config)
     try:
         _check_spaces_before_reset(env)
         obs, _ = env.reset()
@@ -152,7 +155,11 @@ def test_guardrail_collision_detection(num_agents, render=False):
             if step == 0:
                 assert not any(tm.values())
                 assert not any(tc.values())
+            for k, v in r.items():
+                episode_reward_record[k] += v
             for k in tm.keys():
+                if k == "__all__":
+                    continue
                 if not tm[k]:
                     continue
                 assert i[k][TerminationState.CRASH_SIDEWALK]
@@ -161,7 +168,8 @@ def test_guardrail_collision_detection(num_agents, render=False):
                 assert not i[k][TerminationState.CRASH_VEHICLE]
                 assert not i[k][TerminationState.CRASH]
                 assert not i[k][TerminationState.OUT_OF_ROAD]
-                assert r[k] == -crash_sidewalk_penalty
+                # Crash vehicle penalty has higher priority than the crash_sidewalk_penalty
+                assert r[k] == -crash_sidewalk_penalty or r[k] == -10
             if tm["__all__"]:
                 print("Episode finished at step: ", step)
                 print("Episodic return: ", episode_reward_record)
@@ -175,4 +183,4 @@ def test_guardrail_collision_detection(num_agents, render=False):
 
 if __name__ == '__main__':
     # test_ma_racing_env_with_IDM(12)
-    test_guardrail_collision_detection(10)
+    test_guardrail_collision_detection(4,  render=False)

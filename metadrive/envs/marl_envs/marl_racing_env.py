@@ -59,6 +59,7 @@ RACING_CONFIG = dict(
     horizon=3_000,
     idle_done=True,
     crash_sidewalk_done=False,
+    crash_vehicle_done=False,
 
     # Debug setting
     show_fps=True,
@@ -361,17 +362,16 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
     def done_function(self, vehicle_id):
         done, done_info = super(MultiAgentRacingEnv, self).done_function(vehicle_id)
 
-        done_info[TerminationState.IDLE] = False
+        done_info[TerminationState.IDLE] = self._is_idle(vehicle_id)
         if self.config["idle_done"] and self._is_idle(vehicle_id):
             done = True
             self.logger.info(
                 "Episode ended! Scenario Index: {} Reason: IDLE.".format(self.current_seed), extra={"log_once": True}
             )
-            done_info[TerminationState.IDLE] = True
 
+        done_info[TerminationState.CRASH_SIDEWALK] = self.vehicles[vehicle_id].crash_sidewalk
         if self.config["crash_sidewalk_done"] and self.vehicles[vehicle_id].crash_sidewalk:
             done = True
-            done_info[TerminationState.CRASH_SIDEWALK] = True
             self.logger.info(
                 "Episode ended! Scenario Index: {} Reason: CRASH_SIDEWALK.".format(self.current_seed),
                 extra={"log_once": True}
@@ -420,7 +420,6 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         step_info["speed_km_h"] = vehicle.speed_km_h
 
         step_info["step_reward"] = reward
-        step_info["crash_sidewalk"] = False
         if self._is_arrive_destination(vehicle):
             reward = +self.config["success_reward"]
         elif self._is_out_of_road(vehicle):
@@ -429,7 +428,6 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
             reward = -self.config["crash_vehicle_penalty"]
         elif vehicle.crash_sidewalk:
             reward = -self.config["crash_sidewalk_penalty"]
-            step_info["crash_sidewalk"] = True
         elif self._is_idle(vehicle_id):
             reward = -self.config["idle_penalty"]
 
