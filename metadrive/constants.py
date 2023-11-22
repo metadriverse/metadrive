@@ -26,8 +26,10 @@ class TerminationState:
     CRASH_HUMAN = "crash_human"
     CRASH_OBJECT = "crash_object"
     CRASH_BUILDING = "crash_building"
+    CRASH_SIDEWALK = "crash_sidewalk"
     CURRENT_BLOCK = "current_block"
     ENV_SEED = "env_seed"
+    IDLE = "idle"
 
 
 HELP_MESSAGE = "Keyboard Shortcuts:\n" \
@@ -304,7 +306,7 @@ class PGDrivableAreaProperty:
     SIDEWALK_WIDTH = 2
     SIDEWALK_LINE_DIST = 0.6
 
-    GUARDRAIL_HEIGHT = 2.5
+    GUARDRAIL_HEIGHT = 4.0
 
     # visualization color property
     LAND_COLOR = (0.4, 0.4, 0.4, 1)

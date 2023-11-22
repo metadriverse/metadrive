@@ -288,7 +288,7 @@ def get_traffic_obj_type(nuplan_type):
         return MetaDriveType.PEDESTRIAN
     elif nuplan_type == TrackedObjectType.BICYCLE:
         return MetaDriveType.CYCLIST
-    elif nuplan_type == TrackedObjectType.GUARDRAIL:
+    elif nuplan_type == TrackedObjectType.BARRIER:
         return MetaDriveType.TRAFFIC_BARRIER
     elif nuplan_type == TrackedObjectType.EGO:
         raise ValueError("Ego should not be in detected resukts")

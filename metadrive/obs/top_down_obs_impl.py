@@ -141,7 +141,10 @@ class WorldSurface(pygame.Surface):
         :param y: y world coordinate [m]
         :return: the coordinates of the corresponding pixel [px]
         """
-        return self.pix(x - self.origin[0]), self.pix(y - self.origin[1])
+
+        # TODO(markpeng): Hot fix the mirrored BEV issue.
+        # return self.pix(x - self.origin[0]), self.pix(y - self.origin[1])
+        return self.pix(x - self.origin[0]), self.raw_size[-1] - self.pix(y - self.origin[1])
 
     def vec2pix(self, vec: PositionType) -> Tuple[int, int]:
         """
@@ -220,7 +223,11 @@ class ObjectGraphics:
         w = surface.pix(object.WIDTH)
         h = surface.pix(object.LENGTH)
         position = [*surface.pos2pix(object.position[0], object.position[1])]
-        angle = np.rad2deg(heading)
+
+        # TODO(markpeng): Hot fix the mirrored BEV issue.
+        # angle = np.rad2deg(heading)
+        angle = -np.rad2deg(heading)
+
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]
         box_rotate = [p.rotate(angle) + position for p in box]
 
