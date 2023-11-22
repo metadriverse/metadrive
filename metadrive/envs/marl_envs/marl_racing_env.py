@@ -373,7 +373,8 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
             done = True
             done_info[TerminationState.CRASH_SIDEWALK] = True
             self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: CRASH_SIDEWALK.".format(self.current_seed), extra={"log_once": True}
+                "Episode ended! Scenario Index: {} Reason: CRASH_SIDEWALK.".format(self.current_seed),
+                extra={"log_once": True}
             )
 
         return done, done_info
