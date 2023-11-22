@@ -184,6 +184,21 @@ class WorldSurface(pygame.Surface):
         ret.blit(self, (0, 0))
         return ret
 
+    @staticmethod
+    def to_cv2_image(surface):
+        """
+        convert the pygame.surface to image
+        Args:
+            surface: pygame.surface
+
+        Returns: image in numpy array
+
+        """
+        img_array = np.array(pygame.surfarray.pixels3d(surface))
+        image_object = np.transpose(img_array, (1, 0, 2))
+        image_object[:, :, [0, 2]] = image_object[:, :, [2, 0]]
+        return image_object
+
 
 class ObjectGraphics:
     RED = (255, 100, 100)

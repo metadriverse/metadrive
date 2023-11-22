@@ -99,10 +99,7 @@ def draw_top_down_map(
                         two_side = True if l is map.road_network.graph[_from][_to][-1] or decoration else False
                         LaneGraphics.display(l, surface, two_side, use_line_color=True)
 
-    if return_surface:
-        return surface
-    ret = cv2.resize(pygame.surfarray.pixels3d(surface), resolution, interpolation=cv2.INTER_LINEAR)
-    return ret
+    return surface if return_surface else WorldSurface.to_cv2_image(surface)
 
 
 def draw_top_down_trajectory(
@@ -253,7 +250,7 @@ class TopDownRenderer:
         self._frame_canvas.blit(self._background_canvas, (0, 0))
         self.screen_canvas.fill(color_white)
 
-    def render(self, text, *args, **kwargs):
+    def render(self, text, to_image=True, *args, **kwargs):
         self.need_reset = False
         key_press = pygame.key.get_pressed()
         if key_press[pygame.K_r]:
@@ -285,7 +282,7 @@ class TopDownRenderer:
         self.blit()
         ret = self.screen_canvas.copy()
         ret = ret.convert(24)
-        return ret
+        return WorldSurface.to_cv2_image(ret) if to_image else ret
 
     def _add_text(self, text: dict):
         if not text:

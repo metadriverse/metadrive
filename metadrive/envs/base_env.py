@@ -144,7 +144,7 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar,), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
     # ===== Engine Core config =====
     # if true pop a window to render
@@ -302,7 +302,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -453,14 +453,14 @@ class BaseEnv(gym.Env):
 
     def render(self,
                text: Optional[Union[dict, str]] = None,
-               return_bytes=False,
                mode=None,
                *args,
                **kwargs) -> Optional[np.ndarray]:
         """
         This is a pseudo-render function, only used to update onscreen message when using panda3d backend
-        :param text:text to show
-        :return: when mode is 'rgb', image array is returned
+        :param text: text to show
+        :param mode: start_top_down rendering candidate parameter is ["top_down", "topdown", "bev", "birdview"]
+        :return: None or top_down image
         """
 
         if mode in ["top_down", "topdown", "bev", "birdview"]:
@@ -471,22 +471,22 @@ class BaseEnv(gym.Env):
 
         self.engine.render_frame(text)
 
-        if mode != "human" and self.config["image_observation"]:
-            # fetch img from img stack to be make this func compatible with other render func in RL setting
-            return self.observations[DEFAULT_AGENT].img_obs.get_image()
-
-        if mode == "rgb_array":
-            assert self.config["use_render"], "You should create a Panda3d window before rendering images!"
-            # if not hasattr(self, "temporary_img_obs"):
-            #     from metadrive.obs.image_obs import ImageObservation
-            #     image_source = "rgb_camera"
-            #     assert len(self.vehicles) == 1, "Multi-agent not supported yet!"
-            #     self.temporary_img_obs = ImageObservation(self.vehicles[DEFAULT_AGENT].config, image_source, False)
-            # # else:
-            # #     raise ValueError("Not implemented yet!")
-            # self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT])
-            # return self.temporary_img_obs.get_image()
-            return self.engine._get_window_image(return_bytes=return_bytes)
+        # if mode != "human" and self.config["image_observation"]:
+        #     # fetch img from img stack to be make this func compatible with other render func in RL setting
+        #     return self.observations[DEFAULT_AGENT].img_obs.get_image()
+        #
+        # if mode == "rgb_array":
+        #     assert self.config["use_render"], "You should create a Panda3d window before rendering images!"
+        #     # if not hasattr(self, "temporary_img_obs"):
+        #     #     from metadrive.obs.image_obs import ImageObservation
+        #     #     image_source = "rgb_camera"
+        #     #     assert len(self.vehicles) == 1, "Multi-agent not supported yet!"
+        #     #     self.temporary_img_obs = ImageObservation(self.vehicles[DEFAULT_AGENT].config, image_source, False)
+        #     # # else:
+        #     # #     raise ValueError("Not implemented yet!")
+        #     # self.temporary_img_obs.observe(self.vehicles[DEFAULT_AGENT])
+        #     # return self.temporary_img_obs.get_image()
+        #     return self.engine._get_window_image(return_bytes=return_bytes)
         return None
 
     def reset(self, seed: Union[None, int] = None):
@@ -517,7 +517,8 @@ class BaseEnv(gym.Env):
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
-        assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
+        assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1), \
+            "Vehicles: {} != Num_agents: {}".format(len(self.vehicles), self.num_agents)
         assert self.config is self.engine.global_config is get_global_config(), "Inconsistent config may bring errors!"
         return self._get_reset_return()
 
@@ -737,19 +738,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
