@@ -212,7 +212,7 @@ class AgentManager(BaseManager):
         self._agent_to_object[agent_name] = new_v_name
         self._object_to_agent[new_v_name] = agent_name
         # TODO: this may cause error? Sharing observation
-        logger.warning("Test MARL new agent observation to avoid bug!")
+        # logger.warning("Test MARL new agent observation to avoid bug!")
         self.observations[new_v_name] = self._init_observations["agent0"]
         self.observations[new_v_name].reset(vehicle)
         self.observation_spaces[new_v_name] = self._init_observation_spaces["agent0"]

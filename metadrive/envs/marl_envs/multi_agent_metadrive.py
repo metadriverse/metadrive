@@ -60,7 +60,6 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Environmental Setting =====
     traffic_density=0.0,
     camera_height=4,
-    map_file_path="",
     interface_panel=["dashboard"],
 )
 
