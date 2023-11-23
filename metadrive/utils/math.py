@@ -27,6 +27,14 @@ def safe_clip_for_small_array(array, min_val, max_val):
 
 
 def wrap_to_pi(x: float) -> float:
+    """Wrap the input radian to (-pi, pi]. Note that -pi is exclusive and +pi is inclusive.
+
+    Args:
+        x (float): radian.
+
+    Returns:
+        The radian in range (-pi, pi].
+    """
     angles = x
     angles %= 2 * np.pi
     angles -= 2 * np.pi * (angles > np.pi)

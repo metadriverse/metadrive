@@ -72,12 +72,20 @@ def _act(env, action):
     return obs, reward, terminated, truncated, info
 
 
-@pytest.mark.parametrize("num_agents", [1, 3, 5, 8, 12])
+@pytest.mark.parametrize("num_agents", [1, 2, 3, 5, 8, 12])
 def test_ma_racing_env_with_IDM(num_agents):
-    env = MultiAgentRacingEnv(dict(
+    config = dict(
         num_agents=num_agents,
         agent_policy=IDMPolicy,
-    ))
+        # use_render=True,
+        # prefer_track_agent="agent11",
+        debug=True
+    )
+
+    if num_agents > 2:
+        config["map_config"] = {"exit_length": 60}
+
+    env = MultiAgentRacingEnv(config)
     try:
         _check_spaces_before_reset(env)
         obs, _ = env.reset()
@@ -108,12 +116,71 @@ def test_ma_racing_env_with_IDM(num_agents):
                     assert not i[k][TerminationState.CRASH_VEHICLE]
                     assert not i[k][TerminationState.CRASH]
                     assert not i[k][TerminationState.OUT_OF_ROAD]
-                assert 1450 < max(episode_reward_record.values()) < 1550
-                assert 1400 < min(episode_reward_record.values()) < 1500
+                assert 2100 < max(episode_reward_record.values()) < 2300
+                assert 2100 < min(episode_reward_record.values()) < 2300
+                break
+    finally:
+        env.close()
+
+
+@pytest.mark.parametrize("num_agents", [1, 3, 5, 8, 12])
+def test_guardrail_collision_detection(num_agents, render=False):
+    crash_sidewalk_penalty = 7.7
+    config = dict(
+        num_agents=num_agents,
+        crash_sidewalk_done=True,
+        crash_sidewalk_penalty=crash_sidewalk_penalty,
+        # agent_policy=IDMPolicy,
+        use_render=render,
+        # prefer_track_agent="agent11",
+        debug=True
+    )
+
+    if num_agents > 2:
+        config["map_config"] = {"exit_length": 60}
+
+    env = MultiAgentRacingEnv(config)
+    try:
+        _check_spaces_before_reset(env)
+        obs, _ = env.reset()
+        _check_spaces_after_reset(env, obs)
+        assert env.observation_space.contains(obs)
+        episode_reward_record = defaultdict(float)
+        for step in range(3_000):
+            act = {k: [0, 1] for k in env.vehicles.keys()}
+            o, r, tm, tc, i = _act(env, act)
+            print(i)
+            if render:
+                env.render(mode="topdown")
+            if step == 0:
+                assert not any(tm.values())
+                assert not any(tc.values())
+            for k, v in r.items():
+                episode_reward_record[k] += v
+            for k in tm.keys():
+                if k == "__all__":
+                    continue
+                if not tm[k]:
+                    continue
+                assert i[k][TerminationState.CRASH_SIDEWALK]
+                assert not i[k][TerminationState.SUCCESS]
+                assert not i[k][TerminationState.MAX_STEP]
+                assert not i[k][TerminationState.CRASH_VEHICLE]
+                assert not i[k][TerminationState.CRASH]
+                assert not i[k][TerminationState.OUT_OF_ROAD]
+                # Crash vehicle penalty has higher priority than the crash_sidewalk_penalty
+                assert r[k] == -crash_sidewalk_penalty or r[k] == -10
+            if tm["__all__"]:
+                print("Episode finished at step: ", step)
+                print("Episodic return: ", episode_reward_record)
+                print(
+                    f"Max return {max(episode_reward_record.values())}, Min return {min(episode_reward_record.values())}"
+                )
                 break
     finally:
         env.close()
 
 
 if __name__ == '__main__':
-    test_ma_racing_env_with_IDM(1)
+    # test_ma_racing_env_with_IDM(12)
+    test_guardrail_collision_detection(4, render=False)

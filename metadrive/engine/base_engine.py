@@ -344,6 +344,9 @@ class BaseEngine(EngineCore, Randomizable):
 
             cm = process_memory()
 
+        if self.lane_coordinates_debug_node is not None:
+            self.lane_coordinates_debug_node.removeNode()
+
         # reset manager
         for manager_name, manager in self._managers.items():
             # clean all manager
@@ -550,6 +553,9 @@ class BaseEngine(EngineCore, Randomizable):
             self.top_down_renderer.close()
             del self.top_down_renderer
             self.top_down_renderer = None
+
+        if self.lane_coordinates_debug_node is not None:
+            self.lane_coordinates_debug_node.removeNode()
 
     def __del__(self):
         logger.debug("{} is destroyed".format(self.__class__.__name__))
