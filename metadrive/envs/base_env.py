@@ -59,7 +59,6 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Termination =====
     horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
-    max_step_per_agent=None,  # The maximum length of each agent episode. Raise max_step termination when reaches.
 
     # ===== Main Camera =====
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
@@ -341,13 +340,7 @@ class BaseEnv(gym.Env):
                     config["_render_mode"] = RENDER_MODE_OFFSCREEN
                     break
         self.logger.info("Render Mode: {}".format(config["_render_mode"]))
-        if config["is_multi_agent"]:
-            self.logger.info("Max step per agent: {}".format(config["max_step_per_agent"]))
-        else:
-            self.logger.info(
-                "Horizon (Max step per agent): "
-                "{}".format(config["horizon"] or config["max_step_per_agent"])
-            )
+        self.logger.info("Horizon (Max steps per agent): {}".format(config["horizon"]))
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:

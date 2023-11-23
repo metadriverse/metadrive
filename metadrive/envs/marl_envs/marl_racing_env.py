@@ -35,7 +35,6 @@ RACING_CONFIG = dict(
     on_continuous_line_done=False,
     out_of_route_done=False,
     crash_done=False,
-    max_step_per_agent=3_000,
     horizon=3_000,
 
     # Debug setting

@@ -187,17 +187,8 @@ class MetaDriveEnv(BaseEnv):
                 "Episode ended! Scenario Index: {} Reason: crash building ".format(self.current_seed),
                 extra={"log_once": True}
             )
-        if self.config["max_step_per_agent"] is not None and \
-                self.episode_lengths[vehicle_id] >= self.config["max_step_per_agent"]:
-            done = True
-            done_info[TerminationState.MAX_STEP] = True
-            self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
-                extra={"log_once": True}
-            )
 
-        if self.config["horizon"] is not None and \
-                self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
+        if self.config["horizon"] is not None and self.episode_lengths[vehicle_id] >= self.config["horizon"]:
             # single agent horizon has the same meaning as max_step_per_agent
             done = True
             done_info[TerminationState.MAX_STEP] = True
