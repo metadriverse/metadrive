@@ -125,8 +125,7 @@ After verifying your installation, set `config["image_on_cuda"] = True` to get *
 
 .. _action_and_dynamics:
 
-###############
-Action Space
+Action
 ###############
 
 MetaDrive receives normalized action as input to control each target vehicle: :math:`\mathbf a = [a_1, a_2]^T \in [-1, 1]^2`.
