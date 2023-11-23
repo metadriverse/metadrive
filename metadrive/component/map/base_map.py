@@ -154,8 +154,9 @@ class BaseMap(BaseRunnable, ABC):
 
             long_end = long_start + lane.heading_at(0) * 4
             np_y = self.engine._draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
-            np_x = self.engine._draw_line_3d(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1],
-                                             thickness=2)
+            np_x = self.engine._draw_line_3d(
+                Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=2
+            )
             np_x.reparentTo(self.lane_coordinates_debug_node)
             np_y.reparentTo(self.lane_coordinates_debug_node)
 
@@ -180,13 +181,13 @@ class BaseMap(BaseRunnable, ABC):
 
     # @time_me
     def get_semantic_map(
-            self,
-            size=512,
-            pixels_per_meter=8,
-            color_setting=MapTerrainSemanticColor,
-            line_sample_interval=2,
-            polyline_thickness=1,
-            layer=("lane_line", "lane")
+        self,
+        size=512,
+        pixels_per_meter=8,
+        color_setting=MapTerrainSemanticColor,
+        line_sample_interval=2,
+        polyline_thickness=1,
+        layer=("lane_line", "lane")
     ):
         """
         Get semantics of the map for terrain generation
@@ -271,11 +272,11 @@ class BaseMap(BaseRunnable, ABC):
 
     # @time_me
     def get_height_map(
-            self,
-            size=2048,
-            pixels_per_meter=1,
-            extension=2,
-            height=1,
+        self,
+        size=2048,
+        pixels_per_meter=1,
+        extension=2,
+        height=1,
     ):
         """
         Get height of the map for terrain generation

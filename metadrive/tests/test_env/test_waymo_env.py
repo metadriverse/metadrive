@@ -26,6 +26,7 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
             env.reset(seed=seed)
             for i in range(1000):
                 o, r, tm, tc, info = env.step([1.0, 0.])
+                assert env.observation_space.contains(o)
                 if tm or tc:
                     assert info["arrive_dest"], "Can not arrive dest"
                     print("{} track_length: ".format(env.engine.global_seed), info["track_length"])
@@ -61,6 +62,7 @@ def test_store_map_memory_leakage(render=False):
                 env.reset(seed=seed)
                 for i in range(1000):
                     o, r, tm, tc, info = env.step([1.0, 0.])
+                    assert env.observation_space.contains(o)
                     if tm or tc:
                         assert info["arrive_dest"], "Can not arrive dest"
                         assert env.episode_step > 60

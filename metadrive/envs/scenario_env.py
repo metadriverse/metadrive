@@ -51,7 +51,7 @@ SCENARIO_ENV_CONFIG = dict(
     show_sidewalk=False,
 
     # ===== Agent config =====
-    vehicle_config=dict(navigation_module=EdgeNetworkNavigation),
+    vehicle_config=dict(navigation_module=TrajectoryNavigation),
     target_vehicle_configs={
         DEFAULT_AGENT: dict(
             use_special_color=True,
