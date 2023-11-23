@@ -455,10 +455,13 @@ class BaseEnv(gym.Env):
         if mode in ["top_down", "topdown", "bev", "birdview"]:
             ret = self._render_topdown(text=text, *args, **kwargs)
             return ret
-        assert self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE, \
-            ("Panda Rendering is off now, can not render. Please set config['use_render'] = True!")
-
-        self.engine.render_frame(text)
+        if self.config["use_render"] or self.engine.mode != RENDER_MODE_NONE:
+            self.engine.render_frame(text)
+        else:
+            self.logger.warning(
+                "Panda Rendering is off now, can not render. Please set config['use_render'] = True!",
+                exc_info={"log_once": True}
+            )
 
         # if mode != "human" and self.config["image_observation"]:
         #     # fetch img from img stack to be make this func compatible with other render func in RL setting
