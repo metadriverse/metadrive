@@ -143,7 +143,7 @@ BASE_DEFAULT_CONFIG = dict(
     #         )
     # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
     # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
-    sensors=dict(lidar=(Lidar,), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
+    sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
 
     # ===== Engine Core config =====
     # if true pop a window to render
@@ -301,7 +301,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard,)
+                    config["sensors"]["dashboard"] = (DashBoard, )
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -444,11 +444,7 @@ class BaseEnv(gym.Env):
         self.logger.warning("Done function is not implemented. Return Done = False", extra={"log_once": True})
         return False, {}
 
-    def render(self,
-               text: Optional[Union[dict, str]] = None,
-               mode=None,
-               *args,
-               **kwargs) -> Optional[np.ndarray]:
+    def render(self, text: Optional[Union[dict, str]] = None, mode=None, *args, **kwargs) -> Optional[np.ndarray]:
         """
         This is a pseudo-render function, only used to update onscreen message when using panda3d backend
         :param text: text to show
@@ -731,20 +727,19 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-            self,
-            policies: Union[dict, Callable],
-            scenario_index: Union[list, int],
-            max_episode_length=None,
-            verbose=False,
-            suppress_warning=False,
-            render_topdown=False,
-            return_done_info=True,
-            to_dict=True
+        self,
+        policies: Union[dict, Callable],
+        scenario_index: Union[list, int],
+        max_episode_length=None,
+        verbose=False,
+        suppress_warning=False,
+        render_topdown=False,
+        return_done_info=True,
+        to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
-
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

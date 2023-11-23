@@ -259,8 +259,8 @@ def test_ma_intersection_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                            v.navigation.get_current_lane_width() / 2 >= lat >=
-                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                        v.navigation.get_current_lane_width() / 2 >= lat >=
+                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     # if not env._is_arrive_destination(v):
                     # print('sss')
@@ -516,7 +516,6 @@ def test_ma_intersection_reward_sign():
     straight road before coming into intersection.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
-
     class TestEnv(MultiAgentIntersectionEnv):
         _respawn_count = 0
 
