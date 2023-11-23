@@ -173,7 +173,7 @@ def test_ma_horizon_termination():
                 "out_of_road_penalty": 777,
                 "out_of_road_cost": 778,
                 "crash_done": False,
-                "use_render": True,
+                "use_render": False,
             }
         )
         try:
