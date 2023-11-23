@@ -31,7 +31,7 @@ Besides, you can verify the efficiency of MetaDrive via running::
     python -m metadrive.examples.profile_metadrive
 
 
-As we will discuss in :ref:`rl_environments`, MetaDrive provides three sets of RL environments: the generalization environments, the real-world environments, the Safe RL environments and the Multi-agent RL environments.
+As we will discuss in `Environments <rl_environments.html>`_, MetaDrive provides three sets of RL environments: the generalization environments, the real-world environments, the Safe RL environments and the Multi-agent RL environments.
 We provide the examples for those suites as follow:
 
 .. code-block::
