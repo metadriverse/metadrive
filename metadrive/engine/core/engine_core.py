@@ -456,6 +456,17 @@ class EngineCore(ShowBase.ShowBase):
             return task.cont
 
     def _draw_line_3d(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+        """
+        This API is not official
+        Args:
+            start_p:
+            end_p:
+            color:
+            thickness:
+
+        Returns:
+
+        """
         start_p = [*start_p]
         end_p = [*end_p]
         start_p[1] *= 1

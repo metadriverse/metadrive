@@ -88,9 +88,6 @@ class BaseEngine(EngineCore, Randomizable):
         # topdown renderer
         self.top_down_renderer = None
 
-        # lanes debug
-        self.lane_coordinates_debug_node = None
-
         # warm up
         self.warmup()
 
@@ -344,9 +341,6 @@ class BaseEngine(EngineCore, Randomizable):
 
             cm = process_memory()
 
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.removeNode()
-
         # reset manager
         for manager_name, manager in self._managers.items():
             # clean all manager
@@ -554,9 +548,6 @@ class BaseEngine(EngineCore, Randomizable):
             del self.top_down_renderer
             self.top_down_renderer = None
 
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.removeNode()
-
     def __del__(self):
         logger.debug("{} is destroyed".format(self.__class__.__name__))
 
@@ -760,30 +751,6 @@ class BaseEngine(EngineCore, Randomizable):
         img = img[..., ::-1]  # Correct the colors
 
         return img
-
-    def show_lane_coordinates(self, lanes):
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.detachNode()
-            self.lane_coordinates_debug_node.removeNode()
-
-        self.lane_coordinates_debug_node = NodePath("Lane Coordinates debug")
-        self.lane_coordinates_debug_node.hide(CamMask.AllOn)
-        self.lane_coordinates_debug_node.show(CamMask.MainCam)
-        for lane in lanes:
-            long_start = lateral_start = lane.position(0, 0)
-            lateral_end = lane.position(0, 2)
-
-            long_end = long_start + lane.heading_at(0) * 4
-            np_y = self._draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
-            np_x = self._draw_line_3d(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=2)
-            np_x.reparentTo(self.lane_coordinates_debug_node)
-            np_y.reparentTo(self.lane_coordinates_debug_node)
-        self.lane_coordinates_debug_node.reparentTo(self.worldNP)
-
-    def remove_show_lane_coordinates(self):
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.detachNode()
-            self.lane_coordinates_debug_node.removeNode()
 
     def warmup(self):
         """

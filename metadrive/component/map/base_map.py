@@ -4,10 +4,11 @@ from abc import ABC
 
 import cv2
 import numpy as np
+from panda3d.core import NodePath, Vec3
 
 from metadrive.base_class.base_runnable import BaseRunnable
+from metadrive.constants import CamMask
 from metadrive.constants import MapTerrainSemanticColor, MetaDriveType, PGDrivableAreaProperty
-from metadrive.engine.engine_utils import get_global_config
 from metadrive.utils.shapely_utils.geom import find_longest_edge
 
 logger = logging.getLogger(__name__)
@@ -62,6 +63,11 @@ class BaseMap(BaseRunnable, ABC):
         self._generate()
         assert self.blocks, "The generate methods does not fill blocks!"
 
+        # lanes debug
+        self.lane_coordinates_debug_node = None
+        if self.engine.global_config["show_coordinates"]:
+            self.show_coordinates()
+
         #  a trick to optimize performance
         self.spawn_roads = None
         self.detach_from_world()
@@ -69,9 +75,6 @@ class BaseMap(BaseRunnable, ABC):
         # save a backup
         self._semantic_map = None
         self._height_map = None
-
-        if self.engine.global_config["show_coordinates"]:
-            self.show_coordinates()
 
     def _generate(self):
         """Key function! Please overwrite it! This func aims at fill the self.road_network adn self.blocks"""
@@ -81,10 +84,14 @@ class BaseMap(BaseRunnable, ABC):
         parent_node_path, physics_world = self.engine.worldNP or parent_np, self.engine.physics_world or physics_world
         for block in self.blocks:
             block.attach_to_world(parent_node_path, physics_world)
+        if self.lane_coordinates_debug_node is not None:
+            self.lane_coordinates_debug_node.reparentTo(parent_node_path)
 
     def detach_from_world(self, physics_world=None):
         for block in self.blocks:
             block.detach_from_world(self.engine.physics_world or physics_world)
+        if self.lane_coordinates_debug_node is not None:
+            self.lane_coordinates_debug_node.detachNode()
 
     def get_meta_data(self):
         """
@@ -112,9 +119,10 @@ class BaseMap(BaseRunnable, ABC):
         if self.road_network is not None:
             self.road_network.destroy()
         self.road_network = None
-
         self.spawn_roads = None
 
+        if self.lane_coordinates_debug_node is not None:
+            self.lane_coordinates_debug_node.removeNode()
         super(BaseMap, self).destroy()
 
     @property
@@ -131,6 +139,25 @@ class BaseMap(BaseRunnable, ABC):
 
     def show_coordinates(self):
         pass
+
+    def _show_coordinates(self, lanes):
+        if self.lane_coordinates_debug_node is not None:
+            self.lane_coordinates_debug_node.detachNode()
+            self.lane_coordinates_debug_node.removeNode()
+
+        self.lane_coordinates_debug_node = NodePath("Lane Coordinates debug")
+        self.lane_coordinates_debug_node.hide(CamMask.AllOn)
+        self.lane_coordinates_debug_node.show(CamMask.MainCam)
+        for lane in lanes:
+            long_start = lateral_start = lane.position(0, 0)
+            lateral_end = lane.position(0, 2)
+
+            long_end = long_start + lane.heading_at(0) * 4
+            np_y = self.engine._draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
+            np_x = self.engine._draw_line_3d(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1],
+                                             thickness=2)
+            np_x.reparentTo(self.lane_coordinates_debug_node)
+            np_y.reparentTo(self.lane_coordinates_debug_node)
 
     def get_map_features(self, interval=2):
         """
@@ -153,13 +180,13 @@ class BaseMap(BaseRunnable, ABC):
 
     # @time_me
     def get_semantic_map(
-        self,
-        size=512,
-        pixels_per_meter=8,
-        color_setting=MapTerrainSemanticColor,
-        line_sample_interval=2,
-        polyline_thickness=1,
-        layer=("lane_line", "lane")
+            self,
+            size=512,
+            pixels_per_meter=8,
+            color_setting=MapTerrainSemanticColor,
+            line_sample_interval=2,
+            polyline_thickness=1,
+            layer=("lane_line", "lane")
     ):
         """
         Get semantics of the map for terrain generation
@@ -244,11 +271,11 @@ class BaseMap(BaseRunnable, ABC):
 
     # @time_me
     def get_height_map(
-        self,
-        size=2048,
-        pixels_per_meter=1,
-        extension=2,
-        height=1,
+            self,
+            size=2048,
+            pixels_per_meter=1,
+            extension=2,
+            height=1,
     ):
         """
         Get height of the map for terrain generation

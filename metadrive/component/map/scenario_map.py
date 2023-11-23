@@ -19,7 +19,7 @@ class ScenarioMap(BaseMap):
 
     def show_coordinates(self):
         lanes = [lane_info.lane for lane_info in self.road_network.graph.values()]
-        self.engine.show_lane_coordinates(lanes)
+        self._show_coordinates(lanes)
 
     def _generate(self):
         block = ScenarioBlock(
