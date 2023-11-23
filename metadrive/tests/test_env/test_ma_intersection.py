@@ -1,4 +1,5 @@
 import time
+from collections import defaultdict
 
 import numpy as np
 from gymnasium.spaces import Box, Dict
@@ -7,6 +8,7 @@ from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
 from metadrive.utils import distance_greater, norm
 
 from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
+
 MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 
 
@@ -156,6 +158,53 @@ def test_ma_intersection_horizon():
             env.close()
 
 
+def test_ma_horizon_termination():
+    # test horizon
+    for _ in range(3):  # This function is really easy to break, repeat multiple times!
+        env = MultiAgentIntersectionEnv(
+            {
+                "horizon": 100,
+                "num_agents": 40,
+                "vehicle_config": {
+                    "lidar": {
+                        "num_others": 2
+                    }
+                },
+                "out_of_road_penalty": 777,
+                "out_of_road_cost": 778,
+                "crash_done": False,
+                "use_render": True,
+            }
+        )
+        try:
+            ep_len = defaultdict(int)
+            _check_spaces_before_reset(env)
+            obs, _ = env.reset()
+            _check_spaces_after_reset(env, obs)
+            assert env.observation_space.contains(obs)
+            max_agent = set()
+            for step in range(1, 1000):
+                act = {k: [1, 1] if k[-1] in ["0", "1", "2"] else [0, 0] for k in env.vehicles.keys()}
+                for k in act.keys():
+                    ep_len[k] += 1
+                o, r, tm, tc, i = _act(env, act)
+                env.render(text={"step": env.episode_step})
+                for kkk, rrr in tm.items():
+                    if rrr and kkk != "__all__":
+                        if i[kkk]["max_step"]:
+                            assert ep_len[kkk] == 100
+                            assert kkk not in max_agent
+                            max_agent.add(kkk)
+
+                if tm["__all__"]:
+                    break
+            max_agent_ep_len = [ep_len[v] for v in max_agent]
+            assert all(max_agent_ep_len), max_agent_ep_len
+            assert 30 < len(max_agent_ep_len) < 40
+        finally:
+            env.close()
+
+
 def test_ma_intersection_reset():
     env = MultiAgentIntersectionEnv({"horizon": 50, "num_agents": 4})
     try:
@@ -210,8 +259,8 @@ def test_ma_intersection_reset():
                     long, lat = v.navigation.final_lane.local_coordinates(v.position)
                     flag1 = (v.navigation.final_lane.length - 5 < long < v.navigation.final_lane.length + 5)
                     flag2 = (
-                        v.navigation.get_current_lane_width() / 2 >= lat >=
-                        (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
+                            v.navigation.get_current_lane_width() / 2 >= lat >=
+                            (0.5 - v.navigation.get_current_lane_num()) * v.navigation.get_current_lane_width()
                     )
                     # if not env._is_arrive_destination(v):
                     # print('sss')
@@ -353,7 +402,7 @@ def _test_ma_intersection_reward_done_alignment():
                 # for kkk, ddd in d.items():
                 ddd = tm[kkk]
                 if ddd and kkk != "__all__":
-                    #assert r[kkk] == -1.7777
+                    # assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
                     # # print('{} done passed!'.format(kkk))
@@ -448,12 +497,12 @@ def _test_ma_intersection_reward_done_alignment():
             if tm["__all__"]:
                 break
             kkk = "agent0"
-            #assert r[kkk] == 999
+            # assert r[kkk] == 999
             assert i[kkk]["arrive_dest"]
             assert tm[kkk]
 
             kkk = "agent1"
-            #assert r[kkk] != 999
+            # assert r[kkk] != 999
             assert not i[kkk]["arrive_dest"]
             assert not tm[kkk]
             break
@@ -467,6 +516,7 @@ def test_ma_intersection_reward_sign():
     straight road before coming into intersection.
     However, some bugs cause the vehicles receive negative reward by doing this behavior!
     """
+
     class TestEnv(MultiAgentIntersectionEnv):
         _respawn_count = 0
 
@@ -705,7 +755,8 @@ def test_randomize_spawn_place():
 
 
 if __name__ == '__main__':
-    test_ma_intersection_env()
+    # test_ma_intersection_env()
+    test_ma_horizon_termination()
     # test_ma_intersection_horizon()
     # test_ma_intersection_reset()
     # test_ma_intersection_reward_done_alignment()
