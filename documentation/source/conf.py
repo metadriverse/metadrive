@@ -34,6 +34,7 @@ extensions = [
     "myst_nb",
     "sphinx.ext.autosectionlabel",
     "sphinx_rtd_theme",
+    "sphinx.builders.linkcheck",
     "sphinx_copybutton"
 ]
 
@@ -41,7 +42,6 @@ autosectionlabel_prefix_document = True
 
 nbsphinx_execute = 'never'
 nb_execution_mode = 'off'
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

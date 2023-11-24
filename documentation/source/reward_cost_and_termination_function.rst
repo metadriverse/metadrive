@@ -40,7 +40,7 @@ We summarize the default reward config here:
 - :code:`speed_reward = 0.1`: the :math:`c_{2}` in reward function.
 - :code:`use_lateral_reward = False`: disable weighting the driving reward according to centering in the lane.
 
-The reward function is implemented in the :code:`reward_function` in `MetaDriveEnv <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/metadrive_env.py#L209>`_.
+The reward function is implemented in the :code:`reward_function` in `MetaDriveEnv <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/metadrive_env.py>`_.
 
 
 Cost Function
@@ -52,7 +52,7 @@ Similar to the reward function, we also provide default cost function to measure
 - :code:`crash_object_cost = 1.0`: yield cost when crashing to objects, such as cones and triangles.
 - :code:`out_of_road_cost = 1.0`: yield cost when driving out of the road.
 
-The cost function is implemented in the :code:`cost_function` in `MetaDriveEnv <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/metadrive_env.py#L188>`_.
+The cost function is implemented in the :code:`cost_function` in `MetaDriveEnv <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/metadrive_env.py>`_.
 
 Termination Function
 #######################
@@ -65,7 +65,7 @@ MetaDrive will terminate an episode of a vehicle if:
 4. the vehicle crashes to obstacles, or
 5. the vehicle crashes to building (e.g. in Multi-agent Tollgate environment).
 
-The above termination criterion is implemented in the :code:`done_function` in `MetaDriveEnv <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/metadrive_env.py#L153>`_.
+The above termination criterion is implemented in the :code:`done_function` in `MetaDriveEnv <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/metadrive_env.py#>`_.
 
 Please note that in the Safe RL environment `SafeMetaDriveEnv <https://github.com/metadriverse/metadrive/blob/main/metadrive/envs/safe_metadrive_env.py>`_, the episode will not be terminated when vehicles crashing into objects or vehicles.
 This is because we wish to investigate the safety performance of a vehicle in an extremely dangerous environments.

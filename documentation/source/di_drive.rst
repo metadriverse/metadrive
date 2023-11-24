@@ -12,7 +12,7 @@ Decision Intelligence Platform for Autonomous Driving simulation.
 with **high ease of use** and **low difficulty to hands-on**.
 **DI-drive** designes **Casezoo** to make simulation environment closer to real driving.
 **DI-drive** develops Deep Learning driving policy with `Pytorch <http://pytorch.org>`_ and `DI-engine <https://github.com/opendilab/DI-engine>`_
-and supports `Carla <http://carla.org>`_ and `MetaDrive <https://decisionforce.github.io/metadrive>`_ simulator.
+and supports `Carla <http://carla.org>`_ and `MetaDrive <https://metadriverse.github.io/metadrive>`_ simulator.
 
 .. image:: https://opendilab.github.io/DI-drive/_images/macro_demo1.gif
     :alt: macro_demo1
