@@ -6,17 +6,18 @@ import numpy as np
 import random
 
 class DepthLidar(DepthCamera):
+    num_channels = 3
+    
     def __init__(self, width, height, engine, *, cuda=False) :
         super().__init__(width, height, engine, cuda=cuda)
         num_points = height*width
-        visualize = False
+        visualize = True
         self.visualize = visualize
         self.num_points = num_points
         self.offset = 3
         self.cloud_points = []
         _,vfov = self.lens.getFov()
         self.lens.setFov(40,vfov)
-
         self.points = None
         self.mask = None
     
@@ -61,7 +62,9 @@ class DepthLidar(DepthCamera):
             self.update_cloud_points(self.cloud_points, world_homo_points[:,:-1])
         self.points = points_camframe
         self.mask = mask
-        return result
+        
+        reshaped = self.points.reshape(self.BUFFER_H, self.BUFFER_W,3)
+        return reshaped
     
     
     def track(self,base_object):
