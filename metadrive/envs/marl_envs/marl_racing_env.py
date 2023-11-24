@@ -36,7 +36,7 @@ RACING_CONFIG = dict(
         # show_side_detector=True,
         # show_lidar=True,
     ),
-    sensors=dict(lidar=(Lidar, 50)),
+    sensors=dict(lidar=(Lidar,)),
 
     # Number of agents and map setting.
     num_agents=12,
