@@ -142,7 +142,7 @@ class MetaDriveEnv(BaseEnv):
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
-        max_step = self.config["horizon"] and self.episode_lengths[vehicle_id] >= self.config["horizon"],
+        max_step = self.config["horizon"] is not None and self.episode_lengths[vehicle_id] >= self.config["horizon"]
         done_info = {
             TerminationState.CRASH_VEHICLE: vehicle.crash_vehicle,
             TerminationState.CRASH_OBJECT: vehicle.crash_object,
