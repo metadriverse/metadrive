@@ -59,7 +59,7 @@ def test_collision_info(use_render=False):
             if info["crash_vehicle"]:
                 pass_test = True
                 break
-        assert pass_test, "Collision function is broken!"
+        assert pass_test, "Collision info is not in info!"
     finally:
         env.close()
 

@@ -92,7 +92,7 @@ SCENARIO_ENV_CONFIG = dict(
     relax_out_of_road_done=True,
 
     # ===== others =====
-    allowed_more_steps=None,  # None=infinite
+    allowed_more_steps=None,  # horizon, None=infinite
     top_down_show_real_size=False
 )
 
@@ -149,9 +149,9 @@ class ScenarioEnv(BaseEnv):
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING] or done_info[TerminationState.CRASH_SIDEWALK]
-            or done_info[TerminationState.CRASH_HUMAN]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+                or done_info[TerminationState.CRASH_BUILDING] or done_info[TerminationState.CRASH_SIDEWALK]
+                or done_info[TerminationState.CRASH_HUMAN]
         )
 
         def msg(reason):
@@ -178,12 +178,13 @@ class ScenarioEnv(BaseEnv):
             done = True
             self.logger.info(msg("crash building"), extra={"log_once": True})
         elif done_info[TerminationState.MAX_STEP]:
-            done = True
+            if self.config["truncate_as_terminate"]:
+                done = True
             self.logger.info(msg("max step"), extra={"log_once": True})
-        elif self.config["allowed_more_steps"] is not None and \
-                self.episode_lengths[vehicle_id] >= self.engine.data_manager.current_scenario_length + self.config[
-            "allowed_more_steps"] and not self.is_multi_agent:
-            done = True
+        elif self.config["allowed_more_steps"] and self.episode_lengths[vehicle_id] >= \
+                self.engine.data_manager.current_scenario_length + self.config["allowed_more_steps"]:
+            if self.config["truncate_as_terminate"]:
+                done = True
             done_info[TerminationState.MAX_STEP] = True
             self.logger.info(msg("more step than original episode"), extra={"log_once": True})
 

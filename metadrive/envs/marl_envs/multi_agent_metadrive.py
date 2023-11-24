@@ -45,7 +45,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
         # for more information
         vehicle_model="static_default",
     ),
-    sensors=dict(lidar=(Lidar, )),
+    sensors=dict(lidar=(Lidar,)),
     target_vehicle_configs=dict(),
 
     # ===== New Reward Setting =====
@@ -116,8 +116,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         done, done_info = super(MultiAgentMetaDrive, self).done_function(vehicle_id)
         if done_info[TerminationState.CRASH] and (not self.config["crash_done"]):
             assert (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
-                or done_info[TerminationState.OUT_OF_ROAD]
+                    done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
+                    or done_info[TerminationState.OUT_OF_ROAD]
             )
             if not (done_info[TerminationState.SUCCESS] or done_info[TerminationState.OUT_OF_ROAD]):
                 # Does not revert done if high-priority termination happens!
@@ -125,8 +125,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
         if done_info[TerminationState.OUT_OF_ROAD] and (not self.config["out_of_road_done"]):
             assert (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
-                or done_info[TerminationState.OUT_OF_ROAD]
+                    done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
+                    or done_info[TerminationState.OUT_OF_ROAD]
             )
             if not done_info[TerminationState.SUCCESS]:
                 done = False
@@ -138,7 +138,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         o, r, tm, tc, i = self._after_vehicle_done(o, r, tm, tc, i)
 
         # Update respawn manager
-        if self.episode_step >= self.config["horizon"]:
+        if self.config["horizon"] and self.episode_step >= self.config["horizon"]:
             self.agent_manager.set_allow_respawn(False)
         new_obs_dict, new_info_dict = self._respawn_vehicles(randomize_position=self.config["random_traffic"])
         if new_obs_dict:
@@ -150,26 +150,26 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 tc[new_id] = False
 
         # Update __all__
-        d_all = False
-        if (self.config["horizon"] is not None):  # No agent alive or a too long episode happens
-            if (self.episode_step >= self.config["horizon"] and (all(tc.values()) or all(tm.values()))
-                    or (self.episode_step >= 5 * self.config["horizon"])):
-                d_all = True
-        if len(self.vehicles) == 0:  # No agent alive
-            d_all = True
-        tm["__all__"] = d_all
-        if tm["__all__"]:
+        exceed_horizon = self.config["horizon"] and self.episode_step >= self.config["horizon"]
+        if exceed_horizon or all(tc.values()) or all(tm.values()) or len(self.vehicles) == 0:
+            # LQY: in MARL, tm and tc are always the same!
             for k in tm.keys():
                 tm[k] = True
+                tc[k] = True
+                i[k][TerminationState.MAX_STEP] = True
+            tm["__all__"] = tc["__all__"] = True
+        else:
+            tm["__all__"] = tc["__all__"] = False
 
         return o, r, tm, tc, i
 
     def _after_vehicle_done(
-        self, obs: Dict[str, Any], reward: Dict[str, float], terminated: Dict[str, bool], truncated: Dict[str, bool],
-        info: Dict[str, Any]
+            self, obs: Dict[str, Any], reward: Dict[str, float], terminated: Dict[str, bool],
+            truncated: Dict[str, bool],
+            info: Dict[str, Any]
     ):
         for v_id, v_info in info.items():
-            if v_info.get("episode_length", 0) >= self.config["horizon"]:
+            if self.config["horizon"] and v_info.get("episode_length", 0) >= self.config["horizon"]:
                 if terminated[v_id] is not None:
                     info[v_id][TerminationState.MAX_STEP] = True
                     terminated[v_id] = True
@@ -311,12 +311,12 @@ def _vis():
 
 
 def pygame_replay(
-    name,
-    env_class,
-    save=False,
-    other_traj=None,
-    film_size=(1000, 1000),
-    extra_config={},
+        name,
+        env_class,
+        save=False,
+        other_traj=None,
+        film_size=(1000, 1000),
+        extra_config={},
 ):
     import copy
     import json

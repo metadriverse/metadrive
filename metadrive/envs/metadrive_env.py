@@ -204,7 +204,8 @@ class MetaDriveEnv(BaseEnv):
             )
         if done_info[TerminationState.MAX_STEP]:
             # single agent horizon has the same meaning as max_step_per_agent
-            done = True
+            if self.config["truncate_as_terminate"]:
+                done = True
             self.logger.info(
                 "Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
                 extra={"log_once": True}

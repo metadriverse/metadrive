@@ -59,6 +59,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Termination =====
     horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
+    truncate_as_terminate=False,
 
     # ===== Main Camera =====
     use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
@@ -341,6 +342,9 @@ class BaseEnv(gym.Env):
                     break
         self.logger.info("Render Mode: {}".format(config["_render_mode"]))
         self.logger.info("Horizon (Max steps per agent): {}".format(config["horizon"]))
+        if config["truncate_as_terminate"]:
+            self.logger.warning("When reaching max steps, both 'terminate' and 'truncate will be True."  
+                                "Generally, only the `truncate` should be `True`")
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
@@ -548,7 +552,9 @@ class BaseEnv(gym.Env):
         reward_infos = {}
         rewards = {}
         for v_id, v in self.vehicles.items():
+            self.episode_lengths[v_id] += 1
             rewards[v_id], reward_infos[v_id] = self.reward_function(v_id)
+            self.episode_rewards[v_id] += rewards[v_id]
             done_function_result, done_infos[v_id] = self.done_function(v_id)
             _, cost_infos[v_id] = self.cost_function(v_id)
             done = done_function_result or self.dones[v_id]
@@ -567,12 +573,10 @@ class BaseEnv(gym.Env):
                 self.dones[k] = True
 
         terminateds = {k: self.dones[k] for k in self.vehicles.keys()}
-        truncateds = {k: False for k in self.vehicles.keys()}
+        truncateds = {k: step_infos[k][TerminationState.MAX_STEP] for k in self.vehicles.keys()}
 
         for v_id, r in rewards.items():
-            self.episode_rewards[v_id] += r
             step_infos[v_id]["episode_reward"] = self.episode_rewards[v_id]
-            self.episode_lengths[v_id] += 1
             step_infos[v_id]["episode_length"] = self.episode_lengths[v_id]
 
         if not self.is_multi_agent:
