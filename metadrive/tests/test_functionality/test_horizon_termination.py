@@ -4,11 +4,7 @@ from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
 import pytest
 import itertools
 
-envs = [
-    MetaDriveEnv,
-    ScenarioEnv,
-    MultiAgentMetaDrive
-]
+envs = [MetaDriveEnv, ScenarioEnv, MultiAgentMetaDrive]
 horizon = [20, 200, None]
 truncate_as_terminate = [True, False]
 
@@ -21,8 +17,14 @@ def test_horizon(cfg, use_render=False):
     is_marl = env_cls == MultiAgentMetaDrive
     horizon = cfg[1]
     truncate_as_terminate = cfg[2]
-    env = env_cls({"use_render": use_render, "horizon": horizon,
-                   "num_scenarios": 1, "truncate_as_terminate": truncate_as_terminate})
+    env = env_cls(
+        {
+            "use_render": use_render,
+            "horizon": horizon,
+            "num_scenarios": 1,
+            "truncate_as_terminate": truncate_as_terminate
+        }
+    )
     o, _ = env.reset()
     test_pass = True if horizon is None else False
     try:

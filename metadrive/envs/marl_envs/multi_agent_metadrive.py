@@ -45,7 +45,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
         # for more information
         vehicle_model="static_default",
     ),
-    sensors=dict(lidar=(Lidar,)),
+    sensors=dict(lidar=(Lidar, )),
     target_vehicle_configs=dict(),
 
     # ===== New Reward Setting =====
@@ -116,8 +116,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         done, done_info = super(MultiAgentMetaDrive, self).done_function(vehicle_id)
         if done_info[TerminationState.CRASH] and (not self.config["crash_done"]):
             assert (
-                    done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
-                    or done_info[TerminationState.OUT_OF_ROAD]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
+                or done_info[TerminationState.OUT_OF_ROAD]
             )
             if not (done_info[TerminationState.SUCCESS] or done_info[TerminationState.OUT_OF_ROAD]):
                 # Does not revert done if high-priority termination happens!
@@ -125,8 +125,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
         if done_info[TerminationState.OUT_OF_ROAD] and (not self.config["out_of_road_done"]):
             assert (
-                    done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
-                    or done_info[TerminationState.OUT_OF_ROAD]
+                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
+                or done_info[TerminationState.OUT_OF_ROAD]
             )
             if not done_info[TerminationState.SUCCESS]:
                 done = False
@@ -164,9 +164,8 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         return o, r, tm, tc, i
 
     def _after_vehicle_done(
-            self, obs: Dict[str, Any], reward: Dict[str, float], terminated: Dict[str, bool],
-            truncated: Dict[str, bool],
-            info: Dict[str, Any]
+        self, obs: Dict[str, Any], reward: Dict[str, float], terminated: Dict[str, bool], truncated: Dict[str, bool],
+        info: Dict[str, Any]
     ):
         for v_id, v_info in info.items():
             if self.config["horizon"] and v_info.get("episode_length", 0) >= self.config["horizon"]:
@@ -311,12 +310,12 @@ def _vis():
 
 
 def pygame_replay(
-        name,
-        env_class,
-        save=False,
-        other_traj=None,
-        film_size=(1000, 1000),
-        extra_config={},
+    name,
+    env_class,
+    save=False,
+    other_traj=None,
+    film_size=(1000, 1000),
+    extra_config={},
 ):
     import copy
     import json

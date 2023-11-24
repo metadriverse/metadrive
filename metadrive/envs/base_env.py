@@ -343,8 +343,10 @@ class BaseEnv(gym.Env):
         self.logger.info("Render Mode: {}".format(config["_render_mode"]))
         self.logger.info("Horizon (Max steps per agent): {}".format(config["horizon"]))
         if config["truncate_as_terminate"]:
-            self.logger.warning("When reaching max steps, both 'terminate' and 'truncate will be True."  
-                                "Generally, only the `truncate` should be `True`")
+            self.logger.warning(
+                "When reaching max steps, both 'terminate' and 'truncate will be True."
+                "Generally, only the `truncate` should be `True`"
+            )
         return config
 
     def _get_observations(self) -> Dict[str, "ObservationBase"]:
