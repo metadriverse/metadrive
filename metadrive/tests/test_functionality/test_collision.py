@@ -49,6 +49,21 @@ def test_line_contact():
         env.close()
 
 
+def test_collision_info(use_render=False):
+    env = MetaDriveEnv({"traffic_density": 1.0, "map": "SSS", "use_render": use_render, "crash_vehicle_done": False})
+    o, _ = env.reset()
+    pass_test = False
+    try:
+        for i in range(1, 500):
+            o, r, tm, tc, info = env.step([0, 1])
+            if info["crash_vehicle"]:
+                pass_test = True
+                break
+        assert pass_test, "Collision function is broken!"
+    finally:
+        env.close()
+
+
 if __name__ == '__main__':
     test_collision_with_sidewalk()
     # test_collision_with_vehicle(True)

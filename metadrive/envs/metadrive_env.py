@@ -85,6 +85,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     on_continuous_line_done=True,
     crash_vehicle_done=True,
     crash_object_done=True,
+    crash_human_done=True,
 )
 
 
@@ -141,68 +142,73 @@ class MetaDriveEnv(BaseEnv):
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
+        max_step = self.config["horizon"] and self.episode_lengths[vehicle_id] >= self.config["horizon"],
         done_info = {
-            TerminationState.CRASH_VEHICLE: False,
-            TerminationState.CRASH_OBJECT: False,
-            TerminationState.CRASH_BUILDING: False,
-            TerminationState.OUT_OF_ROAD: False,
-            TerminationState.SUCCESS: False,
-            TerminationState.MAX_STEP: False,
-            # TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
+            TerminationState.CRASH_VEHICLE: vehicle.crash_vehicle,
+            TerminationState.CRASH_OBJECT: vehicle.crash_object,
+            TerminationState.CRASH_BUILDING: vehicle.crash_building,
+            TerminationState.CRASH_HUMAN: vehicle.crash_human,
+            TerminationState.CRASH_SIDEWALK: vehicle.crash_sidewalk,
+            TerminationState.OUT_OF_ROAD: self._is_out_of_road(vehicle),
+            TerminationState.SUCCESS: self._is_arrive_destination(vehicle),
+            TerminationState.MAX_STEP: max_step,
             TerminationState.ENV_SEED: self.current_seed,
+            # TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
             # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
         }
-        if self._is_arrive_destination(vehicle):
-            done = True
-            self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: arrive_dest.".format(self.current_seed),
-                extra={"log_once": True}
-            )
-            done_info[TerminationState.SUCCESS] = True
-        if self._is_out_of_road(vehicle):
-            done = True
-            self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: out_of_road.".format(self.current_seed),
-                extra={"log_once": True}
-            )
-            done_info[TerminationState.OUT_OF_ROAD] = True
-        if vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
-            done = True
-            self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: crash vehicle ".format(self.current_seed),
-                extra={"log_once": True}
-            )
-            done_info[TerminationState.CRASH_VEHICLE] = True
-        if vehicle.crash_object and self.config["crash_object_done"]:
-            done = True
-            done_info[TerminationState.CRASH_OBJECT] = True
-            self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: crash object ".format(self.current_seed),
-                extra={"log_once": True}
-            )
-        if vehicle.crash_building:
-            done = True
-            done_info[TerminationState.CRASH_BUILDING] = True
-            self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: crash building ".format(self.current_seed),
-                extra={"log_once": True}
-            )
-
-        if self.config["horizon"] is not None and self.episode_lengths[vehicle_id] >= self.config["horizon"]:
-            # single agent horizon has the same meaning as max_step_per_agent
-            done = True
-            done_info[TerminationState.MAX_STEP] = True
-            self.logger.info(
-                "Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
-                extra={"log_once": True}
-            )
 
         # for compatibility
         # crash almost equals to crashing with vehicles
         done_info[TerminationState.CRASH] = (
             done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
+            or done_info[TerminationState.CRASH_BUILDING] or done_info[TerminationState.CRASH_SIDEWALK]
+            or done_info[TerminationState.CRASH_HUMAN]
         )
+
+        # determine env return
+        if done_info[TerminationState.SUCCESS]:
+            done = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: arrive_dest.".format(self.current_seed),
+                extra={"log_once": True}
+            )
+        if done_info[TerminationState.OUT_OF_ROAD]:
+            done = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: out_of_road.".format(self.current_seed),
+                extra={"log_once": True}
+            )
+        if done_info[TerminationState.CRASH_VEHICLE] and self.config["crash_vehicle_done"]:
+            done = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: crash vehicle ".format(self.current_seed),
+                extra={"log_once": True}
+            )
+        if done_info[TerminationState.CRASH_OBJECT] and self.config["crash_object_done"]:
+            done = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: crash object ".format(self.current_seed),
+                extra={"log_once": True}
+            )
+        if done_info[TerminationState.CRASH_BUILDING]:
+            done = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: crash building ".format(self.current_seed),
+                extra={"log_once": True}
+            )
+        if done_info[TerminationState.CRASH_HUMAN] and self.config["crash_human_done"]:
+            done = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: crash human".format(self.current_seed),
+                extra={"log_once": True}
+            )
+        if done_info[TerminationState.MAX_STEP]:
+            # single agent horizon has the same meaning as max_step_per_agent
+            done = True
+            self.logger.info(
+                "Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
+                extra={"log_once": True}
+            )
         return done, done_info
 
     def cost_function(self, vehicle_id: str):

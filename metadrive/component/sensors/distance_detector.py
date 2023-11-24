@@ -14,6 +14,7 @@ detect_result = namedtuple("detect_result", "cloud_points detected_objects")
 
 logger = get_logger()
 
+
 def add_cloud_point_vis(
     point_x, point_y, height, num_lasers, laser_index, ANGLE_FACTOR, MARK_COLOR0, MARK_COLOR1, MARK_COLOR2
 ):

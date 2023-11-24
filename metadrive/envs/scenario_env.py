@@ -131,54 +131,55 @@ class ScenarioEnv(BaseEnv):
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
-        done_info = dict(
-            crash_vehicle=False,
-            crash_object=False,
-            crash_building=False,
-            out_of_road=False,
-            arrive_dest=False,
-            max_step=False,
-        )
+        max_step = self.config["horizon"] is not None and self.episode_lengths[vehicle_id] >= self.config["horizon"]
+        done_info = {
+            TerminationState.CRASH_VEHICLE: vehicle.crash_vehicle,
+            TerminationState.CRASH_OBJECT: vehicle.crash_object,
+            TerminationState.CRASH_BUILDING: vehicle.crash_building,
+            TerminationState.CRASH_HUMAN: vehicle.crash_human,
+            TerminationState.CRASH_SIDEWALK: vehicle.crash_sidewalk,
+            TerminationState.OUT_OF_ROAD: self._is_out_of_road(vehicle) or vehicle.navigation.route_completion < -0.1,
+            TerminationState.SUCCESS: self._is_arrive_destination(vehicle),
+            TerminationState.MAX_STEP: max_step,
+            TerminationState.ENV_SEED: self.current_seed,
+            # TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
+            # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
+        }
 
-        route_completion = vehicle.navigation.route_completion
+        # for compatibility
+        # crash almost equals to crashing with vehicles
+        done_info[TerminationState.CRASH] = (
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING] or done_info[TerminationState.CRASH_SIDEWALK]
+            or done_info[TerminationState.CRASH_HUMAN]
+        )
 
         def msg(reason):
             return "Episode ended! Scenario Index: {} Scenario id: {} Reason: {}.".format(
                 self.current_seed, self.engine.data_manager.current_scenario_id, reason
             )
 
-        if self._is_arrive_destination(vehicle):
+        if done_info[TerminationState.SUCCESS]:
             done = True
             self.logger.info(msg("arrive_dest"), extra={"log_once": True})
-            done_info[TerminationState.SUCCESS] = True
-
-        elif self._is_out_of_road(vehicle) or route_completion < -0.1:
+        elif done_info[TerminationState.OUT_OF_ROAD]:
             done = True
             self.logger.info(msg("out_of_road"), extra={"log_once": True})
-            done_info[TerminationState.OUT_OF_ROAD] = True
-        elif vehicle.crash_human and self.config["crash_human_done"]:
+        elif done_info[TerminationState.CRASH_HUMAN] and self.config["crash_human_done"]:
             done = True
             self.logger.info(msg("crash human"), extra={"log_once": True})
-            done_info[TerminationState.CRASH_HUMAN] = True
-        elif vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
+        elif done_info[TerminationState.CRASH_VEHICLE] and self.config["crash_vehicle_done"]:
             done = True
             self.logger.info(msg("crash vehicle"), extra={"log_once": True})
-            done_info[TerminationState.CRASH_VEHICLE] = True
-        elif vehicle.crash_object and self.config["crash_object_done"]:
+        elif done_info[TerminationState.CRASH_OBJECT] and self.config["crash_object_done"]:
             done = True
-            done_info[TerminationState.CRASH_OBJECT] = True
             self.logger.info(msg("crash object"), extra={"log_once": True})
-        elif vehicle.crash_building and self.config["crash_object_done"]:
+        elif done_info[TerminationState.CRASH_BUILDING] and self.config["crash_object_done"]:
             done = True
-            done_info[TerminationState.CRASH_BUILDING] = True
             self.logger.info(msg("crash building"), extra={"log_once": True})
-
-        elif self.config["horizon"] is not None and \
-                self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
+        elif done_info[TerminationState.MAX_STEP]:
             done = True
-            done_info[TerminationState.MAX_STEP] = True
             self.logger.info(msg("max step"), extra={"log_once": True})
-
         elif self.config["allowed_more_steps"] is not None and \
                 self.episode_lengths[vehicle_id] >= self.engine.data_manager.current_scenario_length + self.config[
             "allowed_more_steps"] and not self.is_multi_agent:
@@ -186,15 +187,10 @@ class ScenarioEnv(BaseEnv):
             done_info[TerminationState.MAX_STEP] = True
             self.logger.info(msg("more step than original episode"), extra={"log_once": True})
 
-        # for compatibility
-        # crash almost equals to crashing with vehicles
-        done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
-        )
-
         # log data to curriculum manager
-        self.engine.curriculum_manager.log_episode(done_info[TerminationState.SUCCESS], route_completion)
+        self.engine.curriculum_manager.log_episode(
+            done_info[TerminationState.SUCCESS], vehicle.navigation.route_completion
+        )
 
         return done, done_info
 
