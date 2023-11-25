@@ -315,10 +315,6 @@ class BaseEnv(gym.Env):
         # Check sensor existence
         if config["use_render"] or config["image_observation"]:
             config["sensors"]["main_camera"] = ("MainCamera", *config["window_size"])
-        if config["image_observation"]:
-            assert config["vehicle_config"]["image_source"] in config["sensors"], \
-                "Can not find sensor with id: {} from existing sensors: {}".format(
-                    config["vehicle_config"]["image_source"], config["sensors"])
 
         # Merge default sensor to list
         sensor_cfg = self.default_config()["sensors"].update(config["sensors"])
