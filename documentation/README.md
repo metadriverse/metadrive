@@ -9,7 +9,8 @@ cd metadrive/documentation
 rm -rf build/ && sphinx-build -j 4 source build
 ```
 
-add `-b linkcheck` for linkcheck. cross-referenced link might be broken, which is expected.
+add `-b linkcheck` for linkcheck. some cross-referenced link might be broken in the check result, which is expected.
+This tool can only check some external links. For checking cross-reference, using tools like `linkchecker`.
 
 ## Cross-Reference
 
@@ -26,7 +27,7 @@ Supposing you have a section called `Install MetaDrive` in `install.rst`, use
 ```
 
 ### How to reference a section of an `.ipynb` file in an `.ipynb` file?
-Supposing you have a section called 
+Supposing you have a section called `Top-down Renderer` in `top_down_render.ipynb`, use 
 ```
- <a href="install.html#install-metadrive">Install MetaDrive</a>
+ <a href="top_down_renderer.html#top-down-render">Top-down Renderer</a>
 ```
