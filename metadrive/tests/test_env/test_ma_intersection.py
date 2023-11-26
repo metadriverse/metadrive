@@ -160,7 +160,7 @@ def test_ma_intersection_horizon():
 
 def test_ma_horizon_termination():
     # test horizon
-    for _ in range(3):  # This function is really easy to break, repeat multiple times!
+    for _ in range(10):  # This function is really easy to break, repeat multiple times!
         env = MultiAgentIntersectionEnv(
             {
                 "horizon": 100,

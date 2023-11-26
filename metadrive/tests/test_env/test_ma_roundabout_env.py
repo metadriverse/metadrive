@@ -101,7 +101,7 @@ def test_ma_roundabout_env():
 
 def test_ma_roundabout_horizon():
     # test horizon
-    for _ in range(3):  # This function is really easy to break, repeat multiple times!
+    for _ in range(10):  # This function is really easy to break, repeat multiple times!
         env = MultiAgentRoundaboutEnv(
             {
                 "horizon": 100,
