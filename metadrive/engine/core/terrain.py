@@ -114,7 +114,7 @@ class Terrain(BaseObject):
             )
             heightfield_to_modify = heightfield_base[start:end, start:end, ...]
             heightfield_base[start:end, start:end,
-                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+            ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -161,12 +161,12 @@ class Terrain(BaseObject):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -285,9 +285,7 @@ class Terrain(BaseObject):
         path_to_store = self.PATH.joinpath("run_time_map_mesh_{}.png".format(self.engine.pid))
         cv2.imencode('.png', mesh)[1].tofile(path_to_store)
         # cv2.imwrite(str(path_to_store), mesh)
-        if sys.platform.startswith("win"):
-            path_to_store = AssetLoader.windows_style2unix_style(path_to_store)
-        p = PNMImage(Filename(str(path_to_store)))
+        p = PNMImage(Filename(str(AssetLoader.windows_style2unix_style(path_to_store) if is_win() else path_to_store)))
         os.remove(path_to_store)  # remove after using
 
         shape = BulletHeightfieldShape(p, height_scale * 2, ZUp)
@@ -574,7 +572,6 @@ class Terrain(BaseObject):
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
             semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
         return semantics
-
 
 # Some useful threads
 # GeoMipTerrain:
