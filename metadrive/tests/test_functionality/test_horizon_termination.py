@@ -54,12 +54,8 @@ def test_horizon(cfg, use_render=False):
                 if truncate_as_terminate:
                     assert tm, cfg
                 else:
-                    if is_marl:
-                        # in marl. tm and tc should always be the same
-                        assert tm, cfg
-                    else:
-                        # in single-agent, they are different
-                        assert not tm, cfg
+                    # in single-agent, they are different
+                    assert not tm, cfg
             else:
                 assert not tc and not tm, cfg
         assert test_pass

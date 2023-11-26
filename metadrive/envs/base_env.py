@@ -342,7 +342,7 @@ class BaseEnv(gym.Env):
         if config["truncate_as_terminate"]:
             self.logger.warning(
                 "When reaching max steps, both 'terminate' and 'truncate will be True."
-                "Generally, only the `truncate` should be `True`"
+                "Generally, only the `truncate` should be `True`."
             )
         return config
 
