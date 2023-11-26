@@ -288,7 +288,7 @@ class Terrain(BaseObject):
         if sys.platform.startswith("win"):
             path_to_store = AssetLoader.windows_style2unix_style(path_to_store)
         p = PNMImage(Filename(str(path_to_store)))
-        os.remove(path_to_store) # remove after using
+        os.remove(path_to_store)  # remove after using
 
         shape = BulletHeightfieldShape(p, height_scale * 2, ZUp)
         shape.setUseDiamondSubdivision(True)
