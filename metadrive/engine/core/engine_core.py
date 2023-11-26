@@ -1,6 +1,4 @@
-import logging
-from panda3d.core import GraphicsPipeSelection
-from metadrive.engine.logger import get_logger
+import os
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -9,7 +7,8 @@ import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath, LVecBase4
+from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
+from panda3d.core import GraphicsPipeSelection
 
 from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
@@ -25,6 +24,7 @@ from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.engine.core.pssm import PSSM
 from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
+from metadrive.engine.logger import get_logger
 from metadrive.utils.utils import is_mac, setup_logger
 
 logger = get_logger()
@@ -104,6 +104,7 @@ class EngineCore(ShowBase.ShowBase):
         #     #     "No allowed to change ptr of global config, which may cause issue"
         #     pass
         # else:
+        self.pid = os.getpid()
         EngineCore.global_config = global_config
         self.mode = global_config["_render_mode"]
         if self.global_config["pstats"]:

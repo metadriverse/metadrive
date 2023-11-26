@@ -1,5 +1,6 @@
 # import numpyf
 import math
+import os
 import pathlib
 import sys
 
@@ -281,12 +282,13 @@ class Terrain(BaseObject):
         mesh = heightfield_img
         mesh = np.flipud(mesh)
         mesh = cv2.resize(mesh, (mesh.shape[0] + 1, mesh.shape[1] + 1))
-        path_to_store = self.PATH.joinpath("run_time_map_mesh.png")
+        path_to_store = self.PATH.joinpath("run_time_map_mesh_{}.png".format(self.engine.pid))
         cv2.imencode('.png', mesh)[1].tofile(path_to_store)
         # cv2.imwrite(str(path_to_store), mesh)
         if sys.platform.startswith("win"):
             path_to_store = AssetLoader.windows_style2unix_style(path_to_store)
         p = PNMImage(Filename(str(path_to_store)))
+        os.remove(path_to_store) # remove after using
 
         shape = BulletHeightfieldShape(p, height_scale * 2, ZUp)
         shape.setUseDiamondSubdivision(True)
