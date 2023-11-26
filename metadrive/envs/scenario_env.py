@@ -51,10 +51,12 @@ SCENARIO_ENV_CONFIG = dict(
     show_sidewalk=False,
 
     # ===== Agent config =====
-    vehicle_config=dict(navigation_module=TrajectoryNavigation,
-                        lidar=dict(num_lasers=120, distance=50),
-                        lane_line_detector=dict(num_lasers=0, distance=50),
-                        side_detector=dict(num_lasers=12, distance=50),),
+    vehicle_config=dict(
+        navigation_module=TrajectoryNavigation,
+        lidar=dict(num_lasers=120, distance=50),
+        lane_line_detector=dict(num_lasers=0, distance=50),
+        side_detector=dict(num_lasers=12, distance=50),
+    ),
 
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
