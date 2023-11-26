@@ -1,10 +1,8 @@
 import copy
-import logging
 from typing import Dict, Any
 
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
-from metadrive.component.sensors.distance_detector import LaneLineDetector, SideDetector
 from metadrive.component.sensors.lidar import Lidar
 from metadrive.constants import TerminationState
 from metadrive.envs.metadrive_env import MetaDriveEnv
@@ -60,6 +58,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
     traffic_density=0.0,
     camera_height=4,
     interface_panel=["dashboard"],
+    truncate_as_terminate=True,
 )
 
 
@@ -115,19 +114,11 @@ class MultiAgentMetaDrive(MetaDriveEnv):
     def done_function(self, vehicle_id):
         done, done_info = super(MultiAgentMetaDrive, self).done_function(vehicle_id)
         if done_info[TerminationState.CRASH] and (not self.config["crash_done"]):
-            assert (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
-                or done_info[TerminationState.OUT_OF_ROAD]
-            )
             if not (done_info[TerminationState.SUCCESS] or done_info[TerminationState.OUT_OF_ROAD]):
                 # Does not revert done if high-priority termination happens!
                 done = False
 
         if done_info[TerminationState.OUT_OF_ROAD] and (not self.config["out_of_road_done"]):
-            assert (
-                done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.SUCCESS]
-                or done_info[TerminationState.OUT_OF_ROAD]
-            )
             if not done_info[TerminationState.SUCCESS]:
                 done = False
 
@@ -149,17 +140,10 @@ class MultiAgentMetaDrive(MetaDriveEnv):
                 tm[new_id] = False
                 tc[new_id] = False
 
-        # Update __all__
-        exceed_horizon = self.config["horizon"] and self.episode_step >= self.config["horizon"]
-        if exceed_horizon or all(tc.values()) or all(tm.values()) or len(self.vehicles) == 0:
-            # LQY: in MARL, tm and tc are always the same!
-            for k in tm.keys():
-                tm[k] = True
-                tc[k] = True
-                i[k][TerminationState.MAX_STEP] = True
-            tm["__all__"] = tc["__all__"] = True
-        else:
-            tm["__all__"] = tc["__all__"] = False
+        # Update __all__ for truncated
+        tc["__all__"] = all(tc.values())
+        # update __all__ for terminated
+        tm["__all__"] = all(tm.values())
 
         return o, r, tm, tc, i
 
@@ -167,14 +151,9 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         self, obs: Dict[str, Any], reward: Dict[str, float], terminated: Dict[str, bool], truncated: Dict[str, bool],
         info: Dict[str, Any]
     ):
-        for v_id, v_info in info.items():
-            if self.config["horizon"] and v_info.get("episode_length", 0) >= self.config["horizon"]:
-                if terminated[v_id] is not None:
-                    info[v_id][TerminationState.MAX_STEP] = True
-                    terminated[v_id] = True
-                    self.dones[v_id] = True
         for dead_vehicle_id, termed in terminated.items():
-            if termed:
+            if termed or truncated[dead_vehicle_id]:
+                # finish all terminated and truncated vehicles
                 self.agent_manager.finish(
                     dead_vehicle_id,
                     ignore_delay_done=info[dead_vehicle_id].get(TerminationState.SUCCESS, False),
