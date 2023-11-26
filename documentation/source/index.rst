@@ -42,7 +42,8 @@ Please feel free to contact us if you have any suggestions or ideas!
    :caption: RL Training with MetaDrive
 
    rl_environments.ipynb
-   obs_action.ipynb
+   obs.ipynb
+   action.rst
    reward_cost_and_termination_function.rst
    config_system.rst
    training_with_rllib.rst
