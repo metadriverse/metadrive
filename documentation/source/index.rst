@@ -56,6 +56,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    development.rst
    top_down_render.ipynb
    policy.rst
+   navigation.ipynb
 
 .. toctree::
    :hidden:

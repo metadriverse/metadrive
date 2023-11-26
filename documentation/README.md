@@ -30,4 +30,9 @@ Supposing you have a section called `Install MetaDrive` in `install.rst`, use
 Supposing you have a section called `Top-down Renderer` in `top_down_render.ipynb`, use 
 ```
  <a href="top_down_renderer.html#top-down-render">Top-down Renderer</a>
+ 
+ or
+ 
+ [Top-down Renderer](top_down_render.ipynb)
 ```
+The second way can not refer to subtitle.
