@@ -556,8 +556,7 @@ class BaseEnv(gym.Env):
             self.episode_rewards[v_id] += rewards[v_id]
             done_function_result, done_infos[v_id] = self.done_function(v_id)
             _, cost_infos[v_id] = self.cost_function(v_id)
-            done = done_function_result or self.dones[v_id]
-            self.dones[v_id] = done
+            self.dones[v_id] = done_function_result or self.dones[v_id]
             o = self.observations[v_id].observe(v)
             obses[v_id] = o
 

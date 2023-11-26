@@ -68,7 +68,7 @@ class TollGateStateObservation(StateObservation):
     def observation_space(self):
         # Navi info + Other states
         shape = self.ego_state_obs_dim + self.get_line_detector_dim()
-        return gym.spaces.Box(-0.0, 1.0, shape=(shape, ), dtype=np.float32)
+        return gym.spaces.Box(-0.0, 1.0, shape=(shape,), dtype=np.float32)
 
     def observe(self, vehicle):
         ego_state = self.vehicle_state(vehicle)
@@ -247,6 +247,9 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
 
     def done_function(self, vehicle_id):
         done, done_info = super(MultiAgentMetaDrive, self).done_function(vehicle_id)
+        if done_info["max_step"]:
+            return done, done_info
+
         if done_info[TerminationState.CRASH_VEHICLE] and (not self.config["crash_done"]):
             assert done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_BUILDING] or \
                    done_info[TerminationState.SUCCESS] or done_info[TerminationState.OUT_OF_ROAD]

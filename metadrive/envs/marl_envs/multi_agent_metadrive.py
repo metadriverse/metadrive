@@ -113,6 +113,9 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
     def done_function(self, vehicle_id):
         done, done_info = super(MultiAgentMetaDrive, self).done_function(vehicle_id)
+        if done_info["max_step"]:
+            return done, done_info
+
         if done_info[TerminationState.CRASH] and (not self.config["crash_done"]):
             if not (done_info[TerminationState.SUCCESS] or done_info[TerminationState.OUT_OF_ROAD]):
                 # Does not revert done if high-priority termination happens!

@@ -100,7 +100,7 @@ def test_ma_toll_env():
 
 def test_ma_toll_horizon():
     # test horizon
-    for _ in range(3):  # This function is really easy to break, repeat multiple times!
+    for _ in range(10):  # This function is really easy to break, repeat multiple times!
         env = MultiAgentTollgateEnv(
             {
                 "horizon": 100,

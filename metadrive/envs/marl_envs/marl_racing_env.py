@@ -36,7 +36,7 @@ RACING_CONFIG = dict(
         # show_side_detector=True,
         # show_lidar=True,
     ),
-    sensors=dict(lidar=(Lidar, )),
+    sensors=dict(lidar=(Lidar,)),
 
     # Number of agents and map setting.
     num_agents=12,
@@ -75,6 +75,7 @@ RACING_CONFIG = dict(
 
 class RacingMap(PGMap):
     """Create a complex racing map by manually design the topology."""
+
     def _generate(self):
         """Generate the racing map.
 
@@ -321,6 +322,7 @@ class RacingMap(PGMap):
 
 class RacingMapManager(PGMapManager):
     """This map manager load the racing map directly, without the burden to manage multiple maps."""
+
     def __init__(self):
         super(RacingMapManager, self).__init__()
 
@@ -337,6 +339,7 @@ class RacingMapManager(PGMapManager):
 
 class MultiAgentRacingEnv(MultiAgentMetaDrive):
     """The Multi-agent Racing Environment"""
+
     def __init__(self, config):
         super(MultiAgentRacingEnv, self).__init__(config=config)
         self.movement_between_steps = defaultdict(lambda: deque(maxlen=100))
@@ -360,6 +363,8 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
 
     def done_function(self, vehicle_id):
         done, done_info = super(MultiAgentRacingEnv, self).done_function(vehicle_id)
+        if done_info["max_step"]:
+            return done, done_info
 
         done_info[TerminationState.IDLE] = self._is_idle(vehicle_id)
         if self.config["idle_done"] and self._is_idle(vehicle_id):
