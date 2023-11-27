@@ -33,7 +33,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
     random_agent_model=False,  # randomize the car model for the agent
-    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=False, spawn_lane_index=None)},
+    target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=True, spawn_lane_index=None)},
 
     # ===== multi-agent =====
     num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
