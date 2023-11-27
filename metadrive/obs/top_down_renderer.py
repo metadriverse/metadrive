@@ -193,7 +193,7 @@ class TopDownRenderer:
             pygame.init()
 
         self.screen_record = screen_record
-        self._screen_frames = []
+        self.screen_frames = []
         self.pygame_font = None
         self.map = self.engine.current_map
         self.stack_frames = deque(maxlen=num_stack)
@@ -292,11 +292,11 @@ class TopDownRenderer:
             ret = ret.convert(24)
         ret = WorldSurface.to_cv2_image(ret) if to_image else ret
         if self.screen_record:
-            self._screen_frames.append(ret)
+            self.screen_frames.append(ret)
         return ret
 
     def generate_gif(self, gif_name="demo.gif", duration=30):
-        return generate_gif(self._screen_frames, gif_name, is_pygame_surface=False, duration=duration)
+        return generate_gif(self.screen_frames, gif_name, is_pygame_surface=False, duration=duration)
 
     def _add_text(self, text: dict):
         if not text:
@@ -342,7 +342,7 @@ class TopDownRenderer:
         self.history_objects.clear()
         self.history_target_vehicle.clear()
 
-        self._screen_frames.clear()
+        self.screen_frames.clear()
 
     @property
     def current_track_vehicle(self):
