@@ -19,7 +19,6 @@ if __name__ == "__main__":
             "random_spawn_lane_index": False,
             "random_lane_width": False,
             # "image_observation": True,
-            # "controller": "joystick",
             "show_coordinates": True,
             "debug_static_world": True,
             "manual_control": True,

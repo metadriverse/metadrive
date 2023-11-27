@@ -13,7 +13,6 @@ if __name__ == "__main__":
             # "debug_physics_world": True,
             # "debug_static_world":True,
             # "image_observation": True,
-            # "controller": "joystick",
             # "manual_control": True,
             "use_render": False,
             "decision_repeat": 5,

@@ -43,7 +43,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Action/Control =====
     manual_control=False,  # if set to True, agent policy will be Manual Control policy
-    controller="keyboard",  # "joystick" or "keyboard"
+    controller="keyboard",  # "steering_wheel" or "keyboard" or "xbos"
     agent_policy=EnvInputPolicy,
     discrete_action=False,
     discrete_steering_dim=5,

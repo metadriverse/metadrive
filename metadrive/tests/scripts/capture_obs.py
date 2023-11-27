@@ -29,7 +29,6 @@ if __name__ == "__main__":
                 show_lidar=True
             ),
             # "camera_height":100,
-            # "controller":"joystick",
             "image_source": "mini_map",
             "manual_control": True,
             "use_render": True,

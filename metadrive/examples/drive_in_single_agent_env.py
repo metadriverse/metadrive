@@ -18,7 +18,7 @@ from metadrive.constants import HELP_MESSAGE
 
 if __name__ == "__main__":
     config = dict(
-        # controller="joystick",
+        # controller="steering_wheel",
         use_render=True,
         manual_control=True,
         traffic_density=0.1,

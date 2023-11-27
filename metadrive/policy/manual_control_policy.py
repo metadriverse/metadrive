@@ -29,14 +29,14 @@ class ManualControlPolicy(EnvInputPolicy):
         if config["manual_control"]:
             if config["controller"] == "keyboard":
                 self.controller = KeyboardController(pygame_control=pygame_control)
-            elif config["controller"] in ["xboxController", "xboxcontroller", "xbox", "joystick"]:
+            elif config["controller"] in ["xboxController", "xboxcontroller", "xbox", "steering_wheel"]:
                 try:
-                    if config["controller"] == "joystick":
+                    if config["controller"] == "steering_wheel":
                         self.controller = SteeringWheelController()
                     else:
                         self.controller = XboxController()
                 except:
-                    print("Load Joystick Error! Fall back to keyboard control")
+                    print("Load Joystick or Steering Wheel Error! Fall back to keyboard control")
                     self.controller = KeyboardController(pygame_control=pygame_control)
             else:
                 raise ValueError("No such a controller type: {}".format(self.config["controller"]))
@@ -81,7 +81,7 @@ class TakeoverPolicy(EnvInputPolicy):
         super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()
         if config["manual_control"] and config["use_render"]:
-            if config["controller"] == "joystick":
+            if config["controller"] == "steering_wheel":
                 self.controller = SteeringWheelController()
             elif config["controller"] == "keyboard":
                 self.controller = KeyboardController(False)

@@ -17,7 +17,6 @@ if __name__ == "__main__":
             "start_seed": 5,
             # "debug_physics_world": True,
             "pstats": True,
-            # "controller":"joystick",
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,

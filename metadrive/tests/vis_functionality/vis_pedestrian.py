@@ -17,7 +17,6 @@ if __name__ == "__main__":
             "debug": True,
             # "debug_static_world": True,
             # "image_observation": True,
-            # "controller": "joystick",
             "manual_control": True,
             "use_render": True,
             "decision_repeat": 5,
