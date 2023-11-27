@@ -49,7 +49,7 @@ BASE_DEFAULT_CONFIG = dict(
     discrete_steering_dim=5,
     discrete_throttle_dim=5,
     use_multi_discrete=False,  # If True, use MultiDiscrete action space. Otherwise, use Discrete.
-    action_check=False, # check if the action is contained in gym.space
+    action_check=False,  # check if the action is contained in gym.space
     # extra_action_dim=0,  # If you want to control more things besides throttle brake, Deprecated
 
     # ===== Observation =====

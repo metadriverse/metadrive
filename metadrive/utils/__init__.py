@@ -25,4 +25,3 @@ def generate_gif(frames, gif_name="demo.gif", is_pygame_surface=False, duration=
     imgs = [pygame.surfarray.array3d(frame) if is_pygame_surface else frame for frame in frames]
     imgs = [Image.fromarray(img) for img in imgs]
     imgs[0].save(gif_name, save_all=True, append_images=imgs[1:], duration=duration, loop=0)
-

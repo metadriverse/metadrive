@@ -17,7 +17,7 @@ class LaneChangePolicy(EnvInputPolicy):
         self.use_multi_discrete = self.engine.global_config["use_multi_discrete"]
         self.steering_unit = 1.0
         self.throttle_unit = 2.0 / (
-                self.engine.global_config["discrete_throttle_dim"] - 1
+            self.engine.global_config["discrete_throttle_dim"] - 1
         )  # for discrete actions space
         self.discrete_steering_dim = 3  # only left or right
         self.discrete_throttle_dim = self.engine.global_config["discrete_throttle_dim"]
