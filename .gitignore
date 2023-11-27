@@ -50,3 +50,4 @@
 /metadrive/engine/core/*.png
 **/**.mp4
 /documentation/jupyter_execute/
+/documentation/**/**.gif
