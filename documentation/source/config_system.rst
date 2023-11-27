@@ -97,7 +97,6 @@ Action Config
     - :code:`use_multi_discrete` (bool = False): whether to MultiDiscrete action space, if `discrete_action=True`
     - :code:`discrete_steering/throttle_dim` (int = 5, 5): how many dimensions used to discrete the action space
     - :code:`decision_repeat` (int): how many times for the simulation engine to repeat the applied action to the vehicles. The minimal simulation interval :code:`physics_world_step_size` is 0.02 s. Therefore each RL step will last :code:`decision_repeat * 0.02 s` in the simulation world.
-    - :code:`extra_action_dim` (int = 0): If you want to input more control signal than the default [steering, throttle/brake] in your customized environment, change the default value 0 to the extra number of dimensions.
 
 
 Agent Config
