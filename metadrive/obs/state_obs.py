@@ -2,11 +2,11 @@ import gymnasium as gym
 import numpy as np
 
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
-from metadrive.obs.observation_base import ObservationBase
+from metadrive.obs.observation_base import BaseObservation
 from metadrive.utils.math import clip, norm
 
 
-class StateObservation(ObservationBase):
+class StateObservation(BaseObservation):
     ego_state_obs_dim = 6
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
@@ -159,7 +159,7 @@ class StateObservation(ObservationBase):
         return dim
 
 
-class LidarStateObservation(ObservationBase):
+class LidarStateObservation(BaseObservation):
     def __init__(self, config):
         self.state_obs = StateObservation(config)
         super(LidarStateObservation, self).__init__(config)

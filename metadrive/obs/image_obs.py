@@ -3,7 +3,7 @@ from metadrive.component.sensors.base_camera import BaseCamera
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.obs.observation_base import ObservationBase
+from metadrive.obs.observation_base import BaseObservation
 from metadrive.obs.state_obs import StateObservation
 
 _cuda_enable = True
@@ -13,7 +13,7 @@ except ImportError:
     _cuda_enable = False
 
 
-class ImageStateObservation(ObservationBase):
+class ImageStateObservation(BaseObservation):
     """
     Use ego state info, navigation info and front cam image/top down image as input
     The shape needs special handling
@@ -39,7 +39,7 @@ class ImageStateObservation(ObservationBase):
         return {self.IMAGE: self.img_obs.observe(vehicle), self.STATE: self.state_obs.observe(vehicle)}
 
 
-class ImageObservation(ObservationBase):
+class ImageObservation(BaseObservation):
     """
     Use only image info as input
     """

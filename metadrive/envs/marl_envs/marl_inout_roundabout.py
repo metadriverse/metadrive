@@ -75,7 +75,7 @@ class MARoundaboutPGMapManager(PGMapManager):
 # Note: This class allow one agent accessing its neighbors' observation.
 # But we never use this functionality in formal experiment. Therefore we just deprecate it for
 # clarity!
-# class LidarStateObservationMARound(ObservationBase):
+# class LidarStateObservationMARound(BaseObservation):
 #     def __init__(self, vehicle_config):
 #         self.state_obs = StateObservation(vehicle_config)
 #         super(LidarStateObservationMARound, self).__init__(vehicle_config)

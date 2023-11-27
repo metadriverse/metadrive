@@ -23,7 +23,7 @@ from metadrive.manager.agent_manager import AgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.observation_base import DummyObservation
-from metadrive.obs.observation_base import ObservationBase
+from metadrive.obs.observation_base import BaseObservation
 from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.scenario.utils import convert_recorded_scenario_exported
 from metadrive.utils import Config, merge_dicts, get_np_random, concat_step_infos
@@ -346,7 +346,7 @@ class BaseEnv(gym.Env):
             )
         return config
 
-    def _get_observations(self) -> Dict[str, "ObservationBase"]:
+    def _get_observations(self) -> Dict[str, "BaseObservation"]:
         return {DEFAULT_AGENT: self.get_single_observation()}
 
     def _get_observation_space(self):

@@ -7,7 +7,7 @@ from metadrive.engine.logger import get_logger
 logger = get_logger()
 
 
-class ObservationBase(ABC):
+class BaseObservation(ABC):
     """
     BaseObservation Class. Observation should implement all abstracted methods
     """
@@ -32,7 +32,7 @@ class ObservationBase(ABC):
         pass
 
 
-class DummyObservation(ObservationBase):
+class DummyObservation(BaseObservation):
     """
     Fake Observation class, can be used as placeholder
     """

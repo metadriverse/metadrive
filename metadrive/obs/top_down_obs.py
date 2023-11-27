@@ -11,7 +11,7 @@ import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, DEFAULT_AGENT, EDITION
-from metadrive.obs.observation_base import ObservationBase
+from metadrive.obs.observation_base import BaseObservation
 from metadrive.obs.top_down_obs_impl import WorldSurface, ObservationWindow, COLOR_BLACK, \
     ObjectGraphics, LaneGraphics
 from metadrive.utils import import_pygame
@@ -19,7 +19,7 @@ from metadrive.utils import import_pygame
 pygame, gfxdraw = import_pygame()
 
 
-class TopDownObservation(ObservationBase):
+class TopDownObservation(BaseObservation):
     """
     Most of the source code is from Highway-Env, we only optimize and integrate it in MetaDrive
     See more information on its Github page: https://github.com/eleurent/highway-env
