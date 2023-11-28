@@ -392,7 +392,7 @@ class BaseEnv(gym.Env):
         pass
 
     # ===== Run-time =====
-    def step(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]):
+    def step(self, actions: Union[Union[np.ndarray, list], Dict[AnyStr, Union[list, np.ndarray]], int]):
         actions = self._preprocess_actions(actions)
         engine_info = self._step_simulator(actions)
         while self.in_stop:

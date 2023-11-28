@@ -66,3 +66,69 @@ class EnvInputPolicy(BasePolicy):
             else:
                 _input_space = gym.spaces.Discrete(discrete_steering_dim * discrete_throttle_dim)
         return _input_space
+
+
+class ExtraEnvInputPolicy(EnvInputPolicy):
+    """
+    This policy allows the env.step() function accept extra input besides [steering, throttle/brake]
+    """
+    extra_input_space = None
+
+    def __init__(self, obj, seed):
+        """
+        Accept one more argument for creating the input space
+        Args:
+            obj: BaseObject
+            seed: random seed. It is usually filled automatically.
+        """
+        super(ExtraEnvInputPolicy, self).__init__(obj, seed)
+        self.extra_input = None
+
+    def act(self, agent_id):
+        """
+        It retrieves the action from self.engine.external_actions["action"]
+        Args:
+            agent_id: the id of this agent
+
+        Returns: continuous 2-dim action [steering, throttle]
+
+        """
+        action = self.engine.external_actions[agent_id]["action"]
+        self.extra_input = self.engine.external_actions[agent_id]["extra"]
+
+        # the following content is the same as EnvInputPolicy
+        if self.engine.global_config["action_check"]:
+            # Do action check for external input in EnvInputPolicy
+            assert self.get_input_space().contains(self.engine.external_actions[agent_id]), \
+                "Input {} is not compatible with action space {}!".format(
+                self.engine.external_actions[agent_id], self.get_input_space()
+            )
+        to_process = self.convert_to_continuous_action(action) if self.discrete_action else action
+
+        # clip to -1, 1
+        action = [clip(to_process[i], -1.0, 1.0) for i in range(len(to_process))]
+        self.action_info["action"] = action
+        return action
+
+    @classmethod
+    def set_extra_input_space(cls, extra_input_space: gym.spaces.space.Space):
+        """
+        Set the space for this extra input. Error will be thrown, if this class property is set already.
+        Args:
+            extra_input_space: gym.spaces.space.Space
+
+        Returns: None
+
+        """
+        assert isinstance(extra_input_space, gym.spaces.space.Space)
+        ExtraEnvInputPolicy.extra_input_space = extra_input_space
+
+    @classmethod
+    def get_input_space(cls):
+        """
+        Define the input space as a Dict Space
+        Returns: Dict action space
+
+        """
+        action_space = super(ExtraEnvInputPolicy, cls).get_input_space()
+        return gym.spaces.Dict({"action": action_space, "extra": cls.extra_input_space})
