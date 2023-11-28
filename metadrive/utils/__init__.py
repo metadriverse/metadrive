@@ -7,6 +7,11 @@ from metadrive.utils.utils import is_mac, import_pygame, recursive_equal, setup_
     concat_step_infos, is_win
 import pygame
 from PIL import Image
+from textwrap import dedent
+from inspect import getsource
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import TerminalFormatter
 
 
 def generate_gif(frames, gif_name="demo.gif", is_pygame_surface=False, duration=30):
@@ -25,3 +30,16 @@ def generate_gif(frames, gif_name="demo.gif", is_pygame_surface=False, duration=
     imgs = [pygame.surfarray.array3d(frame) if is_pygame_surface else frame for frame in frames]
     imgs = [Image.fromarray(img) for img in imgs]
     imgs[0].save(gif_name, save_all=True, append_images=imgs[1:], duration=duration, loop=0)
+
+
+def print_source(x):
+    """
+    Print the source code of module x
+    Args:
+        x:
+
+    Returns:
+
+    """
+    code = dedent(getsource(x))
+    print(highlight(code, PythonLexer(), TerminalFormatter()))

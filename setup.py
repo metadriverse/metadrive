@@ -60,7 +60,8 @@ install_requires = [
     "psutil",
     "geopandas",
     "shapely",
-    "filelock"
+    "filelock",
+    "pygments",
 ]
 
 

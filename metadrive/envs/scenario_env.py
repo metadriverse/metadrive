@@ -287,49 +287,48 @@ class ScenarioEnv(BaseEnv):
         step_info["step_reward_lateral"] = lateral_penalty
         step_info["step_reward_heading"] = heading_penalty
         step_info["step_reward_action_smooth"] = steering_range_penalty
-
-        # Compute state difference metrics
-        # TODO LQY: Shall we use state difference as reward?
-        # data = self.engine.data_manager.current_scenario
-        # agent_xy = vehicle.position
-        # if vehicle_id == "sdc" or vehicle_id == "default_agent":
-        #     native_vid = data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
-        # else:
-        #     native_vid = vehicle_id
-        #
-        # if native_vid in data["tracks"] and len(data["tracks"][native_vid]) > 0:
-        #     expert_state_list = data["tracks"][native_vid]["state"]
-        #
-        #     mask = expert_state_list["valid"]
-        #     largest_valid_index = np.max(np.where(mask == True)[0])
-        #
-        #     if self.episode_step > largest_valid_index:
-        #         current_step = largest_valid_index
-        #     else:
-        #         current_step = self.episode_step
-        #
-        #     while mask[current_step] == 0.0:
-        #         current_step -= 1
-        #         if current_step == 0:
-        #             break
-        #
-        #     expert_xy = expert_state_list["position"][current_step][:2]
-        #     diff = agent_xy - expert_xy
-        #     dist = norm(diff[0], diff[1])
-        #     step_info["distance_error"] = dist
-        #
-        #     last_state = expert_state_list["position"][largest_valid_index]
-        #     last_expert_xy = last_state[:2]
-        #     diff = agent_xy - last_expert_xy
-        #     last_dist = norm(diff[0], diff[1])
-        #     step_info["distance_error_final"] = last_dist
-
-        # reward = reward - self.config["distance_penalty"] * dist
-
-        # if hasattr(vehicle, "_dynamics_mode"):
-        #     step_info["dynamics_mode"] = vehicle._dynamics_mode
-
         return reward, step_info
+
+    # Compute state difference metrics for reward
+    # TODO LQY: Shall we use state difference as reward?
+    # data = self.engine.data_manager.current_scenario
+    # agent_xy = vehicle.position
+    # if vehicle_id == "sdc" or vehicle_id == "default_agent":
+    #     native_vid = data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
+    # else:
+    #     native_vid = vehicle_id
+    #
+    # if native_vid in data["tracks"] and len(data["tracks"][native_vid]) > 0:
+    #     expert_state_list = data["tracks"][native_vid]["state"]
+    #
+    #     mask = expert_state_list["valid"]
+    #     largest_valid_index = np.max(np.where(mask == True)[0])
+    #
+    #     if self.episode_step > largest_valid_index:
+    #         current_step = largest_valid_index
+    #     else:
+    #         current_step = self.episode_step
+    #
+    #     while mask[current_step] == 0.0:
+    #         current_step -= 1
+    #         if current_step == 0:
+    #             break
+    #
+    #     expert_xy = expert_state_list["position"][current_step][:2]
+    #     diff = agent_xy - expert_xy
+    #     dist = norm(diff[0], diff[1])
+    #     step_info["distance_error"] = dist
+    #
+    #     last_state = expert_state_list["position"][largest_valid_index]
+    #     last_expert_xy = last_state[:2]
+    #     diff = agent_xy - last_expert_xy
+    #     last_dist = norm(diff[0], diff[1])
+    #     step_info["distance_error_final"] = last_dist
+
+    # reward = reward - self.config["distance_penalty"] * dist
+
+    # if hasattr(vehicle, "_dynamics_mode"):
+    #     step_info["dynamics_mode"] = vehicle._dynamics_mode
 
     @staticmethod
     def _is_arrive_destination(vehicle):

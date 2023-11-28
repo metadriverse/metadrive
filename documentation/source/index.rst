@@ -44,7 +44,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    rl_environments.ipynb
    obs.ipynb
    action.ipynb
-   reward_cost_and_termination_function.rst
+   reward_cost_done.ipynb
    config_system.rst
    training_with_rllib.rst
 
