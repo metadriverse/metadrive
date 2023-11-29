@@ -288,6 +288,7 @@ jobs:
           pip install cython
           pip install numpy
           pip install -e .
+          pip install -e .[gym]
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
