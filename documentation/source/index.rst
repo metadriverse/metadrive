@@ -59,6 +59,8 @@ Please feel free to contact us if you have any suggestions or ideas!
    policy.rst
    navigation.ipynb
    sensors.ipynb
+   gui.ipynb
+   record_replay.ipynb
 
 .. toctree::
    :hidden:

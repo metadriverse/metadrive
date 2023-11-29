@@ -48,6 +48,7 @@ BASE_DEFAULT_CONFIG = dict(
     delay_done=0,
 
     # ===== Action/Control =====
+    # Please see Documentation: Action and Policy for more details
     # What policy to use for controlling agents
     agent_policy=EnvInputPolicy,
     # If set to True, agent_policy will be overriden and change to ManualControlPolicy
@@ -66,55 +67,87 @@ BASE_DEFAULT_CONFIG = dict(
     action_check=False,
 
     # ===== Observation =====
-    # Whether to clip the pixel value from 0-255 to 0-1
+    # Please see Documentation: Observation for more details
+    # Whether to normalize the pixel value from 0-255 to 0-1
     norm_pixel=True,
-    stack_size=3,  # the number of timesteps for stacking image observation
-    image_observation=False,  # use image observation or lidar
+    # The number of timesteps for stacking image observation
+    stack_size=3,
+    # Whether to use image observation or lidar. It takes effect in get_single_observation
+    image_observation=False,
+    # Like agent_policy, users can use customized observation class through this field
     agent_observation=None,
 
     # ===== Termination =====
-    horizon=None,  # The maximum length of each environmental episode. Set to None to remove this constraint
+    # The maximum length of each agent episode. Set to None to remove this constraint
+    horizon=None,
+    # If set to True, the terminated will be True when the length of agent episode exceeds horizon and truncated is True
     truncate_as_terminate=False,
 
     # ===== Main Camera =====
-    use_chase_camera_follow_lane=False,  # If true, then vision would be more stable.
+    # A True value makes the camera follow the reference line instead of the vehicle, making its movement smooth
+    use_chase_camera_follow_lane=False,
+    # Height of the main camera
     camera_height=2.2,
+    # Distance between the camera and the vehicle. It is the distance projecting to the x-y plane.
     camera_dist=7.5,
+    # Pitch of main camera. If None, this will be automatically calculated
     camera_pitch=None,  # degree
+    # Smooth the camera movement
     camera_smooth=True,
+    # How many frames used to smooth the camera
     camera_smooth_buffer_size=20,
+    # FOV of main camera
     camera_fov=65,
+    # Only available in MARL setting, choosing which agent to track. Values should be "agent0", "agent1" or so on
     prefer_track_agent=None,
+    # Setting the camera position for the Top-down Camera for 3D viewer (pressing key "B" to activate it)
     top_down_camera_initial_x=0,
     top_down_camera_initial_y=0,
-    top_down_camera_initial_z=200,  # height
+    top_down_camera_initial_z=200,
 
     # ===== Vehicle =====
     vehicle_config=dict(
+        # Vehicle model. Candidates: "s", "m", "l", "xl", "default". random_agent_model makes this config invalid
         vehicle_model="default",
-        show_navi_mark=True,
+        # If set to True, the vehicle can go backwards with throttle/brake < -1
         enable_reverse=False,
+        # Whether to show the box as navigation points
+        show_navi_mark=True,
+        # Whether to show a box mark at the destination
         show_dest_mark=False,
+        # Whether to draw a line from current vehicle position to the designation point
         show_line_to_dest=False,
+        # Whether to draw a line from current vehicle position to the next navigation point
         show_line_to_navi_mark=False,
+        # If set to True, the vehicle will be in color green in top-down renderer or MARL setting
         use_special_color=False,
+        # Clear wheel friction, so it can not move by setting steering and throttle/brake. Used for ReplayPolicy
         no_wheel_friction=False,
 
-        # ===== use image =====
-        image_source="rgb_camera",  # take effect when only when image_observation == True
+        # ===== image capturing =====
+        # Which camera to use for image observation. It should be a sensor registered in sensor config.
+        image_source="rgb_camera",
 
-        # ===== vehicle spawn and destination =====
-        navigation_module=None,  # a class type for self-defined navigation
+        # ===== vehicle spawn and navigation =====
+        # A BaseNavigation instance. It should match the road network type.
+        navigation_module=None,
+        # A lane id specifies which lane to spawn this vehicle
         spawn_lane_index=None,
+        # destination lane id. Required only when navigation module is not None.
+        destination=None,
+        # the longitudinal and lateral position on the spawn lane
         spawn_longitude=5.0,
         spawn_lateral=0.0,
-        destination=None,
+
+        # If the following items is assigned, the vehicle will be spawn at the specified position with certain speed
         spawn_position_heading=None,
         spawn_velocity=None,  # m/s
         spawn_velocity_car_frame=False,
 
         # ==== others ====
-        overtake_stat=False,  # we usually set to True when evaluation
+        # How many cars the vehicle has overtaken. It is deprecated due to bug.
+        overtake_stat=False,
+        # If set to True, the default texture for the vehicle will be replaced with a pure color one.
         random_color=False,
         # The shape of vehicle are predefined by its class. But in special scenario (WaymoVehicle) we might want to
         # set to arbitrary shape.
@@ -123,7 +156,7 @@ BASE_DEFAULT_CONFIG = dict(
         height=None,
         mass=None,
 
-        # only for top-down drawing, the physics size wouldn't be changed
+        # Set the vehicle size only for pygame top-down renderer. It doesn't affect the physical size!
         top_down_width=None,
         top_down_length=None,
 
@@ -136,65 +169,64 @@ BASE_DEFAULT_CONFIG = dict(
         show_lidar=False,
         show_side_detector=False,
         show_lane_line_detector=False,
-        gaussian_noise=0.0,
-        dropout_prob=0.0,
-        light=False,  # vehicle light, only available when enabling render-pipeline
+        # Whether to turn on vehicle light, only available when enabling render-pipeline
+        light=False,
     ),
 
     # ===== Sensors =====
-    sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar,), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
     # ===== Engine Core config =====
-    # if true pop a window to render
+    # If true pop a window to render
     use_render=False,
-    # or (width, height), if set to None, it will be automatically determined
+    # (width, height), if set to None, it will be automatically determined
     window_size=(1200, 900),
-    # when main_camera is not the image_source for vehicle, reduce the window size to (1,1) for boosting efficiency
+    # When main_camera is not the image_source, whether to reduce the window size to (1,1) for boosting efficiency
     auto_resize_window=True,
-    # physics world step 0.02s * decision_repeat per env.step,
+    # Physics world step is 0.02s and will be repeated for decision_repeat times per env.step()
     physics_world_step_size=2e-2,
     decision_repeat=5,
-    # this is an advanced feature for accessing image with moving them to ram!
+    # This is an advanced feature for accessing image without moving them to ram!
     image_on_cuda=False,
-    # We will determine the render mode automatically, it runs at physics-only mode by default
+    # Don't set this config. We will determine the render mode automatically, it runs at physics-only mode by default.
     _render_mode=RENDER_MODE_NONE,
-    # None: unlimited, number: fps
+    # If set to None: the program will run as fast as possible. Otherwise, the fps will be limited under this value
     force_render_fps=None,
-    # if set to True all objects will be force destroyed when call clear()
+    # We will maintain a set of buffers in the engine to store the used objects and can reuse them when possible
+    # enhancing the efficiency. If set to True, all objects will be force destroyed when call clear()
     force_destroy=False,
-    # number of buffering objects for each class.
-    # we will maintain a set of buffers in the engine to store the used objects and can reuse them
-    # when possible. But it is possible that some classes of objects are always forcefully respawn
-    # and thus those used objects are stored in the buffer and never be reused.
+    # Number of buffering objects for each class.
     num_buffering_objects=200,
-    # turn on to use render pipeline, which provides advanced rendering effects (Beta)
+    # Turn on it to use render pipeline, which provides advanced rendering effects (Beta)
     render_pipeline=False,
     # daytime is only available when using render-pipeline
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
-    # Shadow
+    # Shadow range, unit: [m]
     shadow_range=32,
-    # Multi-thread rendering
+    # Whether to use multi-thread rendering
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
-    # model optimization
-    preload_models=True,  # preload pedestrian Object for avoiding lagging when creating it for the first time
-    disable_model_compression=True,  # disable compression if you wish to launch the window quicker.
+    # Model loading optimization. Preload pedestrian for avoiding lagging when creating it for the first time
+    preload_models=True,
+    # model compression increasing the launch time
+    disable_model_compression=True,
 
     # ===== Mesh Terrain =====
-    # road will have a marin whose width is determined by this value, unit: [m]
+    # Road will have a flat marin whose width is determined by this value, unit: [m]
     drivable_area_extension=7,
-    # height scale for mountains, unit: [m]
+    # Height scale for mountains, unit: [m]. 0 height makes the terrain flat
     height_scale=50,
-    # use plane collision or mesh collision
+    # If using mesh collision, mountains will have physics body and thus interact with vehicles.
     use_mesh_terrain=False,
-    # use full-size mesh terrain
+    # If set to False, only the center region of the terrain has the physics body
     full_size_mesh=True,
-    # show crosswalk
+    # Whether to show crosswalk
     show_crosswalk=False,
-    # show sidewalk
+    # Whether to show sidewalk
     show_sidewalk=True,
 
     # ===== Debug =====
+    # Please see Documentation: Debug for more details
     pstats=False,  # turn on to profile the efficiency
     debug=False,  # debug, output more messages
     debug_panda3d=False,  # debug panda3d
@@ -204,21 +236,31 @@ BASE_DEFAULT_CONFIG = dict(
     show_coordinates=False,  # show coordinates for maps and objects for debug
 
     # ===== GUI =====
+    # Please see Documentation: GUI for more details
+    # Whether to show these elements in the 3D scene
     show_fps=True,
     show_logo=True,
     show_mouse=True,
     show_skybox=True,
     show_terrain=True,
     show_interface=True,
-    show_policy_mark=False,  # show marks for policies for debugging multi-policy setting
-    show_interface_navi_mark=True,  # the arrow
-    interface_panel=["dashboard"],  # a list whose element chosen from sensors.keys() + "dashboard"
+    # Show marks for policies for debugging multi-policy setting
+    show_policy_mark=False,
+    # Show an arrow marks for providing navigation information
+    show_interface_navi_mark=True,
+    # A list showing sensor output on window. Its elements are chosen from sensors.keys() + "dashboard"
+    interface_panel=["dashboard"],
 
     # ===== Record/Replay Metadata =====
-    record_episode=False,  # when replay_episode is not None ,this option will be useless
-    replay_episode=None,  # set the replay file to enable replay
-    only_reset_when_replay=False,  # Scenario will only be initialized, while future trajectories will not be replayed
-    force_reuse_object_name=False,  # If True, when restoring objects, use the same ID as in dataset
+    # Please see Documentation: Record and Replay for more details
+    # When replay_episode is True, the episode metadata will be recorded
+    record_episode=False,
+    # The value should be None or the logged metadata. If it is the later one, the simulator will replay logged scenario
+    replay_episode=None,
+    # When set to True, the replay system will only reconstruct the first frame from the logged scenario metadata
+    only_reset_when_replay=False,
+    # If True, when creating and replaying object trajectories, use the same ID as in dataset
+    force_reuse_object_name=False,
 )
 
 
@@ -300,7 +342,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -730,19 +772,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

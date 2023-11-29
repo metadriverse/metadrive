@@ -119,20 +119,6 @@ class MetaDriveEnv(BaseEnv):
         )
         config["vehicle_config"]["norm_pixel"] = config["norm_pixel"]
         config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
-        if config.get("gaussian_noise", 0) > 0:
-            assert config["vehicle_config"]["lidar"]["gaussian_noise"] == 0, "You already provide config!"
-            assert config["vehicle_config"]["side_detector"]["gaussian_noise"] == 0, "You already provide config!"
-            assert config["vehicle_config"]["lane_line_detector"]["gaussian_noise"] == 0, "You already provide config!"
-            config["vehicle_config"]["lidar"]["gaussian_noise"] = config["gaussian_noise"]
-            config["vehicle_config"]["side_detector"]["gaussian_noise"] = config["gaussian_noise"]
-            config["vehicle_config"]["lane_line_detector"]["gaussian_noise"] = config["gaussian_noise"]
-        if config.get("dropout_prob", 0) > 0:
-            assert config["vehicle_config"]["lidar"]["dropout_prob"] == 0, "You already provide config!"
-            assert config["vehicle_config"]["side_detector"]["dropout_prob"] == 0, "You already provide config!"
-            assert config["vehicle_config"]["lane_line_detector"]["dropout_prob"] == 0, "You already provide config!"
-            config["vehicle_config"]["lidar"]["dropout_prob"] = config["dropout_prob"]
-            config["vehicle_config"]["side_detector"]["dropout_prob"] = config["dropout_prob"]
-            config["vehicle_config"]["lane_line_detector"]["dropout_prob"] = config["dropout_prob"]
         target_v_config = copy.deepcopy(config["vehicle_config"])
         if not config["is_multi_agent"]:
             target_v_config.update(config["target_vehicle_configs"][DEFAULT_AGENT])
