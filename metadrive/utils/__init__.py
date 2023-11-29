@@ -37,49 +37,44 @@ def generate_gif(frames, gif_name="demo.gif", is_pygame_surface=False, duration=
 
 
 CONFIG = {
-    Token:              ('',            ''),
-
-    Whitespace:         ('gray',   'brightblack'),
-    Comment:            ('black',   'green'),
-
-    Keyword:            ('blue',    'brightblue'),
-    Keyword.Type:       ('cyan',        'brightcyan'),
-    Operator.Word:      ('magenta',      'brightmagenta'),
-    Name: ('red',        'brightcyan'),
-    Name.Attribute: ('magenta',        'brightcyan'),
-    Name.Builtin: ('magenta',        'brightcyan'),
-    Name.Builtin.Pseudo: ('magenta',        'brightcyan'),
-    Name.Class: ('cyan',        'brightcyan'),
-    Name.Constant: ('magenta',        'brightcyan'),
-    Name.Decorator: ('magenta',        'brightcyan'),
-    Name.Entity: ('magenta',        'brightcyan'),
-    Name.Exception: ('magenta',        'brightcyan'),
-    Name.Function: ('magenta',        'brightcyan'),
-    Name.Function.Magic: ('magenta',        'brightcyan'),
-    Name.Property: ('magenta',        'brightcyan'),
-    Name.Label: ('magenta',        'brightcyan'),
-    Name.Namespace: ('magenta',        'brightcyan'),
-    Name.Other: ('green',        'brightcyan'),
-    Name.Tag: ('magenta',        'brightcyan'),
-    Name.Variable: ('red',        'brightcyan'),
-    Name.Variable.Class: ('red',        'brightcyan'),
-    Name.Variable.Global: ('red',        'brightcyan'),
-    Name.Variable.Instance: ('red',        'brightcyan'),
-    Name.Variable.Magic: ('red',        'brightcyan'),
-    String:             ('yellow',       'yellow'),
-    Number:             ('blue',    'blue'),
-    Number.Float:       ('green',    'blue'),
-
-    Punctuation: ('magenta',    'blue'),
-
-    Generic.Deleted:    ('brightred',        'brightred'),
-    Generic.Inserted:   ('green',  'brightgreen'),
-    Generic.Heading:    ('**',         '**'),
-    Generic.Subheading: ('*magenta*',   '*brightmagenta*'),
-    Generic.Prompt:     ('**',         '**'),
-    Generic.Error:      ('brightred',        'brightred'),
-
-    Error:              ('_brightred_',      '_brightred_'),
+    Token: ('', ''),
+    Whitespace: ('gray', 'brightblack'),
+    Comment: ('black', 'green'),
+    Keyword: ('blue', 'brightblue'),
+    Keyword.Type: ('cyan', 'brightcyan'),
+    Operator.Word: ('magenta', 'brightmagenta'),
+    Name: ('red', 'brightcyan'),
+    Name.Attribute: ('magenta', 'brightcyan'),
+    Name.Builtin: ('magenta', 'brightcyan'),
+    Name.Builtin.Pseudo: ('magenta', 'brightcyan'),
+    Name.Class: ('cyan', 'brightcyan'),
+    Name.Constant: ('magenta', 'brightcyan'),
+    Name.Decorator: ('magenta', 'brightcyan'),
+    Name.Entity: ('magenta', 'brightcyan'),
+    Name.Exception: ('magenta', 'brightcyan'),
+    Name.Function: ('magenta', 'brightcyan'),
+    Name.Function.Magic: ('magenta', 'brightcyan'),
+    Name.Property: ('magenta', 'brightcyan'),
+    Name.Label: ('magenta', 'brightcyan'),
+    Name.Namespace: ('magenta', 'brightcyan'),
+    Name.Other: ('green', 'brightcyan'),
+    Name.Tag: ('magenta', 'brightcyan'),
+    Name.Variable: ('red', 'brightcyan'),
+    Name.Variable.Class: ('red', 'brightcyan'),
+    Name.Variable.Global: ('red', 'brightcyan'),
+    Name.Variable.Instance: ('red', 'brightcyan'),
+    Name.Variable.Magic: ('red', 'brightcyan'),
+    String: ('yellow', 'yellow'),
+    Number: ('blue', 'blue'),
+    Number.Float: ('green', 'blue'),
+    Punctuation: ('magenta', 'blue'),
+    Generic.Deleted: ('brightred', 'brightred'),
+    Generic.Inserted: ('green', 'brightgreen'),
+    Generic.Heading: ('**', '**'),
+    Generic.Subheading: ('*magenta*', '*brightmagenta*'),
+    Generic.Prompt: ('**', '**'),
+    Generic.Error: ('brightred', 'brightred'),
+    Error: ('_brightred_', '_brightred_'),
 }
 
 
@@ -109,5 +104,5 @@ def get_source(x, start_end=None):
     if start_end:
         dict_start = code.find(start_end[0])
         dict_end = code.find(start_end[1])
-        code = code[dict_start: dict_end+1]
+        code = code[dict_start:dict_end + 1]
     return dedent(code)
