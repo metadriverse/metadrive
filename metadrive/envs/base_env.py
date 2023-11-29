@@ -32,7 +32,7 @@ from metadrive.version import VERSION
 BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
-    random_agent_model=False,  # randomize the car model for the agent
+    random_agent_model=False,  # randomize the car model for the agent, randomly choosing from 4 types of cars
     target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=True, spawn_lane_index=None)},
 
     # ===== multi-agent =====
@@ -128,23 +128,6 @@ BASE_DEFAULT_CONFIG = dict(
     ),
 
     # ===== Sensors =====
-    # It should be a dict like this:
-    # sensors={
-    #   "rgb_camera": (RGBCamera, arg_1, arg_2, ..., arg_n),
-    #    ...
-    #   "your_sensor_name": (sensor_class, arg_1, arg_2, ..., arg_n)
-    # }
-    # Example:
-    # sensors = dict(
-    #           lidar=(Lidar,),
-    #           side_detector=(SideDetector,),
-    #           lane_line_detector=(LaneLineDetector,)
-    #           rgb_camera=(RGBCamera, 84, 84),
-    #           mini_map=(MiniMap, 84, 84, 250),
-    #           depth_camera=(DepthCamera, 84, 84),
-    #         )
-    # These sensors will be constructed automatically and can be accessed in engine.get_sensor("sensor_name")
-    # NOTE: main_camera will be added automatically if you are using offscreen/onscreen mode
     sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
 
     # ===== Engine Core config =====

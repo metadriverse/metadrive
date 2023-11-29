@@ -61,7 +61,7 @@ install_requires = [
     "geopandas",
     "shapely",
     "filelock",
-    "pygments",
+    "Pygments",
 ]
 
 

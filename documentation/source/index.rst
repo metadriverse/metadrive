@@ -42,10 +42,10 @@ Please feel free to contact us if you have any suggestions or ideas!
    :caption: RL Training with MetaDrive
 
    rl_environments.ipynb
+   config_system.ipynb
    obs.ipynb
    action.ipynb
    reward_cost_done.ipynb
-   config_system.ipynb
    training.ipynb
 
 .. toctree::
@@ -58,6 +58,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    top_down_render.ipynb
    policy.rst
    navigation.ipynb
+   sensors.ipynb
 
 .. toctree::
    :hidden:
