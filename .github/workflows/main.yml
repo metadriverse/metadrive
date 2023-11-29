@@ -289,6 +289,7 @@ jobs:
           pip install numpy
           pip install -e .
           pip install -e .[gym]
+          pip install stable-baselines3[extra]
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
