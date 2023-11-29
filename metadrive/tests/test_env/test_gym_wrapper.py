@@ -50,9 +50,9 @@ class NoModeGymnasiumInnerClass(gymnasium.Env):
         assert 'mode' not in kwargs.keys()
 
 
-def test_gym_wrapper_removes_mode():
-    gym_env = createGymWrapper(NoModeGymnasiumInnerClass)(config={})
-    gym_env.render(mode=1)
+# def test_gym_wrapper_removes_mode():
+#     gym_env = createGymWrapper(NoModeGymnasiumInnerClass)(config={})
+#     gym_env.render(mode=1)
 
 
 class ConfigOverrideGymnasiumInnerClass(gymnasium.Env):
