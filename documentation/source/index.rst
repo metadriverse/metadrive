@@ -45,7 +45,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    obs.ipynb
    action.ipynb
    reward_cost_done.ipynb
-   config_system.rst
+   config_system.ipynb
    training.ipynb
 
 .. toctree::
