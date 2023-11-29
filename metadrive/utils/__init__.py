@@ -7,7 +7,7 @@ from pygments import highlight
 from pygments.formatters import TerminalFormatter
 from pygments.lexers import PythonLexer
 from pygments.token import Keyword, Name, Comment, String, Error, \
-    Number, Operator, Generic, Token, Whitespace
+    Number, Operator, Generic, Token, Whitespace, Punctuation
 
 from metadrive.utils.config import Config, merge_config_with_unknown_keys, merge_config
 from metadrive.utils.coordinates_shift import panda_heading, panda_vector, metadrive_heading, metadrive_vector
@@ -40,7 +40,7 @@ CONFIG = {
     Token:              ('',            ''),
 
     Whitespace:         ('gray',   'brightblack'),
-    Comment:            ('green',   'green'),
+    Comment:            ('black',   'green'),
 
     Keyword:            ('blue',    'brightblue'),
     Keyword.Type:       ('cyan',        'brightcyan'),
@@ -59,7 +59,7 @@ CONFIG = {
     Name.Property: ('magenta',        'brightcyan'),
     Name.Label: ('magenta',        'brightcyan'),
     Name.Namespace: ('magenta',        'brightcyan'),
-    Name.Other: ('magenta',        'brightcyan'),
+    Name.Other: ('green',        'brightcyan'),
     Name.Tag: ('magenta',        'brightcyan'),
     Name.Variable: ('red',        'brightcyan'),
     Name.Variable.Class: ('red',        'brightcyan'),
@@ -68,6 +68,9 @@ CONFIG = {
     Name.Variable.Magic: ('red',        'brightcyan'),
     String:             ('yellow',       'yellow'),
     Number:             ('blue',    'blue'),
+    Number.Float:       ('green',    'blue'),
+
+    Punctuation: ('magenta',    'blue'),
 
     Generic.Deleted:    ('brightred',        'brightred'),
     Generic.Inserted:   ('green',  'brightgreen'),
@@ -102,9 +105,9 @@ def get_source(x, start_end=None):
     Returns:
 
     """
-    code = dedent(getsource(x))
+    code = getsource(x)
     if start_end:
         dict_start = code.find(start_end[0])
         dict_end = code.find(start_end[1])
-        code = code[dict_start: dict_end + 1]
-    return code
+        code = code[dict_start: dict_end+1]
+    return dedent(code)
