@@ -29,7 +29,7 @@ if __name__ == "__main__":
             "daytime": "19:00",
             "interface_panel": [],
             "need_inverse_traffic": False,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "map": 3,
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,

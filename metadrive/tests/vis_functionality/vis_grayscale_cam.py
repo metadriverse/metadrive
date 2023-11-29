@@ -8,14 +8,14 @@ if __name__ == "__main__":
             "start_seed": 4,
             "vehicle_config": {
                 "stack_size": 5,
-                "rgb_clip": False,
+                "norm_pixel": False,
                 "rgb_camera": (800, 500),
                 # "rgb_to_grayscale": True
             },
             "manual_control": True,
             "use_render": False,
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
-            "rgb_clip": False,  # clip rgb to range(0,1) instead of (0, 255)
+            "norm_pixel": False,  # clip rgb to range(0,1) instead of (0, 255)
             # "pstats": True,
         }
     )

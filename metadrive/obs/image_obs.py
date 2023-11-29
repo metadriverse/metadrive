@@ -23,7 +23,7 @@ class ImageStateObservation(BaseObservation):
 
     def __init__(self, config):
         super(ImageStateObservation, self).__init__(config)
-        self.img_obs = ImageObservation(config, config["vehicle_config"]["image_source"], config["rgb_clip"])
+        self.img_obs = ImageObservation(config, config["vehicle_config"]["image_source"], config["norm_pixel"])
         self.state_obs = StateObservation(config)
 
     @property
@@ -52,8 +52,8 @@ class ImageObservation(BaseObservation):
         self.STACK_SIZE = config["stack_size"]
         self.image_source = image_source
         super(ImageObservation, self).__init__(config)
-        self.rgb_clip = clip_rgb
-        self.state = np.zeros(self.observation_space.shape, dtype=np.float32 if self.rgb_clip else np.uint8)
+        self.norm_pixel = clip_rgb
+        self.state = np.zeros(self.observation_space.shape, dtype=np.float32 if self.norm_pixel else np.uint8)
         if self.enable_cuda:
             self.state = cp.asarray(self.state)
 
@@ -64,13 +64,13 @@ class ImageObservation(BaseObservation):
         channel = sensor_cls.num_channels if sensor_cls != "MainCamera" else 3
         shape = (self.config["sensors"][self.image_source][2],
                  self.config["sensors"][self.image_source][1]) + (channel, self.STACK_SIZE)
-        if self.rgb_clip:
+        if self.norm_pixel:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
             return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
 
     def observe(self, vehicle):
-        new_obs = self.engine.get_sensor(self.image_source).perceive(vehicle, self.rgb_clip)
+        new_obs = self.engine.get_sensor(self.image_source).perceive(vehicle, self.norm_pixel)
         self.state = cp.roll(self.state, -1, axis=-1) if self.enable_cuda else np.roll(self.state, -1, axis=-1)
         self.state[..., -1] = new_obs
         return self.state

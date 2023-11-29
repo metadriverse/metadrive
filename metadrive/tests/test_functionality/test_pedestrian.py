@@ -14,7 +14,7 @@ def test_pedestrian(render=False):
             "use_render": render,
             "decision_repeat": 5,
             "need_inverse_traffic": False,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "map": "X",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,

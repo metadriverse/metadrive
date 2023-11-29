@@ -3,8 +3,8 @@ import pytest
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 blackbox_test_configs = dict(
-    standard=dict(stack_size=3, width=64, height=32, rgb_clip=True),
-    small=dict(stack_size=1, width=64, height=32, rgb_clip=False),
+    standard=dict(stack_size=3, width=64, height=32, norm_pixel=True),
+    small=dict(stack_size=1, width=64, height=32, norm_pixel=False),
 )
 
 
@@ -32,7 +32,7 @@ def test_main_camera(config, render=False):
             "vehicle_config": dict(image_source="main_camera"),
             "interface_panel": [],
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
-            "rgb_clip": config["rgb_clip"],  # clip rgb to range(0,1) instead of (0, 255)
+            "norm_pixel": config["norm_pixel"],  # clip rgb to range(0,1) instead of (0, 255)
         }
     )
     env.reset()

@@ -21,7 +21,7 @@ if __name__ == "__main__":
             "decision_repeat": 5,
             "interface_panel": [MiniMap, DashBoard, RGBCamera],
             "need_inverse_traffic": False,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "map": "SSS",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,

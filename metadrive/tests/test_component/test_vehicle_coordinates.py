@@ -14,7 +14,7 @@ def test_coordinates_shift():
                 # "manual_control": True,
                 # "use_render": True,
                 "decision_repeat": 5,
-                "rgb_clip": True,
+                "norm_pixel": True,
                 "pstats": True,
                 # "discrete_action": True,
                 "map": "SSSSSS",

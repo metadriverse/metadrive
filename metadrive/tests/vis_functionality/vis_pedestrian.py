@@ -21,7 +21,7 @@ if __name__ == "__main__":
             "use_render": True,
             "decision_repeat": 5,
             "need_inverse_traffic": False,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "map": "XSS",
             # "agent_policy": IDMPolicy,
             "random_traffic": False,

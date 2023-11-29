@@ -4,8 +4,8 @@ from metadrive.component.sensors.instance_camera import InstanceCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
 import numpy as np
 blackbox_test_configs = dict(
-    # standard=dict(stack_size=3, width=256, height=128, rgb_clip=True),
-    small=dict(stack_size=1, width=64, height=32, rgb_clip=True),
+    # standard=dict(stack_size=3, width=256, height=128, norm_pixel=True),
+    small=dict(stack_size=1, width=64, height=32, norm_pixel=True),
 )
 
 
@@ -35,7 +35,7 @@ def test_instance_cam(config, render=False):
             },
             "interface_panel": ["dashboard", "camera"],
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
-            "rgb_clip": config["rgb_clip"],  # clip rgb to range(0,1) instead of (0, 255)
+            "norm_pixel": config["norm_pixel"],  # clip rgb to range(0,1) instead of (0, 255)
         }
     )
     env.reset()

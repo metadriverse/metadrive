@@ -108,16 +108,16 @@ class MetaDriveEnv(BaseEnv):
 
     def _post_process_config(self, config):
         config = super(MetaDriveEnv, self)._post_process_config(config)
-        if not config["rgb_clip"]:
+        if not config["norm_pixel"]:
             self.logger.warning(
-                "You have set rgb_clip = False, which means the observation will be uint8 values in [0, 255]. "
+                "You have set norm_pixel = False, which means the observation will be uint8 values in [0, 255]. "
                 "Please make sure you have parsed them later before feeding them to network!"
             )
 
         config["map_config"] = parse_map_config(
             easy_map_config=config["map"], new_map_config=config["map_config"], default_config=self.default_config_copy
         )
-        config["vehicle_config"]["rgb_clip"] = config["rgb_clip"]
+        config["vehicle_config"]["norm_pixel"] = config["norm_pixel"]
         config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
         if config.get("gaussian_noise", 0) > 0:
             assert config["vehicle_config"]["lidar"]["gaussian_noise"] == 0, "You already provide config!"

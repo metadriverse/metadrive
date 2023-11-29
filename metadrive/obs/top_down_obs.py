@@ -32,7 +32,7 @@ class TopDownObservation(BaseObservation):
     def __init__(self, vehicle_config, clip_rgb: bool, onscreen, resolution=None, max_distance=50):
         self.resolution = resolution or self.RESOLUTION
         super(TopDownObservation, self).__init__(vehicle_config)
-        self.rgb_clip = clip_rgb
+        self.norm_pixel = clip_rgb
         self.num_stacks = 3
 
         # self.obs_shape = (64, 64)
@@ -214,7 +214,7 @@ class TopDownObservation(BaseObservation):
     @property
     def observation_space(self):
         shape = self.obs_shape + (self.num_stacks, )
-        if self.rgb_clip:
+        if self.norm_pixel:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
             return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
@@ -223,7 +223,7 @@ class TopDownObservation(BaseObservation):
         self.render()
         surface = self.get_observation_window()
         img = self.pygame.surfarray.array3d(surface)
-        if self.rgb_clip:
+        if self.norm_pixel:
             img = img.astype(np.float32) / 255
         else:
             img = img.astype(np.uint8)

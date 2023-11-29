@@ -32,28 +32,42 @@ from metadrive.version import VERSION
 BASE_DEFAULT_CONFIG = dict(
 
     # ===== agent =====
-    random_agent_model=False,  # randomize the car model for the agent, randomly choosing from 4 types of cars
+    # Whether randomize the car model for the agent, randomly choosing from 4 types of cars
+    random_agent_model=False,
+    # The ego car config is: env_config["vehicle_config"].update(env_config"[target_vehicle_configs"]["default_agent"])
     target_vehicle_configs={DEFAULT_AGENT: dict(use_special_color=True, spawn_lane_index=None)},
 
     # ===== multi-agent =====
-    num_agents=1,  # Note that this can be set to >1 in MARL envs, or set to -1 for as many vehicles as possible.
+    # This should be >1 in MARL envs, or set to -1 for spawning as many vehicles as possible.
+    num_agents=1,
+    # Turn on this to notify the simulator that it is MARL env
     is_multi_agent=False,
+    # The number of agent will be fixed adn determined at the start of the episode, if set to False
     allow_respawn=False,
-    delay_done=0,  # How many steps for the agent to stay static at the death place after done.
+    # How many substepsfor the agent to stay static at the death place after done. env.step = decision_repeat x substeps
+    delay_done=0,
 
     # ===== Action/Control =====
-    manual_control=False,  # if set to True, agent policy will be Manual Control policy
-    controller="keyboard",  # "steering_wheel" or "keyboard" or "xbos"
+    # What policy to use for controlling agents
     agent_policy=EnvInputPolicy,
+    # If set to True, agent_policy will be overriden and change to ManualControlPolicy
+    manual_control=False,
+    # What interfaces to use for manual control, options: "steering_wheel" or "keyboard" or "xbos"
+    controller="keyboard",
+    # Used with EnvInputPolicy. If set to True, the env.action_space will be discrete
     discrete_action=False,
+    # If True, use MultiDiscrete action space. Otherwise, use Discrete.
+    use_multi_discrete=False,
+    # How many discrete actions are used for steering dim
     discrete_steering_dim=5,
+    # How many discrete actions are used for throttle/brake dim
     discrete_throttle_dim=5,
-    use_multi_discrete=False,  # If True, use MultiDiscrete action space. Otherwise, use Discrete.
-    action_check=False,  # check if the action is contained in gym.space
-    # extra_action_dim=0,  # If you want to control more things besides throttle brake, Deprecated
+    # Check if the action is contained in gym.space. Usually turned off to speed up simulation
+    action_check=False,
 
     # ===== Observation =====
-    rgb_clip=True,  # clip rgb to (0, 1)
+    # Whether to clip the pixel value from 0-255 to 0-1
+    norm_pixel=True,
     stack_size=3,  # the number of timesteps for stacking image observation
     image_observation=False,  # use image observation or lidar
     agent_observation=None,

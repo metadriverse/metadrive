@@ -17,7 +17,7 @@ if __name__ == "__main__":
             "use_render": False,
             "decision_repeat": 5,
             "need_inverse_traffic": True,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "debug": False,
             "map": "TXO",
             # "agent_policy": IDMPolicy,

@@ -19,7 +19,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "image_observation": False,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "show_interface": True,
             "agent_policy": ReplayEgoCarPolicy,
             "interface_panel": ["semantic_camera"],

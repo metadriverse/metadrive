@@ -37,7 +37,7 @@ class RosSocketServer():
             image_observation=True if not test else False,
             manual_control=False,
             agent_policy=ReplayEgoCarPolicy,
-            rgb_clip=False,
+            norm_pixel=False,
             show_logo=False,
             show_fps=False,
             show_interface=False,
