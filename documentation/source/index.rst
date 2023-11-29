@@ -46,7 +46,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    action.ipynb
    reward_cost_done.ipynb
    config_system.rst
-   training_with_rllib.rst
+   training.ipynb
 
 .. toctree::
    :hidden:

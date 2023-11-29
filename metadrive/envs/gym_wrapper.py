@@ -96,7 +96,6 @@ try:
 
             def render(self, *args, **kwargs):
                 # remove mode from kwargs
-                kwargs.pop("mode", None)
                 return self._inner.render(*args, **kwargs)
 
             def close(self):
