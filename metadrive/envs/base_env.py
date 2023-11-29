@@ -44,7 +44,7 @@ BASE_DEFAULT_CONFIG = dict(
     is_multi_agent=False,
     # The number of agent will be fixed adn determined at the start of the episode, if set to False
     allow_respawn=False,
-    # How many substepsfor the agent to stay static at the death place after done. env.step = decision_repeat x substeps
+    # How many substeps for the agent to stay static at the death place after done. (Default for MARL: 25)
     delay_done=0,
 
     # ===== Action/Control =====
