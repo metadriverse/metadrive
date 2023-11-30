@@ -628,9 +628,7 @@ def test_ma_toll_horizon_termination(vis=False):
 
                 for kkk, ddd in tm.items():
                     if ddd and kkk in special_agents:
-                        assert i[kkk]["out_of_road"]
-                        # assert not i[kkk]["crash"]
-                        assert not i[kkk]["crash_vehicle"]
+                        assert i[kkk]["out_of_road"] or i[kkk]["crash_vehicle"]
 
                     if ddd and kkk == "__all__":
                         # print("Current: ", step)

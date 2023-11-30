@@ -6,11 +6,11 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 10,
-            "traffic_density": 1,
+            "traffic_density": 0,
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            # "debug": True,
+            "debug": True,
             # "global_light": False,
             # "debug_static_world": True,
             "static_traffic_object": False,
@@ -20,10 +20,11 @@ if __name__ == "__main__":
             "random_lane_width": False,
             # "image_observation": True,
             "show_coordinates": True,
-            "debug_static_world": True,
+            # "debug_static_world": True,
             "manual_control": True,
             "use_render": True,
-            "use_mesh_terrain": False,
+            # "use_mesh_terrain": True,
+            "full_size_mesh": False,
             "accident_prob": 0,
             "decision_repeat": 5,
             "daytime": "19:00",
@@ -99,12 +100,12 @@ if __name__ == "__main__":
 
     o, _ = env.reset(seed=74)
     env.engine.accept("~", env.engine.terrain.reload_terrain_shader)
-    if env.config["render_pipeline"]:
-        env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
-        env.engine.accept("7", acc_speed)
-        env.engine.accept("8", de_speed)
-        env.engine.accept("9", lift_terrain)
-        env.engine.accept("0", lower_terrain)
+    # if env.config["render_pipeline"]:
+    # env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
+    env.engine.accept("7", acc_speed)
+    env.engine.accept("8", de_speed)
+    env.engine.accept("9", lift_terrain)
+    env.engine.accept("0", lower_terrain)
     env.engine.accept("`", env.engine.terrain.reload_terrain_shader)
     # env.main_camera.set_follow_lane(True)
     # env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
@@ -115,6 +116,7 @@ if __name__ == "__main__":
     for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
+        env.render(text={"pos": env.vehicle.origin.getPos()})
         # if tm:
         #     s = time.time()
         #     env.reset()

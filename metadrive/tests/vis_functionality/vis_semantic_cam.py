@@ -21,6 +21,8 @@ if __name__ == "__main__":
             "image_observation": False,
             "norm_pixel": True,
             "show_interface": True,
+            "show_sidewalk": True,
+            "show_crosswalk": True,
             "agent_policy": ReplayEgoCarPolicy,
             "interface_panel": ["semantic_camera"],
             "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),

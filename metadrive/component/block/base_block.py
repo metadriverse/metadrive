@@ -398,7 +398,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 polygon = crosswalk["polygon"]
                 np = make_polygon_model(polygon, 0.0)
                 np.reparentTo(self.crosswalk_node_path)
-                np.setPos(0, 0, -0.05)
+                np.setPos(0, 0, 0.005)
 
                 body_node = BaseGhostBodyNode(cross_id, MetaDriveType.CROSSWALK)
                 body_node.setKinematic(False)

@@ -55,7 +55,7 @@ class Terrain(BaseObject):
         self._terrain_offset = 2055  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
         # pre calculate some variables
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
-        self.origin.setZ(-(self._terrain_offset + 1) / 65536 * self._height_scale * 2 - 0.05)
+        self.origin.setZ(-(self._terrain_offset + 1) / 65536 * self._height_scale * 2)
 
         self._mesh_terrain = None
         self._mesh_terrain_height = None
@@ -148,7 +148,7 @@ class Terrain(BaseObject):
         """
         # Create once for lazy-reset
         # If no render pipeline, we can only have 2d terrain. It will only be generated for once.
-        shape = BulletPlaneShape(Vec3(0, 0, 1), -0.05)
+        shape = BulletPlaneShape(Vec3(0, 0, 1), 0)
         node = BulletRigidBodyNode(MetaDriveType.GROUND)
         node.setFriction(.9)
         node.addShape(shape)
@@ -276,12 +276,11 @@ class Terrain(BaseObject):
         Returns:
 
         """
-        # TODO we can do some optimization here, only update some regions
         # clear previous mesh
         self.dynamic_nodes.clear()
         mesh = heightfield_img
         mesh = np.flipud(mesh)
-        mesh = cv2.resize(mesh, (mesh.shape[0] + 1, mesh.shape[1] + 1))
+        mesh = cv2.resize(mesh, (mesh.shape[0] + 1, mesh.shape[1] + 1), interpolation=cv2.INTER_LINEAR_EXACT)
         path_to_store = self.PATH.joinpath("run_time_map_mesh_{}.png".format(self.engine.pid))
         cv2.imencode('.png', mesh)[1].tofile(path_to_store)
         # cv2.imwrite(str(path_to_store), mesh)
@@ -324,6 +323,7 @@ class Terrain(BaseObject):
         Returns:
 
         """
+        raise DeprecationWarning
         self.origin.hide(
             CamMask.MiniMap | CamMask.Shadow | CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam
         )

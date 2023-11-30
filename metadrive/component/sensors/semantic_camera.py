@@ -12,7 +12,7 @@ class SemanticCamera(BaseCamera):
     # shape(dim_1, dim_2)
     CAM_MASK = CamMask.SemanticCam
 
-    GROUND_HEIGHT = -0.05
+    GROUND_HEIGHT = 0
     VIEW_GROUND = False
     GROUND = None
     GROUND_MODEL = None

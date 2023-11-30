@@ -11,7 +11,7 @@ class DepthCamera(BaseCamera):
     # shape(dim_1, dim_2)
     CAM_MASK = CamMask.DepthCam
 
-    GROUND_HEIGHT = -0.05
+    GROUND_HEIGHT = 0
     VIEW_GROUND = True
     GROUND = None
     GROUND_MODEL = None
