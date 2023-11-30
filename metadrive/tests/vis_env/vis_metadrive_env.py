@@ -5,7 +5,7 @@ if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 10,
+            "num_scenarios": 1,
             "traffic_density": 0,
             "start_seed": 74,
             # "_disable_detector_mask":True,
@@ -23,7 +23,7 @@ if __name__ == "__main__":
             # "debug_static_world": True,
             "manual_control": True,
             "use_render": True,
-            # "use_mesh_terrain": True,
+            "use_mesh_terrain": True,
             "full_size_mesh": False,
             "accident_prob": 0,
             "decision_repeat": 5,
@@ -34,6 +34,7 @@ if __name__ == "__main__":
             "map": 3,
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
+            "height_scale": 100,
             # "random_lane_width": True,
             "driving_reward": 1.0,
             # "pstats": True,
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     )
     import time
 
-    speed = 8
+    speed = 0.1
 
     def acc_speed():
         global speed
@@ -82,12 +83,20 @@ if __name__ == "__main__":
         speed /= 2
 
     def lower_terrain():
-        pos = env.engine.terrain._mesh_terrain.getPos()
-        env.engine.terrain._mesh_terrain.set_pos(pos[0], pos[1], pos[2] - speed)
+        pos = env.engine.terrain.mesh_collision_terrain.getPos()
+        env.engine.terrain.mesh_collision_terrain.set_pos(pos[0], pos[1] - speed, pos[2])
+
+    def lower_terrain_x():
+        pos = env.engine.terrain.mesh_collision_terrain.getPos()
+        env.engine.terrain.mesh_collision_terrain.set_pos(pos[0] - speed, pos[1], pos[2])
 
     def lift_terrain():
-        pos = env.engine.terrain._mesh_terrain.getPos()
-        env.engine.terrain._mesh_terrain.set_pos(pos[0], pos[1], pos[2] + speed)
+        pos = env.engine.terrain.mesh_collision_terrain.getPos()
+        env.engine.terrain.mesh_collision_terrain.set_pos(pos[0], pos[1] + speed, pos[2])
+
+    def lift_terrain_x():
+        pos = env.engine.terrain.mesh_collision_terrain.getPos()
+        env.engine.terrain.mesh_collision_terrain.set_pos(pos[0] + speed, pos[1], pos[2])
 
     init_state = {
         'position': (40.82264362985734, -509.3641208712943),
@@ -102,8 +111,10 @@ if __name__ == "__main__":
     env.engine.accept("~", env.engine.terrain.reload_terrain_shader)
     # if env.config["render_pipeline"]:
     # env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
-    env.engine.accept("7", acc_speed)
-    env.engine.accept("8", de_speed)
+    env.engine.accept("5", acc_speed)
+    env.engine.accept("6", de_speed)
+    env.engine.accept("7", lift_terrain_x)
+    env.engine.accept("8", lower_terrain_x)
     env.engine.accept("9", lift_terrain)
     env.engine.accept("0", lower_terrain)
     env.engine.accept("`", env.engine.terrain.reload_terrain_shader)
@@ -113,10 +124,17 @@ if __name__ == "__main__":
     #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
     print(time.time() - start)
+    origin = env.engine.terrain.mesh_collision_terrain.getPos()
     for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
-        env.render(text={"pos": env.vehicle.origin.getPos()})
+        env.render(
+            text={
+                "pos": env.engine.terrain.mesh_collision_terrain.getPos(),
+                "origin": [origin[0], origin[1]],
+                "speed": speed,
+            }
+        )
         # if tm:
         #     s = time.time()
         #     env.reset()
