@@ -345,6 +345,10 @@ class EngineCore(ShowBase.ShowBase):
         self.sensors = {}
         self.setup_sensors()
 
+        # toggle in debug physics world
+        if self.global_config["debug_physics_world"]:
+            self.toggleDebug()
+
     def render_frame(self, text: Optional[Union[dict, str]] = None):
         """
         The real rendering is conducted by the igLoop task maintained by panda3d.
