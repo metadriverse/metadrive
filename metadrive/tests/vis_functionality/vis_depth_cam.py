@@ -12,7 +12,7 @@ if __name__ == "__main__":
             "manual_control": False,
             # "use_render": True,
             "image_observation": True,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "debug": True,
             "interface_panel": ["depth_camera"],
             "sensors": dict(depth_camera=(DepthCamera, 800, 600)),

@@ -1,15 +1,17 @@
 import gymnasium as gym
-
+from metadrive.engine.logger import get_logger
 from metadrive.component.vehicle.PID_controller import PIDController
 from metadrive.engine.engine_utils import get_global_config
 from metadrive.policy.env_input_policy import EnvInputPolicy
 from metadrive.utils.math import wrap_to_pi
 
+logger = get_logger()
 
-class AgentLaneChangePolicy(EnvInputPolicy):
+
+class LaneChangePolicy(EnvInputPolicy):
     def __init__(self, obj, seed):
         # Since control object may change
-        super(AgentLaneChangePolicy, self).__init__(obj, seed)
+        super(LaneChangePolicy, self).__init__(obj, seed)
         self.discrete_action = self.engine.global_config["discrete_action"]
         assert self.discrete_action, "Must set discrete_action=True for using this control policy"
         self.use_multi_discrete = self.engine.global_config["use_multi_discrete"]
@@ -19,12 +21,13 @@ class AgentLaneChangePolicy(EnvInputPolicy):
         )  # for discrete actions space
         self.discrete_steering_dim = 3  # only left or right
         self.discrete_throttle_dim = self.engine.global_config["discrete_throttle_dim"]
+        logger.info("The discrete_steering_dim for {} is set to 3 [left, keep, right]".format(self.name))
 
         self.heading_pid = PIDController(1.7, 0.01, 3.5)
         self.lateral_pid = PIDController(0.3, .002, 0.05)
 
     def act(self, agent_id):
-        action = super(AgentLaneChangePolicy, self).act(agent_id)
+        action = super(LaneChangePolicy, self).act(agent_id)
         steering = action[0]
         throttle = action[1]
         current_lane = self.control_object.navigation.current_lane
@@ -48,9 +51,7 @@ class AgentLaneChangePolicy(EnvInputPolicy):
        The Input space is a class attribute
        """
         engine_global_config = get_global_config()
-        extra_action_dim = engine_global_config["vehicle_config"]["extra_action_dim"]
-        discrete_action = engine_global_config["discrete_action"]
-        assert discrete_action
+        assert engine_global_config["discrete_action"]
         discrete_throttle_dim = engine_global_config["discrete_throttle_dim"]
         use_multi_discrete = engine_global_config["use_multi_discrete"]
         discrete_steering_dim = 3

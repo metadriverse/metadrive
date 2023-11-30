@@ -12,7 +12,7 @@ class SemanticCamera(BaseCamera):
     # shape(dim_1, dim_2)
     CAM_MASK = CamMask.SemanticCam
 
-    GROUND_HEIGHT = -0.5
+    GROUND_HEIGHT = 0
     VIEW_GROUND = False
     GROUND = None
     GROUND_MODEL = None
@@ -45,7 +45,7 @@ class SemanticCamera(BaseCamera):
             # # Since the terrain is a texture, shader will not calculate the sematic information, we add a moving terrain
             # # model to enable the sematic information of terrain
             self.GROUND_MODEL = self.GROUND.getRoot()
-            self.GROUND_MODEL.setPos(-128, -128, self.GROUND_HEIGHT)
+            self.GROUND_MODEL.setPos(-128, -128, self.GROUND_HEIGHT - 0.5)
             self.GROUND_MODEL.reparentTo(self.engine.render)
             self.GROUND_MODEL.hide(CamMask.AllOn)
             self.GROUND_MODEL.show(CamMask.SemanticCam)
@@ -55,7 +55,7 @@ class SemanticCamera(BaseCamera):
     def track(self, base_object):
         if self.VIEW_GROUND and base_object is not None:
             pos = base_object.origin.getPos()
-            self.GROUND_MODEL.setPos(pos[0], pos[1], self.GROUND_HEIGHT)
+            self.GROUND_MODEL.setPos(pos[0], pos[1], self.GROUND_HEIGHT - 0.5)
             self.GROUND_MODEL.setH(base_object.origin.getH())
             # self.GROUND_MODEL.setP(-base_object.origin.getR())
             # self.GROUND_MODEL.setR(-base_object.origin.getR())

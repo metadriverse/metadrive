@@ -136,14 +136,12 @@ class WorldSurface(pygame.Surface):
     def pos2pix(self, x: float, y: float) -> Tuple[int, int]:
         """
         Convert two world coordinates [m] into a position in the surface [px]
+        The coordinates is changed to right-handed as well
 
         :param x: x world coordinate [m]
         :param y: y world coordinate [m]
         :return: the coordinates of the corresponding pixel [px]
         """
-
-        # TODO(markpeng): Hot fix the mirrored BEV issue.
-        # return self.pix(x - self.origin[0]), self.pix(y - self.origin[1])
         return self.pix(x - self.origin[0]), self.raw_size[-1] - self.pix(y - self.origin[1])
 
     def vec2pix(self, vec: PositionType) -> Tuple[int, int]:
@@ -186,6 +184,21 @@ class WorldSurface(pygame.Surface):
         ret.blit(self, (0, 0))
         return ret
 
+    @staticmethod
+    def to_cv2_image(surface):
+        """
+        convert the pygame.surface to image
+        Args:
+            surface: pygame.surface
+
+        Returns: image in numpy array
+
+        """
+        img_array = np.array(pygame.surfarray.pixels3d(surface))
+        image_object = np.transpose(img_array, (1, 0, 2))
+        # image_object[:, :, [0, 2]] = image_object[:, :, [2, 0]]
+        return image_object
+
 
 class ObjectGraphics:
     RED = (255, 100, 100)
@@ -223,11 +236,9 @@ class ObjectGraphics:
         w = surface.pix(object.WIDTH)
         h = surface.pix(object.LENGTH)
         position = [*surface.pos2pix(object.position[0], object.position[1])]
-
-        # TODO(markpeng): Hot fix the mirrored BEV issue.
-        # angle = np.rad2deg(heading)
+        # As the following rotate code is for left-handed coordinates,
+        # so we plus -1 before the heading to adapt it to right-handed coordinates
         angle = -np.rad2deg(heading)
-
         box = [pygame.math.Vector2(p) for p in [(-h / 2, -w / 2), (-h / 2, w / 2), (h / 2, w / 2), (h / 2, -w / 2)]]
         box_rotate = [p.rotate(angle) + position for p in box]
 
@@ -319,7 +330,7 @@ class LaneGraphics:
         if MetaDriveType.is_yellow_line(type):
             color = (255, 175, 35)
         elif MetaDriveType.is_road_boundary_line(type):
-            color = (255, 175, 35)
+            color = (100, 100, 100)
         else:
             color = (175, 175, 175)
         if MetaDriveType.is_road_line(type) or MetaDriveType.is_road_boundary_line(type):
@@ -343,32 +354,6 @@ class LaneGraphics:
                     )
         elif type == "center_lane" or type is None:
             pass
-
-    @classmethod
-    def display_nuplan(cls, poly_line, type, color, surface) -> None:
-        """
-        Display a lane on a surface.
-        """
-        lane = poly_line
-        if color == PGLineColor.YELLOW:
-            color = (0, 80, 220)
-        else:
-            color = (80, 80, 80)
-        if len(poly_line.segment_property) <= 1:
-            return
-        stripes_count = int(2 * (surface.get_height() + surface.get_width()) / (cls.STRIPE_SPACING * surface.scaling))
-        s_origin, _ = lane.local_coordinates(surface.origin)
-        s0 = (int(s_origin) // cls.STRIPE_SPACING - stripes_count // 2) * cls.STRIPE_SPACING
-
-        if type == PGLineType.BROKEN:
-            starts = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING
-            ends = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING + cls.STRIPE_LENGTH
-            lats = [0 for s in starts]
-        else:
-            starts = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING
-            ends = s0 + np.arange(stripes_count) * cls.STRIPE_SPACING + cls.STRIPE_SPACING
-            lats = [0 for s in starts]
-        cls.draw_stripes(lane, surface, starts, ends, lats, color=color)
 
     @classmethod
     def striped_line(cls, lane, surface, stripes_count: int, longitudinal: float, side: int, color=None) -> None:

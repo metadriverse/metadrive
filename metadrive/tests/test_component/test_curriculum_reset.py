@@ -1,12 +1,12 @@
 from tqdm import tqdm
 
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.real_data_envs.nuscenes_env import NuScenesEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
 def _test_level(level=1, render=False):
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         {
             "use_render": render,
             "agent_policy": ReplayEgoCarPolicy,
@@ -43,7 +43,7 @@ def test_curriculum_seed():
 
 
 def test_curriculum_up_1_level(render=False, level=5):
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         {
             "use_render": render,
             "agent_policy": ReplayEgoCarPolicy,
@@ -73,7 +73,7 @@ def test_curriculum_up_1_level(render=False, level=5):
 
 
 def test_curriculum_level_up(render=False):
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         {
             "use_render": render,
             "agent_policy": ReplayEgoCarPolicy,
@@ -107,7 +107,7 @@ def test_curriculum_level_up(render=False):
 def _worker_env(render, worker_index, level_up=False):
     assert worker_index in [0, 1]
     level = 2
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         {
             "use_render": render,
             "agent_policy": ReplayEgoCarPolicy,
@@ -165,7 +165,7 @@ def test_curriculum_multi_worker(render=False):
 
 
 def level_up_worker(render, worker_index):
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         {
             "use_render": render,
             "agent_policy": ReplayEgoCarPolicy,
@@ -205,7 +205,7 @@ def test_curriculum_worker_level_up(render=False):
 
 
 def test_start_seed_not_0(render=False, worker_index=0):
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         {
             "use_render": render,
             "agent_policy": ReplayEgoCarPolicy,
@@ -243,7 +243,7 @@ def test_start_seed_not_0(render=False, worker_index=0):
 
 
 def test_start_seed_1_9(render=False, worker_index=0):
-    env = NuScenesEnv(
+    env = ScenarioEnv(
         {
             "use_render": render,
             "agent_policy": ReplayEgoCarPolicy,

@@ -74,35 +74,3 @@ def metadrive_heading(heading: float) -> float:
     """
     # return -heading
     return heading
-
-
-def nuplan_to_metadrive_vector(vector, nuplan_center=(0, 0)):
-    "All vec in nuplan should be centered in (0,0) to avoid numerical explosion"
-    vector = np.array(vector)
-    # if len(vector.shape) == 1:
-    #     vector[1] *= -1
-    # else:
-    #     vector[:, 1] *= -1
-    vector -= np.asarray(nuplan_center)
-    return vector
-
-
-def metadrive_to_nuplan_vector(vector, nuplan_center=(0, 0)):
-    "All vec in nuplan should be centered in (0,0) to avoid numerical explosion"
-    vector = np.array(vector)
-    vector += nuplan_center
-    # if len(vector.shape) == 1:
-    #     vector[1] *= -1
-    # else:
-    #     vector[:, 1] *= -1
-    return vector
-
-
-def nuplan_to_metadrive_heading(heading):
-    # return -wrap_to_pi(heading)
-    return wrap_to_pi(heading)
-
-
-def metadrive_to_nuplan_heading(heading):
-    # return -wrap_to_pi(heading)
-    return wrap_to_pi(heading)

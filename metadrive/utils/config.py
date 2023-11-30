@@ -291,6 +291,17 @@ class Config:
         self[key] = value
         self._unchangeable = True
 
+    def set_unchangeable(self, unchangeable):
+        """
+        Lock the config, it is not allowed to be modified if it is set to True
+        Args:
+            unchangeable: boolean
+
+        Returns: None
+
+        """
+        self._unchangeable = unchangeable
+
 
 def _is_identical(k1, v1, k2, v2):
     if k1 != k2:

@@ -138,9 +138,9 @@ class SteeringWheelController(Controller):
             )
         pygame.display.init()
         pygame.joystick.init()
-        assert not is_win(), "Joystick is supported in linux and mac only"
-        assert pygame.joystick.get_count() > 0, "Please connect joystick or use keyboard input"
-        print("Successfully Connect your Joystick!")
+        assert not is_win(), "Steering Wheel is supported in linux and mac only"
+        assert pygame.joystick.get_count() > 0, "Please connect Steering Wheel or use keyboard input"
+        print("Successfully Connect your Steering Wheel!")
 
         ffb_device = evdev.list_devices()[0]
         self.ffb_dev = InputDevice(ffb_device)

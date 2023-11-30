@@ -140,6 +140,8 @@ def test_guardrail_collision_detection(num_agents, render=False):
         config["map_config"] = {"exit_length": 60}
 
     env = MultiAgentRacingEnv(config)
+    crash_side = False
+    crash_v = num_agents == 1
     try:
         _check_spaces_before_reset(env)
         obs, _ = env.reset()
@@ -162,11 +164,17 @@ def test_guardrail_collision_detection(num_agents, render=False):
                     continue
                 if not tm[k]:
                     continue
-                assert i[k][TerminationState.CRASH_SIDEWALK]
+
+                if i[k][TerminationState.CRASH_SIDEWALK]:
+                    crash_side = True
+                if i[k][TerminationState.CRASH_VEHICLE]:
+                    crash_v = True
+                    if not i[k][TerminationState.CRASH_SIDEWALK]:
+                        assert not tm[k], "only crash should not terminate the env!"
+                assert int(i[k][TerminationState.CRASH_SIDEWALK] + i[k][TerminationState.CRASH_VEHICLE]) >= 1
                 assert not i[k][TerminationState.SUCCESS]
                 assert not i[k][TerminationState.MAX_STEP]
-                assert not i[k][TerminationState.CRASH_VEHICLE]
-                assert not i[k][TerminationState.CRASH]
+                # assert not i[k][TerminationState.CRASH] # crash sidewalk will be counted as crash as well
                 assert not i[k][TerminationState.OUT_OF_ROAD]
                 # Crash vehicle penalty has higher priority than the crash_sidewalk_penalty
                 assert r[k] == -crash_sidewalk_penalty or r[k] == -10
@@ -177,6 +185,7 @@ def test_guardrail_collision_detection(num_agents, render=False):
                     f"Max return {max(episode_reward_record.values())}, Min return {min(episode_reward_record.values())}"
                 )
                 break
+        assert crash_side and crash_v
     finally:
         env.close()
 

@@ -5,6 +5,7 @@ from typing import Tuple, Union, List
 import numpy as np
 
 from metadrive.component.lane.abs_lane import AbstractLane
+from metadrive.component.lane.pg_lane import PGLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.road_network import Road
@@ -21,7 +22,7 @@ def create_bend_straight(
     radius: float,
     angle: float,
     clockwise: bool = True,
-    width: float = AbstractLane.DEFAULT_WIDTH,
+    width: float = PGLane.DEFAULT_WIDTH,
     line_types: Tuple[PGLineType, PGLineType] = None,
     forbidden: bool = False,
     speed_limit: float = 20,

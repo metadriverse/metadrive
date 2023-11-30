@@ -1,11 +1,19 @@
 import copy
+from metadrive.constants import MetaDriveType
+from metadrive.engine.logger import get_logger
 import logging
 from collections import OrderedDict
 from typing import Union, List
 
+import numpy as np
+
 from metadrive.component.block.base_block import BaseBlock
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
+from metadrive.constants import PGDrivableAreaProperty
+from metadrive.constants import PGLineType
+
+logger = get_logger()
 
 
 class PGBlockSocket:
@@ -242,7 +250,112 @@ class PGBlock(BaseBlock):
         for _from, to_dict in graph.items():
             for _to, lanes in to_dict.items():
                 for _id, lane in enumerate(lanes):
-                    lane.construct_lane_in_block(self, (_from, _to, _id))
                     pos_road = not Road(_from, _to).is_negative_road()
-                    lane.construct_lane_line_in_block(self, [True, True] if _id == 0 and pos_road else [False, True])
-        self.construct_sidewalk()
+                    self._construct_lane(lane, (_from, _to, _id))
+                    self._construct_lane_line_in_block(lane, [True, True] if _id == 0 and pos_road else [False, True])
+        self._construct_sidewalk()
+        self._construct_crosswalk()
+
+    def _construct_broken_line(self, lane, lateral, line_color, line_type):
+        """
+        Lateral: left[-1/2 * width] or right[1/2 * width]
+        """
+        segment_num = int(lane.length / (2 * PGDrivableAreaProperty.STRIPE_LENGTH))
+        for segment in range(segment_num):
+            start = lane.position(segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
+            end = lane.position(
+                segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH, lateral
+            )
+            if segment == segment_num - 1:
+                end = lane.position(lane.length - PGDrivableAreaProperty.STRIPE_LENGTH, lateral)
+            node_path_list = self._construct_lane_line_segment(start, end, line_color, line_type)
+            self._node_path_list.extend(node_path_list)
+
+    def _construct_continuous_line(self, lane, lateral, line_color, line_type):
+        """
+        We process straight line to several pieces by default, which can be optimized through overriding this function
+        Lateral: left[-1/2 * width] or right[1/2 * width]
+        """
+        segment_num = int(lane.length / PGDrivableAreaProperty.LANE_SEGMENT_LENGTH)
+        if segment_num == 0:
+            start = lane.position(0, lateral)
+            end = lane.position(lane.length, lateral)
+            node_path_list = self._construct_lane_line_segment(start, end, line_color, line_type)
+            self._node_path_list.extend(node_path_list)
+        for segment in range(segment_num):
+            start = lane.position(PGDrivableAreaProperty.LANE_SEGMENT_LENGTH * segment, lateral)
+            if segment == segment_num - 1:
+                end = lane.position(lane.length, lateral)
+            else:
+                end = lane.position((segment + 1) * PGDrivableAreaProperty.LANE_SEGMENT_LENGTH, lateral)
+            node_path_list = self._construct_lane_line_segment(start, end, line_color, line_type)
+            self._node_path_list.extend(node_path_list)
+
+    def _generate_sidewalk_from_line(self, lane, sidewalk_height=None, lateral_direction=1):
+        """
+        Construct the sidewalk for this lane
+        Args:
+            block:
+
+        Returns:
+
+        """
+        if str(lane.index) in self.sidewalks:
+            logger.warning("Sidewalk id {} already exists!".format(str(lane.index)))
+            return
+        polygon = []
+        longs = np.arange(
+            0, lane.length + PGDrivableAreaProperty.SIDEWALK_LENGTH, PGDrivableAreaProperty.SIDEWALK_LENGTH
+        )
+        start_lat = +lane.width_at(0) / 2 + 0.2
+        side_lat = start_lat + PGDrivableAreaProperty.SIDEWALK_WIDTH
+        assert lateral_direction == -1 or lateral_direction == 1
+        start_lat *= lateral_direction
+        side_lat *= lateral_direction
+        if lane.radius != 0 and side_lat > lane.radius:
+            logger.warning(
+                "The sidewalk width ({}) is too large."
+                " It should be < radius ({})".format(side_lat, lane.radius)
+            )
+            return
+        for k, lateral in enumerate([start_lat, side_lat]):
+            if k == 1:
+                longs = longs[::-1]
+            for longitude in longs:
+                longitude = min(lane.length + 0.1, longitude)
+                point = lane.position(longitude, lateral)
+                polygon.append([point[0], point[1]])
+        self.sidewalks[str(lane.index)] = {
+            "type": MetaDriveType.BOUNDARY_SIDEWALK,
+            "polygon": polygon,
+            "height": sidewalk_height
+        }
+
+    def _construct_lane_line_in_block(self, lane, construct_left_right=(True, True)):
+        """
+        Construct lane line in the Panda3d world for getting contact information
+        """
+        for idx, line_type, line_color, need, in zip([-1, 1], lane.line_types, lane.line_colors, construct_left_right):
+            if not need:
+                continue
+            lateral = idx * lane.width_at(0) / 2
+            if line_type == PGLineType.CONTINUOUS:
+                self._construct_continuous_line(lane, lateral, line_color, line_type)
+            elif line_type == PGLineType.BROKEN:
+                self._construct_broken_line(lane, lateral, line_color, line_type)
+            elif line_type == PGLineType.SIDE:
+                self._construct_continuous_line(lane, lateral, line_color, line_type)
+                self._generate_sidewalk_from_line(lane)
+            elif line_type == PGLineType.GUARDRAIL:
+                self._construct_continuous_line(lane, lateral, line_color, line_type)
+                self._generate_sidewalk_from_line(
+                    lane, sidewalk_height=PGDrivableAreaProperty.GUARDRAIL_HEIGHT, lateral_direction=idx
+                )
+
+            elif line_type == PGLineType.NONE:
+                continue
+            else:
+                raise ValueError(
+                    "You have to modify this function and implement a constructing method for line type: {}".
+                    format(line_type)
+                )

@@ -31,7 +31,7 @@ class MyProgressBar():
 
 
 def pull_asset(update):
-    logger = get_logger(propagate=False)
+    logger = get_logger()
     TARGET_DIR = os.path.join(os.path.dirname(__file__))
     if os.path.exists(os.path.join(TARGET_DIR, "assets")):
         if not update:

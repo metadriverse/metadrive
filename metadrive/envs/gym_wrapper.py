@@ -96,7 +96,6 @@ try:
 
             def render(self, *args, **kwargs):
                 # remove mode from kwargs
-                kwargs.pop("mode", None)
                 return self._inner.render(*args, **kwargs)
 
             def close(self):
@@ -141,4 +140,4 @@ try:
                 assert s == env.config["horizon"] and i["max_step"] and d
                 break
 except:
-    pass
+    raise ValueError("Cannot import GymWrapper. Make sure you have `gym` installed via `pip install gym`")

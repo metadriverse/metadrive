@@ -14,7 +14,7 @@ class TopDownSingleFrameMetaDriveEnv(MetaDriveEnv):
                 "frame_skip": 5,
                 "frame_stack": 3,
                 "post_stack": 5,
-                "rgb_clip": True,
+                "norm_pixel": True,
                 "resolution_size": 84,
                 "distance": 30
             }
@@ -24,7 +24,7 @@ class TopDownSingleFrameMetaDriveEnv(MetaDriveEnv):
     def get_single_observation(self, _=None):
         return TopDownObservation(
             self.config["vehicle_config"],
-            self.config["rgb_clip"],
+            self.config["norm_pixel"],
             onscreen=self.config["use_render"],
             max_distance=self.config["distance"]
         )
@@ -35,7 +35,7 @@ class TopDownMetaDrive(TopDownSingleFrameMetaDriveEnv):
         return TopDownMultiChannel(
             self.config["vehicle_config"],
             onscreen=self.config["use_render"],
-            clip_rgb=self.config["rgb_clip"],
+            clip_rgb=self.config["norm_pixel"],
             frame_stack=self.config["frame_stack"],
             post_stack=self.config["post_stack"],
             frame_skip=self.config["frame_skip"],
@@ -54,7 +54,7 @@ class TopDownMetaDriveEnvV2(MetaDriveEnv):
                 "frame_skip": 5,
                 "frame_stack": 3,
                 "post_stack": 5,
-                "rgb_clip": True,
+                "norm_pixel": True,
                 "resolution_size": 84,
                 "distance": 30
             }
@@ -65,7 +65,7 @@ class TopDownMetaDriveEnvV2(MetaDriveEnv):
         return TopDownMultiChannel(
             self.config["vehicle_config"],
             self.config["use_render"],
-            self.config["rgb_clip"],
+            self.config["norm_pixel"],
             frame_stack=self.config["frame_stack"],
             post_stack=self.config["post_stack"],
             frame_skip=self.config["frame_skip"],

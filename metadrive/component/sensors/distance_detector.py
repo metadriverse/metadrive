@@ -1,9 +1,8 @@
 from collections import namedtuple
-from metadrive.engine.core.draw_line import ColorLineNodePath
+from metadrive.engine.core.draw import ColorLineNodePath
 
 import numpy as np
 from panda3d.core import NodePath, LVecBase4
-
 from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.constants import CamMask, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
@@ -12,6 +11,8 @@ from metadrive.utils.coordinates_shift import panda_vector
 from metadrive.utils.math import panda_vector, get_laser_end
 
 detect_result = namedtuple("detect_result", "cloud_points detected_objects")
+
+logger = get_logger()
 
 
 def add_cloud_point_vis(
@@ -154,8 +155,7 @@ class DistanceDetector(BaseSensor):
             if self._current_frame != self.engine.episode_step:
                 self.cloud_points_vis.reset()
             self._current_frame = self.engine.episode_step
-            self.cloud_points_vis.drawLines([[p[1] for p in colors]], [[LVecBase4(*p[-1], 1) for p in colors[1:]]])
-            self.cloud_points_vis.create()
+            self.cloud_points_vis.draw_lines([[p[1] for p in colors]], [[LVecBase4(*p[-1], 1) for p in colors[1:]]])
 
         return detect_result(cloud_points=cloud_points.tolist(), detected_objects=detected_objects)
 
@@ -180,7 +180,7 @@ class DistanceDetector(BaseSensor):
         return np.arange(0, num_lasers) * radian_unit + start_phase_offset
 
     def __del__(self):
-        self.logger.debug("Lidar is destroyed.")
+        logger.debug("Lidar is destroyed.")
 
     def detach_from_world(self):
         if isinstance(self.origin, NodePath):

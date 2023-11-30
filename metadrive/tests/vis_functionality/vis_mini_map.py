@@ -10,7 +10,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "use_render": True,
             "image_observation": True,
-            "rgb_clip": True,
+            "norm_pixel": True,
         }
     )
     env.reset()

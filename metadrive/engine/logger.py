@@ -69,13 +69,20 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def get_logger(level=logging.INFO, propagate=False):
+def get_logger():
+    """
+    Get the global logger
+    Args:
+
+    Returns: None
+
+    """
     global global_logger
     global dup_filter
     if global_logger is None:
         dup_filter = DuplicateFilter()
         logger = logging.getLogger("MetaDrive")
-        logger.propagate = propagate
+        logger.propagate = False
         # create console handler with a higher log level
         ch = logging.StreamHandler()
         # create formatter and add it to the handlers
@@ -83,9 +90,26 @@ def get_logger(level=logging.INFO, propagate=False):
         logger.addHandler(ch)
         logger.addFilter(dup_filter)
         global_logger = logger
+    return global_logger
+
+
+def set_propagate(propagate=False):
+    global global_logger
+    global_logger.propagate = propagate
+
+
+def set_log_level(level=logging.INFO):
+    """
+    Set the level of global logger
+    Args:
+        level: level.INFO, level.DEBUG, level.WARNING
+
+    Returns: None
+
+    """
+    global global_logger
     if global_logger.level != level:
         global_logger.setLevel(level)
-    return global_logger
 
 
 def reset_logger():

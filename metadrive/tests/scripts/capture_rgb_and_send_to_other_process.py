@@ -17,7 +17,6 @@ W, H = 1920, 1200
 
 def main_thread():
     config = dict(
-        # controller="joystick",
         use_render=True,
         image_observation=True,
         manual_control=True,  # set false for external subscriber control

@@ -1,4 +1,5 @@
 from metadrive.engine.logger import get_logger, reset_logger
+from metadrive.constants import CamMask
 
 from metadrive.version import VERSION, asset_version
 import os
@@ -71,9 +72,6 @@ class BaseEngine(EngineCore, Randomizable):
         self.only_reset_when_replay = False
         # self.accept("s", self._stop_replay)
 
-        # cull scene
-        self.cull_scene = self.global_config["cull_scene"]
-
         # add camera or not
         self.main_camera = self.setup_main_camera()
 
@@ -88,10 +86,7 @@ class BaseEngine(EngineCore, Randomizable):
         self.external_actions = None
 
         # topdown renderer
-        self._top_down_renderer = None
-
-        # lanes debug
-        self.lane_coordinates_debug_node = None
+        self.top_down_renderer = None
 
         # warm up
         self.warmup()
@@ -109,9 +104,6 @@ class BaseEngine(EngineCore, Randomizable):
             self.record_manager.add_policy_info(object_id, policy_class, *args, **kwargs)
         return policy
 
-    def add_task(self, object_id, task):
-        self._object_tasks[object_id] = task
-
     def get_policy(self, object_id):
         """
         Return policy of specific object with id
@@ -124,15 +116,6 @@ class BaseEngine(EngineCore, Randomizable):
             # print("Can not find the policy for object(id: {})".format(object_id))
             return None
 
-    def get_task(self, object_id):
-        """
-        Return task of specific object with id
-        :param object_id: a filter function, only return objects satisfying this condition
-        :return: task
-        """
-        assert object_id in self._object_tasks, "Can not find the task for object(id: {})".format(object_id)
-        return self._object_tasks[object_id]
-
     def has_policy(self, object_id, policy_cls=None):
         if policy_cls is None:
             return True if object_id in self._object_policies else False
@@ -140,9 +123,6 @@ class BaseEngine(EngineCore, Randomizable):
             return True if object_id in self._object_policies and isinstance(
                 self._object_policies[object_id], policy_cls
             ) else False
-
-    def has_task(self, object_id):
-        return True if object_id in self._object_tasks else False
 
     def spawn_object(
         self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
@@ -176,7 +156,7 @@ class BaseEngine(EngineCore, Randomizable):
         if self.global_config["record_episode"] and not self.replay_episode and record:
             self.record_manager.add_spawn_info(obj, object_class, kwargs)
         self._spawned_objects[obj.id] = obj
-        color = self.pick_color(obj.id)
+        color = self._pick_color(obj.id)
         if color == (-1, -1, -1):
             print("FK!~")
             exit()
@@ -184,7 +164,7 @@ class BaseEngine(EngineCore, Randomizable):
         obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
         return obj
 
-    def pick_color(self, id):
+    def _pick_color(self, id):
         """
         Return a color multiplier representing a unique color for an object if some colors are available.
         Return -1,-1,-1 if no color available
@@ -202,7 +182,7 @@ class BaseEngine(EngineCore, Randomizable):
         self.c_id[my_color] = id
         return my_color
 
-    def clean_color(self, id):
+    def _clean_color(self, id):
         """
         Relinquish a color once the object is focibly destroyed
         SideEffect:
@@ -295,7 +275,7 @@ class BaseEngine(EngineCore, Randomizable):
                 policy = self._object_policies.pop(id)
                 policy.destroy()
             if force_destroy_this_obj:
-                self.clean_color(obj.id)
+                self._clean_color(obj.id)
                 obj.destroy()
             else:
                 obj.detach_from_world(self.physics_world)
@@ -310,7 +290,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if len(self._dying_objects[obj.class_name]) < self.global_config["num_buffering_objects"]:
                     self._dying_objects[obj.class_name].append(obj)
                 else:
-                    self.clean_color(obj.id)
+                    self._clean_color(obj.id)
                     obj.destroy()
             if self.global_config["record_episode"] and not self.replay_episode and record:
                 self.record_manager.add_clear_info(obj)
@@ -326,7 +306,7 @@ class BaseEngine(EngineCore, Randomizable):
                 obj in self._dying_objects[obj.class_name]:
             self._dying_objects[obj.class_name].remove(obj)
             if hasattr(obj, "destroy"):
-                self.clean_color(obj.id)
+                self._clean_color(obj.id)
                 obj.destroy()
         del obj
 
@@ -360,9 +340,6 @@ class BaseEngine(EngineCore, Randomizable):
                 return mem_info.rss
 
             cm = process_memory()
-
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.removeNode()
 
         # reset manager
         for manager_name, manager in self._managers.items():
@@ -527,8 +504,6 @@ class BaseEngine(EngineCore, Randomizable):
 
         # cull distant blocks
         # poses = [v.position for v in self.agent_manager.active_agents.values()]
-        # if self.cull_scene and False:
-        #     SceneCull.cull_distant_blocks(self, self.current_map.blocks, poses, self.global_config["max_distance"])
         return step_infos
 
     def dump_episode(self, pkl_file_name=None) -> None:
@@ -557,24 +532,21 @@ class BaseEngine(EngineCore, Randomizable):
                 self._object_policies.pop(id).destroy()
             if id in self._object_tasks:
                 self._object_tasks.pop(id).destroy()
-            self.clean_color(obj.id)
+            self._clean_color(obj.id)
             obj.destroy()
         for cls, pending_obj in self._dying_objects.items():
             for obj in pending_obj:
-                self.clean_color(obj.id)
+                self._clean_color(obj.id)
                 obj.destroy()
         if self.main_camera is not None:
             self.main_camera.destroy()
         self.interface.destroy()
         self.close_world()
 
-        if self._top_down_renderer is not None:
-            self._top_down_renderer.close()
-            del self._top_down_renderer
-            self._top_down_renderer = None
-
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.removeNode()
+        if self.top_down_renderer is not None:
+            self.top_down_renderer.close()
+            del self.top_down_renderer
+            self.top_down_renderer = None
 
     def __del__(self):
         logger.debug("{} is destroyed".format(self.__class__.__name__))
@@ -599,7 +571,7 @@ class BaseEngine(EngineCore, Randomizable):
         self._managers = OrderedDict(sorted(self._managers.items(), key=lambda k_v: k_v[-1].PRIORITY))
 
     def seed(self, random_seed):
-        start_seed = self.gets_start_index()
+        start_seed = self.gets_start_index(self.global_config)
         random_seed = ((random_seed - start_seed) % self._num_scenarios_per_level) + start_seed
         random_seed += self._current_level * self._num_scenarios_per_level
         self.global_random_seed = random_seed
@@ -607,9 +579,10 @@ class BaseEngine(EngineCore, Randomizable):
         for mgr in self._managers.values():
             mgr.seed(random_seed)
 
-    def gets_start_index(self):
-        start_seed = self.global_config.get("start_seed", None)
-        start_scenario_index = self.global_config.get("start_scenario_index", None)
+    @staticmethod
+    def gets_start_index(config):
+        start_seed = config.get("start_seed", None)
+        start_scenario_index = config.get("start_scenario_index", None)
         assert start_seed is None or start_scenario_index is None, \
             "It is not allowed to define `start_seed` and `start_scenario_index`"
         if start_seed is not None:
@@ -617,7 +590,7 @@ class BaseEngine(EngineCore, Randomizable):
         elif start_scenario_index is not None:
             return start_scenario_index
         else:
-            logger.info("Can not find `start_seed` or `start_scenario_index`. Use 0 as `start_seed`")
+            logger.warning("Can not find `start_seed` or `start_scenario_index`. Use 0 as `start_seed`")
             return 0
 
     @property
@@ -702,7 +675,7 @@ class BaseEngine(EngineCore, Randomizable):
             bodies += world.getGhosts()
             bodies += world.getVehicles()
             bodies += world.getCharacters()
-            bodies += world.getManifolds()
+            # bodies += world.getManifolds()
 
         filtered = []
         for body in bodies:
@@ -737,14 +710,6 @@ class BaseEngine(EngineCore, Randomizable):
         return {"replay_manager": self.replay_manager} if self.replay_episode and not \
             self.only_reset_when_replay else self._managers
 
-    def change_object_name(self, obj, new_name):
-        raise DeprecationWarning("This function is too dangerous to be used")
-        """
-        Change the name of one object, Note: it may bring some bugs if abusing
-        """
-        obj = self._spawned_objects.pop(obj.name)
-        self._spawned_objects[new_name] = obj
-
     def object_to_agent(self, obj_name):
         if self.replay_episode:
             return self.replay_manager.current_frame.object_to_agent(obj_name)
@@ -758,12 +723,12 @@ class BaseEngine(EngineCore, Randomizable):
             return self.agent_manager.agent_to_object(agent_name)
 
     def render_topdown(self, text, *args, **kwargs):
-        if self._top_down_renderer is None:
+        if self.top_down_renderer is None:
             from metadrive.obs.top_down_renderer import TopDownRenderer
-            self._top_down_renderer = TopDownRenderer(*args, **kwargs)
-        return self._top_down_renderer.render(text, *args, **kwargs)
+            self.top_down_renderer = TopDownRenderer(*args, **kwargs)
+        return self.top_down_renderer.render(text, *args, **kwargs)
 
-    def get_window_image(self, return_bytes=False):
+    def _get_window_image(self, return_bytes=False):
         window_count = self.graphicsEngine.getNumWindows() - 1
         texture = self.graphicsEngine.getWindow(window_count).getDisplayRegion(0).getScreenshot()
 
@@ -786,28 +751,6 @@ class BaseEngine(EngineCore, Randomizable):
         img = img[..., ::-1]  # Correct the colors
 
         return img
-
-    def show_lane_coordinates(self, lanes):
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.detachNode()
-            self.lane_coordinates_debug_node.removeNode()
-
-        self.lane_coordinates_debug_node = NodePath("Lane Coordinates debug")
-        for lane in lanes:
-            long_start = lateral_start = lane.position(0, 0)
-            lateral_end = lane.position(0, 2)
-
-            long_end = long_start + lane.heading_at(0) * 4
-            np_y = self.draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
-            np_x = self.draw_line_3d(Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=2)
-            np_x.reparentTo(self.lane_coordinates_debug_node)
-            np_y.reparentTo(self.lane_coordinates_debug_node)
-        self.lane_coordinates_debug_node.reparentTo(self.worldNP)
-
-    def remove_show_lane_coordinates(self):
-        if self.lane_coordinates_debug_node is not None:
-            self.lane_coordinates_debug_node.detachNode()
-            self.lane_coordinates_debug_node.removeNode()
 
     def warmup(self):
         """
@@ -849,6 +792,32 @@ class BaseEngine(EngineCore, Randomizable):
                 pull_asset(update=True)
             else:
                 AssetLoader.logger.info("Assets version: {}".format(VERSION))
+
+    def change_object_name(self, obj, new_name):
+        raise DeprecationWarning("This function is too dangerous to be used")
+        """
+        Change the name of one object, Note: it may bring some bugs if abusing
+        """
+        obj = self._spawned_objects.pop(obj.name)
+        self._spawned_objects[new_name] = obj
+
+    def add_task(self, object_id, task):
+        raise DeprecationWarning
+        self._object_tasks[object_id] = task
+
+    def has_task(self, object_id):
+        raise DeprecationWarning
+        return True if object_id in self._object_tasks else False
+
+    def get_task(self, object_id):
+        """
+        Return task of specific object with id
+        :param object_id: a filter function, only return objects satisfying this condition
+        :return: task
+        """
+        raise DeprecationWarning
+        assert object_id in self._object_tasks, "Can not find the task for object(id: {})".format(object_id)
+        return self._object_tasks[object_id]
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ class ScenarioMap(BaseMap):
 
     def show_coordinates(self):
         lanes = [lane_info.lane for lane_info in self.road_network.graph.values()]
-        self.engine.show_lane_coordinates(lanes)
+        self._show_coordinates(lanes)
 
     def _generate(self):
         block = ScenarioBlock(
@@ -159,7 +159,6 @@ if __name__ == "__main__":
     engine.enableMouse()
     map.road_network.show_bounding_box(engine)
 
-    # argoverse data set is as the same coordinates as panda3d
     pos = map.get_center_point()
     engine.main_camera.set_bird_view_pos(pos)
     while True:

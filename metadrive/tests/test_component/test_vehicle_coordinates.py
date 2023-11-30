@@ -14,7 +14,7 @@ def test_coordinates_shift():
                 # "manual_control": True,
                 # "use_render": True,
                 "decision_repeat": 5,
-                "rgb_clip": True,
+                "norm_pixel": True,
                 "pstats": True,
                 # "discrete_action": True,
                 "map": "SSSSSS",
@@ -36,6 +36,8 @@ def test_coordinates_shift():
             recover_pos = env.vehicle.convert_to_world_coordinates([heading, side], env.vehicle.position)
             if abs(recover_pos[0] - p[0]) + abs(recover_pos[1] - p[1]) > 0.1:
                 raise ValueError("vehicle coordinates convert error!")
+            if tm:
+                break
     finally:
         env.close()
 

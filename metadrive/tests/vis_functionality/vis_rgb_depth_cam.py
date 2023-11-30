@@ -28,7 +28,7 @@ if __name__ == "__main__":
             "manual_control": True,
             "use_render": True,
             "image_observation": True,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "interface_panel": ["depth_camera"],
             "sensors": dict(depth_camera=(RGBDepthCamera, 800, 600)),
             "vehicle_config": dict(image_source="depth_camera"),

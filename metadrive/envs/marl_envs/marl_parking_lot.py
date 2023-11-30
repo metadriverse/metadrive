@@ -35,7 +35,6 @@ MAParkingLotConfig = dict(
     top_down_camera_initial_z=120,
     vehicle_config={
         "enable_reverse": True,
-        "random_navi_mark_color": True,
         "show_dest_mark": True,
         "show_navi_mark": False,
         "show_line_to_dest": True,

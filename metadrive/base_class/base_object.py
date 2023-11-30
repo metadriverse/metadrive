@@ -1,6 +1,6 @@
 import copy
 from abc import ABC
-
+from metadrive.engine.logger import get_logger
 from metadrive.type import MetaDriveType
 
 import logging
@@ -25,7 +25,7 @@ from metadrive.utils.math import clip
 from metadrive.utils.math import norm
 from metadrive.utils.math import wrap_to_pi
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 def _clean_a_node_path(node_path):
@@ -37,8 +37,6 @@ def _clean_a_node_path(node_path):
 
 
 def clear_node_list(node_path_list):
-    from metadrive.engine.engine_utils import get_engine
-    engine = get_engine()
     for node_path in node_path_list:
         if isinstance(node_path, NodePath):
             _clean_a_node_path(node_path)
@@ -56,19 +54,12 @@ def clear_node_list(node_path_list):
             # It saves Waymo env!!!
             node_path.destroy()
 
-        elif isinstance(node_path, BulletBodyNode):
-            pass
-
         elif isinstance(node_path, PandaNode):
             node_path.removeAllChildren()
             node_path.clearPythonTag(node_path.getName())
 
         else:
             raise ValueError(node_path)
-
-        if engine is not None:
-            engine.physics_world.static_world.remove(node_path)
-            engine.physics_world.dynamic_world.remove(node_path)
 
 
 class PhysicsNodeList(list):
@@ -102,9 +93,12 @@ class PhysicsNodeList(list):
                 break
         self.attached = False
 
-    def destroy_node_list(self, bullet_world: BulletWorld):
+    def destroy_node_list(self):
         for node in self:
-            bullet_world.remove(node)
+            if isinstance(node, BaseGhostBodyNode) or isinstance(node, BaseRigidBodyNode):
+                node.destroy()
+            if isinstance(node, BulletBodyNode):
+                node.removeAllChildren()
         self.clear()
 
 
@@ -225,25 +219,43 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
 
     def attach_to_world(self, parent_node_path: NodePath, physics_world: PhysicsWorld):
         """
-        Load to world from memory
+        Load the object to the world from memory, attach the object to the scene graph.
+        Args:
+            parent_node_path: which parent node to attach
+            physics_world: PhysicsWorld, engine.physics_world
+
+        Returns: None
+
         """
-        if self.render:
-            # double check :-)
+        if not self.is_attached():
             assert isinstance(self.origin, NodePath), "No render model on node_path in this Element"
             self.origin.reparentTo(parent_node_path)
-        self.dynamic_nodes.attach_to_physics_world(physics_world.dynamic_world)
-        self.static_nodes.attach_to_physics_world(physics_world.static_world)
-        logger.debug("{} is attached to the world.".format(type(self)))
+            self.dynamic_nodes.attach_to_physics_world(physics_world.dynamic_world)
+            self.static_nodes.attach_to_physics_world(physics_world.static_world)
+            logger.debug("{} is attached to the world.".format(self.class_name))
+        else:
+            logger.debug("Can not attach object {} to world, as it is already attached!".format(self.class_name))
 
     def detach_from_world(self, physics_world: PhysicsWorld):
         """
-        It is not fully remove, it will be left in memory. if this element is useless in the future, call Func delete()
+        It is not fully remove, it will be left in memory. if this element is useless in the future, call Func destroy()
+        Detach the object from the scene graph but store it in the memory
+        Args:
+            physics_world: PhysicsWorld, engine.physics_world
+
+        Returns: None
+
         """
-        if self.origin is not None and self.origin.hasParent():
+        if self.is_attached():
             self.origin.detachNode()
-        self.dynamic_nodes.detach_from_physics_world(physics_world.dynamic_world)
-        self.static_nodes.detach_from_physics_world(physics_world.static_world)
-        logger.debug("{} is detached from the world.".format(type(self)))
+            self.dynamic_nodes.detach_from_physics_world(physics_world.dynamic_world)
+            self.static_nodes.detach_from_physics_world(physics_world.static_world)
+            logger.debug("{} is detached from the world.".format(self.class_name))
+        else:
+            logger.debug("Object {} is already detached from the world. Can not detach again".format(self.class_name))
+
+    def is_attached(self):
+        return self.origin is not None and self.origin.hasParent()
 
     def destroy(self):
         """
@@ -257,18 +269,19 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         else:
             engine = get_engine()
             if engine is not None:
-                self.detach_from_world(engine.physics_world)
+                if self.is_attached():
+                    self.detach_from_world(engine.physics_world)
                 if self._body is not None and hasattr(self.body, "object"):
                     self.body.generated_object = None
                 if self.origin is not None:
                     self.origin.removeNode()
 
-                self.dynamic_nodes.destroy_node_list(bullet_world=engine.physics_world.dynamic_world)
-                self.static_nodes.destroy_node_list(bullet_world=engine.physics_world.static_world)
+                self.dynamic_nodes.destroy_node_list()
+                self.static_nodes.destroy_node_list()
 
             clear_node_list(self._node_path_list)
 
-            logger.debug("Finish cleaning {} node path.".format(len(self._node_path_list)))
+            logger.debug("Finish cleaning {} node path for {}.".format(len(self._node_path_list), self.class_name))
             self._node_path_list.clear()
             self._node_path_list = []
 

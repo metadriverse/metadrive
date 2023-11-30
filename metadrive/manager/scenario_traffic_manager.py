@@ -7,10 +7,11 @@ from metadrive.component.static_object.traffic_object import TrafficCone, Traffi
 from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.component.vehicle.vehicle_type import get_vehicle_type, reset_vehicle_type_count
+from metadrive.component.vehicle.vehicle_type import SVehicle, LVehicle, MVehicle, XLVehicle, \
+    TrafficDefaultVehicle
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
-from metadrive.policy.idm_policy import ScenarioIDMPolicy
+from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
@@ -66,7 +67,7 @@ class ScenarioTrafficManager(BaseManager):
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
         for v in self.spawned_objects.values():
-            if self.engine.has_policy(v.id, ScenarioIDMPolicy):
+            if self.engine.has_policy(v.id, TrajectoryIDMPolicy):
                 p = self.engine.get_policy(v.name)
                 if p.arrive_destination:
                     self._obj_to_clean_this_frame.append(self._obj_id_to_scenario_id[v.id])
@@ -228,7 +229,7 @@ class ScenarioTrafficManager(BaseManager):
             idm_route = get_idm_route(track["state"]["position"][start_index:end_index][..., :2])
             # only not static and behind ego car, it can get reactive policy
             self.add_policy(
-                v.name, ScenarioIDMPolicy, v, self.generate_seed(), idm_route,
+                v.name, TrajectoryIDMPolicy, v, self.generate_seed(), idm_route,
                 self.idm_policy_count % self.IDM_ACT_BATCH_SIZE
             )
             # no act() is required for IDMPolicy
@@ -318,17 +319,52 @@ class ScenarioTrafficManager(BaseManager):
         ret[self.sdc_scenario_id] = self.sdc_object_id
         return ret
 
-    def get_traffic_v_config(self):
-        v_config = copy.deepcopy(self.engine.global_config["vehicle_config"])
-        v_config["need_navigation"] = False
-        v_config.update(
-            dict(
-                show_navi_mark=False,
-                show_dest_mark=False,
-                enable_reverse=False,
-                show_lidar=False,
-                show_lane_line_detector=False,
-                show_side_detector=False,
-            )
+    @staticmethod
+    def get_traffic_v_config():
+        v_config = dict(
+            navigation_module=None,
+            show_navi_mark=False,
+            show_dest_mark=False,
+            enable_reverse=False,
+            show_lidar=False,
+            show_lane_line_detector=False,
+            show_side_detector=False,
         )
         return v_config
+
+
+type_count = [0 for i in range(3)]
+
+
+def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
+    if np_random is not None:
+        if length <= 4:
+            return SVehicle
+        elif length <= 5.5:
+            return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
+        else:
+            return [LVehicle, XLVehicle][np_random.randint(2)]
+    else:
+        global type_count
+        # evenly sample
+        if length <= 4:
+            return SVehicle
+        elif length <= 5.5:
+            type_count[1] += 1
+            vs = [LVehicle, MVehicle, SVehicle]
+            # vs = [SVehicle, LVehicle, MVehicle]
+            if need_default_vehicle:
+                vs.append(TrafficDefaultVehicle)
+            return vs[type_count[1] % len(vs)]
+        else:
+            type_count[2] += 1
+            vs = [LVehicle, XLVehicle]
+            return vs[type_count[2] % len(vs)]
+
+
+def reset_vehicle_type_count(np_random=None):
+    global type_count
+    if np_random is None:
+        type_count = [0 for i in range(3)]
+    else:
+        type_count = [np_random.randint(100) for i in range(3)]

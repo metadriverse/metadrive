@@ -34,36 +34,53 @@ Please feel free to contact us if you have any suggestions or ideas!
 
    install.rst
    get_start.rst
+   before_reading.ipynb
 
 .. toctree::
    :hidden:
    :maxdepth: 2
    :caption: RL Training with MetaDrive
 
-   rl_environments.rst
-   observation.rst
-   reward_cost_and_termination_function.rst
-   action_and_dynamics.rst
-   config_system.rst
-   read_data_from_dataset.rst
-   training_with_rllib.rst
+   rl_environments.ipynb
+   config_system.ipynb
+   obs.ipynb
+   action.ipynb
+   reward_cost_done.ipynb
+   training.ipynb
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Concept and Customization
+   :caption: Concepts and Customization
 
    concept.rst
    development.rst
+   top_down_render.ipynb
    policy.rst
-
+   navigation.ipynb
+   sensors.ipynb
+   gui.ipynb
+   record_replay.ipynb
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Issues
+   :caption: Debugging
 
-   known_issues.rst
+   debug_mode.ipynb
+   points_and_lines.ipynb
+   log_msg.ipynb
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Ecosystem
+
+   scenarionet.rst
+   ros.rst
+   di_drive.rst
+   sumo.rst
+   opendrive.rst
 
 
 .. raw:: html

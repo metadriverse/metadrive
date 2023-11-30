@@ -218,6 +218,8 @@ jobs:
         run: |
           pip install cython
           pip install numpy
+          pip install mediapy
+          conda install ffmpeg
           pip install -e .
           python -m metadrive.pull_asset
           pip install pytest
@@ -268,6 +270,31 @@ jobs:
           mkdir ./tests/test_ipynb
           cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/test_ipynb/
           pytest --nbmake -n=auto ./tests/test_ipynb/
+
+  test_doc_code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Prepare OpenGL
+        run: |
+          sudo apt-get -y install xvfb
+          sudo /usr/bin/Xvfb :0 -screen 0 1280x1024x24 &
+      - name: Blackbox tests
+        run: |
+          pip install cython
+          pip install numpy
+          pip install -e .
+          pip install -e .[gym]
+          python -m metadrive.pull_asset
+          pip install pytest
+          pip install pytest-cov
+          cd documentation
+          pip install nbmake pytest-xdist
+          TEST_DOC=1 pytest --nbmake -n=auto ./source
 
   test_ros:
     runs-on: ubuntu-22.04

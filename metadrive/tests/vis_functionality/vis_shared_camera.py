@@ -8,7 +8,7 @@ def vis_ma_parking_lot_env():
             "use_render": False,
             "image_observation": True,
             # it is a switch telling metadrive to use rgb as observation
-            "rgb_clip": True,  # clip rgb to range(0,1) instead of (0, 255)
+            "norm_pixel": True,  # clip rgb to range(0,1) instead of (0, 255)
             "delay_done": 0,
             "num_agents": 4,
             "vehicle_config": {

@@ -11,7 +11,7 @@ import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Decoration, DEFAULT_AGENT, EDITION
-from metadrive.obs.observation_base import ObservationBase
+from metadrive.obs.observation_base import BaseObservation
 from metadrive.obs.top_down_obs_impl import WorldSurface, ObservationWindow, COLOR_BLACK, \
     ObjectGraphics, LaneGraphics
 from metadrive.utils import import_pygame
@@ -19,7 +19,7 @@ from metadrive.utils import import_pygame
 pygame, gfxdraw = import_pygame()
 
 
-class TopDownObservation(ObservationBase):
+class TopDownObservation(BaseObservation):
     """
     Most of the source code is from Highway-Env, we only optimize and integrate it in MetaDrive
     See more information on its Github page: https://github.com/eleurent/highway-env
@@ -32,7 +32,7 @@ class TopDownObservation(ObservationBase):
     def __init__(self, vehicle_config, clip_rgb: bool, onscreen, resolution=None, max_distance=50):
         self.resolution = resolution or self.RESOLUTION
         super(TopDownObservation, self).__init__(vehicle_config)
-        self.rgb_clip = clip_rgb
+        self.norm_pixel = clip_rgb
         self.num_stacks = 3
 
         # self.obs_shape = (64, 64)
@@ -214,7 +214,7 @@ class TopDownObservation(ObservationBase):
     @property
     def observation_space(self):
         shape = self.obs_shape + (self.num_stacks, )
-        if self.rgb_clip:
+        if self.norm_pixel:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
             return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
@@ -223,7 +223,7 @@ class TopDownObservation(ObservationBase):
         self.render()
         surface = self.get_observation_window()
         img = self.pygame.surfarray.array3d(surface)
-        if self.rgb_clip:
+        if self.norm_pixel:
             img = img.astype(np.float32) / 255
         else:
             img = img.astype(np.uint8)

@@ -44,14 +44,13 @@ def test_config_sync():
         assert recursive_equal(env.config, get_global_config())
         assert recursive_equal(env.config, BaseEngine.global_config)
 
-        camera_shape = (128, 876)
-        env.config["vehicle_config"]["rgb_camera"] = camera_shape
+        env.config["vehicle_config"]["max_engine_force"] = 100
         assert recursive_equal(env.config, env.engine.global_config)
         assert recursive_equal(env.config, get_global_config())
         assert recursive_equal(env.config, BaseEngine.global_config)
-        assert env.engine.global_config["vehicle_config"]["rgb_camera"] == camera_shape
+        assert env.engine.global_config["vehicle_config"]["max_engine_force"] == 100
         env.reset()
-        assert env.engine.global_config["vehicle_config"]["rgb_camera"] == camera_shape
+        assert env.engine.global_config["vehicle_config"]["max_engine_force"] == 100
         assert recursive_equal(env.config, env.engine.global_config)
         assert recursive_equal(env.config, get_global_config())
         assert recursive_equal(env.config, BaseEngine.global_config)

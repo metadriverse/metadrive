@@ -1,9 +1,11 @@
 """
 This environment can load all scenarios exported from other environments via env.export_scenarios()
 """
-import numpy as np
 
-from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
+import numpy as np
+from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
+from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
@@ -11,16 +13,14 @@ from metadrive.manager.scenario_curriculum_manager import ScenarioCurriculumMana
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
-from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
-from metadrive.obs.image_obs import ImageStateObservation
-from metadrive.obs.state_obs import LidarStateObservation
+from metadrive.manager.scenario_traffic_manager import ScenarioTrafficManager
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.utils import get_np_random
 from metadrive.utils.math import wrap_to_pi
 
 SCENARIO_ENV_CONFIG = dict(
     # ===== Scenario Config =====
-    data_directory=AssetLoader.file_path("waymo", unix_style=False),
+    data_directory=AssetLoader.file_path("nuscenes", unix_style=False),
     start_scenario_index=0,
     num_scenarios=3,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
@@ -38,7 +38,7 @@ SCENARIO_ENV_CONFIG = dict(
     need_lane_localization=True,
     no_map=False,
 
-    # ===== Traffic =====
+    # ===== Scenario =====
     no_traffic=False,  # nothing will be generated including objects/pedestrian/vehicles
     no_static_vehicles=False,  # static vehicle will be removed
     no_light=False,  # no traffic light
@@ -52,11 +52,10 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== Agent config =====
     vehicle_config=dict(
+        navigation_module=TrajectoryNavigation,
         lidar=dict(num_lasers=120, distance=50),
         lane_line_detector=dict(num_lasers=0, distance=50),
         side_detector=dict(num_lasers=12, distance=50),
-        show_dest_mark=True,
-        navigation_module=TrajectoryNavigation,
     ),
 
     # ===== Reward Scheme =====
@@ -88,9 +87,7 @@ SCENARIO_ENV_CONFIG = dict(
     relax_out_of_road_done=True,
 
     # ===== others =====
-    interface_panel=["dashboard"],  # for boosting efficiency
-    horizon=None,
-    allowed_more_steps=None,  # None=infinite
+    allowed_more_steps=None,  # horizon, None=infinite
     top_down_show_real_size=False
 )
 
@@ -113,139 +110,83 @@ class ScenarioEnv(BaseEnv):
         if self.config["num_workers"] > 1:
             assert self.config["sequential_seed"], \
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
-
-    def get_single_observation(self):
-        if self.config["image_observation"]:
-            o = ImageStateObservation(self.config)
-        else:
-            o = LidarStateObservation(self.config)
-        return o
-
-    def switch_to_top_down_view(self):
-        self.main_camera.stop_track()
-
-    def switch_to_third_person_view(self):
-        if self.main_camera is None:
-            return
-        self.main_camera.reset()
-        if self.config["prefer_track_agent"] is not None and self.config["prefer_track_agent"] in self.vehicles.keys():
-            new_v = self.vehicles[self.config["prefer_track_agent"]]
-            current_track_vehicle = new_v
-        else:
-            if self.main_camera.is_bird_view_camera():
-                current_track_vehicle = self.current_track_vehicle
-            else:
-                vehicles = list(self.engine.agents.values())
-                if len(vehicles) <= 1:
-                    return
-                if self.current_track_vehicle in vehicles:
-                    vehicles.remove(self.current_track_vehicle)
-                new_v = get_np_random().choice(vehicles)
-                current_track_vehicle = new_v
-        self.main_camera.track(current_track_vehicle)
-        return
+        self.start_index = self.config["start_scenario_index"]
+        self.num_scenarios = self.config["num_scenarios"]
 
     def setup_engine(self):
-        self.in_stop = False
         super(ScenarioEnv, self).setup_engine()
         self.engine.register_manager("data_manager", ScenarioDataManager())
         self.engine.register_manager("map_manager", ScenarioMapManager())
         if not self.config["no_traffic"]:
-            self.engine.register_manager("traffic_manager", WaymoTrafficManager())
+            self.engine.register_manager("traffic_manager", ScenarioTrafficManager())
         if not self.config["no_light"]:
             self.engine.register_manager("light_manager", ScenarioLightManager())
         self.engine.register_manager("curriculum_manager", ScenarioCurriculumManager())
-        self.engine.accept("p", self.stop)
-        self.engine.accept("q", self.switch_to_third_person_view)
-        self.engine.accept("b", self.switch_to_top_down_view)
-        self.engine.accept("]", self.next_seed_reset)
-        self.engine.accept("[", self.last_seed_reset)
-
-    def next_seed_reset(self):
-        if self.current_seed + 1 < self.config["start_scenario_index"] + self.config["num_scenarios"]:
-            self.reset(self.current_seed + 1)
-        else:
-            self.logger.warning("Can't load next scenario! current seed is already the max scenario index")
-
-    def last_seed_reset(self):
-        if self.current_seed - 1 >= self.config["start_scenario_index"]:
-            self.reset(self.current_seed - 1)
-        else:
-            self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
-
-    def step(self, actions):
-        ret = super(ScenarioEnv, self).step(actions)
-        while self.in_stop:
-            self.engine.taskMgr.step()
-        return ret
 
     def done_function(self, vehicle_id: str):
         vehicle = self.vehicles[vehicle_id]
         done = False
-        done_info = dict(
-            crash_vehicle=False,
-            crash_object=False,
-            crash_building=False,
-            out_of_road=False,
-            arrive_dest=False,
-            max_step=False,
-        )
+        max_step = self.config["horizon"] is not None and self.episode_lengths[vehicle_id] >= self.config["horizon"]
+        done_info = {
+            TerminationState.CRASH_VEHICLE: vehicle.crash_vehicle,
+            TerminationState.CRASH_OBJECT: vehicle.crash_object,
+            TerminationState.CRASH_BUILDING: vehicle.crash_building,
+            TerminationState.CRASH_HUMAN: vehicle.crash_human,
+            TerminationState.CRASH_SIDEWALK: vehicle.crash_sidewalk,
+            TerminationState.OUT_OF_ROAD: self._is_out_of_road(vehicle) or vehicle.navigation.route_completion < -0.1,
+            TerminationState.SUCCESS: self._is_arrive_destination(vehicle),
+            TerminationState.MAX_STEP: max_step,
+            TerminationState.ENV_SEED: self.current_seed,
+            # TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
+            # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
+        }
 
-        route_completion = vehicle.navigation.route_completion
+        # for compatibility
+        # crash almost equals to crashing with vehicles
+        done_info[TerminationState.CRASH] = (
+            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
+            or done_info[TerminationState.CRASH_BUILDING] or done_info[TerminationState.CRASH_SIDEWALK]
+            or done_info[TerminationState.CRASH_HUMAN]
+        )
 
         def msg(reason):
             return "Episode ended! Scenario Index: {} Scenario id: {} Reason: {}.".format(
                 self.current_seed, self.engine.data_manager.current_scenario_id, reason
             )
 
-        if self._is_arrive_destination(vehicle):
+        if done_info[TerminationState.SUCCESS]:
             done = True
             self.logger.info(msg("arrive_dest"), extra={"log_once": True})
-            done_info[TerminationState.SUCCESS] = True
-
-        elif self._is_out_of_road(vehicle) or route_completion < -0.1:
+        elif done_info[TerminationState.OUT_OF_ROAD]:
             done = True
             self.logger.info(msg("out_of_road"), extra={"log_once": True})
-            done_info[TerminationState.OUT_OF_ROAD] = True
-        elif vehicle.crash_human and self.config["crash_human_done"]:
+        elif done_info[TerminationState.CRASH_HUMAN] and self.config["crash_human_done"]:
             done = True
             self.logger.info(msg("crash human"), extra={"log_once": True})
-            done_info[TerminationState.CRASH_HUMAN] = True
-        elif vehicle.crash_vehicle and self.config["crash_vehicle_done"]:
+        elif done_info[TerminationState.CRASH_VEHICLE] and self.config["crash_vehicle_done"]:
             done = True
             self.logger.info(msg("crash vehicle"), extra={"log_once": True})
-            done_info[TerminationState.CRASH_VEHICLE] = True
-        elif vehicle.crash_object and self.config["crash_object_done"]:
+        elif done_info[TerminationState.CRASH_OBJECT] and self.config["crash_object_done"]:
             done = True
-            done_info[TerminationState.CRASH_OBJECT] = True
             self.logger.info(msg("crash object"), extra={"log_once": True})
-        elif vehicle.crash_building and self.config["crash_object_done"]:
+        elif done_info[TerminationState.CRASH_BUILDING] and self.config["crash_object_done"]:
             done = True
-            done_info[TerminationState.CRASH_BUILDING] = True
             self.logger.info(msg("crash building"), extra={"log_once": True})
-
-        elif self.config["horizon"] is not None and \
-                self.episode_lengths[vehicle_id] >= self.config["horizon"] and not self.is_multi_agent:
-            done = True
-            done_info[TerminationState.MAX_STEP] = True
+        elif done_info[TerminationState.MAX_STEP]:
+            if self.config["truncate_as_terminate"]:
+                done = True
             self.logger.info(msg("max step"), extra={"log_once": True})
-
-        elif self.config["allowed_more_steps"] is not None and \
-                self.episode_lengths[vehicle_id] >= self.engine.data_manager.current_scenario_length + self.config[
-            "allowed_more_steps"] and not self.is_multi_agent:
-            done = True
+        elif self.config["allowed_more_steps"] and self.episode_lengths[vehicle_id] >= \
+                self.engine.data_manager.current_scenario_length + self.config["allowed_more_steps"]:
+            if self.config["truncate_as_terminate"]:
+                done = True
             done_info[TerminationState.MAX_STEP] = True
             self.logger.info(msg("more step than original episode"), extra={"log_once": True})
 
-        # for compatibility
-        # crash almost equals to crashing with vehicles
-        done_info[TerminationState.CRASH] = (
-            done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_OBJECT]
-            or done_info[TerminationState.CRASH_BUILDING]
-        )
-
         # log data to curriculum manager
-        self.engine.curriculum_manager.log_episode(done_info[TerminationState.SUCCESS], route_completion)
+        self.engine.curriculum_manager.log_episode(
+            done_info[TerminationState.SUCCESS], vehicle.navigation.route_completion
+        )
 
         return done, done_info
 
@@ -346,51 +287,51 @@ class ScenarioEnv(BaseEnv):
         step_info["step_reward_lateral"] = lateral_penalty
         step_info["step_reward_heading"] = heading_penalty
         step_info["step_reward_action_smooth"] = steering_range_penalty
-
-        # Compute state difference metrics
-        # TODO LQY: Shall we use state difference as reward?
-        # data = self.engine.data_manager.current_scenario
-        # agent_xy = vehicle.position
-        # if vehicle_id == "sdc" or vehicle_id == "default_agent":
-        #     native_vid = data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
-        # else:
-        #     native_vid = vehicle_id
-        #
-        # if native_vid in data["tracks"] and len(data["tracks"][native_vid]) > 0:
-        #     expert_state_list = data["tracks"][native_vid]["state"]
-        #
-        #     mask = expert_state_list["valid"]
-        #     largest_valid_index = np.max(np.where(mask == True)[0])
-        #
-        #     if self.episode_step > largest_valid_index:
-        #         current_step = largest_valid_index
-        #     else:
-        #         current_step = self.episode_step
-        #
-        #     while mask[current_step] == 0.0:
-        #         current_step -= 1
-        #         if current_step == 0:
-        #             break
-        #
-        #     expert_xy = expert_state_list["position"][current_step][:2]
-        #     diff = agent_xy - expert_xy
-        #     dist = norm(diff[0], diff[1])
-        #     step_info["distance_error"] = dist
-        #
-        #     last_state = expert_state_list["position"][largest_valid_index]
-        #     last_expert_xy = last_state[:2]
-        #     diff = agent_xy - last_expert_xy
-        #     last_dist = norm(diff[0], diff[1])
-        #     step_info["distance_error_final"] = last_dist
-
-        # reward = reward - self.config["distance_penalty"] * dist
-
-        # if hasattr(vehicle, "_dynamics_mode"):
-        #     step_info["dynamics_mode"] = vehicle._dynamics_mode
-
         return reward, step_info
 
-    def _is_arrive_destination(self, vehicle):
+    # Compute state difference metrics for reward
+    # TODO LQY: Shall we use state difference as reward?
+    # data = self.engine.data_manager.current_scenario
+    # agent_xy = vehicle.position
+    # if vehicle_id == "sdc" or vehicle_id == "default_agent":
+    #     native_vid = data[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
+    # else:
+    #     native_vid = vehicle_id
+    #
+    # if native_vid in data["tracks"] and len(data["tracks"][native_vid]) > 0:
+    #     expert_state_list = data["tracks"][native_vid]["state"]
+    #
+    #     mask = expert_state_list["valid"]
+    #     largest_valid_index = np.max(np.where(mask == True)[0])
+    #
+    #     if self.episode_step > largest_valid_index:
+    #         current_step = largest_valid_index
+    #     else:
+    #         current_step = self.episode_step
+    #
+    #     while mask[current_step] == 0.0:
+    #         current_step -= 1
+    #         if current_step == 0:
+    #             break
+    #
+    #     expert_xy = expert_state_list["position"][current_step][:2]
+    #     diff = agent_xy - expert_xy
+    #     dist = norm(diff[0], diff[1])
+    #     step_info["distance_error"] = dist
+    #
+    #     last_state = expert_state_list["position"][largest_valid_index]
+    #     last_expert_xy = last_state[:2]
+    #     diff = agent_xy - last_expert_xy
+    #     last_dist = norm(diff[0], diff[1])
+    #     step_info["distance_error_final"] = last_dist
+
+    # reward = reward - self.config["distance_penalty"] * dist
+
+    # if hasattr(vehicle, "_dynamics_mode"):
+    #     step_info["dynamics_mode"] = vehicle._dynamics_mode
+
+    @staticmethod
+    def _is_arrive_destination(vehicle):
         # Use RC as the only criterion to determine arrival in Scenario env.
         route_completion = vehicle.navigation.route_completion
         if route_completion > 0.95 or vehicle.navigation.reference_trajectory.length < 2:
@@ -435,9 +376,6 @@ class ScenarioEnv(BaseEnv):
             current_seed, self.config["start_scenario_index"],
             self.config["start_scenario_index"] + self.config["num_scenarios"])
         self.seed(current_seed)
-
-    def stop(self):
-        self.in_stop = not self.in_stop
 
 
 if __name__ == "__main__":

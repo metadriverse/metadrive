@@ -247,6 +247,9 @@ class MultiAgentTollgateEnv(MultiAgentMetaDrive):
 
     def done_function(self, vehicle_id):
         done, done_info = super(MultiAgentMetaDrive, self).done_function(vehicle_id)
+        if done_info["max_step"]:
+            return done, done_info
+
         if done_info[TerminationState.CRASH_VEHICLE] and (not self.config["crash_done"]):
             assert done_info[TerminationState.CRASH_VEHICLE] or done_info[TerminationState.CRASH_BUILDING] or \
                    done_info[TerminationState.SUCCESS] or done_info[TerminationState.OUT_OF_ROAD]

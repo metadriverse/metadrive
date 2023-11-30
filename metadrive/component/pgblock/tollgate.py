@@ -72,5 +72,4 @@ class TollGate(PGBlock):
                 building = get_engine().spawn_object(
                     TollGateBuilding, lane=lane, position=position, heading_theta=lane.heading_theta_at(0)
                 )
-                self.dynamic_nodes.append(building.body)
                 self._block_objects.append(building)

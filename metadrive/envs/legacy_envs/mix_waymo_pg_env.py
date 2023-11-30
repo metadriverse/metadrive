@@ -8,13 +8,13 @@ from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import engine_initialized
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.manager.pg_map_manager import PGMapManager
 from metadrive.manager.traffic_manager import PGTrafficManager
 from metadrive.manager.traffic_manager import TrafficMode
-from metadrive.manager.waymo_data_manager import WaymoDataManager
-from metadrive.manager.waymo_map_manager import WaymoMapManager
-from metadrive.manager.waymo_traffic_manager import WaymoTrafficManager
+from metadrive.manager.scenario_data_manager import ScenarioDataManager
+from metadrive.manager.scenario_map_manager import ScenarioMapManager
+from metadrive.manager.scenario_traffic_manager import ScenarioTrafficManager
 from metadrive.utils import get_np_random
 
 MIX_WAYMO_PG_ENV_CONFIG = dict(
@@ -60,7 +60,7 @@ MIX_WAYMO_PG_ENV_CONFIG = dict(
 )
 
 
-class MixWaymoPGEnv(WaymoEnv):
+class MixWaymoPGEnv(ScenarioEnv):
     raise DeprecationWarning("Navigation error exists in this env, fix it")
 
     @classmethod
@@ -94,16 +94,16 @@ class MixWaymoPGEnv(WaymoEnv):
 
     def setup_engine(self):
         # Initialize all managers
-        self.waymo_map_manager = WaymoMapManager()
-        self.waymo_traffic_manager = WaymoTrafficManager()
+        self.waymo_map_manager = ScenarioMapManager()
+        self.waymo_traffic_manager = ScenarioTrafficManager()
 
         self.pg_map_manager = PGMapManager()
         self.pg_traffic_manager = PGTrafficManager()
 
-        super(WaymoEnv, self).setup_engine()
+        super(ScenarioEnv, self).setup_engine()
         if self.real_data_ratio > 0:
             self.is_current_real_data = True
-            self.engine.register_manager("data_manager", WaymoDataManager())
+            self.engine.register_manager("data_manager", ScenarioDataManager())
             self.engine.register_manager("map_manager", self.waymo_map_manager)
             if not self.config["no_traffic"]:
                 self.engine.register_manager("traffic_manager", self.waymo_traffic_manager)
@@ -152,8 +152,8 @@ class MixWaymoPGEnv(WaymoEnv):
                 "singleton of MetaDrive and restart your program."
             )
         self.engine.reset()
-        if self._top_down_renderer is not None:
-            self._top_down_renderer.reset(self.current_map)
+        if self.top_down_renderer is not None:
+            self.top_down_renderer.reset(self.current_map)
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_rewards = defaultdict(float)

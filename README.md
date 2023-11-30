@@ -93,12 +93,14 @@ Adding ```--top_down``` can launch top-down pygame renderer.
 
 
 ### Real Environment
-Running the following script enables driving in a scenario constructed from Waymo motion dataset.
+Running the following script enables driving in a scenario constructed from nuScenes dataset or Waymo dataset.
 
 ```bash
-python -m metadrive.examples.drive_in_waymo_env
+python -m metadrive.examples.drive_in_real_env
 ```
 
+The default real-world dataset is nuScenes.
+Use ```--waymo``` to visualize Waymo scenarios.
 Traffic vehicles can not response to surrounding vchicles if directly replaying them.
 Add argument ```--reactive_traffic``` to use an IDM policy control them and make them reactive.
 Press key ```r``` for loading a new scenario, and ```b``` or ```q``` for switching perspective. 
@@ -129,17 +131,12 @@ Press key ```r``` for loading a new scenario, and ```b``` or ```q``` for switchi
 To build the RL environment in python script, you can simply code in the Farama Gymnasium format as:
 
 ```python
-import metadrive  # Import this package to register the environment!
-import gymnasium as gym
+from metadrive.envs.metadrive_env import MetaDriveEnv
 
-env = gym.make("MetaDrive-validation-v0", config={"use_render": True})
-
-# Alternatively, you can instantiate using the class
-# env = metadrive.MetaDriveEnv(config={"use_render": True, "num_scenarios": 100})
-
-env.reset()
+env = MetaDriveEnv(config={"use_render": True})
+obs, info = env.reset()
 for i in range(1000):
-    obs, reward, terminated, truncated, info = env.step(env.action_space.sample())  # Use random policy
+    obs, reward, terminated, truncated, info = env.step(env.action_space.sample())
     if terminated or truncated:
         env.reset()
 env.close()

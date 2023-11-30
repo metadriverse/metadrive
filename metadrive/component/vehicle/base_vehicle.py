@@ -1,4 +1,5 @@
 import math
+from metadrive.constants import CamMask
 from metadrive.engine.logger import get_logger
 import os
 from collections import deque
@@ -18,8 +19,8 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
-from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
+from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
+from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import get_engine, engine_initialized
@@ -56,6 +57,7 @@ class BaseVehicleState:
         self.on_yellow_continuous_line = False
         self.on_white_continuous_line = False
         self.on_broken_line = False
+        self.on_crosswalk = False
 
         # contact results, a set containing objects type name for rendering
         self.contact_results = set()
@@ -118,7 +120,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         name: str = None,
         random_seed=None,
         position=None,
-        heading=None
+        heading=None,
+        _calling_reset=True,
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -134,8 +137,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # self.engine = get_engine()
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
-        self.set_metadrive_type(MetaDriveType.VEHICLE)
         self.update_config(vehicle_config)
+        self.set_metadrive_type(MetaDriveType.VEHICLE)
         use_special_color = self.config["use_special_color"]
 
         # build vehicle physics model
@@ -152,7 +155,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.light_name = None
 
         # powertrain config
-        self.increment_steering = self.config["increment_steering"]
         self.enable_reverse = self.config["enable_reverse"]
         self.max_steering = self.config["max_steering"]
 
@@ -181,7 +183,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self._init_step_info()
 
         # others
-        self.add_navigation()
         self.takeover = False
         self.expert_takeover = False
         self.energy_consumption = 0
@@ -192,7 +193,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.back_vehicles = set()
 
         # if self.engine.current_map is not None:
-        self.reset(position=position, heading=heading)
+        if _calling_reset:
+            self.reset(position=position, heading=heading, vehicle_config=vehicle_config)
 
     def _init_step_info(self):
         # done info will be initialized every frame
@@ -224,14 +226,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.last_heading_dir = self.heading
         if action is not None:
             self.last_current_action.append(action)  # the real step of physics world is implemented in taskMgr.step()
-        if self.increment_steering:
-            self._set_incremental_action(action)
-        else:
-            self._set_action(action)
+        # if self.increment_steering:
+        #     self._set_incremental_action(action)
+        # else:
+        self._set_action(action)
         return step_info
 
     def after_step(self):
-        if self.navigation is not None:
+        if self.navigation and self.config["navigation_module"]:
             self.navigation.update_localization(self)
         self._state_check()
         self.update_dist_to_left_right()
@@ -287,12 +289,17 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if name is not None:
             self.rename(name)
 
+        # reset fully
+        self.update_config(self.engine.global_config["vehicle_config"])
         if random_seed is not None:
             assert isinstance(random_seed, int)
             self.seed(random_seed)
             self.sample_parameters()
+
         if vehicle_config is not None:
             self.update_config(vehicle_config)
+        from metadrive.component.vehicle.vehicle_type import vehicle_class_to_type
+        self.config["vehicle_model"] = vehicle_class_to_type[self.__class__]
 
         # Update some modules that might not be initialized before
         self.add_navigation()
@@ -319,6 +326,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             heading = self.config["spawn_position_heading"][1]
 
         self.spawn_place = position
+        # print("position:", position)
         self.set_heading_theta(heading)
         self.set_static(False)
         # self.set_wheel_friction(self.config["wheel_friction"])
@@ -358,7 +366,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.front_vehicles = set()
         self.back_vehicles = set()
         self.expert_takeover = False
-        if self.config["need_navigation"] and self.engine.current_map is not None:
+        if self.config["navigation_module"] and self.engine.current_map is not None:
             assert self.navigation
 
         if self.config["spawn_velocity"] is not None:
@@ -664,18 +672,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return wheel
 
     def add_navigation(self):
-        if self.navigation is not None or not self.config["need_navigation"] or self.engine.current_map is None:
+        if self.navigation is not None or self.config["navigation_module"] is None or self.engine.current_map is None:
             return
         navi = self.config["navigation_module"]
-        if navi is None:
-            navi = NodeNetworkNavigation if self.engine.current_map.road_network_type == NodeRoadNetwork \
-                else EdgeNetworkNavigation
         self.navigation = navi(
             # self.engine,
-            show_navi_mark=self.engine.global_config["vehicle_config"]["show_navi_mark"],
-            random_navi_mark_color=self.engine.global_config["vehicle_config"]["random_navi_mark_color"],
-            show_dest_mark=self.engine.global_config["vehicle_config"]["show_dest_mark"],
-            show_line_to_dest=self.engine.global_config["vehicle_config"]["show_line_to_dest"],
+            show_navi_mark=self.config["show_navi_mark"],
+            show_dest_mark=self.config["show_dest_mark"],
+            show_line_to_dest=self.config["show_line_to_dest"],
             panda_color=self.panda_color,
             name=self.name,
             vehicle_config=self.config
@@ -690,7 +694,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         For the spawn position, if it is not specify in the config["spawn_lane_index"], we will automatically
         select one lane based on the localization results.
         """
-        if self.navigation is not None and self.config["need_navigation"]:
+        if self.navigation is not None and self.config["navigation_module"]:
             self.navigation.reset(self)
             self.navigation.update_localization(self)
 
@@ -710,6 +714,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.on_white_continuous_line = True
             elif name == MetaDriveType.LINE_SOLID_SINGLE_YELLOW:
                 self.on_yellow_continuous_line = True
+            elif name == MetaDriveType.CROSSWALK:
+                self.on_crosswalk = True
             elif name == MetaDriveType.LINE_BROKEN_SINGLE_YELLOW or name == MetaDriveType.LINE_BROKEN_SINGLE_WHITE:
                 self.on_broken_line = True
             elif name == MetaDriveType.TRAFFIC_LIGHT:
@@ -773,7 +779,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.LENGTH,
                 self.WIDTH,
                 CollisionGroup.LaneSurface,
-                in_static_world=True if not self.engine.global_config["debug_static_world"] else False
+                in_static_world=False
             )
             if not res.hasHit():
                 contacts.add(MetaDriveType.GROUND)
@@ -926,7 +932,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         super(BaseVehicle, self).detach_from_world(physics_world)
 
     def attach_to_world(self, parent_node_path, physics_world):
-        if self.config["show_navi_mark"] and self.config["need_navigation"] and self.navigation is not None:
+        if self.config["show_navi_mark"] and self.config["navigation_module"] and self.navigation is not None:
             self.navigation.attach_to_world(self.engine)
         super(BaseVehicle, self).attach_to_world(parent_node_path, physics_world)
 
@@ -1020,10 +1026,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             return
         height = self.HEIGHT + 0.2
         self.coordinates_debug_np = NodePath("debug coordinate")
+        self.coordinates_debug_np.hide(CamMask.AllOn)
+        self.coordinates_debug_np.show(CamMask.MainCam)
         # 90 degrees offset
-        x = self.engine.draw_line_3d([0, 0, height], [0, 2, height], [1, 1, 1, 1], 2)
-        y = self.engine.draw_line_3d([0, 0, height], [-1, 0, height], [1, 1, 1, 1], 2)
-        z = self.engine.draw_line_3d([0, 0, height], [0, 0, height + 0.5], [1, 1, 1, 1], 2)
+        x = self.engine._draw_line_3d([0, 0, height], [0, 2, height], [1, 1, 1, 1], 2)
+        y = self.engine._draw_line_3d([0, 0, height], [-1, 0, height], [1, 1, 1, 1], 2)
+        z = self.engine._draw_line_3d([0, 0, height], [0, 0, height + 0.5], [1, 1, 1, 1], 2)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)

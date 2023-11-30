@@ -18,7 +18,7 @@ from metadrive.constants import HELP_MESSAGE
 
 if __name__ == "__main__":
     config = dict(
-        # controller="joystick",
+        # controller="steering_wheel",
         use_render=True,
         manual_control=True,
         traffic_density=0.1,
@@ -28,7 +28,7 @@ if __name__ == "__main__":
         random_lane_num=True,
         on_continuous_line_done=False,
         out_of_route_done=True,
-        vehicle_config=dict(show_lidar=False, show_navi_mark=False),
+        vehicle_config=dict(show_lidar=True, show_navi_mark=False),
         # debug=True,
         # debug_static_world=True,
         map=4,  # seven block
@@ -74,7 +74,5 @@ if __name__ == "__main__":
             if (tm or tc) and info["arrive_dest"]:
                 env.reset(env.current_seed + 1)
                 env.current_track_vehicle.expert_takeover = True
-    except Exception as e:
-        raise e
     finally:
         env.close()

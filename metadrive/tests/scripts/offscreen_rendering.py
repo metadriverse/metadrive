@@ -9,7 +9,6 @@ import time
 if __name__ == '__main__':
     W, H = 1920, 1200
     config = dict(
-        # controller="joystick",
 
         # use_render=True,
         image_observation=True,

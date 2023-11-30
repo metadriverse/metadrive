@@ -31,7 +31,5 @@ if __name__ == "__main__":
             if (tm or tc) and info["arrive_dest"]:
                 env.reset()
                 env.current_track_vehicle.expert_takeover = True
-    except:
-        pass
     finally:
         env.close()

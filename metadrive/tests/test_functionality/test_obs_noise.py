@@ -1,5 +1,5 @@
 import numpy as np
-
+from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import TerminationState
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.obs.state_obs import LidarStateObservation
@@ -24,7 +24,7 @@ def test_obs_noise():
     env = MetaDriveEnv({"vehicle_config": {"lidar": {"gaussian_noise": 1.0, "dropout_prob": 1.0}}})
     try:
         obs, _ = env.reset()
-        obs_cls = env.observations[env.DEFAULT_AGENT]
+        obs_cls = env.observations[DEFAULT_AGENT]
         assert isinstance(obs_cls, LidarStateObservation)
         ret = obs_cls._add_noise_to_cloud_points([0.5, 0.5, 0.5], gaussian_noise=1.0, dropout_prob=1.0)
         np.testing.assert_almost_equal(np.array(ret), 0.0)
@@ -39,7 +39,7 @@ def test_obs_noise():
     env = MetaDriveEnv({"vehicle_config": {"lidar": {"gaussian_noise": 0.0, "dropout_prob": 0.0}}})
     try:
         obs, _ = env.reset()
-        obs_cls = env.observations[env.DEFAULT_AGENT]
+        obs_cls = env.observations[DEFAULT_AGENT]
         assert isinstance(obs_cls, LidarStateObservation)
         ret = obs_cls._add_noise_to_cloud_points([0.5, 0.5, 0.5], gaussian_noise=0.0, dropout_prob=0.0)
         assert not np.all(np.array(ret) == 0.0)

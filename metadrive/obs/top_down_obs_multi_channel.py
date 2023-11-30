@@ -15,9 +15,9 @@ from metadrive.obs.top_down_obs_impl import WorldSurface, COLOR_BLACK, ObjectGra
 from metadrive.utils import import_pygame, clip
 
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
-from metadrive.component.vehicle_navigation_module.edge_network_navigation import EdgeNetworkNavigation
-from metadrive.component.vehicle_navigation_module.trajectory_navigation import TrajectoryNavigation
+from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
+from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
+from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
 
 pygame, gfxdraw = import_pygame()
 COLOR_WHITE = pygame.Color("white")
@@ -228,7 +228,7 @@ class TopDownMultiChannel(TopDownObservation):
         # img = np.dot(img[..., :], [0.299, 0.587, 0.114])
         img = img[..., 0] * 0.299 + img[..., 1] * 0.587 + img[..., 2] * 0.114
 
-        if self.rgb_clip:
+        if self.norm_pixel:
             img = img.astype(np.float32) / 255
         else:
             img = img.astype(np.uint8)
@@ -264,7 +264,7 @@ class TopDownMultiChannel(TopDownObservation):
         indices = self._get_stack_indices(len(self.stack_traffic_flow))
         # for i in reversed(indices):
         #     stacked = self.stack_traffic_flow[i] + stacked / 2
-        # if self.rgb_clip:
+        # if self.norm_pixel:
         #     stacked = np.clip(stacked, 0.0, 1.0)
         # else:
         #     stacked = np.clip(stacked, 0, 255)
@@ -273,7 +273,7 @@ class TopDownMultiChannel(TopDownObservation):
 
         # Stack
         img = np.stack(img, axis=2)
-        if self.rgb_clip:
+        if self.norm_pixel:
             img = np.clip(img, 0, 1.0)
         else:
             img = np.clip(img, 0, 255)
@@ -301,7 +301,7 @@ class TopDownMultiChannel(TopDownObservation):
     @property
     def observation_space(self):
         shape = self.obs_shape + (self.num_stacks, )
-        if self.rgb_clip:
+        if self.norm_pixel:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
             return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)

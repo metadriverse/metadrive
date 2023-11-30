@@ -1,5 +1,5 @@
 import numpy as np
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
+from metadrive.envs.scenario_env import ScenarioEnv, AssetLoader
 from metadrive.envs.top_down_env import TopDownSingleFrameMetaDriveEnv, TopDownMetaDrive, TopDownMetaDriveEnvV2
 
 
@@ -9,9 +9,21 @@ def test_top_down_rendering():
             TopDownMetaDrive(dict(num_scenarios=5, map="C", traffic_density=1.0)),
             TopDownMetaDrive(dict(num_scenarios=5, map="C", frame_stack=1, post_stack=2)),
             TopDownMetaDriveEnvV2(dict(num_scenarios=5, map="C", frame_stack=1, post_stack=2)),
-            WaymoEnv(dict(num_scenarios=1, start_scenario_index=0)),
-            WaymoEnv(dict(num_scenarios=1, start_scenario_index=1)),
-            WaymoEnv(dict(num_scenarios=1, start_scenario_index=2)),
+            ScenarioEnv(dict(
+                num_scenarios=1,
+                start_scenario_index=0,
+                data_directory=AssetLoader.file_path("waymo", unix_style=False),
+            )),
+            ScenarioEnv(dict(
+                num_scenarios=1,
+                start_scenario_index=1,
+                data_directory=AssetLoader.file_path("waymo", unix_style=False),
+            )),
+            ScenarioEnv(dict(
+                num_scenarios=1,
+                start_scenario_index=2,
+                data_directory=AssetLoader.file_path("waymo", unix_style=False),
+            )),
     ]:
         try:
             for _ in range(5):

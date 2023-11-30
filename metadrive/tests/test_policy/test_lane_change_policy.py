@@ -1,5 +1,5 @@
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.policy.lange_change_policy import AgentLaneChangePolicy
+from metadrive.policy.lange_change_policy import LaneChangePolicy
 
 
 def test_check_discrete_space(render=False):
@@ -12,7 +12,7 @@ def test_check_discrete_space(render=False):
             "use_render": render,
             "decision_repeat": 5,
             "map": "CXO",
-            "agent_policy": AgentLaneChangePolicy,
+            "agent_policy": LaneChangePolicy,
             "discrete_action": True,
             "use_multi_discrete": False,
             "action_check": True,
@@ -38,7 +38,7 @@ def test_check_multi_discrete_space(render=False):
             "use_render": render,
             "decision_repeat": 5,
             "map": "CXO",
-            "agent_policy": AgentLaneChangePolicy,
+            "agent_policy": LaneChangePolicy,
             "discrete_action": True,
             "use_multi_discrete": True,
             "action_check": True,
@@ -64,7 +64,7 @@ def test_lane_change(render=False):
             "use_render": render,
             "decision_repeat": 5,
             "map": "CXO",
-            "agent_policy": AgentLaneChangePolicy,
+            "agent_policy": LaneChangePolicy,
             "discrete_action": True,
             "use_multi_discrete": True,
             "action_check": True,

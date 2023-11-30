@@ -50,7 +50,7 @@ def test_destroy_state(obs="state"):
     elif obs == "rgb":
         config["image_observation"] = True
         config["use_render"] = False
-        config["rgb_clip"] = True
+        config["norm_pixel"] = True
     _test_destroy(config)
 
 

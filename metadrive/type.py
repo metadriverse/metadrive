@@ -106,11 +106,6 @@ class MetaDriveType:
         return waymo_type_string
 
     @classmethod
-    def from_nuplan(cls, waymo_type_string: str):
-        # TODO: WIP
-        return ""
-
-    @classmethod
     def is_lane(cls, type):
         return type in [
             cls.LANE_SURFACE_STREET, cls.LANE_SURFACE_UNSTRUCTURE, cls.LANE_UNKNOWN, cls.LANE_BIKE_LANE,

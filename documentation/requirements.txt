@@ -57,3 +57,11 @@ sphinxcontrib-serializinghtml==1.1.5
 urllib3==1.26.9
     # via requests
 sphinx_rtd_theme
+
+nbsphinx
+
+sphinx-copybutton
+
+pandoc
+
+myst-nb

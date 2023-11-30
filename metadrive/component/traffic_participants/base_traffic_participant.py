@@ -1,4 +1,5 @@
 from typing import Tuple, Sequence
+from metadrive.constants import CamMask
 
 from panda3d.core import LVector3, NodePath
 
@@ -72,9 +73,11 @@ class BaseTrafficParticipant(BaseObject):
             self.coordinates_debug_np.reparentTo(self.origin)
         height = self.HEIGHT
         self.coordinates_debug_np = NodePath("debug coordinate")
-        x = self.engine.draw_line_3d([0, 0, height], [1, 0, height], [1, 0, 0, 1], 1)
-        y = self.engine.draw_line_3d([0, 0, height], [0, 0.5, height], [1, 0, 0, 1], 1)
-        z = self.engine.draw_line_3d([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 1)
+        self.coordinates_debug_np.hide(CamMask.AllOn)
+        self.coordinates_debug_np.show(CamMask.MainCam)
+        x = self.engine._draw_line_3d([0, 0, height], [1, 0, height], [1, 0, 0, 1], 1)
+        y = self.engine._draw_line_3d([0, 0, height], [0, 0.5, height], [1, 0, 0, 1], 1)
+        z = self.engine._draw_line_3d([0, 0, height], [0, 0, height + 0.5], [0, 0, 1, 1], 1)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)

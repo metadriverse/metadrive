@@ -1,4 +1,4 @@
-import logging
+import os
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -7,14 +7,15 @@ import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
-from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath, LVecBase4
+from panda3d.core import AntialiasAttrib, loadPrcFileData, LineSegs, PythonCallbackObject, Vec3, NodePath
+from panda3d.core import GraphicsPipeSelection
 
 from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.constants import RENDER_MODE_OFFSCREEN, RENDER_MODE_NONE, RENDER_MODE_ONSCREEN, EDITION, CamMask, \
     BKG_COLOR
 from metadrive.engine.asset_loader import initialize_asset_loader, close_asset_loader, randomize_cover, get_logo_file
 from metadrive.engine.core.collision_callback import collision_callback
-from metadrive.engine.core.draw_line import ColorLineNodePath
+from metadrive.engine.core.draw import ColorLineNodePath, ColorSphereNodePath
 from metadrive.engine.core.force_fps import ForceFPS
 from metadrive.engine.core.image_buffer import ImageBuffer
 from metadrive.engine.core.light import Light
@@ -23,7 +24,10 @@ from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.engine.core.pssm import PSSM
 from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
+from metadrive.engine.logger import get_logger
 from metadrive.utils.utils import is_mac, setup_logger
+
+logger = get_logger()
 
 
 def _suppress_warning():
@@ -80,6 +84,7 @@ class EngineCore(ShowBase.ShowBase):
     # loadPrcFileData("", "transform-cache 0")
     # loadPrcFileData("", "state-cache 0")
     loadPrcFileData("", "garbage-collect-states 0")
+    loadPrcFileData("", "print-pipe-types 0")
 
     # loadPrcFileData("", "allow-incomplete-render #t")
     # loadPrcFileData("", "# even-animation #t")
@@ -99,6 +104,7 @@ class EngineCore(ShowBase.ShowBase):
         #     #     "No allowed to change ptr of global config, which may cause issue"
         #     pass
         # else:
+        self.pid = os.getpid()
         EngineCore.global_config = global_config
         self.mode = global_config["_render_mode"]
         if self.global_config["pstats"]:
@@ -172,6 +178,9 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "compressed-textures 1")  # Default to compress
 
         super(EngineCore, self).__init__(windowType=self.mode)
+        logger.info("Known Pipes: {}".format(*GraphicsPipeSelection.getGlobalPtr().getPipeTypes()))
+
+        self._all_panda_tasks = self.taskMgr.getAllTasks()
         if self.use_render_pipeline and self.mode != RENDER_MODE_NONE:
             self.render_pipeline.create(self)
 
@@ -188,7 +197,7 @@ class EngineCore(ShowBase.ShowBase):
                 props = WindowProperties()
                 props.setSize(self.global_config["window_size"][0], self.global_config["window_size"][1])
                 self.win.requestProperties(props)
-                logging.warning(
+                logger.warning(
                     "Since your screen is too small ({}, {}), we resize the window to {}.".format(
                         w, h, self.global_config["window_size"]
                     )
@@ -327,6 +336,7 @@ class EngineCore(ShowBase.ShowBase):
         # task manager
         self.taskMgr.remove("audioLoop")
 
+        # show coordinate
         self.coordinate_line = []
         if self.global_config["show_coordinates"]:
             self.show_coordinates()
@@ -334,6 +344,10 @@ class EngineCore(ShowBase.ShowBase):
         # create sensors
         self.sensors = {}
         self.setup_sensors()
+
+        # toggle in debug physics world
+        if self.global_config["debug_physics_world"]:
+            self.toggleDebug()
 
     def render_frame(self, text: Optional[Union[dict, str]] = None):
         """
@@ -378,20 +392,20 @@ class EngineCore(ShowBase.ShowBase):
             self.debug_node.hide()
 
     def report_body_nums(self, task):
-        logging.debug(self.physics_world.report_bodies())
+        logger.debug(self.physics_world.report_bodies())
         return task.done
 
     def close_world(self):
         self.taskMgr.stop()
-        # It will report a warning said AsynTaskChain is created when taskMgr.destroy() is called but a new showbase is
-        # created.
-        logging.debug(
+        logger.debug(
             "Before del taskMgr: task_chain_num={}, all_tasks={}".format(
                 self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
             )
         )
-        self.taskMgr.destroy()
-        logging.debug(
+        for tsk in self.taskMgr.getAllTasks():
+            if tsk not in self._all_panda_tasks:
+                self.taskMgr.remove(tsk)
+        logger.debug(
             "After del taskMgr: task_chain_num={}, all_tasks={}".format(
                 self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
             )
@@ -446,8 +460,18 @@ class EngineCore(ShowBase.ShowBase):
             self._loading_logo.setColor((1, 1, 1, new_alpha))
             return task.cont
 
-    def draw_line_3d(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
-        assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
+    def _draw_line_3d(self, start_p: Union[Vec3, Tuple], end_p: Union[Vec3, Tuple], color, thickness: float):
+        """
+        This API is not official
+        Args:
+            start_p:
+            end_p:
+            color:
+            thickness:
+
+        Returns:
+
+        """
         start_p = [*start_p]
         end_p = [*end_p]
         start_p[1] *= 1
@@ -461,22 +485,34 @@ class EngineCore(ShowBase.ShowBase):
         # np.reparentTo(self.render)
         return np
 
-    def draw_lines_3d(self, point_lists, parent_node=None, color=LVecBase4(1), thickness=1.0):
-        assert self.mode == RENDER_MODE_ONSCREEN, "Can not call this API in render mode: {}".format(self.mode)
-        np = ColorLineNodePath(parent_node, thickness=thickness, colorVec=color)
-        np.drawLines(point_lists)
-        np.create()
-        return np
+    def make_line_drawer(self, parent_node=None, thickness=1.0):
+        if parent_node is None:
+            parent_node = self.render
+        drawer = ColorLineNodePath(parent_node, thickness=thickness)
+        return drawer
+
+    def make_point_drawer(self, parent_node=None, scale=1.0):
+        if parent_node is None:
+            parent_node = self.render
+        drawer = ColorSphereNodePath(parent_node, scale=scale)
+        return drawer
 
     def show_coordinates(self):
         if len(self.coordinate_line) > 0:
             return
         # x direction = red
-        np_x = self.draw_line_3d(Vec3(0, 0, 0.1), Vec3(100, 0, 0.1), color=[1, 0, 0, 1], thickness=2)
+        np_x = self._draw_line_3d(Vec3(0, 0, 0.1), Vec3(100, 0, 0.1), color=[1, 0, 0, 1], thickness=2)
         np_x.reparentTo(self.render)
         # y direction = blue
-        np_y = self.draw_line_3d(Vec3(0, 0, 0.1), Vec3(0, 50, 0.1), color=[0, 1, 0, 1], thickness=2)
+        np_y = self._draw_line_3d(Vec3(0, 0, 0.1), Vec3(0, 50, 0.1), color=[0, 1, 0, 1], thickness=2)
         np_y.reparentTo(self.render)
+
+        np_y.hide(CamMask.AllOn)
+        np_y.show(CamMask.MainCam)
+
+        np_x.hide(CamMask.AllOn)
+        np_x.show(CamMask.MainCam)
+
         self.coordinate_line.append(np_x)
         self.coordinate_line.append(np_y)
 

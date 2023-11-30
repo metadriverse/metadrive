@@ -101,7 +101,7 @@ def test_ma_parking_lot_env():
 
 def test_ma_parking_lot_horizon():
     # test horizon
-    for _ in range(3):  # This function is really easy to break, repeat multiple times!
+    for _ in range(10):  # This function is really easy to break, repeat multiple times!
         env = MultiAgentParkingLotEnv(
             {
                 "horizon": 100,
@@ -383,6 +383,7 @@ def test_ma_parking_lot_reward_done_alignment():
             },
             # "use_render": True,
             #
+            "allow_respawn": False,
             "horizon": 200,
             "num_agents": 7,
             "crash_vehicle_penalty": 1.7777,
@@ -402,14 +403,14 @@ def test_ma_parking_lot_reward_done_alignment():
             o, r, tm, tc, i = _act(env, act)
 
         for v_id, v in env.vehicles.items():
-            if v_id != "agent0":
+            if v_id != "agent2":
                 v.set_static(True)
         out_num = 0
         for step in range(5000):
             act = {k: [0, 1] for k in env.vehicles.keys()}
             o, r, tm, tc, i = _act(env, act)
             for kkk, iii in i.items():
-                if iii["crash"]:
+                if iii["crash"] and not iii["crash_sidewalk"]:
                     assert iii["crash_vehicle"]
                 if iii["crash_vehicle"]:
                     assert iii["crash"]

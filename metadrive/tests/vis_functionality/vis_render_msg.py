@@ -16,7 +16,7 @@ if __name__ == "__main__":
             "use_render": True,
             "image_observation": False,
             "decision_repeat": 5,
-            "rgb_clip": True,
+            "norm_pixel": True,
             "map_config": {
                 BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
                 BaseMap.GENERATE_CONFIG: 12,

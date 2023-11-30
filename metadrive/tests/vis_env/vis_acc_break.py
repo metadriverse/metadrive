@@ -7,14 +7,13 @@ if __name__ == "__main__":
         # "use_render":True,
         "map": "SSSSS",
         # "manual_control":True,
-        "controller": "joystick",
+        "controller": "steering_wheel",
         "random_agent_model": False,
         "vehicle_config": {
             "vehicle_model": "default",
             # "vehicle_model":"s",
             # "vehicle_model":"m",
             # "vehicle_model":"l",
-            # "vehicle_model":"xl",
         }
     }
     env = MetaDriveEnv(config)

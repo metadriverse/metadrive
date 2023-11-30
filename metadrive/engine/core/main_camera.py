@@ -321,7 +321,7 @@ class MainCamera(BaseSensor):
         self.current_track_vehicle = None
         if self.registered:
             self.unregister()
-            self.camera.node().getDisplayRegion(0).clearDrawCallback()
+            # self.camera.node().getDisplayRegion(0).clearDrawCallback()
 
     def stop_track(self, bird_view_on_current_position=True):
         self.engine.interface.stop_track()

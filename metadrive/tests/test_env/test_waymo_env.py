@@ -1,21 +1,22 @@
 import pytest
+import seaborn as sns
 import numpy as np
 
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.real_data_envs.waymo_env import WaymoEnv
-from metadrive.policy.idm_policy import WaymoIDMPolicy
-from metadrive.policy.replay_policy import WaymoReplayEgoCarPolicy
+from metadrive.envs.scenario_env import ScenarioEnv
+from metadrive.policy.idm_policy import TrajectoryIDMPolicy
+from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 
-@pytest.mark.parametrize("policy", [WaymoIDMPolicy, WaymoReplayEgoCarPolicy])
+@pytest.mark.parametrize("policy", [TrajectoryIDMPolicy, ReplayEgoCarPolicy])
 def test_waymo_env(policy, render=False, num_scenarios=3):
-    WaymoIDMPolicy.NORMAL_SPEED = 30
+    TrajectoryIDMPolicy.NORMAL_SPEED = 30
     asset_path = AssetLoader.asset_path
     try:
-        env = WaymoEnv(
+        env = ScenarioEnv(
             {
                 "manual_control": False,
-                "no_traffic": True if policy == WaymoIDMPolicy else False,
+                "no_traffic": True if policy == TrajectoryIDMPolicy else False,
                 "use_render": render,
                 "agent_policy": policy,
                 "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
@@ -26,6 +27,7 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
             env.reset(seed=seed)
             for i in range(1000):
                 o, r, tm, tc, info = env.step([1.0, 0.])
+                assert env.observation_space.contains(o)
                 if tm or tc:
                     assert info["arrive_dest"], "Can not arrive dest"
                     print("{} track_length: ".format(env.engine.global_seed), info["track_length"])
@@ -34,20 +36,21 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
 
                 if i == 999:
                     raise ValueError("Can not arrive dest")
+            assert env.vehicle.panda_color == sns.color_palette("colorblind")[2]
     finally:
         env.close()
 
 
 def test_store_map_memory_leakage(render=False):
-    WaymoIDMPolicy.NORMAL_SPEED = 30
+    TrajectoryIDMPolicy.NORMAL_SPEED = 30
     asset_path = AssetLoader.asset_path
-    env = WaymoEnv(
+    env = ScenarioEnv(
         {
             "manual_control": False,
             "no_traffic": False,
             "store_map": True,
             "use_render": render,
-            "agent_policy": WaymoReplayEgoCarPolicy,
+            "agent_policy": ReplayEgoCarPolicy,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
             "num_scenarios": 3
         }
@@ -61,6 +64,7 @@ def test_store_map_memory_leakage(render=False):
                 env.reset(seed=seed)
                 for i in range(1000):
                     o, r, tm, tc, info = env.step([1.0, 0.])
+                    assert env.observation_space.contains(o)
                     if tm or tc:
                         assert info["arrive_dest"], "Can not arrive dest"
                         assert env.episode_step > 60
@@ -84,4 +88,4 @@ def test_store_map_memory_leakage(render=False):
 
 if __name__ == "__main__":
     test_store_map_memory_leakage(render=True)
-    # test_waymo_env(policy=WaymoIDMPolicy, render=True)
+    # test_waymo_env(policy=TrajectoryIDMPolicy, render=True)

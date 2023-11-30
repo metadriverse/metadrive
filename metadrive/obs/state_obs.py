@@ -1,12 +1,12 @@
 import gymnasium as gym
 import numpy as np
 
-from metadrive.component.vehicle_navigation_module.node_network_navigation import NodeNetworkNavigation
-from metadrive.obs.observation_base import ObservationBase
+from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
+from metadrive.obs.observation_base import BaseObservation
 from metadrive.utils.math import clip, norm
 
 
-class StateObservation(ObservationBase):
+class StateObservation(BaseObservation):
     ego_state_obs_dim = 6
     """
     Use vehicle state info, navigation info and lidar point clouds info as input
@@ -82,7 +82,7 @@ class StateObservation(ObservationBase):
                 num_lasers=vehicle.config["side_detector"]["num_lasers"],
                 distance=vehicle.config["side_detector"]["distance"],
                 physics_world=vehicle.engine.physics_world.static_world,
-                show=self.config["vehicle_config"]["show_side_detector"],
+                show=vehicle.config["show_side_detector"],
             ).cloud_points
 
         else:
@@ -136,7 +136,7 @@ class StateObservation(ObservationBase):
                 vehicle.engine.physics_world.static_world,
                 num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
                 distance=vehicle.config["lane_line_detector"]["distance"],
-                show=self.config["vehicle_config"]["show_lane_line_detector"],
+                show=vehicle.config["show_lane_line_detector"],
             ).cloud_points
 
         else:
@@ -159,7 +159,7 @@ class StateObservation(ObservationBase):
         return dim
 
 
-class LidarStateObservation(ObservationBase):
+class LidarStateObservation(BaseObservation):
     def __init__(self, config):
         self.state_obs = StateObservation(config)
         super(LidarStateObservation, self).__init__(config)
@@ -212,18 +212,17 @@ class LidarStateObservation(ObservationBase):
                 physics_world=self.engine.physics_world.dynamic_world,
                 num_lasers=vehicle.config["lidar"]["num_lasers"],
                 distance=vehicle.config["lidar"]["distance"],
-                show=self.config["vehicle_config"]["show_lidar"],
+                show=vehicle.config["show_lidar"],
             )
-            if self.config["vehicle_config"]["lidar"]["num_others"] > 0:
+            if vehicle.config["lidar"]["num_others"] > 0:
                 other_v_info += self.engine.get_sensor("lidar").get_surrounding_vehicles_info(
-                    vehicle, detected_objects, self.config["vehicle_config"]["lidar"]["distance"],
-                    self.config["vehicle_config"]["lidar"]["num_others"],
-                    self.config["vehicle_config"]["lidar"]["add_others_navi"]
+                    vehicle, detected_objects, vehicle.config["lidar"]["distance"],
+                    vehicle.config["lidar"]["num_others"], vehicle.config["lidar"]["add_others_navi"]
                 )
             other_v_info += self._add_noise_to_cloud_points(
                 cloud_points,
-                gaussian_noise=self.config["vehicle_config"]["lidar"]["gaussian_noise"],
-                dropout_prob=self.config["vehicle_config"]["lidar"]["dropout_prob"]
+                gaussian_noise=vehicle.config["lidar"]["gaussian_noise"],
+                dropout_prob=vehicle.config["lidar"]["dropout_prob"]
             )
             self.cloud_points = cloud_points
             self.detected_objects = detected_objects

@@ -125,7 +125,7 @@ class PGMap(BaseMap):
         for to_ in self.road_network.graph.values():
             for lanes_to_add in to_.values():
                 lanes += lanes_to_add
-        self.engine.show_lane_coordinates(lanes)
+        self._show_coordinates(lanes)
 
     def get_boundary_line_vector(self, interval):
         map = self

@@ -1,16 +1,18 @@
 import copy
-import logging
 
-from metadrive.policy.idm_policy import TrajectoryIDMPOlicy
+from metadrive.engine.logger import get_logger
+from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from typing import Dict
 
-from gymnasium.spaces import Box, Dict, MultiDiscrete, Discrete
+from gymnasium.spaces import Box, Dict, MultiDiscrete, Discrete, Space
 
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
+
+logger = get_logger()
 
 
 class AgentManager(BaseManager):
@@ -74,7 +76,7 @@ class AgentManager(BaseManager):
             ret[agent_id] = obj
             policy_cls = self.agent_policy
             args = [obj, self.generate_seed()]
-            if policy_cls == TrajectoryIDMPOlicy or issubclass(policy_cls, TrajectoryIDMPOlicy):
+            if policy_cls == TrajectoryIDMPolicy or issubclass(policy_cls, TrajectoryIDMPolicy):
                 args.append(self.engine.map_manager.current_sdc_route)
             self.add_policy(obj.id, policy_cls, *args)
         return ret
@@ -152,8 +154,7 @@ class AgentManager(BaseManager):
                 assert isinstance(obs_space, Dict), "Multi-agent observation should be gym.Dict"
             action_space = self._init_action_spaces[agent_id]
             self.action_spaces[vehicle.name] = action_space
-            assert isinstance(action_space, Box) or isinstance(action_space,
-                                                               MultiDiscrete) or isinstance(action_space, Discrete)
+            assert isinstance(action_space, Space)
         self.next_agent_count = len(init_vehicles)
 
     def set_state(self, state: dict, old_name_to_current=None):
@@ -211,7 +212,7 @@ class AgentManager(BaseManager):
         self._agent_to_object[agent_name] = new_v_name
         self._object_to_agent[new_v_name] = agent_name
         # TODO: this may cause error? Sharing observation
-        logging.warning("Test MARL new agent observation to avoid bug!")
+        # logger.warning("Test MARL new agent observation to avoid bug!")
         self.observations[new_v_name] = self._init_observations["agent0"]
         self.observations[new_v_name].reset(vehicle)
         self.observation_spaces[new_v_name] = self._init_observation_spaces["agent0"]

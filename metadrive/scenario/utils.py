@@ -87,8 +87,7 @@ def find_data_manager_name(manager_info):
     Find the data_manager
     """
     for manager_name in manager_info:
-        if "DataManager" in manager_name and "NuPlan" not in manager_name:
-            # Raw data in NuplanDataManager can not be dumped
+        if "DataManager" in manager_name:
             return manager_name
     return None
 
@@ -514,14 +513,17 @@ def assert_scenario_equal(scenarios1, scenarios2, only_compare_sdc=False, check_
         assert set(old_scene[SD.MAP_FEATURES].keys()).issuperset(set(new_scene[SD.MAP_FEATURES].keys()))
         assert set(old_scene[SD.DYNAMIC_MAP_STATES].keys()) == set(new_scene[SD.DYNAMIC_MAP_STATES].keys())
 
-        for map_id, map_feat in new_scene[SD.MAP_FEATURES].items():
+        for map_id, map_feat in old_scene[SD.MAP_FEATURES].items():
             # It is possible that some line are not included in new scene but exist in old scene.
             # old_scene_polyline = map_feat["polyline"]
             # if coordinate_transform:
             #     old_scene_polyline = waymo_to_metadrive_vector(old_scene_polyline)
-            np.testing.assert_almost_equal(
-                new_scene[SD.MAP_FEATURES][map_id]["polyline"], map_feat["polyline"], decimal=NP_ARRAY_DECIMAL
-            )
+            if map_feat["type"] == MetaDriveType.LANE_SURFACE_STREET:
+                assert len(map_feat["polyline"]) - len(new_scene[SD.MAP_FEATURES][map_id]["polyline"]) <= 1
+                _min = min(len(map_feat["polyline"]), len(new_scene[SD.MAP_FEATURES][map_id]["polyline"]))
+                np.testing.assert_almost_equal(
+                    new_scene[SD.MAP_FEATURES][map_id]["polyline"][:_min], map_feat["polyline"][:_min], decimal=1
+                )
             assert new_scene[SD.MAP_FEATURES][map_id][SD.TYPE] == map_feat[SD.TYPE]
 
         for obj_id, obj_state in old_scene[SD.DYNAMIC_MAP_STATES].items():

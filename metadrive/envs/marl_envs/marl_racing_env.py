@@ -36,7 +36,7 @@ RACING_CONFIG = dict(
         # show_side_detector=True,
         # show_lidar=True,
     ),
-    sensors=dict(lidar=(Lidar, 50)),
+    sensors=dict(lidar=(Lidar, )),
 
     # Number of agents and map setting.
     num_agents=12,
@@ -55,7 +55,6 @@ RACING_CONFIG = dict(
     on_continuous_line_done=False,
     out_of_route_done=False,
     crash_done=False,
-    max_step_per_agent=3_000,
     horizon=3_000,
     idle_done=True,
     crash_sidewalk_done=False,
@@ -361,6 +360,8 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
 
     def done_function(self, vehicle_id):
         done, done_info = super(MultiAgentRacingEnv, self).done_function(vehicle_id)
+        if done_info["max_step"]:
+            return done, done_info
 
         done_info[TerminationState.IDLE] = self._is_idle(vehicle_id)
         if self.config["idle_done"] and self._is_idle(vehicle_id):

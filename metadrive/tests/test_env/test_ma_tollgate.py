@@ -1,5 +1,6 @@
 import time
 from metadrive.envs.marl_envs.multi_agent_metadrive import MULTI_AGENT_METADRIVE_DEFAULT_CONFIG
+
 MULTI_AGENT_METADRIVE_DEFAULT_CONFIG["force_seed_spawn_manager"] = True
 import numpy as np
 from gymnasium.spaces import Box, Dict
@@ -99,7 +100,7 @@ def test_ma_toll_env():
 
 def test_ma_toll_horizon():
     # test horizon
-    for _ in range(3):  # This function is really easy to break, repeat multiple times!
+    for _ in range(10):  # This function is really easy to break, repeat multiple times!
         env = MultiAgentTollgateEnv(
             {
                 "horizon": 100,
@@ -145,7 +146,7 @@ def test_ma_toll_horizon():
                         assert tm[kkk]
                         assert i[kkk]["cost"] == 778
                         assert i[kkk]["out_of_road"]
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
 
                 if tm["__all__"]:
                     break
@@ -298,7 +299,7 @@ def test_ma_toll_reward_done_alignment_1():
                     if ddd and kkk != "__all__" and not tm["__all__"] and not i[kkk]["max_step"]:
                         if r[kkk] != -777:
                             raise ValueError
-                        #assert r[kkk] == -777
+                        # assert r[kkk] == -777
                         assert i[kkk]["out_of_road"]
                         # # print('{} done passed!'.format(kkk))
                 for kkk, rrr in r.items():
@@ -350,11 +351,11 @@ def test_ma_toll_reward_done_alignment_1():
                 iii = i[kkk]
                 assert iii["crash_vehicle"]
                 assert iii["crash"]
-                #assert r[kkk] == -1.7777
+                # assert r[kkk] == -1.7777
                 # for kkk, ddd in te.items():
                 ddd = tm[kkk]
                 if ddd and kkk != "__all__":
-                    #assert r[kkk] == -1.7777
+                    # assert r[kkk] == -1.7777
                     assert i[kkk]["crash_vehicle"]
                     assert i[kkk]["crash"]
                     # # print('{} done passed!'.format(kkk))
@@ -449,12 +450,12 @@ def test_ma_toll_reward_done_alignment_2():
             if tm["__all__"]:
                 break
             kkk = "agent0"
-            #assert r[kkk] == 999
+            # assert r[kkk] == 999
             assert i[kkk]["arrive_dest"]
             assert tm[kkk]
 
             kkk = "agent1"
-            #assert r[kkk] != 999
+            # assert r[kkk] != 999
             assert not i[kkk]["arrive_dest"]
             assert not tm[kkk]
             break
@@ -574,16 +575,27 @@ def test_ma_toll_no_short_episode():
 
 
 def test_ma_toll_horizon_termination(vis=False):
+    """
+    Instead of driving out of road, it may collide with other cars as well! so assertion may fail.
+    """
     # test horizon
-    env = MultiAgentTollgateEnv({
-        "horizon": 100,
-        "num_agents": 8,
-        "crash_done": False,
-    })
+    env = MultiAgentTollgateEnv(
+        {
+            "horizon": 100,
+            "num_agents": 8,
+            "debug_static_world": True,
+            "debug_physics_world": True,
+            "use_render": vis,
+            "debug": True,
+            "crash_done": False,
+            "log_level": 50,
+        }
+    )
     try:
-        for _ in range(3):  # This function is really easy to break, repeat multiple times!
+        for _ in range(1):  # This function is really easy to break, repeat multiple times!
             _check_spaces_before_reset(env)
             obs, _ = env.reset()
+            # env.engine.toggleDebug()
             _check_spaces_after_reset(env, obs)
             assert env.observation_space.contains(obs)
             should_respawn = set()
@@ -598,8 +610,8 @@ def test_ma_toll_horizon_termination(vis=False):
                             env.vehicles[v_id].set_static(True)
                 obs, r, tm, tc, i = _act(env, act)
 
-                if vis:
-                    env.render("topdown")
+                # if vis:
+                #     env.render(mode="topdown")
 
                 if step == 0 or step == 1:
                     assert not any(tm.values())
@@ -615,6 +627,9 @@ def test_ma_toll_horizon_termination(vis=False):
                     should_respawn.clear()
 
                 for kkk, ddd in tm.items():
+                    if ddd and kkk in special_agents:
+                        assert i[kkk]["out_of_road"] or i[kkk]["crash_vehicle"]
+
                     if ddd and kkk == "__all__":
                         # print("Current: ", step)
                         continue
@@ -722,7 +737,7 @@ if __name__ == '__main__':
     # test_ma_toll_reward_sign()
     # test_ma_toll_init_space()
     # test_ma_toll_no_short_episode()
-    test_ma_toll_horizon_termination(vis=True)
+    test_ma_toll_horizon_termination()
     # test_ma_toll_40_agent_reset_after_respawn()
     # test_ma_no_reset_error()
     # test_randomize_spawn_place()
