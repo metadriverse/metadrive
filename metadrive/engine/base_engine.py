@@ -675,7 +675,7 @@ class BaseEngine(EngineCore, Randomizable):
             bodies += world.getGhosts()
             bodies += world.getVehicles()
             bodies += world.getCharacters()
-            bodies += world.getManifolds()
+            # bodies += world.getManifolds()
 
         filtered = []
         for body in bodies:
