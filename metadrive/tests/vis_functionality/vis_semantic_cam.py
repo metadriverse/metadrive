@@ -1,3 +1,5 @@
+import time
+
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -25,12 +27,14 @@ if __name__ == "__main__":
             "show_crosswalk": True,
             "agent_policy": ReplayEgoCarPolicy,
             "interface_panel": ["semantic_camera"],
-            "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
-            "vehicle_config": dict(image_source="semantic_camera"),
+            # "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
+            # "vehicle_config": dict(image_source="semantic_camera"),
             "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
+    start = time.time()
     env.reset(seed=0)
+    print(time.time()-start)
     env.engine.accept("m", get_image, extraArgs=[env])
     import cv2
     for i in range(1, 100000):

@@ -6,6 +6,8 @@ import sys
 
 #
 #
+from abc import ABC
+from metadrive.constants import TerrainProperty
 import cv2
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
@@ -24,7 +26,10 @@ from metadrive.utils.utils import is_win
 logger = get_logger()
 
 
-class Terrain(BaseObject):
+class Terrain(BaseObject, ABC):
+    """
+    Terrain and map
+    """
     COLLISION_MASK = CollisionGroup.Terrain
     HEIGHT = 0.0
     PROBE_HEIGHT = 600
@@ -46,12 +51,13 @@ class Terrain(BaseObject):
         self.mesh_collision_terrain = None  # a 3d mesh, Not available yet!
 
         # visualization mesh feature
-        self._terrain_size = 2048  # [m]
+        self._terrain_size = TerrainProperty.terrain_size  # [m]
         self._height_scale = engine.global_config["height_scale"]  # [m]
         self._drivable_area_extension = engine.global_config["drivable_area_extension"]  # [m] road marin
-        self._heightmap_size = self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
+        # it should include the whole map. Otherwise, road will have no texture!
+        self._heightmap_size = self._semantic_map_size = TerrainProperty.map_region_size  # [m]
         self._heightfield_start = int((self._terrain_size - self._heightmap_size) / 2)
-        self._semantic_map_pixel_per_meter = 22  # [m] how many pixels per meter
+        self._semantic_map_pixel_per_meter = TerrainProperty.semantic_map_pixel_per_meter  # [m]  pixels per meter
         self._terrain_offset = 2055  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
         # pre calculate some variables
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
@@ -114,7 +120,7 @@ class Terrain(BaseObject):
             )
             heightfield_to_modify = heightfield_base[start:end, start:end, ...]
             heightfield_base[start:end, start:end,
-                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+            ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -161,12 +167,12 @@ class Terrain(BaseObject):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -572,7 +578,6 @@ class Terrain(BaseObject):
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
             semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
         return semantics
-
 
 # Some useful threads
 # GeoMipTerrain:
