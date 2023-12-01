@@ -25,8 +25,9 @@ from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math import norm
 from metadrive.utils.vertex import make_polygon_model
+from metadrive.engine.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger()
 
 
 class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
@@ -368,17 +369,19 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 if len(sidewalk["polygon"]) == 0:
                     continue
                 polygon = Polygon(sidewalk["polygon"])
-                polygon = rect_polygon.intersection(polygon)
-
-                # Extract and print the points of the clipped polygon. I love GPT. lol
-                if polygon.is_empty:
-                    continue
-                else:
-                    if isinstance(polygon, Polygon):
-                        polygons = [list(polygon.exterior.coords)]
+                try:
+                    polygon = rect_polygon.intersection(polygon)
+                    # Extract the points of the clipped polygon.
+                    if polygon.is_empty:
+                        continue
                     else:
-                        # Handle cases where the intersection might result in multiple geometries (like MultiPolygon)
-                        polygons = [list(geom.exterior.coords) for geom in polygon.geoms]
+                        # Handle cases where the intersection might result in multiple geometries
+                        polygons = [list(polygon.exterior.coords)] if isinstance(polygon, Polygon) else \
+                            [list(geom.exterior.coords) for geom in polygon.geoms]
+                except Exception as error:
+                    logger.warning(error)
+                    continue
+
                 for polygon in polygons:
                     height = sidewalk.get("height", None)
                     if height is None:
