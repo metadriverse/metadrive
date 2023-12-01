@@ -1,5 +1,6 @@
 import logging
 import math
+import time
 from abc import ABC
 from typing import Dict
 from metadrive.utils.utils import create_rectangle_from_midpoints
@@ -86,6 +87,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             self.sidewalk.setTwoSided(False)
             self.sidewalk.setTexture(self.side_texture)
+
+            self.line_seg = make_polygon_model([(-0.5, 0.5), (-0.5, -0.5), (0.5, -0.5), (0.5, 0.5)], 0)
 
     def _sample_topology(self) -> bool:
         """
@@ -525,5 +528,14 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         #     lane_line = make_polygon_model(polygon, height=0)
         #     lane_line.reparentTo(parent_np)
         #     lane_line.setPos(0, 0, 0.005)
-
+        if self.render and not self.use_render_pipeline \
+                and self.engine.global_config["build_lane_line_for_semantic_cam"]:
+            # For visualization
+            lane_line = NodePath("line_seg")
+            self.line_seg.instanceTo(lane_line)
+            lane_line.setScale(length, PGDrivableAreaProperty.LANE_LINE_WIDTH,
+                               PGDrivableAreaProperty.LANE_LINE_THICKNESS)
+            lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
+            lane_line.setPos(panda_vector(middle, 0.1))
+            lane_line.reparentTo(parent_np)
         return node_path_list

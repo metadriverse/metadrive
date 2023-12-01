@@ -224,6 +224,8 @@ BASE_DEFAULT_CONFIG = dict(
     show_crosswalk=False,
     # Whether to show sidewalk
     show_sidewalk=True,
+    # Show lane line in semantic camera or not. It harms the performance!
+    build_lane_line_for_semantic_cam=False,
 
     # ===== Debug =====
     # Please see Documentation: Debug for more details
@@ -362,9 +364,15 @@ class BaseEnv(gym.Env):
         # show sensor lists
         _str = "Sensors: [{}]"
         sensors_str = ""
+        has_semantic_cam = False
         for _id, cfg in config["sensors"].items():
             sensors_str += "{}: {}{}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
+            if not isinstance(cfg[0], str) and cfg[0].__name__ == "SemanticCamera":
+                has_semantic_cam = True
         self.logger.info(_str.format(sensors_str[:-2]))
+        if config["build_lane_line_for_semantic_cam"] and not has_semantic_cam:
+            config["build_lane_line_for_semantic_cam"] = False
+            self.logger.warning("'build_lane_line_for_semantic_cam' is turned off as SemanticCamera doesn't exist")
 
         # determine render mode automatically
         if config["use_render"]:
