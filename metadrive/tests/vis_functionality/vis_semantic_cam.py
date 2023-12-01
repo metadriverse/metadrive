@@ -38,6 +38,8 @@ if __name__ == "__main__":
     env.reset(seed=0)
     print(time.time()-start)
     env.engine.accept("m", get_image, extraArgs=[env])
+
+    env.engine.current_map.show_bounding_box()
     import cv2
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])

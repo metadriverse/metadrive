@@ -181,16 +181,18 @@ class BaseMap(BaseRunnable, ABC):
 
     # @time_me
     def get_semantic_map(
-        self,
-        size=512,
-        pixels_per_meter=8,
-        color_setting=MapTerrainSemanticColor,
-        line_sample_interval=2,
-        polyline_thickness=1,
-        layer=("lane_line", "lane")
+            self,
+            center_point,
+            size=512,
+            pixels_per_meter=8,
+            color_setting=MapTerrainSemanticColor,
+            line_sample_interval=2,
+            polyline_thickness=1,
+            layer=("lane_line", "lane")
     ):
         """
         Get semantics of the map for terrain generation
+        :param center_point: 2D point, the center to select the rectangular region
         :param size: [m] length and width
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param color_setting: color palette for different attribute. When generating terrain, make sure using
@@ -199,6 +201,7 @@ class BaseMap(BaseRunnable, ABC):
         MapTerrainAttribute
         :return: semantic map
         """
+        center_p = center_point
         if self._semantic_map is None:
             all_lanes = self.get_map_features(interval=line_sample_interval)
             polygons = []
@@ -227,7 +230,6 @@ class BaseMap(BaseRunnable, ABC):
             mask[..., 0] = color_setting.get_color(MetaDriveType.GROUND)
             # create an example bounding box polygon
             # for idx in range(len(polygons)):
-            center_p = self.get_center_point()
             for polygon, color in polygons:
                 points = [
                     [
@@ -272,20 +274,23 @@ class BaseMap(BaseRunnable, ABC):
 
     # @time_me
     def get_height_map(
-        self,
-        size=2048,
-        pixels_per_meter=1,
-        extension=2,
-        height=1,
+            self,
+            center_point,
+            size=2048,
+            pixels_per_meter=1,
+            extension=2,
+            height=1,
     ):
         """
         Get height of the map for terrain generation
         :param size: [m] length and width
+        :param center_point: 2D point, the center to select the rectangular region
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param extension: If > 1, the returned height map's drivable region will be enlarged.
         :param height: height of drivable area.
         :return: heightfield image in uint 16 nparray
         """
+        center_p = center_point
         if self._height_map is None:
             extension = max(1, extension)
             all_lanes = self.get_map_features()
@@ -298,7 +303,6 @@ class BaseMap(BaseRunnable, ABC):
             size = int(size * pixels_per_meter)
             mask = np.zeros([size, size, 1])
 
-            center_p = self.get_center_point()
             need_scale = abs(extension - 1) > 1e-1
 
             for sidewalk in self.sidewalks.values():
@@ -321,3 +325,11 @@ class BaseMap(BaseRunnable, ABC):
                 mask = np.expand_dims(mask, axis=-1)
             self._height_map = mask
         return self._height_map
+
+    def show_bounding_box(self):
+        """
+        Draw the bounding box of map in 3D renderer
+        Returns: None
+
+        """
+        self.road_network.show_bounding_box(self.engine)

@@ -486,10 +486,11 @@ class TerrainProperty:
     _rect_polygon = Polygon([(-x, y), (x, y), (x, -y), (-x, -y)])
 
     @classmethod
-    def point_in_map(cls, point):
+    def point_in_map(cls, point, map_center=None):
         """
         Return if the point is in the map region
         Args:
+            map_center: center point of the map
             point: 2D point
 
         Returns: Boolean
@@ -499,10 +500,11 @@ class TerrainProperty:
         return -cls.x <= x <= cls.x and -cls.y <= y <= cls.y
 
     @classmethod
-    def clip_polygon(cls, polygon):
+    def clip_polygon(cls, polygon, map_center=None):
         """
         Clip the Polygon. Make it fit into the map region and throw away the part outside the map region
         Args:
+            map_center: center point of the map
             polygon: a list of 2D points
 
         Returns: A list of polygon or None

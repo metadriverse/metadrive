@@ -435,9 +435,14 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         if lane_index is not None:
             lane.index = lane_index
-        assert lane.polygon is not None, "Polygon is required for building lane"
         # build physics contact
-        if lane.need_lane_localization:
+        if not lane.need_lane_localization:
+            return
+        assert lane.polygon is not None, "Polygon is required for building lane"
+        polygons = TerrainProperty.clip_polygon(lane.polygon)
+        if not polygons:
+            return
+        for polygon in polygons:
             # It might be Lane surface intersection
             n = BaseRigidBodyNode(lane_index, lane.metadrive_type)
             segment_np = NodePath(n)
@@ -450,7 +455,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             segment_node.setKinematic(False)
             segment_node.setStatic(True)
             shape = BulletConvexHullShape()
-            for point in lane.polygon:
+            for point in polygon:
                 # Panda coordinate is different from metadrive coordinate
                 point_up = LPoint3f(*point, 0.0)
                 shape.addPoint(LPoint3f(*point_up))

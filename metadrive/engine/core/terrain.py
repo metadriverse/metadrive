@@ -95,7 +95,7 @@ class Terrain(BaseObject, ABC):
             self.detach_from_world(self.engine.physics_world)
 
     # @time_me
-    def reset(self, center_position):
+    def reset(self, center_point):
         """
         Update terrain according to current map
         """
@@ -105,7 +105,7 @@ class Terrain(BaseObject, ABC):
 
         if self.render or self.use_mesh_terrain:
             # modify default height image
-            drivable_region = self.get_drivable_region()
+            drivable_region = self.get_drivable_region(center_point)
 
             # embed to the original height image
             start = self._heightfield_start
@@ -130,7 +130,7 @@ class Terrain(BaseObject, ABC):
 
             if self.render:
                 # Make semantics for shader terrain
-                semantics = self.get_terrain_semantics()
+                semantics = self.get_terrain_semantics(center_point)
                 semantic_tex = Texture()
                 semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
                 semantic_tex.setRamImage(semantics)
@@ -143,7 +143,7 @@ class Terrain(BaseObject, ABC):
                 # generate terrain visualization
                 self._generate_mesh_vis_terrain(self._terrain_size, heightfield_tex, semantic_tex)
         # reset position
-        self.set_position(center_position)
+        self.set_position(center_point)
         self.attach_to_world(self.engine.render, self.engine.physics_world)
 
     def generate_plane_collision_terrain(self):
@@ -543,21 +543,21 @@ class Terrain(BaseObject, ABC):
         """
         return self._mesh_terrain
 
-    def get_drivable_region(self):
+    def get_drivable_region(self, center_point):
         """
         Get drivable area, consisting of all roads in map
         Returns: drivable area
 
         """
         if self.engine.current_map:
-            drivable_region = self.engine.current_map.get_height_map(
-                self._heightmap_size, 1, self._drivable_area_extension
-            )
+            drivable_region = self.engine.current_map.get_height_map(center_point,
+                                                                     self._heightmap_size, 1,
+                                                                     self._drivable_area_extension)
         else:
             drivable_region = np.ones((self._heightmap_size, self._heightmap_size, 1))
         return drivable_region
 
-    def get_terrain_semantics(self):
+    def get_terrain_semantics(self, center_point):
         """
         Return semantic maps indicating the property of the terrain for specific region
         Returns:
@@ -568,6 +568,7 @@ class Terrain(BaseObject, ABC):
             layer.append("crosswalk")
         if self.engine.current_map:
             semantics = self.engine.current_map.get_semantic_map(
+                center_point,
                 size=self._semantic_map_size,
                 pixels_per_meter=self._semantic_map_pixel_per_meter,
                 polyline_thickness=int(1024 / self._semantic_map_size),
