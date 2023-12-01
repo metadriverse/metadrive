@@ -120,7 +120,7 @@ class Terrain(BaseObject, ABC):
             )
             heightfield_to_modify = heightfield_base[start:end, start:end, ...]
             heightfield_base[start:end, start:end,
-            ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -167,12 +167,12 @@ class Terrain(BaseObject, ABC):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-            self,
-            size,
-            heightfield: Texture,
-            attribute_tex: Texture,
-            target_triangle_width=10,
-            engine=None,
+        self,
+        size,
+        heightfield: Texture,
+        attribute_tex: Texture,
+        target_triangle_width=10,
+        engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -550,9 +550,9 @@ class Terrain(BaseObject, ABC):
 
         """
         if self.engine.current_map:
-            drivable_region = self.engine.current_map.get_height_map(center_point,
-                                                                     self._heightmap_size, 1,
-                                                                     self._drivable_area_extension)
+            drivable_region = self.engine.current_map.get_height_map(
+                center_point, self._heightmap_size, 1, self._drivable_area_extension
+            )
         else:
             drivable_region = np.ones((self._heightmap_size, self._heightmap_size, 1))
         return drivable_region
@@ -579,6 +579,7 @@ class Terrain(BaseObject, ABC):
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
             semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
         return semantics
+
 
 # Some useful threads
 # GeoMipTerrain:

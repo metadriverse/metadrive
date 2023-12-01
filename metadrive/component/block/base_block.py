@@ -42,11 +42,11 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     ID = "B"
 
     def __init__(
-            self,
-            block_index: int,
-            global_network: NodeRoadNetwork,
-            random_seed,
-            ignore_intersection_checking=False,
+        self,
+        block_index: int,
+        global_network: NodeRoadNetwork,
+        random_seed,
+        ignore_intersection_checking=False,
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -97,12 +97,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         raise NotImplementedError
 
     def construct_block(
-            self,
-            root_render_np: NodePath,
-            physics_world: PhysicsWorld,
-            extra_config: Dict = None,
-            no_same_node=True,
-            attach_to_world=True
+        self,
+        root_render_np: NodePath,
+        physics_world: PhysicsWorld,
+        extra_config: Dict = None,
+        no_same_node=True,
+        attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -533,8 +533,9 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             # For visualization
             lane_line = NodePath("line_seg")
             self.line_seg.instanceTo(lane_line)
-            lane_line.setScale(length, PGDrivableAreaProperty.LANE_LINE_WIDTH,
-                               PGDrivableAreaProperty.LANE_LINE_THICKNESS)
+            lane_line.setScale(
+                length, PGDrivableAreaProperty.LANE_LINE_WIDTH, PGDrivableAreaProperty.LANE_LINE_THICKNESS
+            )
             lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
             lane_line.setPos(panda_vector(middle, 0.1))
             lane_line.reparentTo(parent_np)

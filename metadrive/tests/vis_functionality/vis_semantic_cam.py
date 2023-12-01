@@ -38,7 +38,7 @@ if __name__ == "__main__":
     )
     start = time.time()
     env.reset(seed=0)
-    print(time.time()-start)
+    print(time.time() - start)
     env.engine.accept("m", get_image, extraArgs=[env])
 
     # env.engine.current_map.show_bounding_box()

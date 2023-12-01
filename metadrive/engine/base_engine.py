@@ -121,7 +121,7 @@ class BaseEngine(EngineCore, Randomizable):
             ) else False
 
     def spawn_object(
-            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -327,6 +327,7 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
+
             def process_memory():
                 import psutil
                 import os
