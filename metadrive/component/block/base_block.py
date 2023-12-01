@@ -1,5 +1,4 @@
 import logging
-from shapely.geometry import Polygon
 import math
 from abc import ABC
 from typing import Dict
@@ -27,6 +26,7 @@ from metadrive.utils.math import norm
 from metadrive.utils.vertex import make_polygon_model
 from metadrive.engine.logger import get_logger
 import warnings
+
 warnings.filterwarnings('ignore', 'invalid value encountered in intersection')
 
 logger = get_logger()
@@ -365,26 +365,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         Construct the sidewalk with collision shape
         """
         if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
-            x = y = TerrainProperty.map_region_size / 2
-            rect_polygon = Polygon([(-x, y), (x, y), (x, -y), (-x, -y)])
-            assert rect_polygon.is_valid
             for sidewalk_id, sidewalk in self.sidewalks.items():
                 if len(sidewalk["polygon"]) == 0:
                     continue
-                polygon = Polygon(sidewalk["polygon"])
-                try:
-                    polygon = rect_polygon.intersection(polygon)
-                    # Extract the points of the clipped polygon.
-                    if polygon.is_empty:
-                        continue
-                    else:
-                        # Handle cases where the intersection might result in multiple geometries
-                        polygons = [list(polygon.exterior.coords)] if isinstance(polygon, Polygon) else \
-                            [list(geom.exterior.coords) for geom in polygon.geoms]
-                except Exception as error:
-                    logger.warning(error)
+                polygons = TerrainProperty.clip_polygon(sidewalk["polygon"])
+                if polygons is None:
                     continue
-
                 for polygon in polygons:
                     height = sidewalk.get("height", None)
                     if height is None:
@@ -484,6 +470,10 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
+
+        if not TerrainProperty.point_in_map(middle):
+            return node_path_list
+
         parent_np = self.lane_line_node_path
         if length <= 0:
             return []
