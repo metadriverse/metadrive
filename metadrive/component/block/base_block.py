@@ -230,6 +230,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.lane_line_node_path.flattenStrong()
         self.lane_line_node_path.node().collect()
+        self.lane_line_node_path.hide(CamMask.AllOn)
+        self.lane_line_node_path.show(CamMask.SemanticCam)
 
         self.sidewalk_node_path.flattenStrong()
         self.sidewalk_node_path.node().collect()
@@ -463,9 +465,11 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         if length <= 0:
             return []
         if PGLineType.prohibit(line_type):
-            liane_type = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
+            liane_type = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY \
+                else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
         else:
-            liane_type = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
+            liane_type = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY \
+                else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
 
         # add bullet body for it
         body_node = BaseGhostBodyNode(None, liane_type)
@@ -480,7 +484,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         body_height = PGDrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
         shape = BulletBoxShape(Vec3(length / 2, PGDrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
         body_np.node().addShape(shape)
-        mask = PGDrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN else PGDrivableAreaProperty.BROKEN_COLLISION_MASK
+        mask = PGDrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN \
+            else PGDrivableAreaProperty.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(mask)
         self.static_nodes.append(body_np.node())
 
