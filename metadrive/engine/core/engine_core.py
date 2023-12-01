@@ -34,6 +34,7 @@ def _suppress_warning():
     loadPrcFileData("", "notify-level-glgsg fatal")
     loadPrcFileData("", "notify-level-pgraph fatal")
     loadPrcFileData("", "notify-level-pnmimage fatal")
+    loadPrcFileData("", "notify-level-task fatal")
     loadPrcFileData("", "notify-level-thread fatal")
     loadPrcFileData("", "notify-level-bullet fatal")
     loadPrcFileData("", "notify-level-display fatal")

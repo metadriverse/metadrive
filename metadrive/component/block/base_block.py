@@ -26,6 +26,8 @@ from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math import norm
 from metadrive.utils.vertex import make_polygon_model
 from metadrive.engine.logger import get_logger
+import warnings
+warnings.filterwarnings('ignore', 'invalid value encountered in intersection')
 
 logger = get_logger()
 
@@ -365,6 +367,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
             x = y = TerrainProperty.map_region_size / 2
             rect_polygon = Polygon([(-x, y), (x, y), (x, -y), (-x, -y)])
+            assert rect_polygon.is_valid
             for sidewalk_id, sidewalk in self.sidewalks.items():
                 if len(sidewalk["polygon"]) == 0:
                     continue
