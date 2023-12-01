@@ -406,28 +406,33 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         if self.engine is None or (self.engine.global_config["show_crosswalk"] and not self.engine.use_render_pipeline):
             for cross_id, crosswalk in self.crosswalks.items():
-                polygon = crosswalk["polygon"]
-                np = make_polygon_model(polygon, 0.0)
-                np.reparentTo(self.crosswalk_node_path)
-                np.setPos(0, 0, 0.005)
+                if len(crosswalk["polygon"]) == 0:
+                    continue
+                polygons = TerrainProperty.clip_polygon(crosswalk["polygon"])
+                if polygons is None:
+                    continue
+                for polygon in polygons:
+                    np = make_polygon_model(polygon, 0.0)
+                    np.reparentTo(self.crosswalk_node_path)
+                    np.setPos(0, 0, 0.005)
 
-                body_node = BaseGhostBodyNode(cross_id, MetaDriveType.CROSSWALK)
-                body_node.setKinematic(False)
-                body_node.setStatic(True)
-                body_np = self.crosswalk_node_path.attachNewNode(body_node)
-                # A trick allowing collision with sidewalk
-                body_np.setPos(0, 0, 0.5)
-                self._node_path_list.append(body_np)
+                    body_node = BaseGhostBodyNode(cross_id, MetaDriveType.CROSSWALK)
+                    body_node.setKinematic(False)
+                    body_node.setStatic(True)
+                    body_np = self.crosswalk_node_path.attachNewNode(body_node)
+                    # A trick allowing collision with sidewalk
+                    body_np.setPos(0, 0, 0.5)
+                    self._node_path_list.append(body_np)
 
-                geom = np.node().getGeom(0)
-                mesh = BulletTriangleMesh()
-                mesh.addGeom(geom)
-                shape = BulletTriangleMeshShape(mesh, dynamic=False)
+                    geom = np.node().getGeom(0)
+                    mesh = BulletTriangleMesh()
+                    mesh.addGeom(geom)
+                    shape = BulletTriangleMeshShape(mesh, dynamic=False)
 
-                body_node.addShape(shape)
-                self.static_nodes.append(body_node)
-                body_node.setIntoCollideMask(CollisionGroup.Crosswalk)
-                self._node_path_list.append(np)
+                    body_node.addShape(shape)
+                    self.static_nodes.append(body_node)
+                    body_node.setIntoCollideMask(CollisionGroup.Crosswalk)
+                    self._node_path_list.append(np)
 
     def _construct_lane(self, lane, lane_index):
         """
