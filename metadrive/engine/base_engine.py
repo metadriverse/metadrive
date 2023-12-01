@@ -387,8 +387,8 @@ class BaseEngine(EngineCore, Randomizable):
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
 
         # reset terrain
-        # center_p = self.current_map.get_center_point() if self.current_map else [0, 0]
-        center_p = [0, 0]
+        from metadrive.component.map.pg_map import PGMap
+        center_p = self.current_map.get_center_point() if isinstance(self.current_map, PGMap) else [0, 0]
         self.terrain.reset(center_p)
 
         # init shadow if required

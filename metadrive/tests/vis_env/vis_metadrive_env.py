@@ -12,7 +12,7 @@ if __name__ == "__main__":
             # "debug_physics_world": True,
             "debug": True,
             # "global_light": False,
-            # "debug_static_world": True,
+            "debug_static_world": True,
             "static_traffic_object": False,
             "show_interface": True,
             "random_agent_model": True,
@@ -23,8 +23,8 @@ if __name__ == "__main__":
             # "debug_static_world": True,
             "manual_control": True,
             "use_render": True,
-            "use_mesh_terrain": True,
-            "full_size_mesh": False,
+            "use_mesh_terrain": False,
+            "full_size_mesh": True,
             "accident_prob": 0,
             "decision_repeat": 5,
             "daytime": "19:00",
@@ -124,17 +124,17 @@ if __name__ == "__main__":
     #     line.reparentTo(env.vehicle.origin)
     # env.vehicle.set_velocity([5, 0], in_local_frame=True)
     print(time.time() - start)
-    origin = env.engine.terrain.mesh_collision_terrain.getPos()
+    # origin = env.engine.terrain.mesh_collision_terrain.getPos()
     for s in range(1, 100000):
         # env.vehicle.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
-        env.render(
-            text={
-                "pos": env.engine.terrain.mesh_collision_terrain.getPos(),
-                "origin": [origin[0], origin[1]],
-                "speed": speed,
-            }
-        )
+        # env.render(
+        #     text={
+        #         "pos": env.engine.terrain.mesh_collision_terrain.getPos(),
+        #         "origin": [origin[0], origin[1]],
+        #         "speed": speed,
+        #     }
+        # )
         # if tm:
         #     s = time.time()
         #     env.reset()
