@@ -21,8 +21,8 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "image_observation": False,
-            "debug": True,
-            "debug_static_world": True,
+            # "debug": True,
+            # "debug_static_world": True,
             "norm_pixel": True,
             "show_interface": True,
             "show_sidewalk": True,
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     print(time.time()-start)
     env.engine.accept("m", get_image, extraArgs=[env])
 
-    env.engine.current_map.show_bounding_box()
+    # env.engine.current_map.show_bounding_box()
     import cv2
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])

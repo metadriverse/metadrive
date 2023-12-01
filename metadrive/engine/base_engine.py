@@ -121,7 +121,7 @@ class BaseEngine(EngineCore, Randomizable):
             ) else False
 
     def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
+            self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
     ):
         """
         Call this func to spawn one object
@@ -173,7 +173,7 @@ class BaseEngine(EngineCore, Randomizable):
         assert (len(BaseEngine.COLORS_FREE) > 0)
         my_color = BaseEngine.COLORS_FREE.pop()
         BaseEngine.COLORS_OCCUPIED.add(my_color)
-        #print("After picking:", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
+        # print("After picking:", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
         self.id_c[id] = my_color
         self.c_id[my_color] = id
         return my_color
@@ -192,7 +192,7 @@ class BaseEngine(EngineCore, Randomizable):
             my_color = self.id_c[id]
             BaseEngine.COLORS_OCCUPIED.remove(my_color)
             BaseEngine.COLORS_FREE.add(my_color)
-            #print("After cleaning:,", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
+            # print("After cleaning:,", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
             self.id_c.pop(id)
             self.c_id.pop(my_color)
 
@@ -327,7 +327,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -388,7 +387,8 @@ class BaseEngine(EngineCore, Randomizable):
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
 
         # reset terrain
-        center_p = self.current_map.get_center_point() if self.current_map else [0, 0]
+        # center_p = self.current_map.get_center_point() if self.current_map else [0, 0]
+        center_p = [0, 0]
         self.terrain.reset(center_p)
 
         # init shadow if required
@@ -406,12 +406,12 @@ class BaseEngine(EngineCore, Randomizable):
         for _ in range(5):
             self.graphicsEngine.renderFrame()
 
-        #reset colors
+        # reset colors
         BaseEngine.COLORS_FREE = set(COLOR_SPACE)
         BaseEngine.COLORS_OCCUPIED = set()
         new_i2c = {}
         new_c2i = {}
-        #print("rest objects", len(self.get_objects()))
+        # print("rest objects", len(self.get_objects()))
         for object in self.get_objects().values():
             if object.id in self.id_c.keys():
                 id = object.id
@@ -420,7 +420,7 @@ class BaseEngine(EngineCore, Randomizable):
                 BaseEngine.COLORS_FREE.remove(color)
                 new_i2c[id] = color
                 new_c2i[color] = id
-        #print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
+        # print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
         self.c_id = new_c2i
         self.id_c = new_i2c
 
