@@ -21,6 +21,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "image_observation": False,
+            "num_scenarios": 10,
             # "debug": True,
             # "debug_static_world": True,
             "norm_pixel": True,
