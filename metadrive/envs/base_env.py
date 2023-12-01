@@ -15,7 +15,7 @@ from metadrive.component.sensors.distance_detector import LaneLineDetector, Side
 from metadrive.component.sensors.lidar import Lidar
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
-from metadrive.constants import TerminationState
+from metadrive.constants import TerminationState, TerrainProperty
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
 from metadrive.engine.logger import get_logger, set_log_level
@@ -212,6 +212,8 @@ BASE_DEFAULT_CONFIG = dict(
     disable_model_compression=True,
 
     # ===== Mesh Terrain =====
+    # The size of the square map region
+    map_region_size=512,
     # Road will have a flat marin whose width is determined by this value, unit: [m]
     drivable_area_extension=7,
     # Height scale for mountains, unit: [m]. 0 height makes the terrain flat
@@ -319,6 +321,9 @@ class BaseEnv(gym.Env):
         self.logger.info("MetaDrive version: {}".format(VERSION))
         if not config["show_interface"]:
             config["interface_panel"] = []
+
+        # Adjust terrain
+        TerrainProperty.map_region_size = config["map_region_size"]
 
         # Optimize main window
         if not config["use_render"] and config["image_observation"] and \

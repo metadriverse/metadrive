@@ -480,9 +480,6 @@ class TerrainProperty:
     semantic_map_pixel_per_meter = 22
     terrain_size = 2048
 
-    x = y = map_region_size / 2
-    _rect_polygon = Polygon([(-x, y), (x, y), (x, -y), (-x, -y)])
-
     @classmethod
     def point_in_map(cls, point, map_center=None):
         """
@@ -494,8 +491,9 @@ class TerrainProperty:
         Returns: Boolean
 
         """
-        x, y = point[:2]
-        return -cls.x <= x <= cls.x and -cls.y <= y <= cls.y
+        x_, y_ = point[:2]
+        x = y = cls.map_region_size / 2
+        return -x <= x_ <= x and -y <= y_ <= y
 
     @classmethod
     def clip_polygon(cls, polygon, map_center=None):
@@ -508,10 +506,11 @@ class TerrainProperty:
         Returns: A list of polygon or None
 
         """
-
+        x = y = cls.map_region_size / 2
+        _rect_polygon = Polygon([(-x, y), (x, y), (x, -y), (-x, -y)])
         polygon = Polygon(polygon)
         try:
-            polygon = cls._rect_polygon.intersection(polygon)
+            polygon = _rect_polygon.intersection(polygon)
             # Extract the points of the clipped polygon.
             if polygon.is_empty:
                 return None

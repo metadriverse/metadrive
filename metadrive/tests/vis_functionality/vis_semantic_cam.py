@@ -22,8 +22,9 @@ if __name__ == "__main__":
             "use_render": True,
             "image_observation": False,
             "num_scenarios": 10,
-            # "debug": True,
-            # "debug_static_world": True,
+            "debug": True,
+            "debug_static_world": True,
+            "map_region_size": 256,
             "norm_pixel": True,
             "show_interface": True,
             "show_sidewalk": True,
@@ -31,8 +32,8 @@ if __name__ == "__main__":
             "build_lane_line_for_semantic_cam": True,
             "agent_policy": ReplayEgoCarPolicy,
             "interface_panel": ["semantic_camera"],
-            # "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
-            # "vehicle_config": dict(image_source="semantic_camera"),
+            "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
+            "vehicle_config": dict(image_source="semantic_camera"),
             "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
