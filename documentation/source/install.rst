@@ -47,7 +47,7 @@ To check whether MetaDrive is successfully installed, please run the following c
     python -m metadrive.examples.profile_metadrive
 
 This script can also verify the efficiency of MetaDrive through the printed messages.
-The default observation contains information on ego vehicle's states, Lidar-like cloud points showing neighboring vehicles, and information about navigation and tasks. Besides, you can also try the Pygame-based Top-down rendering (See `TopDownObservation <obs_action.html#topdownobservation>`_), which is also runnable in most headless machine without any special treatment.
+The default observation contains information on ego vehicle's states, Lidar-like cloud points showing neighboring vehicles, and information about navigation and tasks. Besides, you can also try the Pygame-based Top-down rendering (See `TopDownObservation <obs.html#topdownobservation>`_), which is also runnable in most headless machine without any special treatment.
 If the above observation is not enough for your RL algorithms and you wish to use the Panda3D camera to provide realistic RGB images as the observation, please continue reading this section.
 
 
@@ -64,7 +64,7 @@ The script will generate two **same** images to `/path/to/metadrive repo/metadri
 Please fetch and check those images from cluster to ensure MetaDrive can draw the scene and capture images correctly.
 By default, it only generates images from the main camera. Set ```--camera [rgb/depth]``` to check other cameras.
 Also, ```--cuda``` flag can be added to test image_on_cuda pipeline for your headless machine.
-If the captured main camera images are completed as following, then the installation on headless machine is successful and please move on to `ImageStateObservation <obs_action.html#imagestateobservation>`_.
+If the captured main camera images are completed as following, then the installation on headless machine is successful and please move on to `ImageStateObservation <obs.html#imagestateobservation>`_.
 
 .. image:: figs/main_camera_from_observation.png
   :width: 400
