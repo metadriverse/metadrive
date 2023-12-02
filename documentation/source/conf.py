@@ -42,6 +42,7 @@ autosectionlabel_prefix_document = True
 
 nbsphinx_execute = 'never'
 nb_execution_mode = 'off'
+nb_execution_timeout = 300
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
