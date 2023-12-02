@@ -560,7 +560,8 @@ class BaseEnv(gym.Env):
             )
         self.engine.reset()
         if self.top_down_renderer is not None:
-            self.top_down_renderer.reset(self.current_map)
+            self.top_down_renderer.clear()
+            self.engine.top_down_renderer = None
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_rewards = defaultdict(float)
