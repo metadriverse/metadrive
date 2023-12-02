@@ -36,3 +36,17 @@ Supposing you have a section called `Top-down Renderer` in `top_down_render.ipyn
  [Top-down Renderer](top_down_render.ipynb)
 ```
 The second way can not refer to subtitle.
+
+### Execution some cells when building doc
+
+The doc is set to disable executing all cells.
+For enabling executing certain cells or a file, set in Cell metadata or file metadata:
+```python
+{
+    "mystnb": {
+        "execution_mode": "force"
+    }
+}
+```
+For more details, see: https://myst-nb.readthedocs.io/en/latest/configuration.html
+
