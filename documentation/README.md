@@ -1,4 +1,5 @@
-This folder contains files for the documentation: [https://metadrive-simulator.readthedocs.io/](https://metadrive-simulator.readthedocs.io/).
+This folder contains files for the
+documentation: [https://metadrive-simulator.readthedocs.io/](https://metadrive-simulator.readthedocs.io/).
 
 To build documents locally, please run the following codes:
 
@@ -15,19 +16,25 @@ This tool can only check some external links. For checking cross-reference, usin
 ## Cross-Reference
 
 ### How to reference a section of an `.ipynb` file in an RST file?
+
 Supposing you want to reference a section called TopDwnObservation in obs_action.ipynb, use
+
 ```
 `TopDownObservation <obs_action.html#topdownobservation>`_
 ```
 
 ### How to reference a section of an `.rst` file in an `.ipynb` file?
+
 Supposing you have a section called `Install MetaDrive` in `install.rst`, use
+
 ```
  <a href="install.html#install-metadrive">Install MetaDrive</a>
 ```
 
 ### How to reference a section of an `.ipynb` file in an `.ipynb` file?
-Supposing you have a section called `Top-down Renderer` in `top_down_render.ipynb`, use 
+
+Supposing you have a section called `Top-down Renderer` in `top_down_render.ipynb`, use
+
 ```
  <a href="top_down_renderer.html#top-down-render">Top-down Renderer</a>
  
@@ -35,12 +42,14 @@ Supposing you have a section called `Top-down Renderer` in `top_down_render.ipyn
  
  [Top-down Renderer](top_down_render.ipynb)
 ```
+
 The second way can not refer to subtitle.
 
-### Execution some cells when building doc
+### Execution some files when building doc
 
-The doc is set to disable executing all cells.
-For enabling executing certain cells or a file, set in file metadata:
+The doc is set to disable executing all `.ipynb`.
+For enabling executing certain files, set in the file metadata with:
+
 ```python
 {
     "mystnb": {
@@ -48,5 +57,24 @@ For enabling executing certain cells or a file, set in file metadata:
     }
 }
 ```
+
 For more details, see: https://myst-nb.readthedocs.io/en/latest/configuration.html
 
+### Execution some cells in a file
+
+If you only want to execute some cells, first set in the file metadata with
+
+```python
+{
+    "mystnb": {
+        "execution_mode": "auto"
+    }
+}
+```
+
+It will auto run cells that doesn't run before. 
+And you need to skip all cells you don't want to run with cell tags:
+
+```python
+{"tags": ["skip-execution"]}
+```
