@@ -447,7 +447,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         if not lane.need_lane_localization:
             return
         assert lane.polygon is not None, "Polygon is required for building lane"
-        if self.engine.global_config["cull_lanes_outside_map"]:
+        if self.engine and self.engine.global_config["cull_lanes_outside_map"]:
             polygons = TerrainProperty.clip_polygon(lane.polygon)
             if not polygons:
                 return
@@ -532,7 +532,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         #     lane_line.reparentTo(parent_np)
         #     lane_line.setPos(0, 0, 0.005)
         if self.render and not self.use_render_pipeline \
-                and self.engine.global_config["build_lane_line_for_semantic_cam"]:
+                and self.engine and self.engine.global_config["build_lane_line_for_semantic_cam"]:
             # For visualization
             lane_line = NodePath("line_seg")
             self.line_seg.instanceTo(lane_line)
