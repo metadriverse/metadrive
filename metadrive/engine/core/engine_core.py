@@ -303,10 +303,6 @@ class EngineCore(ShowBase.ShowBase):
                 self.render.setLight(self.world_light.direction_np)
                 self.render.setLight(self.world_light.ambient_np)
 
-                # lens property
-                lens = self.cam.node().getLens()
-                lens.setFov(self.global_config["camera_fov"])
-
                 # setup pssm shadow
                 self.pssm = PSSM(self)
 
