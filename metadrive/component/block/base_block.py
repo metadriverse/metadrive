@@ -439,7 +439,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
     def _construct_lane(self, lane, lane_index):
         """
-        Modified from base class, the width is set to 6.5
+        Construct a physics body for the lane localization
         """
         if lane_index is not None:
             lane.index = lane_index

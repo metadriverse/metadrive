@@ -174,7 +174,7 @@ BASE_DEFAULT_CONFIG = dict(
     ),
 
     # ===== Sensors =====
-    sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar,), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
     # ===== Engine Core config =====
     # If true pop a window to render
@@ -212,7 +212,7 @@ BASE_DEFAULT_CONFIG = dict(
     disable_model_compression=True,
 
     # ===== Mesh Terrain =====
-    # The size of the square map region
+    # The size of the square map region, which is centered at [0, 0]. The map objects outside it are culled.
     map_region_size=512,
     # Road will have a flat marin whose width is determined by this value, unit: [m]
     drivable_area_extension=7,
@@ -226,7 +226,7 @@ BASE_DEFAULT_CONFIG = dict(
     show_crosswalk=False,
     # Whether to show sidewalk
     show_sidewalk=True,
-    # Show lane line in semantic camera or not. It harms the performance!
+    # Whether to show lane lines in semantic camera. It harms the performance!
     build_lane_line_for_semantic_cam=False,
 
     # ===== Debug =====
@@ -323,6 +323,8 @@ class BaseEnv(gym.Env):
             config["interface_panel"] = []
 
         # Adjust terrain
+        n = config["map_region_size"]
+        assert (n & (n - 1)) == 0 and 0 < n <= 2048, "map_region_size should be pow of 2 and < 2048."
         TerrainProperty.map_region_size = config["map_region_size"]
 
         # Optimize main window
@@ -349,7 +351,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -785,19 +787,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}

@@ -178,7 +178,7 @@ class Terrain(BaseObject, ABC):
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
         pixels_per_meter is determined by heightfield.size/size
         lane line and so on.
-        :param size: [m] this terrain of the generate terrain
+        :param size: [m] this terrain of the generated terrain
         :param heightfield: terrain heightfield. It should be a 16-bit png and have a quadratic size of a power of two.
         :param attribute_tex: doing texture splatting. r,g,b,a represent: grass/road/lane_line ratio respectively
         :param target_triangle_width: For a value of 10.0 for example, the terrain will attempt to make every triangle 10 pixels wide on screen.
@@ -571,7 +571,7 @@ class Terrain(BaseObject, ABC):
                 center_point,
                 size=self._semantic_map_size,
                 pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=int(1024 / self._semantic_map_size),
+                polyline_thickness=2,
                 layer=layer
             )
         else:

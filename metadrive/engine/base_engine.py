@@ -120,9 +120,13 @@ class BaseEngine(EngineCore, Randomizable):
                 self._object_policies[object_id], policy_cls
             ) else False
 
-    def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
-    ):
+    def spawn_object(self,
+                     object_class,
+                     pbr_model=True,
+                     force_spawn=False,
+                     auto_fill_random_seed=True,
+                     record=True,
+                     **kwargs):
         """
         Call this func to spawn one object
         :param object_class: object class
@@ -327,7 +331,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -388,8 +391,8 @@ class BaseEngine(EngineCore, Randomizable):
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
 
         # reset terrain
-        from metadrive.component.map.pg_map import PGMap
-        center_p = self.current_map.get_center_point() if isinstance(self.current_map, PGMap) else [0, 0]
+        # center_p = self.current_map.get_center_point() if isinstance(self.current_map, PGMap) else [0, 0]
+        center_p = [0, 0]
         self.terrain.reset(center_p)
 
         # init shadow if required
