@@ -1,4 +1,5 @@
 import copy
+
 from metadrive.utils import generate_gif
 import math
 from collections import deque
@@ -175,7 +176,7 @@ class TopDownRenderer:
         semantic_broken_line=True,
         scaling=5,  # auto-scale
         draw_contour=True,
-        no_window=False,
+        window=True,
         screen_record=False,
         **kwargs
         # current_track_vehicle=None
@@ -187,13 +188,13 @@ class TopDownRenderer:
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
         self.contour = draw_contour
         self.semantic_broken_line = semantic_broken_line
-        self.no_window = no_window
+        self.no_window = not window
 
         if self.show_agent_name:
             pygame.init()
 
         self.screen_record = screen_record
-        self.screen_frames = []
+        self._screen_frames = []
         self.pygame_font = None
         self.map = self.engine.current_map
         self.stack_frames = deque(maxlen=num_stack)
@@ -257,6 +258,9 @@ class TopDownRenderer:
         self.screen_canvas.fill(color_white)
 
     def render(self, text, to_image=True, *args, **kwargs):
+        if "semantic_map" in kwargs:
+            self.semantic_map = kwargs["semantic_map"]
+
         self.need_reset = False
         if not self.no_window:
             key_press = pygame.key.get_pressed()
@@ -292,11 +296,11 @@ class TopDownRenderer:
             ret = ret.convert(24)
         ret = WorldSurface.to_cv2_image(ret) if to_image else ret
         if self.screen_record:
-            self.screen_frames.append(ret)
+            self._screen_frames.append(ret)
         return ret
 
     def generate_gif(self, gif_name="demo.gif", duration=30):
-        return generate_gif(self.screen_frames, gif_name, is_pygame_surface=False, duration=duration)
+        return generate_gif(self._screen_frames, gif_name, is_pygame_surface=False, duration=duration)
 
     def _add_text(self, text: dict):
         if not text:
@@ -319,29 +323,20 @@ class TopDownRenderer:
             pygame.display.update()
 
     def close(self):
+        self.clear()
         pygame.quit()
 
-    def reset(self, map):
-        # Reset the super large background
-        self._background_canvas = draw_top_down_map_native(
-            map,
-            scaling=self.scaling,
-            semantic_map=self.semantic_map,
-            return_surface=True,
-            film_size=self.film_size,
-            semantic_broken_line=self.semantic_broken_line
-        )
+    def clear(self):
+        # # Reset the super large background
+        self._background_canvas = None
 
         # Reset several useful variables.
-        # self._screen_size = self._background_canvas.get_size()
-        # Maybe we can optimize here! We don't need to copy but just blit new background on it.
-
-        self._frame_canvas = self._background_canvas.copy()
-        self.canvas_rotate = pygame.Surface(self.receptive_field_double)
+        self._frame_canvas = None
+        self.canvas_rotate = None
 
         self.history_objects.clear()
+        self.stack_frames.clear()
         self.history_target_vehicle.clear()
-
         self.screen_frames.clear()
 
     @property
@@ -532,3 +527,7 @@ class TopDownRenderer:
     def engine(self):
         from metadrive.engine.engine_utils import get_engine
         return get_engine()
+
+    @property
+    def screen_frames(self):
+        return copy.deepcopy(self._screen_frames)

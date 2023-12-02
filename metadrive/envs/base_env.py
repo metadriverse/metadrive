@@ -15,7 +15,7 @@ from metadrive.component.sensors.distance_detector import LaneLineDetector, Side
 from metadrive.component.sensors.lidar import Lidar
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
-from metadrive.constants import TerminationState
+from metadrive.constants import TerminationState, TerrainProperty
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
 from metadrive.engine.logger import get_logger, set_log_level
@@ -211,7 +211,11 @@ BASE_DEFAULT_CONFIG = dict(
     # model compression increasing the launch time
     disable_model_compression=True,
 
-    # ===== Mesh Terrain =====
+    # ===== Terrain =====
+    # The size of the square map region, which is centered at [0, 0]. The map objects outside it are culled.
+    map_region_size=1024,
+    # Whether to remove lanes outside the map region. If True, lane localization only applies to map region
+    cull_lanes_outside_map=False,
     # Road will have a flat marin whose width is determined by this value, unit: [m]
     drivable_area_extension=7,
     # Height scale for mountains, unit: [m]. 0 height makes the terrain flat
@@ -224,6 +228,8 @@ BASE_DEFAULT_CONFIG = dict(
     show_crosswalk=False,
     # Whether to show sidewalk
     show_sidewalk=True,
+    # Whether to show lane lines in semantic camera. It harms the performance!
+    build_lane_line_for_semantic_cam=False,
 
     # ===== Debug =====
     # Please see Documentation: Debug for more details
@@ -318,6 +324,11 @@ class BaseEnv(gym.Env):
         if not config["show_interface"]:
             config["interface_panel"] = []
 
+        # Adjust terrain
+        n = config["map_region_size"]
+        assert (n & (n - 1)) == 0 and 0 < n <= 2048, "map_region_size should be pow of 2 and < 2048."
+        TerrainProperty.map_region_size = config["map_region_size"]
+
         # Optimize main window
         if not config["use_render"] and config["image_observation"] and \
                 config["vehicle_config"]["image_source"] != "main_camera" and config["auto_resize_window"]:
@@ -362,9 +373,15 @@ class BaseEnv(gym.Env):
         # show sensor lists
         _str = "Sensors: [{}]"
         sensors_str = ""
+        has_semantic_cam = False
         for _id, cfg in config["sensors"].items():
             sensors_str += "{}: {}{}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
+            if not isinstance(cfg[0], str) and cfg[0].__name__ == "SemanticCamera":
+                has_semantic_cam = True
         self.logger.info(_str.format(sensors_str[:-2]))
+        if config["build_lane_line_for_semantic_cam"] and not has_semantic_cam:
+            config["build_lane_line_for_semantic_cam"] = False
+            self.logger.warning("'build_lane_line_for_semantic_cam' is turned off as SemanticCamera doesn't exist")
 
         # determine render mode automatically
         if config["use_render"]:
@@ -545,7 +562,8 @@ class BaseEnv(gym.Env):
             )
         self.engine.reset()
         if self.top_down_renderer is not None:
-            self.top_down_renderer.reset(self.current_map)
+            self.top_down_renderer.clear()
+            self.engine.top_down_renderer = None
 
         self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
         self.episode_rewards = defaultdict(float)
@@ -865,13 +883,19 @@ class BaseEnv(gym.Env):
         if self.current_seed + 1 < self.start_index + self.num_scenarios:
             self.reset(self.current_seed + 1)
         else:
-            self.logger.warning("Can't load next scenario! current seed is already the max scenario index")
+            self.logger.warning(
+                "Can't load next scenario! Current seed is already the max scenario index."
+                "Allowed index: {}-{}".format(self.start_index, self.start_index + self.num_scenarios - 1)
+            )
 
     def last_seed_reset(self):
         if self.current_seed - 1 >= self.start_index:
             self.reset(self.current_seed - 1)
         else:
-            self.logger.warning("Can't load last scenario! current seed is already the min scenario index")
+            self.logger.warning(
+                "Can't load last scenario! Current seed is already the min scenario index"
+                "Allowed index: {}-{}".format(self.start_index, self.start_index + self.num_scenarios - 1)
+            )
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else \

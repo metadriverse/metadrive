@@ -6,6 +6,8 @@ import sys
 
 #
 #
+from abc import ABC
+from metadrive.constants import TerrainProperty
 import cv2
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
@@ -24,7 +26,10 @@ from metadrive.utils.utils import is_win
 logger = get_logger()
 
 
-class Terrain(BaseObject):
+class Terrain(BaseObject, ABC):
+    """
+    Terrain and map
+    """
     COLLISION_MASK = CollisionGroup.Terrain
     HEIGHT = 0.0
     PROBE_HEIGHT = 600
@@ -46,12 +51,13 @@ class Terrain(BaseObject):
         self.mesh_collision_terrain = None  # a 3d mesh, Not available yet!
 
         # visualization mesh feature
-        self._terrain_size = 2048  # [m]
+        self._terrain_size = TerrainProperty.terrain_size  # [m]
         self._height_scale = engine.global_config["height_scale"]  # [m]
         self._drivable_area_extension = engine.global_config["drivable_area_extension"]  # [m] road marin
-        self._heightmap_size = self._semantic_map_size = 512  # [m] it should include the whole map. Otherwise, road will have no texture!
+        # it should include the whole map. Otherwise, road will have no texture!
+        self._heightmap_size = self._semantic_map_size = TerrainProperty.map_region_size  # [m]
         self._heightfield_start = int((self._terrain_size - self._heightmap_size) / 2)
-        self._semantic_map_pixel_per_meter = 22  # [m] how many pixels per meter
+        self._semantic_map_pixel_per_meter = TerrainProperty.get_semantic_map_pixel_per_meter()  # [m]  pixels per meter
         self._terrain_offset = 2055  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
         # pre calculate some variables
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
@@ -89,7 +95,7 @@ class Terrain(BaseObject):
             self.detach_from_world(self.engine.physics_world)
 
     # @time_me
-    def reset(self, center_position):
+    def reset(self, center_point):
         """
         Update terrain according to current map
         """
@@ -99,7 +105,7 @@ class Terrain(BaseObject):
 
         if self.render or self.use_mesh_terrain:
             # modify default height image
-            drivable_region = self.get_drivable_region()
+            drivable_region = self.get_drivable_region(center_point)
 
             # embed to the original height image
             start = self._heightfield_start
@@ -124,7 +130,7 @@ class Terrain(BaseObject):
 
             if self.render:
                 # Make semantics for shader terrain
-                semantics = self.get_terrain_semantics()
+                semantics = self.get_terrain_semantics(center_point)
                 semantic_tex = Texture()
                 semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
                 semantic_tex.setRamImage(semantics)
@@ -137,7 +143,7 @@ class Terrain(BaseObject):
                 # generate terrain visualization
                 self._generate_mesh_vis_terrain(self._terrain_size, heightfield_tex, semantic_tex)
         # reset position
-        self.set_position(center_position)
+        self.set_position(center_point)
         self.attach_to_world(self.engine.render, self.engine.physics_world)
 
     def generate_plane_collision_terrain(self):
@@ -172,7 +178,7 @@ class Terrain(BaseObject):
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
         pixels_per_meter is determined by heightfield.size/size
         lane line and so on.
-        :param size: [m] this terrain of the generate terrain
+        :param size: [m] this terrain of the generated terrain
         :param heightfield: terrain heightfield. It should be a 16-bit png and have a quadratic size of a power of two.
         :param attribute_tex: doing texture splatting. r,g,b,a represent: grass/road/lane_line ratio respectively
         :param target_triangle_width: For a value of 10.0 for example, the terrain will attempt to make every triangle 10 pixels wide on screen.
@@ -537,7 +543,7 @@ class Terrain(BaseObject):
         """
         return self._mesh_terrain
 
-    def get_drivable_region(self):
+    def get_drivable_region(self, center_point):
         """
         Get drivable area, consisting of all roads in map
         Returns: drivable area
@@ -545,13 +551,13 @@ class Terrain(BaseObject):
         """
         if self.engine.current_map:
             drivable_region = self.engine.current_map.get_height_map(
-                self._heightmap_size, 1, self._drivable_area_extension
+                center_point, self._heightmap_size, 1, self._drivable_area_extension
             )
         else:
             drivable_region = np.ones((self._heightmap_size, self._heightmap_size, 1))
         return drivable_region
 
-    def get_terrain_semantics(self):
+    def get_terrain_semantics(self, center_point):
         """
         Return semantic maps indicating the property of the terrain for specific region
         Returns:
@@ -562,9 +568,11 @@ class Terrain(BaseObject):
             layer.append("crosswalk")
         if self.engine.current_map:
             semantics = self.engine.current_map.get_semantic_map(
+                center_point,
                 size=self._semantic_map_size,
                 pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=int(1024 / self._semantic_map_size),
+                polyline_thickness=int(self._semantic_map_pixel_per_meter / 11),
+                # 1 when map_region_size == 2048, 2 for others
                 layer=layer
             )
         else:

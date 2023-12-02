@@ -1,4 +1,5 @@
 import math
+from shapely.geometry import Polygon
 from collections import namedtuple
 from typing import List, Tuple
 
@@ -396,6 +397,9 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+    YELLOW = 0.1
+    WHITE = 0.3
+
     @staticmethod
     def get_color(type):
         """
@@ -411,7 +415,7 @@ class MapTerrainSemanticColor:
         if MetaDriveType.is_yellow_line(type):
             # return (255, 0, 0, 0)
             # return (1, 0, 0, 0)
-            return 0.1
+            return MapTerrainSemanticColor.YELLOW
         elif MetaDriveType.is_lane(type):
             # return (0, 1, 0, 0)
             return 0.2
@@ -420,7 +424,7 @@ class MapTerrainSemanticColor:
             return 0.0
         elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
             # return (0, 0, 0, 1)
-            return 0.3
+            return MapTerrainSemanticColor.WHITE
         elif type == MetaDriveType.CROSSWALK:
             # The range of crosswalk value is 0.4 <= value < 0.76,
             # so people can save the angle (degree) of the crosswalk in attribute map
@@ -469,3 +473,62 @@ class TopDownSemanticColor:
         # else:
         #     raise ValueError("Unsupported type: {}".format(type))
         return ret
+
+
+class TerrainProperty:
+    """
+    Define some constants/properties for the map and terrain
+    """
+    map_region_size = 512
+    terrain_size = 2048
+
+    @classmethod
+    def get_semantic_map_pixel_per_meter(cls):
+        """
+        Get how many pixels are used to represent one-meter
+        Returns: a constant
+
+        """
+        assert cls.terrain_size <= 2048, "Terrain size should be fixed to 2048"
+        return 22 if cls.map_region_size <= 1024 else 11
+
+    @classmethod
+    def point_in_map(cls, point, map_center=None):
+        """
+        Return if the point is in the map region
+        Args:
+            map_center: center point of the map
+            point: 2D point
+
+        Returns: Boolean
+
+        """
+        x_, y_ = point[:2]
+        x = y = cls.map_region_size / 2
+        return -x <= x_ <= x and -y <= y_ <= y
+
+    @classmethod
+    def clip_polygon(cls, polygon, map_center=None):
+        """
+        Clip the Polygon. Make it fit into the map region and throw away the part outside the map region
+        Args:
+            map_center: center point of the map
+            polygon: a list of 2D points
+
+        Returns: A list of polygon or None
+
+        """
+        x = y = cls.map_region_size / 2
+        _rect_polygon = Polygon([(-x, y), (x, y), (x, -y), (-x, -y)])
+        polygon = Polygon(polygon)
+        try:
+            polygon = _rect_polygon.intersection(polygon)
+            # Extract the points of the clipped polygon.
+            if polygon.is_empty:
+                return None
+            else:
+                # Handle cases where the intersection might result in multiple geometries
+                return [list(polygon.exterior.coords)] if isinstance(polygon, Polygon) else \
+                    [list(geom.exterior.coords) for geom in polygon.geoms]
+        except Exception as error:
+            return None

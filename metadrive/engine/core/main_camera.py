@@ -49,6 +49,9 @@ class MainCamera(BaseSensor):
 
         # vehicle chase camera
         self.camera = engine.camera
+        # lens property
+        lens = engine.cam.node().getLens()
+        lens.setFov(engine.global_config["camera_fov"])
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"

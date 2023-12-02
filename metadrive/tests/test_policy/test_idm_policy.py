@@ -31,8 +31,8 @@ def _create_vehicle():
 @pytest.mark.parametrize("use_mesh_terrain", [True, False], ids=["plane", "mesh"])
 def test_idm_policy_briefly(use_mesh_terrain):
     env = MetaDriveEnv({"use_mesh_terrain": use_mesh_terrain})
-    env.reset()
     try:
+        env.reset()
         vehicles = env.engine.traffic_manager.traffic_vehicles
         for v in vehicles:
             policy = IDMPolicy(
@@ -61,9 +61,9 @@ def test_idm_policy_is_moving(use_mesh_terrain, render=False, in_test=True):
     if render:
         config.update({"use_render": True, "manual_control": True})
     env = MetaDriveEnv(config)
-    env.reset(seed=0)
-    last_pos = None
     try:
+        env.reset(seed=0)
+        last_pos = None
         for t in range(100):
             env.step(env.action_space.sample())
             vs = env.engine.traffic_manager.traffic_vehicles

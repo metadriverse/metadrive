@@ -1,8 +1,9 @@
 import logging
 import math
+import time
 from abc import ABC
 from typing import Dict
-
+from metadrive.utils.utils import create_rectangle_from_midpoints
 import numpy as np
 from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletConvexHullShape
@@ -11,7 +12,7 @@ from panda3d.core import LPoint3f
 from panda3d.core import Vec3, LQuaternionf, RigidBodyCombiner, \
     SamplerState, NodePath, Texture
 from panda3d.core import Vec4
-
+from metadrive.constants import TerrainProperty
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.road_network.road import Road
@@ -24,8 +25,12 @@ from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math import norm
 from metadrive.utils.vertex import make_polygon_model
+from metadrive.engine.logger import get_logger
+import warnings
 
-logger = logging.getLogger(__name__)
+warnings.filterwarnings('ignore', 'invalid value encountered in intersection')
+
+logger = get_logger()
 
 
 class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
@@ -82,6 +87,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             self.sidewalk.setTwoSided(False)
             self.sidewalk.setTexture(self.side_texture)
+
+            self.line_seg = make_polygon_model([(-0.5, 0.5), (-0.5, -0.5), (0.5, -0.5), (0.5, 0.5)], 0)
 
     def _sample_topology(self) -> bool:
         """
@@ -230,6 +237,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.lane_line_node_path.flattenStrong()
         self.lane_line_node_path.node().collect()
+        self.lane_line_node_path.hide(CamMask.AllOn)
+        self.lane_line_node_path.show(CamMask.SemanticCam)
 
         self.sidewalk_node_path.flattenStrong()
         self.sidewalk_node_path.node().collect()
@@ -360,34 +369,39 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
             for sidewalk_id, sidewalk in self.sidewalks.items():
-                polygon = sidewalk["polygon"]
-                height = sidewalk.get("height", None)
-                if height is None:
-                    height = PGDrivableAreaProperty.SIDEWALK_THICKNESS
-                z_pos = height / 2
-                np = make_polygon_model(polygon, height)
-                np.reparentTo(self.sidewalk_node_path)
-                np.setPos(0, 0, z_pos)
-                if self.render:
-                    np.setTexture(self.side_texture)
-                # np.setTexture(self.ts_normal, self.side_normal)
+                if len(sidewalk["polygon"]) == 0:
+                    continue
+                polygons = TerrainProperty.clip_polygon(sidewalk["polygon"])
+                if polygons is None:
+                    continue
+                for polygon in polygons:
+                    height = sidewalk.get("height", None)
+                    if height is None:
+                        height = PGDrivableAreaProperty.SIDEWALK_THICKNESS
+                    z_pos = height / 2
+                    np = make_polygon_model(polygon, height)
+                    np.reparentTo(self.sidewalk_node_path)
+                    np.setPos(0, 0, z_pos)
+                    if self.render:
+                        np.setTexture(self.side_texture)
+                    # np.setTexture(self.ts_normal, self.side_normal)
 
-                body_node = BaseRigidBodyNode(None, MetaDriveType.BOUNDARY_SIDEWALK)
-                body_node.setKinematic(False)
-                body_node.setStatic(True)
-                body_np = self.sidewalk_node_path.attachNewNode(body_node)
-                body_np.setPos(0, 0, z_pos)
-                self._node_path_list.append(body_np)
+                    body_node = BaseRigidBodyNode(None, MetaDriveType.BOUNDARY_SIDEWALK)
+                    body_node.setKinematic(False)
+                    body_node.setStatic(True)
+                    body_np = self.sidewalk_node_path.attachNewNode(body_node)
+                    body_np.setPos(0, 0, z_pos)
+                    self._node_path_list.append(body_np)
 
-                geom = np.node().getGeom(0)
-                mesh = BulletTriangleMesh()
-                mesh.addGeom(geom)
-                shape = BulletTriangleMeshShape(mesh, dynamic=False)
+                    geom = np.node().getGeom(0)
+                    mesh = BulletTriangleMesh()
+                    mesh.addGeom(geom)
+                    shape = BulletTriangleMeshShape(mesh, dynamic=False)
 
-                body_node.addShape(shape)
-                self.dynamic_nodes.append(body_node)
-                body_node.setIntoCollideMask(CollisionGroup.Sidewalk)
-                self._node_path_list.append(np)
+                    body_node.addShape(shape)
+                    self.dynamic_nodes.append(body_node)
+                    body_node.setIntoCollideMask(CollisionGroup.Sidewalk)
+                    self._node_path_list.append(np)
 
     def _construct_crosswalk(self):
         """
@@ -395,38 +409,51 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         if self.engine is None or (self.engine.global_config["show_crosswalk"] and not self.engine.use_render_pipeline):
             for cross_id, crosswalk in self.crosswalks.items():
-                polygon = crosswalk["polygon"]
-                np = make_polygon_model(polygon, 0.0)
-                np.reparentTo(self.crosswalk_node_path)
-                np.setPos(0, 0, 0.005)
+                if len(crosswalk["polygon"]) == 0:
+                    continue
+                polygons = TerrainProperty.clip_polygon(crosswalk["polygon"])
+                if polygons is None:
+                    continue
+                for polygon in polygons:
+                    np = make_polygon_model(polygon, 0.0)
+                    np.reparentTo(self.crosswalk_node_path)
+                    np.setPos(0, 0, 0.005)
 
-                body_node = BaseGhostBodyNode(cross_id, MetaDriveType.CROSSWALK)
-                body_node.setKinematic(False)
-                body_node.setStatic(True)
-                body_np = self.crosswalk_node_path.attachNewNode(body_node)
-                # A trick allowing collision with sidewalk
-                body_np.setPos(0, 0, 0.5)
-                self._node_path_list.append(body_np)
+                    body_node = BaseGhostBodyNode(cross_id, MetaDriveType.CROSSWALK)
+                    body_node.setKinematic(False)
+                    body_node.setStatic(True)
+                    body_np = self.crosswalk_node_path.attachNewNode(body_node)
+                    # A trick allowing collision with sidewalk
+                    body_np.setPos(0, 0, 0.5)
+                    self._node_path_list.append(body_np)
 
-                geom = np.node().getGeom(0)
-                mesh = BulletTriangleMesh()
-                mesh.addGeom(geom)
-                shape = BulletTriangleMeshShape(mesh, dynamic=False)
+                    geom = np.node().getGeom(0)
+                    mesh = BulletTriangleMesh()
+                    mesh.addGeom(geom)
+                    shape = BulletTriangleMeshShape(mesh, dynamic=False)
 
-                body_node.addShape(shape)
-                self.static_nodes.append(body_node)
-                body_node.setIntoCollideMask(CollisionGroup.Crosswalk)
-                self._node_path_list.append(np)
+                    body_node.addShape(shape)
+                    self.static_nodes.append(body_node)
+                    body_node.setIntoCollideMask(CollisionGroup.Crosswalk)
+                    self._node_path_list.append(np)
 
     def _construct_lane(self, lane, lane_index):
         """
-        Modified from base class, the width is set to 6.5
+        Construct a physics body for the lane localization
         """
         if lane_index is not None:
             lane.index = lane_index
-        assert lane.polygon is not None, "Polygon is required for building lane"
         # build physics contact
-        if lane.need_lane_localization:
+        if not lane.need_lane_localization:
+            return
+        assert lane.polygon is not None, "Polygon is required for building lane"
+        if self.engine and self.engine.global_config["cull_lanes_outside_map"]:
+            polygons = TerrainProperty.clip_polygon(lane.polygon)
+            if not polygons:
+                return
+        else:
+            polygons = [lane.polygon]
+        for polygon in polygons:
             # It might be Lane surface intersection
             n = BaseRigidBodyNode(lane_index, lane.metadrive_type)
             segment_np = NodePath(n)
@@ -439,7 +466,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             segment_node.setKinematic(False)
             segment_node.setStatic(True)
             shape = BulletConvexHullShape()
-            for point in lane.polygon:
+            for point in polygon:
                 # Panda coordinate is different from metadrive coordinate
                 point_up = LPoint3f(*point, 0.0)
                 shape.addPoint(LPoint3f(*point_up))
@@ -459,13 +486,19 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         length = norm(end_point[0] - start_point[0], end_point[1] - start_point[1])
         middle = (start_point + end_point) / 2
+
+        if not TerrainProperty.point_in_map(middle):
+            return node_path_list
+
         parent_np = self.lane_line_node_path
         if length <= 0:
             return []
         if PGLineType.prohibit(line_type):
-            liane_type = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
+            liane_type = MetaDriveType.LINE_SOLID_SINGLE_WHITE if line_color == PGLineColor.GREY \
+                else MetaDriveType.LINE_SOLID_SINGLE_YELLOW
         else:
-            liane_type = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
+            liane_type = MetaDriveType.LINE_BROKEN_SINGLE_WHITE if line_color == PGLineColor.GREY \
+                else MetaDriveType.LINE_BROKEN_SINGLE_YELLOW
 
         # add bullet body for it
         body_node = BaseGhostBodyNode(None, liane_type)
@@ -480,7 +513,8 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         body_height = PGDrivableAreaProperty.LANE_LINE_GHOST_HEIGHT
         shape = BulletBoxShape(Vec3(length / 2, PGDrivableAreaProperty.LANE_LINE_WIDTH / 4, body_height))
         body_np.node().addShape(shape)
-        mask = PGDrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN else PGDrivableAreaProperty.BROKEN_COLLISION_MASK
+        mask = PGDrivableAreaProperty.CONTINUOUS_COLLISION_MASK if line_type != PGLineType.BROKEN \
+            else PGDrivableAreaProperty.BROKEN_COLLISION_MASK
         body_np.node().setIntoCollideMask(mask)
         self.static_nodes.append(body_np.node())
 
@@ -490,5 +524,22 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         # theta = -numpy.arctan2(direction_v[1], direction_v[0])
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-
+        #
+        # if self.render and not self.use_render_pipeline:
+        #     # For visualization in semantic camera
+        #     polygon = create_rectangle_from_midpoints(start_point, end_point, PGDrivableAreaProperty.LANE_LINE_WIDTH)
+        #     lane_line = make_polygon_model(polygon, height=0)
+        #     lane_line.reparentTo(parent_np)
+        #     lane_line.setPos(0, 0, 0.005)
+        if self.render and not self.use_render_pipeline \
+                and self.engine and self.engine.global_config["build_lane_line_for_semantic_cam"]:
+            # For visualization
+            lane_line = NodePath("line_seg")
+            self.line_seg.instanceTo(lane_line)
+            lane_line.setScale(
+                length, PGDrivableAreaProperty.LANE_LINE_WIDTH, PGDrivableAreaProperty.LANE_LINE_THICKNESS
+            )
+            lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
+            lane_line.setPos(panda_vector(middle, 0.1))
+            lane_line.reparentTo(parent_np)
         return node_path_list

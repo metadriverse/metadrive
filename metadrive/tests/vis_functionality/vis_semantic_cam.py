@@ -1,3 +1,5 @@
+import time
+
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -19,10 +21,15 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "image_observation": False,
+            "num_scenarios": 10,
+            "debug": True,
+            "debug_static_world": True,
+            "map_region_size": 256,
             "norm_pixel": True,
             "show_interface": True,
             "show_sidewalk": True,
             "show_crosswalk": True,
+            "build_lane_line_for_semantic_cam": True,
             "agent_policy": ReplayEgoCarPolicy,
             "interface_panel": ["semantic_camera"],
             "sensors": dict(semantic_camera=(SemanticCamera, 800, 600)),
@@ -30,8 +37,12 @@ if __name__ == "__main__":
             "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
+    start = time.time()
     env.reset(seed=0)
+    print(time.time() - start)
     env.engine.accept("m", get_image, extraArgs=[env])
+
+    # env.engine.current_map.show_bounding_box()
     import cv2
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])

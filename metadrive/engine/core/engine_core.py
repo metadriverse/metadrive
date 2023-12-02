@@ -34,6 +34,7 @@ def _suppress_warning():
     loadPrcFileData("", "notify-level-glgsg fatal")
     loadPrcFileData("", "notify-level-pgraph fatal")
     loadPrcFileData("", "notify-level-pnmimage fatal")
+    loadPrcFileData("", "notify-level-task fatal")
     loadPrcFileData("", "notify-level-thread fatal")
     loadPrcFileData("", "notify-level-bullet fatal")
     loadPrcFileData("", "notify-level-display fatal")
@@ -301,10 +302,6 @@ class EngineCore(ShowBase.ShowBase):
                 self.world_light.attach_to_world(self.render, self.physics_world)
                 self.render.setLight(self.world_light.direction_np)
                 self.render.setLight(self.world_light.ambient_np)
-
-                # lens property
-                lens = self.cam.node().getLens()
-                lens.setFov(self.global_config["camera_fov"])
 
                 # setup pssm shadow
                 self.pssm = PSSM(self)

@@ -1,25 +1,21 @@
-from metadrive.engine.logger import get_logger, reset_logger
-from metadrive.constants import CamMask
-
-from metadrive.version import VERSION, asset_version
 import os
-from metadrive.pull_asset import pull_asset
-from metadrive.constants import RENDER_MODE_NONE, RENDER_MODE_OFFSCREEN, RENDER_MODE_ONSCREEN
 import pickle
 import time
 from collections import OrderedDict
 from typing import Callable, Optional, Union, List, Dict, AnyStr
 
-from collections import deque
 import numpy as np
-from panda3d.core import NodePath, Vec3
 
 from metadrive.base_class.randomizable import Randomizable
+from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
+from metadrive.engine.logger import get_logger, reset_logger
 from metadrive.manager.base_manager import BaseManager
+from metadrive.pull_asset import pull_asset
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
+from metadrive.version import VERSION, asset_version
 
 logger = get_logger()
 
@@ -177,7 +173,7 @@ class BaseEngine(EngineCore, Randomizable):
         assert (len(BaseEngine.COLORS_FREE) > 0)
         my_color = BaseEngine.COLORS_FREE.pop()
         BaseEngine.COLORS_OCCUPIED.add(my_color)
-        #print("After picking:", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
+        # print("After picking:", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
         self.id_c[id] = my_color
         self.c_id[my_color] = id
         return my_color
@@ -196,7 +192,7 @@ class BaseEngine(EngineCore, Randomizable):
             my_color = self.id_c[id]
             BaseEngine.COLORS_OCCUPIED.remove(my_color)
             BaseEngine.COLORS_FREE.add(my_color)
-            #print("After cleaning:,", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
+            # print("After cleaning:,", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
             self.id_c.pop(id)
             self.c_id.pop(my_color)
 
@@ -392,7 +388,8 @@ class BaseEngine(EngineCore, Randomizable):
                 #     self.main_camera.stop_track(bird_view_on_current_position=False)
 
         # reset terrain
-        center_p = self.current_map.get_center_point() if self.current_map else [0, 0]
+        # center_p = self.current_map.get_center_point() if isinstance(self.current_map, PGMap) else [0, 0]
+        center_p = [0, 0]
         self.terrain.reset(center_p)
 
         # init shadow if required
@@ -410,12 +407,12 @@ class BaseEngine(EngineCore, Randomizable):
         for _ in range(5):
             self.graphicsEngine.renderFrame()
 
-        #reset colors
+        # reset colors
         BaseEngine.COLORS_FREE = set(COLOR_SPACE)
         BaseEngine.COLORS_OCCUPIED = set()
         new_i2c = {}
         new_c2i = {}
-        #print("rest objects", len(self.get_objects()))
+        # print("rest objects", len(self.get_objects()))
         for object in self.get_objects().values():
             if object.id in self.id_c.keys():
                 id = object.id
@@ -424,7 +421,7 @@ class BaseEngine(EngineCore, Randomizable):
                 BaseEngine.COLORS_FREE.remove(color)
                 new_i2c[id] = color
                 new_c2i[color] = id
-        #print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
+        # print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
         self.c_id = new_c2i
         self.id_c = new_i2c
 

@@ -24,7 +24,7 @@ def test_map_get_semantic_map(dir="waymo", render=False, show=False):
         for idx in range(default_config["num_scenarios"]):
             engine.seed(idx)
             map = ScenarioMap(map_index=idx)
-            heightfield = map.get_semantic_map(size, res)
+            heightfield = map.get_semantic_map([0, 0], size, res)
             assert heightfield.shape[0] == heightfield.shape[1] == int(size * res)
             if show:
                 cv2.imshow('terrain', heightfield)
@@ -49,7 +49,7 @@ def test_map_get_elevation_map(dir="waymo", render=False, show=False):
         for idx in range(default_config["num_scenarios"]):
             engine.seed(idx)
             map = ScenarioMap(map_index=idx)
-            heightfield = map.get_height_map(size, res, extension=4)
+            heightfield = map.get_height_map([0, 0], size, res, extension=4)
             assert heightfield.shape[0] == heightfield.shape[1] == int(size * res)
             if show:
                 cv2.imshow('terrain', heightfield)
