@@ -120,12 +120,13 @@ class Terrain(BaseObject, ABC):
             )
             heightfield_to_modify = heightfield_base[start:end, start:end, ...]
             heightfield_base[start:end, start:end,
-            ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
                 self._generate_collision_mesh(
-                    heightfield_base if self.full_size_mesh else heightfield_to_modify, self._height_scale)
+                    heightfield_base if self.full_size_mesh else heightfield_to_modify, self._height_scale
+                )
 
             if self.render:
                 # Make semantics for shader terrain
@@ -166,12 +167,12 @@ class Terrain(BaseObject, ABC):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-            self,
-            size,
-            heightfield: Texture,
-            attribute_tex: Texture,
-            target_triangle_width=10,
-            engine=None,
+        self,
+        size,
+        heightfield: Texture,
+        attribute_tex: Texture,
+        target_triangle_width=10,
+        engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -579,6 +580,7 @@ class Terrain(BaseObject, ABC):
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
             semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
         return semantics
+
 
 # Some useful threads
 # GeoMipTerrain:
