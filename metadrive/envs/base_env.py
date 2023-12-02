@@ -211,7 +211,7 @@ BASE_DEFAULT_CONFIG = dict(
     # model compression increasing the launch time
     disable_model_compression=True,
 
-    # ===== Mesh Terrain =====
+    # ===== Terrain =====
     # The size of the square map region, which is centered at [0, 0]. The map objects outside it are culled.
     map_region_size=1024,
     # Whether to remove lanes outside the map region. If True, lane localization only applies to map region
