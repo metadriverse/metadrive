@@ -40,7 +40,7 @@ The second way can not refer to subtitle.
 ### Execution some cells when building doc
 
 The doc is set to disable executing all cells.
-For enabling executing certain cells or a file, set in Cell metadata or file metadata:
+For enabling executing certain cells or a file, set in file metadata:
 ```python
 {
     "mystnb": {
