@@ -31,7 +31,6 @@ METADRIVE_DEFAULT_CONFIG = dict(
         "exit_length": 50,
     },
     store_map=True,
-    map_region_size=1024,  # centered at 0,0. The map out of this will be culled
 
     # ===== Traffic =====
     traffic_density=0.1,

@@ -213,7 +213,9 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Mesh Terrain =====
     # The size of the square map region, which is centered at [0, 0]. The map objects outside it are culled.
-    map_region_size=512,
+    map_region_size=1024,
+    # Whether to remove lanes outside the map region. If True, lane localization only applies to map region
+    cull_lanes_outside_map=False,
     # Road will have a flat marin whose width is determined by this value, unit: [m]
     drivable_area_extension=7,
     # Height scale for mountains, unit: [m]. 0 height makes the terrain flat

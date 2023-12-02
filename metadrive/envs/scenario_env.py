@@ -37,6 +37,8 @@ SCENARIO_ENV_CONFIG = dict(
     store_data=True,
     need_lane_localization=True,
     no_map=False,
+    map_region_size=512,
+    cull_lanes_outside_map=True,
 
     # ===== Scenario =====
     no_traffic=False,  # nothing will be generated including objects/pedestrian/vehicles

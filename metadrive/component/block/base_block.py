@@ -447,9 +447,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         if not lane.need_lane_localization:
             return
         assert lane.polygon is not None, "Polygon is required for building lane"
-        polygons = TerrainProperty.clip_polygon(lane.polygon)
-        if not polygons:
-            return
+        if self.engine.global_config["cull_lanes_outside_map"]:
+            polygons = TerrainProperty.clip_polygon(lane.polygon)
+            if not polygons:
+                return
+        else:
+            polygons = [lane.polygon]
         for polygon in polygons:
             # It might be Lane surface intersection
             n = BaseRigidBodyNode(lane_index, lane.metadrive_type)
