@@ -150,12 +150,12 @@ env.close()
 Please find more details in: https://metadrive-simulator.readthedocs.io
 
 ### Running Examples in Doc
-The documentation is built with `.ipynb` and thus you can run every example locally
+The documentation is built with `.ipynb` so every example can run locally
 or with colab. For Colab running, on the Colab interface, click “GitHub,” enter the URL of MetaDrive:
 https://github.com/metadriverse/metadrive, and hit the search icon.
-After running these examples, you are expected to get the same output and visualization results as the documentation!
+After running examples, you are expected to get the same output and visualization results as the documentation!
 
-For example, hitting the following icon opens the source `.ipynb` file of the documentation section [Environments](https://metadrive-simulator.readthedocs.io/en/latest/rl_environments.html).
+For example, hitting the following icon opens the source `.ipynb` file of the documentation section: [Environments](https://metadrive-simulator.readthedocs.io/en/latest/rl_environments.html).
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/documentation/source/rl_environments.ipynb)
 
