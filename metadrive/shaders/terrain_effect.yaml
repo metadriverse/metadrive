@@ -90,21 +90,22 @@ fragment:
         uniform sampler2D rock_rough;
         
         uniform sampler2D attribute_tex;
+        uniform float grass_tex_ratio;
         
         // just learned that uniform means the variable won't change in each stage, while in/out is able to do that : )
         uniform float elevation_texture_ratio; 
         uniform float height_scale; 
 
     material: |
-        float road_tex_ratio = 32.0 * elevation_texture_ratio;
-        float grass_tex_ratio = 128.0 * elevation_texture_ratio;
+        float road_tex_ratio = 128;
+        float grass_tex_ratio = grass_tex_ratio * 4;
         const float r_min = (1-1/elevation_texture_ratio)/2;
         const float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
         
         vec4 attri;
         if (abs(elevation_texture_ratio - 1) < 0.001) {
             attri = texture(attribute_tex, terrain_uv);
-            road_tex_ratio = road_tex_ratio * 2;}
+        }
         else {
             attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);
         }
