@@ -397,6 +397,8 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+    YELLOW = 0.1
+    WHITE = 0.3
 
     @staticmethod
     def get_color(type):
@@ -413,7 +415,7 @@ class MapTerrainSemanticColor:
         if MetaDriveType.is_yellow_line(type):
             # return (255, 0, 0, 0)
             # return (1, 0, 0, 0)
-            return 0.1
+            return MapTerrainSemanticColor.YELLOW
         elif MetaDriveType.is_lane(type):
             # return (0, 1, 0, 0)
             return 0.2
@@ -422,7 +424,7 @@ class MapTerrainSemanticColor:
             return 0.0
         elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
             # return (0, 0, 0, 1)
-            return 0.3
+            return MapTerrainSemanticColor.WHITE
         elif type == MetaDriveType.CROSSWALK:
             # The range of crosswalk value is 0.4 <= value < 0.76,
             # so people can save the angle (degree) of the crosswalk in attribute map

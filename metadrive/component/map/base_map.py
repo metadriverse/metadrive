@@ -181,14 +181,14 @@ class BaseMap(BaseRunnable, ABC):
 
     # @time_me
     def get_semantic_map(
-        self,
-        center_point,
-        size=512,
-        pixels_per_meter=8,
-        color_setting=MapTerrainSemanticColor,
-        line_sample_interval=2,
-        polyline_thickness=1,
-        layer=("lane_line", "lane")
+            self,
+            center_point,
+            size=512,
+            pixels_per_meter=8,
+            color_setting=MapTerrainSemanticColor,
+            line_sample_interval=2,
+            polyline_thickness=1,
+            layer=("lane_line", "lane")
     ):
         """
         Get semantics of the map for terrain generation
@@ -245,7 +245,9 @@ class BaseMap(BaseRunnable, ABC):
                         int((p[1] - center_p[1]) * pixels_per_meter) + size / 2
                     ] for p in line
                 ]
-                cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, polyline_thickness)
+                thickness = polyline_thickness * 2 if color == MapTerrainSemanticColor.YELLOW else polyline_thickness
+                thickness = min(thickness, 2) # clip
+                cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, thickness)
 
             if "crosswalk" in layer:
                 for id, sidewalk in self.crosswalks.items():
@@ -274,12 +276,12 @@ class BaseMap(BaseRunnable, ABC):
 
     # @time_me
     def get_height_map(
-        self,
-        center_point,
-        size=2048,
-        pixels_per_meter=1,
-        extension=2,
-        height=1,
+            self,
+            center_point,
+            size=2048,
+            pixels_per_meter=1,
+            extension=2,
+            height=1,
     ):
         """
         Get height of the map for terrain generation

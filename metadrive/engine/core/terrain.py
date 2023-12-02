@@ -125,8 +125,7 @@ class Terrain(BaseObject, ABC):
             # generate collision mesh
             if self.use_mesh_terrain:
                 self._generate_collision_mesh(
-                    heightfield_base if self.full_size_mesh else heightfield_to_modify, self._height_scale
-                )
+                    heightfield_base if self.full_size_mesh else heightfield_to_modify, self._height_scale)
 
             if self.render:
                 # Make semantics for shader terrain
