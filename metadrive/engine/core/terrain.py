@@ -57,7 +57,7 @@ class Terrain(BaseObject, ABC):
         # it should include the whole map. Otherwise, road will have no texture!
         self._heightmap_size = self._semantic_map_size = TerrainProperty.map_region_size  # [m]
         self._heightfield_start = int((self._terrain_size - self._heightmap_size) / 2)
-        self._semantic_map_pixel_per_meter = TerrainProperty.semantic_map_pixel_per_meter  # [m]  pixels per meter
+        self._semantic_map_pixel_per_meter = TerrainProperty.get_semantic_map_pixel_per_meter()  # [m]  pixels per meter
         self._terrain_offset = 2055  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
         # pre calculate some variables
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
@@ -120,7 +120,7 @@ class Terrain(BaseObject, ABC):
             )
             heightfield_to_modify = heightfield_base[start:end, start:end, ...]
             heightfield_base[start:end, start:end,
-                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+            ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -167,12 +167,12 @@ class Terrain(BaseObject, ABC):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -571,7 +571,8 @@ class Terrain(BaseObject, ABC):
                 center_point,
                 size=self._semantic_map_size,
                 pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=2,
+                polyline_thickness=int(self._semantic_map_pixel_per_meter / 11),
+                # 1 when map_region_size == 2048, 2 for others
                 layer=layer
             )
         else:
@@ -579,7 +580,6 @@ class Terrain(BaseObject, ABC):
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
             semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
         return semantics
-
 
 # Some useful threads
 # GeoMipTerrain:

@@ -100,7 +100,14 @@ fragment:
         float grass_tex_ratio = 128.0 * elevation_texture_ratio;
         const float r_min = (1-1/elevation_texture_ratio)/2;
         const float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
-        vec4 attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);
+        
+        vec4 attri;
+        if (abs(elevation_texture_ratio - 1) < 0.001) {
+            attri = texture(attribute_tex, terrain_uv);
+            road_tex_ratio = road_tex_ratio * 2;}
+        else {
+            attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);
+        }
         
         vec3 pixel_size = vec3(1.0, -1.0, 0) / textureSize(ShaderTerrainMesh.heightfield, 0).xxx;
         float h_u0 = texture(ShaderTerrainMesh.heightfield, terrain_uv + pixel_size.yz).x * height_scale;
@@ -113,7 +120,7 @@ fragment:
         // normal.x *= -1;
         mat3 tbn = mat3(tangent, binormal, normal);
         
-        if ((attri.r > 0.01) && terrain_uv.x>r_min && terrain_uv.y > r_min && terrain_uv.x<r_max && terrain_uv.y<r_max){
+        if ((attri.r > 0.01) && terrain_uv.x>=r_min && terrain_uv.y >= r_min && terrain_uv.x<=r_max && terrain_uv.y<=r_max){
             float value = attri.r; // Assuming it's a red channel texture
             vec3 diffuse;
             if (value < 0.11) {

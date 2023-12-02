@@ -397,6 +397,7 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         """
@@ -438,6 +439,7 @@ class TopDownSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_lane(type):
@@ -477,8 +479,17 @@ class TerrainProperty:
     Define some constants/properties for the map and terrain
     """
     map_region_size = 512
-    semantic_map_pixel_per_meter = 22
     terrain_size = 2048
+
+    @classmethod
+    def get_semantic_map_pixel_per_meter(cls):
+        """
+        Get how many pixels are used to represent one-meter
+        Returns: a constant
+
+        """
+        assert cls.terrain_size <= 2048, "Terrain size should be fixed to 2048"
+        return 22 if cls.map_region_size <= 1024 else 11
 
     @classmethod
     def point_in_map(cls, point, map_center=None):
