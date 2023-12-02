@@ -66,7 +66,9 @@ python -m metadrive.examples.profile_metadrive
 
 ## 🚕 Examples
 We provide [examples](https://github.com/metadriverse/metadrive/tree/main/metadrive/examples) to demonstrate features and basic usages of MetaDrive after the local installation.
-Or you can run some examples directly in Colab. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb) 
+There is an `.ipynb` example which can be directly opened in Colab. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb)
+
+Also, you can try examples in the documentation directly in Colab! See more details in [Documentations](#-documentations).
 
 ### Single Agent Environment
 Run the following command to launch a simple driving scenario with auto-drive mode on. Press W, A, S, D to drive the vehicle manually.
@@ -145,8 +147,17 @@ env.close()
 
 ## 🏫 Documentations
 
-Find more details in: [MetaDrive](https://metadrive-simulator.readthedocs.io)
+Please find more details in: https://metadrive-simulator.readthedocs.io
 
+### Running Examples in Doc
+The documentation is built with `.ipynb` and thus you can run every example locally
+or with colab. For Colab running, on the Colab interface, click “GitHub,” enter the URL of MetaDrive:
+https://github.com/metadriverse/metadrive, and hit the search icon.
+After running these examples, you are expected to get the same output and visualization results as the documentation!
+
+For example, hitting the following icon opens the source `.ipynb` file of the documentation section [Environments](https://metadrive-simulator.readthedocs.io/en/latest/rl_environments.html).
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/metadriverse/metadrive/blob/main/documentation/source/rl_environments.ipynb)
 
 ## 📎 References
 
