@@ -36,6 +36,7 @@ def _suppress_warning():
     loadPrcFileData("", "notify-level-pnmimage fatal")
     loadPrcFileData("", "notify-level-task fatal")
     loadPrcFileData("", "notify-level-thread fatal")
+    loadPrcFileData("", "notify-level-device fatal")
     loadPrcFileData("", "notify-level-bullet fatal")
     loadPrcFileData("", "notify-level-display fatal")
 
