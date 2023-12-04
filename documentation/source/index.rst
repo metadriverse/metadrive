@@ -53,7 +53,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    :maxdepth: 2
    :caption: Concepts and Customization
 
-   concept.rst
+   system_design.ipynb
    development.rst
    top_down_render.ipynb
    policy.rst
