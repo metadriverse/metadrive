@@ -287,8 +287,8 @@ class EngineCore(ShowBase.ShowBase):
                     use_occlusion_maps=False
                 )
                 self.pbrpipe.render_node = self.pbr_render
-                self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
-                self.pbrpipe._recompile_pbr()
+                # self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
+                # self.pbrpipe._recompile_pbr()
                 # self.pbrpipe.manager.cleanup()
                 #
                 # # filter
