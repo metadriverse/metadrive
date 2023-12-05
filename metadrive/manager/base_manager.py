@@ -17,6 +17,11 @@ class BaseManager(Randomizable):
 
     @property
     def episode_step(self):
+        """
+        Return how many steps are taken from env.reset() to current step
+        Returns:
+
+        """
         return self.engine.episode_step
 
     def before_step(self, *args, **kwargs) -> dict:
