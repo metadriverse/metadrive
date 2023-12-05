@@ -60,6 +60,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    navigation.ipynb
    sensors.ipynb
    gui.ipynb
+   description.ipynb
    record_replay.ipynb
 
 .. toctree::
