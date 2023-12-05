@@ -77,18 +77,57 @@ CONFIG = {
     Error: ('_brightred_', '_brightred_'),
 }
 
+FUNC = {
+    Token: ('', ''),
+    Whitespace: ('gray', 'brightblack'),
+    Comment: ('green', 'green'),
+    Keyword: ('blue', 'brightblue'),
+    Keyword.Type: ('cyan', 'brightcyan'),
+    Operator.Word: ('magenta', 'brightmagenta'),
+    Name: ('black', 'brightcyan'),
+    Name.Attribute: ('magenta', 'brightcyan'),
+    Name.Builtin: ('magenta', 'brightcyan'),
+    Name.Builtin.Pseudo: ('magenta', 'brightcyan'),
+    Name.Class: ('cyan', 'brightcyan'),
+    Name.Constant: ('magenta', 'brightcyan'),
+    Name.Decorator: ('magenta', 'brightcyan'),
+    Name.Entity: ('magenta', 'brightcyan'),
+    Name.Exception: ('magenta', 'brightcyan'),
+    Name.Function: ('magenta', 'brightcyan'),
+    Name.Function.Magic: ('magenta', 'brightcyan'),
+    Name.Property: ('magenta', 'brightcyan'),
+    Name.Label: ('magenta', 'brightcyan'),
+    Name.Namespace: ('magenta', 'brightcyan'),
+    Name.Other: ('green', 'brightcyan'),
+    Name.Tag: ('magenta', 'brightcyan'),
+    Name.Variable: ('black', 'brightcyan'),
+    String: ('yellow', 'yellow'),
+    Number: ('blue', 'blue'),
+    Number.Float: ('green', 'blue'),
+    Punctuation: ('magenta', 'blue'),
+    Generic.Deleted: ('brightred', 'brightred'),
+    Generic.Inserted: ('green', 'brightgreen'),
+    Generic.Heading: ('**', '**'),
+    Generic.Subheading: ('*magenta*', '*brightmagenta*'),
+    Generic.Prompt: ('**', '**'),
+    Generic.Error: ('brightred', 'brightred'),
+    Error: ('_brightred_', '_brightred_'),
+}
 
-def print_source(x, start_end=None, **kwargs):
+
+def print_source(x, start_end=None, colorscheme=FUNC, **kwargs):
     """
     Print the source code of module x
     Args:
+        colorscheme: color scheme of the output
         x: python module
         start_end: a tuple consists of start line content and end line content
     Returns:
 
     """
     code = get_source(x, start_end)
-    print(highlight(code, PythonLexer(), TerminalFormatter(**kwargs)))
+
+    print(highlight(code, PythonLexer(), TerminalFormatter(colorscheme=colorscheme, **kwargs)))
 
 
 def get_source(x, start_end=None):

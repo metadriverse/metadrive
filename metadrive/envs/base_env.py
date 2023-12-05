@@ -449,11 +449,11 @@ class BaseEnv(gym.Env):
 
     # ===== Run-time =====
     def step(self, actions: Union[Union[np.ndarray, list], Dict[AnyStr, Union[list, np.ndarray]], int]):
-        actions = self._preprocess_actions(actions)
-        engine_info = self._step_simulator(actions)
+        actions = self._preprocess_actions(actions)  # preprocess environment input
+        engine_info = self._step_simulator(actions)  # step the simulation
         while self.in_stop:
-            self.engine.taskMgr.step()
-        return self._get_step_return(actions, engine_info=engine_info)
+            self.engine.taskMgr.step()  # pause simulation
+        return self._get_step_return(actions, engine_info=engine_info)  # collect observation, reward, termination
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]) \
             -> Union[np.ndarray, Dict[AnyStr, np.ndarray], int]:
@@ -476,12 +476,13 @@ class BaseEnv(gym.Env):
         return actions
 
     def _step_simulator(self, actions):
-        # Note that we use shallow update for info dict in this function! This will accelerate system.
+        # prepare for stepping the simulation
         scene_manager_before_step_infos = self.engine.before_step(actions)
-        # step all entities
+        # step all entities and the simulator
         self.engine.step(self.config["decision_repeat"])
         # update states, if restore from episode data, position and heading will be force set in update_state() function
         scene_manager_after_step_infos = self.engine.after_step()
+        # Note that we use shallow update for info dict in this function! This will accelerate system.
         return merge_dicts(
             scene_manager_after_step_infos, scene_manager_before_step_infos, allow_new_keys=True, without_copy=True
         )
