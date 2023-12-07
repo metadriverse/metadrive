@@ -772,6 +772,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         # only for visualization detection
         if self.render:
+            debug_static_world = self.engine.global_config["debug_static_world"] and self.engine.global_config["debug"]
             res = rect_region_detection(
                 self.engine,
                 self.position,
@@ -779,7 +780,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 self.LENGTH,
                 self.WIDTH,
                 CollisionGroup.LaneSurface,
-                in_static_world=False
+                in_static_world=not debug_static_world
             )
             if not res.hasHit():
                 contacts.add(MetaDriveType.GROUND)

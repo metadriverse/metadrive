@@ -1,6 +1,6 @@
 from direct.directtools.DirectGeometry import LineNodePath
 from metadrive.engine.asset_loader import AssetLoader
-from panda3d.core import VBase4, NodePath
+from panda3d.core import VBase4, NodePath, Material
 from metadrive.constants import CamMask
 from panda3d.core import LVecBase4f
 
@@ -30,15 +30,15 @@ class ColorLineNodePath(LineNodePath):
         self.create()
 
 
-class ColorSphereNodePath:
+class ColorSphereNodePath(NodePath):
     def __init__(self, parent=None, scale=1):
+        super(ColorSphereNodePath, self).__init__("Point Debugger")
         scale /= 10
         from metadrive.engine.engine_utils import get_engine
         self.scale = scale
         self.engine = get_engine()
-        self.origin = NodePath("Point Debugger")
-        self.origin.hide(CamMask.Shadow)
-        self.origin.reparentTo(self.engine.render if parent is None else parent)
+        self.hide(CamMask.Shadow)
+        self.reparentTo(self.engine.render if parent is None else parent)
         self._existing_points = []
         self._dying_points = []
 
@@ -60,10 +60,16 @@ class ColorSphereNodePath:
                 model = self.engine.loader.loadModel(AssetLoader.file_path("models", "sphere.egg"))
                 model.setScale(self.scale)
                 model.reparentTo(np)
+            material = Material()
             if colors:
-                np.setColor(LVecBase4f(*colors[k]))
+                material.setBaseColor(LVecBase4f(*colors[k]))
+            else:
+                material.setBaseColor(LVecBase4f(1, 1, 1, 1))
+            material.setShininess(64)
+            # material.setEmission((1, 1, 1, 1))
+            np.setMaterial(material, True)
             np.setPos(*point)
-            np.reparentTo(self.origin)
+            np.reparentTo(self)
             self._existing_points.append(np)
 
     def reset(self):
