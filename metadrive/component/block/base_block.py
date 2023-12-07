@@ -242,7 +242,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.sidewalk_node_path.flattenStrong()
         self.sidewalk_node_path.node().collect()
-        self.sidewalk_node_path.hide(CamMask.ScreenshotCam | CamMask.Shadow)
 
         self.crosswalk_node_path.flattenStrong()
         self.crosswalk_node_path.node().collect()

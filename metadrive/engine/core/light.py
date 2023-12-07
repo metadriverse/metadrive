@@ -48,20 +48,6 @@ class Light(BaseObject):
 
         self.ambient_np = NodePath(AmbientLight("Ambient"))
         self.ambient_np.node().setColor(LVector4(0.18, 0.2, 0.2, 1))
-        # self.ambient_np.node().setColor(LVector4(0.8, 0.8, 0.8, 1))
         self.ambient_np.reparentTo(self.origin)
 
         self._node_path_list.append(self.ambient_np)
-
-    def set_pos(self, pos):
-        """
-        Disable sync pos now
-        Args:
-            pos: target light position
-
-        Returns:
-
-        """
-        return
-        self.direction_np.setPos(-100, 100, 120)
-        self.direction_np.lookAt(0, 0, 0)

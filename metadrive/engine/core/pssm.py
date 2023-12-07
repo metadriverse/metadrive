@@ -7,7 +7,7 @@ from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, 
 
 class PSSM:
     """
-    This is the implementation of PSSM for adding shadwo for the scene.
+    This is the implementation of PSSM for adding shadow for the scene.
     It is based on https://github.com/el-dee/panda3d-samples
     """
     def __init__(self, engine):
