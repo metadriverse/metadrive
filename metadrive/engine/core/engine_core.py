@@ -4,6 +4,7 @@ import time
 from typing import Optional, Union, Tuple
 from panda3d.core import Material, LVecBase4
 import gltf
+from simplepbr import init
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
@@ -235,14 +236,14 @@ class EngineCore(ShowBase.ShowBase):
 
         # add element to render and pbr render, if is exists all the time.
         # these element will not be removed when clear_world() is called
-        self.pbr_render = self.render.attachNewNode("pbrNP")
+        self.pbr_render = self.render
 
         # attach node to this root whose children nodes will be clear after calling clear_world()
         self.worldNP = self.render.attachNewNode("world_np")
         self.origin = self.worldNP
 
         # same as worldNP, but this node is only used for render gltf model with pbr material
-        self.pbr_worldNP = self.pbr_render.attachNewNode("pbrNP")
+        self.pbr_worldNP = self.worldNP
         self.debug_node = None
 
         # some render attribute
@@ -272,29 +273,10 @@ class EngineCore(ShowBase.ShowBase):
                 if self.global_config["daytime"] is not None:
                     self.render_pipeline.daytime_mgr.time = self.global_config["daytime"]
             else:
-                from metadrive.engine.core.our_pbr import OurPipeline
-                self.pbrpipe = OurPipeline(
-                    render_node=None,
-                    window=None,
-                    camera_node=None,
-                    msaa_samples=16,
-                    max_lights=8,
-                    use_normal_maps=False,
-                    use_emission_maps=True,
-                    exposure=1.0,
-                    enable_shadows=False,
-                    enable_fog=False,
-                    use_occlusion_maps=False
-                )
-                self.pbrpipe.render_node = self.pbr_render
-                # self.pbrpipe.render_node.set_antialias(AntialiasAttrib.M_auto)
-                # self.pbrpipe._recompile_pbr()
-                # self.pbrpipe.manager.cleanup()
-                #
-                # # filter
-                # from direct.filter.CommonFilters import CommonFilters
-                # self.common_filter = CommonFilters(self.win, self.cam)
-                # self.common_filter.set_gamma_adjust(0.8)
+                self.pbrpipe = init(msaa_samples=16,
+                                    # use_normal_maps=True,
+                                    # enable_shadows=True,
+                                    use_330=False)
 
                 self.sky_box = SkyBox(not self.global_config["show_skybox"])
                 self.sky_box.attach_to_world(self.render, self.physics_world)
@@ -306,10 +288,6 @@ class EngineCore(ShowBase.ShowBase):
 
                 # setup pssm shadow
                 self.pssm = PSSM(self)
-
-                # enable default shaders
-                self.render.setShaderAuto()
-                self.render.setAntialias(AntialiasAttrib.MAuto)
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)

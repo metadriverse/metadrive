@@ -3,7 +3,7 @@ import math
 import time
 from abc import ABC
 from typing import Dict
-from panda3d.core import LVecBase4
+from panda3d.core import LVecBase4, TextureStage
 from metadrive.utils.utils import create_rectangle_from_midpoints
 import numpy as np
 from panda3d.bullet import BulletBoxShape
@@ -238,11 +238,15 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.sidewalk_node_path.flattenStrong()
         self.sidewalk_node_path.node().collect()
-        # self.sidewalk_node_path.setShaderInput("p3d_TextureBaseColor", self.side_texture)
-        # self.sidewalk_node_path.setShaderInput("p3d_TextureNormal", self.side_normal)
-        # material = Material()
-        # material.setBaseColor(LVecBase4(1, 1, 1, 1))
-        # self.sidewalk_node_path.setMaterial(material, True)
+        if self.render:
+            # np.setShaderInput("p3d_TextureBaseColor", self.side_texture)
+            # np.setShaderInput("p3d_TextureNormal", self.side_normal)
+            self.sidewalk_node_path.setTexture(self.side_texture)
+            ts = TextureStage("normal")
+            ts.setMode(TextureStage.MNormal)
+            self.sidewalk_node_path.setTexture(ts, self.side_normal)
+            material = Material()
+            self.sidewalk_node_path.setMaterial(material, True)
 
         self.crosswalk_node_path.flattenStrong()
         self.crosswalk_node_path.node().collect()
@@ -382,9 +386,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                     np = make_polygon_model(polygon, height)
                     np.reparentTo(self.sidewalk_node_path)
                     np.setPos(0, 0, z_pos)
-                    if self.render:
-                        np.setTexture(self.side_texture)
-                    # np.setTexture(self.ts_normal, self.side_normal)
 
                     body_node = BaseRigidBodyNode(None, MetaDriveType.BOUNDARY_SIDEWALK)
                     body_node.setKinematic(False)
