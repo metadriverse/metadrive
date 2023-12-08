@@ -1,13 +1,10 @@
-from metadrive.engine.logger import get_logger
-from direct.filter.FilterManager import FilterManager
-import panda3d.core as p3d
-from simplepbr import _load_shader_str
 from typing import Union, List
-from panda3d.core import FrameBufferProperties
+
 import numpy as np
-from panda3d.core import NodePath, Vec3, Vec4, Camera, PNMImage, Shader, RenderState, ShaderAttrib
+from panda3d.core import NodePath, Vec3, Vec4, Camera
 
 from metadrive.constants import RENDER_MODE_ONSCREEN, BKG_COLOR, RENDER_MODE_NONE
+from metadrive.engine.logger import get_logger
 
 
 class ImageBuffer:
