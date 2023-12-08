@@ -3,12 +3,13 @@ import math
 import time
 from abc import ABC
 from typing import Dict
+from panda3d.core import LVecBase4
 from metadrive.utils.utils import create_rectangle_from_midpoints
 import numpy as np
 from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletTriangleMeshShape, BulletTriangleMesh
-from panda3d.core import LPoint3f
+from panda3d.core import LPoint3f, Material
 from panda3d.core import Vec3, LQuaternionf, RigidBodyCombiner, \
     SamplerState, NodePath, Texture
 from panda3d.core import Vec4
@@ -42,11 +43,11 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
     ID = "B"
 
     def __init__(
-        self,
-        block_index: int,
-        global_network: NodeRoadNetwork,
-        random_seed,
-        ignore_intersection_checking=False,
+            self,
+            block_index: int,
+            global_network: NodeRoadNetwork,
+            random_seed,
+            ignore_intersection_checking=False,
     ):
         super(BaseBlock, self).__init__(str(block_index) + self.ID, random_seed, escape_random_seed_assertion=True)
         # block information
@@ -83,11 +84,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             # self.side_normal.set_format(Texture.F_srgb)
             self.side_normal.setWrapU(Texture.WM_repeat)
             self.side_normal.setWrapV(Texture.WM_repeat)
-
-            self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            self.sidewalk.setTwoSided(False)
-            self.sidewalk.setTexture(self.side_texture)
-
             self.line_seg = make_polygon_model([(-0.5, 0.5), (-0.5, -0.5), (0.5, -0.5), (0.5, 0.5)], 0)
 
     def _sample_topology(self) -> bool:
@@ -97,12 +93,12 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         raise NotImplementedError
 
     def construct_block(
-        self,
-        root_render_np: NodePath,
-        physics_world: PhysicsWorld,
-        extra_config: Dict = None,
-        no_same_node=True,
-        attach_to_world=True
+            self,
+            root_render_np: NodePath,
+            physics_world: PhysicsWorld,
+            extra_config: Dict = None,
+            no_same_node=True,
+            attach_to_world=True
     ) -> bool:
         """
         Randomly Construct a block, if overlap return False
@@ -242,6 +238,11 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.sidewalk_node_path.flattenStrong()
         self.sidewalk_node_path.node().collect()
+        # self.sidewalk_node_path.setShaderInput("p3d_TextureBaseColor", self.side_texture)
+        # self.sidewalk_node_path.setShaderInput("p3d_TextureNormal", self.side_normal)
+        # material = Material()
+        # material.setBaseColor(LVecBase4(1, 1, 1, 1))
+        # self.sidewalk_node_path.setMaterial(material, True)
 
         self.crosswalk_node_path.flattenStrong()
         self.crosswalk_node_path.node().collect()

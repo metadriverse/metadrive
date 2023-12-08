@@ -14,11 +14,11 @@ if __name__ == "__main__":
             "agent_policy": ReplayEgoCarPolicy,
             "manual_control": True,
             "show_interface": True,
-            "debug_static_world": True,
+            # "debug_static_world": True,
             # "need_lane_localization": False,
             # "image_observation": True,
             "show_logo": False,
-            "no_traffic": False,
+            "no_traffic": True,
             "store_data": False,
             "sequential_seed": True,
             # "debug_static_world": True,
@@ -70,6 +70,7 @@ if __name__ == "__main__":
     # for i in range(10):
     start_reset = time.time()
     env.reset(seed=0)
+    env.engine.accept("`", env.engine.terrain.reload_terrain_shader)
 
     reset_used_time += time.time() - start_reset
     reset_num += 1

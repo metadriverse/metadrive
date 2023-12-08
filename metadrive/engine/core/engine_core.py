@@ -2,7 +2,7 @@ import os
 import sys
 import time
 from typing import Optional, Union, Tuple
-
+from panda3d.core import Material, LVecBase4
 import gltf
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
@@ -475,12 +475,13 @@ class EngineCore(ShowBase.ShowBase):
         start_p[1] *= 1
         end_p[1] *= 1
         line_seg = LineSegs("interface")
-        line_seg.setColor(*color)
         line_seg.moveTo(Vec3(*start_p))
         line_seg.drawTo(Vec3(*end_p))
         line_seg.setThickness(thickness)
         np = NodePath(line_seg.create(False))
-        # np.reparentTo(self.render)
+        material = Material()
+        material.setBaseColor(LVecBase4(*color[:3], 1))
+        np.setMaterial(material, True)
         return np
 
     def make_line_drawer(self, parent_node=None, thickness=1.0):
