@@ -238,7 +238,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.sidewalk_node_path.flattenStrong()
         self.sidewalk_node_path.node().collect()
-        if self.render:
+        if self.render and not self.use_render_pipeline:
             # np.setShaderInput("p3d_TextureBaseColor", self.side_texture)
             # np.setShaderInput("p3d_TextureNormal", self.side_normal)
             self.sidewalk_node_path.setTexture(self.side_texture)

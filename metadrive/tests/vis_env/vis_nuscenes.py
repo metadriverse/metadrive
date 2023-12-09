@@ -43,6 +43,7 @@ if __name__ == "__main__":
             "interface_panel": ["semantic"],
             "start_scenario_index": 0,
             "num_scenarios": 10,
+            # "render_pipeline": True,
             # "force_reuse_object_name": True,
             "horizon": 1000,
             "vehicle_config": dict(
