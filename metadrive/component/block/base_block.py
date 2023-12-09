@@ -72,7 +72,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.crosswalks = {}
         self.sidewalks = {}
 
-        if self.render and not self.use_render_pipeline:
+        if self.render:
             # side
             self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
             # self.side_texture.set_format(Texture.F_srgb)
@@ -238,7 +238,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.sidewalk_node_path.flattenStrong()
         self.sidewalk_node_path.node().collect()
-        if self.render and not self.use_render_pipeline:
+        if self.render:
             # np.setShaderInput("p3d_TextureBaseColor", self.side_texture)
             # np.setShaderInput("p3d_TextureNormal", self.side_normal)
             self.sidewalk_node_path.setTexture(self.side_texture)
@@ -371,7 +371,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         Construct the sidewalk with collision shape
         """
-        if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
+        if self.engine is None or (self.engine.global_config["show_sidewalk"]):
             for sidewalk_id, sidewalk in self.sidewalks.items():
                 if len(sidewalk["polygon"]) == 0:
                     continue
