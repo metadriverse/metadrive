@@ -2,7 +2,7 @@
 import panda3d.core as p3d
 
 from panda3d.core import Shader, ConfigVariableString
-from simplepbr import Pipeline, _add_shader_defines, _load_shader_str
+from metadrive.third_party.simplepbr import Pipeline, _add_shader_defines, _load_shader_str
 
 from metadrive.engine.asset_loader import AssetLoader
 

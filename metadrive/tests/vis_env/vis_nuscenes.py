@@ -34,7 +34,7 @@ if __name__ == "__main__":
             },
             # "pstats": True,
             # "use_mesh_terrain": True,
-            "debug": True,
+            # "debug": True,
             "no_static_vehicles": False,
             # "pstats": True,
             # "render_pipeline": True,

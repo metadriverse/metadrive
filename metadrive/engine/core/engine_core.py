@@ -4,7 +4,7 @@ import time
 from typing import Optional, Union, Tuple
 from panda3d.core import Material, LVecBase4
 import gltf
-from simplepbr import init
+from metadrive.third_party.simplepbr import init
 from direct.gui.OnscreenImage import OnscreenImage
 from direct.showbase import ShowBase
 from panda3d.bullet import BulletDebugNode
