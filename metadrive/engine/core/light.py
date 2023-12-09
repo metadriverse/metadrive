@@ -25,7 +25,6 @@ class Light(BaseObject):
         #     # self.direction_np.lookAt(100, -30, 0)
         # else:
         #     self.direction_np.node().setShadowCaster(True, 128, 128)
-        self.direction_np.node().setShadowCaster(True, 128, 128)
 
         # self.direction_np.node().showFrustum()
         # self.light.node().getLens().setNearFar(10, 100)

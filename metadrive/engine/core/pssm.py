@@ -10,6 +10,7 @@ class PSSM:
     This is the implementation of PSSM for adding shadow for the scene.
     It is based on https://github.com/el-dee/panda3d-samples
     """
+
     def __init__(self, engine):
         assert engine.terrain, "terrain should be created before having this shadow"
         assert engine.world_light, "world_light should be created before having this shadow"
@@ -31,11 +32,6 @@ class PSSM:
         self.last_cache_reset = engine.clock.get_frame_time()
         self.depth_tex = None
         self.buffer = None
-
-        # Cast shadow
-        engine.world_light.direction_np.node().set_shadow_caster(True, 256, 256)
-        engine.world_light.direction_np.node().getLens().set_near_far(0, 512)
-        engine.world_light.direction_np.node().getLens().set_film_size(512, 512)
 
     def init(self):
         """

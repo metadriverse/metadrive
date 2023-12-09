@@ -6,10 +6,10 @@ from direct.filter.FilterManager import FilterManager
 
 from .version import __version__
 
-try:
-    from .shaders import shaders
-except ImportError:
-    shaders = None
+# try:
+#     from .shaders import shaders
+# except ImportError:
+shaders = None
 
 
 __all__ = [
@@ -50,7 +50,7 @@ def _load_shader_str(shaderpath, defines=None):
     else:
         shader_dir = os.path.join(os.path.dirname(__file__), 'shaders')
 
-        with open(os.path.join(shader_dir, shaderpath)) as shaderfile:
+        with open(os.path.join(shader_dir, shaderpath+".glsl")) as shaderfile:
             shaderstr = shaderfile.read()
 
     if defines is None:

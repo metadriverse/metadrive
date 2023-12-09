@@ -19,7 +19,7 @@ from metadrive.engine.asset_loader import AssetLoader
 
 
 class OurPipeline(Pipeline):
-    # raise DeprecationWarning("This feature is deprecated now")
+    raise DeprecationWarning("This feature is deprecated now")
 
     def __init__(
         self,
