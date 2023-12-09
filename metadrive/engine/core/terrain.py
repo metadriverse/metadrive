@@ -111,16 +111,22 @@ class Terrain(BaseObject, ABC):
             start = self._heightfield_start
             end = self._heightfield_start + self._heightmap_size
             heightfield_base = np.copy(self.heightfield_img)
-            drivable_area_height_mean = np.mean(
-                self.heightfield_img[start:end, start:end, ...][np.where(drivable_region)]
-            ).astype(np.uint16)
-            heightfield_base = np.where(
-                heightfield_base > (drivable_area_height_mean - self._terrain_offset),
-                heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0
-            )
-            heightfield_to_modify = heightfield_base[start:end, start:end, ...]
-            heightfield_base[start:end, start:end,
-                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+
+            if abs(np.mean(drivable_region) - 0.0) < 1e-3:
+                heightfield_to_modify = heightfield_base[start:end, start:end, ...]
+                logger.warning("No map is found in map region, "
+                               "size: [{}, {}], "
+                               "center: {}".format(self._semantic_map_size, self._semantic_map_size, center_point))
+            else:
+                drivable_area_height_mean = np.mean(
+                    self.heightfield_img[start:end, start:end, ...][np.where(drivable_region)])
+                heightfield_base = np.where(
+                    heightfield_base > (drivable_area_height_mean - self._terrain_offset),
+                    heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0
+                ).astype(np.uint16)
+                heightfield_to_modify = heightfield_base[start:end, start:end, ...]
+                heightfield_base[start:end, start:end, ...] = np.where(drivable_region,
+                                                                       self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -167,12 +173,12 @@ class Terrain(BaseObject, ABC):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -580,7 +586,6 @@ class Terrain(BaseObject, ABC):
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
             semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
         return semantics
-
 
 # Some useful threads
 # GeoMipTerrain:
