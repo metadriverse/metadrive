@@ -12,7 +12,6 @@ class PSSM:
     """
 
     def __init__(self, engine):
-        assert engine.terrain, "terrain should be created before having this shadow"
         assert engine.world_light, "world_light should be created before having this shadow"
 
         # engine
@@ -42,17 +41,8 @@ class PSSM:
         self.create_pssm_camera_rig()
         self.create_pssm_buffer()
         self.attach_pssm_camera_rig()
-        self.set_shader_inputs(self.engine.terrain.mesh_terrain)
+        self.set_shader_inputs(self.engine.render)
         self.engine.task_mgr.add(self.update)
-
-    @property
-    def terrain(self):
-        """
-        Pointer to created mesh terrain
-        Returns: mesh_terrain node path
-
-        """
-        return self.engine.terrain.mesh_terrain
 
     @property
     def directional_light(self):
@@ -70,7 +60,7 @@ class PSSM:
 
         """
         self.use_pssm = not self.use_pssm
-        self.terrain.set_shader_inputs(use_pssm=self.use_pssm)
+        self.engine.render.set_shader_inputs(use_pssm=self.use_pssm)
 
     def toggle_freeze_pssm(self):
         """
@@ -87,7 +77,7 @@ class PSSM:
 
         """
         self.fog = not self.fog
-        self.terrain.set_shader_inputs(fog=self.fog)
+        self.engine.render.set_shader_inputs(fog=self.fog)
 
     def update(self, task):
         """
@@ -102,7 +92,7 @@ class PSSM:
         mvp_array = PTA_LMatrix4()
         for array in src_mvp_array:
             mvp_array.push_back(array)
-        self.terrain.set_shader_inputs(pssm_mvps=mvp_array)
+        self.engine.render.set_shader_inputs(pssm_mvps=mvp_array)
 
         if not self.freeze_pssm:
             # Update the camera position and the light direction
