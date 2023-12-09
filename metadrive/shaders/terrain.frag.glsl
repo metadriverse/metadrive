@@ -166,9 +166,10 @@ void main() {
   shading += vec3(0.07, 0.07, 0.1);
 
 //   dynamic shadow
+  int split = 99;
   if (use_pssm) {
     // Find in which split the current point is present.
-    int split = 99;
+
     float border_bias = 0.5 - (0.5 / (1.0 + border_bias));
 
     // Find the first matching split
@@ -212,5 +213,14 @@ void main() {
     float fog_factor = smoothstep(0, 1, dist / 8000.0);
     shading = mix(shading, vec3(0.7, 0.7, 0.8), fog_factor);
   }
+//   if (split==0){
+//     shading = vec3(1, 0, 0);
+//   }
+//   else if (split==1) {
+//     shading = vec3(0, 1, 0);
+//   }
+//   else{
+//     shading = vec3(0, 0, 1);
+//   }
   color = vec4(shading, 1.0);
 }
