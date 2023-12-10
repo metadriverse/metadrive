@@ -74,11 +74,9 @@ if __name__ == "__main__":
     start_reset = time.time()
     env.reset(seed=0)
 
-
     def reload_shader():
         env.engine.pbrpipe._recompile_pbr()
         env.engine.pssm.set_shader_inputs(env.engine.render)
-
 
     env.engine.accept("`", reload_shader)
     env.engine.accept("9", env.engine.terrain.reload_terrain_shader)

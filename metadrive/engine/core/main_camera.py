@@ -232,7 +232,6 @@ class MainCamera(BaseSensor):
                 self._heading_of_lane(vehicle.navigation.current_ref_lanes[0], vehicle.position) / np.pi * 180 - 90
             )
 
-
         # Don't use reparentTo()
         # pos = vehicle.convert_to_world_coordinates([0.8, 0.], vehicle.position)
         # look_at = vehicle.convert_to_world_coordinates([10.4, 0.], vehicle.position)

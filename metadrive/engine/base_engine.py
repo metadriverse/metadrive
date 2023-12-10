@@ -120,9 +120,7 @@ class BaseEngine(EngineCore, Randomizable):
                 self._object_policies[object_id], policy_cls
             ) else False
 
-    def spawn_object(
-        self, object_class, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
-    ):
+    def spawn_object(self, object_class, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs):
         """
         Call this func to spawn one object
         :param object_class: object class

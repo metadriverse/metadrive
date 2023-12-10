@@ -10,7 +10,6 @@ class PSSM:
     This is the implementation of PSSM for adding shadow for the scene.
     It is based on https://github.com/el-dee/panda3d-samples
     """
-
     def __init__(self, engine):
         assert engine.world_light, "world_light should be created before having this shadow"
 

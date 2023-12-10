@@ -267,10 +267,12 @@ class EngineCore(ShowBase.ShowBase):
                 if self.global_config["daytime"] is not None:
                     self.render_pipeline.daytime_mgr.time = self.global_config["daytime"]
             else:
-                self.pbrpipe = init(msaa_samples=16,
-                                    use_hardware_skinning=True,
-                                    # use_normal_maps=True,
-                                    use_330=False)
+                self.pbrpipe = init(
+                    msaa_samples=16,
+                    use_hardware_skinning=True,
+                    # use_normal_maps=True,
+                    use_330=False
+                )
 
                 self.sky_box = SkyBox(not self.global_config["show_skybox"])
                 self.sky_box.attach_to_world(self.render, self.physics_world)

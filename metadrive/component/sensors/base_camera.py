@@ -142,7 +142,6 @@ class BaseCamera(ImageBuffer, BaseSensor):
             self.attached_object = base_object
             self.origin.reparentTo(base_object.origin)
 
-
     def __del__(self):
         if self.enable_cuda:
             self.unregister()

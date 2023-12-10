@@ -11,12 +11,7 @@ from .version import __version__
 # except ImportError:
 shaders = None
 
-
-__all__ = [
-    'init',
-    'Pipeline'
-]
-
+__all__ = ['init', 'Pipeline']
 
 
 def _add_shader_defines(shaderstr, defines):
@@ -30,18 +25,9 @@ def _add_shader_defines(shaderstr, defines):
         raise RuntimeError('Failed to find GLSL version string')
     shaderlines.remove(version_line)
 
+    define_lines = [f'#define {define} {value}' for define, value in defines.items()]
 
-    define_lines = [
-        f'#define {define} {value}'
-        for define, value in defines.items()
-    ]
-
-    return '\n'.join(
-        [version_line]
-        + define_lines
-        + ['#line 1']
-        + shaderlines
-    )
+    return '\n'.join([version_line] + define_lines + ['#line 1'] + shaderlines)
 
 
 def _load_shader_str(shaderpath, defines=None):
@@ -50,7 +36,7 @@ def _load_shader_str(shaderpath, defines=None):
     else:
         shader_dir = os.path.join(os.path.dirname(__file__), 'shaders')
 
-        with open(os.path.join(shader_dir, shaderpath+".glsl")) as shaderfile:
+        with open(os.path.join(shader_dir, shaderpath + ".glsl")) as shaderfile:
             shaderstr = shaderfile.read()
 
     if defines is None:
@@ -73,23 +59,24 @@ def _load_shader_str(shaderpath, defines=None):
 
     return shaderstr
 
+
 class Pipeline:
     def __init__(
-            self,
-            *,
-            render_node=None,
-            window=None,
-            camera_node=None,
-            taskmgr=None,
-            msaa_samples=4,
-            max_lights=8,
-            use_normal_maps=False,
-            use_emission_maps=True,
-            exposure=1.0,
-            enable_fog=False,
-            use_occlusion_maps=False,
-            use_330=None,
-            use_hardware_skinning=None,
+        self,
+        *,
+        render_node=None,
+        window=None,
+        camera_node=None,
+        taskmgr=None,
+        msaa_samples=4,
+        max_lights=8,
+        use_normal_maps=False,
+        use_emission_maps=True,
+        exposure=1.0,
+        enable_fog=False,
+        use_occlusion_maps=False,
+        use_330=None,
+        use_hardware_skinning=None,
     ):
         if render_node is None:
             render_node = base.render
@@ -145,15 +132,11 @@ class Pipeline:
             self.use_330 = False
 
             cvar = p3d.ConfigVariableInt('gl-version')
-            gl_version = [
-                cvar.get_word(i)
-                for i in range(cvar.get_num_words())
-            ]
+            gl_version = [cvar.get_word(i) for i in range(cvar.get_num_words())]
             if len(gl_version) >= 2 and gl_version[0] >= 3 and gl_version[1] >= 2:
                 # Not exactly accurate, but setting this variable to '3 2' is common for disabling
                 # the fixed-function pipeline and 3.2 support likely means 3.3 support as well.
                 self.use_330 = True
-
 
     def __setattr__(self, name, value):
         if hasattr(self, name):
@@ -171,6 +154,7 @@ class Pipeline:
             'enable_fog',
             'use_occlusion_maps',
         ]
+
         def resetup_tonemap():
             # Destroy previous buffers so we can re-create
             self.manager.cleanup()
@@ -234,7 +218,6 @@ class Pipeline:
                 caster.set_shadow_buffer_size((0, 0))
                 caster.set_shadow_buffer_size(sbuff_size)
 
-
         fbprops = p3d.FrameBufferProperties()
         fbprops.float_color = True
         fbprops.set_rgba_bits(16, 16, 16, 16)
@@ -262,17 +245,9 @@ class Pipeline:
 
     def get_all_casters(self):
         engine = p3d.GraphicsEngine.get_global_ptr()
-        cameras = [
-            dispregion.camera
-            for win in engine.windows
-            for dispregion in win.active_display_regions
-        ]
+        cameras = [dispregion.camera for win in engine.windows for dispregion in win.active_display_regions]
 
-        return [
-            i.node()
-            for i in cameras
-            if hasattr(i.node(), 'is_shadow_caster') and i.node().is_shadow_caster()
-        ]
+        return [i.node() for i in cameras if hasattr(i.node(), 'is_shadow_caster') and i.node().is_shadow_caster()]
 
     def _update(self, task):
         # Use a simpler, faster shader for shadows
@@ -308,6 +283,7 @@ class Pipeline:
 
         check_node_shader(self.render_node)
         check_node_shader(self.tonemap_quad)
+
 
 def init(**kwargs):
     '''Initialize the PBR render pipeline
