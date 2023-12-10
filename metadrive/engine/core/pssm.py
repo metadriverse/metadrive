@@ -116,7 +116,7 @@ class PSSM:
         # Set the distance between the far plane of the frustum and the sun, objects farther do not cas shadows
         self.camera_rig.set_sun_distance(64)
         # Set the logarithmic factor that defines the splits
-        self.camera_rig.set_logarithmic_factor(2.4)
+        self.camera_rig.set_logarithmic_factor(0.8)
 
         self.camera_rig.set_border_bias(self.border_bias)
         # Enable CSM splits snapping to avoid shadows flickering when moving

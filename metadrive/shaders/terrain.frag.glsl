@@ -196,9 +196,16 @@ void main() {
         float ref_depth = projected.z - fixed_bias * 0.001 * (1 + 1.5 * split);
 
         // Check if the pixel is shadowed or not
-        float depth_sample = textureLod(PSSMShadowAtlas, projected_coord, 0).x;
-        float shadow_factor = step(ref_depth, depth_sample);
-
+        float shadow_factor=0.0;
+        float samples = 9.0; // Number of samples
+        float radius = 0.001; // Sample radius
+        for(int x = -1; x <= 1; x++) {
+            for(int y = -1; y <= 1; y++) {
+                float depth_sample = texture2D(PSSMShadowAtlas, projected_coord.xy + vec2(x, y) * radius).r;
+                shadow_factor += step(ref_depth, depth_sample);
+        }
+        }
+        shadow_factor /= samples;
         shading *= shadow_factor;
     }
     }
@@ -219,8 +226,11 @@ void main() {
 //   else if (split==1) {
 //     shading = vec3(0, 1, 0);
 //   }
-//   else{
+//   else if (split==2) {
 //     shading = vec3(0, 0, 1);
+//   }
+//   else{
+//     shading = vec3(0, 1, 1);
 //   }
   color = vec4(shading, 1.0);
 }
