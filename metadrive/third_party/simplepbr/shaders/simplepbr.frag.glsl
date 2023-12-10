@@ -1,6 +1,6 @@
 // Based on code from https://github.com/KhronosGroup/glTF-Sample-Viewer
 
-#version 130
+#version 330
 
 #ifndef MAX_LIGHTS
     #define MAX_LIGHTS 8

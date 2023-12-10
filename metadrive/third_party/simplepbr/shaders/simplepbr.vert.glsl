@@ -1,4 +1,4 @@
-#version 130
+#version 330
 
 #ifndef MAX_LIGHTS
     #define MAX_LIGHTS 8
