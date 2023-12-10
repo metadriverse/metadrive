@@ -33,7 +33,6 @@ class ComplexObjectManager(TrafficObjectManager):
             lane=lane,
             position=lane.position(longitude, lateral),
             heading_theta=lane.heading_theta_at(longitude),
-            pbr_model=False
         )
 
         # part 1

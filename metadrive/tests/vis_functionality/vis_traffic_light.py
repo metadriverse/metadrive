@@ -27,7 +27,7 @@ def vis_traffic_light(render=True, manual_control=False, debug=False):
         # green
         env.reset()
         light = env.engine.spawn_object(
-            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0], pbr_model=True
+            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0]
         )
         light.set_green()
         test_success = False
@@ -43,7 +43,7 @@ def vis_traffic_light(render=True, manual_control=False, debug=False):
 
         # red test
         light = env.engine.spawn_object(
-            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0], pbr_model=True
+            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0]
         )
         light.set_red()
         test_success = False
@@ -53,7 +53,7 @@ def vis_traffic_light(render=True, manual_control=False, debug=False):
         # yellow
         env.reset()
         light = env.engine.spawn_object(
-            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0], pbr_model=True
+            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0]
         )
         light.set_yellow()
         test_success = False

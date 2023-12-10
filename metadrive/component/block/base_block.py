@@ -155,7 +155,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         if not self.is_attached():
             for obj in self._block_objects:
-                obj.attach_to_world(self.engine.pbr_worldNP, physics_world)
+                obj.attach_to_world(self.engine.worldNP, physics_world)
         super(BaseBlock, self).attach_to_world(parent_node_path, physics_world)
 
     def destruct_block(self, physics_world: PhysicsWorld):

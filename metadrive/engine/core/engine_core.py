@@ -234,16 +234,10 @@ class EngineCore(ShowBase.ShowBase):
 
         self.closed = False
 
-        # add element to render and pbr render, if is exists all the time.
-        # these element will not be removed when clear_world() is called
-        self.pbr_render = self.render
-
         # attach node to this root whose children nodes will be clear after calling clear_world()
         self.worldNP = self.render.attachNewNode("world_np")
         self.origin = self.worldNP
 
-        # same as worldNP, but this node is only used for render gltf model with pbr material
-        self.pbr_worldNP = self.worldNP
         self.debug_node = None
 
         # some render attribute
@@ -405,7 +399,6 @@ class EngineCore(ShowBase.ShowBase):
 
     def clear_world(self):
         self.worldNP.removeNode()
-        self.pbr_worldNP.removeNode()
 
     def toggle_help_message(self):
         if self.on_screen_message:
