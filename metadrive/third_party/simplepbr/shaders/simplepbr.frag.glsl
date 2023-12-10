@@ -11,7 +11,7 @@ uniform mat4 p3d_ModelMatrix;
 uniform mat4 p3d_ProjectionMatrix;
 uniform mat4 p3d_ModelViewMatrix;
 in vec4 p3d_Vertex;
-const int split_count=2;
+const int split_count=3;
 uniform sampler2D PSSMShadowAtlas;
 uniform mat4 pssm_mvps[split_count];
 uniform vec2 pssm_nearfar[split_count];

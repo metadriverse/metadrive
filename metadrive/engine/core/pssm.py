@@ -21,7 +21,7 @@ class PSSM:
         self.split_regions = []
 
         # Basic PSSM configuration
-        self.num_splits = 2
+        self.num_splits = 3
         self.split_resolution = 1024
         self.border_bias = 0.058
         self.fixed_bias = 0.5

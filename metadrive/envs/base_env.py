@@ -202,7 +202,7 @@ BASE_DEFAULT_CONFIG = dict(
     # daytime is only available when using render-pipeline
     daytime="19:00",  # use string like "13:40", We usually set this by editor in toolkit
     # Shadow range, unit: [m]
-    shadow_range=32,
+    shadow_range=50,
     # Whether to use multi-thread rendering
     multi_thread_render=True,
     multi_thread_render_mode="Cull",  # or "Cull/Draw"
