@@ -4,6 +4,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.component.sensors.semantic_camera import SemanticCamera
+from metadrive.component.sensors.depth_camera import DepthCamera
 
 NuScenesEnv = ScenarioEnv
 
@@ -18,7 +19,7 @@ if __name__ == "__main__":
             # "need_lane_localization": False,
             # "image_observation": True,
             "show_logo": False,
-            # "no_traffic": True,
+            "no_traffic": True,
             "store_data": False,
             "sequential_seed": True,
             # "debug_static_world": True,
@@ -30,7 +31,8 @@ if __name__ == "__main__":
             "show_crosswalk": True,
             # "show_coordinates": True,
             "sensors": {
-                "semantic": (SemanticCamera, 200, 100)
+                "semantic": (SemanticCamera, 200, 100),
+                "depth": (DepthCamera, 200, 100)
             },
             # "pstats": True,
             # "use_mesh_terrain": True,
@@ -40,7 +42,7 @@ if __name__ == "__main__":
             # "render_pipeline": True,
             "window_size": (1600, 900),
             "camera_dist": 9,
-            "interface_panel": ["semantic"],
+            "interface_panel": ["semantic", "depth"],
             "start_scenario_index": 0,
             "num_scenarios": 10,
             # "force_reuse_object_name": True,
