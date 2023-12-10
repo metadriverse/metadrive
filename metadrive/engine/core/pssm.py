@@ -1,7 +1,7 @@
 from panda3d._rplight import PSSMCameraRig
 from metadrive.constants import CamMask
 from panda3d.core import PTA_LMatrix4
-from panda3d.core import Texture
+from panda3d.core import Texture, SamplerState
 from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsOutput
 
 
@@ -135,9 +135,10 @@ class PSSM:
 
         """
         self.depth_tex = Texture("PSSMShadowMap")
-        self.buffer = self.create_render_buffer(
-            self.split_resolution * self.num_splits, self.split_resolution, 32, self.depth_tex
-        )
+        self.depth_tex.setFormat(Texture.FDepthComponent)
+        self.depth_tex.setMinfilter(SamplerState.FTShadow)
+        self.depth_tex.setMagfilter(SamplerState.FTShadow)
+        self.buffer = self.create_render_buffer(self.split_resolution * self.num_splits, self.split_resolution, 32)
 
         # Remove all unused display regions
         self.buffer.remove_all_display_regions()
@@ -192,7 +193,7 @@ class PSSM:
             light_direction=self.engine.world_light.direction_pos
         )
 
-    def create_render_buffer(self, size_x, size_y, depth_bits, depth_tex):
+    def create_render_buffer(self, size_x, size_y, depth_bits):
         """
         Boilerplate code to create a render buffer producing only a depth texture
         Args:
