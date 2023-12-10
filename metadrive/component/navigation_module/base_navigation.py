@@ -23,6 +23,7 @@ class BaseNavigation:
     CKPT_UPDATE_RANGE = 5
     FORCE_CALCULATE = False
     LINE_TO_DEST_HEIGHT = 0.6
+    MARK_HEIGHT = 1.2
 
     def __init__(
         self,
@@ -56,6 +57,8 @@ class BaseNavigation:
             self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
         )
         self.origin = NodePath("navigation_sign") if self._show_navi_info else None
+        self.origin.clearShader()
+        self.origin.setShaderAuto()
         if panda_color is not None:
             assert len(panda_color) == 3 and 0 <= panda_color[0] <= 1
             self.navi_mark_color = tuple(panda_color)

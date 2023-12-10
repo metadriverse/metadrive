@@ -65,9 +65,10 @@ if __name__ == "__main__":
                 # "show_lane_line_detector": True,
                 # "side_detector": dict(num_lasers=2, distance=50),
                 # "lane_line_detector": dict(num_lasers=2, distance=50),
-                # "show_line_to_navi_mark": True,
-                "show_navi_mark": False,
-                # "show_dest_mark": True
+                "show_line_to_navi_mark": True,
+                "show_line_to_dest": True,
+                "show_navi_mark": True,
+                "show_dest_mark": True
             },
         }
     )
