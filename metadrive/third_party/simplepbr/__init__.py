@@ -86,7 +86,6 @@ class Pipeline:
             use_normal_maps=False,
             use_emission_maps=True,
             exposure=1.0,
-            enable_shadows=False,
             enable_fog=False,
             use_occlusion_maps=False,
             use_330=None,
@@ -111,7 +110,6 @@ class Pipeline:
         self.max_lights = max_lights
         self.use_normal_maps = use_normal_maps
         self.use_emission_maps = use_emission_maps
-        self.enable_shadows = enable_shadows
         self.enable_fog = enable_fog
         self.exposure = exposure
         self.msaa_samples = msaa_samples
@@ -170,7 +168,6 @@ class Pipeline:
             'max_lights',
             'use_normal_maps',
             'use_emission_maps',
-            'enable_shadows',
             'enable_fog',
             'use_occlusion_maps',
         ]
@@ -205,8 +202,6 @@ class Pipeline:
             pbr_defines['USE_NORMAL_MAP'] = ''
         if self.use_emission_maps:
             pbr_defines['USE_EMISSION_MAP'] = ''
-        if self.enable_shadows:
-            pbr_defines['ENABLE_SHADOWS'] = ''
         if self.enable_fog:
             pbr_defines['ENABLE_FOG'] = ''
         if self.use_occlusion_maps:
@@ -332,8 +327,6 @@ def init(**kwargs):
     :type use_emission_maps: bool
     :param exposure: a value used to multiply the screen-space color value prior to tonemapping, defaults to 1.0
     :type exposure: float
-    :param enable_shadows: Enable shadow map support (breaks with point lights), defaults to False
-    :type enable_shadows: bool
     :param enable_fog: Enable exponential fog, defaults to False
     :type enable_fog: bool
     :param use_occlusion_maps: Use occlusion maps, defaults to `False` (NOTE: Requires occlusion channel in

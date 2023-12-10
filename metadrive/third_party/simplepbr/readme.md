@@ -1,4 +1,4 @@
-### We build a simple-pbr rendering pipeline based on this open-sourced project
+### We build a simple-pbr rendering pipeline based on this open-sourced project. Shaders are converted from shaders.py and stored in shaders
 
 ---
 
@@ -81,8 +81,6 @@ The `init()` function will choose typical defaults, but the following can be mod
 `use_occlusion_maps`
 : Use occlusion maps, defaults to `False` (NOTE: Requires occlusion channel in metal-roughness map)
 
-`enable_shadows`
-: Enable shadow map support, defaults to `True`
 
 `enable_fog`
 : Enable exponential fog, defaults to False

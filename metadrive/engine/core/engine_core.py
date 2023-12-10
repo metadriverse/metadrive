@@ -275,7 +275,6 @@ class EngineCore(ShowBase.ShowBase):
             else:
                 self.pbrpipe = init(msaa_samples=16,
                                     # use_normal_maps=True,
-                                    # enable_shadows=True,
                                     use_330=False)
 
                 self.sky_box = SkyBox(not self.global_config["show_skybox"])
@@ -287,7 +286,10 @@ class EngineCore(ShowBase.ShowBase):
                 self.render.setLight(self.world_light.ambient_np)
 
                 # setup pssm shadow
-                self.pssm = PSSM(self)
+                # init shadow if required
+                if self.global_config["show_terrain"] and not self.global_config["debug_physics_world"]:
+                    self.pssm = PSSM(self)
+                    self.pssm.init()
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)

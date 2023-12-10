@@ -392,11 +392,6 @@ class BaseEngine(EngineCore, Randomizable):
         center_p = [0, 0]
         self.terrain.reset(center_p)
 
-        # init shadow if required
-        if hasattr(self, "pssm") and self.pssm.buffer is None and self.global_config["show_terrain"] \
-                and not self.global_config["debug_physics_world"]:
-            self.pssm.init()
-
         # move skybox
         if self.sky_box is not None:
             self.sky_box.set_position(center_p)

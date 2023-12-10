@@ -1,10 +1,23 @@
 // Based on code from https://github.com/KhronosGroup/glTF-Sample-Viewer
 
-#version 120
+#version 130
 
 #ifndef MAX_LIGHTS
     #define MAX_LIGHTS 8
 #endif
+
+// shadow
+uniform mat4 p3d_ModelMatrix;
+uniform mat4 p3d_ProjectionMatrix;
+uniform mat4 p3d_ModelViewMatrix;
+in vec4 p3d_Vertex;
+const int split_count=2;
+uniform sampler2D PSSMShadowAtlas;
+uniform mat4 pssm_mvps[split_count];
+uniform vec2 pssm_nearfar[split_count];
+uniform float border_bias;
+uniform float fixed_bias;
+uniform bool use_pssm;
 
 uniform struct p3d_MaterialParameters {
     vec4 baseColor;
@@ -20,10 +33,6 @@ uniform struct p3d_LightSourceParameters {
     vec3 attenuation;
     vec3 spotDirection;
     float spotCosCutoff;
-#ifdef ENABLE_SHADOWS
-    sampler2DShadow shadowMap;
-    mat4 shadowViewMatrix;
-#endif
 } p3d_LightSource[MAX_LIGHTS];
 
 uniform struct p3d_LightModelParameters {
@@ -63,17 +72,21 @@ const float PI = 3.141592653589793;
 const float SPOTSMOOTH = 0.001;
 const float LIGHT_CUTOFF = 0.001;
 
-varying vec3 v_position;
-varying vec4 v_color;
-varying vec2 v_texcoord;
-varying mat3 v_tbn;
-#ifdef ENABLE_SHADOWS
-varying vec4 v_shadow_pos[MAX_LIGHTS];
-#endif
+in vec3 v_position;
+in vec4 shadow_vtx_pos;
+in vec4 v_color;
+in vec2 v_texcoord;
+in mat3 v_tbn;
+out vec4 FragColor;
 
 #ifdef USE_330
 out vec4 o_color;
 #endif
+
+vec3 project(mat4 mvp, vec4 p) {
+    vec4 projected = mvp * p;
+    return (projected.xyz / projected.w) * vec3(0.5) + vec3(0.5);
+}
 
 // Schlick's Fresnel approximation with Spherical Gaussian approximation to replace the power
 vec3 specular_reflection(FunctionParamters func_params) {
@@ -139,7 +152,8 @@ void main() {
 #endif
 
     vec4 color = vec4(vec3(0.0), base_color.a) + p3d_TexAlphaOnly;
-
+    // shadow split
+    int split=99;
     for (int i = 0; i < p3d_LightSource.length(); ++i) {
         vec3 lightcol = p3d_LightSource[i].diffuse.rgb;
 
@@ -156,15 +170,47 @@ void main() {
         float spotcos = dot(normalize(p3d_LightSource[i].spotDirection), -l);
         float spotcutoff = p3d_LightSource[i].spotCosCutoff;
         float shadowSpot = smoothstep(spotcutoff-SPOTSMOOTH, spotcutoff+SPOTSMOOTH, spotcos);
-#ifdef ENABLE_SHADOWS
-#ifdef USE_330
-        float shadowCaster = textureProj(p3d_LightSource[i].shadowMap, v_shadow_pos[i]);
-#else
-        float shadowCaster = shadow2DProj(p3d_LightSource[i].shadowMap, v_shadow_pos[i]).r;
-#endif
-#else
+
         float shadowCaster = 1.0;
-#endif
+//         vec4 shadow_vtx_pos = p3d_Vertex;
+        if (use_pssm) {
+            // Find in which split the current point is present.
+            split=99;
+            float border_bias = 0.5 - (0.5 / (1.0 + border_bias));
+
+            // Find the first matching split
+            for (int i = 0; i < split_count; ++i) {
+                vec3 coord = project(pssm_mvps[i], shadow_vtx_pos);
+                if (coord.x >= border_bias && coord.x <= 1 - border_bias &&
+                    coord.y >= border_bias && coord.y <= 1 - border_bias &&
+                    coord.z >= 0.0 && coord.z <= 1.0) {
+                    split = i;
+                    break;
+                }
+            }
+
+            // Compute the shadowing factor
+            if (split < split_count) {
+
+                // Get the MVP for the current split
+                mat4 mvp = pssm_mvps[split];
+
+                // Project the current pixel to the view of the light
+                vec3 projected = project(mvp, shadow_vtx_pos);
+                vec2 projected_coord = vec2((projected.x + split) / float(split_count), projected.y);
+                // Apply a fixed bias based on the current split to diminish the shadow acne
+                float ref_depth = projected.z - fixed_bias * 0.001 * (1 + 1.5 * split);
+
+                // Check if the pixel is shadowed or not
+                float depth_sample = textureLod(PSSMShadowAtlas, projected_coord, 0).x;
+                shadowCaster = step(ref_depth, depth_sample);
+            }
+//             else{
+//                 shadowCaster = .0;
+//             }
+        }
+
+
         float shadow = shadowSpot * shadowCaster * attenuation_factor;
 
         FunctionParamters func_params;
@@ -197,10 +243,19 @@ void main() {
     float fog_factor = clamp(1.0 / exp(fog_distance * p3d_Fog.density), 0.0, 1.0);
     color = mix(p3d_Fog.color, color, fog_factor);
 #endif
-
-#ifdef USE_330
-    o_color = color;
-#else
-    gl_FragColor = color;
-#endif
+//
+// vec3 shading;
+//
+// if (split==0){
+// shading = vec3(1, 0, 0);
+// }
+// else if (split==1) {
+// shading = vec3(0, 1, 0);
+// }
+// else{
+// shading = vec3(0, 0, 1);
+// }
+//
+// FragColor = vec4(shading, 1);
+FragColor = color;
 }
