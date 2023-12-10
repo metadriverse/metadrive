@@ -21,8 +21,8 @@ class PSSM:
         self.split_regions = []
 
         # Basic PSSM configuration
-        self.num_splits = 3
-        self.split_resolution = 512
+        self.num_splits = 2
+        self.split_resolution = 1024
         self.border_bias = 0.058
         self.fixed_bias = 0.5
         self.use_pssm = True
@@ -116,7 +116,7 @@ class PSSM:
         # Set the distance between the far plane of the frustum and the sun, objects farther do not cas shadows
         self.camera_rig.set_sun_distance(64)
         # Set the logarithmic factor that defines the splits
-        self.camera_rig.set_logarithmic_factor(0.8)
+        self.camera_rig.set_logarithmic_factor(0.2)
 
         self.camera_rig.set_border_bias(self.border_bias)
         # Enable CSM splits snapping to avoid shadows flickering when moving

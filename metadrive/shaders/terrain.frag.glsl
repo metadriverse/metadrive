@@ -1,7 +1,7 @@
 #version 330
 
 // Number of splits in the PSSM, it must be in line with what is configured in the PSSMCameraRig
-const int split_count=3;
+const int split_count=2;
 uniform  vec3 light_direction;
 
 uniform mat3 p3d_NormalMatrix;
@@ -197,10 +197,10 @@ void main() {
 
         // Check if the pixel is shadowed or not
         float shadow_factor=0.0;
-        float samples = 25.0; // Number of samples
+        float samples = 9.0; // Number of samples
         float radius = 0.001; // Sample radius
-        for(int x = -2; x <= 2; x++) {
-            for(int y = -2; y <= 2; y++) {
+        for(int x = -1; x <= 1; x++) {
+            for(int y = -1; y <= 1; y++) {
                 float depth_sample = texture2D(PSSMShadowAtlas, projected_coord.xy + vec2(x, y) * radius).r;
                 shadow_factor += step(ref_depth, depth_sample);
         }

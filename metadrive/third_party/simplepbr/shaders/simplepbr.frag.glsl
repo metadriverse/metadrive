@@ -11,7 +11,7 @@ uniform mat4 p3d_ModelMatrix;
 uniform mat4 p3d_ProjectionMatrix;
 uniform mat4 p3d_ModelViewMatrix;
 in vec4 p3d_Vertex;
-const int split_count=3;
+const int split_count=2;
 uniform sampler2D PSSMShadowAtlas;
 uniform mat4 pssm_mvps[split_count];
 uniform vec2 pssm_nearfar[split_count];
@@ -203,10 +203,10 @@ void main() {
 
                 // Check if the pixel is shadowed or not
                 float shadow_factor=0.0;
-                float samples = 25.0; // Number of samples
+                float samples = 9.0; // Number of samples
                 float radius = 0.001; // Sample radius
-                for(int x = -2; x <= 2; x++) {
-                    for(int y = -2; y <= 2; y++) {
+                for(int x = -1; x <= 1; x++) {
+                    for(int y = -1; y <= 1; y++) {
                         float depth_sample = texture2D(PSSMShadowAtlas, projected_coord.xy + vec2(x, y) * radius).r;
                         shadow_factor += step(ref_depth, depth_sample);
                 }

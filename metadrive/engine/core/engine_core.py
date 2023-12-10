@@ -274,6 +274,7 @@ class EngineCore(ShowBase.ShowBase):
                     self.render_pipeline.daytime_mgr.time = self.global_config["daytime"]
             else:
                 self.pbrpipe = init(msaa_samples=16,
+                                    use_hardware_skinning=True,
                                     # use_normal_maps=True,
                                     use_330=False)
 
