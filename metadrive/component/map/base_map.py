@@ -153,9 +153,9 @@ class BaseMap(BaseRunnable, ABC):
             lateral_end = lane.position(0, 2)
 
             long_end = long_start + lane.heading_at(0) * 4
-            np_y = self.engine._draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=2)
+            np_y = self.engine._draw_line_3d(Vec3(*long_start, 0), Vec3(*long_end, 0), color=[0, 1, 0, 1], thickness=3)
             np_x = self.engine._draw_line_3d(
-                Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=2
+                Vec3(*lateral_start, 0), Vec3(*lateral_end, 0), color=[1, 0, 0, 1], thickness=3
             )
             np_x.reparentTo(self.lane_coordinates_debug_node)
             np_y.reparentTo(self.lane_coordinates_debug_node)

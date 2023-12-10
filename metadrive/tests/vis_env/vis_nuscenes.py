@@ -13,7 +13,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
+            # "manual_control": True,
             "show_interface": True,
             # "debug_static_world": True,
             # "need_lane_localization": False,
@@ -29,7 +29,7 @@ if __name__ == "__main__":
             "show_fps": True,
             "show_sidewalk": True,
             "show_crosswalk": True,
-            # "show_coordinates": True,
+            "show_coordinates": True,
             "sensors": {
                 "semantic": (SemanticCamera, 200, 100),
                 "depth": (DepthCamera, 200, 100),
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             "camera_dist": 9,
             "interface_panel": ["rgb", "semantic", "depth"],
             "start_scenario_index": 0,
-            "num_scenarios": 10,
+            "num_scenarios": 1,
             # "force_reuse_object_name": True,
             "horizon": 1000,
             "vehicle_config": dict(
