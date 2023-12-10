@@ -22,7 +22,7 @@ class PSSM:
 
         # Basic PSSM configuration
         self.num_splits = 3
-        self.split_resolution = 1024
+        self.split_resolution = 512
         self.border_bias = 0.058
         self.fixed_bias = 0.5
         self.use_pssm = True
