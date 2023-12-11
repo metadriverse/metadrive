@@ -284,7 +284,7 @@ class EngineCore(ShowBase.ShowBase):
 
                 # setup pssm shadow
                 # init shadow if required
-                if self.global_config["show_terrain"] and not self.global_config["debug_physics_world"]:
+                if not self.global_config["debug_physics_world"]:
                     self.pssm = PSSM(self)
                     self.pssm.init()
 
