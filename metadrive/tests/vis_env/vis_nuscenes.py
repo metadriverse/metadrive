@@ -23,6 +23,7 @@ if __name__ == "__main__":
             # "no_traffic": True,
             "store_data": False,
             "sequential_seed": True,
+            "pstats": True,
             # "debug_static_world": True,
             # "sequential_seed": True,
             # "reactive_traffic": True,
