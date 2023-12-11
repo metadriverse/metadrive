@@ -40,7 +40,7 @@ if __name__ == "__main__":
             "debug": True,
             # "no_static_vehicles": False,
             # "pstats": True,
-            "render_pipeline": True,
+            # "render_pipeline": True,
             "window_size": (1600, 900),
             "camera_dist": 9,
             # "interface_panel": ["rgb", "semantic", "depth"],
