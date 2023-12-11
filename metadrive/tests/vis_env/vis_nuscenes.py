@@ -1,4 +1,5 @@
 import time
+from panda3d.core import PNMImage
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -13,7 +14,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            # "manual_control": True,
+            "manual_control": True,
             "show_interface": True,
             # "debug_static_world": True,
             # "need_lane_localization": False,
@@ -40,12 +41,12 @@ if __name__ == "__main__":
             "debug": True,
             # "no_static_vehicles": False,
             # "pstats": True,
-            "render_pipeline": True,
-            "window_size": (1600, 900),
+            # "render_pipeline": True,
+            # "window_size": (1600, 900),
             "camera_dist": 9,
             # "interface_panel": ["rgb", "semantic", "depth"],
             "start_scenario_index": 0,
-            "num_scenarios": 1,
+            "num_scenarios": 10,
             # "force_reuse_object_name": True,
             "horizon": 1000,
             "vehicle_config": dict(

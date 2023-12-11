@@ -16,7 +16,7 @@ uniform sampler2D PSSMShadowAtlas;
 uniform mat4 pssm_mvps[split_count];
 uniform vec2 pssm_nearfar[split_count];
 uniform float border_bias;
-uniform float fixed_bias;
+const float fixed_bias=10; // trick absolutely remove self-shading
 uniform bool use_pssm;
 
 uniform struct p3d_MaterialParameters {
