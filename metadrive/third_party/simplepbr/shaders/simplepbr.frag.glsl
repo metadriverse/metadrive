@@ -252,9 +252,8 @@ void main() {
     float fog_factor = clamp(1.0 / exp(fog_distance * p3d_Fog.density), 0.0, 1.0);
     color = mix(p3d_Fog.color, color, fog_factor);
 #endif
-//
+
 // vec3 shading;
-//
 // if (split==0){
 // shading = vec3(1, 0, 0);
 // }
