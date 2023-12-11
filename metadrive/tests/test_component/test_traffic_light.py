@@ -25,9 +25,7 @@ def test_traffic_light(render=False, manual_control=False, debug=False):
     try:
         # green
         env.reset()
-        light = env.engine.spawn_object(
-            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0], pbr_model=False
-        )
+        light = env.engine.spawn_object(BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0])
         light.set_green()
         test_success = False
         for s in range(1, 100):
@@ -39,9 +37,7 @@ def test_traffic_light(render=False, manual_control=False, debug=False):
         light.destroy()
 
         # red test
-        light = env.engine.spawn_object(
-            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0], pbr_model=False
-        )
+        light = env.engine.spawn_object(BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0])
         light.set_red()
         test_success = False
         for s in range(1, 100):
@@ -53,9 +49,7 @@ def test_traffic_light(render=False, manual_control=False, debug=False):
         light.destroy()
         # yellow
         env.reset()
-        light = env.engine.spawn_object(
-            BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0], pbr_model=False
-        )
+        light = env.engine.spawn_object(BaseTrafficLight, lane=env.current_map.road_network.graph[">>>"]["1X1_0_"][0])
         light.set_yellow()
         test_success = False
         for s in range(1, 100):

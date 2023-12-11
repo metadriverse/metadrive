@@ -111,16 +111,25 @@ class Terrain(BaseObject, ABC):
             start = self._heightfield_start
             end = self._heightfield_start + self._heightmap_size
             heightfield_base = np.copy(self.heightfield_img)
-            drivable_area_height_mean = np.mean(
-                self.heightfield_img[start:end, start:end, ...][np.where(drivable_region)]
-            ).astype(np.uint16)
-            heightfield_base = np.where(
-                heightfield_base > (drivable_area_height_mean - self._terrain_offset),
-                heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0
-            )
-            heightfield_to_modify = heightfield_base[start:end, start:end, ...]
-            heightfield_base[start:end, start:end,
-                             ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+
+            if abs(np.mean(drivable_region) - 0.0) < 1e-3:
+                heightfield_to_modify = heightfield_base[start:end, start:end, ...]
+                logger.warning(
+                    "No map is found in map region, "
+                    "size: [{}, {}], "
+                    "center: {}".format(self._semantic_map_size, self._semantic_map_size, center_point)
+                )
+            else:
+                drivable_area_height_mean = np.mean(
+                    self.heightfield_img[start:end, start:end, ...][np.where(drivable_region)]
+                )
+                heightfield_base = np.where(
+                    heightfield_base > (drivable_area_height_mean - self._terrain_offset),
+                    heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0
+                ).astype(np.uint16)
+                heightfield_to_modify = heightfield_base[start:end, start:end, ...]
+                heightfield_base[start:end, start:end,
+                                 ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -247,6 +256,7 @@ class Terrain(BaseObject, ABC):
             self._mesh_terrain.set_shader_input("rock_tex", self.rock_tex)
             self._mesh_terrain.set_shader_input("rock_normal", self.rock_normal)
             self._mesh_terrain.set_shader_input("rock_rough", self.rock_rough)
+            self._mesh_terrain.set_shader_input("rock_tex_ratio", self.rock_tex_ratio)
 
             self._mesh_terrain.set_shader_input("road_tex", self.road_texture)
             self._mesh_terrain.set_shader_input("yellow_tex", self.yellow_lane_line)
@@ -381,29 +391,29 @@ class Terrain(BaseObject, ABC):
         self.ts_normal.setMode(TextureStage.M_normal)
 
         # grass
-        if engine.use_render_pipeline:
-            # grass
-            self.grass_tex = self.loader.loadTexture(
-                AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
-            )
-            self.grass_normal = self.loader.loadTexture(
-                AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
-            )
-            self.grass_rough = self.loader.loadTexture(
-                AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
-            )
-            self.grass_tex_ratio = 128.0
-        else:
-            self.grass_tex = self.loader.loadTexture(
-                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
-            )
-            self.grass_normal = self.loader.loadTexture(
-                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_NRM_1K.jpg")
-            )
-            self.grass_rough = self.loader.loadTexture(
-                AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_BUMP_1K.jpg")
-            )
-            self.grass_tex_ratio = 64.0
+        # if engine.use_render_pipeline:
+        #     # grass
+        #     self.grass_tex = self.loader.loadTexture(
+        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
+        #     )
+        #     self.grass_normal = self.loader.loadTexture(
+        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
+        #     )
+        #     self.grass_rough = self.loader.loadTexture(
+        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+        #     )
+        #     self.grass_tex_ratio = 128.0
+        # else:
+        self.grass_tex = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
+        )
+        self.grass_normal = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_NRM_1K.jpg")
+        )
+        self.grass_rough = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+        )
+        self.grass_tex_ratio = 64
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -425,6 +435,7 @@ class Terrain(BaseObject, ABC):
         self.rock_rough = self.loader.loadTexture(
             AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_rough_1k.png")
         )
+        self.rock_tex_ratio = 128
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror

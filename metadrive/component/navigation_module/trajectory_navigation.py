@@ -128,13 +128,13 @@ class TrajectoryNavigation(BaseNavigation):
 
         # target_road_1 is the road segment the vehicle is driving on.
         self._navi_info.fill(0.0)
-        for k, ckpt in enumerate(ckpts):
+        for k, ckpt in enumerate(ckpts[1:]):
             start = k * self.CHECK_POINT_INFO_DIM
             end = (k + 1) * self.CHECK_POINT_INFO_DIM
             self._navi_info[start:end], lanes_heading = self._get_info_for_checkpoint(ckpt, ego_vehicle)
             if self._show_navi_info and self._ckpt_vis_models is not None:
                 pos_of_goal = ckpt
-                self._ckpt_vis_models[k].setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], 1.8))
+                self._ckpt_vis_models[k].setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], self.MARK_HEIGHT))
                 self._ckpt_vis_models[k].setH(self._goal_node_path.getH() + 3)
 
         self._navi_info[end] = clip((lat / self.engine.global_config["max_lateral_dist"] + 1) / 2, 0.0, 1.0)

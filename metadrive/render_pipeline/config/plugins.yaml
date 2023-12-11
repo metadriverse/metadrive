@@ -116,7 +116,7 @@ overrides:
         num_samples: 12
 
     pssm:
-        max_distance: 128
+        max_distance: 100
         logarithmic_factor: 2.37
         sun_distance: 256
         split_count: 4

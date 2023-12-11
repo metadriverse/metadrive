@@ -1,10 +1,8 @@
 import math
-from metadrive.constants import CamMask
-from metadrive.engine.logger import get_logger
 import os
 from collections import deque
 from typing import Union, Optional
-from metadrive.constants import Semantics
+
 import numpy as np
 import seaborn as sns
 from panda3d._rplight import RPSpotLight
@@ -17,13 +15,14 @@ from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.lane.straight_lane import StraightLane
-from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
-from metadrive.component.road_network.node_road_network import NodeRoadNetwork
-from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
+from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
+from metadrive.constants import CamMask
 from metadrive.constants import MetaDriveType, CollisionGroup
+from metadrive.constants import Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.engine_utils import get_engine, engine_initialized
+from metadrive.engine.logger import get_logger
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils import Config, safe_clip_for_small_array
 from metadrive.utils.math import get_vertical_vector, norm, clip
@@ -1030,9 +1029,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.coordinates_debug_np.hide(CamMask.AllOn)
         self.coordinates_debug_np.show(CamMask.MainCam)
         # 90 degrees offset
-        x = self.engine._draw_line_3d([0, 0, height], [0, 2, height], [1, 1, 1, 1], 2)
-        y = self.engine._draw_line_3d([0, 0, height], [-1, 0, height], [1, 1, 1, 1], 2)
-        z = self.engine._draw_line_3d([0, 0, height], [0, 0, height + 0.5], [1, 1, 1, 1], 2)
+        x = self.engine._draw_line_3d([0, 0, height], [0, 2, height], [1, 1, 1, 1], 3)
+        y = self.engine._draw_line_3d([0, 0, height], [-1, 0, height], [1, 1, 1, 1], 3)
+        z = self.engine._draw_line_3d([0, 0, height], [0, 0, height + 0.5], [1, 1, 1, 1], 3)
         x.reparentTo(self.coordinates_debug_np)
         y.reparentTo(self.coordinates_debug_np)
         z.reparentTo(self.coordinates_debug_np)

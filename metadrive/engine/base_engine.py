@@ -120,13 +120,10 @@ class BaseEngine(EngineCore, Randomizable):
                 self._object_policies[object_id], policy_cls
             ) else False
 
-    def spawn_object(
-        self, object_class, pbr_model=True, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs
-    ):
+    def spawn_object(self, object_class, force_spawn=False, auto_fill_random_seed=True, record=True, **kwargs):
         """
         Call this func to spawn one object
         :param object_class: object class
-        :param pbr_model: if the visualization model is pbr model
         :param force_spawn: spawn a new object instead of fetching from _dying_objects list
         :param auto_fill_random_seed: whether to set random seed using purely random integer
         :param record: record the spawn information
@@ -157,7 +154,7 @@ class BaseEngine(EngineCore, Randomizable):
             print("FK!~")
             exit()
 
-        obj.attach_to_world(self.pbr_worldNP if pbr_model else self.worldNP, self.physics_world)
+        obj.attach_to_world(self.worldNP, self.physics_world)
         return obj
 
     def _pick_color(self, id):
@@ -391,11 +388,6 @@ class BaseEngine(EngineCore, Randomizable):
         # center_p = self.current_map.get_center_point() if isinstance(self.current_map, PGMap) else [0, 0]
         center_p = [0, 0]
         self.terrain.reset(center_p)
-
-        # init shadow if required
-        if hasattr(self, "pssm") and self.pssm.buffer is None and self.global_config["show_terrain"] \
-                and not self.global_config["debug_physics_world"]:
-            self.pssm.init()
 
         # move skybox
         if self.sky_box is not None:
@@ -682,7 +674,7 @@ class BaseEngine(EngineCore, Randomizable):
         assert len(filtered) == 0, "Physics Bodies should be cleaned before manager.reset() is called. " \
                                    "Uncleared bodies: {}".format(filtered)
 
-        children = self.pbr_worldNP.getChildren() + self.worldNP.getChildren()
+        children = self.worldNP.getChildren()
         assert len(children) == 0, "NodePath are not cleaned thoroughly. Remaining NodePath: {}".format(children)
 
     def update_manager(self, manager_name: str, manager: BaseManager, destroy_previous_manager=True):

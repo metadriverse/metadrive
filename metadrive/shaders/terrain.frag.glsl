@@ -166,9 +166,10 @@ void main() {
   shading += vec3(0.07, 0.07, 0.1);
 
 //   dynamic shadow
+  int split = 99;
   if (use_pssm) {
     // Find in which split the current point is present.
-    int split = 99;
+
     float border_bias = 0.5 - (0.5 / (1.0 + border_bias));
 
     // Find the first matching split
@@ -195,9 +196,16 @@ void main() {
         float ref_depth = projected.z - fixed_bias * 0.001 * (1 + 1.5 * split);
 
         // Check if the pixel is shadowed or not
-        float depth_sample = textureLod(PSSMShadowAtlas, projected_coord, 0).x;
-        float shadow_factor = step(ref_depth, depth_sample);
-
+        float shadow_factor=0.0;
+        float samples = 9.0; // Number of samples
+        float radius = 0.001; // Sample radius
+        for(int x = -1; x <= 1; x++) {
+            for(int y = -1; y <= 1; y++) {
+                float depth_sample = texture2D(PSSMShadowAtlas, projected_coord.xy + vec2(x, y) * radius).r;
+                shadow_factor += step(ref_depth, depth_sample);
+        }
+        }
+        shadow_factor /= samples;
         shading *= shadow_factor;
     }
     }
@@ -212,5 +220,17 @@ void main() {
     float fog_factor = smoothstep(0, 1, dist / 8000.0);
     shading = mix(shading, vec3(0.7, 0.7, 0.8), fog_factor);
   }
+//   if (split==0){
+//     shading = vec3(1, 0, 0);
+//   }
+//   else if (split==1) {
+//     shading = vec3(0, 1, 0);
+//   }
+//   else if (split==2) {
+//     shading = vec3(0, 0, 1);
+//   }
+//   else{
+//     shading = vec3(0, 1, 1);
+//   }
   color = vec4(shading, 1.0);
 }

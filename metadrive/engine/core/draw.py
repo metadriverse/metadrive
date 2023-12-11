@@ -9,6 +9,8 @@ class ColorLineNodePath(LineNodePath):
     def __init__(self, parent=None, thickness=1.0):
         super(ColorLineNodePath, self).__init__(parent, name=None, thickness=thickness, colorVec=VBase4(1))
         self.hide(CamMask.Shadow)
+        self.clearShader()
+        self.setShaderAuto()
 
     def draw_lines(self, lineList, colorList=None):
         """

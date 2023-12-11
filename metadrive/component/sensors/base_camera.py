@@ -96,7 +96,6 @@ class BaseCamera(ImageBuffer, BaseSensor):
         """
         Borrow the camera to get observations
         """
-        self.sync_light(base_object)
         self.origin.reparentTo(base_object.origin)
         img = self.get_rgb_array_cpu()
         self.track(self.attached_object)
@@ -107,7 +106,6 @@ class BaseCamera(ImageBuffer, BaseSensor):
         cv2.imwrite(name, img)
 
     def perceive(self, base_object, clip=True) -> np.ndarray:
-        self.sync_light(base_object)
         self.track(base_object)
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
@@ -143,10 +141,6 @@ class BaseCamera(ImageBuffer, BaseSensor):
         if base_object is not None and self is not None:
             self.attached_object = base_object
             self.origin.reparentTo(base_object.origin)
-
-    def sync_light(self, obj):
-        if self.engine.world_light is not None:
-            self.engine.world_light.set_pos(obj.position)
 
     def __del__(self):
         if self.enable_cuda:

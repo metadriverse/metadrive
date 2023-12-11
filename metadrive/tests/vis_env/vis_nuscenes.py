@@ -1,9 +1,10 @@
 import time
-
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.component.sensors.semantic_camera import SemanticCamera
+from metadrive.component.sensors.depth_camera import DepthCamera
+from metadrive.component.sensors.rgb_camera import RGBCamera
 
 NuScenesEnv = ScenarioEnv
 
@@ -12,43 +13,45 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
+            # "manual_control": True,
             "show_interface": True,
-            "debug_static_world": True,
+            # "debug_static_world": True,
             # "need_lane_localization": False,
             # "image_observation": True,
             "show_logo": False,
-            "no_traffic": False,
+            # "no_traffic": True,
             "store_data": False,
             "sequential_seed": True,
             # "debug_static_world": True,
             # "sequential_seed": True,
-            "reactive_traffic": True,
+            # "reactive_traffic": True,
             "curriculum_level": 1,
             "show_fps": True,
             "show_sidewalk": True,
             "show_crosswalk": True,
-            "show_coordinates": True,
-            "sensors": {
-                "semantic": (SemanticCamera, 200, 100)
-            },
+            # "show_coordinates": True,
+            # "sensors": {
+            #     "semantic": (SemanticCamera, 200, 100),
+            #     "depth": (DepthCamera, 200, 100),
+            #     "rgb": (RGBCamera, 200, 100),
+            # },
             # "pstats": True,
             # "use_mesh_terrain": True,
             "debug": True,
-            "no_static_vehicles": False,
+            # "no_static_vehicles": False,
             # "pstats": True,
-            # "render_pipeline": True,
+            "render_pipeline": True,
             "window_size": (1600, 900),
             "camera_dist": 9,
-            "interface_panel": ["semantic"],
+            # "interface_panel": ["rgb", "semantic", "depth"],
             "start_scenario_index": 0,
-            "num_scenarios": 10,
+            "num_scenarios": 1,
             # "force_reuse_object_name": True,
             "horizon": 1000,
             "vehicle_config": dict(
                 # light=True,
                 # random_color=True,
-                show_navi_mark=False,
+                show_navi_mark=True,
                 # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50),
                 lane_line_detector=dict(num_lasers=0, distance=50),
@@ -71,10 +74,19 @@ if __name__ == "__main__":
     start_reset = time.time()
     env.reset(seed=0)
 
+    def reload_shader():
+        env.engine.pbrpipe._recompile_pbr()
+        env.engine.pssm.set_shader_inputs(env.engine.render)
+
+    env.engine.accept("`", reload_shader)
+    env.engine.accept("9", env.engine.terrain.reload_terrain_shader)
+    env.engine.accept("0", env.engine.bufferViewer.toggleEnable)
+
     reset_used_time += time.time() - start_reset
     reset_num += 1
-    for t in range(10000):
+    for t in range(1000000):
         o, r, tm, tc, info = env.step([1, 0.88])
+        env.engine.terrain.origin.set_shader_input('is_terrain', 1)
         assert env.observation_space.contains(o)
         s += 1
         if env.config["use_render"]:

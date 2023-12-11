@@ -1,6 +1,6 @@
 import panda3d.core as p3d
 from direct.filter.FilterManager import FilterManager
-from simplepbr import _load_shader_str
+from metadrive.third_party.simplepbr import _load_shader_str
 from panda3d.core import FrameBufferProperties
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask

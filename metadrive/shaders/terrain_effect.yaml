@@ -91,6 +91,8 @@ fragment:
         
         uniform sampler2D attribute_tex;
         uniform float grass_tex_ratio;
+        uniform float rock_tex_ratio;
+        
         
         // just learned that uniform means the variable won't change in each stage, while in/out is able to do that : )
         uniform float elevation_texture_ratio; 
@@ -189,9 +191,9 @@ fragment:
             grass_mat.specular_ior = 0.;
     
             MaterialShaderOutput rock_mat = make_default_material_output();
-            rock_mat.basecolor = texture(rock_tex, terrain_uv * grass_tex_ratio).rgb;
-            rock_mat.roughness = texture(rock_rough, terrain_uv * grass_tex_ratio).r;
-            rock_mat.normal = texture(rock_normal, terrain_uv * grass_tex_ratio).rgb*2.0-1.0;
+            rock_mat.basecolor = texture(rock_tex, terrain_uv * rock_tex_ratio*4).rgb;
+            rock_mat.roughness = texture(rock_rough, terrain_uv * rock_tex_ratio*4).r;
+            rock_mat.normal = texture(rock_normal, terrain_uv * rock_tex_ratio*4).rgb*2.0-1.0;
             rock_mat.specular_ior = 1.7;
     
             MaterialShaderOutput snow_mat = make_default_material_output();

@@ -3,12 +3,13 @@ import math
 import time
 from abc import ABC
 from typing import Dict
+from panda3d.core import LVecBase4, TextureStage
 from metadrive.utils.utils import create_rectangle_from_midpoints
 import numpy as np
 from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletTriangleMeshShape, BulletTriangleMesh
-from panda3d.core import LPoint3f
+from panda3d.core import LPoint3f, Material
 from panda3d.core import Vec3, LQuaternionf, RigidBodyCombiner, \
     SamplerState, NodePath, Texture
 from panda3d.core import Vec4
@@ -71,7 +72,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.crosswalks = {}
         self.sidewalks = {}
 
-        if self.render and not self.use_render_pipeline:
+        if self.render:
             # side
             self.side_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
             # self.side_texture.set_format(Texture.F_srgb)
@@ -83,11 +84,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
             # self.side_normal.set_format(Texture.F_srgb)
             self.side_normal.setWrapU(Texture.WM_repeat)
             self.side_normal.setWrapV(Texture.WM_repeat)
-
-            self.sidewalk = self.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
-            self.sidewalk.setTwoSided(False)
-            self.sidewalk.setTexture(self.side_texture)
-
             self.line_seg = make_polygon_model([(-0.5, 0.5), (-0.5, -0.5), (0.5, -0.5), (0.5, 0.5)], 0)
 
     def _sample_topology(self) -> bool:
@@ -159,7 +155,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         if not self.is_attached():
             for obj in self._block_objects:
-                obj.attach_to_world(self.engine.pbr_worldNP, physics_world)
+                obj.attach_to_world(self.engine.worldNP, physics_world)
         super(BaseBlock, self).attach_to_world(parent_node_path, physics_world)
 
     def destruct_block(self, physics_world: PhysicsWorld):
@@ -242,7 +238,15 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
 
         self.sidewalk_node_path.flattenStrong()
         self.sidewalk_node_path.node().collect()
-        self.sidewalk_node_path.hide(CamMask.ScreenshotCam | CamMask.Shadow)
+        if self.render:
+            # np.setShaderInput("p3d_TextureBaseColor", self.side_texture)
+            # np.setShaderInput("p3d_TextureNormal", self.side_normal)
+            self.sidewalk_node_path.setTexture(self.side_texture)
+            ts = TextureStage("normal")
+            ts.setMode(TextureStage.MNormal)
+            self.sidewalk_node_path.setTexture(ts, self.side_normal)
+            material = Material()
+            self.sidewalk_node_path.setMaterial(material, True)
 
         self.crosswalk_node_path.flattenStrong()
         self.crosswalk_node_path.node().collect()
@@ -367,7 +371,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         """
         Construct the sidewalk with collision shape
         """
-        if self.engine is None or (self.engine.global_config["show_sidewalk"] and not self.engine.use_render_pipeline):
+        if self.engine is None or (self.engine.global_config["show_sidewalk"]):
             for sidewalk_id, sidewalk in self.sidewalks.items():
                 if len(sidewalk["polygon"]) == 0:
                     continue
@@ -382,9 +386,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                     np = make_polygon_model(polygon, height)
                     np.reparentTo(self.sidewalk_node_path)
                     np.setPos(0, 0, z_pos)
-                    if self.render:
-                        np.setTexture(self.side_texture)
-                    # np.setTexture(self.ts_normal, self.side_normal)
 
                     body_node = BaseRigidBodyNode(None, MetaDriveType.BOUNDARY_SIDEWALK)
                     body_node.setKinematic(False)

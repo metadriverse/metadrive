@@ -1,17 +1,16 @@
 from panda3d._rplight import PSSMCameraRig
 from metadrive.constants import CamMask
 from panda3d.core import PTA_LMatrix4
-from panda3d.core import Texture
+from panda3d.core import Texture, SamplerState
 from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsOutput
 
 
 class PSSM:
     """
-    This is the implementation of PSSM for adding shadwo for the scene.
+    This is the implementation of PSSM for adding shadow for the scene.
     It is based on https://github.com/el-dee/panda3d-samples
     """
     def __init__(self, engine):
-        assert engine.terrain, "terrain should be created before having this shadow"
         assert engine.world_light, "world_light should be created before having this shadow"
 
         # engine
@@ -32,11 +31,6 @@ class PSSM:
         self.depth_tex = None
         self.buffer = None
 
-        # Cast shadow
-        engine.world_light.direction_np.node().set_shadow_caster(True, 256, 256)
-        engine.world_light.direction_np.node().getLens().set_near_far(0, 512)
-        engine.world_light.direction_np.node().getLens().set_film_size(512, 512)
-
     def init(self):
         """
         Create the PSSM. Lazy init
@@ -46,17 +40,8 @@ class PSSM:
         self.create_pssm_camera_rig()
         self.create_pssm_buffer()
         self.attach_pssm_camera_rig()
-        self.set_shader_inputs(self.engine.terrain.mesh_terrain)
+        self.set_shader_inputs(self.engine.render)
         self.engine.task_mgr.add(self.update)
-
-    @property
-    def terrain(self):
-        """
-        Pointer to created mesh terrain
-        Returns: mesh_terrain node path
-
-        """
-        return self.engine.terrain.mesh_terrain
 
     @property
     def directional_light(self):
@@ -74,7 +59,7 @@ class PSSM:
 
         """
         self.use_pssm = not self.use_pssm
-        self.terrain.set_shader_inputs(use_pssm=self.use_pssm)
+        self.engine.render.set_shader_inputs(use_pssm=self.use_pssm)
 
     def toggle_freeze_pssm(self):
         """
@@ -91,7 +76,7 @@ class PSSM:
 
         """
         self.fog = not self.fog
-        self.terrain.set_shader_inputs(fog=self.fog)
+        self.engine.render.set_shader_inputs(fog=self.fog)
 
     def update(self, task):
         """
@@ -106,7 +91,7 @@ class PSSM:
         mvp_array = PTA_LMatrix4()
         for array in src_mvp_array:
             mvp_array.push_back(array)
-        self.terrain.set_shader_inputs(pssm_mvps=mvp_array)
+        self.engine.render.set_shader_inputs(pssm_mvps=mvp_array)
 
         if not self.freeze_pssm:
             # Update the camera position and the light direction
@@ -130,7 +115,7 @@ class PSSM:
         # Set the distance between the far plane of the frustum and the sun, objects farther do not cas shadows
         self.camera_rig.set_sun_distance(64)
         # Set the logarithmic factor that defines the splits
-        self.camera_rig.set_logarithmic_factor(2.4)
+        self.camera_rig.set_logarithmic_factor(0.2)
 
         self.camera_rig.set_border_bias(self.border_bias)
         # Enable CSM splits snapping to avoid shadows flickering when moving
@@ -149,9 +134,10 @@ class PSSM:
 
         """
         self.depth_tex = Texture("PSSMShadowMap")
-        self.buffer = self.create_render_buffer(
-            self.split_resolution * self.num_splits, self.split_resolution, 32, self.depth_tex
-        )
+        self.depth_tex.setFormat(Texture.FDepthComponent)
+        self.depth_tex.setMinfilter(SamplerState.FTShadow)
+        self.depth_tex.setMagfilter(SamplerState.FTShadow)
+        self.buffer = self.create_render_buffer(self.split_resolution * self.num_splits, self.split_resolution, 32)
 
         # Remove all unused display regions
         self.buffer.remove_all_display_regions()
@@ -206,7 +192,7 @@ class PSSM:
             light_direction=self.engine.world_light.direction_pos
         )
 
-    def create_render_buffer(self, size_x, size_y, depth_bits, depth_tex):
+    def create_render_buffer(self, size_x, size_y, depth_bits):
         """
         Boilerplate code to create a render buffer producing only a depth texture
         Args:

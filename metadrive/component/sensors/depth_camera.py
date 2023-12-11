@@ -54,14 +54,14 @@ class DepthCamera(BaseCamera):
             self.GROUND_MODEL.show(CamMask.DepthCam)
             self.GROUND.generate()
 
-    def track(self, base_object):
-        if self.VIEW_GROUND:
-            pos = base_object.origin.getPos()
-            self.GROUND_MODEL.setPos(pos[0], pos[1], self.GROUND_HEIGHT - 0.5)
-            self.GROUND_MODEL.setH(base_object.origin.getH())
-            # self.GROUND_MODEL.setP(-base_object.origin.getR())
-            # self.GROUND_MODEL.setR(-base_object.origin.getR())
-        return super(DepthCamera, self).track(base_object)
+            def sync_pos(task):
+                if self.attached_object:
+                    pos = self.attached_object.origin.getPos()
+                    self.GROUND_MODEL.setPos(pos[0], pos[1], self.GROUND_HEIGHT - 0.5)
+                    self.GROUND_MODEL.setH(self.attached_object.origin.getH())
+                return task.cont
+
+            self.engine.taskMgr.add(sync_pos)
 
     def _setup_effect(self):
         """
