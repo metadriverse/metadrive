@@ -128,7 +128,7 @@ class TrajectoryNavigation(BaseNavigation):
 
         # target_road_1 is the road segment the vehicle is driving on.
         self._navi_info.fill(0.0)
-        for k, ckpt in enumerate(ckpts):
+        for k, ckpt in enumerate(ckpts[1:]):
             start = k * self.CHECK_POINT_INFO_DIM
             end = (k + 1) * self.CHECK_POINT_INFO_DIM
             self._navi_info[start:end], lanes_heading = self._get_info_for_checkpoint(ckpt, ego_vehicle)
