@@ -56,9 +56,12 @@ class BaseNavigation:
         self._show_navi_info = (
             self.engine.mode == RENDER_MODE_ONSCREEN and not self.engine.global_config["debug_physics_world"]
         )
-        self.origin = NodePath("navigation_sign") if self._show_navi_info else None
-        self.origin.clearShader()
-        self.origin.setShaderAuto()
+        if self._show_navi_info:
+            self.origin = NodePath("navigation_sign")
+            self.origin.clearShader()
+            self.origin.setShaderAuto()
+        else:
+            self.origin = None
         if panda_color is not None:
             assert len(panda_color) == 3 and 0 <= panda_color[0] <= 1
             self.navi_mark_color = tuple(panda_color)
