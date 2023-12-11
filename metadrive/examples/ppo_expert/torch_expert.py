@@ -77,4 +77,3 @@ def torch_value(obs, weights):
         x = torch.tanh(x)
         x = torch.matmul(x, weights["default_policy/value_out/kernel"]) + weights["default_policy/value_out/bias"]
         return x.squeeze(0).cpu().numpy()  # Move back to CPU and remove batch dimension
-
