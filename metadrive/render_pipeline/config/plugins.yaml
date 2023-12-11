@@ -125,7 +125,7 @@ overrides:
         use_pcf: True
         filter_sequence: halton_2D_32
         filter_radius: 1.38
-        fixed_bias: 0.4928
+        fixed_bias: 0.001
         slope_bias: 1.11
         normal_bias: 0.43
         use_pcss: False
