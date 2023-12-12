@@ -1,5 +1,5 @@
 from metadrive.constants import TerminationState
-from metadrive.examples.ppo_expert.numpy_expert import expert
+from metadrive.examples.ppo_expert import expert
 
 
 def get_terminal_state(info):
