@@ -37,20 +37,25 @@ def obs_correction(obs):
 def expert(vehicle, deterministic=False, need_obs=False):
     global _expert_weights
     global _expert_observation
-    obs_cfg = dict(
+    expert_obs_cfg = dict(
         lidar=dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0),
+        random_agent_model=False
+    )
+    origin_obs_cfg = dict(
+        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0),
         random_agent_model=False
     )
 
     if _expert_weights is None:
         _expert_weights = np.load(ckpt_path)
         config = get_global_config().copy()
-        config["vehicle_config"].update(obs_cfg)
+        config["vehicle_config"].update(expert_obs_cfg)
         _expert_observation = LidarStateObservation(config)
         assert _expert_observation.observation_space.shape[0] == 275, "Observation not match"
 
-    vehicle.config.update(obs_cfg)
+    vehicle.config.update(expert_obs_cfg)
     obs = _expert_observation.observe(vehicle)
+    vehicle.config.update(origin_obs_cfg)
     obs = obs_correction(obs)
     weights = _expert_weights
     obs = obs.reshape(1, -1)
