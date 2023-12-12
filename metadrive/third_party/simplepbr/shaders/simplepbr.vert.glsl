@@ -10,6 +10,7 @@ uniform mat4 p3d_TransformTable[100];
 
 uniform mat4 p3d_ProjectionMatrix;
 uniform mat4 p3d_ModelViewMatrix;
+uniform mat4 p3d_ModelMatrix;
 uniform mat3 p3d_NormalMatrix;
 uniform mat4 p3d_TextureMatrix;
 
@@ -44,7 +45,7 @@ void main() {
     vec4 vert_pos4 = p3d_ModelViewMatrix * p3d_Vertex;
     vec3 normal = normalize(p3d_NormalMatrix * p3d_Normal);
 #endif
-    shadow_vtx_pos = p3d_Vertex.xyzw;
+    shadow_vtx_pos = p3d_ModelMatrix * p3d_Vertex.xyzw;
     v_position = vec3(vert_pos4);
     v_color = p3d_Color;
     v_texcoord = (p3d_TextureMatrix * vec4(p3d_MultiTexCoord0, 0, 1)).xy;

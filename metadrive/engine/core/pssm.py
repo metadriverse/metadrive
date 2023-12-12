@@ -23,7 +23,6 @@ class PSSM:
         self.num_splits = 2
         self.split_resolution = 1024
         self.border_bias = 0.058
-        self.fixed_bias = 0.5
         self.use_pssm = True
         self.freeze_pssm = False
         self.fog = True
@@ -185,7 +184,6 @@ class PSSM:
             pssm_mvps=self.camera_rig.get_mvp_array(),
             pssm_nearfar=self.camera_rig.get_nearfar_array(),
             border_bias=self.border_bias,
-            fixed_bias=self.fixed_bias,
             use_pssm=self.use_pssm,
             fog=self.fog,
             split_count=self.num_splits,

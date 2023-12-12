@@ -2,7 +2,7 @@ __all__ = ['BaseConstructor', 'SafeConstructor', 'Constructor', 'ConstructorErro
 
 from .error import *
 from .nodes import *
-
+from collections.abc import Hashable
 import collections, datetime, base64, binascii, re, sys, types
 
 
@@ -115,7 +115,7 @@ class BaseConstructor:
         mapping = {}
         for key_node, value_node in node.value:
             key = self.construct_object(key_node, deep=deep)
-            if not isinstance(key, collections.Hashable):
+            if not isinstance(key, Hashable):
                 raise ConstructorError(
                     "while constructing a mapping", node.start_mark, "found unhashable key", key_node.start_mark
                 )

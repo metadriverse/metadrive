@@ -69,16 +69,17 @@ classes_to_import_and_rename = {"RPPointLight": "PointLight", "RPSpotLight": "Sp
 native_module = None
 
 # If the module was built, use it, otherwise use the python wrappers
-if NATIVE_CXX_LOADED:
-    try:
-        from panda3d import _rplight as _native_module  # pylint: disable=wrong-import-position
-        # RPObject.global_debug("CORE", "Using panda3d-supplied core module")
-    except ImportError:
-        # RPObject.global_debug("CORE", "Using native core module")
-        from metadrive.render_pipeline.rpcore.native import native_ as _native_module  # pylint: disable=wrong-import-position
-else:
-    from metadrive.render_pipeline.rpcore import pynative as _native_module  # pylint: disable=wrong-import-position
-    RPObject.global_debug("CORE", "Using simulated python-wrapper module")
+# if NATIVE_CXX_LOADED:
+#     try:
+from panda3d import _rplight as _native_module  # pylint: disable=wrong-import-position
+
+# RPObject.global_debug("CORE", "Using panda3d-supplied core module")
+#     except ImportError:
+#         # RPObject.global_debug("CORE", "Using native core module")
+#         from metadrive.render_pipeline.rpcore.native import native_ as _native_module  # pylint: disable=wrong-import-position
+# else:
+#     from metadrive.render_pipeline.rpcore import pynative as _native_module  # pylint: disable=wrong-import-position
+#     RPObject.global_debug("CORE", "Using simulated python-wrapper module")
 
 # Import all classes
 for v in classes_to_import + list(classes_to_import_and_rename.keys()):
