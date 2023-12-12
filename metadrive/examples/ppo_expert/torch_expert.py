@@ -18,6 +18,11 @@ def obs_correction(obs):
 def numpy_to_torch(weights, device):
     """
     Convert numpy weights to torch tensors and move them to the specified device.
+    :params:
+        weights: numpy weights
+        device: torch device
+    :return:
+        torch_weights: weights in torch tensor
     """
     torch_weights = {}
     for k in weights.keys():
@@ -29,6 +34,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def torch_expert(vehicle, deterministic=False, need_obs=False):
+    """
+    load weights by torch, use ppo actor to predict action
+    :params:
+        vehicle: vehicle instance
+        deterministic: whether to use deterministic policy
+        need_obs: whether to return observation
+    :return:
+        action: action predicted by expert
+    """
     global _expert_weights
     global _expert_observation
     expert_obs_cfg = dict(
@@ -68,6 +82,14 @@ def torch_expert(vehicle, deterministic=False, need_obs=False):
 
 
 def torch_value(obs, weights):
+    """
+    ppo critic to predict value
+    :params:
+        obs: observation
+        weights: weights
+    :return:
+        value: value predicted by critic
+    """
     with torch.no_grad():  # Disable gradient computation
         obs = torch.from_numpy(obs).float().unsqueeze(0).to(device)  # Convert to tensor and move to device
         weights = _expert_weights
