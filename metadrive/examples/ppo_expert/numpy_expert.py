@@ -16,7 +16,7 @@ default_policy/value_out/bias (1,)
 """
 
 import os.path as osp
-
+from metadrive.engine.logger import get_logger
 import numpy as np
 
 from metadrive.engine.engine_utils import get_global_config
@@ -25,6 +25,8 @@ from metadrive.obs.state_obs import LidarStateObservation
 ckpt_path = osp.join(osp.dirname(__file__), "expert_weights.npz")
 _expert_weights = None
 _expert_observation = None
+
+logger = get_logger()
 
 
 def obs_correction(obs):
@@ -52,6 +54,7 @@ def expert(vehicle, deterministic=False, need_obs=False):
         config["vehicle_config"].update(expert_obs_cfg)
         _expert_observation = LidarStateObservation(config)
         assert _expert_observation.observation_space.shape[0] == 275, "Observation not match"
+        logger.info("Torch is not available. Use numpy PPO expert.")
 
     vehicle.config.update(expert_obs_cfg)
     obs = _expert_observation.observe(vehicle)
@@ -106,7 +109,6 @@ def value(obs, weights):
     x = np.matmul(x, weights["default_policy/value_out/kernel"]) + weights["default_policy/value_out/bias"]
     ret = x.reshape(-1)
     return ret
-
 
 # if __name__ == '__main__':
 #     for i in range(100):
