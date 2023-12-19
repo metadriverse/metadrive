@@ -1,4 +1,5 @@
 from panda3d.core import Texture, SamplerState
+import numpy as np
 from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsOutput
 
 from metadrive.component.sensors.base_camera import BaseCamera
@@ -21,8 +22,12 @@ class DepthCamera(BaseCamera):
         super(DepthCamera, self).__init__(engine, cuda)
 
         # post set camera
+        # Clears are done on the buffer
         self.cam.node().set_scene(self.engine.render)
-        self.buffer_display_region.set_camera(self.cam)
+        self.buffer_display_region = self.cam.node().getDisplayRegion(0)
+        self.buffer_display_region.set_sort(25)
+        self.buffer_display_region.disable_clears()
+        self.buffer_display_region.set_active(True)
 
         cam = self.get_cam()
 
@@ -69,7 +74,9 @@ class DepthCamera(BaseCamera):
             print("Failed to create buffer")
             return
 
-        buffer.add_render_texture(self.depth_tex, GraphicsOutput.RTM_bind_or_copy, GraphicsOutput.RTP_depth)
+        buffer.add_render_texture(self.depth_tex,
+                                  GraphicsOutput.RTM_bind_or_copy if self._enable_cuda else GraphicsOutput.RTMCopyRam,
+                                  GraphicsOutput.RTP_depth)
         buffer.set_sort(-1000)
         buffer.disable_clears()
         buffer.get_display_region(0).disable_clears()
@@ -84,12 +91,21 @@ class DepthCamera(BaseCamera):
         # Set a clear on the buffer instead on all regions
         buffer.set_clear_depth(1)
         buffer.set_clear_depth_active(True)
-
-        # Prepare the display regions, one for each split
-        region = buffer.make_display_region(0, 1, 0, 1)
-        region.set_sort(25)
-        # Clears are done on the buffer
-        region.disable_clears()
-        region.set_active(True)
-        self.buffer_display_region = region
         return buffer
+
+    def get_rgb_array_cpu(self):
+        origin_img = self.depth_tex
+        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
+        img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), -1))
+        img = img[::-1]
+        img = img[..., :self.num_channels]
+        return img
+
+    def add_display_region(self, display_region):
+        return
+        # if self.engine.mode != "none" and self.display_region is None:
+        #     # only show them when onscreen
+        #     self.display_region = self.engine.win.makeDisplayRegion(*display_region)
+        #     self.display_region.setCamera(self.buffer.getDisplayRegions()[1].camera)
+        #     self.draw_border(display_region)
+
