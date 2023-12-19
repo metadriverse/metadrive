@@ -83,9 +83,9 @@ class ImageBuffer:
 
         """
         if frame_buffer_property is not None:
-            return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
+            return self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height, fbp=frame_buffer_property)
         else:
-            return self.engine.win.makeTextureBuffer("camera", width, height)
+            return self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height)
 
     def _setup_effect(self):
         """

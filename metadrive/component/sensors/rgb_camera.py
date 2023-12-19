@@ -70,4 +70,4 @@ class RGBCamera(BaseCamera):
         if frame_buffer_property is None:
             frame_buffer_property = FrameBufferProperties()
         frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
-        return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
+        return self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height, fbp=frame_buffer_property)
