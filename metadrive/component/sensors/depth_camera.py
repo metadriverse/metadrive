@@ -42,9 +42,7 @@ class DepthCamera(BaseCamera):
 
         """
         self.depth_tex = Texture("PSSMShadowMap")
-        self.depth_tex.setFormat(Texture.FDepthComponent)
-        self.depth_tex.setMinfilter(SamplerState.FTShadow)
-        self.depth_tex.setMagfilter(SamplerState.FTShadow)
+        self.depth_tex.setFormat(Texture.FDepthComponent16)
 
         window_props = WindowProperties.size(width, height)
         buffer_props = FrameBufferProperties()
@@ -54,7 +52,7 @@ class DepthCamera(BaseCamera):
         buffer_props.set_stencil_bits(0)
         buffer_props.set_back_buffers(0)
         buffer_props.set_coverage_samples(0)
-        buffer_props.set_depth_bits(8)
+        buffer_props.set_depth_bits(16)
 
         # if depth_bits == 32:
         # buffer_props.set_float_depth(True)
@@ -66,7 +64,8 @@ class DepthCamera(BaseCamera):
         buffer_props.set_stencil_bits(0)
 
         buffer = self.engine.graphics_engine.make_output(
-            self.engine.win.get_pipe(), "pssm_buffer", 1, buffer_props, window_props, GraphicsPipe.BF_refuse_window,
+            self.engine.win.get_pipe(), self.__class__.__name__, 1, buffer_props, window_props,
+            GraphicsPipe.BF_refuse_window,
             self.engine.win.gsg, self.engine.win
         )
 
@@ -95,9 +94,10 @@ class DepthCamera(BaseCamera):
 
     def get_rgb_array_cpu(self):
         origin_img = self.depth_tex
-        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
+        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint16)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), -1))
-        img = img[::-1]
+        assert img.shape[-1] == 1
+        img /= 256  # to uint 8
         img = img[..., :self.num_channels]
         return img
 
@@ -108,4 +108,3 @@ class DepthCamera(BaseCamera):
         #     self.display_region = self.engine.win.makeDisplayRegion(*display_region)
         #     self.display_region.setCamera(self.buffer.getDisplayRegions()[1].camera)
         #     self.draw_border(display_region)
-
