@@ -1,14 +1,11 @@
-from panda3d.core import Shader, RenderState, ShaderAttrib, GeoMipTerrain, PNMImage, LightAttrib, \
-    TextureAttrib, ColorAttrib
+from panda3d.core import Texture, SamplerState
+from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsOutput
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
-from metadrive.constants import RENDER_MODE_NONE
-from metadrive.engine.asset_loader import AssetLoader
 
 
 class DepthCamera(BaseCamera):
-    # shape(dim_1, dim_2)
     CAM_MASK = CamMask.DepthCam
 
     GROUND_HEIGHT = 0
@@ -22,64 +19,79 @@ class DepthCamera(BaseCamera):
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         super(DepthCamera, self).__init__(engine, cuda)
+
+        # post set camera
+        self.cam.node().set_scene(self.engine.render)
+        self.buffer_display_region.set_camera(self.cam)
+
         cam = self.get_cam()
         lens = self.get_lens()
+        lens.setFov(60)
 
         # cam.lookAt(0, 2.4, 1.3)
         cam.lookAt(0, 10.4, 1.6)
 
-        lens.setFov(60)
-        # lens.setAspectRatio(2.0)
-        if self.engine.mode == RENDER_MODE_NONE or not AssetLoader.initialized():
-            return
-        # add shader for it
-        # if get_global_config()["headless_machine_render"]:
-        #     vert_path = AssetLoader.file_path("shaders", "depth_cam_gles.vert.glsl")
-        #     frag_path = AssetLoader.file_path("shaders", "depth_cam_gles.frag.glsl")
-        # else:
-        if self.VIEW_GROUND:
-            ground = PNMImage(257, 257, 4)
-            ground.fill(1., 1., 1.)
-
-            self.GROUND = GeoMipTerrain("mySimpleTerrain")
-            self.GROUND.setHeightfield(ground)
-            self.GROUND.setAutoFlatten(GeoMipTerrain.AFMStrong)
-            # terrain.setBruteforce(True)
-            # # Since the terrain is a texture, shader will not calculate the depth information, we add a moving terrain
-            # # model to enable the depth information of terrain
-            self.GROUND_MODEL = self.GROUND.getRoot()
-            self.GROUND_MODEL.setPos(-128, -128, self.GROUND_HEIGHT - 0.5)
-            self.GROUND_MODEL.reparentTo(self.engine.render)
-            self.GROUND_MODEL.hide(CamMask.AllOn)
-            self.GROUND_MODEL.show(CamMask.DepthCam)
-            self.GROUND.generate()
-
-            def sync_pos(task):
-                if self.attached_object:
-                    pos = self.attached_object.origin.getPos()
-                    self.GROUND_MODEL.setPos(pos[0], pos[1], self.GROUND_HEIGHT - 0.5)
-                    self.GROUND_MODEL.setH(self.attached_object.origin.getH())
-                return task.cont
-
-            self.engine.taskMgr.add(sync_pos)
-
-    def _setup_effect(self):
+    def _create_buffer(self, width, height, frame_buffer_property):
         """
-        Setup Camera Effect enabling depth calculation
+        Boilerplate code to create a render buffer producing only a depth texture
 
-        Returns: None
+        Returns: FrameBuffer for rendering into
+
         """
-        from metadrive.utils import is_mac
-        if is_mac():
-            vert_path = AssetLoader.file_path("../shaders", "{}_mac.vert.glsl".format(self.shader_name))
-            frag_path = AssetLoader.file_path("../shaders", "{}_mac.frag.glsl".format(self.shader_name))
-        else:
-            vert_path = AssetLoader.file_path("../shaders", "{}.vert.glsl".format(self.shader_name))
-            frag_path = AssetLoader.file_path("../shaders", "{}.frag.glsl".format(self.shader_name))
-        custom_shader = Shader.load(Shader.SL_GLSL, vertex=vert_path, fragment=frag_path)
-        self.get_cam().node().setInitialState(
-            RenderState.make(
-                LightAttrib.makeAllOff(), TextureAttrib.makeOff(), ColorAttrib.makeOff(),
-                ShaderAttrib.make(custom_shader, 1)
-            )
+        self.depth_tex = Texture("PSSMShadowMap")
+        self.depth_tex.setFormat(Texture.FDepthComponent)
+        self.depth_tex.setMinfilter(SamplerState.FTShadow)
+        self.depth_tex.setMagfilter(SamplerState.FTShadow)
+
+        window_props = WindowProperties.size(width, height)
+        buffer_props = FrameBufferProperties()
+
+        buffer_props.set_rgba_bits(0, 0, 0, 0)
+        buffer_props.set_accum_bits(0)
+        buffer_props.set_stencil_bits(0)
+        buffer_props.set_back_buffers(0)
+        buffer_props.set_coverage_samples(0)
+        buffer_props.set_depth_bits(8)
+
+        # if depth_bits == 32:
+        # buffer_props.set_float_depth(True)
+
+        buffer_props.set_force_hardware(True)
+        buffer_props.set_multisamples(0)
+        buffer_props.set_srgb_color(False)
+        buffer_props.set_stereo(False)
+        buffer_props.set_stencil_bits(0)
+
+        buffer = self.engine.graphics_engine.make_output(
+            self.engine.win.get_pipe(), "pssm_buffer", 1, buffer_props, window_props, GraphicsPipe.BF_refuse_window,
+            self.engine.win.gsg, self.engine.win
         )
+
+        if buffer is None:
+            print("Failed to create buffer")
+            return
+
+        buffer.add_render_texture(self.depth_tex, GraphicsOutput.RTM_bind_or_copy, GraphicsOutput.RTP_depth)
+        buffer.set_sort(-1000)
+        buffer.disable_clears()
+        buffer.get_display_region(0).disable_clears()
+        buffer.get_overlay_display_region().disable_clears()
+        buffer.get_overlay_display_region().set_active(False)
+
+        # Remove all unused display regions
+        buffer.remove_all_display_regions()
+        buffer.get_display_region(0).set_active(False)
+        buffer.disable_clears()
+
+        # Set a clear on the buffer instead on all regions
+        buffer.set_clear_depth(1)
+        buffer.set_clear_depth_active(True)
+
+        # Prepare the display regions, one for each split
+        region = buffer.make_display_region(0, 1, 0, 1)
+        region.set_sort(25)
+        # Clears are done on the buffer
+        region.disable_clears()
+        region.set_active(True)
+        self.buffer_display_region = region
+        return buffer
