@@ -273,7 +273,7 @@ jobs:
           pip install nbmake pytest-xdist
           mkdir ./tests/test_ipynb
           cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/test_ipynb/
-          pytest --nbmake -n=auto ./tests/test_ipynb/
+          TEST_IPYNB=1 pytest --nbmake -n=auto ./tests/test_ipynb/
 
   test_doc_code:
     runs-on: ubuntu-latest
