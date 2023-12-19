@@ -20,10 +20,10 @@ class RGBCamera(BaseCamera):
         self.BUFFER_W, self.BUFFER_H = width, height
         super(RGBCamera, self).__init__(engine, cuda)
         cam = self.get_cam()
-        lens = self.get_lens()
+
         # cam.lookAt(0, 2.4, 1.3)
         cam.lookAt(0, 10.4, 1.6)
-        lens.setFov(60)
+
 
     def _setup_effect(self):
         """

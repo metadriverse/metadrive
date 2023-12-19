@@ -65,6 +65,7 @@ class ImageBuffer:
         self.cam.reparentTo(self.origin)
         # self.cam.setH(-90)  # face to x
         self.lens = self.cam.node().getLens()
+        self.lens.setFov(60)
         self.cam.node().setCameraMask(self.CAM_MASK)
         if parent_node is not None:
             self.origin.reparentTo(parent_node)

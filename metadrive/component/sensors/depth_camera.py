@@ -25,8 +25,6 @@ class DepthCamera(BaseCamera):
         self.buffer_display_region.set_camera(self.cam)
 
         cam = self.get_cam()
-        lens = self.get_lens()
-        lens.setFov(60)
 
         # cam.lookAt(0, 2.4, 1.3)
         cam.lookAt(0, 10.4, 1.6)
