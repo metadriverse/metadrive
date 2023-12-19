@@ -17,7 +17,7 @@
 [
 <a href="https://metadrive-simulator.readthedocs.io">Documentation</a>
 |
-<a href="https://colab.research.google.com/github/metadriverse/metadrive/blob/main/metadrive/examples/Basic_MetaDrive_Usages.ipynb">Colab Examples</a>
+<a href="https://github.com/metadriverse/metadrive?tab=readme-ov-file#-examples">Colab Examples</a>
 |
 <a href="https://www.youtube.com/embed/3ziJPqC_-T4">Demo Video</a>
 |
