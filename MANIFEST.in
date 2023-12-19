@@ -9,3 +9,7 @@ recursive-include metadrive\render_pipeline\ *
 recursive-include metadrive/shaders/ *
 recursive-include metadrive\\shaders\\ *
 recursive-include metadrive\shaders\ *
+
+recursive-include metadrive/third_party/simplepbr/shaders/ *
+recursive-include metadrive\\third_party\\simplepbr\\shaders\\ *
+recursive-include metadrive\third_party\simplepbr\shaders\ *
