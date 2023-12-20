@@ -110,9 +110,11 @@ class DepthCamera(BaseCamera):
         """
         Call me per frame when you want to access the depth texture result with cuda enabled
         """
-        self.engine.graphicsEngine.dispatch_compute((32, 32, 1),
+        self.engine.graphicsEngine.dispatch_compute((64, 64, 1),
                                                     self.compute_node.get_attrib(ShaderAttrib),
                                                     self.engine.win.get_gsg())
+        # self.engine.graphicsEngine.extractTextureData(self.output_tex, self.engine.win.get_gsg())
+        # self.output_tex.write("{}.png".format(self.engine.episode_step))
         return task.cont
 
     def get_rgb_array_cpu(self):
