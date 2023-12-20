@@ -6,15 +6,16 @@ layout (local_size_x = 16, local_size_y = 16) in;
 
 // Declare the texture inputs
 uniform sampler2D fromTex;
+in vec2 texSize;
 uniform writeonly image2D toTex;
 
 void main() {
-    // Acquire the coordinates to the texel we are to process.
-    ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
+  // Acquire the coordinates to the texel we are to process.
+  ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
 
-    // Read the pixel from the first texture.
-    float pixel = texture2D(fromTex, texelCoords).r;
+  // The normalization is very important!
+  vec4 depthSample = texture2D(fromTex, texelCoords/texSize);
 
-    // Now write the modified pixel to the second texture.
-    imageStore(toTex, texelCoords, vec4(1, 1, 1, 1));
+  // Now write the modified pixel to the second texture.
+  imageStore(toTex, texelCoords, depthSample);
 }
