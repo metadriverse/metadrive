@@ -1,7 +1,7 @@
-from panda3d.core import Texture, SamplerState
+from panda3d.core import Texture, SamplerState, Shader, NodePath, ShaderAttrib
 import numpy as np
 from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsOutput
-
+from metadrive.engine.asset_loader import AssetLoader
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 
@@ -15,24 +15,18 @@ class DepthCamera(BaseCamera):
     GROUND_MODEL = None
 
     num_channels = 1
-    shader_name = "depth_cam"
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         super(DepthCamera, self).__init__(engine, cuda)
 
-        # post set camera
-        # Clears are done on the buffer
+    def _create_camera(self, pos, bkg_color):
+        super(DepthCamera, self)._create_camera(pos, bkg_color)
         self.cam.node().set_scene(self.engine.render)
         self.buffer_display_region = self.cam.node().getDisplayRegion(0)
         self.buffer_display_region.set_sort(25)
         self.buffer_display_region.disable_clears()
         self.buffer_display_region.set_active(True)
-
-        cam = self.get_cam()
-
-        # cam.lookAt(0, 2.4, 1.3)
-        cam.lookAt(0, 10.4, 1.6)
 
     def _create_buffer(self, width, height, frame_buffer_property):
         """
@@ -41,8 +35,8 @@ class DepthCamera(BaseCamera):
         Returns: FrameBuffer for rendering into
 
         """
-        self.depth_tex = Texture("PSSMShadowMap")
-        self.depth_tex.setFormat(Texture.FDepthComponent16)
+        self.depth_tex = Texture("DepthCameraTexture")
+        self.depth_tex.setFormat(Texture.FDepthComponent)
 
         window_props = WindowProperties.size(width, height)
         buffer_props = FrameBufferProperties()
@@ -52,10 +46,9 @@ class DepthCamera(BaseCamera):
         buffer_props.set_stencil_bits(0)
         buffer_props.set_back_buffers(0)
         buffer_props.set_coverage_samples(0)
-        buffer_props.set_depth_bits(16)
-
-        # if depth_bits == 32:
-        # buffer_props.set_float_depth(True)
+        # TODO use buffer_props.set_depth_bits(16)
+        buffer_props.set_depth_bits(32)
+        buffer_props.set_float_depth(True)
 
         buffer_props.set_force_hardware(True)
         buffer_props.set_multisamples(0)
@@ -90,7 +83,24 @@ class DepthCamera(BaseCamera):
         # Set a clear on the buffer instead on all regions
         buffer.set_clear_depth(1)
         buffer.set_clear_depth_active(True)
-        return buffer
+        self.buffer = buffer
+
+        # # make it for cuda
+        # self.output_tex = Texture()
+        # self.output_tex.setup_2d_texture(self.depth_tex.getXSize(),
+        #                                  self.depth_tex.getYSize(),
+        #                                  Texture.T_unsigned_byte,
+        #                                  Texture.F_rgba8)
+        # self.output_tex.set_clear_color((0, 0, 0, 1))
+        # shader = Shader.load_compute(Shader.SL_GLSL,
+        #                              AssetLoader.file_path("../shaders", "depth_convert.glsl"))
+        # self.compute_node = NodePath("dummy")
+        # self.compute_node.set_shader(shader)
+        # self.compute_node.set_shader_input("fromTex", self.depth_tex)
+        # self.compute_node.set_shader_input("toTex", self.output_tex)
+        # self.engine.graphicsEngine.dispatch_compute((32, 32, 1),
+        #                                             self.compute_node.get_attrib(ShaderAttrib),
+        #                                             self.engine.win.get_gsg())
 
     def get_rgb_array_cpu(self):
         origin_img = self.depth_tex

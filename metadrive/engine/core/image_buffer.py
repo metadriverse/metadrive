@@ -76,7 +76,6 @@ class ImageBuffer:
         # cam.lookAt(0, 2.4, 1.3)
         self.lens = self.cam.node().getLens()
         self.lens.setFov(60)
-        return cam
 
     def _create_buffer(self, width, height, frame_buffer_property):
         """
