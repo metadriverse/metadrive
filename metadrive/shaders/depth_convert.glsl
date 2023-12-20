@@ -6,7 +6,7 @@ layout (local_size_x = 16, local_size_y = 16) in;
 
 // Declare the texture inputs
 uniform sampler2D fromTex;
-in vec2 texSize;
+uniform vec2 texSize;
 uniform writeonly image2D toTex;
 
 void main() {
