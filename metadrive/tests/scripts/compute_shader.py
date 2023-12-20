@@ -30,7 +30,7 @@ sattr = dummy.get_attrib(ShaderAttrib)
 base.graphicsEngine.dispatch_compute((32, 32, 1), sattr, base.win.get_gsg())
 
 # Store the output
-base.graphicsEngine.extractTextureData(myTex2,base.win.get_gsg())
+base.graphicsEngine.extractTextureData(myTex2, base.win.get_gsg())
 frame = PNMImage()
 myTex2.store(frame)
 frame.write("test_compute_shader.png")

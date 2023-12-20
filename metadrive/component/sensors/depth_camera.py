@@ -79,17 +79,14 @@ class DepthCamera(BaseCamera):
 
         buffer = self.engine.graphics_engine.make_output(
             self.engine.win.get_pipe(), self.__class__.__name__, 1, buffer_props, window_props,
-            GraphicsPipe.BF_refuse_window,
-            self.engine.win.gsg, self.engine.win
+            GraphicsPipe.BF_refuse_window, self.engine.win.gsg, self.engine.win
         )
 
         if buffer is None:
             print("Failed to create buffer")
             return
 
-        buffer.add_render_texture(self.depth_tex,
-                                  GraphicsOutput.RTM_bind_or_copy,
-                                  GraphicsOutput.RTP_depth)
+        buffer.add_render_texture(self.depth_tex, GraphicsOutput.RTM_bind_or_copy, GraphicsOutput.RTP_depth)
         buffer.set_sort(-1000)
         buffer.disable_clears()
         buffer.get_display_region(0).disable_clears()
@@ -108,15 +105,13 @@ class DepthCamera(BaseCamera):
 
         # make it for cuda
         self.output_tex = Texture()
-        self.output_tex.setup_2d_texture(self.depth_tex.getXSize(),
-                                         self.depth_tex.getYSize(),
-                                         Texture.T_unsigned_byte,
-                                         Texture.F_rgba8)
+        self.output_tex.setup_2d_texture(
+            self.depth_tex.getXSize(), self.depth_tex.getYSize(), Texture.T_unsigned_byte, Texture.F_rgba8
+        )
 
         if self.enable_cuda:
             self.output_tex.set_clear_color((0, 0, 0, 1))
-            shader = Shader.load_compute(Shader.SL_GLSL,
-                                         AssetLoader.file_path("../shaders", "depth_convert.glsl"))
+            shader = Shader.load_compute(Shader.SL_GLSL, AssetLoader.file_path("../shaders", "depth_convert.glsl"))
             self.compute_node = NodePath("dummy")
             self.compute_node.set_shader(shader)
             # set shader input
@@ -129,9 +124,9 @@ class DepthCamera(BaseCamera):
         """
         Call me per frame when you want to access the depth texture result with cuda enabled
         """
-        self.engine.graphicsEngine.dispatch_compute((64, 64, 1),
-                                                    self.compute_node.get_attrib(ShaderAttrib),
-                                                    self.engine.win.get_gsg())
+        self.engine.graphicsEngine.dispatch_compute(
+            (64, 64, 1), self.compute_node.get_attrib(ShaderAttrib), self.engine.win.get_gsg()
+        )
         # self.engine.graphicsEngine.extractTextureData(self.output_tex, self.engine.win.get_gsg())
         # self.output_tex.write("{}.png".format(self.engine.episode_step))
         return task.cont

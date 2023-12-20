@@ -26,14 +26,14 @@ class ImageBuffer:
     num_channels = 3
 
     def __init__(
-            self,
-            width: float,
-            height: float,
-            pos: Vec3,
-            bkg_color: Union[Vec4, Vec3],
-            parent_node: NodePath = None,
-            frame_buffer_property=None,
-            engine=None
+        self,
+        width: float,
+        height: float,
+        pos: Vec3,
+        bkg_color: Union[Vec4, Vec3],
+        parent_node: NodePath = None,
+        frame_buffer_property=None,
+        engine=None
     ):
         self.logger = get_logger()
         self._node_path_list = []
@@ -89,8 +89,9 @@ class ImageBuffer:
 
         """
         if frame_buffer_property is not None:
-            self.buffer = self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height,
-                                                            fbp=frame_buffer_property)
+            self.buffer = self.engine.win.makeTextureBuffer(
+                self.__class__.__name__, width, height, fbp=frame_buffer_property
+            )
         else:
             self.buffer = self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height)
 
