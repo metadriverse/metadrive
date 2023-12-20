@@ -8,14 +8,24 @@ layout (local_size_x = 16, local_size_y = 16) in;
 uniform sampler2D fromTex;
 uniform vec2 texSize;
 uniform writeonly image2D toTex;
+uniform float near;// Camera's near plane
+uniform float far;// Camera's far plane
 
 void main() {
-  // Acquire the coordinates to the texel we are to process.
-  ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
+    // Acquire the coordinates to the texel we are to process.
+    ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
 
-  // The normalization is very important!
-  vec4 depthSample = texture2D(fromTex, texelCoords/texSize);
+    // The normalization is very important!
+    float nonLinearDepth = texture2D(fromTex, texelCoords/texSize).r * 2.0 - 1.0;
+    // Convert back to linear depth
+    float linearDepth = (2.0 * near * far) / (far + near - nonLinearDepth * (far - near));
 
-  // Now write the modified pixel to the second texture.
-  imageStore(toTex, texelCoords, depthSample);
+    // log
+    float base=5;
+    // distance=32
+    float b = 16;
+    float c = log(linearDepth/base)/log(b);
+
+    // Now write the modified pixel to the second texture.
+    imageStore(toTex, texelCoords, vec4(vec3(c), 1));
 }
