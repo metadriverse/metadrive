@@ -55,29 +55,27 @@ class ImageBuffer:
             return
 
         # self.texture = Texture()
-        self.buffer = self._create_buffer(width, height, frame_buffer_property)
         self.origin = NodePath("new render")
-
-        # this takes care of setting up their camera properly
-        self.cam = self._create_camera(bkg_color)
-        self.cam.setPos(pos)
-        # should put extrinsic parameters here
-        self.cam.reparentTo(self.origin)
-        # self.cam.setH(-90)  # face to x
-        self.lens = self.cam.node().getLens()
+        self._create_buffer(width, height, frame_buffer_property)
+        self._create_camera(pos, bkg_color)
 
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
         self._setup_effect()
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
-    def _create_camera(self, bkg_color):
+    def _create_camera(self, pos, bkg_color):
         """
         Create camera for the buffer
         """
-        cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
+        self.cam = cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         cam.node().setCameraMask(self.CAM_MASK)
-        cam.node().getLens().setFov(60)
+        self.cam.reparentTo(self.origin)
+        self.cam.setPos(pos)
+        cam.lookAt(0, 10.4, 1.6)
+        # cam.lookAt(0, 2.4, 1.3)
+        self.lens = self.cam.node().getLens()
+        self.lens.setFov(60)
         return cam
 
     def _create_buffer(self, width, height, frame_buffer_property):
@@ -92,9 +90,10 @@ class ImageBuffer:
 
         """
         if frame_buffer_property is not None:
-            return self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height, fbp=frame_buffer_property)
+            self.buffer = self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height,
+                                                            fbp=frame_buffer_property)
         else:
-            return self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height)
+            self.buffer = self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height)
 
     def _setup_effect(self):
         """

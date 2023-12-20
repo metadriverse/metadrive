@@ -23,10 +23,6 @@ class SemanticCamera(BaseCamera):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.VIEW_GROUND = True  # default true
         super(SemanticCamera, self).__init__(engine, cuda)
-        cam = self.get_cam()
-
-        # cam.lookAt(0, 2.4, 1.3)
-        cam.lookAt(0, 10.4, 1.6)
 
         # lens.setAspectRatio(2.0)
         if self.engine.mode == RENDER_MODE_NONE or not AssetLoader.initialized():

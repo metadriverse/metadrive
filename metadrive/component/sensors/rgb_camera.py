@@ -19,10 +19,6 @@ class RGBCamera(BaseCamera):
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         super(RGBCamera, self).__init__(engine, cuda)
-        cam = self.get_cam()
-
-        # cam.lookAt(0, 2.4, 1.3)
-        cam.lookAt(0, 10.4, 1.6)
 
 
     def _setup_effect(self):
@@ -70,4 +66,5 @@ class RGBCamera(BaseCamera):
         if frame_buffer_property is None:
             frame_buffer_property = FrameBufferProperties()
         frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
-        return self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height, fbp=frame_buffer_property)
+        self.buffer = self.engine.win.makeTextureBuffer(self.__class__.__name__, width, height,
+                                                        fbp=frame_buffer_property)
