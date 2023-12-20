@@ -26,14 +26,14 @@ class ImageBuffer:
     num_channels = 3
 
     def __init__(
-        self,
-        width: float,
-        height: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        engine=None
+            self,
+            width: float,
+            height: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            engine=None
     ):
         self.logger = get_logger()
         self._node_path_list = []
@@ -59,18 +59,26 @@ class ImageBuffer:
         self.origin = NodePath("new render")
 
         # this takes care of setting up their camera properly
-        self.cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
+        self.cam = self._create_camera(bkg_color)
         self.cam.setPos(pos)
         # should put extrinsic parameters here
         self.cam.reparentTo(self.origin)
         # self.cam.setH(-90)  # face to x
         self.lens = self.cam.node().getLens()
-        self.lens.setFov(60)
-        self.cam.node().setCameraMask(self.CAM_MASK)
+
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
         self._setup_effect()
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
+
+    def _create_camera(self, bkg_color):
+        """
+        Create camera for the buffer
+        """
+        cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
+        cam.node().setCameraMask(self.CAM_MASK)
+        cam.node().getLens().setFov(60)
+        return cam
 
     def _create_buffer(self, width, height, frame_buffer_property):
         """
