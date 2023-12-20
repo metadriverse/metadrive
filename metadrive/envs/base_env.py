@@ -324,6 +324,11 @@ class BaseEnv(gym.Env):
         if not config["show_interface"]:
             config["interface_panel"] = []
 
+        # Multi-Thread
+        if config["image_on_cuda"]:
+            self.logger.info("Turn Off Multi-thread rendering due to image_on_cuda=True")
+            config["multi_thread_render"] = False
+
         # Adjust terrain
         n = config["map_region_size"]
         assert (n & (n - 1)) == 0 and 0 < n <= 2048, "map_region_size should be pow of 2 and < 2048."
