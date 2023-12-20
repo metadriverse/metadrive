@@ -10,6 +10,8 @@ uniform vec2 texSize;
 uniform writeonly image2D toTex;
 uniform float near;// Camera's near plane
 uniform float far;// Camera's far plane
+uniform float log_b;
+uniform float log_base_div_b;
 
 void main() {
     // Acquire the coordinates to the texel we are to process.
@@ -21,10 +23,7 @@ void main() {
     float linearDepth = (2.0 * near * far) / (far + near - nonLinearDepth * (far - near));
 
     // log
-    float base=5;
-    // distance=32
-    float b = 16;
-    float c = log(linearDepth/base)/log(b);
+    float c = log(linearDepth)/log_b - log_base_div_b;
 
     // Now write the modified pixel to the second texture.
     imageStore(toTex, texelCoords, vec4(vec3(c), 1));

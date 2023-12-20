@@ -19,7 +19,21 @@ class DepthCamera(BaseCamera):
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
+        # factors of the log algorithm used to process distance to object
+        self.log_b = np.log(16)
+        self.log_base = np.log(5)
+        self.log_base_div_b = self.log_base / self.log_b
+
+        # create
         super(DepthCamera, self).__init__(engine, cuda)
+
+        # for converting depth value to distance-based depth on CPU
+        near = self.lens.getNear()
+        far = self.lens.getFar()
+        self.far_near_mul = near * far
+        self.far_near_add = near + far
+        self.far_near_minus = far - near
+
         if self.enable_cuda:
             self.engine.taskMgr.add(self._dispatch_compute)
 
@@ -30,6 +44,11 @@ class DepthCamera(BaseCamera):
         self.buffer_display_region.set_sort(25)
         self.buffer_display_region.disable_clears()
         self.buffer_display_region.set_active(True)
+        if self.enable_cuda:
+            self.compute_node.set_shader_input("near", self.lens.getNear())
+            self.compute_node.set_shader_input("far", self.lens.getFar())
+            self.compute_node.set_shader_input("log_b", self.log_b)
+            self.compute_node.set_shader_input("log_base_div_b", self.log_base_div_b)
 
     def _create_buffer(self, width, height, frame_buffer_property):
         """
@@ -123,9 +142,14 @@ class DepthCamera(BaseCamera):
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint16)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), -1))
         assert img.shape[-1] == 1
-        img = img[::-1] / 256  # to uint 8
+        img = img[::-1] / 65535  # to 0-1 float
         img = img[..., :self.num_channels]
-        return img
+
+        # post proces non-linear depth value
+        img = img * 2.0 - 1.0
+        img = (2.0 * self.far_near_mul) / (self.far_near_add - img * self.far_near_minus)
+        img = np.log(img) / self.log_b - self.log_base_div_b
+        return img * 256  # to 0-255
 
     def add_display_region(self, display_region):
         return
