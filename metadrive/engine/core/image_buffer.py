@@ -107,8 +107,8 @@ class ImageBuffer:
         origin_img = self.buffer.getDisplayRegion(1).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), -1))
-        img = img[::-1]
         img = img[..., :self.num_channels]
+        img = img[::-1]
         return img
 
     @staticmethod

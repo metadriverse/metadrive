@@ -26,16 +26,21 @@ class DepthCamera(BaseCamera):
 
         # create
         super(DepthCamera, self).__init__(engine, cuda)
+        self.engine.taskMgr.add(self._dispatch_compute)
 
-        # for converting depth value to distance-based depth on CPU
-        near = self.lens.getNear()
-        far = self.lens.getFar()
-        self.far_near_mul = near * far
-        self.far_near_add = near + far
-        self.far_near_minus = far - near
-
-        if self.enable_cuda:
-            self.engine.taskMgr.add(self._dispatch_compute)
+    def _setup_effect(self):
+        """
+        Set compute shader input
+        """
+        self.compute_node.set_shader_input("near_far_mul", self.far_near_mul)
+        self.compute_node.set_shader_input("near_far_add", self.far_near_add)
+        self.compute_node.set_shader_input("near_far_minus", self.far_near_minus)
+        self.compute_node.set_shader_input("log_b", self.log_b)
+        self.compute_node.set_shader_input("log_base_div_b", self.log_base_div_b)
+        size = LVector2(self.depth_tex.getXSize(), self.depth_tex.getYSize())
+        self.compute_node.set_shader_input("fromTex", self.depth_tex)
+        self.compute_node.set_shader_input("toTex", self.output_tex)
+        self.compute_node.set_shader_input("texSize", size)
 
     def _create_camera(self, pos, bkg_color):
         super(DepthCamera, self)._create_camera(pos, bkg_color)
@@ -44,11 +49,13 @@ class DepthCamera(BaseCamera):
         self.buffer_display_region.set_sort(25)
         self.buffer_display_region.disable_clears()
         self.buffer_display_region.set_active(True)
-        if self.enable_cuda:
-            self.compute_node.set_shader_input("near", self.lens.getNear())
-            self.compute_node.set_shader_input("far", self.lens.getFar())
-            self.compute_node.set_shader_input("log_b", self.log_b)
-            self.compute_node.set_shader_input("log_base_div_b", self.log_base_div_b)
+
+        # for converting depth value to distance-based depth on CPU
+        near = self.lens.getNear()
+        far = self.lens.getFar()
+        self.far_near_mul = near * far
+        self.far_near_add = near + far
+        self.far_near_minus = far - near
 
     def _create_buffer(self, width, height, frame_buffer_property):
         """
@@ -106,19 +113,15 @@ class DepthCamera(BaseCamera):
         # make it for cuda
         self.output_tex = Texture()
         self.output_tex.setup_2d_texture(
-            self.depth_tex.getXSize(), self.depth_tex.getYSize(), Texture.T_unsigned_byte, Texture.F_rgba8
-        )
+            self.depth_tex.getXSize(),
+            self.depth_tex.getYSize(),
+            Texture.T_unsigned_byte,
+            Texture.F_rgba8)
 
-        if self.enable_cuda:
-            self.output_tex.set_clear_color((0, 0, 0, 1))
-            shader = Shader.load_compute(Shader.SL_GLSL, AssetLoader.file_path("../shaders", "depth_convert.glsl"))
-            self.compute_node = NodePath("dummy")
-            self.compute_node.set_shader(shader)
-            # set shader input
-            size = LVector2(self.depth_tex.getXSize(), self.depth_tex.getYSize())
-            self.compute_node.set_shader_input("fromTex", self.depth_tex)
-            self.compute_node.set_shader_input("toTex", self.output_tex)
-            self.compute_node.set_shader_input("texSize", size)
+        self.output_tex.set_clear_color((0, 0, 0, 1))
+        shader = Shader.load_compute(Shader.SL_GLSL, AssetLoader.file_path("../shaders", "depth_convert.glsl"))
+        self.compute_node = NodePath("dummy")
+        self.compute_node.set_shader(shader)
 
     def _dispatch_compute(self, task):
         """
@@ -132,19 +135,14 @@ class DepthCamera(BaseCamera):
         return task.cont
 
     def get_rgb_array_cpu(self):
-        origin_img = self.depth_tex
-        self.engine.graphicsEngine.extractTextureData(self.depth_tex, self.engine.win.get_gsg())
-        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint16)
+        origin_img = self.output_tex
+        self.engine.graphicsEngine.extractTextureData(self.output_tex, self.engine.win.get_gsg())
+        img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), -1))
-        assert img.shape[-1] == 1
-        img = img[::-1] / 65535  # to 0-1 float
         img = img[..., :self.num_channels]
-
-        # post proces non-linear depth value
-        img = img * 2.0 - 1.0
-        img = (2.0 * self.far_near_mul) / (self.far_near_add - img * self.far_near_minus)
-        img = np.log(img) / self.log_b - self.log_base_div_b
-        return img * 256  # to 0-255
+        assert img.shape[-1] == 1
+        img = img[::-1]
+        return img
 
     def add_display_region(self, display_region):
         return
