@@ -1,4 +1,4 @@
-from panda3d.core import NodePath, PGTop, TextNode, CardMaker, Vec3
+from panda3d.core import NodePath, PGTop, TextNode, CardMaker, Vec3, OrthographicLens
 
 from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.constants import CamMask
@@ -92,6 +92,16 @@ class DashBoard(ImageBuffer, BaseSensor):
             engine=engine
         )
         self._node_path_list.extend(tmp_node_path_list)
+
+    def _create_camera(self, pos, bkg_color):
+        """
+        Create orthogonal camera for the buffer
+        """
+        self.cam = cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
+        cam.node().setCameraMask(self.CAM_MASK)
+
+        self.cam.reparentTo(self.origin)
+        self.cam.setPos(pos)
 
     def update_vehicle_state(self, vehicle):
         """
