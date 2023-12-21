@@ -75,8 +75,8 @@ class DepthCamera(BaseCamera):
         buffer_props.set_stencil_bits(0)
         buffer_props.set_back_buffers(0)
         buffer_props.set_coverage_samples(0)
-        buffer_props.set_depth_bits(16)
-        # buffer_props.set_float_depth(True)
+        buffer_props.set_depth_bits(32)
+        buffer_props.set_float_depth(True)
 
         buffer_props.set_force_hardware(True)
         buffer_props.set_multisamples(0)
