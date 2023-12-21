@@ -1,4 +1,7 @@
 import numpy as np
+from panda3d.core import Camera
+from panda3d.core import CardMaker
+from panda3d.core import OrthographicLens
 from panda3d.core import Texture, Shader, NodePath, ShaderAttrib, LVector2
 from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsOutput
 
@@ -28,6 +31,10 @@ class DepthCamera(BaseCamera):
         super(DepthCamera, self).__init__(engine, cuda)
         self.engine.taskMgr.add(self._dispatch_compute)
 
+        # display region
+        self.quad = None
+        self.quadcam = None
+
     def _setup_effect(self):
         """
         Set compute shader input
@@ -43,6 +50,9 @@ class DepthCamera(BaseCamera):
         self.compute_node.set_shader_input("texSize", size)
 
     def _create_camera(self, pos, bkg_color):
+        """
+        Create camera for the buffer
+        """
         super(DepthCamera, self)._create_camera(pos, bkg_color)
         self.cam.node().set_scene(self.engine.render)
         self.buffer_display_region = self.cam.node().getDisplayRegion(0)
@@ -133,6 +143,11 @@ class DepthCamera(BaseCamera):
         return task.cont
 
     def get_rgb_array_cpu(self):
+        """
+        Moving the texture to RAM and turn it into numpy array
+        Returns:
+
+        """
         origin_img = self.output_tex
         self.engine.graphicsEngine.extractTextureData(self.output_tex, self.engine.win.get_gsg())
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
@@ -143,12 +158,41 @@ class DepthCamera(BaseCamera):
         return img
 
     def add_display_region(self, display_region):
-        return
-        # if self.engine.mode != "none" and self.display_region is None:
-        #     # only show them when onscreen
-        #     self.display_region = self.engine.win.makeDisplayRegion(*display_region)
-        #     self.display_region.setCamera(self.buffer.getDisplayRegions()[1].camera)
-        #     self.draw_border(display_region)
+        """
+        Add a display region to show the rendering result
+        """
+        if self.engine.mode != "none" and self.display_region is None:
+            cm = CardMaker("filter-base-quad")
+            cm.setFrameFullscreenQuad()
+            self.quad = quad = NodePath(cm.generate())
+            quad.setDepthTest(0)
+            quad.setDepthWrite(0)
+            quad.setTexture(self.output_tex)
+
+            quadcamnode = Camera("depth_result_cam")
+            lens = OrthographicLens()
+            lens.setFilmSize(2, 2)
+            lens.setFilmOffset(0, 0)
+            lens.setNearFar(-1000, 1000)
+            quadcamnode.setLens(lens)
+            self.quadcam = quad.attachNewNode(quadcamnode)
+
+            # only show them when onscreen
+            self.display_region = self.engine.win.makeDisplayRegion(*display_region)
+            self.display_region.setCamera(self.quadcam)
+            self.draw_border(display_region)
+
+    def remove_display_region(self):
+        """
+        Remove the display region
+        """
+        if self.quadcam is not None:
+            self.quadcam.removeNode()
+            self.quad.removeNode()
+        super(DepthCamera, self).remove_display_region()
 
     def _make_cuda_texture(self):
+        """
+        Decide which texture to retrieve on GPU
+        """
         self.cuda_texture = self.output_tex
