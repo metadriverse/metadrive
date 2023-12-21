@@ -113,10 +113,8 @@ class DepthCamera(BaseCamera):
         # make it for cuda
         self.output_tex = Texture()
         self.output_tex.setup_2d_texture(
-            self.depth_tex.getXSize(),
-            self.depth_tex.getYSize(),
-            Texture.T_unsigned_byte,
-            Texture.F_rgba8)
+            self.depth_tex.getXSize(), self.depth_tex.getYSize(), Texture.T_unsigned_byte, Texture.F_rgba8
+        )
 
         self.output_tex.set_clear_color((0, 0, 0, 1))
         shader = Shader.load_compute(Shader.SL_GLSL, AssetLoader.file_path("../shaders", "depth_convert.glsl"))
