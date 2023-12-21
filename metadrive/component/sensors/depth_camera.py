@@ -157,11 +157,16 @@ class DepthCamera(BaseCamera):
         img = img[::-1]
         return img
 
-    def add_display_region(self, display_region):
+    def add_display_region(self, display_region, keep_height=True):
         """
         Add a display region to show the rendering result
         """
         if self.engine.mode != "none" and self.display_region is None:
+            if keep_height:
+                ratio = self.BUFFER_H / self.BUFFER_W
+                h = 0.333 * ratio
+                display_region[-2] = 1 - h
+
             cm = CardMaker("filter-base-quad")
             cm.setFrameFullscreenQuad()
             self.quad = quad = NodePath(cm.generate())

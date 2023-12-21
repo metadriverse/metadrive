@@ -125,8 +125,8 @@ class DashBoard(ImageBuffer, BaseSensor):
         self.buffer.set_active(False)
         super(DashBoard, self).remove_display_region()
 
-    def add_display_region(self, display_region):
-        super(DashBoard, self).add_display_region(display_region)
+    def add_display_region(self, display_region, keep_height=False):
+        super(DashBoard, self).add_display_region(display_region, False)
         self.buffer.set_active(True)
         self.origin.reparentTo(self.aspect2d_np)
 

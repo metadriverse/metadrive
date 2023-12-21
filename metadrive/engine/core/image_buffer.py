@@ -26,14 +26,14 @@ class ImageBuffer:
     num_channels = 3
 
     def __init__(
-        self,
-        width: float,
-        height: float,
-        pos: Vec3,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        engine=None
+            self,
+            width: float,
+            height: float,
+            pos: Vec3,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            engine=None
     ):
         self.logger = get_logger()
         self._node_path_list = []
@@ -124,9 +124,17 @@ class ImageBuffer:
             numpy_array = np.array([[img.getGray(i, j) for j in range(img.getYSize())] for i in range(img.getXSize())])
             return np.clip(numpy_array, 0, 1)
 
-    def add_display_region(self, display_region: List[float]):
+    def add_display_region(self, display_region: List[float], keep_height=True):
+        """
+        Make a display region for this image buffer and show in on main window
+        """
+        # only show them when onscreen
         if self.engine.mode != RENDER_MODE_NONE and self.display_region is None:
-            # only show them when onscreen
+            if keep_height:
+                ratio = self.BUFFER_H / self.BUFFER_W
+                h = 0.333 * ratio
+                display_region[-2] = 1 - h
+
             self.display_region = self.engine.win.makeDisplayRegion(*display_region)
             self.display_region.setCamera(self.buffer.getDisplayRegions()[1].camera)
             self.draw_border(display_region)

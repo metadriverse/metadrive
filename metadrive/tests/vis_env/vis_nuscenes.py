@@ -34,7 +34,7 @@ if __name__ == "__main__":
             # "show_coordinates": True,
             "sensors": {
                 # "semantic": (SemanticCamera, 200, 100),
-                "depth": (DepthCamera, 200, 100),
+                "depth": (DepthCamera, 400, 400),
                 # "rgb": (RGBCamera, 200, 100),
             },
             # "pstats": True,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             # "render_pipeline": True,
             # "window_size": (1600, 900),
             "camera_dist": 9,
-            "interface_panel": ["depth"],
+            "interface_panel": ["depth", "dashboard"],
             "start_scenario_index": 0,
             "num_scenarios": 10,
             # "force_reuse_object_name": True,
