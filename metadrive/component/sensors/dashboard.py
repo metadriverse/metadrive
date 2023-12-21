@@ -9,6 +9,13 @@ class DashBoard(ImageBuffer, BaseSensor):
     """
     Dashboard for showing the speed and brake/throttle/steering
     """
+
+    def perceive(self, *args, **kwargs):
+        """
+        This is only used for GUI and won't provide any observation result
+        """
+        raise NotImplementedError
+
     PARA_VIS_LENGTH = 12
     PARA_VIS_HEIGHT = 1
     MAX_SPEED = 120
@@ -87,6 +94,9 @@ class DashBoard(ImageBuffer, BaseSensor):
         self._node_path_list.extend(tmp_node_path_list)
 
     def update_vehicle_state(self, vehicle):
+        """
+        Update the dashboard result given a vehicle
+        """
         steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed_km_h
         if throttle_brake < 0:
             self.para_vis_np["Throttle"].setScale(0, 1, 1)

@@ -339,10 +339,11 @@ class BaseEnv(gym.Env):
                 config["vehicle_config"]["image_source"] != "main_camera" and config["auto_resize_window"]:
             # reduce size as we don't use the main camera content for improving efficiency
             config["window_size"] = (1, 1)
+            config["show_interface"] = False
+            config["interface_panel"] = []
             self.logger.debug(
                 "Main window size is reduced to (1, 1) for boosting efficiency."
-                "To cancel this, set auto_resize_window = False"
-            )
+                "To cancel this, set auto_resize_window = False")
 
         # Optimize sensor creation in none-screen mode
         if not config["use_render"] and not config["image_observation"]:
@@ -355,14 +356,13 @@ class BaseEnv(gym.Env):
 
         # Merge dashboard config with sensors
         to_use = []
-        if not config["render_pipeline"]:
+        if not config["render_pipeline"] and config["show_interface"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard" and config["window_size"] != (1, 1):
                     config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
-                        "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
-                    )
+                        "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
                 else:
                     to_use.append(panel)
         config["interface_panel"] = to_use
