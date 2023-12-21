@@ -9,7 +9,6 @@ class DashBoard(ImageBuffer, BaseSensor):
     """
     Dashboard for showing the speed and brake/throttle/steering
     """
-
     def perceive(self, *args, **kwargs):
         """
         This is only used for GUI and won't provide any observation result
