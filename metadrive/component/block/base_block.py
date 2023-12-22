@@ -1,4 +1,5 @@
 import logging
+from metadrive.constants import Semantics
 import math
 import warnings
 from abc import ABC
@@ -218,7 +219,9 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.sidewalk_node_path = NodePath(RigidBodyCombiner(self.name + "_sidewalk"))
         self.crosswalk_node_path = NodePath(RigidBodyCombiner(self.name + "_crosswalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
-        self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
+
+        # semantics
+        self.sidewalk_node_path.setTag("type", Semantics.SIDEWALK.label)
 
         if skip:  # for debug
             pass
@@ -251,10 +254,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.lane_node_path.flattenStrong()
         self.lane_node_path.node().collect()
 
-        self.lane_vis_node_path.flattenStrong()
-        self.lane_vis_node_path.node().collect()
-        self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam)
-
         self.origin.hide(CamMask.Shadow)
 
         self.sidewalk_node_path.reparentTo(self.origin)
@@ -273,7 +272,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self._node_path_list.append(self.crosswalk_node_path)
         self._node_path_list.append(self.lane_line_node_path)
         self._node_path_list.append(self.lane_node_path)
-        self._node_path_list.append(self.lane_vis_node_path)
 
     def create_in_world(self):
         """
