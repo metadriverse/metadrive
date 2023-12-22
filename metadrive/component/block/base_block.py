@@ -19,7 +19,7 @@ from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.road_network.road import Road
 from metadrive.constants import CollisionGroup
 from metadrive.constants import MetaDriveType, CamMask, PGLineType, PGLineColor, PGDrivableAreaProperty
-from metadrive.constants import Semantics
+from metadrive.constants import Semantics, CameraTagStateKey
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
 from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
@@ -221,10 +221,10 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
         self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
 
-        self.sidewalk_node_path.setTag("type", Semantics.SIDEWALK.label)
-        self.crosswalk_node_path.setTag("type", Semantics.CROSSWALK.label)
-        self.lane_vis_node_path.setTag("type", Semantics.ROAD.label)
-        self.lane_line_node_path.setTag("type", Semantics.LANE_LINE.label)
+        self.sidewalk_node_path.setTag(CameraTagStateKey.Semantic, Semantics.SIDEWALK.label)
+        self.crosswalk_node_path.setTag(CameraTagStateKey.Semantic, Semantics.CROSSWALK.label)
+        self.lane_vis_node_path.setTag(CameraTagStateKey.Semantic, Semantics.ROAD.label)
+        self.lane_line_node_path.setTag(CameraTagStateKey.Semantic, Semantics.LANE_LINE.label)
 
         if skip:  # for debug
             pass

@@ -1,9 +1,11 @@
 import panda3d.core as p3d
 from direct.filter.FilterManager import FilterManager
-from metadrive.third_party.simplepbr import _load_shader_str
 from panda3d.core import FrameBufferProperties
+
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
+from metadrive.constants import Semantics, CameraTagStateKey
+from metadrive.third_party.simplepbr import _load_shader_str
 
 
 class RGBCamera(BaseCamera):
@@ -26,6 +28,13 @@ class RGBCamera(BaseCamera):
         Returns: None
 
         """
+        cam = self.get_cam().node()
+        cam.setTagStateKey(CameraTagStateKey.RGB)
+        from metadrive.engine.core.terrain import Terrain
+        cam.setTagState(Semantics.TERRAIN.label, Terrain.make_render_state(self.engine,
+                                                                           "terrain.vert.glsl",
+                                                                           "terrain.frag.glsl"))
+
         self.scene_tex = None
         self.manager = FilterManager(self.buffer, self.cam)
         fbprops = p3d.FrameBufferProperties()

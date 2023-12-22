@@ -7,16 +7,12 @@ from panda3d.core import WindowProperties, FrameBufferProperties, GraphicsPipe, 
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
+from metadrive.constants import Semantics, CameraTagStateKey
 from metadrive.engine.asset_loader import AssetLoader
 
 
 class DepthCamera(BaseCamera):
     CAM_MASK = CamMask.DepthCam
-
-    GROUND_HEIGHT = 0
-    VIEW_GROUND = True
-    GROUND = None
-    GROUND_MODEL = None
 
     num_channels = 1
 
@@ -39,6 +35,13 @@ class DepthCamera(BaseCamera):
         """
         Set compute shader input
         """
+        cam = self.get_cam().node()
+        cam.setTagStateKey(CameraTagStateKey.Depth)
+        from metadrive.engine.core.terrain import Terrain
+        cam.setTagState(Semantics.TERRAIN.label, Terrain.make_render_state(self.engine,
+                                                                           "terrain.vert.glsl",
+                                                                           "terrain_depth.frag.glsl"))
+
         self.compute_node.set_shader_input("near_far_mul", self.far_near_mul)
         self.compute_node.set_shader_input("near_far_add", self.far_near_add)
         self.compute_node.set_shader_input("near_far_minus", self.far_near_minus)

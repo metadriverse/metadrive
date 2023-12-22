@@ -1,5 +1,4 @@
 import math
-from shapely.geometry import Polygon
 from collections import namedtuple
 from typing import List, Tuple
 
@@ -7,8 +6,10 @@ import numpy as np
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
-from metadrive.version import VERSION
+from shapely.geometry import Polygon
+
 from metadrive.type import MetaDriveType
+from metadrive.version import VERSION
 
 EDITION = "MetaDrive v{}".format(VERSION)
 DATA_VERSION = EDITION  # Use MetaDrive version to mark the data version
@@ -441,6 +442,7 @@ class TopDownSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
+
     @staticmethod
     def get_color(type):
         if MetaDriveType.is_lane(type):
@@ -532,3 +534,13 @@ class TerrainProperty:
                     [list(geom.exterior.coords) for geom in polygon.geoms]
         except Exception as error:
             return None
+
+
+class CameraTagStateKey:
+    """
+    Enables multi-pass rendering
+    """
+    ID = "id"
+    RGB = "rgb"
+    Depth = "depth"
+    Semantic = "semantic"

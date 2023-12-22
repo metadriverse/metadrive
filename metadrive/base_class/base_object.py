@@ -11,7 +11,7 @@ import numpy as np
 import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode, BulletVehicle
 from panda3d.core import LVector3, NodePath, PandaNode
-from metadrive.constants import Semantics
+from metadrive.constants import Semantics, CameraTagStateKey
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import ObjectState
 from metadrive.engine.asset_loader import AssetLoader
@@ -133,7 +133,7 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         self.origin = NodePath(self.name)
 
         # semantic color
-        self.origin.setTag("type", self.SEMANTIC_LABEL)
+        self.origin.setTag(CameraTagStateKey.Semantic, self.SEMANTIC_LABEL)
 
         # Temporally store bullet nodes that have to place in bullet world (not NodePath)
         self.dynamic_nodes = PhysicsNodeList()
@@ -194,7 +194,7 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
 
             self._node_path_list.append(self.origin)
             self.origin = new_origin
-            self.origin.setTag("type", self.SEMANTIC_LABEL)
+            self.origin.setTag(CameraTagStateKey.Semantic, self.SEMANTIC_LABEL)
             if add_to_static_world:
                 self.static_nodes.append(physics_body)
             else:

@@ -1,6 +1,7 @@
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 import cv2
 from panda3d.core import GeoMipTerrain, PNMImage
+from metadrive.constants import CameraTagStateKey
 from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, LVecBase4, MaterialAttrib
 from metadrive.constants import Semantics
 from metadrive.component.sensors.base_camera import BaseCamera
@@ -35,9 +36,9 @@ class InstanceCamera(SemanticCamera):
             mapping = get_engine().id_c
             spawned_objects = get_engine().get_objects()
             for id, obj in spawned_objects.items():
-                obj.origin.setTag("id", id)
+                obj.origin.setTag(CameraTagStateKey.ID, id)
             cam = self.get_cam().node()
-            cam.setTagStateKey("id")
+            cam.setTagStateKey(CameraTagStateKey.ID)
             cam.setInitialState(
                 RenderState.make(
                     ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),

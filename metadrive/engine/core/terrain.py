@@ -1,5 +1,6 @@
 # import numpyf
 import math
+
 import os
 import pathlib
 import sys
@@ -7,12 +8,12 @@ import sys
 #
 #
 from abc import ABC
-from metadrive.constants import TerrainProperty
+from metadrive.constants import TerrainProperty, CameraTagStateKey
 import cv2
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
 from panda3d.bullet import ZUp, BulletHeightfieldShape
-from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf
+from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf, NodePath
 from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage, Shader, Filename
 
 from metadrive.base_class.base_object import BaseObject
@@ -39,7 +40,7 @@ class Terrain(BaseObject, ABC):
 
     def __init__(self, show_terrain, engine):
         super(Terrain, self).__init__(random_seed=0)
-        self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.ScreenshotCam | CamMask.SemanticCam)
+        self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.ScreenshotCam)
         # use plane terrain or mesh terrain， True by default.
         self.use_mesh_terrain = engine.global_config["use_mesh_terrain"]
         self.full_size_mesh = engine.global_config["full_size_mesh"]
@@ -127,7 +128,7 @@ class Terrain(BaseObject, ABC):
                 ).astype(np.uint16)
                 heightfield_to_modify = heightfield_base[start:end, start:end, ...]
                 heightfield_base[start:end, start:end,
-                                 ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+                ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -174,12 +175,12 @@ class Terrain(BaseObject, ABC):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -211,6 +212,10 @@ class Terrain(BaseObject, ABC):
         # Generate the terrain
         self._mesh_terrain_node.generate()
         self._mesh_terrain = self.origin.attach_new_node(self._mesh_terrain_node)
+        # shader is determined by tag state, enabling multi-pass rendering
+        self._mesh_terrain.setTag(CameraTagStateKey.Semantic, self.SEMANTIC_LABEL)
+        self._mesh_terrain.setTag(CameraTagStateKey.RGB, self.SEMANTIC_LABEL)
+        self._mesh_terrain.setTag(CameraTagStateKey.Depth, self.SEMANTIC_LABEL)
         self._set_terrain_shader(engine, attribute_tex)
 
         # Attach the terrain to the main scene and set its scale. With no scale
@@ -235,7 +240,6 @@ class Terrain(BaseObject, ABC):
                 vert = AssetLoader.file_path("../shaders", "terrain.vert.glsl")
                 frag = AssetLoader.file_path("../shaders", "terrain.frag.glsl")
                 terrain_shader = Shader.load(Shader.SL_GLSL, vert, frag)
-                self._mesh_terrain.set_shader(terrain_shader)
             # # height
             self._mesh_terrain.set_shader_input("camera", self.engine.camera)
             self._mesh_terrain.set_shader_input("height_scale", self._height_scale)
@@ -590,6 +594,25 @@ class Terrain(BaseObject, ABC):
             semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
         return semantics
 
+    @staticmethod
+    def make_render_state(engine, vert, frag):
+        """
+        Make a render state for specific camera
+        Args:
+            engine: BaseEngine
+            vert: vert shader file name in shaders
+            frag: frag shader file name in shaders
+
+        Returns: RenderState
+
+        """
+        vert = AssetLoader.file_path("../shaders", vert)
+        frag = AssetLoader.file_path("../shaders", frag)
+        terrain_shader = Shader.load(Shader.SL_GLSL, vert, frag)
+
+        dummy_np = NodePath("Dummy")
+        dummy_np.setShader(terrain_shader)
+        return dummy_np.getState()
 
 # Some useful threads
 # GeoMipTerrain:
