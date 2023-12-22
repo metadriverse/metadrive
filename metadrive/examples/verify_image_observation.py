@@ -27,6 +27,7 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
 
     env = MetaDriveEnv(
         dict(
+            debug=True,
             num_scenarios=1,
             start_seed=1010,
             agent_policy=IDMPolicy,
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--camera", default="main", choices=["main", "rgb", "depth", "semantic"])
     args = parser.parse_args()
-    _test_rgb_camera_as_obs(args.render, image_on_cuda=args.cuda, debug=args.debug, camera=args.camera)
+    _test_rgb_camera_as_obs(args.render, image_on_cuda=args.cuda, debug=args.debug, camera="semantic")
     print(
         "Test Successful !! The FPS should go beyond 400 FPS, if you are using CUDA in offscreen mode "
         "with GPUs better than RTX 3060."

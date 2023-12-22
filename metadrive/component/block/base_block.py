@@ -1,5 +1,5 @@
 import logging
-from metadrive.constants import Semantics
+from metadrive.constants import Semantics, CameraTagStateKey
 import math
 import warnings
 from abc import ABC
@@ -220,9 +220,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.crosswalk_node_path = NodePath(RigidBodyCombiner(self.name + "_crosswalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
 
-        # semantics
-        self.sidewalk_node_path.setTag("type", Semantics.SIDEWALK.label)
-
         if skip:  # for debug
             pass
         else:
@@ -260,6 +257,9 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.crosswalk_node_path.reparentTo(self.origin)
         self.lane_line_node_path.reparentTo(self.origin)
         self.lane_node_path.reparentTo(self.origin)
+
+        # semantics
+        self.sidewalk_node_path.setTag(CameraTagStateKey.Semantic, Semantics.SIDEWALK.label)
 
         try:
             self._bounding_box = self.block_network.get_bounding_box()
