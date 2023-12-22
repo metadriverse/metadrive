@@ -27,7 +27,6 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
 
     env = MetaDriveEnv(
         dict(
-            debug=True,
             num_scenarios=1,
             start_seed=1010,
             agent_policy=IDMPolicy,

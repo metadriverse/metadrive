@@ -14,7 +14,7 @@ class SemanticCamera(BaseCamera):
         buffer_props.set_rgba_bits(16, 16, 16, 16)
         buffer_props.set_depth_bits(8)
         buffer_props.set_force_hardware(True)
-        buffer_props.set_multisamples(8)
+        buffer_props.set_multisamples(16)
         buffer_props.set_srgb_color(False)
         buffer_props.set_stereo(False)
         buffer_props.set_stencil_bits(0)
