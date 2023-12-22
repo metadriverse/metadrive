@@ -56,8 +56,9 @@ class MainCamera(BaseSensor):
 
         from metadrive.engine.core.terrain import Terrain
         engine.cam.node().setTagStateKey(CameraTagStateKey.RGB)
-        engine.cam.node().setTagState(Semantics.TERRAIN.label,
-                                      Terrain.make_render_state(engine, "terrain.vert.glsl", "terrain.frag.glsl"))
+        engine.cam.node().setTagState(
+            Semantics.TERRAIN.label, Terrain.make_render_state(engine, "terrain.vert.glsl", "terrain.frag.glsl")
+        )
 
         self.camera_queue = None
         self.camera_dist = camera_dist

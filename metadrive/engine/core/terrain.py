@@ -128,7 +128,7 @@ class Terrain(BaseObject, ABC):
                 ).astype(np.uint16)
                 heightfield_to_modify = heightfield_base[start:end, start:end, ...]
                 heightfield_base[start:end, start:end,
-                ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+                                 ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -175,12 +175,12 @@ class Terrain(BaseObject, ABC):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-            self,
-            size,
-            heightfield: Texture,
-            attribute_tex: Texture,
-            target_triangle_width=10,
-            engine=None,
+        self,
+        size,
+        heightfield: Texture,
+        attribute_tex: Texture,
+        target_triangle_width=10,
+        engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -272,10 +272,12 @@ class Terrain(BaseObject, ABC):
             def to_float(color):
                 return Vec3(*[i / 255 for i in color])
 
-            self._mesh_terrain.set_shader_inputs(crosswalk_semantics=to_float(Semantics.CROSSWALK.color),
-                                                 lane_line_semantics=to_float(Semantics.LANE_LINE.color),
-                                                 road_semantics=to_float(Semantics.ROAD.color),
-                                                 ground_semantics=to_float(Semantics.TERRAIN.color))
+            self._mesh_terrain.set_shader_inputs(
+                crosswalk_semantics=to_float(Semantics.CROSSWALK.color),
+                lane_line_semantics=to_float(Semantics.LANE_LINE.color),
+                road_semantics=to_float(Semantics.ROAD.color),
+                ground_semantics=to_float(Semantics.TERRAIN.color)
+            )
         self._mesh_terrain.set_shader_input("attribute_tex", attribute_tex)
 
     def reload_terrain_shader(self):
@@ -619,6 +621,7 @@ class Terrain(BaseObject, ABC):
         dummy_np = NodePath("Dummy")
         dummy_np.setShader(terrain_shader)
         return dummy_np.getState()
+
 
 # Some useful threads
 # GeoMipTerrain:

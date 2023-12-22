@@ -38,9 +38,10 @@ class DepthCamera(BaseCamera):
         cam = self.get_cam().node()
         cam.setTagStateKey(CameraTagStateKey.Depth)
         from metadrive.engine.core.terrain import Terrain
-        cam.setTagState(Semantics.TERRAIN.label, Terrain.make_render_state(self.engine,
-                                                                           "terrain.vert.glsl",
-                                                                           "terrain_depth.frag.glsl"))
+        cam.setTagState(
+            Semantics.TERRAIN.label,
+            Terrain.make_render_state(self.engine, "terrain.vert.glsl", "terrain_depth.frag.glsl")
+        )
 
         self.compute_node.set_shader_input("near_far_mul", self.far_near_mul)
         self.compute_node.set_shader_input("near_far_add", self.far_near_add)

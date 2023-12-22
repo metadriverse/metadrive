@@ -31,9 +31,9 @@ class RGBCamera(BaseCamera):
         cam = self.get_cam().node()
         cam.setTagStateKey(CameraTagStateKey.RGB)
         from metadrive.engine.core.terrain import Terrain
-        cam.setTagState(Semantics.TERRAIN.label, Terrain.make_render_state(self.engine,
-                                                                           "terrain.vert.glsl",
-                                                                           "terrain.frag.glsl"))
+        cam.setTagState(
+            Semantics.TERRAIN.label, Terrain.make_render_state(self.engine, "terrain.vert.glsl", "terrain.frag.glsl")
+        )
 
         self.scene_tex = None
         self.manager = FilterManager(self.buffer, self.cam)

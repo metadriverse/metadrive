@@ -33,12 +33,14 @@ class SemanticCamera(BaseCamera):
             label, c = getattr(Semantics, t)
             if label == Semantics.TERRAIN.label:
                 from metadrive.engine.core.terrain import Terrain
-                cam.setTagState(label, Terrain.make_render_state(self.engine,
-                                                                 "terrain.vert.glsl",
-                                                                 "terrain_semantics.frag.glsl"))
+                cam.setTagState(
+                    label, Terrain.make_render_state(self.engine, "terrain.vert.glsl", "terrain_semantics.frag.glsl")
+                )
             else:
-                cam.setTagState(label,
-                                RenderState.make(ShaderAttrib.makeOff(),
-                                                 LightAttrib.makeAllOff(),
-                                                 TextureAttrib.makeOff(),
-                                                 ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1))
+                cam.setTagState(
+                    label,
+                    RenderState.make(
+                        ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),
+                        ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1
+                    )
+                )
