@@ -38,11 +38,11 @@ def test_instance_cam(config, render=False):
             "norm_pixel": config["norm_pixel"],  # clip rgb to range(0,1) instead of (0, 255)
         }
     )
-    env.reset()
-    base_free = len(env.engine.COLORS_FREE)
-    base_occupied = len(env.engine.COLORS_OCCUPIED)
-    assert base_free + base_occupied == 4096
     try:
+        env.reset()
+        base_free = len(env.engine.COLORS_FREE)
+        base_occupied = len(env.engine.COLORS_OCCUPIED)
+        assert base_free + base_occupied == 4096
         import cv2
         import time
         start = time.time()

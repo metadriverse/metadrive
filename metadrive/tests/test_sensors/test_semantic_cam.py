@@ -1,5 +1,6 @@
 import pytest
-
+import numpy as np
+from metadrive.constants import Semantics
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
@@ -38,8 +39,8 @@ def test_semantic_cam(config, render=False):
             "norm_pixel": config["norm_pixel"],  # clip rgb to range(0,1) instead of (0, 255)
         }
     )
-    env.reset()
     try:
+        env.reset()
         import cv2
         import time
         start = time.time()
@@ -50,6 +51,11 @@ def test_semantic_cam(config, render=False):
             assert o["image"].shape == (
                 config["height"], config["width"], SemanticCamera.num_channels, config["stack_size"]
             )
+            image = o["image"][..., -1]
+            image = image.reshape(-1, 3)
+            unique_colors = np.unique(image, axis=0)
+            assert Semantics.SIDEWALK.color in unique_colors
+            assert Semantics.SKY.color in unique_colors
             if render:
                 cv2.imshow('img', o["image"][..., -1])
                 cv2.waitKey(1)

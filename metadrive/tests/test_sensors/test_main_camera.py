@@ -35,8 +35,8 @@ def test_main_camera(config, render=False):
             "norm_pixel": config["norm_pixel"],  # clip rgb to range(0,1) instead of (0, 255)
         }
     )
-    env.reset()
     try:
+        env.reset()
         import cv2
         import time
         start = time.time()

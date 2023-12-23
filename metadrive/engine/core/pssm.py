@@ -96,7 +96,7 @@ class PSSM:
             # Update the camera position and the light direction
             light_dir = self.directional_light.get_mat().xform(-self.directional_light.node().get_direction()).xyz
             self.camera_rig.update(self.engine.camera, light_dir)
-        cache_diff = self.engine.clock.get_frame_time() - self.last_cache_reset
+        # cache_diff = self.engine.clock.get_frame_time() - self.last_cache_reset
         # if cache_diff > 5.0:
         self.last_cache_reset = self.engine.clock.get_frame_time()
         self.camera_rig.reset_film_size_cache()
