@@ -6,6 +6,7 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.component.sensors.depth_camera import DepthCamera
 from metadrive.component.sensors.rgb_camera import RGBCamera
+from metadrive.component.sensors.instance_camera import InstanceCamera
 
 NuScenesEnv = ScenarioEnv
 

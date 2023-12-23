@@ -1,15 +1,9 @@
+from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib
+
 from metadrive.component.sensors.semantic_camera import SemanticCamera
-import cv2
-from panda3d.core import GeoMipTerrain, PNMImage
-from metadrive.constants import CameraTagStateKey
-from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, LVecBase4, MaterialAttrib
-from metadrive.constants import Semantics
-from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
-from metadrive.constants import RENDER_MODE_NONE
-from metadrive.engine.asset_loader import AssetLoader
+from metadrive.constants import CameraTagStateKey
 from metadrive.engine.engine_utils import get_engine
-import random
 
 
 class InstanceCamera(SemanticCamera):
