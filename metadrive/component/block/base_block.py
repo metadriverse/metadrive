@@ -408,14 +408,14 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 if polygons is None:
                     continue
                 for polygon in polygons:
-                    np = make_polygon_model(polygon, 0.0)
+                    np = make_polygon_model(polygon, 1.5)
 
                     body_node = BaseGhostBodyNode(cross_id, MetaDriveType.CROSSWALK)
                     body_node.setKinematic(False)
                     body_node.setStatic(True)
                     body_np = self.crosswalk_node_path.attachNewNode(body_node)
                     # A trick allowing collision with sidewalk
-                    body_np.setPos(0, 0, 0.5)
+                    body_np.setPos(0, 0, 1.5)
                     self._node_path_list.append(body_np)
 
                     geom = np.node().getGeom(0)
