@@ -11,7 +11,7 @@ class SemanticCamera(BaseCamera):
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         buffer_props = FrameBufferProperties()
-        buffer_props.set_rgba_bits(16, 16, 16, 16)
+        buffer_props.set_rgba_bits(8, 8, 8, 8)
         buffer_props.set_depth_bits(8)
         buffer_props.set_force_hardware(True)
         buffer_props.set_multisamples(16)
