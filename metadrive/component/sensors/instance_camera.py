@@ -1,16 +1,18 @@
-from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib
+from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, FrameBufferProperties
 
-from metadrive.component.sensors.semantic_camera import SemanticCamera
+from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import CameraTagStateKey
 from metadrive.engine.engine_utils import get_engine
 
 
-class InstanceCamera(SemanticCamera):
+class InstanceCamera(BaseCamera):
     CAM_MASK = CamMask.SemanticCam
 
     def __init__(self, width, height, engine, *, cuda=False):
-        super().__init__(width, height, engine, cuda=cuda)
+        self.BUFFER_W = width
+        self.BUFFER_H = height
+        super().__init__(engine, cuda)
 
     def track(self, base_object):
         self._setup_effect()
@@ -41,3 +43,6 @@ class InstanceCamera(SemanticCamera):
             )
             for id, c in mapping.items():
                 cam.setTagState(id, RenderState.make(ColorAttrib.makeFlat((c[0], c[1], c[2], 1)), 1))
+
+    def perceive(self, base_object, clip=True):
+        return super(InstanceCamera, self).perceive(base_object, clip)[::-1]
