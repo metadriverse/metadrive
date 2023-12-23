@@ -179,7 +179,7 @@ jobs:
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_export_record_scenario
 
   test_sensor_pipeline:
-    runs-on: ubuntu-large
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
