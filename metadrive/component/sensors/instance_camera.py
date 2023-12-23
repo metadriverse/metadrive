@@ -43,6 +43,3 @@ class InstanceCamera(BaseCamera):
             )
             for id, c in mapping.items():
                 cam.setTagState(id, RenderState.make(ColorAttrib.makeFlat((c[0], c[1], c[2], 1)), 1))
-
-    def perceive(self, base_object, clip=True):
-        return super(InstanceCamera, self).perceive(base_object, clip)[::-1]

@@ -56,6 +56,7 @@ def test_instance_cam(config, render=False):
             image = o["image"][..., -1]
             image = image.reshape(-1, 3)
             unique_colors = np.unique(image, axis=0)
+            assert len(unique_colors) > 0
             #Making sure every color observed correspond to an object
             for unique_color in unique_colors:
                 if (unique_color != np.array((0, 0, 0))).all():  #Ignore the black background.
