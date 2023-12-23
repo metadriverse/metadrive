@@ -21,7 +21,7 @@ class SkyBox(BaseObject):
             return
         skybox = self.loader.loadModel(AssetLoader.file_path("models", "skybox.bam"))
 
-        skybox.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.ScreenshotCam)
+        skybox.hide(CamMask.MiniMap | CamMask.Shadow)
         skybox.set_scale(20000)
 
         skybox_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "skybox.jpg"))

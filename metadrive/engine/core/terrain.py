@@ -40,7 +40,7 @@ class Terrain(BaseObject, ABC):
 
     def __init__(self, show_terrain, engine):
         super(Terrain, self).__init__(random_seed=0)
-        self.origin.hide(CamMask.MiniMap | CamMask.Shadow | CamMask.ScreenshotCam)
+        self.origin.hide(CamMask.MiniMap | CamMask.Shadow)
         # use plane terrain or mesh terrain， True by default.
         self.use_mesh_terrain = engine.global_config["use_mesh_terrain"]
         self.full_size_mesh = engine.global_config["full_size_mesh"]
