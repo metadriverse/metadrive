@@ -10,8 +10,10 @@ blackbox_test_configs = dict(
 
 
 @pytest.mark.parametrize("config", list(blackbox_test_configs.values()), ids=list(blackbox_test_configs.keys()))
-def test_depth_cam(config, render=False):
+def _test_depth_cam(config, render=False):
     """
+    Temporally disable it, as Github CI can not support compute shader
+    
     Test the output shape of Depth camera. This can not make sure the correctness of rendered image but only for
     checking the shape of image output and image retrieve pipeline
     Args:
