@@ -6,6 +6,7 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.component.sensors.depth_camera import DepthCamera
 from metadrive.component.sensors.rgb_camera import RGBCamera
+from metadrive.component.sensors.instance_camera import InstanceCamera
 
 NuScenesEnv = ScenarioEnv
 
@@ -23,7 +24,7 @@ if __name__ == "__main__":
             # "no_traffic": True,
             "store_data": False,
             "sequential_seed": True,
-            "pstats": True,
+            # "pstats": True,
             # "debug_static_world": True,
             # "sequential_seed": True,
             # "reactive_traffic": True,
@@ -33,19 +34,19 @@ if __name__ == "__main__":
             "show_crosswalk": True,
             # "show_coordinates": True,
             # "sensors": {
-            #     "semantic": (SemanticCamera, 200, 100),
-            #     "depth": (DepthCamera, 200, 100),
-            #     "rgb": (RGBCamera, 200, 100),
+            #     "semantic": (SemanticCamera, 400, 300),
+            #     "depth": (DepthCamera, 400, 300),
+            #     "rgb": (RGBCamera, 400, 300),
             # },
             # "pstats": True,
             # "use_mesh_terrain": True,
-            # "debug": True,
+            "debug": True,
             # "no_static_vehicles": False,
             # "pstats": True,
-            "render_pipeline": True,
+            # "render_pipeline": True,
             # "window_size": (1600, 900),
             "camera_dist": 9,
-            # "interface_panel": ["rgb", "semantic", "depth"],
+            # "interface_panel": ["semantic", "depth", "rgb"],
             "start_scenario_index": 0,
             "num_scenarios": 10,
             # "force_reuse_object_name": True,
@@ -53,7 +54,7 @@ if __name__ == "__main__":
             "vehicle_config": dict(
                 # light=True,
                 # random_color=True,
-                show_navi_mark=True,
+                show_navi_mark=False,
                 # no_wheel_friction=True,
                 lidar=dict(num_lasers=120, distance=50),
                 lane_line_detector=dict(num_lasers=0, distance=50),
@@ -91,19 +92,19 @@ if __name__ == "__main__":
         env.engine.terrain.origin.set_shader_input('is_terrain', 1)
         assert env.observation_space.contains(o)
         s += 1
-        if env.config["use_render"]:
-            env.render(
-                text={
-                    "seed": env.current_seed,
-                    "num_map": info["num_stored_maps"],
-                    "data_coverage": info["data_coverage"],
-                    "reward": r,
-                    "heading_r": info["step_reward_heading"],
-                    "lateral_r": info["step_reward_lateral"],
-                    "smooth_action_r": info["step_reward_action_smooth"]
-                },
-                # mode="topdown"
-            )
+        # if env.config["use_render"]:
+        #     env.render(
+        #         text={
+        #             "seed": env.current_seed,
+        #             "num_map": info["num_stored_maps"],
+        #             "data_coverage": info["data_coverage"],
+        #             "reward": r,
+        #             "heading_r": info["step_reward_heading"],
+        #             "lateral_r": info["step_reward_lateral"],
+        #             "smooth_action_r": info["step_reward_action_smooth"]
+        #         },
+        #         # mode="topdown"
+        #     )
         # if tm or tc:
         #     print(
         #         "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(

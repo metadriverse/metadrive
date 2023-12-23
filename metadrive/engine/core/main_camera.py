@@ -2,12 +2,13 @@ import math
 import queue
 from collections import deque
 from typing import Tuple
+
 import numpy as np
 from direct.controls.InputState import InputState
 from panda3d.core import Vec3, Point3, PNMImage
 from panda3d.core import WindowProperties
 
-from metadrive.constants import CollisionGroup
+from metadrive.constants import CollisionGroup, CameraTagStateKey, Semantics
 from metadrive.engine.engine_utils import get_engine
 from metadrive.utils.coordinates_shift import panda_heading, panda_vector
 from metadrive.utils.cuda import check_cudart_err
@@ -52,6 +53,13 @@ class MainCamera(BaseSensor):
         # lens property
         lens = engine.cam.node().getLens()
         lens.setFov(engine.global_config["camera_fov"])
+
+        from metadrive.engine.core.terrain import Terrain
+        engine.cam.node().setTagStateKey(CameraTagStateKey.RGB)
+        engine.cam.node().setTagState(
+            Semantics.TERRAIN.label, Terrain.make_render_state(engine, "terrain.vert.glsl", "terrain.frag.glsl")
+        )
+
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"

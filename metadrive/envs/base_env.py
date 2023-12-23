@@ -228,8 +228,6 @@ BASE_DEFAULT_CONFIG = dict(
     show_crosswalk=False,
     # Whether to show sidewalk
     show_sidewalk=True,
-    # Whether to show lane lines in semantic camera. It harms the performance!
-    build_lane_line_for_semantic_cam=False,
 
     # ===== Debug =====
     # Please see Documentation: Debug for more details
@@ -324,6 +322,11 @@ class BaseEnv(gym.Env):
         if not config["show_interface"]:
             config["interface_panel"] = []
 
+        # Multi-Thread
+        if config["image_on_cuda"]:
+            self.logger.info("Turn Off Multi-thread rendering due to image_on_cuda=True")
+            config["multi_thread_render"] = False
+
         # Adjust terrain
         n = config["map_region_size"]
         assert (n & (n - 1)) == 0 and 0 < n <= 2048, "map_region_size should be pow of 2 and < 2048."
@@ -334,6 +337,8 @@ class BaseEnv(gym.Env):
                 config["vehicle_config"]["image_source"] != "main_camera" and config["auto_resize_window"]:
             # reduce size as we don't use the main camera content for improving efficiency
             config["window_size"] = (1, 1)
+            config["show_interface"] = False
+            config["interface_panel"] = []
             self.logger.debug(
                 "Main window size is reduced to (1, 1) for boosting efficiency."
                 "To cancel this, set auto_resize_window = False"
@@ -350,9 +355,9 @@ class BaseEnv(gym.Env):
 
         # Merge dashboard config with sensors
         to_use = []
-        if not config["render_pipeline"]:
+        if not config["render_pipeline"] and config["show_interface"]:
             for panel in config["interface_panel"]:
-                if panel == "dashboard":
+                if panel == "dashboard" and config["window_size"] != (1, 1):
                     config["sensors"]["dashboard"] = (DashBoard, )
                 if panel not in config["sensors"]:
                     self.logger.warning(
@@ -379,9 +384,6 @@ class BaseEnv(gym.Env):
             if not isinstance(cfg[0], str) and cfg[0].__name__ == "SemanticCamera":
                 has_semantic_cam = True
         self.logger.info(_str.format(sensors_str[:-2]))
-        if config["build_lane_line_for_semantic_cam"] and not has_semantic_cam:
-            config["build_lane_line_for_semantic_cam"] = False
-            self.logger.warning("'build_lane_line_for_semantic_cam' is turned off as SemanticCamera doesn't exist")
 
         # determine render mode automatically
         if config["use_render"]:

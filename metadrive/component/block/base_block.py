@@ -1,33 +1,33 @@
 import logging
+from metadrive.constants import Semantics, CameraTagStateKey
 import math
-import time
+import warnings
 from abc import ABC
 from typing import Dict
-from panda3d.core import LVecBase4, TextureStage
-from metadrive.utils.utils import create_rectangle_from_midpoints
+
 import numpy as np
 from panda3d.bullet import BulletBoxShape
 from panda3d.bullet import BulletConvexHullShape
 from panda3d.bullet import BulletTriangleMeshShape, BulletTriangleMesh
 from panda3d.core import LPoint3f, Material
+from panda3d.core import TextureStage
 from panda3d.core import Vec3, LQuaternionf, RigidBodyCombiner, \
     SamplerState, NodePath, Texture
 from panda3d.core import Vec4
-from metadrive.constants import TerrainProperty
+
 from metadrive.base_class.base_object import BaseObject
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.component.road_network.road import Road
 from metadrive.constants import CollisionGroup
 from metadrive.constants import MetaDriveType, CamMask, PGLineType, PGLineColor, PGDrivableAreaProperty
-from metadrive.constants import Semantics
+from metadrive.constants import TerrainProperty
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.engine.logger import get_logger
 from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_vector, panda_heading
 from metadrive.utils.math import norm
 from metadrive.utils.vertex import make_polygon_model
-from metadrive.engine.logger import get_logger
-import warnings
 
 warnings.filterwarnings('ignore', 'invalid value encountered in intersection')
 
@@ -219,12 +219,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.sidewalk_node_path = NodePath(RigidBodyCombiner(self.name + "_sidewalk"))
         self.crosswalk_node_path = NodePath(RigidBodyCombiner(self.name + "_crosswalk"))
         self.lane_node_path = NodePath(RigidBodyCombiner(self.name + "_lane"))
-        self.lane_vis_node_path = NodePath(RigidBodyCombiner(self.name + "_lane_vis"))
-
-        self.sidewalk_node_path.setTag("type", Semantics.SIDEWALK.label)
-        self.crosswalk_node_path.setTag("type", Semantics.CROSSWALK.label)
-        self.lane_vis_node_path.setTag("type", Semantics.ROAD.label)
-        self.lane_line_node_path.setTag("type", Semantics.LANE_LINE.label)
 
         if skip:  # for debug
             pass
@@ -257,16 +251,15 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self.lane_node_path.flattenStrong()
         self.lane_node_path.node().collect()
 
-        self.lane_vis_node_path.flattenStrong()
-        self.lane_vis_node_path.node().collect()
-        self.lane_vis_node_path.hide(CamMask.DepthCam | CamMask.ScreenshotCam | CamMask.SemanticCam)
-
         self.origin.hide(CamMask.Shadow)
 
         self.sidewalk_node_path.reparentTo(self.origin)
         self.crosswalk_node_path.reparentTo(self.origin)
         self.lane_line_node_path.reparentTo(self.origin)
         self.lane_node_path.reparentTo(self.origin)
+
+        # semantics
+        self.sidewalk_node_path.setTag(CameraTagStateKey.Semantic, Semantics.SIDEWALK.label)
 
         try:
             self._bounding_box = self.block_network.get_bounding_box()
@@ -279,7 +272,6 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         self._node_path_list.append(self.crosswalk_node_path)
         self._node_path_list.append(self.lane_line_node_path)
         self._node_path_list.append(self.lane_node_path)
-        self._node_path_list.append(self.lane_vis_node_path)
 
     def create_in_world(self):
         """
@@ -416,16 +408,14 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                 if polygons is None:
                     continue
                 for polygon in polygons:
-                    np = make_polygon_model(polygon, 0.0)
-                    np.reparentTo(self.crosswalk_node_path)
-                    np.setPos(0, 0, 0.005)
+                    np = make_polygon_model(polygon, 1.5)
 
                     body_node = BaseGhostBodyNode(cross_id, MetaDriveType.CROSSWALK)
                     body_node.setKinematic(False)
                     body_node.setStatic(True)
                     body_np = self.crosswalk_node_path.attachNewNode(body_node)
                     # A trick allowing collision with sidewalk
-                    body_np.setPos(0, 0, 0.5)
+                    body_np.setPos(0, 0, 1.5)
                     self._node_path_list.append(body_np)
 
                     geom = np.node().getGeom(0)
@@ -436,7 +426,7 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
                     body_node.addShape(shape)
                     self.static_nodes.append(body_node)
                     body_node.setIntoCollideMask(CollisionGroup.Crosswalk)
-                    self._node_path_list.append(np)
+                    np.removeNode()
 
     def _construct_lane(self, lane, lane_index):
         """
@@ -525,22 +515,5 @@ class BaseBlock(BaseObject, PGDrivableAreaProperty, ABC):
         # theta = -numpy.arctan2(direction_v[1], direction_v[0])
         theta = panda_heading(math.atan2(direction_v[1], direction_v[0]))
         body_np.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-        #
-        # if self.render and not self.use_render_pipeline:
-        #     # For visualization in semantic camera
-        #     polygon = create_rectangle_from_midpoints(start_point, end_point, PGDrivableAreaProperty.LANE_LINE_WIDTH)
-        #     lane_line = make_polygon_model(polygon, height=0)
-        #     lane_line.reparentTo(parent_np)
-        #     lane_line.setPos(0, 0, 0.005)
-        if self.render and not self.use_render_pipeline \
-                and self.engine and self.engine.global_config["build_lane_line_for_semantic_cam"]:
-            # For visualization
-            lane_line = NodePath("line_seg")
-            self.line_seg.instanceTo(lane_line)
-            lane_line.setScale(
-                length, PGDrivableAreaProperty.LANE_LINE_WIDTH, PGDrivableAreaProperty.LANE_LINE_THICKNESS
-            )
-            lane_line.setQuat(LQuaternionf(math.cos(theta / 2), 0, 0, math.sin(theta / 2)))
-            lane_line.setPos(panda_vector(middle, 0.1))
-            lane_line.reparentTo(parent_np)
+
         return node_path_list

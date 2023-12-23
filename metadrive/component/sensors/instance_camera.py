@@ -1,21 +1,18 @@
-from metadrive.component.sensors.semantic_camera import SemanticCamera
-import cv2
-from panda3d.core import GeoMipTerrain, PNMImage
-from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, LVecBase4, MaterialAttrib
-from metadrive.constants import Semantics
+from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, FrameBufferProperties
+
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
-from metadrive.constants import RENDER_MODE_NONE
-from metadrive.engine.asset_loader import AssetLoader
+from metadrive.constants import CameraTagStateKey
 from metadrive.engine.engine_utils import get_engine
-import random
 
 
-class InstanceCamera(SemanticCamera):
+class InstanceCamera(BaseCamera):
     CAM_MASK = CamMask.SemanticCam
 
     def __init__(self, width, height, engine, *, cuda=False):
-        super().__init__(width, height, engine, cuda=cuda)
+        self.BUFFER_W = width
+        self.BUFFER_H = height
+        super().__init__(engine, cuda)
 
     def track(self, base_object):
         self._setup_effect()
@@ -35,9 +32,9 @@ class InstanceCamera(SemanticCamera):
             mapping = get_engine().id_c
             spawned_objects = get_engine().get_objects()
             for id, obj in spawned_objects.items():
-                obj.origin.setTag("id", id)
+                obj.origin.setTag(CameraTagStateKey.ID, id)
             cam = self.get_cam().node()
-            cam.setTagStateKey("id")
+            cam.setTagStateKey(CameraTagStateKey.ID)
             cam.setInitialState(
                 RenderState.make(
                     ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),

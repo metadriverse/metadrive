@@ -38,11 +38,11 @@ def test_instance_cam(config, render=False):
             "norm_pixel": config["norm_pixel"],  # clip rgb to range(0,1) instead of (0, 255)
         }
     )
-    env.reset()
-    base_free = len(env.engine.COLORS_FREE)
-    base_occupied = len(env.engine.COLORS_OCCUPIED)
-    assert base_free + base_occupied == 4096
     try:
+        env.reset()
+        base_free = len(env.engine.COLORS_FREE)
+        base_occupied = len(env.engine.COLORS_OCCUPIED)
+        assert base_free + base_occupied == 4096
         import cv2
         import time
         start = time.time()
@@ -56,6 +56,7 @@ def test_instance_cam(config, render=False):
             image = o["image"][..., -1]
             image = image.reshape(-1, 3)
             unique_colors = np.unique(image, axis=0)
+            assert len(unique_colors) > 0
             #Making sure every color observed correspond to an object
             for unique_color in unique_colors:
                 if (unique_color != np.array((0, 0, 0))).all():  #Ignore the black background.

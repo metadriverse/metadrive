@@ -1,9 +1,11 @@
 import panda3d.core as p3d
 from direct.filter.FilterManager import FilterManager
-from metadrive.third_party.simplepbr import _load_shader_str
 from panda3d.core import FrameBufferProperties
+
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
+from metadrive.constants import Semantics, CameraTagStateKey
+from metadrive.third_party.simplepbr import _load_shader_str
 
 
 class RGBCamera(BaseCamera):
@@ -19,11 +21,6 @@ class RGBCamera(BaseCamera):
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         super(RGBCamera, self).__init__(engine, cuda)
-        cam = self.get_cam()
-        lens = self.get_lens()
-        # cam.lookAt(0, 2.4, 1.3)
-        cam.lookAt(0, 10.4, 1.6)
-        lens.setFov(60)
 
     def _setup_effect(self):
         """
@@ -31,6 +28,13 @@ class RGBCamera(BaseCamera):
         Returns: None
 
         """
+        cam = self.get_cam().node()
+        cam.setTagStateKey(CameraTagStateKey.RGB)
+        from metadrive.engine.core.terrain import Terrain
+        cam.setTagState(
+            Semantics.TERRAIN.label, Terrain.make_render_state(self.engine, "terrain.vert.glsl", "terrain.frag.glsl")
+        )
+
         self.scene_tex = None
         self.manager = FilterManager(self.buffer, self.cam)
         fbprops = p3d.FrameBufferProperties()
@@ -70,4 +74,6 @@ class RGBCamera(BaseCamera):
         if frame_buffer_property is None:
             frame_buffer_property = FrameBufferProperties()
         frame_buffer_property.set_rgba_bits(8, 8, 8, 0)  # disable alpha for RGB camera
-        return self.engine.win.makeTextureBuffer("camera", width, height, fbp=frame_buffer_property)
+        self.buffer = self.engine.win.makeTextureBuffer(
+            self.__class__.__name__, width, height, fbp=frame_buffer_property
+        )

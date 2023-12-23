@@ -1,5 +1,4 @@
 import math
-from shapely.geometry import Polygon
 from collections import namedtuple
 from typing import List, Tuple
 
@@ -7,8 +6,10 @@ import numpy as np
 from panda3d.bullet import BulletWorld
 from panda3d.core import Vec3
 from panda3d.core import Vec4, BitMask32
-from metadrive.version import VERSION
+from shapely.geometry import Polygon
+
 from metadrive.type import MetaDriveType
+from metadrive.version import VERSION
 
 EDITION = "MetaDrive v{}".format(VERSION)
 DATA_VERSION = EDITION  # Use MetaDrive version to mark the data version
@@ -121,7 +122,6 @@ class CamMask(Mask):
     MiniMap = BitMask32.bit(12)
     PARA_VIS = BitMask32.bit(13)
     DepthCam = BitMask32.bit(14)
-    ScreenshotCam = BitMask32.bit(15)
     SemanticCam = BitMask32.bit(16)
 
 
@@ -532,3 +532,13 @@ class TerrainProperty:
                     [list(geom.exterior.coords) for geom in polygon.geoms]
         except Exception as error:
             return None
+
+
+class CameraTagStateKey:
+    """
+    Enables multi-pass rendering
+    """
+    ID = "id"
+    RGB = "rgb"
+    Depth = "depth"
+    Semantic = "semantic"

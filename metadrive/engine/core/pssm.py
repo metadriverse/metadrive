@@ -86,19 +86,18 @@ class PSSM:
         Returns: task.con (task.continue)
 
         """
+        light_dir = self.directional_light.get_mat().xform(-self.directional_light.node().get_direction()).xyz
+        self.camera_rig.update(self.engine.camera, light_dir)
+
         src_mvp_array = self.camera_rig.get_mvp_array()
         mvp_array = PTA_LMatrix4()
         for array in src_mvp_array:
             mvp_array.push_back(array)
         self.engine.render.set_shader_inputs(pssm_mvps=mvp_array)
 
-        if not self.freeze_pssm:
-            # Update the camera position and the light direction
-            light_dir = self.directional_light.get_mat().xform(-self.directional_light.node().get_direction()).xyz
-            self.camera_rig.update(self.engine.camera, light_dir)
-        cache_diff = self.engine.clock.get_frame_time() - self.last_cache_reset
+        # cache_diff = self.engine.clock.get_frame_time() - self.last_cache_reset
         # if cache_diff > 5.0:
-        self.last_cache_reset = self.engine.clock.get_frame_time()
+        # self.last_cache_reset = self.engine.clock.get_frame_time()
         self.camera_rig.reset_film_size_cache()
         return task.cont
 
@@ -232,7 +231,7 @@ class PSSM:
 
         buffer.add_render_texture(self.depth_tex, GraphicsOutput.RTM_bind_or_copy, GraphicsOutput.RTP_depth)
 
-        buffer.set_sort(-1000)
+        buffer.set_sort(-1001)
         buffer.disable_clears()
         buffer.get_display_region(0).disable_clears()
         buffer.get_overlay_display_region().disable_clears()

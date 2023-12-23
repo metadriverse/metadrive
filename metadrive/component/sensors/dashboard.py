@@ -1,4 +1,4 @@
-from panda3d.core import NodePath, PGTop, TextNode, CardMaker, Vec3
+from panda3d.core import NodePath, PGTop, TextNode, CardMaker, Vec3, OrthographicLens
 
 from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.constants import CamMask
@@ -9,6 +9,12 @@ class DashBoard(ImageBuffer, BaseSensor):
     """
     Dashboard for showing the speed and brake/throttle/steering
     """
+    def perceive(self, *args, **kwargs):
+        """
+        This is only used for GUI and won't provide any observation result
+        """
+        raise NotImplementedError
+
     PARA_VIS_LENGTH = 12
     PARA_VIS_HEIGHT = 1
     MAX_SPEED = 120
@@ -86,7 +92,20 @@ class DashBoard(ImageBuffer, BaseSensor):
         )
         self._node_path_list.extend(tmp_node_path_list)
 
+    def _create_camera(self, pos, bkg_color):
+        """
+        Create orthogonal camera for the buffer
+        """
+        self.cam = cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
+        cam.node().setCameraMask(self.CAM_MASK)
+
+        self.cam.reparentTo(self.origin)
+        self.cam.setPos(pos)
+
     def update_vehicle_state(self, vehicle):
+        """
+        Update the dashboard result given a vehicle
+        """
         steering, throttle_brake, speed = vehicle.steering, vehicle.throttle_brake, vehicle.speed_km_h
         if throttle_brake < 0:
             self.para_vis_np["Throttle"].setScale(0, 1, 1)
@@ -115,8 +134,8 @@ class DashBoard(ImageBuffer, BaseSensor):
         self.buffer.set_active(False)
         super(DashBoard, self).remove_display_region()
 
-    def add_display_region(self, display_region):
-        super(DashBoard, self).add_display_region(display_region)
+    def add_display_region(self, display_region, keep_height=False):
+        super(DashBoard, self).add_display_region(display_region, False)
         self.buffer.set_active(True)
         self.origin.reparentTo(self.aspect2d_np)
 

@@ -58,7 +58,7 @@ class TrafficCone(TrafficObject):
         self.set_static(static)
         if self.render:
             model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
-            # model.node().setTag("type", "vehicle")
+            # model.node().setTag("semantic", "vehicle")
             model.setScale(0.02, 0.02, 0.025)
             model.setPos(0, 0, -self.HEIGHT / 2)
             model.reparentTo(self.origin)

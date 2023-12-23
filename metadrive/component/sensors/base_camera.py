@@ -65,8 +65,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
             self._cuda_buffer = None
 
             # make texture
-            self.cuda_texture = Texture()
-            self.buffer.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMBindOrCopy)
+            self._make_cuda_texture()
 
             def _callback_func(cbdata: DisplayRegionDrawCallbackData):
                 # print("DRAW CALLBACK!!!!!!!!!!!!!!!11")
@@ -87,6 +86,13 @@ class BaseCamera(ImageBuffer, BaseSensor):
             self.cuda_texture_identifier = None
             self.new_cuda_mem_ptr = None
             self.cuda_rendered_result = None
+
+    def _make_cuda_texture(self):
+        """
+        Make a texture for cuda access
+        """
+        self.cuda_texture = Texture()
+        self.buffer.addRenderTexture(self.cuda_texture, GraphicsOutput.RTMBindOrCopy)
 
     @property
     def enable_cuda(self):
@@ -109,11 +115,9 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.track(base_object)
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
-            ret = self.cuda_rendered_result[..., :-1][..., ::-1][::-1][..., :self.num_channels]
+            ret = self.cuda_rendered_result[..., :self.num_channels][..., ::-1][::-1]
         else:
             ret = self.get_rgb_array_cpu()
-        # if self.engine.global_config["rgb_to_grayscale"]:
-        #     ret = np.dot(ret[..., :3], [0.299, 0.587, 0.114])
         if not clip:
             return ret.astype(np.uint8, copy=False, order="C")
         else:
