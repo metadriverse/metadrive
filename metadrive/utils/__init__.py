@@ -114,7 +114,6 @@ FUNC = {
     Error: ('_brightred_', '_brightred_'),
 }
 
-
 FUNC_2 = {
     Token: ('', ''),
     Whitespace: ('gray', 'brightblack'),
@@ -155,6 +154,7 @@ FUNC_2 = {
     Generic.Error: ('brightred', 'brightred'),
     Error: ('_brightred_', '_brightred_'),
 }
+
 
 def print_source(x, start_end=None, colorscheme=FUNC, **kwargs):
     """
