@@ -115,6 +115,47 @@ FUNC = {
 }
 
 
+FUNC_2 = {
+    Token: ('', ''),
+    Whitespace: ('gray', 'brightblack'),
+    Comment: ('black', 'green'),
+    Keyword: ('blue', 'brightblue'),
+    Keyword.Type: ('cyan', 'brightcyan'),
+    Operator.Word: ('magenta', 'brightmagenta'),
+    Name: ('red', 'brightcyan'),
+    Name.Attribute: ('magenta', 'brightcyan'),
+    Name.Builtin: ('magenta', 'brightcyan'),
+    Name.Builtin.Pseudo: ('magenta', 'brightcyan'),
+    Name.Class: ('cyan', 'brightcyan'),
+    Name.Constant: ('magenta', 'brightcyan'),
+    Name.Decorator: ('magenta', 'brightcyan'),
+    Name.Entity: ('magenta', 'brightcyan'),
+    Name.Exception: ('magenta', 'brightcyan'),
+    Name.Function: ('magenta', 'brightcyan'),
+    Name.Function.Magic: ('magenta', 'brightcyan'),
+    Name.Property: ('magenta', 'brightcyan'),
+    Name.Label: ('magenta', 'brightcyan'),
+    Name.Namespace: ('magenta', 'brightcyan'),
+    Name.Other: ('green', 'brightcyan'),
+    Name.Tag: ('magenta', 'brightcyan'),
+    Name.Variable: ('red', 'brightcyan'),
+    Name.Variable.Class: ('red', 'brightcyan'),
+    Name.Variable.Global: ('red', 'brightcyan'),
+    Name.Variable.Instance: ('red', 'brightcyan'),
+    Name.Variable.Magic: ('red', 'brightcyan'),
+    String: ('black', 'black'),
+    Number: ('blue', 'blue'),
+    Number.Float: ('green', 'blue'),
+    Punctuation: ('magenta', 'blue'),
+    Generic.Deleted: ('brightred', 'brightred'),
+    Generic.Inserted: ('green', 'brightgreen'),
+    Generic.Heading: ('**', '**'),
+    Generic.Subheading: ('*magenta*', '*brightmagenta*'),
+    Generic.Prompt: ('**', '**'),
+    Generic.Error: ('brightred', 'brightred'),
+    Error: ('_brightred_', '_brightred_'),
+}
+
 def print_source(x, start_end=None, colorscheme=FUNC, **kwargs):
     """
     Print the source code of module x
