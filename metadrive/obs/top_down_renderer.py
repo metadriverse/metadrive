@@ -178,8 +178,6 @@ class TopDownRenderer:
         draw_contour=True,
         window=True,
         screen_record=False,
-        **kwargs
-        # current_track_vehicle=None
     ):
         # Setup some useful flags
         self.position = camera_position
@@ -244,7 +242,6 @@ class TopDownRenderer:
 
         # Draw
         self.blit()
-        self.kwargs = kwargs
 
         # key accept
         self.need_reset = False
