@@ -9,6 +9,9 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
+  jobs:
+    post_install: 
+      - python -m metadrive.pull_asset
     # You can also specify other tool versions:
     # nodejs: "20"
     # rust: "1.70"

@@ -225,7 +225,7 @@ BASE_DEFAULT_CONFIG = dict(
     # If set to False, only the center region of the terrain has the physics body
     full_size_mesh=True,
     # Whether to show crosswalk
-    show_crosswalk=False,
+    show_crosswalk=True,
     # Whether to show sidewalk
     show_sidewalk=True,
 
