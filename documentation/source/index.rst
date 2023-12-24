@@ -54,14 +54,14 @@ Please feel free to contact us if you have any suggestions or ideas!
    :caption: Concepts and Customization
 
    system_design.ipynb
-   development.rst
    top_down_render.ipynb
-   policy.rst
+   panda_render.ipynb
+   vehicle.ipynb
    navigation.ipynb
    sensors.ipynb
-   gui.ipynb
    description.ipynb
    record_replay.ipynb
+   development.rst
 
 .. toctree::
    :hidden:
