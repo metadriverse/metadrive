@@ -1,4 +1,5 @@
 import argparse
+import logging
 import time
 import os
 import progressbar
@@ -55,7 +56,8 @@ def pull_asset(update):
         with lock.acquire():
             # Fetch the zip file
             logger.info("Pull assets from {} to {}".format(ASSET_URL, zip_path))
-            urllib.request.urlretrieve(ASSET_URL, zip_path, MyProgressBar())
+            extra_arg = [MyProgressBar()] if logger.level == logging.INFO else []
+            urllib.request.urlretrieve(ASSET_URL, zip_path, *extra_arg)
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(TARGET_DIR)
             logger.info(
