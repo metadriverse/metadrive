@@ -36,8 +36,9 @@ class BaseObservation(ABC):
         """
         Clear allocated memory
         """
-        Config.clear_nested_dict(self.config)
-        self.config = None
+        pass
+        # Config.clear_nested_dict(self.config)
+        # self.config = None
 
 
 class DummyObservation(BaseObservation):
