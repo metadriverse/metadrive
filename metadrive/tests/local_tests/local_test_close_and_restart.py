@@ -14,6 +14,7 @@ def local_test_close_and_restart(repeat=100):
     plt.ion()  # Turn on interactive mode
     fig, ax = plt.subplots()
     memory_usage = []
+    snapshot = None
     try:
         for m in ["X", "O", "C", "R", "r", ] * 40:
             env = MetaDriveEnv({"map": m, "use_render": False, "log_level": 50, "traffic_density": 0})
@@ -29,11 +30,15 @@ def local_test_close_and_restart(repeat=100):
             ax.set_ylabel('Memory Usage')
             plt.pause(0.05)  # A short pause to update the plot
 
-            snapshot = tracemalloc.take_snapshot()
-            top_stats = snapshot.statistics('lineno')
-            print("[ Top 10 ]")
-            for stat in top_stats[:10]:
-                print(stat)
+            new_snapshot = tracemalloc.take_snapshot()
+            if snapshot:
+                stats = new_snapshot.compare_to(snapshot, 'lineno')
+                print("[ Top 10 ]")
+                for stat in stats[:10]:
+                    print(stat)
+            snapshot = new_snapshot
+
+
 
     finally:
         if "env" in locals():

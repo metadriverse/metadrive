@@ -38,6 +38,11 @@ class ImageStateObservation(BaseObservation):
     def observe(self, vehicle: BaseVehicle):
         return {self.IMAGE: self.img_obs.observe(vehicle), self.STATE: self.state_obs.observe(vehicle)}
 
+    def destroy(self):
+        super(ImageStateObservation, self).destroy()
+        self.img_obs.destroy()
+        self.state_obs.destroy()
+
 
 class ImageObservation(BaseObservation):
     """
@@ -88,3 +93,10 @@ class ImageObservation(BaseObservation):
         self.state = np.zeros(self.observation_space.shape, dtype=np.float32)
         if self.enable_cuda:
             self.state = cp.asarray(self.state)
+
+    def destroy(self):
+        """
+        Clear memory
+        """
+        super(ImageObservation, self).destroy()
+        self.state = None

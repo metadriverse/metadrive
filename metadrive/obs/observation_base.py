@@ -31,6 +31,13 @@ class BaseObservation(ABC):
     def reset(self, env, vehicle=None):
         pass
 
+    def destroy(self):
+        """
+        Clear allocated memory
+        """
+        self.config.clear()
+        self.config = None
+
 
 class DummyObservation(BaseObservation):
     """

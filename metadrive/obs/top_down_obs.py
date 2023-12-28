@@ -175,10 +175,10 @@ class TopDownObservation(BaseObservation):
 
     @staticmethod
     def blit_rotate(
-        surf: pygame.SurfaceType,
-        image: pygame.SurfaceType,
-        pos,
-        angle: float,
+            surf: pygame.SurfaceType,
+            image: pygame.SurfaceType,
+            pos,
+            angle: float,
     ) -> Tuple:
         """Many thanks to https://stackoverflow.com/a/54714144."""
         # calculate the axis aligned bounding box of the rotated image
@@ -213,7 +213,7 @@ class TopDownObservation(BaseObservation):
 
     @property
     def observation_space(self):
-        shape = self.obs_shape + (self.num_stacks, )
+        shape = self.obs_shape + (self.num_stacks,)
         if self.norm_pixel:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:
@@ -228,3 +228,8 @@ class TopDownObservation(BaseObservation):
         else:
             img = img.astype(np.uint8)
         return np.transpose(img, (1, 0, 2))
+
+    def destroy(self):
+        # scene
+        self.road_network = None
+        super(TopDownObservation, self).destroy()
