@@ -63,8 +63,9 @@ class BaseManager(Randomizable):
         Destroy manager
         """
         # self.engine = None
-        self.spawned_objects = None
         super(BaseManager, self).destroy()
+        self.clear_objects(list(self.spawned_objects.keys()), force_destroy=True)
+        self.spawned_objects = None
 
     def spawn_object(self, object_class, **kwargs):
         """
@@ -123,7 +124,7 @@ class BaseManager(Randomizable):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-                                                         ].class_name == class_name, "Can not restore mappings!"
+            ].class_name == class_name, "Can not restore mappings!"
             ret[current_name] = name_obj[current_name]
         self.spawned_objects = ret
 

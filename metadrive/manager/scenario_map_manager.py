@@ -101,7 +101,8 @@ class ScenarioMapManager(BaseManager):
             assert len(self.spawned_objects) == 0
 
     def destroy(self):
-        self.maps = None
+        self.clear_stored_maps()
+        self._stored_maps = None
         self.current_map = None
 
         self.sdc_start_point = None
@@ -121,12 +122,6 @@ class ScenarioMapManager(BaseManager):
         self.sdc_dest_point = None
         self.current_sdc_route = None
         self.current_map = None
-
-    def clear_objects(self, *args, **kwargs):
-        """
-        As Map instance should not be recycled, we will forcefully destroy useless map instances.
-        """
-        return super(ScenarioMapManager, self).clear_objects(force_destroy=True, *args, **kwargs)
 
     def clear_stored_maps(self):
         for m in self._stored_maps.values():

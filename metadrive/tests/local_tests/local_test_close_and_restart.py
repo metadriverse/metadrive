@@ -16,8 +16,8 @@ def local_test_close_and_restart(repeat=100):
     memory_usage = []
     try:
         for m in ["X", "O", "C", "R", "r", ] * 40:
-            # env = MetaDriveEnv({"map": m, "use_render": False})
-            env = BaseEnv({"use_render": False, "log_level": 50})
+            env = MetaDriveEnv({"map": m, "use_render": False, "log_level": 50, "traffic_density": 0})
+            # env = BaseEnv({"use_render": False, "log_level": 50})
             o, _ = env.reset()
             env.close()
             memory = process_memory(to_mb=True)
