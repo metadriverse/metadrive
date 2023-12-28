@@ -389,7 +389,7 @@ class EngineCore(ShowBase.ShowBase):
         self.physics_world.destroy()
         self.destroy()
         close_asset_loader()
-        EngineCore.global_config.clear()
+        # EngineCore.global_config.clear()
         EngineCore.global_config = None
 
         import sys
