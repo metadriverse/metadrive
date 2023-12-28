@@ -99,6 +99,7 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
         Configurable.destroy(self)
         Randomizable.destroy(self)
         Nameable.destroy(self)
+        self.PARAMETER_SPACE.destroy()
 
     @property
     def engine(self):

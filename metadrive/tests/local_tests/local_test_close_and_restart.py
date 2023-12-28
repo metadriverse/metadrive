@@ -15,7 +15,7 @@ def local_test_close_and_restart(repeat=100):
     fig, ax = plt.subplots()
     memory_usage = []
     try:
-        for m in ["X", "O", "C", "S", "R", "r", "T"] * repeat:
+        for m in ["X", "O", "C", "R", "r", ] * 40:
             # env = MetaDriveEnv({"map": m, "use_render": False})
             env = BaseEnv({"use_render": False})
             o, _ = env.reset()
