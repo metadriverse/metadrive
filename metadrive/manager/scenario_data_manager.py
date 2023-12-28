@@ -196,6 +196,6 @@ class ScenarioDataManager(BaseManager):
         super(ScenarioDataManager, self).destroy()
         self._scenarios = {}
         Config.clear_nested_dict(self.summary_dict)
-        Config.clear_nested_dict(self.summary_lookup)
-        Config.clear_nested_dict(self.mapping)
+        self.summary_lookup.clear()
+        self.mapping.clear()
         self.summary_dict, self.summary_lookup, self.mapping = None, None, None

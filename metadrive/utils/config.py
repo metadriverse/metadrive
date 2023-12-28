@@ -101,7 +101,11 @@ class Config:
         for key, value in d.items():
             if isinstance(value, dict) or isinstance(value, Config):
                 Config.clear_nested_dict(value)
-        d.clear()
+        if isinstance(d, dict):
+            d.clear()
+        elif isinstance(d, Config):
+            d._config.clear()
+            d._config = None
 
     def register_type(self, key, *types):
         """
