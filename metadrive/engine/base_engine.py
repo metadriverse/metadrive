@@ -324,7 +324,6 @@ class BaseEngine(EngineCore, Randomizable):
         _debug_memory_usage = False
 
         if _debug_memory_usage:
-
             def process_memory():
                 import psutil
                 import os
@@ -536,6 +535,8 @@ class BaseEngine(EngineCore, Randomizable):
             self.top_down_renderer.close()
             del self.top_down_renderer
             self.top_down_renderer = None
+
+        Randomizable.destroy(self)
 
     def __del__(self):
         logger.debug("{} is destroyed".format(self.__class__.__name__))

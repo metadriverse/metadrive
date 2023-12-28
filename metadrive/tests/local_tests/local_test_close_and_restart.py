@@ -1,6 +1,10 @@
+from metadrive.envs.base_env import BaseEnv
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
 import matplotlib.pyplot as plt
+import tracemalloc
+
+tracemalloc.start()
 
 
 def local_test_close_and_restart(repeat=100):
@@ -12,7 +16,8 @@ def local_test_close_and_restart(repeat=100):
     memory_usage = []
     try:
         for m in ["X", "O", "C", "S", "R", "r", "T"] * repeat:
-            env = MetaDriveEnv({"map": m, "use_render": False})
+            # env = MetaDriveEnv({"map": m, "use_render": False})
+            env = BaseEnv({"use_render": False})
             o, _ = env.reset()
             env.close()
             memory = process_memory(to_mb=True)
@@ -22,6 +27,13 @@ def local_test_close_and_restart(repeat=100):
             ax.set_xlabel('Step')
             ax.set_ylabel('Memory Usage')
             plt.pause(0.05)  # A short pause to update the plot
+
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.statistics('lineno')
+            print("[ Top 10 ]")
+            for stat in top_stats[:10]:
+                print(stat)
+
     finally:
         if "env" in locals():
             env = locals()["env"]

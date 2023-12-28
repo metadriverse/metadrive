@@ -75,7 +75,7 @@ class PGMap(BaseMap):
         )
         big_map.generate(self._config[self.GENERATE_TYPE], self._config[self.GENERATE_CONFIG])
         self.blocks = big_map.blocks
-        del big_map
+        big_map.destroy()
 
     def _config_generate(self, blocks_config: List, parent_node_path: NodePath, physics_world: PhysicsWorld):
         assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"

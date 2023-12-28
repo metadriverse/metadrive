@@ -4,7 +4,6 @@ from metadrive.base_class.randomizable import Randomizable
 class BaseManager(Randomizable):
     """
     Managers should be created and registered after launching BaseEngine
-    TODO LQY, inherit event manager so that we can control the process in a standard way
     """
     PRIORITY = 10  # the engine will call managers according to the priority
 
@@ -65,6 +64,7 @@ class BaseManager(Randomizable):
         """
         # self.engine = None
         self.spawned_objects = None
+        super(BaseManager, self).destroy()
 
     def spawn_object(self, object_class, **kwargs):
         """

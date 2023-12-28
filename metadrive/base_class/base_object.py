@@ -287,7 +287,6 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
 
             self.dynamic_nodes.clear()
             self.static_nodes.clear()
-            self._config.clear()
 
     def set_position(self, position, height=None):
         """

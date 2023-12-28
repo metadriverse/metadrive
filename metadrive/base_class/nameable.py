@@ -31,3 +31,9 @@ class Nameable:
     def rename(self, new_name):
         self.name = new_name
         self.id = self.name
+
+    def destroy(self):
+        """
+        Clear memory
+        """
+        self.name = self.id = None
