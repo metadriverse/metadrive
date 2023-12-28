@@ -151,7 +151,7 @@ class PointLane(AbstractLane, InterpolatingLine):
         self.end = None
         self._polygon = None
         InterpolatingLine.destroy(self)
-        super(PointLane, self).destroy()
+        AbstractLane.destroy(self)
 
     @property
     def polygon(self):

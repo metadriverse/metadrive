@@ -93,7 +93,13 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
         self.update_config(ret)
 
     def destroy(self):
+        """
+        Destroy base classes
+        """
         Configurable.destroy(self)
+        Randomizable.destroy(self)
+        Nameable.destroy(self)
+        self.PARAMETER_SPACE.destroy()
 
     @property
     def engine(self):

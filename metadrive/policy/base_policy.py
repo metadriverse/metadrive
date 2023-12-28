@@ -54,12 +54,16 @@ class BasePolicy(Randomizable, Configurable):
         self.action_info.clear()
 
     def destroy(self):
+        """
+        Destroy Base class
+        """
         if self._debug_mark is not None:
             self.engine.taskMgr.remove(self._mark_update_task_name)
             self._debug_mark.removeNode()
             self._debug_mark = None
             self._mark_update_task_name = None
-        super(BasePolicy, self).destroy()
+        Configurable.destroy(self)
+        Randomizable.destroy(self)
         self.control_object = None
         logging.debug("{} is released".format(self.__class__.__name__))
 

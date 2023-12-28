@@ -398,6 +398,8 @@ class AgentManager(BaseManager):
         self._dying_objects = {}
 
         # Dict[object_id: value], init for **only** once after spawning vehicle
+        for obs in self.observations.values():
+            obs.destroy()
         self.observations = {}
         self.observation_spaces = {}
         self.action_spaces = {}

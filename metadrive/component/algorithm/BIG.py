@@ -165,3 +165,23 @@ class BIG:
 
     def __del__(self):
         logging.debug("Destroy Big")
+
+    def destroy(self):
+        """
+        Destroy BIG
+        """
+        self.block_dist_config = None
+        self._block_sequence = None
+        self.random_seed = None
+        self.np_random = None
+        # Don't change this right now, since we need to make maps identical to old one
+        self._lane_num = None
+        self._lane_width = None
+        self.block_num = None
+        self._render_node_path = None
+        self._physics_world = None
+        self._global_network = None
+        self.blocks = []
+        self._exit_length = None
+        self.blocks = None
+        self.next_step = None

@@ -160,6 +160,9 @@ class StateObservation(BaseObservation):
 
 
 class LidarStateObservation(BaseObservation):
+    """
+    This observation uses lidar to detect moving objects
+    """
     def __init__(self, config):
         self.state_obs = StateObservation(config)
         super(LidarStateObservation, self).__init__(config)
@@ -239,3 +242,12 @@ class LidarStateObservation(BaseObservation):
             points[np.random.uniform(0, 1, size=points.shape) < dropout_prob] = 0.0
 
         return list(points)
+
+    def destroy(self):
+        """
+        Clear allocated memory
+        """
+        self.state_obs.destroy()
+        super(LidarStateObservation, self).destroy()
+        self.cloud_points = None
+        self.detected_objects = None

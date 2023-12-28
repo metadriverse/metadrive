@@ -86,7 +86,27 @@ class Config:
         self._unchangeable = unchangeable
 
     def clear(self):
-        self._config.clear()
+        """
+        Clear and destroy config
+        """
+        self.clear_nested_dict(self._config)
+        self._config = None
+
+    @staticmethod
+    def clear_nested_dict(d):
+        """
+        Clear nested dict
+        """
+        if d is None:
+            return
+        for key, value in d.items():
+            if isinstance(value, dict) or isinstance(value, Config):
+                Config.clear_nested_dict(value)
+        if isinstance(d, dict):
+            d.clear()
+        elif isinstance(d, Config):
+            d._config.clear()
+            d._config = None
 
     def register_type(self, key, *types):
         """

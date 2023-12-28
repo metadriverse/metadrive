@@ -228,3 +228,8 @@ class TopDownObservation(BaseObservation):
         else:
             img = img.astype(np.uint8)
         return np.transpose(img, (1, 0, 2))
+
+    def destroy(self):
+        # scene
+        self.road_network = None
+        super(TopDownObservation, self).destroy()

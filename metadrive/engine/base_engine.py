@@ -537,6 +537,8 @@ class BaseEngine(EngineCore, Randomizable):
             del self.top_down_renderer
             self.top_down_renderer = None
 
+        Randomizable.destroy(self)
+
     def __del__(self):
         logger.debug("{} is destroyed".format(self.__class__.__name__))
 

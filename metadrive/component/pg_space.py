@@ -61,8 +61,11 @@ class Space:
         # By default, assume identity is JSONable
         return sample_n
 
-    def __del__(self):
-        del self.np_random
+    def destroy(self):
+        """
+        Clear memory
+        """
+        self.np_random = None
 
 
 class Dict(Space):

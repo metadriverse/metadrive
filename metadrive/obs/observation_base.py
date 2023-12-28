@@ -3,6 +3,7 @@ import numpy as np
 import gymnasium as gym
 from copy import deepcopy
 from metadrive.engine.logger import get_logger
+from metadrive.utils.config import Config
 
 logger = get_logger()
 
@@ -30,6 +31,14 @@ class BaseObservation(ABC):
 
     def reset(self, env, vehicle=None):
         pass
+
+    def destroy(self):
+        """
+        Clear allocated memory
+        """
+        pass
+        # Config.clear_nested_dict(self.config)
+        # self.config = None
 
 
 class DummyObservation(BaseObservation):

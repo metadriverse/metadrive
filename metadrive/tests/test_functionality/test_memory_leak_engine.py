@@ -59,12 +59,18 @@ def total_size(o, handlers={}, verbose=False):
 
 
 # inner psutil function
-def process_memory():
+def process_memory(to_mb=False):
+    """
+    Return the memory usage of current process. The unit is byte by default.
+    """
     import psutil
     import os
     process = psutil.Process(os.getpid())
     mem_info = process.memory_info()
-    return mem_info.rss
+    if to_mb:
+        return mem_info.rss / (1024**2)
+    else:
+        return mem_info.rss
 
 
 def test_engine_memory_leak():

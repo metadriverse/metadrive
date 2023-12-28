@@ -19,3 +19,9 @@ class Randomizable:
 
     def generate_seed(self):
         return self.np_random.randint(0, self.MAX_RAND_INT)
+
+    def destroy(self):
+        """
+        Destroy random generator
+        """
+        self.np_random = None
