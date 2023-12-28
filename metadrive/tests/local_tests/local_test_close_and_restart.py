@@ -18,7 +18,13 @@ def local_test_close_and_restart(repeat=100):
         memory_usage = []
     snapshot = None
     try:
-        for m in ["X", "O", "C", "R", "r", ] * 40:
+        for m in [
+                "X",
+                "O",
+                "C",
+                "R",
+                "r",
+        ] * 40:
             # env = MetaDriveEnv({"map": m, "use_render": False, "log_level": 50, "traffic_density": 0})
             # env = BaseEnv({"use_render": False, "log_level": 50})
             env = ScenarioEnv({"use_render": False, "log_level": 50})

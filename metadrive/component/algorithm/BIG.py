@@ -28,16 +28,16 @@ class BIG:
     MAX_TRIAL = 5
 
     def __init__(
-            self,
-            lane_num: int,
-            lane_width: float,
-            global_network: NodeRoadNetwork,
-            render_node_path: NodePath,
-            physics_world: PhysicsWorld,
-            # block_type_version: str,
-            exit_length=50,
-            random_seed=None,
-            block_dist_config=PGBlockDistConfig
+        self,
+        lane_num: int,
+        lane_width: float,
+        global_network: NodeRoadNetwork,
+        render_node_path: NodePath,
+        physics_world: PhysicsWorld,
+        # block_type_version: str,
+        exit_length=50,
+        random_seed=None,
+        block_dist_config=PGBlockDistConfig
     ):
         self.block_dist_config = block_dist_config
         self._block_sequence = None

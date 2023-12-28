@@ -68,7 +68,7 @@ def process_memory(to_mb=False):
     process = psutil.Process(os.getpid())
     mem_info = process.memory_info()
     if to_mb:
-        return mem_info.rss / (1024 ** 2)
+        return mem_info.rss / (1024**2)
     else:
         return mem_info.rss
 

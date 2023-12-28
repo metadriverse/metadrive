@@ -30,7 +30,13 @@ def test_close_and_restart_metadrive_env():
     start = 11
     start_memory = None
     try:
-        for idx, m in enumerate(["X", "O", "C", "R", "r", ] * 20):
+        for idx, m in enumerate([
+                "X",
+                "O",
+                "C",
+                "R",
+                "r",
+        ] * 20):
             env = MetaDriveEnv({"map": m, "use_render": False, "log_level": 50, "traffic_density": 0})
             o, _ = env.reset()
             env.close()

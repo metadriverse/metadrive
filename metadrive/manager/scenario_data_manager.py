@@ -175,7 +175,7 @@ class ScenarioDataManager(BaseManager):
     @property
     def current_scenario_difficulty(self):
         return self.scenario_difficulty[self.summary_lookup[self.engine.global_random_seed]
-        ] if self.scenario_difficulty is not None else 0
+                                        ] if self.scenario_difficulty is not None else 0
 
     @property
     def current_scenario_id(self):
