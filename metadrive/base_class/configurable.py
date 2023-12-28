@@ -31,8 +31,9 @@ class Configurable:
         """
         Fully delete this element and release the memory
         """
-        self._config.clear()
-        self._config = None
+        if self._config is not None:
+            self._config.clear()
+            self._config = None
         # if hasattr(self, "engine"):
         #     self.engine = None
 
