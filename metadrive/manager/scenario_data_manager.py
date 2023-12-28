@@ -1,6 +1,6 @@
 import copy
 import os
-
+from metadrive.utils.config import Config
 import numpy as np
 
 from metadrive.manager.base_manager import BaseManager
@@ -195,7 +195,7 @@ class ScenarioDataManager(BaseManager):
         """
         super(ScenarioDataManager, self).destroy()
         self._scenarios = {}
-        self.summary_dict.clear()
-        self.summary_lookup.clear()
-        self.mapping.clear()
+        Config.clear_nested_dict(self.summary_dict)
+        Config.clear_nested_dict(self.summary_lookup.clear())
+        Config.clear_nested_dict(self.mapping.clear())
         self.summary_dict, self.summary_lookup, self.mapping = None, None, None

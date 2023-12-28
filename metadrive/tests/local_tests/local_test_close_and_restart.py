@@ -1,10 +1,10 @@
-from metadrive.envs.base_env import BaseEnv
-from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
-import matplotlib.pyplot as plt
 import tracemalloc
+import matplotlib.pyplot as plt
 
-tracemalloc.start()
+from metadrive.envs.scenario_env import ScenarioEnv
+from metadrive.tests.test_functionality.test_memory_leak_engine import process_memory
+
+# tracemalloc.start()
 
 
 def local_test_close_and_restart(repeat=100):
@@ -19,8 +19,9 @@ def local_test_close_and_restart(repeat=100):
     snapshot = None
     try:
         for m in ["X", "O", "C", "R", "r", ] * 40:
-            env = MetaDriveEnv({"map": m, "use_render": False, "log_level": 50, "traffic_density": 0})
+            # env = MetaDriveEnv({"map": m, "use_render": False, "log_level": 50, "traffic_density": 0})
             # env = BaseEnv({"use_render": False, "log_level": 50})
+            env = ScenarioEnv({"use_render": False, "log_level": 50})
             o, _ = env.reset()
             env.close()
             memory = process_memory(to_mb=True)
@@ -33,13 +34,13 @@ def local_test_close_and_restart(repeat=100):
                 ax.set_ylabel('Memory Usage')
                 plt.pause(0.05)  # A short pause to update the plot
 
-            new_snapshot = tracemalloc.take_snapshot()
-            if snapshot:
-                stats = new_snapshot.compare_to(snapshot, 'lineno')
-                print("[ Top 10 ]")
-                for stat in stats[:10]:
-                    print(stat)
-            snapshot = new_snapshot
+            # new_snapshot = tracemalloc.take_snapshot()
+            # if snapshot:
+            #     stats = new_snapshot.compare_to(snapshot, 'lineno')
+            #     print("[ Top 10 ]")
+            #     for stat in stats[:10]:
+            #         print(stat)
+            # snapshot = new_snapshot
 
     finally:
         if "env" in locals():

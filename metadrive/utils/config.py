@@ -75,6 +75,7 @@ class Config:
     For these <key, value> items, use Config["your key"] = None to init your PgConfig, then it will not implement
     type check at the first time. key "config" in map.py and key "force_fps" in world.py are good examples.
     """
+
     def __init__(self, config: Union["Config", dict], unchangeable=False):
         self._unchangeable = False
         if isinstance(config, Config):
@@ -89,8 +90,18 @@ class Config:
         """
         Clear and destroy config
         """
-        self._config.clear()
+        self.clear_nested_dict(self._config)
         self._config = None
+
+    @staticmethod
+    def clear_nested_dict(d):
+        """
+        Clear nested dict
+        """
+        for key, value in d.items():
+            if isinstance(value, dict) or isinstance(value, Config):
+                Config.clear_nested_dict(value)
+        d.clear()
 
     def register_type(self, key, *types):
         """
