@@ -17,10 +17,11 @@ def local_test_close_and_restart(repeat=100):
     try:
         for m in ["X", "O", "C", "R", "r", ] * 40:
             # env = MetaDriveEnv({"map": m, "use_render": False})
-            env = BaseEnv({"use_render": False})
+            env = BaseEnv({"use_render": False, "log_level": 50})
             o, _ = env.reset()
             env.close()
             memory = process_memory(to_mb=True)
+            print(process_memory(to_mb=True))
             memory_usage.append(memory)
             ax.clear()
             ax.plot(memory_usage)
