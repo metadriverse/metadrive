@@ -97,6 +97,8 @@ class Config:
         """
         Clear nested dict
         """
+        if d is None:
+            return
         for key, value in d.items():
             if isinstance(value, dict) or isinstance(value, Config):
                 Config.clear_nested_dict(value)
