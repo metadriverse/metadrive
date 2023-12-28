@@ -86,7 +86,11 @@ class Config:
         self._unchangeable = unchangeable
 
     def clear(self):
+        """
+        Clear and destroy config
+        """
         self._config.clear()
+        self._config = None
 
     def register_type(self, key, *types):
         """

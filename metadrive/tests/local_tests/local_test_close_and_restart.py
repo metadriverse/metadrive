@@ -11,9 +11,11 @@ def local_test_close_and_restart(repeat=100):
     """
     Test the memory leak
     """
-    plt.ion()  # Turn on interactive mode
-    fig, ax = plt.subplots()
-    memory_usage = []
+    draw = False
+    if draw:
+        plt.ion()  # Turn on interactive mode
+        fig, ax = plt.subplots()
+        memory_usage = []
     snapshot = None
     try:
         for m in ["X", "O", "C", "R", "r", ] * 40:
@@ -22,13 +24,14 @@ def local_test_close_and_restart(repeat=100):
             o, _ = env.reset()
             env.close()
             memory = process_memory(to_mb=True)
-            print(process_memory(to_mb=True))
-            memory_usage.append(memory)
-            ax.clear()
-            ax.plot(memory_usage)
-            ax.set_xlabel('Step')
-            ax.set_ylabel('Memory Usage')
-            plt.pause(0.05)  # A short pause to update the plot
+            print(memory)
+            if draw:
+                memory_usage.append(memory)
+                ax.clear()
+                ax.plot(memory_usage)
+                ax.set_xlabel('Step')
+                ax.set_ylabel('Memory Usage')
+                plt.pause(0.05)  # A short pause to update the plot
 
             new_snapshot = tracemalloc.take_snapshot()
             if snapshot:
@@ -37,8 +40,6 @@ def local_test_close_and_restart(repeat=100):
                 for stat in stats[:10]:
                     print(stat)
             snapshot = new_snapshot
-
-
 
     finally:
         if "env" in locals():
