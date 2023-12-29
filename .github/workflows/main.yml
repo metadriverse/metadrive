@@ -186,15 +186,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: Install dependencies
-        run: sudo apt-get install -y libglu1-mesa-dev freeglut3-dev mesa-common-dev
-      - name: Setup Mesa OpenGL
-        run: |
-          sudo add-apt-repository ppa:kisak/kisak-mesa
-          sudo apt-get update
-          sudo apt-get install libgl1-mesa-glx libgl1-mesa-dri
-          export LIBGL_ALWAYS_SOFTWARE=1
-      - name: open-window
+      - name: Prepare OpenGL
         run: |
           sudo apt-get -y install xvfb
           sudo /usr/bin/Xvfb :0 -screen 0 1280x1024x24 &
