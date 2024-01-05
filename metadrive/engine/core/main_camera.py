@@ -280,6 +280,9 @@ class MainCamera(BaseSensor):
         """
         self.current_track_vehicle = vehicle
         self.engine.interface.track(vehicle)
+        for name, sensor in self.engine.sensors.items():
+            if hasattr(sensor, "track") and name != "main_camera":
+                sensor.track(vehicle)
         pos = None
         if self.FOLLOW_LANE:
             pos = self._pos_on_lane(vehicle)  # Return None if routing system is not ready
