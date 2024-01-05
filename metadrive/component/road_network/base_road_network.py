@@ -33,7 +33,6 @@ class BaseRoadNetwork:
         x_min, x_max, y_min, y_max = self.get_bounding_box()
         return (x_max + x_min) / 2, (y_max + y_min) / 2
 
-
     def _get_bounding_box(self):
         raise NotImplementedError
 
