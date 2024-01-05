@@ -102,7 +102,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         """
         Save the image to the disk
         """
-        self.origin.reparentTo(base_object.origin)
+        self.cam.reparentTo(base_object.origin)
         img = self.get_rgb_array_cpu()
         self.track(self.attached_object)
         cv2.imwrite(name, img)
@@ -182,7 +182,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         """
         if base_object is not None and self is not None:
             self.attached_object = base_object
-            self.origin.reparentTo(base_object.origin)
+            self.cam.reparentTo(base_object.origin)
 
     def __del__(self):
         if self.enable_cuda:

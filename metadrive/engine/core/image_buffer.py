@@ -26,13 +26,13 @@ class ImageBuffer:
     num_channels = 3
 
     def __init__(
-        self,
-        width: float,
-        height: float,
-        bkg_color: Union[Vec4, Vec3],
-        parent_node: NodePath = None,
-        frame_buffer_property=None,
-        engine=None
+            self,
+            width: float,
+            height: float,
+            bkg_color: Union[Vec4, Vec3],
+            parent_node: NodePath = None,
+            frame_buffer_property=None,
+            engine=None
     ):
         self.logger = get_logger()
         self._node_path_list = []
@@ -54,22 +54,19 @@ class ImageBuffer:
             return
 
         # self.texture = Texture()
-        self.origin = NodePath("new render")
         self._create_buffer(width, height, frame_buffer_property)
         self._create_camera(bkg_color)
 
-        if parent_node is not None:
-            self.origin.reparentTo(parent_node)
         self._setup_effect()
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
-    def _create_camera(self, bkg_color):
+    def _create_camera(self, parent_node, bkg_color):
         """
         Create camera for the buffer
         """
         self.cam = cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         cam.node().setCameraMask(self.CAM_MASK)
-        self.cam.reparentTo(self.origin)
+        self.cam.reparentTo(parent_node)
         self.lens = self.cam.node().getLens()
         self.lens.setFov(60)
 

@@ -90,6 +90,7 @@ class DashBoard(ImageBuffer, BaseSensor):
             parent_node=self.aspect2d_np,
             engine=engine
         )
+        self.origin = NodePath("DashBoard")
         self._node_path_list.extend(tmp_node_path_list)
 
     def _create_camera(self, pos, bkg_color):
