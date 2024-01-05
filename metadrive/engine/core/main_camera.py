@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Point3, PNMImage
+from panda3d.core import Vec3, Point3, PNMImage, NodePath
 from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup, CameraTagStateKey, Semantics
@@ -426,10 +426,13 @@ class MainCamera(BaseSensor):
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
-    def perceive(self, base_object_or_position, hpr=None, clip=True, refresh=False):
+    def perceive(self, parent_node: NodePath, position=None, hpr=None, clip=True, refresh=False):
         """
-        The object_or_pos can be a BaseObject instance like a vehicle or a 3-dimensional position vector, and hpr is also
-        a 3-dimension vector representing the heading/pitch/roll of the sensor
+        parent_node should be object.origin like vehicle.origin or self.engine.origin, which means the world origin
+
+        The position and hpr is a 3-dimensional position vector representing:
+            1) the relative position to the parent node
+            2) the heading/pitch/roll of the sensor
 
         Call refresh only when
             1) the base_object_or_position is an object and is not self.attached_object, or
@@ -437,21 +440,26 @@ class MainCamera(BaseSensor):
             3) the camera has a new hpr
         This usually happens when using one camera to render multiple times from different positions and poses
         """
+
+        # return camera to original state
         original_object = self.camera.getParent()
         original_hpr = self.camera.getHpr()
-        if hasattr(base_object_or_position, "origin"):
-            # is base object
-            self.camera.reparentTo(base_object_or_position.origin)
-        elif len(base_object_or_position) == 3:
-            # is position
-            self.camera.setPos(Vec3(*base_object_or_position))
+        original_position = self.camera.getPos()
+
+        # parent node
+        self.camera.reparentTo(parent_node)
+        # relative position
+        if position and len(position) == 3:
+            self.camera.setPos(Vec3(*position))
         else:
             raise ValueError("The first parameter of camera.perceive() should be a BaseObject instance or a 3-dim "
                              "vector representing the (x,y,z) position.")
-        if hpr:
-            assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing the" \
-                                  "heading/pitch/roll."
+        # hpr
+        if hpr and len(hpr) == 3:
             self.camera.setHpr(Vec3(*hpr))
+        else:
+            raise ValueError("The hpr parameter of camera.perceive() should be  a 3-dim vector representing the"
+                             "heading/pitch/roll.")
 
         engine = get_engine()
         # assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
@@ -472,6 +480,7 @@ class MainCamera(BaseSensor):
         # restore
         self.camera.reparentTo(original_object)
         self.camera.setHpr(original_hpr)
+        self.camera.setPos(original_position)
 
         if not clip:
             return img.astype(np.uint8, copy=False, order="C")
