@@ -445,9 +445,9 @@ class MainCamera(BaseSensor):
         """
 
         # return camera to original state
-        # original_object = self.camera.getParent()
-        # original_hpr = self.camera.getHpr()
-        # original_position = self.camera.getPos()
+        original_object = self.camera.getParent()
+        original_hpr = self.camera.getHpr()
+        original_position = self.camera.getPos()
 
         # parent node
         self.camera.reparentTo(parent_node)
@@ -479,9 +479,9 @@ class MainCamera(BaseSensor):
             img = img[..., :self.num_channels]
 
         # restore
-        # self.camera.reparentTo(original_object)
-        # self.camera.setHpr(original_hpr)
-        # self.camera.setPos(original_position)
+        self.camera.reparentTo(original_object)
+        self.camera.setHpr(original_hpr)
+        self.camera.setPos(original_position)
 
         if not clip:
             return img.astype(np.uint8, copy=False, order="C")

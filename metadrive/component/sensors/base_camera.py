@@ -123,9 +123,9 @@ class BaseCamera(ImageBuffer, BaseSensor):
         """
 
         # return camera to original state
-        # original_object = self.cam.getParent()
-        # original_hpr = self.cam.getHpr()
-        # original_position = self.cam.getPos()
+        original_object = self.cam.getParent()
+        original_hpr = self.cam.getHpr()
+        original_position = self.cam.getPos()
 
         # parent node
         self.cam.reparentTo(parent_node)
@@ -150,9 +150,9 @@ class BaseCamera(ImageBuffer, BaseSensor):
             ret = self.get_rgb_array_cpu()
 
         # return camera to original objects
-        # self.cam.reparentTo(original_object)
-        # self.cam.setHpr(original_hpr)
-        # self.cam.setPos(original_position)
+        self.cam.reparentTo(original_object)
+        self.cam.setHpr(original_hpr)
+        self.cam.setPos(original_position)
         if not clip:
             return ret.astype(np.uint8, copy=False, order="C")
         else:
