@@ -98,26 +98,43 @@ class BaseCamera(ImageBuffer, BaseSensor):
     def enable_cuda(self):
         return self is not None and self._enable_cuda
 
-    def get_image(self, base_object):
+    def save_image(self, base_object, name="debug.png"):
         """
-        Borrow the camera to get observations
+        Save the image to the disk
         """
         self.origin.reparentTo(base_object.origin)
         img = self.get_rgb_array_cpu()
         self.track(self.attached_object)
-        return img
-
-    def save_image(self, base_object, name="debug.png"):
-        img = self.get_image(base_object)
         cv2.imwrite(name, img)
 
-    def perceive(self, base_object, clip=True) -> np.ndarray:
-        self.track(base_object)
+    def perceive(self, base_object_or_position, hpr=None, clip=True) -> np.ndarray:
+        """
+        The base object can be a BaseObject instance like a vehicle or a 3-dimensional position vector, and hpr is also
+        a 3-dimension vector representing the heading/pitch/roll of the sensor
+        """
+        if hasattr(base_object_or_position, "origin"):
+            # is base object
+            self.origin.reparentTo(base_object_or_position.origin)
+        elif len(base_object_or_position) == 3:
+            # is position
+            self.origin.setPos(Vec3(*base_object_or_position))
+        else:
+            raise ValueError("The first parameter of camera.perceive() should be a BaseObject instance or a 3-dim "
+                             "vector representing the (x,y,z) position.")
+        original_hpr = self.origin.getHpr()
+        if hpr:
+            assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing the" \
+                                  "heading/pitch/roll."
+            self.origin.setHpr(Vec3(*hpr))
+
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
             ret = self.cuda_rendered_result[..., :self.num_channels][..., ::-1][::-1]
         else:
             ret = self.get_rgb_array_cpu()
+
+        # return camera to original objects
+        self.track(self.attached_object, original_hpr)
         if not clip:
             return ret.astype(np.uint8, copy=False, order="C")
         else:
@@ -141,10 +158,16 @@ class BaseCamera(ImageBuffer, BaseSensor):
     def remove_display_region(self):
         super(BaseCamera, self).remove_display_region()
 
-    def track(self, base_object):
+    def track(self, base_object, hpr=None):
+        """
+        Track a given object. It allows rendering to the interface panels with a given object and a hpr
+        """
         if base_object is not None and self is not None:
             self.attached_object = base_object
             self.origin.reparentTo(base_object.origin)
+        if hpr:
+            assert len(hpr) == 3, "hpr should be a 3 dim vector"
+            self.origin.setHpr(hpr)
 
     def __del__(self):
         if self.enable_cuda:

@@ -14,9 +14,12 @@ class InstanceCamera(BaseCamera):
         self.BUFFER_H = height
         super().__init__(engine, cuda)
 
-    def track(self, base_object):
+    def track(self, base_object, hpr=None):
+        """
+        See BaseCamera.track
+        """
         self._setup_effect()
-        super().track(base_object)
+        super().track(base_object, hpr)
 
     def _setup_effect(self):
         """

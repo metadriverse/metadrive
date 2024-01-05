@@ -71,8 +71,8 @@ class ImageBuffer:
         self.cam = cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         cam.node().setCameraMask(self.CAM_MASK)
         self.cam.reparentTo(self.origin)
-        self.cam.setPos(pos)
-        cam.lookAt(0, 10.4, 1.6)
+        self.origin.setPos(pos)
+        self.origin.lookAt(0, 10.4, 1.6)
         # cam.lookAt(0, 2.4, 1.3)
         self.lens = self.cam.node().getLens()
         self.lens.setFov(60)
@@ -104,6 +104,9 @@ class ImageBuffer:
         pass
 
     def get_rgb_array_cpu(self):
+        """
+        Get the rgb array on CPU, which suffers from the latency of moving data from graphics card to memory
+        """
         origin_img = self.buffer.getDisplayRegion(1).getScreenshot()
         img = np.frombuffer(origin_img.getRamImage().getData(), dtype=np.uint8)
         img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), -1))

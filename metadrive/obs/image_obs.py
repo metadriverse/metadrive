@@ -74,8 +74,11 @@ class ImageObservation(BaseObservation):
         else:
             return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
 
-    def observe(self, vehicle):
-        new_obs = self.engine.get_sensor(self.image_source).perceive(vehicle, self.norm_pixel)
+    def observe(self, object_or_pos, hpr=None):
+        """
+        Image Observation from a given position or object and hpr
+        """
+        new_obs = self.engine.get_sensor(self.image_source).perceive(object_or_pos, hpr, self.norm_pixel)
         self.state = cp.roll(self.state, -1, axis=-1) if self.enable_cuda else np.roll(self.state, -1, axis=-1)
         self.state[..., -1] = new_obs
         return self.state
