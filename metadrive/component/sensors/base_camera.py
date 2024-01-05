@@ -109,7 +109,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
 
     def perceive(self, base_object_or_position, hpr=None, clip=True) -> np.ndarray:
         """
-        The base object can be a BaseObject instance like a vehicle or a 3-dimensional position vector, and hpr is also
+        The object_or_pos can be a BaseObject instance like a vehicle or a 3-dimensional position vector, and hpr is also
         a 3-dimension vector representing the heading/pitch/roll of the sensor
         """
         if hasattr(base_object_or_position, "origin"):

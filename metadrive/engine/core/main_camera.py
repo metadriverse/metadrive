@@ -63,7 +63,7 @@ class MainCamera(BaseSensor):
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                                          ] is not None else None
+                                                                     ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.camera_smooth_buffer_size = engine.global_config["camera_smooth_buffer_size"]
         self.direction_running_mean = deque(maxlen=self.camera_smooth_buffer_size if self.camera_smooth else 1)
@@ -421,9 +421,29 @@ class MainCamera(BaseSensor):
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
-    def perceive(self, vehicle, clip):
+    def perceive(self, base_object_or_position, hpr=None, clip=True):
+        """
+        The object_or_pos can be a BaseObject instance like a vehicle or a 3-dimensional position vector, and hpr is also
+        a 3-dimension vector representing the heading/pitch/roll of the sensor
+        """
+        original_object = self.camera.getParent()
+        original_hpr = self.camera.getHpr()
+        if hasattr(base_object_or_position, "origin"):
+            # is base object
+            self.camera.reparentTo(base_object_or_position.origin)
+        elif len(base_object_or_position) == 3:
+            # is position
+            self.camera.setPos(Vec3(*base_object_or_position))
+        else:
+            raise ValueError("The first parameter of camera.perceive() should be a BaseObject instance or a 3-dim "
+                             "vector representing the (x,y,z) position.")
+        if hpr:
+            assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing the" \
+                                  "heading/pitch/roll."
+            self.camera.setHpr(Vec3(*hpr))
+
         engine = get_engine()
-        assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
+        # assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
             img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
@@ -433,6 +453,10 @@ class MainCamera(BaseSensor):
             img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
             img = img[::-1]
             img = img[..., :self.num_channels]
+
+        # restore
+        self.camera.reparentTo(original_object)
+        self.camera.setHpr(original_hpr)
 
         if not clip:
             return img.astype(np.uint8, copy=False, order="C")
