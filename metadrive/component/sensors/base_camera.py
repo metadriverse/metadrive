@@ -1,4 +1,5 @@
 import numpy as np
+from panda3d.core import NodePath
 import cv2
 from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.utils.cuda import check_cudart_err
@@ -107,10 +108,13 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.track(self.attached_object)
         cv2.imwrite(name, img)
 
-    def perceive(self, base_object_or_position, hpr=None, clip=True, refresh=False) -> np.ndarray:
+    def perceive(self, parent_node: NodePath, position=None, hpr=None, clip=True, refresh=False) -> np.ndarray:
         """
-        The object_or_pos can be a BaseObject instance like a vehicle or a 3-dimensional position vector, and hpr is also
-        a 3-dimension vector representing the heading/pitch/roll of the sensor.
+        parent_node should be object.origin like vehicle.origin or self.engine.origin, which means the world origin
+
+        The position and hpr is a 3-dimensional position vector representing:
+            1) the relative position to the parent node
+            2) the heading/pitch/roll of the sensor
 
         Call refresh only when
             1) the base_object_or_position is an object and is not self.attached_object, or
@@ -118,20 +122,24 @@ class BaseCamera(ImageBuffer, BaseSensor):
             3) the camera has a new hpr
         This usually happens when using one camera to render multiple times from different positions and poses
         """
-        if hasattr(base_object_or_position, "origin"):
-            # is base object
-            self.origin.reparentTo(base_object_or_position.origin)
-        elif len(base_object_or_position) == 3:
-            # is position
-            self.origin.setPos(Vec3(*base_object_or_position))
-        else:
-            raise ValueError("The first parameter of camera.perceive() should be a BaseObject instance or a 3-dim "
-                             "vector representing the (x,y,z) position.")
-        original_hpr = self.origin.getHpr()
+
+        # return camera to original state
+        original_object = self.cam.getParent()
+        original_hpr = self.cam.getHpr()
+        original_position = self.cam.getPos()
+
+        # parent node
+        self.cam.reparentTo(parent_node)
+        # relative position
+        if position:
+            assert len(position) == 3, "The first parameter of camera.perceive() should be a BaseObject instance " \
+                                       "or a 3-dim vector representing the (x,y,z) position."
+            self.cam.setPos(Vec3(*position))
+        # hpr
         if hpr:
-            assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing the" \
-                                  "heading/pitch/roll."
-            self.origin.setHpr(Vec3(*hpr))
+            assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing " \
+                                  "the heading/pitch/roll."
+            self.cam.setHpr(Vec3(*hpr))
 
         if refresh:
             self.engine.taskMgr.step()
@@ -143,7 +151,9 @@ class BaseCamera(ImageBuffer, BaseSensor):
             ret = self.get_rgb_array_cpu()
 
         # return camera to original objects
-        self.track(self.attached_object, original_hpr)
+        self.cam.reparentTo(original_object)
+        self.cam.setHpr(original_hpr)
+        self.cam.setPos(original_position)
         if not clip:
             return ret.astype(np.uint8, copy=False, order="C")
         else:
@@ -167,16 +177,13 @@ class BaseCamera(ImageBuffer, BaseSensor):
     def remove_display_region(self):
         super(BaseCamera, self).remove_display_region()
 
-    def track(self, base_object, hpr=None):
+    def track(self, base_object):
         """
         Track a given object. It allows rendering to the interface panels with a given object and a hpr
         """
         if base_object is not None and self is not None:
             self.attached_object = base_object
             self.origin.reparentTo(base_object.origin)
-        if hpr:
-            assert len(hpr) == 3, "hpr should be a 3 dim vector"
-            self.origin.setHpr(hpr)
 
     def __del__(self):
         if self.enable_cuda:

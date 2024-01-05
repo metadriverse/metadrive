@@ -449,17 +449,15 @@ class MainCamera(BaseSensor):
         # parent node
         self.camera.reparentTo(parent_node)
         # relative position
-        if position and len(position) == 3:
+        if position:
+            assert len(position) == 3, "The first parameter of camera.perceive() should be a BaseObject instance " \
+                                       "or a 3-dim vector representing the (x,y,z) position."
             self.camera.setPos(Vec3(*position))
-        else:
-            raise ValueError("The first parameter of camera.perceive() should be a BaseObject instance or a 3-dim "
-                             "vector representing the (x,y,z) position.")
         # hpr
-        if hpr and len(hpr) == 3:
+        if hpr:
+            assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing " \
+                                  "the heading/pitch/roll."
             self.camera.setHpr(Vec3(*hpr))
-        else:
-            raise ValueError("The hpr parameter of camera.perceive() should be  a 3-dim vector representing the"
-                             "heading/pitch/roll.")
 
         engine = get_engine()
         # assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
