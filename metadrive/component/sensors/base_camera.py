@@ -107,10 +107,16 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.track(self.attached_object)
         cv2.imwrite(name, img)
 
-    def perceive(self, base_object_or_position, hpr=None, clip=True) -> np.ndarray:
+    def perceive(self, base_object_or_position, hpr=None, clip=True, refresh=False) -> np.ndarray:
         """
         The object_or_pos can be a BaseObject instance like a vehicle or a 3-dimensional position vector, and hpr is also
-        a 3-dimension vector representing the heading/pitch/roll of the sensor
+        a 3-dimension vector representing the heading/pitch/roll of the sensor.
+
+        Call refresh only when
+            1) the base_object_or_position is an object and is not self.attached_object, or
+            2) the camera is set to a position, or
+            3) the camera has a new hpr
+        This usually happens when using one camera to render multiple times from different positions and poses
         """
         if hasattr(base_object_or_position, "origin"):
             # is base object
@@ -126,6 +132,9 @@ class BaseCamera(ImageBuffer, BaseSensor):
             assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing the" \
                                   "heading/pitch/roll."
             self.origin.setHpr(Vec3(*hpr))
+
+        if refresh:
+            self.engine.taskMgr.step()
 
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None

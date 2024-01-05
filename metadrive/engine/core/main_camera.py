@@ -46,6 +46,7 @@ class MainCamera(BaseSensor):
 
     def __init__(self, engine, camera_height: float, camera_dist: float):
         self._origin_height = camera_height
+        self.run_task = True
         # self.engine = engine
 
         # vehicle chase camera
@@ -196,6 +197,8 @@ class MainCamera(BaseSensor):
         self._last_frame_has_mouse = self.has_mouse
 
     def _chase_task(self, vehicle, task):
+        if not self.run_task:
+            return task.cont
         self.update_mouse_info()
         self.chase_camera_height = self._update_height(self.chase_camera_height)
         chassis_pos = vehicle.chassis.get_pos()
@@ -344,6 +347,8 @@ class MainCamera(BaseSensor):
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def _top_down_task(self, task):
+        if not self.run_task:
+            return task.cont
         self.top_down_camera_height = self._update_height(self.top_down_camera_height)
 
         if self.inputs.isSet("up"):
@@ -421,10 +426,16 @@ class MainCamera(BaseSensor):
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
-    def perceive(self, base_object_or_position, hpr=None, clip=True):
+    def perceive(self, base_object_or_position, hpr=None, clip=True, refresh=False):
         """
         The object_or_pos can be a BaseObject instance like a vehicle or a 3-dimensional position vector, and hpr is also
         a 3-dimension vector representing the heading/pitch/roll of the sensor
+
+        Call refresh only when
+            1) the base_object_or_position is an object and is not self.attached_object, or
+            2) the camera is set to a position, or
+            3) the camera has a new hpr
+        This usually happens when using one camera to render multiple times from different positions and poses
         """
         original_object = self.camera.getParent()
         original_hpr = self.camera.getHpr()
@@ -444,6 +455,10 @@ class MainCamera(BaseSensor):
 
         engine = get_engine()
         # assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
+        if refresh:
+            self.run_task = False
+            engine.taskMgr.step()
+        self.run_task = True
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
             img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
