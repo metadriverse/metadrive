@@ -29,7 +29,6 @@ class ImageBuffer:
         self,
         width: float,
         height: float,
-        pos: Vec3,
         bkg_color: Union[Vec4, Vec3],
         parent_node: NodePath = None,
         frame_buffer_property=None,
@@ -57,23 +56,20 @@ class ImageBuffer:
         # self.texture = Texture()
         self.origin = NodePath("new render")
         self._create_buffer(width, height, frame_buffer_property)
-        self._create_camera(pos, bkg_color)
+        self._create_camera(bkg_color)
 
         if parent_node is not None:
             self.origin.reparentTo(parent_node)
         self._setup_effect()
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
 
-    def _create_camera(self, pos, bkg_color):
+    def _create_camera(self, bkg_color):
         """
         Create camera for the buffer
         """
         self.cam = cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         cam.node().setCameraMask(self.CAM_MASK)
         self.cam.reparentTo(self.origin)
-        self.cam.setPos(pos)
-        cam.lookAt(0, 10.4, 1.6)
-        # cam.lookAt(0, 2.4, 1.3)
         self.lens = self.cam.node().getLens()
         self.lens.setFov(60)
 

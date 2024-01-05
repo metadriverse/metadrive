@@ -38,7 +38,6 @@ class BaseCamera(ImageBuffer, BaseSensor):
         super(BaseCamera, self).__init__(
             self.BUFFER_W,
             self.BUFFER_H,
-            Vec3(0., 0.8, 1.5),
             self.BKG_COLOR,
             engine=engine,
             frame_buffer_property=frame_buffer_property
