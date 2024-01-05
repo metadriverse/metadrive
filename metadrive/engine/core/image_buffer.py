@@ -55,7 +55,7 @@ class ImageBuffer:
 
         # self.texture = Texture()
         self._create_buffer(width, height, frame_buffer_property)
-        self._create_camera(bkg_color)
+        self._create_camera(parent_node, bkg_color)
 
         self._setup_effect()
         self.logger.debug("Load Image Buffer: {}".format(self.__class__.__name__))
@@ -66,7 +66,8 @@ class ImageBuffer:
         """
         self.cam = cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         cam.node().setCameraMask(self.CAM_MASK)
-        self.cam.reparentTo(parent_node)
+        if parent_node:
+            self.cam.reparentTo(parent_node)
         self.lens = self.cam.node().getLens()
         self.lens.setFov(60)
 
