@@ -36,10 +36,7 @@ class ImageStateObservation(BaseObservation):
         )
 
     def observe(self, vehicle: BaseVehicle):
-        return {
-            self.IMAGE: self.img_obs.observe(),
-            self.STATE: self.state_obs.observe(vehicle)
-        }
+        return {self.IMAGE: self.img_obs.observe(), self.STATE: self.state_obs.observe(vehicle)}
 
     def destroy(self):
         super(ImageStateObservation, self).destroy()
@@ -82,8 +79,7 @@ class ImageObservation(BaseObservation):
         Get the image Observation. By setting new_parent_node and the reset parameters, it can capture a new image from
         a different position and pose
         """
-        new_obs = self.engine.get_sensor(self.image_source
-                                         ).perceive(self.norm_pixel, new_parent_node, position, hpr)
+        new_obs = self.engine.get_sensor(self.image_source).perceive(self.norm_pixel, new_parent_node, position, hpr)
         self.state = cp.roll(self.state, -1, axis=-1) if self.enable_cuda else np.roll(self.state, -1, axis=-1)
         self.state[..., -1] = new_obs
         return self.state
