@@ -68,8 +68,6 @@ class ImageBuffer:
         cam.node().setCameraMask(self.CAM_MASK)
         if parent_node:
             self.cam.reparentTo(parent_node)
-        self.cam.setPos(*[0., 0.8, 1.5])
-        self.cam.setHpr(*[0, 0.59681, 0])
         self.lens = self.cam.node().getLens()
         self.lens.setFov(60)
 

@@ -368,22 +368,6 @@ class BaseEngine(EngineCore, Randomizable):
                     print("{}: After Reset! Mem Change {:.3f}MB".format(manager_name, (lm - cm) / 1e6))
                 cm = lm
 
-        # reset cam
-        if self.main_camera is not None:
-            self.main_camera.reset()
-            if hasattr(self, "agent_manager"):
-                bev_cam = self.main_camera.is_bird_view_camera() and self.main_camera.current_track_vehicle is not None
-                vehicles = list(self.agents.values())
-                current_track_vehicle = vehicles[0]
-                self.main_camera.set_follow_lane(self.global_config["use_chase_camera_follow_lane"])
-                self.main_camera.track(current_track_vehicle)
-                if bev_cam:
-                    self.main_camera.stop_track()
-                    self.main_camera.set_bird_view_pos(current_track_vehicle.position)
-
-                # if self.global_config["is_multi_agent"]:
-                #     self.main_camera.stop_track(bird_view_on_current_position=False)
-
         # reset terrain
         # center_p = self.current_map.get_center_point() if isinstance(self.current_map, PGMap) else [0, 0]
         center_p = [0, 0]
