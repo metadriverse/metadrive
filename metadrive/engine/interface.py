@@ -174,7 +174,7 @@ class Interface:
             np.removeNode()
 
         if self.need_interface:
-            self.stop_track()
+            self.undisplay()
             self.contact_result_render.removeNode()
             self.arrow.removeNode()
             self.contact_result_render = None
