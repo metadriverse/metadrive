@@ -50,7 +50,7 @@ The second way can not refer to subtitle.
 ### Execution some files when building doc
 
 The doc is set to disable executing all `.ipynb`.
-For enabling executing certain files, set in the file metadata with:
+For enabling executing certain files and generate result when compiling the doc, set in the file metadata with:
 
 ```python
 {

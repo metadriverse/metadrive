@@ -377,8 +377,6 @@ class BaseEngine(EngineCore, Randomizable):
         if self.sky_box is not None:
             self.sky_box.set_position(center_p)
 
-        self.taskMgr.step()
-
         # refresh graphics to support multi-thread rendering, avoiding bugs like shadow disappearance at first frame
         for _ in range(5):
             self.graphicsEngine.renderFrame()
