@@ -148,8 +148,6 @@ class AgentManager(BaseManager):
             self.observations[vehicle.name] = self._init_observations[agent_id]
             obs_space = self._init_observation_spaces[agent_id]
             self.observation_spaces[vehicle.name] = obs_space
-            if self.engine.global_config["is_multi_agent"]:
-                assert isinstance(obs_space, Dict), "Multi-agent observation should be gym.Dict"
             action_space = self._init_action_spaces[agent_id]
             self.action_spaces[vehicle.name] = action_space
             assert isinstance(action_space, Space)
