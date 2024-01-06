@@ -583,7 +583,7 @@ class BaseEnv(gym.Env):
         This is the developer API. Overriding it determines how to place sensors in the scene. You can mount it on an
         object or fix it at a given position for the whole episode.
         """
-        # reset cam
+        # reset the cam at the start at the episode.
         if self.main_camera is not None:
             self.main_camera.reset()
             if hasattr(self, "agent_manager"):
@@ -595,6 +595,9 @@ class BaseEnv(gym.Env):
                 if bev_cam:
                     self.main_camera.stop_track()
                     self.main_camera.set_bird_view_pos(current_track_vehicle.position)
+                for name, sensor in self.engine.sensors.items():
+                    if hasattr(sensor, "track") and name != "main_camera":
+                        sensor.track(current_track_vehicle.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
 
     def _get_reset_return(self):
         # TODO: figure out how to get the information of the before step
