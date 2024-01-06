@@ -38,9 +38,9 @@ class RGBCamera(BaseCamera):
         self.scene_tex = None
         self.manager = FilterManager(self.buffer, self.cam)
         fbprops = p3d.FrameBufferProperties()
-        # fbprops.float_color = True
-        # fbprops.set_rgba_bits(16, 16, 16, 16)
-        # fbprops.set_depth_bits(24)
+        fbprops.float_color = True
+        fbprops.set_rgba_bits(16, 16, 16, 16)
+        fbprops.set_depth_bits(24)
         fbprops.set_multisamples(self.engine.pbrpipe.msaa_samples)
         self.scene_tex = p3d.Texture()
         self.scene_tex.set_format(p3d.Texture.F_rgba16)

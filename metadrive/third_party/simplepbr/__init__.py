@@ -264,9 +264,9 @@ class Pipeline:
                 caster.set_shadow_buffer_size(sbuff_size)
 
         fbprops = p3d.FrameBufferProperties()
-        # fbprops.float_color = True
-        # fbprops.set_rgba_bits(16, 16, 16, 16)
-        # fbprops.set_depth_bits(24)
+        fbprops.float_color = True
+        fbprops.set_rgba_bits(16, 16, 16, 16)
+        fbprops.set_depth_bits(24)
         fbprops.set_multisamples(self.msaa_samples)
         scene_tex = p3d.Texture()
         scene_tex.set_format(p3d.Texture.F_rgba16)
