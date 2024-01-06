@@ -36,7 +36,10 @@ class ImageStateObservation(BaseObservation):
         )
 
     def observe(self, vehicle: BaseVehicle):
-        return {self.IMAGE: self.img_obs.observe(vehicle), self.STATE: self.state_obs.observe(vehicle)}
+        return {
+            self.IMAGE: self.img_obs.observe(vehicle.origin, [0., 0.8, 1.5], [0, 0.59681, 0]),
+            self.STATE: self.state_obs.observe(vehicle)
+        }
 
     def destroy(self):
         super(ImageStateObservation, self).destroy()
@@ -74,8 +77,12 @@ class ImageObservation(BaseObservation):
         else:
             return gym.spaces.Box(0, 255, shape=shape, dtype=np.uint8)
 
-    def observe(self, vehicle):
-        new_obs = self.engine.get_sensor(self.image_source).perceive(vehicle, self.norm_pixel)
+    def observe(self, parent_node, position=None, hpr=None, refresh=False):
+        """
+        Image Observation from a given position or object and hpr
+        """
+        new_obs = self.engine.get_sensor(self.image_source
+                                         ).perceive(parent_node, position, hpr, self.norm_pixel, refresh)
         self.state = cp.roll(self.state, -1, axis=-1) if self.enable_cuda else np.roll(self.state, -1, axis=-1)
         self.state[..., -1] = new_obs
         return self.state

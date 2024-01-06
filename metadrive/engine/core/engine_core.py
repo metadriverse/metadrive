@@ -182,6 +182,8 @@ class EngineCore(ShowBase.ShowBase):
 
         super(EngineCore, self).__init__(windowType=self.mode)
         logger.info("Known Pipes: {}".format(*GraphicsPipeSelection.getGlobalPtr().getPipeTypes()))
+        if self.global_config["window_size"] == (1, 1):
+            self.win.setActive(False)
 
         self._all_panda_tasks = self.taskMgr.getAllTasks()
         if self.use_render_pipeline and self.mode != RENDER_MODE_NONE:

@@ -15,6 +15,9 @@ class InstanceCamera(BaseCamera):
         super().__init__(engine, cuda)
 
     def track(self, base_object):
+        """
+        See BaseCamera.track
+        """
         self._setup_effect()
         super().track(base_object)
 

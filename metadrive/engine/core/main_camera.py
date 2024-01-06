@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 from direct.controls.InputState import InputState
-from panda3d.core import Vec3, Point3, PNMImage
+from panda3d.core import Vec3, Point3, PNMImage, NodePath
 from panda3d.core import WindowProperties
 
 from metadrive.constants import CollisionGroup, CameraTagStateKey, Semantics
@@ -46,6 +46,7 @@ class MainCamera(BaseSensor):
 
     def __init__(self, engine, camera_height: float, camera_dist: float):
         self._origin_height = camera_height
+        self.run_task = True
         # self.engine = engine
 
         # vehicle chase camera
@@ -196,6 +197,8 @@ class MainCamera(BaseSensor):
         self._last_frame_has_mouse = self.has_mouse
 
     def _chase_task(self, vehicle, task):
+        if not self.run_task:
+            return task.cont
         self.update_mouse_info()
         self.chase_camera_height = self._update_height(self.chase_camera_height)
         chassis_pos = vehicle.chassis.get_pos()
@@ -277,6 +280,9 @@ class MainCamera(BaseSensor):
         """
         self.current_track_vehicle = vehicle
         self.engine.interface.track(vehicle)
+        for name, sensor in self.engine.sensors.items():
+            if hasattr(sensor, "track") and name != "main_camera":
+                sensor.track(vehicle)
         pos = None
         if self.FOLLOW_LANE:
             pos = self._pos_on_lane(vehicle)  # Return None if routing system is not ready
@@ -344,6 +350,8 @@ class MainCamera(BaseSensor):
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def _top_down_task(self, task):
+        if not self.run_task:
+            return task.cont
         self.top_down_camera_height = self._update_height(self.top_down_camera_height)
 
         if self.inputs.isSet("up"):
@@ -421,9 +429,45 @@ class MainCamera(BaseSensor):
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
-    def perceive(self, vehicle, clip):
+    def perceive(self, parent_node: NodePath, position=None, hpr=None, clip=True, refresh=False):
+        """
+        parent_node should be object.origin like vehicle.origin or self.engine.origin, which means the world origin
+
+        The position and hpr is a 3-dimensional position vector representing:
+            1) the relative position to the parent node
+            2) the heading/pitch/roll of the sensor
+
+        Call refresh only when
+            1) the base_object_or_position is an object and is not self.attached_object, or
+            2) the camera is set to a position, or
+            3) the camera has a new hpr
+        This usually happens when using one camera to render multiple times from different positions and poses
+        """
+
+        # return camera to original state
+        original_object = self.camera.getParent()
+        original_hpr = self.camera.getHpr()
+        original_position = self.camera.getPos()
+
+        # parent node
+        self.camera.reparentTo(parent_node)
+        # relative position
+        if position:
+            assert len(position) == 3, "The first parameter of camera.perceive() should be a BaseObject instance " \
+                                       "or a 3-dim vector representing the (x,y,z) position."
+            self.camera.setPos(Vec3(*position))
+        # hpr
+        if hpr:
+            assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing " \
+                                  "the heading/pitch/roll."
+            self.camera.setHpr(Vec3(*hpr))
+
         engine = get_engine()
-        assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
+        # assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
+        if refresh:
+            self.run_task = False
+            engine.taskMgr.step()
+        self.run_task = True
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
             img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
@@ -433,6 +477,11 @@ class MainCamera(BaseSensor):
             img = img.reshape((origin_img.getYSize(), origin_img.getXSize(), 4))
             img = img[::-1]
             img = img[..., :self.num_channels]
+
+        # restore
+        self.camera.reparentTo(original_object)
+        self.camera.setHpr(original_hpr)
+        self.camera.setPos(original_position)
 
         if not clip:
             return img.astype(np.uint8, copy=False, order="C")

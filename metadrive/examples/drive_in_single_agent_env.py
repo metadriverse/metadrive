@@ -41,7 +41,7 @@ if __name__ == "__main__":
         config.update(
             dict(
                 image_observation=True,
-                sensors=dict(rgb_camera=(RGBCamera, 512, 256)),
+                sensors=dict(rgb_camera=(RGBCamera, 400, 300)),
                 interface_panel=["rgb_camera", "dashboard"]
             )
         )

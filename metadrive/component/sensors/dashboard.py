@@ -83,24 +83,20 @@ class DashBoard(ImageBuffer, BaseSensor):
                 card.setPos(0.2 + self.PARA_VIS_LENGTH / 2, 0, 0.22)
                 self.para_vis_np[name] = card
         super(DashBoard, self).__init__(
-            self.BUFFER_W,
-            self.BUFFER_H,
-            Vec3(-0.9, -1.01, 0.78),
-            self.BKG_COLOR,
-            parent_node=self.aspect2d_np,
-            engine=engine
+            self.BUFFER_W, self.BUFFER_H, self.BKG_COLOR, parent_node=self.aspect2d_np, engine=engine
         )
+        self.origin = NodePath("DashBoard")
         self._node_path_list.extend(tmp_node_path_list)
 
-    def _create_camera(self, pos, bkg_color):
+    def _create_camera(self, parent_node, bkg_color):
         """
         Create orthogonal camera for the buffer
         """
         self.cam = cam = self.engine.makeCamera(self.buffer, clearColor=bkg_color)
         cam.node().setCameraMask(self.CAM_MASK)
 
-        self.cam.reparentTo(self.origin)
-        self.cam.setPos(pos)
+        self.cam.reparentTo(parent_node)
+        self.cam.setPos(Vec3(-0.9, -1.01, 0.78))
 
     def update_vehicle_state(self, vehicle):
         """
