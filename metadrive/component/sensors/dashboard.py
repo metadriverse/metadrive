@@ -9,7 +9,6 @@ class DashBoard(ImageBuffer, BaseSensor):
     """
     Dashboard for showing the speed and brake/throttle/steering
     """
-
     def perceive(self, *args, **kwargs):
         """
         This is only used for GUI and won't provide any observation result
@@ -84,11 +83,7 @@ class DashBoard(ImageBuffer, BaseSensor):
                 card.setPos(0.2 + self.PARA_VIS_LENGTH / 2, 0, 0.22)
                 self.para_vis_np[name] = card
         super(DashBoard, self).__init__(
-            self.BUFFER_W,
-            self.BUFFER_H,
-            self.BKG_COLOR,
-            parent_node=self.aspect2d_np,
-            engine=engine
+            self.BUFFER_W, self.BUFFER_H, self.BKG_COLOR, parent_node=self.aspect2d_np, engine=engine
         )
         self.origin = NodePath("DashBoard")
         self._node_path_list.extend(tmp_node_path_list)

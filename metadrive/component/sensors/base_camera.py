@@ -36,11 +36,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
     def __init__(self, engine, need_cuda=False, frame_buffer_property=None):
         self._enable_cuda = need_cuda
         super(BaseCamera, self).__init__(
-            self.BUFFER_W,
-            self.BUFFER_H,
-            self.BKG_COLOR,
-            engine=engine,
-            frame_buffer_property=frame_buffer_property
+            self.BUFFER_W, self.BUFFER_H, self.BKG_COLOR, engine=engine, frame_buffer_property=frame_buffer_property
         )
 
         width = self.BUFFER_W
