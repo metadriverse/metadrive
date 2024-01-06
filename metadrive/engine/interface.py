@@ -40,7 +40,7 @@ class Interface:
         if base_engine.mode == RENDER_MODE_NONE:
             assert self.need_interface is False, \
                 "We should not using interface with extra cameras when in offscreen mode!"
-        self.init_interface()
+        self._init_interface()
         self._is_showing_arrow = True  # store the state of navigation mark
 
     def after_step(self):
@@ -52,7 +52,7 @@ class Interface:
             if hasattr(track_v, "navigation") and track_v.navigation is not None:
                 self._update_navi_arrow(track_v.navigation.navi_arrow_dir)
 
-    def init_interface(self):
+    def _init_interface(self):
         if self.need_interface:
             info_np = NodePath("Collision info nodepath")
             info_np.reparentTo(self.engine.aspect2d)
@@ -99,7 +99,10 @@ class Interface:
             # the transparency attribute of gltf model is invalid on windows
             # self.arrow.setTransparency(TransparencyAttrib.M_alpha)
 
-    def stop_track(self):
+    def undisplay(self):
+        """
+        Remove the panels and the badge
+        """
         if self.need_interface:
             if self.right_panel:
                 self.right_panel.remove_display_region()
@@ -110,17 +113,17 @@ class Interface:
             self.contact_result_render.detachNode()
             self.arrow.detachNode()
 
-    def track(self, vehicle):
+    def display(self):
+        """
+        Add the panels and the badge
+        """
         if self.need_interface:
             if self.right_panel:
                 self.right_panel.add_display_region(DisplayRegionPosition.right)
-                self.right_panel.track(vehicle)
             if self.mid_panel:
                 self.mid_panel.add_display_region(DisplayRegionPosition.mid)
-                self.mid_panel.track(vehicle)
             if self.left_panel:
                 self.left_panel.add_display_region(DisplayRegionPosition.left)
-                self.left_panel.track(vehicle)
 
             self.arrow.reparentTo(self.engine.aspect2d)
             self.contact_result_render.reparentTo(self.engine.aspect2d)

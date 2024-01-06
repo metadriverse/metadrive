@@ -100,7 +100,7 @@ class MainCamera(BaseSensor):
         self.camera_x = engine.global_config["top_down_camera_initial_x"]
         self.camera_y = engine.global_config["top_down_camera_initial_y"]
         self.camera_rotate = 0
-        engine.interface.stop_track()
+        engine.interface.undisplay()
         engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
         # TPP rotate
@@ -279,7 +279,7 @@ class MainCamera(BaseSensor):
         :return: None
         """
         self.current_track_vehicle = vehicle
-        self.engine.interface.track(vehicle)
+        self.engine.interface.display()
         for name, sensor in self.engine.sensors.items():
             if hasattr(sensor, "track") and name != "main_camera":
                 sensor.track(vehicle.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
@@ -338,7 +338,7 @@ class MainCamera(BaseSensor):
             # self.camera.node().getDisplayRegion(0).clearDrawCallback()
 
     def stop_track(self, bird_view_on_current_position=True):
-        self.engine.interface.stop_track()
+        self.engine.interface.undisplay()
         if self.engine.task_manager.hasTaskNamed(self.CHASE_TASK_NAME):
             self.engine.task_manager.remove(self.CHASE_TASK_NAME)
         if not self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
