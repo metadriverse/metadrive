@@ -141,6 +141,6 @@ class DashBoard(ImageBuffer, BaseSensor):
             para.removeNode()
         self.aspect2d_np.removeNode()
 
-    def track(self, base_object):
+    def track(self, *args, **kwargs):
         # for compatibility
         pass

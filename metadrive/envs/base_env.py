@@ -564,6 +564,9 @@ class BaseEnv(gym.Env):
                 "singleton of MetaDrive and restart your program."
             )
         self.engine.reset()
+        self.reset_sensors()
+        # render the scene
+        self.engine.taskMgr.step()
         if self.top_down_renderer is not None:
             self.top_down_renderer.clear()
             self.engine.top_down_renderer = None
@@ -576,6 +579,27 @@ class BaseEnv(gym.Env):
             "Vehicles: {} != Num_agents: {}".format(len(self.vehicles), self.num_agents)
         assert self.config is self.engine.global_config is get_global_config(), "Inconsistent config may bring errors!"
         return self._get_reset_return()
+
+    def reset_sensors(self):
+        """
+        This is the developer API. Overriding it determines how to place sensors in the scene. You can mount it on an
+        object or fix it at a given position for the whole episode.
+        """
+        # reset the cam at the start at the episode.
+        if self.main_camera is not None:
+            self.main_camera.reset()
+            if hasattr(self, "agent_manager"):
+                bev_cam = self.main_camera.is_bird_view_camera() and self.main_camera.current_track_vehicle is not None
+                vehicles = list(self.engine.agents.values())
+                current_track_vehicle = vehicles[0]
+                self.main_camera.set_follow_lane(self.config["use_chase_camera_follow_lane"])
+                self.main_camera.track(current_track_vehicle)
+                if bev_cam:
+                    self.main_camera.stop_track()
+                    self.main_camera.set_bird_view_pos(current_track_vehicle.position)
+                for name, sensor in self.engine.sensors.items():
+                    if hasattr(sensor, "track") and name != "main_camera":
+                        sensor.track(current_track_vehicle.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
 
     def _get_reset_return(self):
         # TODO: figure out how to get the information of the before step
@@ -876,6 +900,9 @@ class BaseEnv(gym.Env):
                 new_v = get_np_random().choice(vehicles)
                 current_track_vehicle = new_v
         self.main_camera.track(current_track_vehicle)
+        for name, sensor in self.engine.sensors.items():
+            if hasattr(sensor, "track") and name != "main_camera":
+                sensor.track(current_track_vehicle.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
         return
 
     def next_seed_reset(self):

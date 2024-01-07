@@ -1,7 +1,7 @@
 import math
 import queue
 from collections import deque
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 from direct.controls.InputState import InputState
@@ -100,7 +100,7 @@ class MainCamera(BaseSensor):
         self.camera_x = engine.global_config["top_down_camera_initial_x"]
         self.camera_y = engine.global_config["top_down_camera_initial_y"]
         self.camera_rotate = 0
-        engine.interface.stop_track()
+        engine.interface.undisplay()
         engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
         # TPP rotate
@@ -279,10 +279,7 @@ class MainCamera(BaseSensor):
         :return: None
         """
         self.current_track_vehicle = vehicle
-        self.engine.interface.track(vehicle)
-        for name, sensor in self.engine.sensors.items():
-            if hasattr(sensor, "track") and name != "main_camera":
-                sensor.track(vehicle)
+        self.engine.interface.display()
         pos = None
         if self.FOLLOW_LANE:
             pos = self._pos_on_lane(vehicle)  # Return None if routing system is not ready
@@ -338,7 +335,7 @@ class MainCamera(BaseSensor):
             # self.camera.node().getDisplayRegion(0).clearDrawCallback()
 
     def stop_track(self, bird_view_on_current_position=True):
-        self.engine.interface.stop_track()
+        self.engine.interface.undisplay()
         if self.engine.task_manager.hasTaskNamed(self.CHASE_TASK_NAME):
             self.engine.task_manager.remove(self.CHASE_TASK_NAME)
         if not self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
@@ -429,45 +426,46 @@ class MainCamera(BaseSensor):
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
-    def perceive(self, parent_node: NodePath, position=None, hpr=None, clip=True, refresh=False):
+    def perceive(self, clip=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None) -> np.ndarray:
         """
-        parent_node should be object.origin like vehicle.origin or self.engine.origin, which means the world origin
+        When clip is set to False, the image will be represented by unit8 with component value ranging from [0-255].
+        Otherwise, it will be float type with component value ranging from [0.-1.]. By default, the reset parameters are
+        all None. In this case, the camera will render the result with poses and position set by track() function.
 
-        The position and hpr is a 3-dimensional position vector representing:
-            1) the relative position to the parent node
+        When the reset parameters are not None, this camera will be mounted to a new place and render corresponding new
+        results. After this, the camera will be returned to the original states. This process is like borrowing the
+        camera to capture a new image and return the camera to the owner. This usually happens when using one camera to
+        render multiple times from different positions and poses.
+
+        new_parent_node should be a NodePath like object.origin and vehicle.origin or self.engine.origin, which
+        means the world origin. When new_parent_node is set, both position and hpr have to be set as well. The position
+        and hpr are all 3-dim vector representing:
+            1) the relative position to the reparent node
             2) the heading/pitch/roll of the sensor
-
-        Call refresh only when
-            1) the base_object_or_position is an object and is not self.attached_object, or
-            2) the camera is set to a position, or
-            3) the camera has a new hpr
-        This usually happens when using one camera to render multiple times from different positions and poses
         """
 
-        # return camera to original state
-        original_object = self.camera.getParent()
-        original_hpr = self.camera.getHpr()
-        original_position = self.camera.getPos()
+        if new_parent_node:
+            assert position and hpr, "When new_parent_node is set, both position and hpr should be set as well"
 
-        # parent node
-        self.camera.reparentTo(parent_node)
-        # relative position
-        if position:
+            # return camera to original state
+            original_object = self.camera.getParent()
+            original_hpr = self.camera.getHpr()
+            original_position = self.camera.getPos()
+
+            # reparent to new parent node
+            self.camera.reparentTo(new_parent_node)
+            # relative position
             assert len(position) == 3, "The first parameter of camera.perceive() should be a BaseObject instance " \
                                        "or a 3-dim vector representing the (x,y,z) position."
             self.camera.setPos(Vec3(*position))
-        # hpr
-        if hpr:
             assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing " \
                                   "the heading/pitch/roll."
             self.camera.setHpr(Vec3(*hpr))
+            self.run_task = False
+            self.engine.taskMgr.step()
+            self.run_task = True
 
         engine = get_engine()
-        # assert engine.main_camera.current_track_vehicle is vehicle, "Tracked vehicle mismatch"
-        if refresh:
-            self.run_task = False
-            engine.taskMgr.step()
-        self.run_task = True
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
             img = self.cuda_rendered_result[..., :-1][..., ::-1][::-1]
@@ -479,9 +477,10 @@ class MainCamera(BaseSensor):
             img = img[..., :self.num_channels]
 
         # restore
-        self.camera.reparentTo(original_object)
-        self.camera.setHpr(original_hpr)
-        self.camera.setPos(original_position)
+        if new_parent_node:
+            self.camera.reparentTo(original_object)
+            self.camera.setHpr(original_hpr)
+            self.camera.setPos(original_position)
 
         if not clip:
             return img.astype(np.uint8, copy=False, order="C")

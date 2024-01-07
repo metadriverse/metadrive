@@ -54,11 +54,11 @@ Please feel free to contact us if you have any suggestions or ideas!
    :caption: Concepts and Customization
 
    system_design.ipynb
+   sensors.ipynb
    top_down_render.ipynb
    panda_render.ipynb
    vehicle.ipynb
    navigation.ipynb
-   sensors.ipynb
    description.ipynb
    record_replay.ipynb
    development.rst
