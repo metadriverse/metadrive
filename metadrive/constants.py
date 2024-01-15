@@ -493,7 +493,7 @@ class TerrainProperty:
         return 22 if cls.map_region_size <= 1024 else 11
 
     @classmethod
-    def point_in_map(cls, point, map_center=None):
+    def point_in_map(cls, point):
         """
         Return if the point is in the map region
         Args:
@@ -508,7 +508,7 @@ class TerrainProperty:
         return -x <= x_ <= x and -y <= y_ <= y
 
     @classmethod
-    def clip_polygon(cls, polygon, map_center=None):
+    def clip_polygon(cls, polygon):
         """
         Clip the Polygon. Make it fit into the map region and throw away the part outside the map region
         Args:

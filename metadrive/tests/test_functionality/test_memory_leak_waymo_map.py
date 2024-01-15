@@ -63,8 +63,8 @@ def test_waymo_map_memory_leak():
 
         for t in range(10):
             lt = time.time()
-
-            map = ScenarioMap(map_index=0)
+            m_data = engine.data_manager.get_scenario(0, should_copy=False)["map_features"]
+            map = ScenarioMap(map_index=0, map_data=m_data)
             map.attach_to_world(engine.render, engine.physics_world)
             map.destroy()
 
