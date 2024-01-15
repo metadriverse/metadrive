@@ -12,8 +12,9 @@ from metadrive.utils.math import resample_polyline, get_polyline_length
 
 
 class ScenarioMap(BaseMap):
-    def __init__(self, map_index, random_seed=None):
+    def __init__(self, map_index, map_data, random_seed=None):
         self.map_index = map_index
+        self.map_data = map_data
         self.need_lane_localization = self.engine.global_config["need_lane_localization"]
         super(ScenarioMap, self).__init__(dict(id=self.map_index), random_seed=random_seed)
 
@@ -27,6 +28,7 @@ class ScenarioMap(BaseMap):
             global_network=self.road_network,
             random_seed=0,
             map_index=self.map_index,
+            map_data=self.map_data,
             need_lane_localization=self.need_lane_localization
         )
         self.crosswalks = block.crosswalks
@@ -144,6 +146,7 @@ if __name__ == "__main__":
     # data = read_scenario_data(file_path)
 
     default_config = ScenarioEnv.default_config()
+    default_config["_render_mode"] = "onscreen"
     default_config["use_render"] = True
     default_config["debug"] = True
     default_config["debug_static_world"] = True
@@ -154,7 +157,8 @@ if __name__ == "__main__":
     engine = initialize_engine(default_config)
 
     engine.data_manager = ScenarioDataManager()
-    map = ScenarioMap(map_index=0)
+    m_data = engine.data_manager.get_scenario(0, should_copy=False)["map_features"]
+    map = ScenarioMap(map_index=0, map_data=m_data)
     map.attach_to_world()
     engine.enableMouse()
     map.road_network.show_bounding_box(engine)
