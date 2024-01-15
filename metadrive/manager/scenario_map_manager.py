@@ -37,7 +37,7 @@ class ScenarioMapManager(BaseManager):
             self.sdc_dest_point = None
 
             if self._stored_maps[seed] is None:
-                m_data = self.engine.data_manager.get_scenario(0, should_copy=False)["map_features"]
+                m_data = self.engine.data_manager.get_scenario(seed, should_copy=False)["map_features"]
                 new_map = ScenarioMap(map_index=seed, map_data=m_data)
                 if self.store_map:
                     self._stored_maps[seed] = new_map
