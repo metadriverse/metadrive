@@ -19,9 +19,6 @@ class ScenarioBlock(BaseBlock):
         self.need_lane_localization = need_lane_localization
         self.map_index = map_index
         self.map_data = map_data
-        data = self.engine.data_manager.current_scenario
-        sdc_track = data.get_sdc_track()
-        self.sdc_start_point = sdc_track["state"]["position"][0]
         super(ScenarioBlock, self).__init__(block_index, global_network, random_seed)
 
     def _sample_topology(self) -> bool:
@@ -79,10 +76,6 @@ class ScenarioBlock(BaseBlock):
         segment_num = int(line.length / PGDrivableAreaProperty.STRIPE_LENGTH)
         for segment in range(segment_num):
             start = line.get_point(PGDrivableAreaProperty.STRIPE_LENGTH * segment)
-            # trick for optimizing
-            dist = norm(start[0] - self.sdc_start_point[0], start[1] - self.sdc_start_point[1])
-            if dist > self.LINE_CULL_DIST:
-                continue
 
             if segment == segment_num - 1:
                 end = line.get_point(line.length)
@@ -96,10 +89,6 @@ class ScenarioBlock(BaseBlock):
         segment_num = int(line.length / (2 * PGDrivableAreaProperty.STRIPE_LENGTH))
         for segment in range(segment_num):
             start = line.get_point(segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2)
-            # trick for optimizing
-            dist = norm(start[0] - self.sdc_start_point[0], start[1] - self.sdc_start_point[1])
-            if dist > self.LINE_CULL_DIST:
-                continue
             end = line.get_point(
                 segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH
             )
