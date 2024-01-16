@@ -176,7 +176,7 @@ class AgentManager(BaseManager):
                 spawn_road_start, spawn_road_end, index
             )
 
-    def finish(self, agent_name, ignore_delay_done=False):
+    def _finish(self, agent_name, ignore_delay_done=False):
         """
         ignore_delay_done: Whether to ignore the delay done. This is not required when the agent success the episode!
         """

@@ -614,7 +614,7 @@ def test_ma_parking_lot_40_agent_reset_after_respawn():
             env.reset()
             check_pos(list(env.agents.values()))
             for v_id in list(env.agents.keys())[:20]:
-                env.agent_manager.finish(v_id)
+                env.agent_manager._finish(v_id)
             env.step({k: [1, 1] for k in env.agents.keys()})
             env.step({k: [1, 1] for k in env.agents.keys()})
             env.step({k: [1, 1] for k in env.agents.keys()})

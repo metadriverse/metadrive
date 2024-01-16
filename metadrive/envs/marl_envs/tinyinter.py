@@ -261,13 +261,13 @@ class MixedIDMAgentManager(AgentManager):
         else:
             return ret
 
-    def finish(self, agent_name, ignore_delay_done=False):
+    def _finish(self, agent_name, ignore_delay_done=False):
         # ignore_delay_done = True
         if self.ignore_delay_done is not None:
             ignore_delay_done = self.ignore_delay_done
         if agent_name in self.RL_agents:
             self.dying_RL_agents.add(agent_name)
-        super(MixedIDMAgentManager, self).finish(agent_name, ignore_delay_done)
+        super(MixedIDMAgentManager, self)._finish(agent_name, ignore_delay_done)
 
     def _remove_vehicle(self, v):
         agent_name = self.object_to_agent(v.name)

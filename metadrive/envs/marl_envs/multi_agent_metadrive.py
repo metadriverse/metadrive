@@ -157,7 +157,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         for dead_vehicle_id, termed in terminated.items():
             if termed or truncated[dead_vehicle_id]:
                 # finish all terminated and truncated vehicles
-                self.agent_manager.finish(
+                self.agent_manager._finish(
                     dead_vehicle_id,
                     ignore_delay_done=info[dead_vehicle_id].get(TerminationState.SUCCESS, False),
                 )
