@@ -69,6 +69,9 @@ class BaseTrafficLight(BaseObject):
                 self._line_drawer = self.engine.make_line_drawer(thickness=2)
                 self._lane_center_lines = self.lane.get_polyline()
 
+    def before_step(self, *args, **kwargs):
+        self.set_status(*args, **kwargs)
+
     def set_status(self, status):
         """
         People should overwrite this method to parse traffic light status and to determine which traffic light to set
