@@ -119,12 +119,12 @@ def merge_dicts(old_dict, new_dict, allow_new_keys=False, without_copy=False):
 
 
 def _deep_update(
-        original,
-        new_dict,
-        new_keys_allowed=False,
-        allow_new_subkey_list=None,
-        override_all_if_type_changes=None,
-        raise_error=True
+    original,
+    new_dict,
+    new_keys_allowed=False,
+    allow_new_subkey_list=None,
+    override_all_if_type_changes=None,
+    raise_error=True
 ):
     allow_new_subkey_list = allow_new_subkey_list or []
     override_all_if_type_changes = override_all_if_type_changes or []
@@ -240,7 +240,6 @@ def time_me_with_prefix(prefix):
     Returns: None
 
     """
-
     def decorator(fn):
         def _wrapper(*args, **kwargs):
             start = time.time()

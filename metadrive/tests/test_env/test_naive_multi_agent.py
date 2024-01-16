@@ -34,7 +34,7 @@ def test_naive_multi_agent_metadrive():
             "agent_configs": {"agent{}".format(i): {
                 "spawn_longitude": i * 5
             }
-                                       for i in range(4)}
+                              for i in range(4)}
         }
     )
     try:

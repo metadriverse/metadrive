@@ -60,7 +60,7 @@ class AgentManager(BaseManager):
         self._delay_done = None
         self._infinite_agents = None
 
-        self._dying_objects = {} # BaseVehicles which will be recycled after the delay_done time
+        self._dying_objects = {}  # BaseVehicles which will be recycled after the delay_done time
         self._agents_finished_this_frame = dict()  # for observation space
         self.next_agent_count = 0
 
@@ -121,9 +121,7 @@ class AgentManager(BaseManager):
         self._delay_done = config["delay_done"]
         self._infinite_agents = config["num_agents"] == -1
         self._allow_respawn = config["allow_respawn"]
-        self.episode_created_agents = self._get_vehicles(
-            config_dict=self.engine.global_config["agent_configs"]
-        )
+        self.episode_created_agents = self._get_vehicles(config_dict=self.engine.global_config["agent_configs"])
 
     def after_reset(self):
         init_vehicles = self.episode_created_agents

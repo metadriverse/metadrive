@@ -42,9 +42,7 @@ def test_scenario_randomness(vis=False):
         positions_1.append([env.agent.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles])
         for i in range(1, 100000 if vis else 2000):
             o, r, tm, tc, info = env.step([0, 1])
-            positions_1.append(
-                [env.agent.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
-            )
+            positions_1.append([env.agent.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles])
             if tm or tc:
                 break
         env.close()
