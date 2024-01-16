@@ -32,15 +32,11 @@ class AgentManager(BaseManager):
         """
         # BaseVehicles which can be controlled by policies when env.step() called
         self._active_objects = {}
-        # BaseVehicles which will be recycled after the delay_done time
-        self._dying_objects = {}
-        self._agents_finished_this_frame = dict()  # for observation space
-
-        self.next_agent_count = 0
 
         # fake init. before creating engine and vehicles, it is necessary when all vehicles re-created in runtime
         self.observations = copy.copy(init_observations)  # its value is map<agent_id, obs> before init() is called
         self._init_observations = init_observations  # map <agent_id, observation>
+
         # init spaces before initializing env.engine
         observation_space = {
             agent_id: single_obs.observation_space
@@ -58,11 +54,15 @@ class AgentManager(BaseManager):
         self._agent_to_object = {k: k for k in self.observations.keys()}  # no target vehicles created, fake init
         self._object_to_agent = {k: k for k in self.observations.keys()}  # no target vehicles created, fake init
 
-        # get the value in init()
+        # For multi-agent env, None values is updated in init()
         self._allow_respawn = None
         self._debug = None
         self._delay_done = None
         self._infinite_agents = None
+
+        self._dying_objects = {} # BaseVehicles which will be recycled after the delay_done time
+        self._agents_finished_this_frame = dict()  # for observation space
+        self.next_agent_count = 0
 
     def _get_vehicles(self, config_dict: dict):
         from metadrive.component.vehicle.vehicle_type import random_vehicle_type, vehicle_type
