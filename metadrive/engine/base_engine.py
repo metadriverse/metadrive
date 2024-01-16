@@ -595,9 +595,9 @@ class BaseEngine(EngineCore, Randomizable):
                 return None
 
     @property
-    def current_track_vehicle(self):
+    def current_track_agent(self):
         if self.main_camera is not None:
-            return self.main_camera.current_track_vehicle
+            return self.main_camera.current_track_agent
         elif "default_agent" in self.agents:
             return self.agents["default_agent"]
         else:

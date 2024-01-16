@@ -30,7 +30,7 @@ def _test_bicycle_model():
     )
     bicycle_model = BicycleModel()
     o, _ = env.reset()
-    vehicle = env.current_track_vehicle
+    vehicle = env.current_track_agent
     v_dir = vehicle.velocity_direction
     bicycle_model.reset(*vehicle.position, vehicle.speed, vehicle.heading_theta, np.arctan2(v_dir[1], v_dir[0]))
     actions = []
@@ -41,13 +41,13 @@ def _test_bicycle_model():
                 actions += [[s, throttle]] * 20
     predict_states = []
     for s in range(len(actions)):
-        vehicle = env.current_track_vehicle
+        vehicle = env.current_track_agent
         v_dir = vehicle.velocity_direction
         predict_states.append(
             predict(
                 current_state=(
-                    *env.current_track_vehicle.position, env.current_track_vehicle.speed,
-                    env.current_track_vehicle.heading_theta, np.arctan2(v_dir[1], v_dir[0])
+                    *env.current_track_agent.position, env.current_track_agent.speed,
+                    env.current_track_agent.heading_theta, np.arctan2(v_dir[1], v_dir[0])
                 ),
                 actions=[actions[i] for i in range(s, s + horizon)],
                 model=bicycle_model

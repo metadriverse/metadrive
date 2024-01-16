@@ -9,7 +9,7 @@ from metadrive.policy.idm_policy import IDMPolicy
 
 
 def _check_spaces_before_reset(env):
-    a = set(env.config["target_vehicle_configs"].keys())
+    a = set(env.config["agent_configs"].keys())
     b = set(env.observation_space.spaces.keys())
     c = set(env.action_space.spaces.keys())
     assert a == b == c
@@ -17,7 +17,7 @@ def _check_spaces_before_reset(env):
 
 
 def _check_spaces_after_reset(env, obs=None):
-    a = set(env.config["target_vehicle_configs"].keys())
+    a = set(env.config["agent_configs"].keys())
     b = set(env.observation_space.spaces.keys())
     assert a == b
     _check_shape(env)

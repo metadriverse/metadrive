@@ -17,19 +17,19 @@ if __name__ == "__main__":
         print(HELP_MESSAGE)
         env.vehicle.expert_takeover = True
         for i in range(1, 1000000000):
-            previous_takeover = env.current_track_vehicle.expert_takeover
+            previous_takeover = env.current_track_agent.expert_takeover
             o, r, tm, tc, info = env.step([0, 0])
             env.render(
                 text={
-                    "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
+                    "Auto-Drive (Switch mode: T)": "on" if env.current_track_agent.expert_takeover else "off",
                     "Total episode cost": env.episode_cost,
                     "Keyboard Control": "W,A,S,D",
                 }
             )
-            if not previous_takeover and env.current_track_vehicle.expert_takeover:
+            if not previous_takeover and env.current_track_agent.expert_takeover:
                 logging.warning("Auto-Drive mode may fail to solve some scenarios due to distribution mismatch")
             if (tm or tc) and info["arrive_dest"]:
                 env.reset()
-                env.current_track_vehicle.expert_takeover = True
+                env.current_track_agent.expert_takeover = True
     finally:
         env.close()

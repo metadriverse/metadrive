@@ -18,7 +18,7 @@ def test_respawn():
     try:
 
         assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
-        assert set(env.config["target_vehicle_configs"].keys()) == {"agent0", "agent1"}
+        assert set(env.config["agent_configs"].keys()) == {"agent0", "agent1"}
         assert set(env.vehicles.keys()) == set()  # Not initialized yet!
 
         o, _ = env.reset()
@@ -28,7 +28,7 @@ def test_respawn():
         assert set(o.keys()) == {"agent0", "agent1"}
         assert set(env.observations.keys()) == {"agent0", "agent1"}
         assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
-        assert set(env.config["target_vehicle_configs"].keys()) == {"agent0", "agent1"}
+        assert set(env.config["agent_configs"].keys()) == {"agent0", "agent1"}
         assert set(env.vehicles.keys()) == {"agent0", "agent1"}
 
         v_id_0 = "agent0"
@@ -65,7 +65,7 @@ def test_respawn():
                 assert set(o.keys()) == {"agent0", "agent1"}
                 assert set(env.observations.keys()) == {"agent0", "agent1"}
                 assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
-                assert set(env.config["target_vehicle_configs"].keys()) == {"agent0", "agent1"}
+                assert set(env.config["agent_configs"].keys()) == {"agent0", "agent1"}
                 assert set(env.vehicles.keys()) == {"agent0", "agent1"}
     finally:
         env.close()
@@ -80,7 +80,7 @@ def test_delay_done(render=False):
         {
             # "use_render": True,
             #
-            "target_vehicle_configs": {
+            "agent_configs": {
                 "agent0": {
                     "spawn_longitude": 12,
                     "spawn_lateral": 0,

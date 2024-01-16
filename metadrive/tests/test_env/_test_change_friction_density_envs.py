@@ -24,7 +24,7 @@ def test_change_friction():
 
 # SidePassEnv is tested in test_object_collision.py!
 # def test_side_pass_env():
-#     _run(SidePassEnv({"target_vehicle_configs": {"default_agent": {"show_navi_mark": False}}}))
+#     _run(SidePassEnv({"agent_configs": {"default_agent": {"show_navi_mark": False}}}))
 
 
 def test_change_density_env():

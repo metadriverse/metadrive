@@ -50,12 +50,12 @@ class SpawnManager(BaseManager):
         self.need_update_spawn_places = True
         self.spawn_places_used = []  # reset every step
 
-        target_vehicle_configs = copy.copy(self.engine.global_config["target_vehicle_configs"])
-        self._init_target_vehicle_configs = target_vehicle_configs
+        agent_configs = copy.copy(self.engine.global_config["agent_configs"])
+        self._init_agent_configs = agent_configs
 
         spawn_roads = self.engine.global_config["spawn_roads"]
-        target_vehicle_configs, safe_spawn_places = self._auto_fill_spawn_roads_randomly(spawn_roads)
-        self.available_target_vehicle_configs = target_vehicle_configs
+        agent_configs, safe_spawn_places = self._auto_fill_spawn_roads_randomly(spawn_roads)
+        self.available_agent_configs = agent_configs
         self.safe_spawn_places = {place["identifier"]: place for place in safe_spawn_places}
         self.spawn_roads = spawn_roads
         self.need_update_spawn_places = True
@@ -71,38 +71,38 @@ class SpawnManager(BaseManager):
 
     def reset(self):
         # random assign spawn points
-        num_agents = self.num_agents if self.num_agents is not None else len(self.available_target_vehicle_configs)
-        assert len(self.available_target_vehicle_configs) > 0
+        num_agents = self.num_agents if self.num_agents is not None else len(self.available_agent_configs)
+        assert len(self.available_agent_configs) > 0
 
         if num_agents == -1:  # Infinite number of agents
-            target_agents = list(range(len(self.available_target_vehicle_configs)))
+            target_agents = list(range(len(self.available_agent_configs)))
         else:
             target_agents = self.np_random.choice(
-                [i for i in range(len(self.available_target_vehicle_configs))], num_agents, replace=False
+                [i for i in range(len(self.available_agent_configs))], num_agents, replace=False
             )
 
         # set the spawn road
         ret = {}
         if len(target_agents) > 1:
             for real_idx, idx in enumerate(target_agents):
-                v_config = self.available_target_vehicle_configs[idx]["config"]
+                v_config = self.available_agent_configs[idx]["config"]
                 v_config = self._randomize_position_in_slot(v_config)
                 ret["agent{}".format(real_idx)] = v_config
         else:
-            ret["agent0"] = self._randomize_position_in_slot(self.available_target_vehicle_configs[0]["config"])
+            ret["agent0"] = self._randomize_position_in_slot(self.available_agent_configs[0]["config"])
 
         # set the destination/spawn point and update target_v config
-        target_vehicle_configs = {}
+        agent_configs = {}
         for agent_id, config in ret.items():
-            init_config = copy.deepcopy(self._init_target_vehicle_configs[agent_id])
+            init_config = copy.deepcopy(self._init_agent_configs[agent_id])
             if not init_config.get("_specified_spawn_lane", False):
                 init_config.update(config)
             config = init_config
             if not config.get("destination", False) or config["destination"] is None:
                 config = self.update_destination_for(agent_id, config)
-            target_vehicle_configs[agent_id] = config
+            agent_configs[agent_id] = config
 
-        self.engine.global_config["target_vehicle_configs"] = copy.deepcopy(target_vehicle_configs)
+        self.engine.global_config["agent_configs"] = copy.deepcopy(agent_configs)
 
     @staticmethod
     def max_capacity(spawn_roads, exit_length, lane_num):
@@ -133,14 +133,14 @@ class SpawnManager(BaseManager):
         # We can spawn agents in the middle of road at the initial time, but when some vehicles need to be respawn,
         # then we have to set it to the farthest places to ensure safety (otherwise the new vehicles may suddenly
         # appear at the middle of the road!)
-        target_vehicle_configs = []
+        agent_configs = []
         safe_spawn_places = []
         for i, road in enumerate(spawn_roads):
             for lane_idx in range(self.lane_num):
                 for j in range(num_slots):
                     long = 1 / 2 * self.RESPAWN_REGION_LONGITUDE + j * self.RESPAWN_REGION_LONGITUDE
                     lane_tuple = road.lane_index(lane_idx)  # like (>>>, 1C0_0_, 1) and so on.
-                    target_vehicle_configs.append(
+                    agent_configs.append(
                         Config(
                             dict(
                                 identifier="|".join((str(s) for s in lane_tuple + (j, ))),
@@ -154,8 +154,8 @@ class SpawnManager(BaseManager):
                         )
                     )  # lock the spawn positions
                     if j == 0:
-                        safe_spawn_places.append(copy.deepcopy(target_vehicle_configs[-1]))
-        return target_vehicle_configs, safe_spawn_places
+                        safe_spawn_places.append(copy.deepcopy(agent_configs[-1]))
+        return agent_configs, safe_spawn_places
 
     def step(self):
         self.spawn_places_used = []

@@ -70,7 +70,7 @@ class MainCamera(BaseSensor):
         self.direction_running_mean = deque(maxlen=self.camera_smooth_buffer_size if self.camera_smooth else 1)
         self.world_light = engine.world_light  # light chases the chase camera, when not using global light
         self.inputs = InputState()
-        self.current_track_vehicle = None
+        self.current_track_agent = None
 
         # height control
         self.chase_camera_height = camera_height
@@ -278,7 +278,7 @@ class MainCamera(BaseSensor):
         :param vehicle: Vehicle to chase
         :return: None
         """
-        self.current_track_vehicle = vehicle
+        self.current_track_agent = vehicle
         self.engine.interface.display()
         pos = None
         if self.FOLLOW_LANE:
@@ -329,7 +329,7 @@ class MainCamera(BaseSensor):
             engine.task_manager.remove(self.CHASE_TASK_NAME)
         if engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
-        self.current_track_vehicle = None
+        self.current_track_agent = None
         if self.registered:
             self.unregister()
             # self.camera.node().getDisplayRegion(0).clearDrawCallback()

@@ -425,7 +425,7 @@ def _vis():
         ep_s += 1
         # d.update({"total_r": total_r, "episode length": ep_s})
         if len(env.vehicles) != 0:
-            v = env.current_track_vehicle
+            v = env.current_track_agent
             dist = v.dist_to_left_side, v.dist_to_right_side
             ckpt_idx = v.navigation._target_checkpoints_index
         else:
@@ -444,7 +444,7 @@ def _vis():
             "parking_space_num": len(env.engine.spawn_manager.parking_space_available)
         }
         if len(env.vehicles) > 0:
-            v = env.current_track_vehicle
+            v = env.current_track_agent
             # print(v.navigation.checkpoints)
             render_text["current_road"] = v.navigation.current_road
 

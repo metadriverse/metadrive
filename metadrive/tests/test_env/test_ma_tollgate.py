@@ -10,7 +10,7 @@ from metadrive.utils import distance_greater, norm
 
 
 def _check_spaces_before_reset(env):
-    a = set(env.config["target_vehicle_configs"].keys())
+    a = set(env.config["agent_configs"].keys())
     b = set(env.observation_space.spaces.keys())
     c = set(env.action_space.spaces.keys())
     assert a == b == c
@@ -18,7 +18,7 @@ def _check_spaces_before_reset(env):
 
 
 def _check_spaces_after_reset(env, obs=None):
-    a = set(env.config["target_vehicle_configs"].keys())
+    a = set(env.config["agent_configs"].keys())
     b = set(env.observation_space.spaces.keys())
     assert a == b
     _check_shape(env)
@@ -175,7 +175,7 @@ def test_ma_toll_reset():
                 _check_spaces_after_reset(env, obs)
                 assert set(env.observation_space.spaces.keys()) == set(env.action_space.spaces.keys()) == \
                        set(env.observations.keys()) == set(obs.keys()) == \
-                       set(env.config["target_vehicle_configs"].keys())
+                       set(env.config["agent_configs"].keys())
 
                 break
     finally:

@@ -43,8 +43,8 @@ class VaryingDynamicsAgentManager(AgentManager):
             else:
                 raise ValueError("Unknown parameter range: {}".format(para_range))
 
-        assert len(self.engine.global_config["target_vehicle_configs"]) == 1, "Only supporting single-agent now!"
-        self.engine.global_config["target_vehicle_configs"]["default_agent"].update(dynamics)
+        assert len(self.engine.global_config["agent_configs"]) == 1, "Only supporting single-agent now!"
+        self.engine.global_config["agent_configs"]["default_agent"].update(dynamics)
         super(VaryingDynamicsAgentManager, self).reset()
 
 

@@ -58,7 +58,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Agent =====
     random_spawn_lane_index=True,
     vehicle_config=dict(navigation_module=NodeNetworkNavigation),
-    target_vehicle_configs={
+    agent_configs={
         DEFAULT_AGENT: dict(
             use_special_color=True,
             spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
@@ -121,8 +121,8 @@ class MetaDriveEnv(BaseEnv):
         config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
         target_v_config = copy.deepcopy(config["vehicle_config"])
         if not config["is_multi_agent"]:
-            target_v_config.update(config["target_vehicle_configs"][DEFAULT_AGENT])
-            config["target_vehicle_configs"][DEFAULT_AGENT] = target_v_config
+            target_v_config.update(config["agent_configs"][DEFAULT_AGENT])
+            config["agent_configs"][DEFAULT_AGENT] = target_v_config
         return config
 
     def done_function(self, vehicle_id: str):

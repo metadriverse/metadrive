@@ -134,10 +134,10 @@ class MixWaymoPGEnv(ScenarioEnv):
                 self._init_pg_episode()
 
     def _init_pg_episode(self):
-        self.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (
+        self.config["agent_configs"]["default_agent"]["spawn_lane_index"] = (
             FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, self.engine.np_random.randint(3)
         )
-        self.config["target_vehicle_configs"]["default_agent"]["destination"] = None
+        self.config["agent_configs"]["default_agent"]["destination"] = None
 
     def reset(self, seed: Union[None, int] = None):
         self.change_suite()

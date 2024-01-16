@@ -122,7 +122,7 @@ class AgentManager(BaseManager):
         self._infinite_agents = config["num_agents"] == -1
         self._allow_respawn = config["allow_respawn"]
         self.episode_created_agents = self._get_vehicles(
-            config_dict=self.engine.global_config["target_vehicle_configs"]
+            config_dict=self.engine.global_config["agent_configs"]
         )
 
     def after_reset(self):
@@ -171,10 +171,10 @@ class AgentManager(BaseManager):
     def random_spawn_lane_in_single_agent(self):
         if not self.engine.global_config["is_multi_agent"] and \
                 self.engine.global_config.get("random_spawn_lane_index", False) and self.engine.current_map is not None:
-            spawn_road_start = self.engine.global_config["target_vehicle_configs"][DEFAULT_AGENT]["spawn_lane_index"][0]
-            spawn_road_end = self.engine.global_config["target_vehicle_configs"][DEFAULT_AGENT]["spawn_lane_index"][1]
+            spawn_road_start = self.engine.global_config["agent_configs"][DEFAULT_AGENT]["spawn_lane_index"][0]
+            spawn_road_end = self.engine.global_config["agent_configs"][DEFAULT_AGENT]["spawn_lane_index"][1]
             index = self.np_random.randint(self.engine.current_map.config["lane_num"])
-            self.engine.global_config["target_vehicle_configs"][DEFAULT_AGENT]["spawn_lane_index"] = (
+            self.engine.global_config["agent_configs"][DEFAULT_AGENT]["spawn_lane_index"] = (
                 spawn_road_start, spawn_road_end, index
             )
 
@@ -202,7 +202,7 @@ class AgentManager(BaseManager):
     def propose_new_vehicle(self):
         # Create a new vehicle.
         agent_name = self.next_agent_id()
-        next_config = self.engine.global_config["target_vehicle_configs"]["agent0"]
+        next_config = self.engine.global_config["agent_configs"]["agent0"]
         vehicle = self._get_vehicles({agent_name: next_config})[agent_name]
         new_v_name = vehicle.name
         self._agent_to_object[agent_name] = new_v_name

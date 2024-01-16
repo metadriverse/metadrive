@@ -31,7 +31,7 @@ def test_naive_multi_agent_metadrive():
         config={
             "map": "SSS",
             "num_agents": 4,
-            "target_vehicle_configs": {"agent{}".format(i): {
+            "agent_configs": {"agent{}".format(i): {
                 "spawn_longitude": i * 5
             }
                                        for i in range(4)}

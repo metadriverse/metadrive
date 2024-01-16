@@ -30,6 +30,6 @@ if __name__ == "__main__":
             o, r, tm, tc, info = env.step([0, 0])
             if (tm or tc) and info["arrive_dest"]:
                 env.reset()
-                env.current_track_vehicle.expert_takeover = True
+                env.current_track_agent.expert_takeover = True
     finally:
         env.close()

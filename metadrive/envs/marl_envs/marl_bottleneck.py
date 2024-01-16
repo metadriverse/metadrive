@@ -278,12 +278,12 @@ def _vis():
             "cam_x": env.main_camera.camera_x,
             "cam_y": env.main_camera.camera_y,
             "cam_z": env.main_camera.top_down_camera_height,
-            "current_track_v": env.agent_manager.object_to_agent(env.current_track_vehicle.name)
+            "current_track_v": env.agent_manager.object_to_agent(env.current_track_agent.name)
         }
-        track_v = env.agent_manager.object_to_agent(env.current_track_vehicle.name)
+        track_v = env.agent_manager.object_to_agent(env.current_track_agent.name)
         render_text["tack_v_reward"] = r[track_v]
-        render_text["dist_to_right"] = env.current_track_vehicle.dist_to_right_side
-        render_text["dist_to_left"] = env.current_track_vehicle.dist_to_left_side
+        render_text["dist_to_right"] = env.current_track_agent.dist_to_right_side
+        render_text["dist_to_left"] = env.current_track_agent.dist_to_left_side
         env.render(text=render_text)
         if tm["__all__"]:
             print(
