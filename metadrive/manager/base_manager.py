@@ -1,4 +1,5 @@
 import copy
+from metadrive.constants import DEFAULT_AGENT
 
 from gymnasium.spaces import Space
 
@@ -158,7 +159,7 @@ class BaseAgentManager(BaseManager):
 
     INITIALIZED = False  # when the reset() and init() are called, it will be set to True
 
-    def __init__(self, init_observations, init_action_space):
+    def __init__(self, init_observations):
         """
         The real init is happened in self.init(), in which super().__init__() will be called
         """
@@ -174,6 +175,7 @@ class BaseAgentManager(BaseManager):
             agent_id: single_obs.observation_space
             for agent_id, single_obs in init_observations.items()
         }
+        init_action_space = self._get_action_space()
         assert isinstance(init_action_space, dict)
         assert isinstance(observation_space, dict)
         self._init_observation_spaces = observation_space
@@ -188,9 +190,23 @@ class BaseAgentManager(BaseManager):
 
         self._debug = None
 
+    def _get_action_space(self):
+        from metadrive.engine.engine_utils import get_global_config
+        if len(self.observations) > 1:
+            return {v_id: self.agent_policy.get_input_space() for v_id in
+                    get_global_config()["agent_configs"].keys()}
+        else:
+            return {DEFAULT_AGENT: self.agent_policy.get_input_space()}
+
     @property
     def agent_policy(self):
-        return self.engine.global_config["agent_policy"]
+        """
+        Return the agent policy
+        Returns: Agent Poicy class
+        Make sure you access the global config via get_global_config() instead of self.engine.global_config
+        """
+        from metadrive.engine.engine_utils import get_global_config
+        return get_global_config()["agent_policy"]
 
     def before_reset(self):
         if not self.INITIALIZED:

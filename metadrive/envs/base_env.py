@@ -407,17 +407,8 @@ class BaseEnv(gym.Env):
     def _get_observations(self) -> Dict[str, "BaseObservation"]:
         return {DEFAULT_AGENT: self.get_single_observation()}
 
-    def _get_observation_space(self):
-        return {v_id: obs.observation_space for v_id, obs in self.observations.items()}
-
-    def _get_action_space(self):
-        if self.is_multi_agent:
-            return {v_id: self.config["agent_policy"].get_input_space() for v_id in self.config["agent_configs"].keys()}
-        else:
-            return {DEFAULT_AGENT: self.config["agent_policy"].get_input_space()}
-
     def _get_agent_manager(self):
-        return VehicleAgentManager(init_observations=self._get_observations(), init_action_space=self._get_action_space())
+        return VehicleAgentManager(init_observations=self._get_observations())
 
     def lazy_init(self):
         """

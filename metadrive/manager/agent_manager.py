@@ -20,11 +20,11 @@ class VehicleAgentManager(BaseAgentManager):
     """
     INITIALIZED = False  # when vehicles instances are created, it will be set to True
 
-    def __init__(self, init_observations, init_action_space):
+    def __init__(self, init_observations):
         """
         The real init is happened in self.init(), in which super().__init__() will be called
         """
-        super(VehicleAgentManager, self).__init__(init_observations, init_action_space)
+        super(VehicleAgentManager, self).__init__(init_observations)
         # For multi-agent env, None values is updated in init()
         self._allow_respawn = None
         self._delay_done = None
@@ -53,15 +53,19 @@ class VehicleAgentManager(BaseAgentManager):
 
     @property
     def agent_policy(self):
-        # note: agent.id = object id
-
-        if self.engine.global_config["manual_control"]:
-            if self.engine.global_config.get("use_AI_protector", False):
+        """
+        Return the agent policy
+        Returns: Agent Poicy class
+        Make sure you access the global config via get_global_config() instead of self.engine.global_config
+        """
+        from metadrive.engine.engine_utils import get_global_config
+        if get_global_config()["manual_control"]:
+            if get_global_config().get("use_AI_protector", False):
                 policy = AIProtectPolicy
             else:
                 policy = ManualControlPolicy
         else:
-            policy = self.engine.global_config["agent_policy"]
+            policy = get_global_config()["agent_policy"]
         return policy
 
     def before_reset(self):

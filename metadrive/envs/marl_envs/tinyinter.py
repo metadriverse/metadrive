@@ -222,10 +222,8 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
 
 class MixedIDMAgentManager(VehicleAgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
-    def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
-        super(MixedIDMAgentManager, self).__init__(
-            init_observations=init_observations, init_action_space=init_action_space
-        )
+    def __init__(self, init_observations, num_RL_agents, ignore_delay_done=None, target_speed=10):
+        super(MixedIDMAgentManager, self).__init__(init_observations=init_observations)
         self.num_RL_agents = num_RL_agents
         self.RL_agents = set()
         self.dying_RL_agents = set()
@@ -407,7 +405,6 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         # else:
         self.agent_manager = MixedIDMAgentManager(
             init_observations=self._get_observations(),
-            init_action_space=self._get_action_space(),
             num_RL_agents=self.num_RL_agents,
             ignore_delay_done=self.config["ignore_delay_done"],
             target_speed=self.config["target_speed"]

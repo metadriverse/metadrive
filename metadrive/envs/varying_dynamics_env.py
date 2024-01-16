@@ -56,9 +56,7 @@ class VaryingDynamicsEnv(MetaDriveEnv):
         return config
 
     def _get_agent_manager(self):
-        return VaryingDynamicsAgentManager(
-            init_observations=self._get_observations(), init_action_space=self._get_action_space()
-        )
+        return VaryingDynamicsAgentManager(init_observations=self._get_observations())
 
 
 if __name__ == '__main__':
