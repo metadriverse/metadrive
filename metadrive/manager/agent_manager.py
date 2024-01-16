@@ -1,14 +1,12 @@
 import copy
 
-from metadrive.engine.logger import get_logger
-from metadrive.policy.idm_policy import TrajectoryIDMPolicy
-from typing import Dict
-
-from gymnasium.spaces import Box, Dict, MultiDiscrete, Discrete, Space
+from gymnasium.spaces import Space
 
 from metadrive.constants import DEFAULT_AGENT
+from metadrive.engine.logger import get_logger
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
+from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 
@@ -21,7 +19,7 @@ class AgentManager(BaseManager):
     of objects.
 
     Note:
-    agent name: Agent name that exists in the environment, like agent0, agent1, ....
+    agent name: Agent name that exists in the environment, like default_agent, agent0, agent1, ....
     object name: The unique name for each object, typically be random string.
     """
     INITIALIZED = False  # when vehicles instances are created, it will be set to True
@@ -30,8 +28,8 @@ class AgentManager(BaseManager):
         """
         The real init is happened in self.init(), in which super().__init__() will be called
         """
-        # BaseVehicles which can be controlled by policies when env.step() called
-        self._active_objects = {}
+        # for getting {agent_id: BaseObject}, use agent_manager.active_agents
+        self._active_objects = {}  # {object.id: BaseObject}
 
         # fake init. before creating engine and vehicles, it is necessary when all vehicles re-created in runtime
         self.observations = copy.copy(init_observations)  # its value is map<agent_id, obs> before init() is called
@@ -105,7 +103,7 @@ class AgentManager(BaseManager):
             for v in self.dying_agents.values():
                 self._remove_vehicle(v)
 
-        for v in self.get_vehicle_list():
+        for v in list(self._active_objects.values()) + [v for (v, _) in self._dying_objects.values()]:
             if hasattr(v, "before_reset"):
                 v.before_reset()
 
@@ -199,7 +197,7 @@ class AgentManager(BaseManager):
 
     def propose_new_vehicle(self):
         # Create a new vehicle.
-        agent_name = self.next_agent_id()
+        agent_name = self._next_agent_id()
         next_config = self.engine.global_config["agent_configs"]["agent0"]
         vehicle = self._get_vehicles({agent_name: next_config})[agent_name]
         new_v_name = vehicle.name
@@ -217,7 +215,7 @@ class AgentManager(BaseManager):
         vehicle.set_static(False)
         return agent_name, vehicle, step_info
 
-    def next_agent_id(self):
+    def _next_agent_id(self):
         ret = "agent{}".format(self.next_agent_count)
         self.next_agent_count += 1
         return ret
@@ -274,9 +272,6 @@ class AgentManager(BaseManager):
     def _translate(self, d):
         return {self._object_to_agent[k]: v for k, v in d.items()}
 
-    def get_vehicle_list(self):
-        return list(self._active_objects.values()) + [v for (v, _) in self._dying_objects.values()]
-
     def get_observations(self):
         if hasattr(self, "engine") and self.engine.replay_episode:
             return self.engine.replay_manager.get_replay_agent_observations()
@@ -332,24 +327,12 @@ class AgentManager(BaseManager):
         assert not self.engine.replay_episode
         ret = {}
         for agent_name, v_name in self._agents_finished_this_frame.items():
-            v = self.get_object(v_name, raise_error=False)
+            v = self.get_agent(v_name, raise_error=False)
             ret[agent_name] = v
         return ret
 
-    @property
-    def active_objects(self):
-        """
-        Return meta-data, a pointer, Caution !
-        :return: Map<obj_name, obj>
-        """
-        raise DeprecationWarning("prohibit! Use active agent instead")
-        return self._active_objects
-
-    def get_agent(self, agent_name):
+    def get_agent(self, agent_name, raise_error=True):
         object_name = self.agent_to_object(agent_name)
-        return self.get_object(object_name)
-
-    def get_object(self, object_name, raise_error=True):
         if object_name in self._active_objects:
             return self._active_objects[object_name]
         elif object_name in self._dying_objects:
