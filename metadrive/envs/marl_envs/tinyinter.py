@@ -4,7 +4,7 @@ import gymnasium as gym
 import numpy as np
 
 from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
-from metadrive.manager.agent_manager import AgentManager
+from metadrive.manager.agent_manager import VehicleAgentManager
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
@@ -220,7 +220,7 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
         return [0, 0]
 
 
-class MixedIDMAgentManager(AgentManager):
+class MixedIDMAgentManager(VehicleAgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
     def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
         super(MixedIDMAgentManager, self).__init__(
@@ -277,7 +277,7 @@ class MixedIDMAgentManager(AgentManager):
             self.dying_RL_agents.remove(agent_name)
         super(MixedIDMAgentManager, self)._remove_vehicle(v)
 
-    def _get_vehicles(self, config_dict: dict):
+    def _create_agents(self, config_dict: dict):
         from metadrive.component.vehicle.vehicle_type import random_vehicle_type, vehicle_type
         ret = {}
         for agent_count, (agent_id, v_config) in enumerate(config_dict.items()):

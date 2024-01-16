@@ -19,7 +19,7 @@ from metadrive.constants import TerminationState, TerrainProperty
 from metadrive.engine.engine_utils import initialize_engine, close_engine, \
     engine_initialized, set_global_random_seed, initialize_global_config, get_global_config
 from metadrive.engine.logger import get_logger, set_log_level
-from metadrive.manager.agent_manager import AgentManager
+from metadrive.manager.agent_manager import VehicleAgentManager
 from metadrive.manager.record_manager import RecordManager
 from metadrive.manager.replay_manager import ReplayManager
 from metadrive.obs.observation_base import DummyObservation
@@ -417,7 +417,7 @@ class BaseEnv(gym.Env):
             return {DEFAULT_AGENT: self.config["agent_policy"].get_input_space()}
 
     def _get_agent_manager(self):
-        return AgentManager(init_observations=self._get_observations(), init_action_space=self._get_action_space())
+        return VehicleAgentManager(init_observations=self._get_observations(), init_action_space=self._get_action_space())
 
     def lazy_init(self):
         """

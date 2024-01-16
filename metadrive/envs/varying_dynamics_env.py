@@ -9,7 +9,7 @@ the same dynamics. Set num_scenarios > 1 to allow more diverse dynamics.
 """
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.manager.agent_manager import AgentManager
+from metadrive.manager.agent_manager import VehicleAgentManager
 
 VaryingDynamicsConfig = dict(
     vehicle_config=dict(vehicle_model="varying_dynamics", ),
@@ -25,7 +25,7 @@ VaryingDynamicsConfig = dict(
 )
 
 
-class VaryingDynamicsAgentManager(AgentManager):
+class VaryingDynamicsAgentManager(VehicleAgentManager):
     def reset(self):
         # Randomize ego vehicle's dynamics here
         random_fields = self.engine.global_config["random_dynamics"]
