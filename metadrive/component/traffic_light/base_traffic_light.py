@@ -20,13 +20,20 @@ class BaseTrafficLight(BaseObject):
     LIGHT_VIS_WIDTH = 0.8
     PLACE_LONGITUDE = 5
 
-    def __init__(
-        self, lane, position=None, name=None, random_seed=None, config=None, escape_random_seed_assertion=False
-    ):
+    def __init__(self,
+                 lane,
+                 position=None,
+                 name=None,
+                 random_seed=None,
+                 config=None,
+                 escape_random_seed_assertion=False,
+                 draw_line=False):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
         self.set_metadrive_type(MetaDriveType.TRAFFIC_LIGHT)
         self.lane = lane
         self.status = MetaDriveType.LIGHT_UNKNOWN
+        self._draw_line = draw_line
+        self._lane_center_lines = None
 
         self.lane_width = lane.width_at(0) if lane else 4
         air_wall = generate_static_box_physics_body(
@@ -58,6 +65,9 @@ class BaseTrafficLight(BaseObject):
                     model.hide(CamMask.Shadow)
                     BaseTrafficLight.TRAFFIC_LIGHT_MODEL[color] = model
             self.origin.setScale(0.5, 1.2, 1.2)
+            if self._draw_line:
+                self._line_drawer = self.engine.make_line_drawer(thickness=2)
+                self._lane_center_lines = self.lane.get_polyline()
 
     def set_status(self, status):
         """
@@ -96,6 +106,9 @@ class BaseTrafficLight(BaseObject):
     def destroy(self):
         super(BaseTrafficLight, self).destroy()
         self.lane = None
+        if self._draw_line:
+            self._line_drawer.reset()
+            self._line_drawer.removeNode()
 
     @property
     def top_down_color(self):
