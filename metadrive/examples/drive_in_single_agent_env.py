@@ -51,7 +51,7 @@ if __name__ == "__main__":
     try:
         o, _ = env.reset(seed=21)
         print(HELP_MESSAGE)
-        env.vehicle.expert_takeover = True
+        env.agent.expert_takeover = True
         if args.observation == "rgb_camera":
             assert isinstance(o, dict)
             print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})

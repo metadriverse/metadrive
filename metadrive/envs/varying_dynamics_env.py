@@ -68,7 +68,7 @@ if __name__ == '__main__':
     })
     for ep in range(3):
         obs, _ = env.reset()
-        print("Current Dynamics Parameters:", env.vehicle.get_dynamics_parameters())
+        print("Current Dynamics Parameters:", env.agent.get_dynamics_parameters())
         for step in range(1000):
             o, r, tm, tc, i = env.step(env.action_space.sample())
             if tm or tc:

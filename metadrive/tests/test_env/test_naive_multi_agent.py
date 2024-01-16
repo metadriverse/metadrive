@@ -50,7 +50,7 @@ def test_naive_multi_agent_metadrive():
                 obses = list(o.values())
                 assert not np.isclose(obses[0], obses[1], rtol=1e-3, atol=1e-3).all()
 
-            pos_z_list = [v.chassis.getNode(0).transform.pos[2] for v in env.vehicles.values()]
+            pos_z_list = [v.chassis.getNode(0).transform.pos[2] for v in env.agents.values()]
             for p in pos_z_list:
                 assert p < 5.0 or step <= 10
 

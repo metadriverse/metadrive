@@ -19,7 +19,7 @@ def test_respawn():
 
         assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
         assert set(env.config["agent_configs"].keys()) == {"agent0", "agent1"}
-        assert set(env.vehicles.keys()) == set()  # Not initialized yet!
+        assert set(env.agents.keys()) == set()  # Not initialized yet!
 
         o, _ = env.reset()
 
@@ -29,7 +29,7 @@ def test_respawn():
         assert set(env.observations.keys()) == {"agent0", "agent1"}
         assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
         assert set(env.config["agent_configs"].keys()) == {"agent0", "agent1"}
-        assert set(env.vehicles.keys()) == {"agent0", "agent1"}
+        assert set(env.agents.keys()) == {"agent0", "agent1"}
 
         v_id_0 = "agent0"
         v_id_1 = "agent1"
@@ -66,7 +66,7 @@ def test_respawn():
                 assert set(env.observations.keys()) == {"agent0", "agent1"}
                 assert set(env.action_space.spaces.keys()) == {"agent0", "agent1"}
                 assert set(env.config["agent_configs"].keys()) == {"agent0", "agent1"}
-                assert set(env.vehicles.keys()) == {"agent0", "agent1"}
+                assert set(env.agents.keys()) == {"agent0", "agent1"}
     finally:
         env.close()
     assert done_count > 0
@@ -105,9 +105,9 @@ def test_delay_done(render=False):
         o, _ = env.reset()
         for i in range(1, 300):
             actions = {"agent0": [1, 1], "agent1": [1, 1]}
-            if "agent0" not in env.vehicles:
+            if "agent0" not in env.agents:
                 actions.pop("agent0")
-            if "agent1" not in env.vehicles:
+            if "agent1" not in env.agents:
                 actions.pop("agent1")
             o, r, tm, tc, info = env.step(actions)
             if agent0_done:
@@ -134,10 +134,10 @@ def test_delay_done(render=False):
         env.reset()
         dead = set()
         for _ in range(300):
-            o, r, tm, tc, i = env.step({k: [1, 1] for k in env.vehicles.keys()})
+            o, r, tm, tc, i = env.step({k: [1, 1] for k in env.agents.keys()})
             for dead_name in dead:
                 assert dead_name not in o
-            # print("{} there!".format(env.vehicles.keys()))
+            # print("{} there!".format(env.agents.keys()))
             # print("{} dead!".format([kkk for kkk, ddd in d.items() if ddd]))
             for kkk, ddd in tm.items():
                 if ddd and kkk != "__all__":

@@ -5,7 +5,7 @@ def test_config_consistency():
     env = MetaDriveEnv({"vehicle_config": {"lidar": {"num_lasers": 999}}})
     try:
         env.reset()
-        assert env.vehicle.config["lidar"]["num_lasers"] == 999
+        assert env.agent.config["lidar"]["num_lasers"] == 999
     finally:
         env.close()
 

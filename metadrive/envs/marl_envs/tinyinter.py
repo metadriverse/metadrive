@@ -455,7 +455,7 @@ if __name__ == '__main__':
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step({k: [0.0, 0.0] for k in env.action_space.sample().keys()})
         # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
-        vehicles = env.vehicles
+        vehicles = env.agents
 
         for k, v in tm.items():
             if v and k in info:

@@ -334,7 +334,7 @@ def _expert():
                 )
             )
             break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -364,7 +364,7 @@ def _vis_debug_respawn():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        action = {k: [.0, 1.0] for k in env.vehicles.keys()}
+        action = {k: [.0, 1.0] for k in env.agents.keys()}
         o, r, tm, tc, info = env.step(action)
         for r_ in r.values():
             total_r += r_
@@ -385,7 +385,7 @@ def _vis_debug_respawn():
                 )
             )
             # break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -419,7 +419,7 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, tm, tc, info = env.step({k: [0, 1] for k in env.vehicles.keys()})
+        o, r, tm, tc, info = env.step({k: [0, 1] for k in env.agents.keys()})
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -448,7 +448,7 @@ def _vis():
                 )
             )
             # break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -522,7 +522,7 @@ def _long_run():
             if (step + 1) % 200 == 0:
                 print(
                     "{}/{} Agents: {} {}\nO: {}\nR: {}\nD: {}\nI: {}\n\n".format(
-                        step + 1, 10000, len(env.vehicles), list(env.vehicles.keys()),
+                        step + 1, 10000, len(env.agents), list(env.agents.keys()),
                         {k: (oo.shape, oo.mean(), oo.min(), oo.max())
                          for k, oo in o.items()}, r, tm, i
                     )

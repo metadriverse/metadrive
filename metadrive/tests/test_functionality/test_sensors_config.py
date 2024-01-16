@@ -27,9 +27,9 @@ def test_sensor_config():
         assert 50 in env.engine.get_sensor("lidar").broad_detectors
         assert len(env.engine.get_sensor("lidar").broad_detectors) == 1
         env.engine.get_sensor("lidar_new").perceive(
-            env.vehicle,
+            env.agent,
             physics_world=env.engine.physics_world.dynamic_world,
-            num_lasers=env.vehicle.config["lidar"]["num_lasers"],
+            num_lasers=env.agent.config["lidar"]["num_lasers"],
             distance=100.5,
             detector_mask=None
         )
@@ -46,9 +46,9 @@ def test_sensor_config():
         assert 50 in env.engine.get_sensor("lidar").broad_detectors
         assert len(env.engine.get_sensor("lidar").broad_detectors) == 1
         env.engine.get_sensor("lidar_new").perceive(
-            env.vehicle,
+            env.agent,
             physics_world=env.engine.physics_world.dynamic_world,
-            num_lasers=env.vehicle.config["lidar"]["num_lasers"],
+            num_lasers=env.agent.config["lidar"]["num_lasers"],
             distance=100.5,
             detector_mask=None
         )

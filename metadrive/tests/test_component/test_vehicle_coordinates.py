@@ -21,8 +21,8 @@ def test_coordinates_shift():
             }
         )
         env.reset()
-        env.vehicle.set_velocity([1, 0], 10)
-        # print(env.vehicle.speed)
+        env.agent.set_velocity([1, 0], 10)
+        # print(env.agent.speed)
         pos = [(x, y) for x in [-10, 0, 10] for y in [-20, 0, 20]] * 10
         p = pos.pop()
         for s in range(1, 100000):
@@ -32,8 +32,8 @@ def test_coordinates_shift():
                     break
                 p = pos.pop()
             p = np.asarray(p)
-            heading, side = env.vehicle.convert_to_local_coordinates(p, env.vehicle.position)
-            recover_pos = env.vehicle.convert_to_world_coordinates([heading, side], env.vehicle.position)
+            heading, side = env.agent.convert_to_local_coordinates(p, env.agent.position)
+            recover_pos = env.agent.convert_to_world_coordinates([heading, side], env.agent.position)
             if abs(recover_pos[0] - p[0]) + abs(recover_pos[1] - p[1]) > 0.1:
                 raise ValueError("vehicle coordinates convert error!")
             if tm:

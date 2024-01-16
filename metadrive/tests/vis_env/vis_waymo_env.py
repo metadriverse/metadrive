@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([1.0, 0.])
-        # print(env.vehicle.height)
+        # print(env.agent.height)
         env.render(text={"seed": env.current_seed, "reward": r})
         if tm or tc:
             # print(info["arrive_dest"])

@@ -29,7 +29,7 @@ def test_horizon(cfg, use_render=False):
     test_pass = True if horizon is None else False
     try:
         for i in range(1, 500):
-            action = {k: [0, -1] for k in env.vehicles.keys()} if is_marl else [0, -1]
+            action = {k: [0, -1] for k in env.agents.keys()} if is_marl else [0, -1]
             o, r, tms, tcs, infos = env.step(action)
             if not isinstance(tms, dict):
                 tms = dict(__all__=tms)

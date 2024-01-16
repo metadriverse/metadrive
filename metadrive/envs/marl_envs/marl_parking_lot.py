@@ -331,7 +331,7 @@ def _expert():
                 )
             )
             break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -361,7 +361,7 @@ def _vis_debug_respawn():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        action = {k: [0.0, .0] for k in env.vehicles.keys()}
+        action = {k: [0.0, .0] for k in env.agents.keys()}
         o, r, tm, tc, info = env.step(action)
         for r_ in r.values():
             total_r += r_
@@ -382,7 +382,7 @@ def _vis_debug_respawn():
                 )
             )
             # break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -416,15 +416,15 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        actions = {k: [1.0, .0] for k in env.vehicles.keys()}
-        if len(env.vehicles) == 1:
-            actions = {k: [-1.0, .0] for k in env.vehicles.keys()}
+        actions = {k: [1.0, .0] for k in env.agents.keys()}
+        if len(env.agents) == 1:
+            actions = {k: [-1.0, .0] for k in env.agents.keys()}
         o, r, tm, tc, info = env.step(actions)
         for r_ in r.values():
             total_r += r_
         ep_s += 1
         # d.update({"total_r": total_r, "episode length": ep_s})
-        if len(env.vehicles) != 0:
+        if len(env.agents) != 0:
             v = env.current_track_agent
             dist = v.dist_to_left_side, v.dist_to_right_side
             ckpt_idx = v.navigation._target_checkpoints_index
@@ -438,12 +438,12 @@ def _vis():
             "cam_x": env.main_camera.camera_x,
             "cam_y": env.main_camera.camera_y,
             "cam_z": env.main_camera.top_down_camera_height,
-            "alive": len(env.vehicles),
+            "alive": len(env.agents),
             "dist_right_left": dist,
             "ckpt_idx": ckpt_idx,
             "parking_space_num": len(env.engine.spawn_manager.parking_space_available)
         }
-        if len(env.vehicles) > 0:
+        if len(env.agents) > 0:
             v = env.current_track_agent
             # print(v.navigation.checkpoints)
             render_text["current_road"] = v.navigation.current_road
@@ -470,7 +470,7 @@ def _vis():
             )
             env.reset()
             # break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -545,7 +545,7 @@ def _long_run():
             if (step + 1) % 200 == 0:
                 print(
                     "{}/{} Agents: {} {}\nO: {}\nR: {}\nD: {}\nI: {}\n\n".format(
-                        step + 1, 10000, len(env.vehicles), list(env.vehicles.keys()),
+                        step + 1, 10000, len(env.agents), list(env.agents.keys()),
                         {k: (oo.shape, oo.mean(), oo.min(), oo.max())
                          for k, oo in o.items()}, r, d, i
                     )

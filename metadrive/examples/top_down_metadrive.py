@@ -73,7 +73,7 @@ if __name__ == "__main__":
     try:
         o, _ = env.reset()
         for i in range(1, 100000):
-            o, r, tm, tc, info = env.step(expert(env.vehicle))
+            o, r, tm, tc, info = env.step(expert(env.agent))
             env.render(mode="top_down", text={"Quit": "ESC"}, film_size=(2000, 2000))
             if tm or tc:
                 env.reset()

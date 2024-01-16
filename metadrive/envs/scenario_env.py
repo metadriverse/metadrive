@@ -421,8 +421,8 @@ if __name__ == "__main__":
         for t in range(10000):
             o, r, tm, tc, info = env.step([0, 0])
             assert env.observation_space.contains(o)
-            c_lane = env.vehicle.lane
-            long, lat, = c_lane.local_coordinates(env.vehicle.position)
+            c_lane = env.agent.lane
+            long, lat, = c_lane.local_coordinates(env.agent.position)
             # if env.config["use_render"]:
             env.render(
                 text={

@@ -231,7 +231,7 @@ def _test():
     total_r = 0
     for i in range(1, 100000):
         # o, r, tm, tc, info = env.step(env.action_space.sample())
-        o, r, tm, tc, info = env.step({v_id: [0, 1] for v_id in env.vehicles.keys()})
+        o, r, tm, tc, info = env.step({v_id: [0, 1] for v_id in env.agents.keys()})
         for r_ in r.values():
             total_r += r_
         # o, r, tm, tc, info = env.step([0,1])
@@ -239,7 +239,7 @@ def _test():
         # d.update({"total_r": total_r})
         # env.render(text=d)
         env.render(mode="top_down")
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -277,14 +277,14 @@ def _vis():
     total_r = 0
     for i in range(1, 100000):
         # o, r, tm, tc, info = env.step(env.action_space.sample())
-        o, r, tm, tc, info = env.step({v_id: [0.0, 0.0] for v_id in env.vehicles.keys()})
+        o, r, tm, tc, info = env.step({v_id: [0.0, 0.0] for v_id in env.agents.keys()})
         for r_ in r.values():
             total_r += r_
         # o, r, tm, tc, info = env.step([0,1])
         # tm.update({"total_r": total_r})
         env.render(mode="top_down")
         # env.reset()
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()

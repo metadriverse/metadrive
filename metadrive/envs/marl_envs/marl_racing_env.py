@@ -463,7 +463,7 @@ def _vis(generate_video=False):
 
     try:
         for i in range(1, 100000):
-            o, r, tm, tc, info = env.step({k: [-0.0, 1] for k in env.vehicles.keys()})
+            o, r, tm, tc, info = env.step({k: [-0.0, 1] for k in env.agents.keys()})
             for r_ in r.values():
                 total_r += r_
             ep_s += 1

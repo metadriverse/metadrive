@@ -15,7 +15,7 @@ if __name__ == "__main__":
     try:
         env.reset()
         print(HELP_MESSAGE)
-        env.vehicle.expert_takeover = True
+        env.agent.expert_takeover = True
         for i in range(1, 1000000000):
             previous_takeover = env.current_track_agent.expert_takeover
             o, r, tm, tc, info = env.step([0, 0])

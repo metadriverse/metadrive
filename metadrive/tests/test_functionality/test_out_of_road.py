@@ -17,16 +17,16 @@ def test_out_of_road():
             )
             try:
                 obs, _ = env.reset()
-                tolerance = math.sqrt(env.vehicle.WIDTH**2 + env.vehicle.LENGTH**2) / distance
+                tolerance = math.sqrt(env.agent.WIDTH**2 + env.agent.LENGTH**2) / distance
                 for _ in range(100000000):
                     o, r, tm, tc, i = env.step([steering, 1])
                     if tm or tc:
                         per = env.engine.get_sensor("side_detector").perceive
                         points = per(
-                            env.vehicle,
-                            env.vehicle.engine.physics_world.static_world,
-                            num_lasers=env.vehicle.config["side_detector"]["num_lasers"],
-                            distance=env.vehicle.config["side_detector"]["distance"]
+                            env.agent,
+                            env.agent.engine.physics_world.static_world,
+                            num_lasers=env.agent.config["side_detector"]["num_lasers"],
+                            distance=env.agent.config["side_detector"]["distance"]
                         ).cloud_points
                         assert min(points) < tolerance, (min(points), tolerance)
                         print(
@@ -51,7 +51,7 @@ def useless_left_right_distance_printing():
         try:
             for _ in range(100000000):
                 o, r, tm, tc, i = env.step([steering, 1])
-                vehicle = env.vehicle
+                vehicle = env.agent
                 l, r = vehicle.dist_to_left_side, vehicle.dist_to_right_side
                 total_width = float(
                     (vehicle.navigation.get_current_lane_num() + 1) * vehicle.navigation.get_current_lane_width()

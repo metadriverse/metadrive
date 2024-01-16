@@ -46,23 +46,23 @@ if __name__ == "__main__":
     o, _ = env.reset()
 
     depth_camera = env.config["vehicle_config"]["depth_camera"]
-    depth_camera = DepthCamera(*depth_camera, chassis_np=env.vehicle.chassis, engine=env.engine)
-    env.vehicle.add_image_sensor("depth_camera", depth_camera)
+    depth_camera = DepthCamera(*depth_camera, chassis_np=env.agent.chassis, engine=env.engine)
+    env.agent.add_image_sensor("depth_camera", depth_camera)
     depth_camera.remove_display_region(env.engine)
 
-    # for sensor in env.vehicle.image_sensors.values():
+    # for sensor in env.agent.image_sensors.values():
     #     sensor.remove_display_region(env.engine)
-    # env.vehicle.contact_result_render.detachNode()
-    # env.vehicle.navigation._right_arrow.detachNode()
+    # env.agent.contact_result_render.detachNode()
+    # env.agent.navigation._right_arrow.detachNode()
 
-    env.vehicle.chassis.setPos(244, 0, 1.5)
+    env.agent.chassis.setPos(244, 0, 1.5)
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])
         env.render(
             # text={
             #     "vehicle_num": len(env.engine.traffic_manager.traffic_vehicles),
-            #     "dist_to_left:": env.vehicle.dist_to_left,
-            #     "dist_to_right:": env.vehicle.dist_to_right,
+            #     "dist_to_left:": env.agent.dist_to_left,
+            #     "dist_to_right:": env.agent.dist_to_right,
             # }
         )
         if tm or tc:
