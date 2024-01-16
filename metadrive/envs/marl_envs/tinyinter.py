@@ -396,7 +396,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         if self.num_RL_agents == self.num_agents:
             return super(MultiAgentTinyInter, self)._preprocess_actions(actions)
 
-        actions = {v_id: actions[v_id] for v_id in self.vehicles.keys() if v_id in self.agent_manager.RL_agents}
+        actions = {v_id: actions[v_id] for v_id in self.agents.keys() if v_id in self.agent_manager.RL_agents}
         return actions
 
     def __init__(self, config=None):

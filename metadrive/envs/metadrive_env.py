@@ -126,7 +126,7 @@ class MetaDriveEnv(BaseEnv):
         return config
 
     def done_function(self, vehicle_id: str):
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         done = False
         max_step = self.config["horizon"] is not None and self.episode_lengths[vehicle_id] >= self.config["horizon"]
         done_info = {
@@ -139,7 +139,7 @@ class MetaDriveEnv(BaseEnv):
             TerminationState.SUCCESS: self._is_arrive_destination(vehicle),
             TerminationState.MAX_STEP: max_step,
             TerminationState.ENV_SEED: self.current_seed,
-            # TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
+            # TerminationState.CURRENT_BLOCK: self.agent.navigation.current_road.block_ID(),
             # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
         }
 
@@ -199,7 +199,7 @@ class MetaDriveEnv(BaseEnv):
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict()
         step_info["cost"] = 0
         if self._is_out_of_road(vehicle):
@@ -242,7 +242,7 @@ class MetaDriveEnv(BaseEnv):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane

@@ -97,7 +97,7 @@ class MultiAgentBidirectionEnv(MultiAgentMetaDrive):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane

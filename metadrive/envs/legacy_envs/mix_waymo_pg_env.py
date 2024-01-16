@@ -156,16 +156,16 @@ class MixWaymoPGEnv(ScenarioEnv):
             self.top_down_renderer.clear()
         self.engine.top_down_renderer = None
 
-        self.dones = {agent_id: False for agent_id in self.vehicles.keys()}
+        self.dones = {agent_id: False for agent_id in self.agents.keys()}
         self.episode_rewards = defaultdict(float)
         self.episode_lengths = defaultdict(int)
 
-        assert (len(self.vehicles) == self.num_agents) or (self.num_agents == -1)
+        assert (len(self.agents) == self.num_agents) or (self.num_agents == -1)
         # ^^^^^^ same as Base Env ^^^^^
 
         if not self.is_current_real_data:
             # give a initial speed when on metadrive
-            self.vehicle.set_velocity(self.vehicle.heading, self.engine.np_random.randint(10))
+            self.agent.set_velocity(self.agent.heading, self.engine.np_random.randint(10))
         return self._get_reset_return()
 
     def _reset_global_seed(self, force_seed=None):
