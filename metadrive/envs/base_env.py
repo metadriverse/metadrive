@@ -352,6 +352,8 @@ class BaseEnv(gym.Env):
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
+                elif panel == "main_camera":
+                    self.logger.warning("main_camera can not be added to interface_panel, remove")
                 else:
                     to_use.append(panel)
         config["interface_panel"] = to_use

@@ -132,5 +132,57 @@ def test_creation():
     assert not env.engine.main_window_disabled
     env.close()
 
+    # image_observation: False, use_render: True, request main_camera
+    env = MetaDriveEnv({
+        "show_terrain": False,
+        "window_size": (16, 16),
+        "sensors": {
+            "semantic": (SemanticCamera, 400, 300),
+            "depth": (DepthCamera, 400, 300),
+            "rgb": (RGBCamera, 400, 300),
+            "main_camera": (),
+        },
+        "vehicle_config": dict(image_source="main_camera"),
+        "interface_panel": ["rgb", "main_camera"],
+        "image_observation": False,
+        "use_render": True,
+    })
+    env.reset()
+    assert env.config["sensors"].keys() == {"lidar",
+                                            "side_detector",
+                                            "lane_line_detector",
+                                            "semantic",
+                                            "rgb",
+                                            "main_camera",
+                                            "depth"} == env.engine.sensors.keys()
+    assert env.config["interface_panel"] == ["rgb"]
+    assert not env.engine.main_window_disabled
+    env.close()
+
+    # image_observation: False, use_render: False, request main_camera
+    env = MetaDriveEnv({
+        "show_terrain": False,
+        "window_size": (16, 16),
+        "sensors": {
+            "semantic": (SemanticCamera, 400, 300),
+            "depth": (DepthCamera, 400, 300),
+            "rgb": (RGBCamera, 400, 300),
+            "main_camera": (),
+        },
+        "vehicle_config": dict(image_source="main_camera"),
+        "interface_panel": ["rgb", "main_camera"],
+        "image_observation": False,
+        "use_render": False,
+    })
+    env.reset()
+    assert env.config["sensors"].keys() == {"lidar",
+                                            "side_detector",
+                                            "lane_line_detector",
+                                            } == env.engine.sensors.keys()
+    assert env.config["interface_panel"] == []
+    assert env.engine.main_window_disabled
+    env.close()
+
+
 if __name__ == '__main__':
     test_creation()
