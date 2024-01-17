@@ -120,7 +120,8 @@ class MainCamera(BaseSensor):
         self.enable_cuda = engine.global_config["image_on_cuda"] and need_cuda
 
         self.cuda_graphics_resource = None
-        self.engine.sensors["main_camera"] = self
+        if "main_camera" in engine.global_config["sensors"]:
+            self.engine.sensors["main_camera"] = self
         if self.enable_cuda:
             assert _cuda_enable, "Can not enable cuda rendering pipeline"
 

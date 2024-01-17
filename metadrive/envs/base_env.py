@@ -181,8 +181,6 @@ BASE_DEFAULT_CONFIG = dict(
     use_render=False,
     # (width, height), if set to None, it will be automatically determined
     window_size=(1200, 900),
-    # When main_camera is not the image_source, whether to reduce the window size to (1,1) for boosting efficiency
-    auto_resize_window=True,
     # Physics world step is 0.02s and will be repeated for decision_repeat times per env.step()
     physics_world_step_size=2e-2,
     decision_repeat=5,
@@ -332,17 +330,6 @@ class BaseEnv(gym.Env):
         #     self.logger.info("Turn Off Multi-thread rendering due to image_on_cuda=True")
         #     config["multi_thread_render"] = False
 
-        # Optimize main window
-        # no_main = config["vehicle_config"]["image_source"] != "main_camera" and config.get("image_source") != "main_camera"
-        # if not config["use_render"] and config["image_observation"] and no_main and config["auto_resize_window"]:
-        #     # reduce size as we don't use the main camera content for improving efficiency
-        #     config["window_size"] = (1, 1)
-        #     config["show_interface"] = False
-        #     config["interface_panel"] = []
-        #     self.logger.info(
-        #         "Main window size is reduced to (1, 1) for boosting efficiency."
-        #         "To cancel this, set auto_resize_window = False")
-
         # Optimize sensor creation in none-screen mode
         if not config["use_render"] and not config["image_observation"]:
             filtered = {}
@@ -352,11 +339,15 @@ class BaseEnv(gym.Env):
             config["sensors"] = filtered
             config["interface_panel"] = []
 
+        # Check sensor existence
+        if config["use_render"] or "main_camera" in config["sensors"]:
+            config["sensors"]["main_camera"] = ("MainCamera", *config["window_size"])
+
         # Merge dashboard config with sensors
         to_use = []
-        if not config["render_pipeline"] and config["show_interface"]:
+        if not config["render_pipeline"] and config["show_interface"] and "main_camera" in config["sensors"]:
             for panel in config["interface_panel"]:
-                if panel == "dashboard" and "main_camera" in config["sensors"]:
+                if panel == "dashboard":
                     config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
@@ -364,10 +355,6 @@ class BaseEnv(gym.Env):
                 else:
                     to_use.append(panel)
         config["interface_panel"] = to_use
-
-        # Check sensor existence
-        if config["use_render"] or "main_camera" in config["sensors"]:
-            config["sensors"]["main_camera"] = ("MainCamera", *config["window_size"])
 
         # Merge default sensor to list
         sensor_cfg = self.default_config()["sensors"].update(config["sensors"])
@@ -387,7 +374,7 @@ class BaseEnv(gym.Env):
         else:
             config["_render_mode"] = RENDER_MODE_NONE
             for sensor in config["sensors"].values():
-                if sensor[0] == "MainCamera" or (issubclass(BaseCamera, sensor[0]) and sensor[0] != DashBoard):
+                if sensor[0] == "MainCamera" or (issubclass(sensor[0], BaseCamera) and sensor[0] != DashBoard):
                     config["_render_mode"] = RENDER_MODE_OFFSCREEN
                     break
         self.logger.info("Render Mode: {}".format(config["_render_mode"]))
