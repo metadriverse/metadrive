@@ -130,7 +130,7 @@ class BaseManager(Randomizable):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-                                                         ].class_name == class_name, "Can not restore mappings!"
+            ].class_name == class_name, "Can not restore mappings!"
             ret[current_name] = name_obj[current_name]
         self.spawned_objects = ret
 
@@ -197,7 +197,7 @@ class BaseAgentManager(BaseManager):
 
     def _get_action_space(self):
         from metadrive.engine.engine_utils import get_global_config
-        if len(self.observations) > 1:
+        if self.global_config["is_multi_agent"]:
             return {v_id: self.agent_policy.get_input_space() for v_id in get_global_config()["agent_configs"].keys()}
         else:
             return {DEFAULT_AGENT: self.agent_policy.get_input_space()}
