@@ -129,7 +129,7 @@ class BaseManager(Randomizable):
             current_name = old_name_to_current[name]
             name_obj = self.engine.get_objects([current_name])
             assert current_name in name_obj and name_obj[current_name
-                                                         ].class_name == class_name, "Can not restore mappings!"
+            ].class_name == class_name, "Can not restore mappings!"
             ret[current_name] = name_obj[current_name]
         self.spawned_objects = ret
 
@@ -149,6 +149,10 @@ class BaseManager(Randomizable):
         """
         assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
         return {}
+
+    @property
+    def global_config(self):
+        return self.engine.global_config
 
 
 class BaseAgentManager(BaseManager):
