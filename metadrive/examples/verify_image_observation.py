@@ -23,7 +23,9 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
         "semantic": {
             "semantic_camera": (SemanticCamera, *res)
         },
-        "main": {"main_camera": ()},
+        "main": {
+            "main_camera": ()
+        },
     }
 
     env = MetaDriveEnv(
