@@ -22,7 +22,8 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
         },
         "semantic": {
             "semantic_camera": (SemanticCamera, *res)
-        }
+        },
+        "main": {"main_camera": ()},
     }
 
     env = MetaDriveEnv(
@@ -35,7 +36,7 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
             image_on_cuda=True if image_on_cuda else False,
             use_render=False,
             vehicle_config=dict(image_source="{}_camera".format(camera)),
-            sensors=mapping[camera] if camera != "main" else {},
+            sensors=mapping[camera],
             show_interface=False,
             show_logo=False,
             show_fps=False,
