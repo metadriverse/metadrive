@@ -11,7 +11,6 @@ from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.pg_lane import PGLane
 from metadrive.constants import CollisionGroup
 from metadrive.constants import Decoration, MetaDriveType
-from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
 from metadrive.utils.coordinates_shift import panda_heading
 from metadrive.utils.coordinates_shift import panda_vector
@@ -152,7 +151,7 @@ def get_all_lanes(roadnet: "NodeRoadNetwork"):
 def ray_localization(
     heading: tuple,
     position: tuple,
-    engine: EngineCore,
+    engine,
     use_heading_filter=True,
     return_on_lane=False,
 ) -> Union[List[Tuple], Tuple]:
@@ -212,7 +211,7 @@ def ray_localization(
 
 
 def rect_region_detection(
-    engine: EngineCore,
+    engine,
     position: Tuple,
     heading: float,
     heading_direction_length: float,
@@ -258,7 +257,7 @@ def rect_region_detection(
 
 
 def circle_region_detection(
-    engine: EngineCore, position: Tuple, radius: float, detection_group: int, height=10, in_static_world=False
+    engine, position: Tuple, radius: float, detection_group: int, height=10, in_static_world=False
 ):
     """
     :param engine: BaseEngine class

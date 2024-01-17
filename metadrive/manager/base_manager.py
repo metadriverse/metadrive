@@ -1,4 +1,5 @@
 import copy
+from metadrive.engine.engine_utils import get_global_config
 from metadrive.constants import DEFAULT_AGENT
 
 from gymnasium.spaces import Space
@@ -152,7 +153,7 @@ class BaseManager(Randomizable):
 
     @property
     def global_config(self):
-        return self.engine.global_config
+        return get_global_config()
 
 
 class BaseAgentManager(BaseManager):
