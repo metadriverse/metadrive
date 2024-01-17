@@ -116,7 +116,7 @@ class MainCamera(BaseSensor):
         self._in_recover = False
         self._last_frame_has_mouse = False
 
-        need_cuda = engine.global_config["vehicle_config"]["image_source"] == "main_camera"
+        need_cuda = "main_camera" in engine.global_config["sensors"]
         self.enable_cuda = engine.global_config["image_on_cuda"] and need_cuda
 
         self.cuda_graphics_resource = None

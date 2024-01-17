@@ -174,7 +174,7 @@ BASE_DEFAULT_CONFIG = dict(
     ),
 
     # ===== Sensors =====
-    sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar,), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
     # ===== Engine Core config =====
     # If true pop a window to render
@@ -322,27 +322,26 @@ class BaseEnv(gym.Env):
         if not config["show_interface"]:
             config["interface_panel"] = []
 
-        # Multi-Thread
-        if config["image_on_cuda"]:
-            self.logger.info("Turn Off Multi-thread rendering due to image_on_cuda=True")
-            config["multi_thread_render"] = False
-
         # Adjust terrain
         n = config["map_region_size"]
         assert (n & (n - 1)) == 0 and 0 < n <= 2048, "map_region_size should be pow of 2 and < 2048."
         TerrainProperty.map_region_size = config["map_region_size"]
 
+        # Multi-Thread
+        # if config["image_on_cuda"]:
+        #     self.logger.info("Turn Off Multi-thread rendering due to image_on_cuda=True")
+        #     config["multi_thread_render"] = False
+
         # Optimize main window
-        if not config["use_render"] and config["image_observation"] and \
-                config["vehicle_config"]["image_source"] != "main_camera" and config["auto_resize_window"]:
-            # reduce size as we don't use the main camera content for improving efficiency
-            config["window_size"] = (1, 1)
-            config["show_interface"] = False
-            config["interface_panel"] = []
-            self.logger.debug(
-                "Main window size is reduced to (1, 1) for boosting efficiency."
-                "To cancel this, set auto_resize_window = False"
-            )
+        # no_main = config["vehicle_config"]["image_source"] != "main_camera" and config.get("image_source") != "main_camera"
+        # if not config["use_render"] and config["image_observation"] and no_main and config["auto_resize_window"]:
+        #     # reduce size as we don't use the main camera content for improving efficiency
+        #     config["window_size"] = (1, 1)
+        #     config["show_interface"] = False
+        #     config["interface_panel"] = []
+        #     self.logger.info(
+        #         "Main window size is reduced to (1, 1) for boosting efficiency."
+        #         "To cancel this, set auto_resize_window = False")
 
         # Optimize sensor creation in none-screen mode
         if not config["use_render"] and not config["image_observation"]:
@@ -357,18 +356,17 @@ class BaseEnv(gym.Env):
         to_use = []
         if not config["render_pipeline"] and config["show_interface"]:
             for panel in config["interface_panel"]:
-                if panel == "dashboard" and config["window_size"] != (1, 1):
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                if panel == "dashboard" and "main_camera" in config["sensors"]:
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
-                        "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
-                    )
+                        "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel))
                 else:
                     to_use.append(panel)
         config["interface_panel"] = to_use
 
         # Check sensor existence
-        if config["use_render"] or config["image_observation"]:
+        if config["use_render"] or "main_camera" in config["sensors"]:
             config["sensors"]["main_camera"] = ("MainCamera", *config["window_size"])
 
         # Merge default sensor to list
@@ -378,11 +376,8 @@ class BaseEnv(gym.Env):
         # show sensor lists
         _str = "Sensors: [{}]"
         sensors_str = ""
-        has_semantic_cam = False
         for _id, cfg in config["sensors"].items():
             sensors_str += "{}: {}{}, ".format(_id, cfg[0] if isinstance(cfg[0], str) else cfg[0].__name__, cfg[1:])
-            if not isinstance(cfg[0], str) and cfg[0].__name__ == "SemanticCamera":
-                has_semantic_cam = True
         self.logger.info(_str.format(sensors_str[:-2]))
 
         # determine render mode automatically
@@ -787,19 +782,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
