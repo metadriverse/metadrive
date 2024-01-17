@@ -334,7 +334,7 @@ class BaseEnv(gym.Env):
         if not config["use_render"] and not config["image_observation"]:
             filtered = {}
             for id, cfg in config["sensors"].items():
-                if not issubclass(cfg[0], BaseCamera):
+                if len(cfg) > 0 and not issubclass(cfg[0], BaseCamera) and id != "main_camera":
                     filtered[id] = cfg
             config["sensors"] = filtered
             config["interface_panel"] = []
