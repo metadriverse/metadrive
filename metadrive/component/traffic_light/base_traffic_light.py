@@ -22,14 +22,16 @@ class BaseTrafficLight(BaseObject):
     LIGHT_VIS_WIDTH = 0.8
     PLACE_LONGITUDE = 5
 
-    def __init__(self,
-                 lane,
-                 position=None,
-                 name=None,
-                 random_seed=None,
-                 config=None,
-                 escape_random_seed_assertion=False,
-                 draw_line=False):
+    def __init__(
+        self,
+        lane,
+        position=None,
+        name=None,
+        random_seed=None,
+        config=None,
+        escape_random_seed_assertion=False,
+        draw_line=False
+    ):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
         self.set_metadrive_type(MetaDriveType.TRAFFIC_LIGHT)
         self.lane = lane
@@ -90,7 +92,7 @@ class BaseTrafficLight(BaseObject):
             if self.current_light is not None:
                 self.current_light.detachNode()
             self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["green"].instanceTo(self.origin)
-            self._try_draw_line([3/255, 255/255, 3/255])
+            self._try_draw_line([3 / 255, 255 / 255, 3 / 255])
         self.status = MetaDriveType.LIGHT_GREEN
 
     def set_red(self):
@@ -98,7 +100,7 @@ class BaseTrafficLight(BaseObject):
             if self.current_light is not None:
                 self.current_light.detachNode()
             self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["red"].instanceTo(self.origin)
-            self._try_draw_line([252/255, 0/255, 0/255])
+            self._try_draw_line([252 / 255, 0 / 255, 0 / 255])
         self.status = MetaDriveType.LIGHT_RED
 
     def set_yellow(self):
@@ -106,7 +108,7 @@ class BaseTrafficLight(BaseObject):
             if self.current_light is not None:
                 self.current_light.detachNode()
             self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
-            self._try_draw_line([252/255, 227/255, 3/255])
+            self._try_draw_line([252 / 255, 227 / 255, 3 / 255])
         self.status = MetaDriveType.LIGHT_YELLOW
 
     def set_unknown(self):

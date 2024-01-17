@@ -25,8 +25,9 @@ class ColorLineNodePath(LineNodePath):
                 self.moveTo(*pointList[0])
                 for point, seg_color, in zip(pointList[1:], lineColor):
                     assert 3 <= len(seg_color) <= 4, "color vector should have 3 or 4 component, get {} instead".format(
-                        len(seg_color))
-                    if len(seg_color)==4:
+                        len(seg_color)
+                    )
+                    if len(seg_color) == 4:
                         self.setColor(LVecBase4f(*seg_color))
                     else:
                         self.setColor(LVecBase4f(*seg_color, 1.0))
