@@ -30,7 +30,9 @@ def test_main_camera(config, render=False):
             "window_size": (config["width"], config["height"]),
             "stack_size": config["stack_size"],
             "vehicle_config": dict(image_source="main_camera"),
-            "sensors": {"main_camera": ()},
+            "sensors": {
+                "main_camera": ()
+            },
             "interface_panel": [],
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
             "norm_pixel": config["norm_pixel"],  # clip rgb to range(0,1) instead of (0, 255)
