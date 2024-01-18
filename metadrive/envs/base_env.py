@@ -689,7 +689,8 @@ class BaseEnv(gym.Env):
     @property
     def action_space(self) -> gym.Space:
         """
-        Return action spaces of active and controllable agents
+        Return action spaces of active and controllable agents. Generally, it is defined in AgentManager. But you can
+        still overwrite this function to define the action space for the environment.
         :return: Dict
         """
         ret = self.agent_manager.get_action_spaces()

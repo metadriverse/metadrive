@@ -292,13 +292,6 @@ class BaseAgentManager(BaseManager):
         for agent_id in self.active_agents.keys():
             policy = self.get_policy(self._agent_to_object[agent_id])
             assert policy is not None, "No policy is set for agent {}".format(agent_id)
-            # if is_replay:
-            #     if stage == "after_step":
-            #         policy.act(agent_id)
-            #         step_infos[agent_id] = policy.get_action_info()
-            #     else:
-            #         step_infos[agent_id] = self.get_agent(agent_id).before_step([0, 0])
-            # else:
             if stage == "before_step":
                 action = policy.act(agent_id)
                 step_infos[agent_id] = policy.get_action_info()
