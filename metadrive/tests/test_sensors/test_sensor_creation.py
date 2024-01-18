@@ -1,4 +1,3 @@
-from metadrive.component.sensors.depth_camera import DepthCamera
 from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.envs.metadrive_env import MetaDriveEnv
@@ -16,7 +15,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
                 "main_camera": (),
             },
@@ -41,7 +40,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
                 "main_camera": (),
             },
@@ -66,7 +65,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
             },
             "interface_panel": ["rgb", "dashboard"],
@@ -86,7 +85,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
                 "main_camera": (),
             },
@@ -107,7 +106,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
             },
             "interface_panel": ["rgb", "dashboard"],
@@ -130,7 +129,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
             },
             "vehicle_config": dict(image_source="rgb"),
@@ -153,7 +152,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
             },
             "vehicle_config": dict(image_source="rgb"),
@@ -177,7 +176,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
                 "main_camera": (),
             },
@@ -202,7 +201,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
                 "main_camera": (),
             },
@@ -227,7 +226,7 @@ def test_creation():
             "window_size": (16, 16),
             "sensors": {
                 "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
+
                 "rgb": (RGBCamera, 400, 300),
                 "main_camera": (),
             },
