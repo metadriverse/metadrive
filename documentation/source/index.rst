@@ -59,7 +59,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    panda_render.ipynb
    vehicle.ipynb
    navigation.ipynb
-   description.ipynb
+   scenario_description.ipynb
    record_replay.ipynb
    development.rst
 
