@@ -136,15 +136,15 @@ def test_random_lane_width():
     )
     try:
         o, _ = env.reset(seed=12)
-        old_config_1 = env.vehicle.lane.width
+        old_config_1 = env.agent.lane.width
         env.reset(seed=15)
-        old_config_2 = env.vehicle.lane.width
+        old_config_2 = env.agent.lane.width
         env.reset(seed=13)
         env.reset(seed=12)
-        new_config = env.vehicle.lane.width
+        new_config = env.agent.lane.width
         assert old_config_1 == new_config
         env.reset(seed=15)
-        new_config = env.vehicle.lane.width
+        new_config = env.agent.lane.width
         assert old_config_2 == new_config
         assert old_config_1 != old_config_2
     finally:
@@ -163,21 +163,21 @@ def test_random_lane_num():
     )
     try:
         o, _ = env.reset(seed=12)
-        old_config_1 = env.vehicle.navigation.get_current_lane_num()
+        old_config_1 = env.agent.navigation.get_current_lane_num()
         env.reset(seed=15)
-        old_config_2 = env.vehicle.navigation.get_current_lane_num()
+        old_config_2 = env.agent.navigation.get_current_lane_num()
         env.reset(seed=13)
         env.reset(seed=12)
-        new_config = env.vehicle.navigation.get_current_lane_num()
+        new_config = env.agent.navigation.get_current_lane_num()
         assert old_config_1 == new_config
         env.reset(seed=15)
-        new_config = env.vehicle.navigation.get_current_lane_num()
+        new_config = env.agent.navigation.get_current_lane_num()
         assert old_config_2 == new_config
         env.close()
         env.reset(seed=12)
-        assert old_config_1 == env.vehicle.navigation.get_current_lane_num()
+        assert old_config_1 == env.agent.navigation.get_current_lane_num()
         env.reset(seed=15)
-        assert old_config_2 == env.vehicle.navigation.get_current_lane_num()
+        assert old_config_2 == env.agent.navigation.get_current_lane_num()
     finally:
         env.close()
 
@@ -194,15 +194,15 @@ def test_random_vehicle_parameter():
     )
     try:
         o, _ = env.reset(seed=12)
-        old_config_1 = env.vehicle.get_config(True)
+        old_config_1 = env.agent.get_config(True)
         env.reset(seed=15)
-        old_config_2 = env.vehicle.get_config(True)
+        old_config_2 = env.agent.get_config(True)
         env.reset(seed=13)
         env.reset(seed=12)
-        new_config = env.vehicle.get_config(True)
+        new_config = env.agent.get_config(True)
         assert recursive_equal(old_config_1, new_config)
         env.reset(seed=15)
-        new_config = env.vehicle.get_config(True)
+        new_config = env.agent.get_config(True)
         assert recursive_equal(old_config_2, new_config)
     finally:
         env.close()

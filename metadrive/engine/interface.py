@@ -44,8 +44,8 @@ class Interface:
         self._is_showing_arrow = True  # store the state of navigation mark
 
     def after_step(self):
-        if self.engine.current_track_vehicle is not None and self.need_interface and self.engine.mode != RENDER_MODE_NONE:
-            track_v = self.engine.current_track_vehicle
+        if self.engine.current_track_agent is not None and self.need_interface and self.engine.mode != RENDER_MODE_NONE:
+            track_v = self.engine.current_track_agent
             if self.dashboard is not None:
                 self.dashboard.update_vehicle_state(track_v)
             self._render_contact_result(track_v.contact_results)

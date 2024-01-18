@@ -241,9 +241,9 @@ class TopDownRenderer:
         self.history_objects = deque(maxlen=num_stack)
         self.history_target_vehicle = []
         self.history_smooth = history_smooth
-        # self.current_track_vehicle = current_track_vehicle
+        # self.current_track_agent = current_track_agent
         if self.target_vehicle_heading_up:
-            assert self.current_track_vehicle is not None, "Specify which vehicle to track"
+            assert self.current_track_agent is not None, "Specify which vehicle to track"
         self._text_render_pos = [50, 50]
         self._font_size = 25
         self._text_render_interval = 20
@@ -315,12 +315,12 @@ class TopDownRenderer:
             self.history_target_vehicle.append(
                 history_object(
                     type=MetaDriveType.VEHICLE,
-                    name=self.current_track_vehicle.name,
-                    heading_theta=self.current_track_vehicle.heading_theta,
-                    WIDTH=self.current_track_vehicle.top_down_width,
-                    LENGTH=self.current_track_vehicle.top_down_length,
-                    position=self.current_track_vehicle.position,
-                    color=self.current_track_vehicle.top_down_color,
+                    name=self.current_track_agent.name,
+                    heading_theta=self.current_track_agent.heading_theta,
+                    WIDTH=self.current_track_agent.top_down_width,
+                    LENGTH=self.current_track_agent.top_down_length,
+                    position=self.current_track_agent.position,
+                    color=self.current_track_agent.top_down_color,
                     done=False
                 )
             )
@@ -379,8 +379,8 @@ class TopDownRenderer:
         self.screen_frames.clear()
 
     @property
-    def current_track_vehicle(self):
-        return self.engine.current_track_vehicle
+    def current_track_agent(self):
+        return self.engine.current_track_agent
 
     @staticmethod
     def _append_frame_objects(objects):
@@ -492,7 +492,7 @@ class TopDownRenderer:
                 )
                 self._deads.append(v)
 
-        v = self.current_track_vehicle
+        v = self.current_track_agent
         canvas = self._frame_canvas
         field = self._screen_canvas.get_size()
         if not self.target_vehicle_heading_up:

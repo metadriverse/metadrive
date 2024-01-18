@@ -44,7 +44,7 @@ class TestBlock(ShowBase.ShowBase):
         self.accept("4", self.render.analyze)
         self.accept("f1", self.toggleDebug)
         self.accept("1", self.toggleDebug)
-        self.vehicle = None
+        self.agent = None
         self.inputs = None
 
     def toggleDebug(self):

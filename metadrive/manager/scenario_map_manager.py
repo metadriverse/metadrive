@@ -67,7 +67,7 @@ class ScenarioMapManager(BaseManager):
         self.engine.global_config.update(
             copy.deepcopy(
                 dict(
-                    target_vehicle_configs={
+                    agent_configs={
                         DEFAULT_AGENT: dict(
                             spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"]
                         )

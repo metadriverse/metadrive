@@ -4,7 +4,7 @@ import gymnasium as gym
 import numpy as np
 
 from metadrive.envs.marl_envs.marl_intersection import MultiAgentIntersectionEnv
-from metadrive.manager.agent_manager import AgentManager
+from metadrive.manager.agent_manager import VehicleAgentManager
 from metadrive.obs.state_obs import LidarStateObservation
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import Config
@@ -220,12 +220,10 @@ class TinyInterRuleBasedPolicy(IDMPolicy):
         return [0, 0]
 
 
-class MixedIDMAgentManager(AgentManager):
+class MixedIDMAgentManager(VehicleAgentManager):
     """In this manager, we can replace part of RL policy by IDM policy"""
-    def __init__(self, init_observations, init_action_space, num_RL_agents, ignore_delay_done=None, target_speed=10):
-        super(MixedIDMAgentManager, self).__init__(
-            init_observations=init_observations, init_action_space=init_action_space
-        )
+    def __init__(self, init_observations, num_RL_agents, ignore_delay_done=None, target_speed=10):
+        super(MixedIDMAgentManager, self).__init__(init_observations=init_observations)
         self.num_RL_agents = num_RL_agents
         self.RL_agents = set()
         self.dying_RL_agents = set()
@@ -261,13 +259,13 @@ class MixedIDMAgentManager(AgentManager):
         else:
             return ret
 
-    def finish(self, agent_name, ignore_delay_done=False):
+    def _finish(self, agent_name, ignore_delay_done=False):
         # ignore_delay_done = True
         if self.ignore_delay_done is not None:
             ignore_delay_done = self.ignore_delay_done
         if agent_name in self.RL_agents:
             self.dying_RL_agents.add(agent_name)
-        super(MixedIDMAgentManager, self).finish(agent_name, ignore_delay_done)
+        super(MixedIDMAgentManager, self)._finish(agent_name, ignore_delay_done)
 
     def _remove_vehicle(self, v):
         agent_name = self.object_to_agent(v.name)
@@ -277,7 +275,7 @@ class MixedIDMAgentManager(AgentManager):
             self.dying_RL_agents.remove(agent_name)
         super(MixedIDMAgentManager, self)._remove_vehicle(v)
 
-    def _get_vehicles(self, config_dict: dict):
+    def _create_agents(self, config_dict: dict):
         from metadrive.component.vehicle.vehicle_type import random_vehicle_type, vehicle_type
         ret = {}
         for agent_count, (agent_id, v_config) in enumerate(config_dict.items()):
@@ -396,7 +394,7 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         if self.num_RL_agents == self.num_agents:
             return super(MultiAgentTinyInter, self)._preprocess_actions(actions)
 
-        actions = {v_id: actions[v_id] for v_id in self.vehicles.keys() if v_id in self.agent_manager.RL_agents}
+        actions = {v_id: actions[v_id] for v_id in self.agents.keys() if v_id in self.agent_manager.RL_agents}
         return actions
 
     def __init__(self, config=None):
@@ -407,7 +405,6 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         # else:
         self.agent_manager = MixedIDMAgentManager(
             init_observations=self._get_observations(),
-            init_action_space=self._get_action_space(),
             num_RL_agents=self.num_RL_agents,
             ignore_delay_done=self.config["ignore_delay_done"],
             target_speed=self.config["target_speed"]
@@ -455,7 +452,7 @@ if __name__ == '__main__':
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step({k: [0.0, 0.0] for k in env.action_space.sample().keys()})
         # env.render("top_down", camera_position=(42.5, 0), film_size=(500, 500))
-        vehicles = env.vehicles
+        vehicles = env.agents
 
         for k, v in tm.items():
             if v and k in info:

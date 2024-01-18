@@ -44,12 +44,12 @@ if __name__ == "__main__":
     print("vehicle num", len(env.engine.traffic_manager.vehicles))
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])
-        info["fuel"] = env.vehicle.energy_consumption
+        info["fuel"] = env.agent.energy_consumption
         env.render(
             text={
-                "left": env.vehicle.dist_to_left_side,
-                "right": env.vehicle.dist_to_right_side,
-                "white_lane_line": env.vehicle.on_white_continuous_line
+                "left": env.agent.dist_to_left_side,
+                "right": env.agent.dist_to_right_side,
+                "white_lane_line": env.agent.on_white_continuous_line
             }
         )
         if tm or tc:

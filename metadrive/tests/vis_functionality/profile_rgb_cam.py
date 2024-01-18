@@ -21,9 +21,7 @@ if __name__ == "__main__":
     )
     env.reset()
     # # print m to capture rgb observation
-    env.engine.accept(
-        "m", env.vehicle.get_camera(env.vehicle.config["image_source"]).save_image, extraArgs=[env.vehicle]
-    )
+    env.engine.accept("m", env.agent.get_camera(env.agent.config["image_source"]).save_image, extraArgs=[env.agent])
     start = time.time()
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 0])

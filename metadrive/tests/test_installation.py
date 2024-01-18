@@ -44,7 +44,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
         )
         cam = env.engine.get_sensor(image_source)
         cam.save_image(
-            env.vehicle,
+            env.agent,
             os.path.join(
                 MetaDrive_PACKAGE_DIR, "examples", "{}_from_buffer{}.png".format(image_source, "_cuda" if cuda else "")
             )

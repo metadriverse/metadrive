@@ -11,7 +11,7 @@ def test_varying_dynamics_env():
             env.reset(seed=seed)
             for _ in range(10):
                 env.step(env.action_space.sample())
-            dy = env.vehicle.get_dynamics_parameters()
+            dy = env.agent.get_dynamics_parameters()
             print("Dynamics: ", dy)
             dy = np.array(list(dy.values()))
             if len(dys) > 0:

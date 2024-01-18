@@ -70,7 +70,7 @@ class MainCamera(BaseSensor):
         self.direction_running_mean = deque(maxlen=self.camera_smooth_buffer_size if self.camera_smooth else 1)
         self.world_light = engine.world_light  # light chases the chase camera, when not using global light
         self.inputs = InputState()
-        self.current_track_vehicle = None
+        self.current_track_agent = None
 
         # height control
         self.chase_camera_height = camera_height
@@ -116,11 +116,12 @@ class MainCamera(BaseSensor):
         self._in_recover = False
         self._last_frame_has_mouse = False
 
-        need_cuda = engine.global_config["vehicle_config"]["image_source"] == "main_camera"
+        need_cuda = "main_camera" in engine.global_config["sensors"]
         self.enable_cuda = engine.global_config["image_on_cuda"] and need_cuda
 
         self.cuda_graphics_resource = None
-        self.engine.sensors["main_camera"] = self
+        if "main_camera" in engine.global_config["sensors"]:
+            self.engine.sensors["main_camera"] = self
         if self.enable_cuda:
             assert _cuda_enable, "Can not enable cuda rendering pipeline"
 
@@ -278,7 +279,7 @@ class MainCamera(BaseSensor):
         :param vehicle: Vehicle to chase
         :return: None
         """
-        self.current_track_vehicle = vehicle
+        self.current_track_agent = vehicle
         self.engine.interface.display()
         pos = None
         if self.FOLLOW_LANE:
@@ -329,7 +330,7 @@ class MainCamera(BaseSensor):
             engine.task_manager.remove(self.CHASE_TASK_NAME)
         if engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
-        self.current_track_vehicle = None
+        self.current_track_agent = None
         if self.registered:
             self.unregister()
             # self.camera.node().getDisplayRegion(0).clearDrawCallback()

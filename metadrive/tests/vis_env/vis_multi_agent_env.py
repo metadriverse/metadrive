@@ -11,10 +11,10 @@ class TestEnv(MultiAgentRoundaboutEnv):
                 "num_agents": 4,
                 "force_destroy": True,
                 "manual_control": True,
-                "target_vehicle_configs": {"agent{}".format(i): {
+                "agent_configs": {"agent{}".format(i): {
                     "spawn_longitude": i * 5
                 }
-                                           for i in range(4)}
+                                  for i in range(4)}
             }
         )
 

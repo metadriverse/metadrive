@@ -44,7 +44,7 @@ MULTI_AGENT_METADRIVE_DEFAULT_CONFIG = dict(
         vehicle_model="static_default",
     ),
     sensors=dict(lidar=(Lidar, )),
-    target_vehicle_configs=dict(),  # will be filled automatically
+    agent_configs=dict(),  # will be filled automatically
 
     # ===== New Reward Setting =====
     out_of_road_penalty=10,
@@ -82,7 +82,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         config = super(MultiAgentMetaDrive, self)._post_process_config(config)
         ret_config = config
         # merge basic vehicle config into target vehicle config
-        target_vehicle_configs = dict()
+        agent_configs = dict()
         num_agents = (
             ret_config["num_agents"] if ret_config["num_agents"] != -1 else SpawnManager.max_capacity(
                 config["spawn_roads"],
@@ -93,21 +93,21 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         for id in range(num_agents):
             agent_id = "agent{}".format(id)
             config = copy.deepcopy(ret_config["vehicle_config"])
-            if agent_id in ret_config["target_vehicle_configs"]:
+            if agent_id in ret_config["agent_configs"]:
                 config["_specified_spawn_lane"] = (
-                    True if "spawn_lane_index" in ret_config["target_vehicle_configs"][agent_id] else False
+                    True if "spawn_lane_index" in ret_config["agent_configs"][agent_id] else False
                 )
                 config["_specified_destination"] = (
-                    True if "destination" in ret_config["target_vehicle_configs"][agent_id] else False
+                    True if "destination" in ret_config["agent_configs"][agent_id] else False
                 )
-                config.update(ret_config["target_vehicle_configs"][agent_id])
-            target_vehicle_configs[agent_id] = config
-        ret_config["target_vehicle_configs"] = target_vehicle_configs
+                config.update(ret_config["agent_configs"][agent_id])
+            agent_configs[agent_id] = config
+        ret_config["agent_configs"] = agent_configs
         # if ret_config["use_render"] and ret_config["disable_model_compression"]:
         #     logging.warning("Turn disable_model_compression=True can decrease the loading time!")
 
         if "prefer_track_agent" in config and config["prefer_track_agent"]:
-            ret_config["target_vehicle_configs"][config["prefer_track_agent"]]["use_special_color"] = True
+            ret_config["agent_configs"][config["prefer_track_agent"]]["use_special_color"] = True
         ret_config["vehicle_config"]["random_agent_model"] = ret_config["random_agent_model"]
         return ret_config
 
@@ -157,7 +157,7 @@ class MultiAgentMetaDrive(MetaDriveEnv):
         for dead_vehicle_id, termed in terminated.items():
             if termed or truncated[dead_vehicle_id]:
                 # finish all terminated and truncated vehicles
-                self.agent_manager.finish(
+                self.agent_manager._finish(
                     dead_vehicle_id,
                     ignore_delay_done=info[dead_vehicle_id].get(TerminationState.SUCCESS, False),
                 )
@@ -166,12 +166,12 @@ class MultiAgentMetaDrive(MetaDriveEnv):
 
     def _update_camera_after_finish(self):
         if (self.main_camera is not None
-                and self.current_track_vehicle.id not in self.engine.agent_manager._active_objects
+                and self.current_track_agent.id not in self.engine.agent_manager._active_objects
                 and self.engine.task_manager.hasTaskNamed(self.main_camera.CHASE_TASK_NAME)):
             self.switch_to_third_person_view()
 
     def _get_observations(self):
-        return {name: self.get_single_observation() for name in self.config["target_vehicle_configs"].keys()}
+        return {name: self.get_single_observation() for name in self.config["agent_configs"].keys()}
 
     def _respawn_vehicles(self, randomize_position=False):
         new_obs_dict = {}
@@ -231,7 +231,7 @@ def _test():
     total_r = 0
     for i in range(1, 100000):
         # o, r, tm, tc, info = env.step(env.action_space.sample())
-        o, r, tm, tc, info = env.step({v_id: [0, 1] for v_id in env.vehicles.keys()})
+        o, r, tm, tc, info = env.step({v_id: [0, 1] for v_id in env.agents.keys()})
         for r_ in r.values():
             total_r += r_
         # o, r, tm, tc, info = env.step([0,1])
@@ -239,7 +239,7 @@ def _test():
         # d.update({"total_r": total_r})
         # env.render(text=d)
         env.render(mode="top_down")
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -258,7 +258,7 @@ def _vis():
             "vehicle_config": {
                 "vehicle_model": "s"
             },
-            "target_vehicle_configs": {
+            "agent_configs": {
                 "agent0": {
                     "vehicle_model": "static_default"
                 },
@@ -277,14 +277,14 @@ def _vis():
     total_r = 0
     for i in range(1, 100000):
         # o, r, tm, tc, info = env.step(env.action_space.sample())
-        o, r, tm, tc, info = env.step({v_id: [0.0, 0.0] for v_id in env.vehicles.keys()})
+        o, r, tm, tc, info = env.step({v_id: [0.0, 0.0] for v_id in env.agents.keys()})
         for r_ in r.values():
             total_r += r_
         # o, r, tm, tc, info = env.step([0,1])
         # tm.update({"total_r": total_r})
         env.render(mode="top_down")
         # env.reset()
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()

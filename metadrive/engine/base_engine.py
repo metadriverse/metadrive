@@ -11,7 +11,7 @@ from metadrive.constants import RENDER_MODE_NONE
 from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.engine.logger import get_logger, reset_logger
-from metadrive.manager.base_manager import BaseManager
+
 from metadrive.pull_asset import pull_asset
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
@@ -530,7 +530,7 @@ class BaseEngine(EngineCore, Randomizable):
             return
         self.STOP_REPLAY = not self.STOP_REPLAY
 
-    def register_manager(self, manager_name: str, manager: BaseManager):
+    def register_manager(self, manager_name: str, manager):
         """
         Add a manager to BaseEngine, then all objects can communicate with this class
         :param manager_name: name shouldn't exist in self._managers and not be same as any class attribute
@@ -595,9 +595,9 @@ class BaseEngine(EngineCore, Randomizable):
                 return None
 
     @property
-    def current_track_vehicle(self):
+    def current_track_agent(self):
         if self.main_camera is not None:
-            return self.main_camera.current_track_vehicle
+            return self.main_camera.current_track_agent
         elif "default_agent" in self.agents:
             return self.agents["default_agent"]
         else:
@@ -661,7 +661,7 @@ class BaseEngine(EngineCore, Randomizable):
         children = self.worldNP.getChildren()
         assert len(children) == 0, "NodePath are not cleaned thoroughly. Remaining NodePath: {}".format(children)
 
-    def update_manager(self, manager_name: str, manager: BaseManager, destroy_previous_manager=True):
+    def update_manager(self, manager_name: str, manager, destroy_previous_manager=True):
         """
         Update an existing manager with a new one
         :param manager_name: existing manager name

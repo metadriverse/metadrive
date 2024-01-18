@@ -48,7 +48,7 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
         """
         Do Information fusion and then analyze and wait for decision
         """
-        pass
+        return {}
 
     def set_action(self, *args, **kwargs):
         """
@@ -63,12 +63,13 @@ class BaseRunnable(Configurable, Nameable, Randomizable):
         time. However some runnable instances who don't belong to the physics world and their actions are not force need
         to implement this function to get the action accumulated result respect to time.
         """
-        pass
+        return {}
 
     def after_step(self, *args, **kwargs):
         """
         After advancing all objects for a time period, their state should be updated for statistic or other purpose
         """
+        return {}
 
     def reset(self, random_seed=None, *args, **kwargs):
         """

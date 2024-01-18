@@ -9,7 +9,7 @@ the same dynamics. Set num_scenarios > 1 to allow more diverse dynamics.
 """
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.manager.agent_manager import AgentManager
+from metadrive.manager.agent_manager import VehicleAgentManager
 
 VaryingDynamicsConfig = dict(
     vehicle_config=dict(vehicle_model="varying_dynamics", ),
@@ -25,7 +25,7 @@ VaryingDynamicsConfig = dict(
 )
 
 
-class VaryingDynamicsAgentManager(AgentManager):
+class VaryingDynamicsAgentManager(VehicleAgentManager):
     def reset(self):
         # Randomize ego vehicle's dynamics here
         random_fields = self.engine.global_config["random_dynamics"]
@@ -43,8 +43,8 @@ class VaryingDynamicsAgentManager(AgentManager):
             else:
                 raise ValueError("Unknown parameter range: {}".format(para_range))
 
-        assert len(self.engine.global_config["target_vehicle_configs"]) == 1, "Only supporting single-agent now!"
-        self.engine.global_config["target_vehicle_configs"]["default_agent"].update(dynamics)
+        assert len(self.engine.global_config["agent_configs"]) == 1, "Only supporting single-agent now!"
+        self.engine.global_config["agent_configs"]["default_agent"].update(dynamics)
         super(VaryingDynamicsAgentManager, self).reset()
 
 
@@ -56,9 +56,7 @@ class VaryingDynamicsEnv(MetaDriveEnv):
         return config
 
     def _get_agent_manager(self):
-        return VaryingDynamicsAgentManager(
-            init_observations=self._get_observations(), init_action_space=self._get_action_space()
-        )
+        return VaryingDynamicsAgentManager(init_observations=self._get_observations())
 
 
 if __name__ == '__main__':
@@ -68,7 +66,7 @@ if __name__ == '__main__':
     })
     for ep in range(3):
         obs, _ = env.reset()
-        print("Current Dynamics Parameters:", env.vehicle.get_dynamics_parameters())
+        print("Current Dynamics Parameters:", env.agent.get_dynamics_parameters())
         for step in range(1000):
             o, r, tm, tc, i = env.step(env.action_space.sample())
             if tm or tc:

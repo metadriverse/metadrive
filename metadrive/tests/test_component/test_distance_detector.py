@@ -33,14 +33,14 @@ def test_original_lidar(render=False):
         v_config["spawn_lane_index"] = (FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0)
         another_v = DefaultVehicle(v_config, random_seed=0)
         another_v.reset()
-        objs = env.engine.get_sensor("side_detector").perceive(env.vehicle,
-                                                               env.vehicle.engine.physics_world.static_world,
+        objs = env.engine.get_sensor("side_detector").perceive(env.agent,
+                                                               env.agent.engine.physics_world.static_world,
                                                                num_lasers=2,
                                                                distance=50
                                                                ).detected_objects + \
                env.engine.get_sensor("lane_line_detector").perceive(
-                   env.vehicle,
-                   env.vehicle.engine.physics_world.static_world,
+                   env.agent,
+                   env.agent.engine.physics_world.static_world,
                    num_lasers=2,
                    distance=50
                ).detected_objects
@@ -53,7 +53,7 @@ def test_original_lidar(render=False):
         detect_base_vehicle = False
         for i in range(1, 1000):
             o, r, tm, tc, info = env.step([0, 1])
-            if len(env.vehicle.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
+            if len(env.agent.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
                 detect_traffic_vehicle = True
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 if isinstance(hit, BaseVehicle):
@@ -92,14 +92,14 @@ def test_lidar_with_mask(render=False):
         another_v = DefaultVehicle(v_config, random_seed=0)
         another_v.reset()
         # for test
-        objs = env.engine.get_sensor("side_detector").perceive(env.vehicle,
-                                                               env.vehicle.engine.physics_world.static_world,
+        objs = env.engine.get_sensor("side_detector").perceive(env.agent,
+                                                               env.agent.engine.physics_world.static_world,
                                                                num_lasers=2,
                                                                distance=50
                                                                ).detected_objects + \
                env.engine.get_sensor("lane_line_detector").perceive(
-                   env.vehicle,
-                   env.vehicle.engine.physics_world.static_world,
+                   env.agent,
+                   env.agent.engine.physics_world.static_world,
                    num_lasers=2,
                    distance=50
                ).detected_objects
@@ -112,7 +112,7 @@ def test_lidar_with_mask(render=False):
         detect_base_vehicle = False
         for i in range(1, 1000):
             o, r, tm, tc, info = env.step([0, 1])
-            if len(env.vehicle.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
+            if len(env.agent.lidar.get_surrounding_vehicles(env.observations[DEFAULT_AGENT].detected_objects)) > 2:
                 detect_traffic_vehicle = True
             for hit in env.observations[DEFAULT_AGENT].detected_objects:
                 if isinstance(hit, BaseVehicle):

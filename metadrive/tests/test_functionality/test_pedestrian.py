@@ -39,7 +39,7 @@ def test_pedestrian(render=False):
         obj_2 = env.engine.spawn_object(Pedestrian, position=[30, 6], heading_theta=0, random_seed=1)
         obj_1.set_velocity([1, 0], 1, in_local_frame=True)
         obj_2.set_velocity([1, 0], 0, in_local_frame=True)
-        env.vehicle.set_velocity([5, 0], in_local_frame=False)
+        env.agent.set_velocity([5, 0], in_local_frame=False)
         for s in range(1, 1000):
             o, r, tm, tc, info = env.step([0, 0])
             # obj_1.set_velocity([1, 0], 2, in_local_frame=True)

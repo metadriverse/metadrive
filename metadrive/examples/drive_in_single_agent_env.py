@@ -51,7 +51,7 @@ if __name__ == "__main__":
     try:
         o, _ = env.reset(seed=21)
         print(HELP_MESSAGE)
-        env.vehicle.expert_takeover = True
+        env.agent.expert_takeover = True
         if args.observation == "rgb_camera":
             assert isinstance(o, dict)
             print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
@@ -62,7 +62,7 @@ if __name__ == "__main__":
             o, r, tm, tc, info = env.step([0, 0])
             env.render(
                 text={
-                    "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
+                    "Auto-Drive (Switch mode: T)": "on" if env.current_track_agent.expert_takeover else "off",
                     "Current Observation": args.observation,
                     "Keyboard Control": "W,A,S,D",
                 }
@@ -73,6 +73,6 @@ if __name__ == "__main__":
                 cv2.waitKey(1)
             if (tm or tc) and info["arrive_dest"]:
                 env.reset(env.current_seed + 1)
-                env.current_track_vehicle.expert_takeover = True
+                env.current_track_agent.expert_takeover = True
     finally:
         env.close()

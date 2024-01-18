@@ -135,7 +135,7 @@ try:
         assert isinstance(env.action_space, gymnasium.spaces.Space)
         for s in range(600):
             o, r, d, i = env.step([0, -1])
-            env.vehicle.set_velocity([0, 0])
+            env.agent.set_velocity([0, 0])
             if d:
                 assert s == env.config["horizon"] and i["max_step"] and d
                 break

@@ -60,7 +60,7 @@ def test_pgdrive_env_blackbox(config):
     env = MetaDriveEnv(config=cfg)
     try:
         obs, _ = env.reset()
-        assert env.vehicle.panda_color == sns.color_palette("colorblind")[2]
+        assert env.agent.panda_color == sns.color_palette("colorblind")[2]
         assert env.observation_space.contains(obs)
         _act(env, env.action_space.sample())
         for x in [-1, 0, 1]:

@@ -39,12 +39,10 @@ def test_scenario_randomness(vis=False):
     try:
         positions_1 = []
         o, _ = env.reset()
-        positions_1.append([env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles])
+        positions_1.append([env.agent.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles])
         for i in range(1, 100000 if vis else 2000):
             o, r, tm, tc, info = env.step([0, 1])
-            positions_1.append(
-                [env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
-            )
+            positions_1.append([env.agent.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles])
             if tm or tc:
                 break
         env.close()
@@ -52,12 +50,12 @@ def test_scenario_randomness(vis=False):
         env = SafeMetaDriveEnv(cfg)
         o, _ = env.reset()
         old_position = positions_1.pop()
-        new_position = [env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
+        new_position = [env.agent.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
         assert_equal_pos(old_position, new_position)
         for i in range(1, 100000 if vis else 2000):
             o, r, tm, tc, info = env.step([0, 1])
             old_position = positions_1.pop()
-            new_position = [env.vehicle.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
+            new_position = [env.agent.position] + [v.position for v in env.engine.traffic_manager.traffic_vehicles]
             assert_equal_pos(old_position, new_position)
             if tm or tc:
                 break

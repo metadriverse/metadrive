@@ -58,7 +58,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Agent =====
     random_spawn_lane_index=True,
     vehicle_config=dict(navigation_module=NodeNetworkNavigation),
-    target_vehicle_configs={
+    agent_configs={
         DEFAULT_AGENT: dict(
             use_special_color=True,
             spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0),
@@ -121,12 +121,12 @@ class MetaDriveEnv(BaseEnv):
         config["vehicle_config"]["random_agent_model"] = config["random_agent_model"]
         target_v_config = copy.deepcopy(config["vehicle_config"])
         if not config["is_multi_agent"]:
-            target_v_config.update(config["target_vehicle_configs"][DEFAULT_AGENT])
-            config["target_vehicle_configs"][DEFAULT_AGENT] = target_v_config
+            target_v_config.update(config["agent_configs"][DEFAULT_AGENT])
+            config["agent_configs"][DEFAULT_AGENT] = target_v_config
         return config
 
     def done_function(self, vehicle_id: str):
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         done = False
         max_step = self.config["horizon"] is not None and self.episode_lengths[vehicle_id] >= self.config["horizon"]
         done_info = {
@@ -139,7 +139,7 @@ class MetaDriveEnv(BaseEnv):
             TerminationState.SUCCESS: self._is_arrive_destination(vehicle),
             TerminationState.MAX_STEP: max_step,
             TerminationState.ENV_SEED: self.current_seed,
-            # TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
+            # TerminationState.CURRENT_BLOCK: self.agent.navigation.current_road.block_ID(),
             # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
         }
 
@@ -199,7 +199,7 @@ class MetaDriveEnv(BaseEnv):
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict()
         step_info["cost"] = 0
         if self._is_out_of_road(vehicle):
@@ -242,7 +242,7 @@ class MetaDriveEnv(BaseEnv):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane

@@ -65,7 +65,7 @@ if __name__ == "__main__":
     obj_2.set_velocity([1, 0], 2, in_local_frame=True)
     c_1.set_velocity([3, 0], 2, in_local_frame=True)
     # obj_2.show_coordinates()
-    env.vehicle.set_velocity([10, 0], in_local_frame=False)
+    env.agent.set_velocity([10, 0], in_local_frame=False)
     for s in range(1, 10000):
         # print(c_1.heading_theta)
         o, r, tm, tc, info = env.step(env.action_space.sample())
@@ -91,12 +91,12 @@ if __name__ == "__main__":
         # if s % 100 == 0:
         #     env.close()
         #     env.reset()
-        # info["fuel"] = env.vehicle.energy_consumption
+        # info["fuel"] = env.agent.energy_consumption
         env.render(
             text={
-                "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-                "lane_width": env.vehicle.lane.width,
-                "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
+                "heading_diff": env.agent.heading_diff(env.agent.lane),
+                "lane_width": env.agent.lane.width,
+                "lateral": env.agent.lane.local_coordinates(env.agent.position),
                 "current_seed": env.current_seed,
                 "step": s,
             }

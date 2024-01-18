@@ -1,3 +1,9 @@
+import copy
+from metadrive.engine.engine_utils import get_global_config
+from metadrive.constants import DEFAULT_AGENT
+
+from gymnasium.spaces import Space
+
 from metadrive.base_class.randomizable import Randomizable
 
 
@@ -144,3 +150,254 @@ class BaseManager(Randomizable):
         """
         assert self.episode_step == 0, "This func can only be called after env.reset() without any env.step() called"
         return {}
+
+    @property
+    def global_config(self):
+        return get_global_config()
+
+
+class BaseAgentManager(BaseManager):
+    """
+    This manager allows one to use object like vehicles/traffic lights as agent with multi-agent support.
+    You would better make your own agent manager based on this class
+    """
+
+    INITIALIZED = False  # when the reset() and init() are called, it will be set to True
+
+    def __init__(self, init_observations):
+        """
+        The real init is happened in self.init(), in which super().__init__() will be called
+        """
+        # for getting {agent_id: BaseObject}, use agent_manager.active_agents
+        self._active_objects = {}  # {object.id: BaseObject}
+
+        # fake init. before creating engine, it is necessary when all objects re-created in runtime
+        self.observations = copy.copy(init_observations)  # its value is map<agent_id, obs> before init() is called
+        self._init_observations = init_observations  # map <agent_id, observation>
+
+        # init spaces before initializing env.engine
+        observation_space = {
+            agent_id: single_obs.observation_space
+            for agent_id, single_obs in init_observations.items()
+        }
+        init_action_space = self._get_action_space()
+        assert isinstance(init_action_space, dict)
+        assert isinstance(observation_space, dict)
+        self._init_observation_spaces = observation_space
+        self._init_action_spaces = init_action_space
+        self.observation_spaces = copy.copy(observation_space)
+        self.action_spaces = copy.copy(init_action_space)
+        self.episode_created_agents = None
+
+        # this map will be override when the env.init() is first called and objects are made
+        self._agent_to_object = {k: k for k in self.observations.keys()}  # no target objects created, fake init
+        self._object_to_agent = {k: k for k in self.observations.keys()}  # no target objects created, fake init
+
+        self._debug = None
+
+    def _get_action_space(self):
+        from metadrive.engine.engine_utils import get_global_config
+        if self.global_config["is_multi_agent"]:
+            return {v_id: self.agent_policy.get_input_space() for v_id in get_global_config()["agent_configs"].keys()}
+        else:
+            return {DEFAULT_AGENT: self.agent_policy.get_input_space()}
+
+    @property
+    def agent_policy(self):
+        """
+        Return the agent policy
+        Returns: Agent Poicy class
+        Make sure you access the global config via get_global_config() instead of self.engine.global_config
+        """
+        from metadrive.engine.engine_utils import get_global_config
+        return get_global_config()["agent_policy"]
+
+    def before_reset(self):
+        if not self.INITIALIZED:
+            super(BaseAgentManager, self).__init__()
+            self.INITIALIZED = True
+        self.episode_created_agents = None
+
+        for v in list(self._active_objects.values()):
+            if hasattr(v, "before_reset"):
+                v.before_reset()
+        super(BaseAgentManager, self).before_reset()
+
+    def _create_agents(self, config_dict):
+        """
+        It should create a set of vehicles or other objects serving as agents
+        Args:
+            config_dict:
+
+        Returns:
+
+        """
+        raise NotImplementedError
+
+    def reset(self):
+        """
+        Agent manager is really initialized after the BaseObject Instances are created
+        """
+        config = self.engine.global_config
+        self._debug = config["debug"]
+        self.episode_created_agents = self._create_agents(config_dict=self.engine.global_config["agent_configs"])
+
+    def after_reset(self):
+        init_objects = self.episode_created_agents
+        objects_created = set(init_objects.keys())
+        objects_in_config = set(self._init_observations.keys())
+        assert objects_created == objects_in_config, "{} not defined in target objects config".format(
+            objects_created.difference(objects_in_config)
+        )
+
+        # it is used when reset() is called to reset its original agent_id
+        self._agent_to_object = {agent_id: object.name for agent_id, object in init_objects.items()}
+        self._object_to_agent = {object.name: agent_id for agent_id, object in init_objects.items()}
+        self._active_objects = {v.name: v for v in init_objects.values()}
+
+        # real init {obj_name: space} map
+        self.observations = dict()
+        self.observation_spaces = dict()
+        self.action_spaces = dict()
+        for agent_id, object in init_objects.items():
+            self.observations[object.name] = self._init_observations[agent_id]
+            obs_space = self._init_observation_spaces[agent_id]
+            self.observation_spaces[object.name] = obs_space
+            action_space = self._init_action_spaces[agent_id]
+            self.action_spaces[object.name] = action_space
+            assert isinstance(action_space, Space)
+
+    def set_state(self, state: dict, old_name_to_current=None):
+        super(BaseAgentManager, self).set_state(state, old_name_to_current)
+        created_agents = state["created_agents"]
+        created_agents = {agent_id: old_name_to_current[obj_name] for agent_id, obj_name in created_agents.items()}
+        episode_created_agents = {}
+        for a_id, name in created_agents.items():
+            episode_created_agents[a_id] = self.engine.get_objects([name])[name]
+        self.episode_created_agents = episode_created_agents
+
+    def get_state(self):
+        ret = super(BaseAgentManager, self).get_state()
+        agent_info = {agent_id: obj.name for agent_id, obj in self.episode_created_agents.items()}
+        ret["created_agents"] = agent_info
+        return ret
+
+    def try_actuate_agent(self, step_infos, stage="before_step"):
+        """
+        Some policies should make decision before physics world actuation, in particular, those need decision-making
+        But other policies like ReplayPolicy should be called in after_step, as they already know the final state and
+        exempt the requirement for rolling out the dynamic system to get it.
+        """
+        assert stage == "before_step" or stage == "after_step"
+        for agent_id in self.active_agents.keys():
+            policy = self.get_policy(self._agent_to_object[agent_id])
+            assert policy is not None, "No policy is set for agent {}".format(agent_id)
+            if stage == "before_step":
+                action = policy.act(agent_id)
+                step_infos[agent_id] = policy.get_action_info()
+                step_infos[agent_id].update(self.get_agent(agent_id).before_step(action))
+
+        return step_infos
+
+    def before_step(self):
+        # not in replay mode
+        step_infos = self.try_actuate_agent(dict(), stage="before_step")
+        return step_infos
+
+    def after_step(self, *args, **kwargs):
+        step_infos = self.for_each_active_agents(lambda v: v.after_step())
+        step_infos = self.try_actuate_agent(step_infos, stage="after_step")
+        return step_infos
+
+    def _translate(self, d):
+        return {self._object_to_agent[k]: v for k, v in d.items()}
+
+    def get_observations(self):
+        if hasattr(self, "engine") and self.engine.replay_episode:
+            return self.engine.replay_manager.get_replay_agent_observations()
+        else:
+            ret = {}
+            for obj_id, observation in self.observations.items():
+                if self.is_active_object(obj_id):
+                    ret[self.object_to_agent(obj_id)] = observation
+            return ret
+
+    def get_observation_spaces(self):
+        ret = {}
+        for obj_id, space in self.observation_spaces.items():
+            if self.is_active_object(obj_id):
+                ret[self.object_to_agent(obj_id)] = space
+        return ret
+
+    def get_action_spaces(self):
+        ret = dict()
+        for obj_id, space in self.action_spaces.items():
+            if self.is_active_object(obj_id):
+                ret[self.object_to_agent(obj_id)] = space
+        return ret
+
+    def is_active_object(self, object_name):
+        if not self.INITIALIZED:
+            return True
+        return True if object_name in self._active_objects.keys() else False
+
+    @property
+    def active_agents(self):
+        """
+        Return Map<agent_id, BaseObject>
+        """
+        if hasattr(self, "engine") and self.engine is not None and self.engine.replay_episode:
+            return self.engine.replay_manager.replay_agents
+        else:
+            return {self._object_to_agent[k]: v for k, v in self._active_objects.items()}
+
+    def get_agent(self, agent_name, raise_error=True):
+        object_name = self.agent_to_object(agent_name)
+        if object_name in self._active_objects:
+            return self._active_objects[object_name]
+        else:
+            if raise_error:
+                raise ValueError("Object {} not found!".format(object_name))
+            else:
+                return None
+
+    def object_to_agent(self, obj_name):
+        """
+        We recommend to use engine.agent_to_object() or engine.object_to_agent() instead of the ones in agent_manager,
+        since this two functions DO NOT work when replaying episode.
+        :param obj_name: BaseObject.name
+        :return: agent id
+        """
+        return self._object_to_agent[obj_name]
+
+    def agent_to_object(self, agent_id):
+        """
+        We recommend to use engine.agent_to_object() or engine.object_to_agent() instead of the ones in agent_manager,
+        since this two functions DO NOT work when replaying episode.
+        """
+        return self._agent_to_object[agent_id]
+
+    def destroy(self):
+        # when new agent joins in the game, we only change this two maps.
+        if self.INITIALIZED:
+            super(BaseAgentManager, self).destroy()
+        self._agent_to_object = {}
+        self._object_to_agent = {}
+        self._active_objects = {}
+        for obs in self.observations.values():
+            obs.destroy()
+        self.observations = {}
+        self.observation_spaces = {}
+        self.action_spaces = {}
+
+        self.INITIALIZED = False
+
+    def for_each_active_agents(self, func, *args, **kwargs):
+        """
+        This func is a function that take each object as the first argument and *arg and **kwargs as others.
+        """
+        assert len(self.active_agents) > 0, "Not enough objects exist!"
+        ret = dict()
+        for k, v in self.active_agents.items():
+            ret[k] = func(v, *args, **kwargs)
+        return ret

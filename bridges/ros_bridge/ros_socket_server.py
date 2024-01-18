@@ -55,7 +55,7 @@ class RosSocketServer():
 
             env.reset()
             print(HELP_MESSAGE)
-            env.vehicle.expert_takeover = False
+            env.agent.expert_takeover = False
             while True:
                 o = env.step([0, 0])
                 if test:
@@ -79,17 +79,17 @@ class RosSocketServer():
                         print(msg)
                 del image_data  # explicit delete to free memory
 
-                lidar_data, objs = env.vehicle.lidar.perceive(
-                    env.vehicle,
+                lidar_data, objs = env.agent.lidar.perceive(
+                    env.agent,
                     env.engine.physics_world.dynamic_world,
-                    env.vehicle.config["lidar"]["num_lasers"],
-                    env.vehicle.config["lidar"]["distance"],
+                    env.agent.config["lidar"]["num_lasers"],
+                    env.agent.config["lidar"]["distance"],
                     height=1.0,
                 )
 
-                ego_x = env.vehicle.position[0]
-                ego_y = env.vehicle.position[1]
-                ego_theta = np.arctan2(env.vehicle.heading[1], env.vehicle.heading[0])
+                ego_x = env.agent.position[0]
+                ego_y = env.agent.position[1]
+                ego_theta = np.arctan2(env.agent.heading[1], env.agent.heading[0])
 
                 num_data = struct.pack('i', len(objs))
                 obj_data = []
@@ -123,9 +123,9 @@ class RosSocketServer():
                 del obj_data  # explicit delete to free memory
 
                 # convert lidar data to xyz
-                lidar_data = np.array(lidar_data) * env.vehicle.config["lidar"]["distance"]
-                lidar_range = env.vehicle.lidar._get_lidar_range(
-                    env.vehicle.config["lidar"]["num_lasers"], env.vehicle.lidar.start_phase_offset
+                lidar_data = np.array(lidar_data) * env.agent.config["lidar"]["distance"]
+                lidar_range = env.agent.lidar._get_lidar_range(
+                    env.agent.config["lidar"]["num_lasers"], env.agent.lidar.start_phase_offset
                 )
                 point_x = lidar_data * np.cos(lidar_range)
                 point_y = lidar_data * np.sin(lidar_range)

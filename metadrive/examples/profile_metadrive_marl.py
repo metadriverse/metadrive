@@ -20,13 +20,13 @@ if __name__ == '__main__':
     reset_used_time = 0
     action = [0.0, 1.]
     total_steps = args.num_steps
-    vehicle_num = [len(env.vehicles)]
+    vehicle_num = [len(env.agents)]
     for s in range(total_steps):
-        o, r, tm, tc, i = env.step({k: action for k in env.vehicles})
+        o, r, tm, tc, i = env.step({k: action for k in env.agents})
         if tm["__all__"]:
             start_reset = time.time()
             env.reset()
-            vehicle_num.append(len(env.vehicles))
+            vehicle_num.append(len(env.agents))
             reset_used_time += time.time() - start_reset
         if (s + 1) % 100 == 0:
             print(

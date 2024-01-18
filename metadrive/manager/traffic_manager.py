@@ -322,7 +322,7 @@ class PGTrafficManager(BaseManager):
         logging.debug("{} is destroyed".format(self.__class__.__name__))
 
     def __repr__(self):
-        return self.vehicles.__repr__()
+        return self._traffic_vehicles.__repr__()
 
     @property
     def vehicles(self):

@@ -27,8 +27,8 @@ if __name__ == "__main__":
         o, r, tm, tc, info = env.step(acc)
         # print(
         #     "new:{}, old:{}, diff:{}".format(
-        #         env.vehicle.speed_km_h, env.vehicle.system.get_current_speed_km_hour(),
-        #         env.vehicle.speed_km_h - env.vehicle.system.get_current_speed_km_hour()
+        #         env.agent.speed_km_h, env.agent.system.get_current_speed_km_hour(),
+        #         env.agent.speed_km_h - env.agent.system.get_current_speed_km_hour()
         #     )
         # )
         env.render("Test: {}".format(i))

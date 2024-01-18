@@ -15,15 +15,15 @@ def test_ma_env_force_reset():
     e = MultiAgentRoundaboutEnv(config)
     _raw_input_config = copy.deepcopy(config)
     e.reset()
-    assert len(e.vehicles) == e.num_agents == len(e.config["target_vehicle_configs"]) == 1
+    assert len(e.vehicles) == e.num_agents == len(e.config["agent_configs"]) == 1
 
     close_and_reset_num_agents(e, num_agents=2, raw_input_config=_raw_input_config)
     e.reset()
-    assert len(e.vehicles) == e.num_agents == len(e.config["target_vehicle_configs"]) == 2
+    assert len(e.vehicles) == e.num_agents == len(e.config["agent_configs"]) == 2
 
     close_and_reset_num_agents(e, num_agents=5, raw_input_config=_raw_input_config)
     e.reset()
-    assert len(e.vehicles) == e.num_agents == len(e.config["target_vehicle_configs"]) == 5
+    assert len(e.vehicles) == e.num_agents == len(e.config["agent_configs"]) == 5
 
     e.close()
 

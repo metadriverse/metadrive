@@ -31,10 +31,10 @@ def test_naive_multi_agent_metadrive():
         config={
             "map": "SSS",
             "num_agents": 4,
-            "target_vehicle_configs": {"agent{}".format(i): {
+            "agent_configs": {"agent{}".format(i): {
                 "spawn_longitude": i * 5
             }
-                                       for i in range(4)}
+                              for i in range(4)}
         }
     )
     try:
@@ -50,7 +50,7 @@ def test_naive_multi_agent_metadrive():
                 obses = list(o.values())
                 assert not np.isclose(obses[0], obses[1], rtol=1e-3, atol=1e-3).all()
 
-            pos_z_list = [v.chassis.getNode(0).transform.pos[2] for v in env.vehicles.values()]
+            pos_z_list = [v.chassis.getNode(0).transform.pos[2] for v in env.agents.values()]
             for p in pos_z_list:
                 assert p < 5.0 or step <= 10
 

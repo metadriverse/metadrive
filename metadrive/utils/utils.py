@@ -231,6 +231,27 @@ def time_me(fn):
     return _wrapper
 
 
+def time_me_with_prefix(prefix):
+    """
+    Wrapper for testing the function time
+    Args:
+        prefix: add a string to the function name itself
+
+    Returns: None
+
+    """
+    def decorator(fn):
+        def _wrapper(*args, **kwargs):
+            start = time.time()
+            ret = fn(*args, **kwargs)
+            print(prefix, "function: %s cost %s second" % (fn.__name__, time.time() - start))
+            return ret
+
+        return _wrapper
+
+    return decorator
+
+
 def create_rectangle_from_midpoints(p1, p2, width, length_factor=1.0):
     """
     Create the vertices of a rectangle given two midpoints on opposite sides, the width of the rectangle,
