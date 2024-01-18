@@ -26,7 +26,7 @@ def test_creation():
     )
     env.reset()
     assert env.config["sensors"].keys() == {
-        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "main_camera", "dashboard", "depth"
+        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "main_camera", "dashboard"
     } == env.engine.sensors.keys()
     assert env.config["interface_panel"] == ["rgb", "dashboard"]
     assert not env.engine.main_window_disabled
@@ -50,7 +50,7 @@ def test_creation():
     )
     env.reset()
     assert env.config["sensors"].keys() == {
-        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "dashboard", "main_camera", "depth"
+        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "dashboard", "main_camera"
     } == env.engine.sensors.keys()
     assert env.config["interface_panel"] == ["rgb", "dashboard"]
     assert not env.engine.main_window_disabled
@@ -111,7 +111,7 @@ def test_creation():
     )
     env.reset()
     assert env.config["sensors"].keys() == {
-        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "depth", "main_camera", "dashboard"
+        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "main_camera", "dashboard"
     } == env.engine.sensors.keys()
     assert env.config["interface_panel"] == ["rgb", "dashboard"]
     assert not env.engine.main_window_disabled
@@ -133,7 +133,7 @@ def test_creation():
         }
     )
     env.reset()
-    assert env.config["sensors"].keys() == {"lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "depth"
+    assert env.config["sensors"].keys() == {"lidar", "side_detector", "lane_line_detector", "semantic", "rgb"
                                             } == env.engine.sensors.keys()
     assert env.config["interface_panel"] == []
     assert env.engine.main_window_disabled
@@ -156,7 +156,7 @@ def test_creation():
     )
     env.reset()
     assert env.config["sensors"].keys() == {
-        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "dashboard", "main_camera", "depth"
+        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "dashboard", "main_camera"
     } == env.engine.sensors.keys()
     assert env.config["interface_panel"] == ["rgb", "dashboard"]
     assert not env.engine.main_window_disabled
@@ -180,7 +180,7 @@ def test_creation():
     )
     env.reset()
     assert env.config["sensors"].keys() == {
-        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "dashboard", "main_camera", "depth"
+        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "dashboard", "main_camera"
     } == env.engine.sensors.keys()
     assert env.config["interface_panel"] == ["rgb", "dashboard"]
     assert not env.engine.main_window_disabled
@@ -204,7 +204,7 @@ def test_creation():
     )
     env.reset()
     assert env.config["sensors"].keys() == {
-        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "main_camera", "depth"
+        "lidar", "side_detector", "lane_line_detector", "semantic", "rgb", "main_camera"
     } == env.engine.sensors.keys()
     assert env.config["interface_panel"] == ["rgb"]
     assert not env.engine.main_window_disabled
