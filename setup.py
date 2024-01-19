@@ -117,27 +117,15 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 5. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
     rm -rf dist/ build/ documentation/build/ metadrive_simulator.egg-info/ docs/build/
 
-6. Rename current version to X.Y.Z.rcA, where A is arbitrary value represent "release candidate A". 
-   This is really important since pypi do not support renaming and re-uploading. 
-   Rename version in metadrive/versions.py 
-
-7. Get wheel
+6. Get wheel
     python setup.py sdist bdist_wheel
 
-8. Upload to test channel
-    twine upload --repository testpypi dist/*
-
-9. Test as next line. If failed, change the version name and repeat 1, 2, 3, 4, 5.
-    pip install --index-url https://test.pypi.org/simple/ metadrive
-
-10. Rename current version to X.Y.Z in setup.py, rerun 1, 3 steps.
-
-11. Upload to production channel 
+7. Upload to production channel 
     twine upload dist/*
 
-12. Upload the generated .whl file to release files
+8. Upload the generated .whl file to release files
 
-13. merge this branch into main
+9. merge this branch into main
 
 !!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
 
