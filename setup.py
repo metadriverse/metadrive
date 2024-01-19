@@ -120,20 +120,12 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 6. Get wheel
     python setup.py sdist bdist_wheel
 
-7. Upload to test channel
-    twine upload --repository testpypi dist/*
-
-8. Test as next line. If failed, change the version name and repeat 1, 2, 3, 4, 5.
-    pip install --index-url https://test.pypi.org/simple/ metadrive
-
-9. Rename current version to X.Y.Z in setup.py, rerun 1, 3 steps.
-
-10. Upload to production channel 
+7. Upload to production channel 
     twine upload dist/*
 
-11. Upload the generated .whl file to release files
+8. Upload the generated .whl file to release files
 
-12. merge this branch into main
+9. merge this branch into main
 
 !!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
 
