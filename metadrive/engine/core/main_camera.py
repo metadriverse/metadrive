@@ -158,9 +158,27 @@ class MainCamera(BaseSensor):
             self.cuda_rendered_result = None
 
     def set_bird_view_pos(self, position):
+        """
+        Set the x,y position for the main camera
+        Args:
+            position:
+
+        Returns:
+
+        """
         self.set_bird_view_pos_hpr(position)
 
     def set_bird_view_pos_hpr(self, position, hpr=None):
+        """
+        Set the x,y position and heading, pitch, roll  for the main camera
+        Args:
+            position:
+            hpr:
+
+        Returns:
+
+        """
+        self.set_bird_view_pos_hpr(position)
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             p_pos = panda_vector(position)
