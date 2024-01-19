@@ -1,6 +1,6 @@
 import os
 
-VERSION = "0.4.1.2"
+VERSION = "0.4.2.0"
 
 
 def asset_version():
