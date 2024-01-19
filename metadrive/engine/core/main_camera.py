@@ -178,11 +178,12 @@ class MainCamera(BaseSensor):
         Returns:
 
         """
-        self.set_bird_view_pos_hpr(position)
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             p_pos = panda_vector(position)
             self.camera_x, self.camera_y = p_pos[0], p_pos[1]
+            if len(p_pos) == 3:
+                self.top_down_camera_height = p_pos[2]
             self.camera_hpr = hpr or [0, 0, 0]
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
