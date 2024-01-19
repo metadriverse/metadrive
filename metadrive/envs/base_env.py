@@ -552,7 +552,7 @@ class BaseEnv(gym.Env):
                 self.main_camera.track(current_track_agent)
                 if bev_cam:
                     self.main_camera.stop_track()
-                    self.main_camera.set_bird_view_pos(current_track_agent.position)
+                    self.main_camera.set_bird_view_pos_hpr(current_track_agent.position)
                 for name, sensor in self.engine.sensors.items():
                     if hasattr(sensor, "track") and name != "main_camera":
                         sensor.track(current_track_agent.origin, [0., 0.8, 1.5], [0, 0.59681, 0])

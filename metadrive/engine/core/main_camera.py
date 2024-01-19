@@ -99,7 +99,7 @@ class MainCamera(BaseSensor):
         self.top_down_camera_height = engine.global_config["top_down_camera_initial_z"]
         self.camera_x = engine.global_config["top_down_camera_initial_x"]
         self.camera_y = engine.global_config["top_down_camera_initial_y"]
-        self.camera_rotate = 0
+        self.camera_hpr = [0, 0, 0]
         engine.interface.undisplay()
         engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
@@ -158,11 +158,32 @@ class MainCamera(BaseSensor):
             self.cuda_rendered_result = None
 
     def set_bird_view_pos(self, position):
+        """
+        Set the x,y position for the main camera
+        Args:
+            position:
+
+        Returns:
+
+        """
+        self.set_bird_view_pos_hpr(position)
+
+    def set_bird_view_pos_hpr(self, position, hpr=None):
+        """
+        Set the x,y position and heading, pitch, roll  for the main camera
+        Args:
+            position:
+            hpr:
+
+        Returns:
+
+        """
+        self.set_bird_view_pos_hpr(position)
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
             p_pos = panda_vector(position)
             self.camera_x, self.camera_y = p_pos[0], p_pos[1]
-            self.camera_rotate = 0
+            self.camera_hpr = hpr or [0, 0, 0]
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def reset(self):
@@ -344,7 +365,7 @@ class MainCamera(BaseSensor):
             if bird_view_on_current_position:
                 current_pos = self.camera.getPos()
                 self.camera_x, self.camera_y = current_pos[0], current_pos[1]
-                self.camera_rotate = 0
+                self.camera_hpr = [0, 0, 0]
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def _top_down_task(self, task):
@@ -364,13 +385,10 @@ class MainCamera(BaseSensor):
         self.camera.setPos(self.camera_x, self.camera_y, self.top_down_camera_height)
         if self.engine.global_config["show_coordinates"]:
             self.engine.set_coordinates_indicator_pos([self.camera_x, self.camera_y])
-        self.camera.lookAt(self.camera_x, self.camera_y, 0)
-
-        if self.inputs.isSet("right_rotate"):
-            self.camera_rotate += 3
-        if self.inputs.isSet("left_rotate"):
-            self.camera_rotate -= 3
-        self.camera.setH(self.camera_rotate)
+        if abs(sum(self.camera_hpr)) < 0.0001:
+            self.camera.lookAt(self.camera_x, self.camera_y, 0)
+        else:
+            self.camera.setHpr(Vec3(*self.camera_hpr))
         return task.cont
 
     def _update_height(self, height):
