@@ -1,6 +1,5 @@
 from inspect import getsource
 from textwrap import dedent
-
 import pygame
 from PIL import Image
 from pygments import highlight
@@ -15,7 +14,7 @@ from metadrive.utils.math import safe_clip, clip, norm, distance_greater, safe_c
 from metadrive.utils.random_utils import get_np_random, random_string
 from metadrive.utils.registry import get_metadrive_class
 from metadrive.utils.utils import is_mac, import_pygame, recursive_equal, setup_logger, merge_dicts, \
-    concat_step_infos, is_win
+    concat_step_infos, is_win, time_me
 
 
 def generate_gif(frames, gif_name="demo.gif", is_pygame_surface=False, duration=30):
