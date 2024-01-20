@@ -15,7 +15,7 @@ def test_read_data_and_create_summary():
 
     summary_dict = {}
     for track_id, track in sd_scenario[SD.TRACKS].items():
-        summary_dict[track_id] = SD.get_object_summary(state_dict=track, id=track_id)
+        summary_dict[track_id] = SD.get_object_summary(object_dict=track, object_id=track_id)
     sd_scenario[SD.METADATA][SD.SUMMARY.OBJECT_SUMMARY] = summary_dict
 
     # test

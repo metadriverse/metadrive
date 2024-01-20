@@ -197,7 +197,21 @@ class ScenarioDescription(dict):
 
     @classmethod
     def sanity_check(cls, scenario_dict, check_self_type=False, valid_check=False):
+        """Check if the input scenario dict is self-consistent and has filled required fields.
 
+        The required high-level fields include tracks, dynamic_map_states, metadata, map_features.
+        For each object, the tracks[obj_id] should at least contain type, state, metadata.
+        For each object, the tracks[obj_id]['state'] should at least contain position, heading.
+        For each lane in map_features, map_feature[map_feat_id] should at least contain polyline.
+        For metadata, it should at least contain metadrive_processed, coordinate and timestep.
+        We have more checks to ensure the consistency of the data.
+
+        Args:
+            scenario_dict: the input dict.
+            check_self_type: if True, assert the input dict is a native Python dict.
+            valid_check: if True, we will assert the values for a given timestep are zeros if valid=False at that
+                timestep.
+        """
         if check_self_type:
             assert isinstance(scenario_dict, dict)
             assert not isinstance(scenario_dict, ScenarioDescription)
@@ -252,6 +266,15 @@ class ScenarioDescription(dict):
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
+        """Check the state dict of an object (the dynamic objects such as road users, vehicles or traffic lights).
+
+        Args:
+            obj_state: the state dict of the object.
+            scenario_length: the length (# of timesteps) of the scenario.
+            object_id: the ID of the object.
+            valid_check: if True, we will examine the data at each timestep and see if it's non-zero when valid=False
+                at that timestep.
+        """
         # Check keys
         assert set(obj_state).issuperset(cls.STATE_DICT_KEYS)
 
@@ -296,17 +319,36 @@ class ScenarioDescription(dict):
             assert obj_state[cls.METADATA][cls.OBJECT_ID] == object_id
 
     def to_dict(self):
+        """Convert the object to a native python dict.
+
+        Returns:
+            A python dict
+        """
         return dict(self)
 
     def get_sdc_track(self):
+        """Return the object info dict for the SDC.
+
+        Returns:
+            The info dict for the SDC.
+        """
         assert self.SDC_ID in self[self.METADATA]
         sdc_id = str(self[self.METADATA][self.SDC_ID])
         return self[self.TRACKS][sdc_id]
 
     @staticmethod
-    def get_object_summary(state_dict, id):
-        type = state_dict["type"]
-        state_dict = state_dict["state"]
+    def get_object_summary(object_dict, object_id: str):
+        """Summarize the information of one dynamic object.
+
+        Args:
+            object_dict: the info dict of a particular object, aka scenario['tracks'][obj_id] (not the ['state'] dict!)
+            object_id: the ID of the object
+
+        Returns:
+            A dict summarizing the information of this object.
+        """
+        object_type = object_dict["type"]
+        state_dict = object_dict["state"]
         track = state_dict["position"]
         valid_track = track[np.where(state_dict["valid"].astype(int))][..., :2]
         distance = float(
@@ -322,8 +364,8 @@ class ScenarioDescription(dict):
                 break
 
         return {
-            ScenarioDescription.SUMMARY.TYPE: type,
-            ScenarioDescription.SUMMARY.OBJECT_ID: str(id),
+            ScenarioDescription.SUMMARY.TYPE: object_type,
+            ScenarioDescription.SUMMARY.OBJECT_ID: str(object_id),
             ScenarioDescription.SUMMARY.TRACK_LENGTH: int(len(track)),
             ScenarioDescription.SUMMARY.MOVING_DIST: float(distance),
             ScenarioDescription.SUMMARY.VALID_LENGTH: int(valid_length),
@@ -331,11 +373,20 @@ class ScenarioDescription(dict):
         }
 
     @staticmethod
-    def get_export_file_name(dataset, dataset_version, scenario_name):
+    def get_export_file_name(dataset: str, dataset_version: str, scenario_name: str):
+        """Return the file name of .pkl file of this scenario, if exported."""
         return "sd_{}_{}_{}.pkl".format(dataset, dataset_version, scenario_name)
 
     @staticmethod
-    def is_scenario_file(file_name):
+    def is_scenario_file(file_name: str):
+        """Verify if the scenario file is valid.
+
+        Args:
+            file_name: The path to the .pkl file.
+
+        Returns:
+            A Boolean.
+        """
         file_name = os.path.basename(file_name)
         if not file_name.endswith(".pkl"):
             return False
@@ -395,9 +446,25 @@ class ScenarioDescription(dict):
 
     @staticmethod
     def sdc_moving_dist(scenario):
+        """Get the moving distance of SDC in this scenario. This is useful to filter the scenario.
+
+        Args:
+            scenario: The scenario description.
+
+        Returns:
+            (float) The moving distance of SDC.
+        """
+        scenario = ScenarioDescription(scenario)
+
         SD = ScenarioDescription
         metadata = scenario[SD.METADATA]
-        sdc_info = metadata[SD.SUMMARY.OBJECT_SUMMARY][metadata[SD.SDC_ID]]
+
+        sdc_id = metadata[SD.SDC_ID]
+        sdc_info = metadata[SD.SUMMARY.OBJECT_SUMMARY][sdc_id]
+
+        if SD.SUMMARY.MOVING_DIST not in sdc_info:
+            sdc_info = SD.get_object_summary(object_dict=scenario.get_sdc_track(), object_id=sdc_id)
+
         moving_dist = sdc_info[SD.SUMMARY.MOVING_DIST]
         return moving_dist
 
