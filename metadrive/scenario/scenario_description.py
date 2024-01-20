@@ -558,7 +558,16 @@ class ScenarioDescription(dict):
         return ScenarioDescription.get_num_objects(scenario, object_type)
 
     @staticmethod
-    def num_moving_object(scenario, object_type=None):
+    def get_num_moving_objects(scenario, object_type=None):
+        """Return the number of moving objects (vehicles, pedestrians, cyclists, ...).
+
+        Args:
+            scenario: The input scenario.
+            object_type: The string of the object type. If None, return the number of all objects.
+
+        Returns:
+            (int) The number of moving objects.
+        """
         SD = ScenarioDescription
         metadata = scenario[SD.METADATA]
         if SD.SUMMARY.NUM_MOVING_OBJECTS not in metadata[SD.SUMMARY.NUMBER_SUMMARY]:
@@ -572,7 +581,30 @@ class ScenarioDescription(dict):
             return num_summary[SD.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE].get(object_type, 0)
 
     @staticmethod
+    def num_moving_object(scenario, object_type=None):
+        """Return the number of moving objects (vehicles, pedestrians, cyclists, ...).
+
+        Args:
+            scenario: The input scenario.
+            object_type: The string of the object type. If None, return the number of all objects.
+
+        Returns:
+            (int) The number of moving objects.
+        """
+        return ScenarioDescription.get_num_moving_objects(scenario, object_type=object_type)
+
+    @staticmethod
     def map_height_diff(map_features, target=10):
+        """Compute the height difference in a map.
+
+        Args:
+            map_features: The map feature dict of a scenario.
+            target: The target height difference, default to 10. If we find height difference > 10, we will return 10
+                immediately. This can be used to accelerate computing if we are filtering a batch of scenarios.
+
+        Returns:
+            (float) The height difference in the map feature, or the target height difference if the diff > target.
+        """
         max = -math.inf
         min = math.inf
         for feature in map_features.values():
