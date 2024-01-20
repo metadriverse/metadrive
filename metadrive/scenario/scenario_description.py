@@ -401,6 +401,11 @@ class ScenarioDescription(dict):
             ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE: defaultdict(int)
         }
         for v in scenario[ScenarioDescription.METADATA][ScenarioDescription.SUMMARY.OBJECT_SUMMARY].values():
+
+            # Fix a tiny compatibility issue
+            if ScenarioDescription.SUMMARY.MOVING_DIST not in v:
+                v[ScenarioDescription.SUMMARY.MOVING_DIST] = v['distance']
+
             if v[ScenarioDescription.SUMMARY.MOVING_DIST] > 1:
                 number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS] += 1
                 number_summary_dict[ScenarioDescription.SUMMARY.NUM_MOVING_OBJECTS_EACH_TYPE][v["type"]] += 1
@@ -418,6 +423,12 @@ class ScenarioDescription(dict):
         for v in scenario[ScenarioDescription.TRACKS].values():
             object_types_counter[v["type"]] += 1
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_OBJECTS_EACH_TYPE] = dict(object_types_counter)
+
+        # If object summary does not exist, fill them here
+        object_summaries = {}
+        for track_id, track in scenario[scenario.TRACKS].items():
+            object_summaries[track_id] = scenario.get_object_summary(object_dict=track, object_id=track_id)
+        scenario[scenario.METADATA][scenario.SUMMARY.OBJECT_SUMMARY] = object_summaries
 
         # moving object
         number_summary_dict.update(ScenarioDescription._calculate_num_moving_objects(scenario))
