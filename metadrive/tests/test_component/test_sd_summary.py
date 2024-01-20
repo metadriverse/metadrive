@@ -37,7 +37,8 @@ def test_read_all_data_and_create_summary():
         sd_scenario = read_scenario_data(os.path.join(dataset_path, mapping[scenarios[sid]], scenarios[sid]))
         for track_id, track in sd_scenario[SD.TRACKS].items():
             SD.get_object_summary(object_dict=track, object_id=track_id)
-        sd_scenario[SD.METADATA][SD.SUMMARY.NUMBER_SUMMARY] = SD.get_number_summary(sd_scenario)
+        SD.get_number_summary(sd_scenario)
+        SD.get_num_objects(sd_scenario)
 
     dataset_path = AssetLoader.file_path("waymo", unix_style=False)
     summary, scenarios, mapping = read_dataset_summary(dataset_path)
@@ -45,7 +46,8 @@ def test_read_all_data_and_create_summary():
         sd_scenario = read_scenario_data(os.path.join(dataset_path, mapping[scenarios[sid]], scenarios[sid]))
         for track_id, track in sd_scenario[SD.TRACKS].items():
             SD.get_object_summary(object_dict=track, object_id=track_id)
-        sd_scenario[SD.METADATA][SD.SUMMARY.NUMBER_SUMMARY] = SD.get_number_summary(sd_scenario)
+        SD.get_number_summary(sd_scenario)
+        SD.get_num_objects(sd_scenario)
 
 
 def test_repeated_key_check():
