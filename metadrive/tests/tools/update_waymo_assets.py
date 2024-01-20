@@ -6,8 +6,9 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.scenario import utils as sd_utils
 
 if __name__ == '__main__':
-    waymo_data = AssetLoader.file_path(AssetLoader.asset_path, "waymo",
-                                       unix_style=False)  # Use the built-in datasets with simulator
+    waymo_data = AssetLoader.file_path(
+        AssetLoader.asset_path, "waymo", unix_style=False
+    )  # Use the built-in datasets with simulator
     os.listdir(waymo_data)  # there are 3 waymo scenario files with one 'dataset_summary.pkl' in this example dataset.
 
     with open(waymo_data + '/dataset_summary.pkl', 'rb') as f:
