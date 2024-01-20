@@ -164,6 +164,6 @@ if __name__ == "__main__":
     map.road_network.show_bounding_box(engine)
 
     pos = map.get_center_point()
-    engine.main_camera.set_bird_view_pos(pos)
+    engine.main_camera.set_bird_view_pos_hpr(pos)
     while True:
         map.engine.step()

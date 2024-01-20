@@ -370,8 +370,8 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
                 "Episode ended! Scenario Index: {} Reason: IDLE.".format(self.current_seed), extra={"log_once": True}
             )
 
-        done_info[TerminationState.CRASH_SIDEWALK] = self.vehicles[vehicle_id].crash_sidewalk
-        if self.config["crash_sidewalk_done"] and self.vehicles[vehicle_id].crash_sidewalk:
+        done_info[TerminationState.CRASH_SIDEWALK] = self.agents[vehicle_id].crash_sidewalk
+        if self.config["crash_sidewalk_done"] and self.agents[vehicle_id].crash_sidewalk:
             done = True
             self.logger.info(
                 "Episode ended! Scenario Index: {} Reason: CRASH_SIDEWALK.".format(self.current_seed),
@@ -399,7 +399,7 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane
@@ -463,7 +463,7 @@ def _vis(generate_video=False):
 
     try:
         for i in range(1, 100000):
-            o, r, tm, tc, info = env.step({k: [-0.0, 1] for k in env.vehicles.keys()})
+            o, r, tm, tc, info = env.step({k: [-0.0, 1] for k in env.agents.keys()})
             for r_ in r.values():
                 total_r += r_
             ep_s += 1

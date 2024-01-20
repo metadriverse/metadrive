@@ -10,7 +10,7 @@ class SceneCull:
     """
     Used to cull distant rendering object in MetaDrive to improve rendering efficiency
     """
-
+    raise DeprecationWarning
     # Visualization cull
     LOD_MAP_VIS_DIST = 300  # highly related to the render efficiency !
     LOD_VEHICLE_VIS_DIST = 500

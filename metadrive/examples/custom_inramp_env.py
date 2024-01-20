@@ -23,13 +23,13 @@ if __name__ == "__main__":
     env = MetaDriveEnv(config)
     try:
         o, _ = env.reset()
-        env.vehicle.expert_takeover = True
+        env.agent.expert_takeover = True
         assert isinstance(o, np.ndarray)
         print("The observation is an numpy array with shape: ", o.shape)
         for i in range(1, 1000000000):
             o, r, tm, tc, info = env.step([0, 0])
             if (tm or tc) and info["arrive_dest"]:
                 env.reset()
-                env.current_track_vehicle.expert_takeover = True
+                env.current_track_agent.expert_takeover = True
     finally:
         env.close()

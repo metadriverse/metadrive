@@ -47,7 +47,7 @@ def test_discrete_action():
         env.reset()
         assert isinstance(env.action_space, gym.spaces.Discrete)
         assert env.action_space.n == 15
-        v = env.vehicle
+        v = env.agent
         policy = env.engine.get_policy(v.name)
         assert policy.convert_to_continuous_action(0) == (-1, -1)
         assert policy.convert_to_continuous_action(1) == (0, -1)
@@ -78,7 +78,7 @@ def test_multi_discrete_action():
         assert isinstance(env.action_space, gym.spaces.MultiDiscrete)
         assert env.action_space.shape == (2, )
         assert all(env.action_space.nvec == (3, 5))
-        v = env.vehicle
+        v = env.agent
         policy = env.engine.get_policy(v.name)
         assert policy.convert_to_continuous_action([0, 0]) == (-1, -1)
         assert policy.convert_to_continuous_action([1, 0]) == (0, -1)

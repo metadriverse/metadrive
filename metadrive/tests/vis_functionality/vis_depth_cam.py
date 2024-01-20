@@ -28,14 +28,14 @@ if __name__ == "__main__":
     env.reset()
 
     def get_image(env):
-        depth_cam = env.vehicle.get_camera(env.vehicle.config["image_source"])
-        rgb_cam = env.vehicle.get_camera("rgb_camera")
+        depth_cam = env.agent.get_camera(env.agent.config["image_source"])
+        rgb_cam = env.agent.get_camera("rgb_camera")
         for h in range(-180, 180, 20):
             env.engine.graphicsEngine.renderFrame()
             depth_cam.get_cam().setH(h)
             rgb_cam.get_cam().setH(h)
-            depth_cam.save_image(env.vehicle, "depth_{}.jpg".format(h))
-            rgb_cam.save_image(env.vehicle, "rgb_{}.jpg".format(h))
+            depth_cam.save_image(env.agent, "depth_{}.jpg".format(h))
+            rgb_cam.save_image(env.agent, "rgb_{}.jpg".format(h))
         env.engine.screenshot()
 
     env.engine.accept("m", get_image, extraArgs=[env])

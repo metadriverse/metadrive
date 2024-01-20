@@ -121,14 +121,14 @@ if __name__ == "__main__":
     env.engine.accept("0", lower_terrain)
     env.engine.accept("`", env.engine.terrain.reload_terrain_shader)
     # env.main_camera.set_follow_lane(True)
-    # env.vehicle.get_camera("rgb_camera").save_image(env.vehicle)
+    # env.agent.get_camera("rgb_camera").save_image(env.agent)
     # for line in env.engine.coordinate_line:
-    #     line.reparentTo(env.vehicle.origin)
-    # env.vehicle.set_velocity([5, 0], in_local_frame=True)
+    #     line.reparentTo(env.agent.origin)
+    # env.agent.set_velocity([5, 0], in_local_frame=True)
     print(time.time() - start)
     # origin = env.engine.terrain.mesh_collision_terrain.getPos()
     for s in range(1, 100000):
-        # env.vehicle.set_velocity([1, 0], in_local_frame=True)
+        # env.agent.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
         # env.render(
         #     text={
@@ -142,19 +142,19 @@ if __name__ == "__main__":
         #     env.reset()
         #     print(time.time() - s)
 
-        # env.vehicle.set_pitch(-np.pi/4)
+        # env.agent.set_pitch(-np.pi/4)
         # [0.09231533, 0.491018, 0.47076905, 0.7691619, 0.5, 0.5, 1.0, 0.0, 0.48037243, 0.8904728, 0.81229943, 0.7317231, 1.0, 0.85320455, 0.9747932, 0.65675277, 0.0, 0.5, 0.5]
         # else:
         # if s % 100 == 0:
         #     env.close()
         #     env.reset()
-        # info["fuel"] = env.vehicle.energy_consumption
+        # info["fuel"] = env.agent.energy_consumption
         # env.render(
         #     text={
-        #         # "heading_diff": env.vehicle.heading_diff(env.vehicle.lane),
-        #         # "lane_width": env.vehicle.lane.width,
-        #         # "lane_index": env.vehicle.lane_index,
-        #         # "lateral": env.vehicle.lane.local_coordinates(env.vehicle.position),
+        #         # "heading_diff": env.agent.heading_diff(env.agent.lane),
+        #         # "lane_width": env.agent.lane.width,
+        #         # "lane_index": env.agent.lane_index,
+        #         # "lateral": env.agent.lane.local_coordinates(env.agent.position),
         #         "current_seed": env.current_seed
         #     }
         # )

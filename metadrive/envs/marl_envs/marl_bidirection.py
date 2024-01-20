@@ -97,7 +97,7 @@ class MultiAgentBidirectionEnv(MultiAgentMetaDrive):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane
@@ -192,7 +192,7 @@ def _expert():
                 )
             )
             break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -222,7 +222,7 @@ def _vis_debug_respawn():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        action = {k: [.0, 1.0] for k in env.vehicles.keys()}
+        action = {k: [.0, 1.0] for k in env.agents.keys()}
         o, r, tm, tc, info = env.step(action)
         for r_ in r.values():
             total_r += r_
@@ -243,7 +243,7 @@ def _vis_debug_respawn():
                 )
             )
             # break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -272,7 +272,7 @@ def _vis():
     total_r = 0
     ep_s = 0
     for i in range(1, 100000):
-        o, r, tm, tc, info = env.step({k: [1.0, .0] for k in env.vehicles.keys()})
+        o, r, tm, tc, info = env.step({k: [1.0, .0] for k in env.agents.keys()})
         for r_ in r.values():
             total_r += r_
         ep_s += 1
@@ -283,12 +283,12 @@ def _vis():
             "cam_x": env.main_camera.camera_x,
             "cam_y": env.main_camera.camera_y,
             "cam_z": env.main_camera.top_down_camera_height,
-            "current_track_v": env.agent_manager.object_to_agent(env.current_track_vehicle.name)
+            "current_track_v": env.agent_manager.object_to_agent(env.current_track_agent.name)
         }
-        track_v = env.agent_manager.object_to_agent(env.current_track_vehicle.name)
+        track_v = env.agent_manager.object_to_agent(env.current_track_agent.name)
         render_text["tack_v_reward"] = r[track_v]
-        render_text["dist_to_right"] = env.current_track_vehicle.dist_to_right_side
-        render_text["dist_to_left"] = env.current_track_vehicle.dist_to_left_side
+        render_text["dist_to_right"] = env.current_track_agent.dist_to_right_side
+        render_text["dist_to_left"] = env.current_track_agent.dist_to_left_side
         env.render(text=render_text)
         if tm["__all__"]:
             print(
@@ -297,7 +297,7 @@ def _vis():
                 )
             )
             # break
-        if len(env.vehicles) == 0:
+        if len(env.agents) == 0:
             total_r = 0
             print("Reset")
             env.reset()
@@ -371,7 +371,7 @@ def _long_run():
             if (step + 1) % 200 == 0:
                 print(
                     "{}/{} Agents: {} {}\nO: {}\nR: {}\nD: {}\nI: {}\n\n".format(
-                        step + 1, 10000, len(env.vehicles), list(env.vehicles.keys()),
+                        step + 1, 10000, len(env.agents), list(env.agents.keys()),
                         {k: (oo.shape, oo.mean(), oo.min(), oo.max())
                          for k, oo in o.items()}, r, d, i
                     )

@@ -57,26 +57,26 @@ if __name__ == "__main__":
     )
     try:
         env.reset()
-        # if env.current_track_vehicle:
-        #     env.current_track_vehicle.expert_takeover = True
+        # if env.current_track_agent:
+        #     env.current_track_agent.expert_takeover = True
         print(HELP_MESSAGE)
         env.switch_to_third_person_view()  # Default is in Top-down view, we switch to Third-person view.
         for i in range(1, 10000000000):
-            o, r, tm, tc, info = env.step({agent_id: [0, 0] for agent_id in env.vehicles.keys()})
+            o, r, tm, tc, info = env.step({agent_id: [0, 0] for agent_id in env.agents.keys()})
             env.render(
                 **extra_args,
                 mode="top_down" if args.top_down else None,
                 text={
                     "Quit": "ESC",
-                    "Number of existing vehicles": len(env.vehicles),
-                    "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_vehicle.id),
+                    "Number of existing vehicles": len(env.agents),
+                    "Tracked agent (Press Q)": env.engine.agent_manager.object_to_agent(env.current_track_agent.id),
                     "Keyboard Control": "W,A,S,D",
-                    # "Auto-Drive (Switch mode: T)": "on" if env.current_track_vehicle.expert_takeover else "off",
+                    # "Auto-Drive (Switch mode: T)": "on" if env.current_track_agent.expert_takeover else "off",
                 } if not args.top_down else {}
             )
             if tm["__all__"]:
                 env.reset()
-                # if env.current_track_vehicle:
-                #     env.current_track_vehicle.expert_takeover = True
+                # if env.current_track_agent:
+                #     env.current_track_agent.expert_takeover = True
     finally:
         env.close()

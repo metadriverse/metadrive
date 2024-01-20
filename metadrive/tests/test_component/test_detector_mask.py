@@ -256,9 +256,9 @@ def test_detector_mask_in_lidar():
     )
     try:
         env.reset()
-        span = 2 * max(env.vehicle.WIDTH, env.vehicle.LENGTH)
+        span = 2 * max(env.agent.WIDTH, env.agent.LENGTH)
         detector_mask = DetectorMask(
-            env.vehicle.config.lidar.num_lasers, span, max_distance=env.vehicle.config.lidar.distance
+            env.agent.config.lidar.num_lasers, span, max_distance=env.agent.config.lidar.distance
         )
         ep_count = 0
         for tt in range(3000):
@@ -266,12 +266,12 @@ def test_detector_mask_in_lidar():
 
             # print("We have: {} vehicles!".format(env.engine.traffic_manager.get_vehicle_num()))
 
-            v = env.vehicle
+            v = env.agent
             c_p, objs = env.engine.get_sensor("lidar").perceive(
                 v,
                 physics_world=env.engine.physics_world.dynamic_world,
-                num_lasers=env.vehicle.config["lidar"]["num_lasers"],
-                distance=env.vehicle.config["lidar"]["distance"],
+                num_lasers=env.agent.config["lidar"]["num_lasers"],
+                distance=env.agent.config["lidar"]["distance"],
                 detector_mask=None
             )
             old_objs = v.lidar.get_surrounding_vehicles(objs)
@@ -290,7 +290,7 @@ def test_detector_mask_in_lidar():
             )
 
             real_mask = old_cloud_points != 1.0
-            mask = detector_mask.get_mask(env.vehicle.name)
+            mask = detector_mask.get_mask(env.agent.name)
             stack = np.stack([old_cloud_points, real_mask, mask])
             if not all(mask[real_mask]):
                 print('stop')
@@ -304,12 +304,12 @@ def test_detector_mask_in_lidar():
             )
 
             # assert sum(abs(mask.astype(int) - real_mask.astype(int))) <= 3
-            v = env.vehicle
+            v = env.agent
             c_p, objs = env.engine.get_sensor("lidar").perceive(
                 v,
-                physics_world=env.vehicle.engine.physics_world.dynamic_world,
-                num_lasers=env.vehicle.config["lidar"]["num_lasers"],
-                distance=env.vehicle.config["lidar"]["distance"],
+                physics_world=env.agent.engine.physics_world.dynamic_world,
+                num_lasers=env.agent.config["lidar"]["num_lasers"],
+                distance=env.agent.config["lidar"]["distance"],
             )
             new_cloud_points = np.array(copy.deepcopy(c_p))
             np.testing.assert_almost_equal(old_cloud_points, new_cloud_points)

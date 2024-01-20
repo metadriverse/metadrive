@@ -69,7 +69,7 @@ def test_save_episode(vis=False):
 
                 assert np.isclose(np.array([pos[0], pos[1]]), np.array(step_info[i][old_id][0]), 1e-2, 1e-2).all()
                 assert abs(wrap_to_pi(heading - np.array(step_info[i][old_id][1]))) < 1e-2
-            # assert abs(env.vehicle.get_z() - record_pos[-1]) < 1e-3
+            # assert abs(env.agent.get_z() - record_pos[-1]) < 1e-3
             o, r, tm, tc, info = env.step([0, 1])
             if vis:
                 env.render()
@@ -105,7 +105,7 @@ def test_save_episode_marl(vis=False):
         env.engine.spawn_manager.seed(tt)
         o, _ = env.reset()
         for i in range(1, 100000 if vis else 600):
-            o, r, tm, tc, info = env.step({agent_id: [0, .2] for agent_id in env.vehicles.keys()})
+            o, r, tm, tc, info = env.step({agent_id: [0, .2] for agent_id in env.agents.keys()})
             if vis:
                 env.render()
             if tm["__all__"]:
@@ -136,7 +136,7 @@ def test_save_episode_marl(vis=False):
                 assert np.isclose(np.array([pos[0], pos[1], obj.get_z()]), np.array(record_pos)).all()
                 assert abs(wrap_to_pi(heading - record_heading)) < 1e-2
             # print("Replay MARL step: {}".format(i))
-            o, r, tm, tc, info = env.step({agent_id: [0, 0.1] for agent_id in env.vehicles.keys()})
+            o, r, tm, tc, info = env.step({agent_id: [0, 0.1] for agent_id in env.agents.keys()})
             if vis:
                 env.render()
             if tm["__all__"]:

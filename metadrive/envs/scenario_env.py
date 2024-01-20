@@ -126,7 +126,7 @@ class ScenarioEnv(BaseEnv):
         self.engine.register_manager("curriculum_manager", ScenarioCurriculumManager())
 
     def done_function(self, vehicle_id: str):
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         done = False
         max_step = self.config["horizon"] is not None and self.episode_lengths[vehicle_id] >= self.config["horizon"]
         done_info = {
@@ -139,7 +139,7 @@ class ScenarioEnv(BaseEnv):
             TerminationState.SUCCESS: self._is_arrive_destination(vehicle),
             TerminationState.MAX_STEP: max_step,
             TerminationState.ENV_SEED: self.current_seed,
-            # TerminationState.CURRENT_BLOCK: self.vehicle.navigation.current_road.block_ID(),
+            # TerminationState.CURRENT_BLOCK: self.agent.navigation.current_road.block_ID(),
             # crash_vehicle=False, crash_object=False, crash_building=False, out_of_road=False, arrive_dest=False,
         }
 
@@ -193,7 +193,7 @@ class ScenarioEnv(BaseEnv):
         return done, done_info
 
     def cost_function(self, vehicle_id: str):
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict(num_crash_object=0, num_crash_human=0, num_crash_vehicle=0, num_on_line=0)
         step_info["cost"] = 0
         if vehicle.on_yellow_continuous_line or vehicle.crash_sidewalk or vehicle.on_white_continuous_line:
@@ -219,7 +219,7 @@ class ScenarioEnv(BaseEnv):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
-        vehicle = self.vehicles[vehicle_id]
+        vehicle = self.agents[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane
@@ -421,8 +421,8 @@ if __name__ == "__main__":
         for t in range(10000):
             o, r, tm, tc, info = env.step([0, 0])
             assert env.observation_space.contains(o)
-            c_lane = env.vehicle.lane
-            long, lat, = c_lane.local_coordinates(env.vehicle.position)
+            c_lane = env.agent.lane
+            long, lat, = c_lane.local_coordinates(env.agent.position)
             # if env.config["use_render"]:
             env.render(
                 text={

@@ -11,8 +11,8 @@ def test_traffic_respawn(vis=False):
         for i in range(1, 3000):
             env.step([0, 0])
             current_v = set(env.engine.traffic_manager.vehicles)
-            for v in list(env.engine.traffic_manager.traffic_vehicles) + [env.vehicle]:
-                if v is env.vehicle:
+            for v in list(env.engine.traffic_manager.traffic_vehicles) + [env.agent]:
+                if v is env.agent:
                     current_v.discard(v)
                 else:
                     current_v.discard(v)

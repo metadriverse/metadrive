@@ -411,7 +411,7 @@ class ManualControllableIDMPolicy(IDMPolicy):
         self.engine.global_config["manual_control"] = False  # hack
 
     def act(self, agent_id):
-        if self.control_object is self.engine.current_track_vehicle:
+        if self.control_object is self.engine.current_track_agent:
             self.engine.global_config["manual_control"] = True  # hack
             action = self.manual_control_policy.act(agent_id)
             self.engine.global_config["manual_control"] = False  # hack

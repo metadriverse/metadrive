@@ -30,7 +30,7 @@ def test_traffic_light(render=False, manual_control=False, debug=False):
         test_success = False
         for s in range(1, 100):
             env.step([0, 1])
-            if env.vehicle.green_light:
+            if env.agent.green_light:
                 test_success = True
                 break
         assert test_success
@@ -42,7 +42,7 @@ def test_traffic_light(render=False, manual_control=False, debug=False):
         test_success = False
         for s in range(1, 100):
             env.step([0, 1])
-            if env.vehicle.red_light:
+            if env.agent.red_light:
                 test_success = True
                 break
         assert test_success
@@ -54,7 +54,7 @@ def test_traffic_light(render=False, manual_control=False, debug=False):
         test_success = False
         for s in range(1, 100):
             env.step([0, 1])
-            if env.vehicle.yellow_light:
+            if env.agent.yellow_light:
                 test_success = True
                 break
         assert test_success

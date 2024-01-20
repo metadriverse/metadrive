@@ -24,10 +24,13 @@ class ColorLineNodePath(LineNodePath):
             for pointList, lineColor in zip(lineList, colorList):
                 self.moveTo(*pointList[0])
                 for point, seg_color, in zip(pointList[1:], lineColor):
-                    assert len(seg_color) == 4, "color vector should have 4 component, get {} instead".format(
+                    assert 3 <= len(seg_color) <= 4, "color vector should have 3 or 4 component, get {} instead".format(
                         len(seg_color)
                     )
-                    self.setColor(LVecBase4f(*seg_color))
+                    if len(seg_color) == 4:
+                        self.setColor(LVecBase4f(*seg_color))
+                    else:
+                        self.setColor(LVecBase4f(*seg_color, 1.0))
                     self.drawTo(*point)
         self.create()
 

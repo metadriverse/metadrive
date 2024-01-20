@@ -41,7 +41,7 @@ class RGBCamera(BaseCamera):
         fbprops.float_color = True
         fbprops.set_rgba_bits(16, 16, 16, 16)
         fbprops.set_depth_bits(24)
-        fbprops.set_multisamples(self.engine.pbrpipe.msaa_samples)
+        fbprops.set_multisamples(16)
         self.scene_tex = p3d.Texture()
         self.scene_tex.set_format(p3d.Texture.F_rgba16)
         self.scene_tex.set_component_type(p3d.Texture.T_float)

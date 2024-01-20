@@ -19,13 +19,13 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
         lidar_success = False
         success_list, reward_list, ep_reward, ep_len, ep_count = [], [], 0, 0, 0
         while ep_count < num_episode:
-            action = expert(env.vehicle, deterministic=True)
+            action = expert(env.agent, deterministic=True)
             obs, reward, terminated, truncated, info = env.step(action)
             if need_on_same_lane:
-                assert lane_idx_need_to_stay == env.vehicle.lane_index[-1], "Not one the same lane"
+                assert lane_idx_need_to_stay == env.agent.lane_index[-1], "Not one the same lane"
             # double check lidar
             if env.config["use_render"]:
-                env.render(text={"lane_index": env.vehicle.lane_index, "step": env.episode_step})
+                env.render(text={"lane_index": env.agent.lane_index, "step": env.episode_step})
             lidar = [True if p == 1.0 else False for p in env.observations[DEFAULT_AGENT].cloud_points]
             if not all(lidar):
                 lidar_success = True
@@ -37,9 +37,7 @@ def _evaluate(env_config, num_episode, has_traffic=True, need_on_same_lane=True)
                 reward_list.append(ep_reward)
                 ep_reward = 0
                 ep_len = 0
-                env.config["target_vehicle_configs"]["default_agent"]["spawn_lane_index"] = (
-                    ">", ">>", len(reward_list) % 3
-                )
+                env.config["agent_configs"]["default_agent"]["spawn_lane_index"] = (">", ">>", len(reward_list) % 3)
                 lane_idx_need_to_stay = len(reward_list) % 3
                 obs, _ = env.reset()
                 if has_traffic:

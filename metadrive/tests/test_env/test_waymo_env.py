@@ -36,7 +36,7 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
 
                 if i == 999:
                     raise ValueError("Can not arrive dest")
-            assert env.vehicle.panda_color == sns.color_palette("colorblind")[2]
+            assert env.agent.panda_color == sns.color_palette("colorblind")[2]
     finally:
         env.close()
 

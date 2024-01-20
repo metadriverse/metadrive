@@ -70,7 +70,7 @@ class MainCamera(BaseSensor):
         self.direction_running_mean = deque(maxlen=self.camera_smooth_buffer_size if self.camera_smooth else 1)
         self.world_light = engine.world_light  # light chases the chase camera, when not using global light
         self.inputs = InputState()
-        self.current_track_vehicle = None
+        self.current_track_agent = None
 
         # height control
         self.chase_camera_height = camera_height
@@ -99,7 +99,7 @@ class MainCamera(BaseSensor):
         self.top_down_camera_height = engine.global_config["top_down_camera_initial_z"]
         self.camera_x = engine.global_config["top_down_camera_initial_x"]
         self.camera_y = engine.global_config["top_down_camera_initial_y"]
-        self.camera_rotate = 0
+        self.camera_hpr = [0, 0, 0]
         engine.interface.undisplay()
         engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
@@ -116,11 +116,12 @@ class MainCamera(BaseSensor):
         self._in_recover = False
         self._last_frame_has_mouse = False
 
-        need_cuda = engine.global_config["vehicle_config"]["image_source"] == "main_camera"
+        need_cuda = "main_camera" in engine.global_config["sensors"]
         self.enable_cuda = engine.global_config["image_on_cuda"] and need_cuda
 
         self.cuda_graphics_resource = None
-        self.engine.sensors["main_camera"] = self
+        if "main_camera" in engine.global_config["sensors"]:
+            self.engine.sensors["main_camera"] = self
         if self.enable_cuda:
             assert _cuda_enable, "Can not enable cuda rendering pipeline"
 
@@ -157,11 +158,31 @@ class MainCamera(BaseSensor):
             self.cuda_rendered_result = None
 
     def set_bird_view_pos(self, position):
+        """
+        Set the x,y position for the main camera
+        Args:
+            position:
+
+        Returns:
+
+        """
+        self.set_bird_view_pos_hpr(position)
+
+    def set_bird_view_pos_hpr(self, position, hpr=None):
+        """
+        Set the x,y position and heading, pitch, roll  for the main camera
+        Args:
+            position:
+            hpr:
+
+        Returns:
+
+        """
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # adjust hpr
-            p_pos = panda_vector(position)
-            self.camera_x, self.camera_y = p_pos[0], p_pos[1]
-            self.camera_rotate = 0
+            p_pos = panda_vector(position, self.engine.global_config["top_down_camera_initial_z"])
+            self.camera_x, self.camera_y, self.top_down_camera_height = p_pos[0], p_pos[1], p_pos[2]
+            self.camera_hpr = hpr or [0, 0, 0]
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def reset(self):
@@ -278,7 +299,7 @@ class MainCamera(BaseSensor):
         :param vehicle: Vehicle to chase
         :return: None
         """
-        self.current_track_vehicle = vehicle
+        self.current_track_agent = vehicle
         self.engine.interface.display()
         pos = None
         if self.FOLLOW_LANE:
@@ -329,7 +350,7 @@ class MainCamera(BaseSensor):
             engine.task_manager.remove(self.CHASE_TASK_NAME)
         if engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             engine.task_manager.remove(self.TOP_DOWN_TASK_NAME)
-        self.current_track_vehicle = None
+        self.current_track_agent = None
         if self.registered:
             self.unregister()
             # self.camera.node().getDisplayRegion(0).clearDrawCallback()
@@ -343,7 +364,7 @@ class MainCamera(BaseSensor):
             if bird_view_on_current_position:
                 current_pos = self.camera.getPos()
                 self.camera_x, self.camera_y = current_pos[0], current_pos[1]
-                self.camera_rotate = 0
+                self.camera_hpr = [0, 0, 0]
             self.engine.task_manager.add(self._top_down_task, self.TOP_DOWN_TASK_NAME, extraArgs=[], appendTask=True)
 
     def _top_down_task(self, task):
@@ -363,13 +384,10 @@ class MainCamera(BaseSensor):
         self.camera.setPos(self.camera_x, self.camera_y, self.top_down_camera_height)
         if self.engine.global_config["show_coordinates"]:
             self.engine.set_coordinates_indicator_pos([self.camera_x, self.camera_y])
-        self.camera.lookAt(self.camera_x, self.camera_y, 0)
-
-        if self.inputs.isSet("right_rotate"):
-            self.camera_rotate += 3
-        if self.inputs.isSet("left_rotate"):
-            self.camera_rotate -= 3
-        self.camera.setH(self.camera_rotate)
+        if abs(sum(self.camera_hpr)) < 0.0001:
+            self.camera.lookAt(self.camera_x, self.camera_y, 0)
+        else:
+            self.camera.setHpr(Vec3(*self.camera_hpr))
         return task.cont
 
     def _update_height(self, height):

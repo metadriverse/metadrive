@@ -15,53 +15,53 @@ def get_result(env):
     reported_end = None
     reported_start = None
     reported_rotation = None
-    start_heading = env.vehicle.heading_theta
+    start_heading = env.agent.heading_theta
     rotate_start_pos = None
     max_speed_loc = None
     for s in range(10000):
         if s < 20:
             action = np.array([0.0, 0.0])
-        elif env.vehicle.speed_km_h < 100 and not reported_max_speed:
+        elif env.agent.speed_km_h < 100 and not reported_max_speed:
             action = np.array([0.0, 1.0])
         else:
             action = np.array([0.0, -1.0])
             # action = np.array([0.0, 0.0])
 
-        if s > 20 and env.vehicle.speed_km_h > 1.0 and not reported_start:
+        if s > 20 and env.agent.speed_km_h > 1.0 and not reported_start:
             # print("Start the car at {}".format(s))
             reported_start = s
             start_time = time.time()
 
-        if s > 20 and env.vehicle.speed_km_h >= 100 and not reported_max_speed:
+        if s > 20 and env.agent.speed_km_h >= 100 and not reported_max_speed:
             spend = (s - 1 - reported_start) * 0.1
             print(
                 "Achieve max speed: {} at {}. Spend {} s. Current location: {}".format(
-                    max_speed_km_h, s - 1, spend, env.vehicle.position
+                    max_speed_km_h, s - 1, spend, env.agent.position
                 )
             )
             # print("real time spend to acc: {}".format(time.time() - start_time))
             reported_max_speed = s
-            max_speed_loc = env.vehicle.position
+            max_speed_loc = env.agent.position
 
-        max_speed_km_h = max(max_speed_km_h, env.vehicle.speed_km_h)
+        max_speed_km_h = max(max_speed_km_h, env.agent.speed_km_h)
 
-        if s > 20 and env.vehicle.speed_km_h <= 1.0 and reported_max_speed and not reported_end:
-            dist = env.vehicle.position - max_speed_loc
+        if s > 20 and env.agent.speed_km_h <= 1.0 and reported_max_speed and not reported_end:
+            dist = env.agent.position - max_speed_loc
             dist = dist[0]
-            # print("Stop the car at {}. Distance {}. Current location: {}".format(s, dist, env.vehicle.position))
+            # print("Stop the car at {}. Distance {}. Current location: {}".format(s, dist, env.agent.position))
             reported_end = True
 
-        speed = env.vehicle.speed_km_h
-        current_heading = env.vehicle.heading_theta
+        speed = env.agent.speed_km_h
+        current_heading = env.agent.heading_theta
         if reported_end and not reported_rotation:
             if rotate_start_pos is None:
-                rotate_start_pos = env.vehicle.position
+                rotate_start_pos = env.agent.position
             if speed < 99:
                 action = np.array([0.0, 1.0])
             else:
                 action = np.array([-1.0, 1.0])
                 if abs(current_heading - start_heading) >= np.pi / 2:
-                    rotate_displacement = np.asarray(env.vehicle.position) - np.asarray(rotate_start_pos)
+                    rotate_displacement = np.asarray(env.agent.position) - np.asarray(rotate_start_pos)
                     reported_rotation = True
 
         o, r, tm, tc, i = env.step(action)

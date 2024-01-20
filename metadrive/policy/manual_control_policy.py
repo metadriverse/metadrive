@@ -48,17 +48,17 @@ class ManualControlPolicy(EnvInputPolicy):
         self.controller.process_others(takeover_callback=self.toggle_takeover)
 
         try:
-            if self.engine.current_track_vehicle.expert_takeover and self.enable_expert:
-                return expert(self.engine.current_track_vehicle)
+            if self.engine.current_track_agent.expert_takeover and self.enable_expert:
+                return expert(self.engine.current_track_agent)
         except (ValueError, AssertionError):
             # if observation doesn't match, fall back to manual control
             print("Current observation does not match the format that expert can accept.")
             self.toggle_takeover()
 
-        is_track_vehicle = self.engine.agent_manager.get_agent(agent_id) is self.engine.current_track_vehicle
+        is_track_vehicle = self.engine.agent_manager.get_agent(agent_id) is self.engine.current_track_agent
         not_in_native_bev = (self.engine.main_camera is None) or (not self.engine.main_camera.is_bird_view_camera())
         if self.engine.global_config["manual_control"] and is_track_vehicle and not_in_native_bev:
-            action = self.controller.process_input(self.engine.current_track_vehicle)
+            action = self.controller.process_input(self.engine.current_track_agent)
             self.action_info["manual_control"] = True
         else:
             action = super(ManualControlPolicy, self).act(agent_id)
@@ -68,9 +68,9 @@ class ManualControlPolicy(EnvInputPolicy):
         return action
 
     def toggle_takeover(self):
-        if self.engine.current_track_vehicle is not None:
-            self.engine.current_track_vehicle.expert_takeover = not self.engine.current_track_vehicle.expert_takeover
-            print("The expert takeover is set to: ", self.engine.current_track_vehicle.expert_takeover)
+        if self.engine.current_track_agent is not None:
+            self.engine.current_track_agent.expert_takeover = not self.engine.current_track_agent.expert_takeover
+            print("The expert takeover is set to: ", self.engine.current_track_agent.expert_takeover)
 
 
 class TakeoverPolicy(EnvInputPolicy):
@@ -94,8 +94,8 @@ class TakeoverPolicy(EnvInputPolicy):
     def act(self, agent_id):
         agent_action = super(TakeoverPolicy, self).act(agent_id)
         if self.engine.global_config["manual_control"] and self.engine.agent_manager.get_agent(
-                agent_id) is self.engine.current_track_vehicle and not self.engine.main_camera.is_bird_view_camera():
-            expert_action = self.controller.process_input(self.engine.current_track_vehicle)
+                agent_id) is self.engine.current_track_agent and not self.engine.main_camera.is_bird_view_camera():
+            expert_action = self.controller.process_input(self.engine.current_track_agent)
             if isinstance(self.controller, SteeringWheelController) and (self.controller.left_shift_paddle
                                                                          or self.controller.right_shift_paddle):
                 # if expert_action[0]*agent_action[0]< 0 or expert_action[1]*agent_action[1] < 0:

@@ -9,7 +9,7 @@ from metadrive.policy.idm_policy import IDMPolicy
 
 
 def _check_spaces_before_reset(env):
-    a = set(env.config["target_vehicle_configs"].keys())
+    a = set(env.config["agent_configs"].keys())
     b = set(env.observation_space.spaces.keys())
     c = set(env.action_space.spaces.keys())
     assert a == b == c
@@ -17,7 +17,7 @@ def _check_spaces_before_reset(env):
 
 
 def _check_spaces_after_reset(env, obs=None):
-    a = set(env.config["target_vehicle_configs"].keys())
+    a = set(env.config["agent_configs"].keys())
     b = set(env.observation_space.spaces.keys())
     assert a == b
     _check_shape(env)
@@ -30,7 +30,7 @@ def _check_spaces_after_reset(env, obs=None):
 def _check_shape(env):
     b = set(env.observation_space.spaces.keys())
     c = set(env.action_space.spaces.keys())
-    d = set(env.vehicles.keys())
+    d = set(env.agents.keys())
     e = set(env.engine.agents.keys())
     f = set([k for k in env.observation_space.spaces.keys() if not env.dones[k]])
     assert d == e == f, (b, c, d, e, f)
@@ -60,7 +60,7 @@ def _act(env, action):
     obs, reward, terminated, truncated, info = env.step(action)
     _check_shape(env)
     if not terminated["__all__"]:
-        assert len(env.vehicles) > 0
+        assert len(env.agents) > 0
     if not (set(obs.keys()) == set(reward.keys()) == set(env.observation_space.spaces.keys())):
         raise ValueError
     assert env.observation_space.contains(obs)
@@ -93,7 +93,7 @@ def test_ma_racing_env_with_IDM(num_agents):
         assert env.observation_space.contains(obs)
         episode_reward_record = defaultdict(float)
         for step in range(3_000):
-            act = {k: [1, 1] for k in env.vehicles.keys()}
+            act = {k: [1, 1] for k in env.agents.keys()}
             o, r, tm, tc, i = _act(env, act)
             # env.render(mode="topdown")
             if step == 0:
@@ -149,7 +149,7 @@ def test_guardrail_collision_detection(num_agents, render=False):
         assert env.observation_space.contains(obs)
         episode_reward_record = defaultdict(float)
         for step in range(3_000):
-            act = {k: [0, 1] for k in env.vehicles.keys()}
+            act = {k: [0, 1] for k in env.agents.keys()}
             o, r, tm, tc, i = _act(env, act)
             print(i)
             if render:

@@ -107,6 +107,13 @@ class EngineCore(ShowBase.ShowBase):
         #     #     "No allowed to change ptr of global config, which may cause issue"
         #     pass
         # else:
+        config = global_config
+        self.main_window_disabled = False
+        if "main_camera" not in global_config["sensors"]:
+            # reduce size as we don't use the main camera content for improving efficiency
+            config["window_size"] = (1, 1)
+            self.main_window_disabled = True
+
         self.pid = os.getpid()
         EngineCore.global_config = global_config
         self.mode = global_config["_render_mode"]
@@ -182,7 +189,7 @@ class EngineCore(ShowBase.ShowBase):
 
         super(EngineCore, self).__init__(windowType=self.mode)
         logger.info("Known Pipes: {}".format(*GraphicsPipeSelection.getGlobalPtr().getPipeTypes()))
-        if self.global_config["window_size"] == (1, 1):
+        if self.main_window_disabled and self.mode != RENDER_MODE_NONE:
             self.win.setActive(False)
 
         self._all_panda_tasks = self.taskMgr.getAllTasks()

@@ -46,7 +46,7 @@ if __name__ == '__main__':
     frame_count = 0
 
     o, _ = env.reset(seed=start_seed)
-    env.vehicle.expert_takeover = True
+    env.agent.expert_takeover = True
     env.engine.force_fps.disable()
 
     while True:
@@ -92,5 +92,5 @@ if __name__ == '__main__':
                 break
 
             o, _ = env.reset(seed=ep_count + start_seed)
-            env.vehicle.expert_takeover = True
+            env.agent.expert_takeover = True
             env.engine.force_fps.disable()
