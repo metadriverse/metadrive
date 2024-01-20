@@ -293,7 +293,7 @@ jobs:
           pip install numpy
           pip install -e .
           pip install -e .[gym]
-          python -m metadrive.pull_asset
+          python -m metadrive.pull_asset --update
           pip install pytest
           pip install pytest-cov
           cd documentation
