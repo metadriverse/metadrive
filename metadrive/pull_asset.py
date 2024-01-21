@@ -11,7 +11,9 @@ from filelock import Timeout
 from metadrive.constants import VERSION
 from metadrive.engine.logger import get_logger
 from metadrive.version import asset_version
+from pathlib import Path
 
+ROOT_DIR = Path(__file__).parent
 ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
 
 
@@ -33,8 +35,8 @@ class MyProgressBar():
 
 def pull_asset(update):
     logger = get_logger()
-    TARGET_DIR = os.path.join(os.path.dirname(__file__))
-    if os.path.exists(os.path.join(TARGET_DIR, "assets")):
+    assets_folder = ROOT_DIR / "assets"
+    if os.path.exists(assets_folder):
         if not update:
             logger.warning(
                 "Fail to pull. Assets already exists, version: {}. Expected version: {}. "
@@ -45,10 +47,10 @@ def pull_asset(update):
             return
         else:
             logger.info("Remove existing assets, version: {}..".format(asset_version()))
-            shutil.rmtree(os.path.join(TARGET_DIR, "assets"))
+            shutil.rmtree(assets_folder, ignore_errors=True)
 
-    zip_path = os.path.join(TARGET_DIR, 'assets.zip')
-    zip_lock = os.path.join(TARGET_DIR, 'assets.zip.lock')
+    zip_path = ROOT_DIR / 'assets.zip'
+    zip_lock = ROOT_DIR / 'assets.zip.lock'
     # filelock
     lock = filelock.FileLock(zip_lock, timeout=1)
     # Extract the zip file to the desired location
@@ -59,7 +61,7 @@ def pull_asset(update):
             extra_arg = [MyProgressBar()] if logger.level == logging.INFO else []
             urllib.request.urlretrieve(ASSET_URL, zip_path, *extra_arg)
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(TARGET_DIR)
+                zip_ref.extractall(ROOT_DIR)
             logger.info(
                 "Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION)
             )
