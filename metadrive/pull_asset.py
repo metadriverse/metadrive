@@ -1,17 +1,18 @@
 import argparse
 import logging
-import time
 import os
-import progressbar
 import shutil
+import time
 import urllib.request
-import zipfile
+from pathlib import Path
+
 import filelock
+import progressbar
 from filelock import Timeout
+
 from metadrive.constants import VERSION
 from metadrive.engine.logger import get_logger
-from metadrive.version import asset_version
-from pathlib import Path
+from metadrive.version import asset_version, ASSET_LOCK
 
 ROOT_DIR = Path(__file__).parent
 ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
@@ -38,7 +39,7 @@ def pull_asset(update):
 
     assets_folder = ROOT_DIR / "assets"
     zip_path = ROOT_DIR / 'assets.zip'
-    lock_path = ROOT_DIR / 'assets.lock'
+    lock_path = ROOT_DIR / ASSET_LOCK
 
     should_remove_existing_assets = False
     if os.path.exists(assets_folder):
