@@ -34,15 +34,23 @@ class MyProgressBar():
             self.pbar.finish()
 
 
+def _is_asset_version_file_ready():
+    asset_version_path = ROOT_DIR / 'assets' / 'version.txt'
+    return asset_version_path.exists()
+
+
 def wait_asset_lock():
-    lock_path = ROOT_DIR / 'assets.lock'
-    # Another instance of this program is already running. Wait for the asset pulling finished from another program...
-    if lock_path.exists():
+    logger = get_logger()
+    logger.info(
+        "Another instance of this program is already running. "
+        "Wait for the asset pulling finished from another program..."
+    )
+    if not _is_asset_version_file_ready():
         import time
-        while lock_path.exists():
-            # Assets not pulled yet. Waiting for 10 seconds...
+        while not _is_asset_version_file_ready():
+            logger.info("Assets not pulled yet. Waiting for 10 seconds...")
             time.sleep(10)
-    # Assets are now available.
+    logger.info("Assets are now available.")
 
 
 def pull_asset(update):
@@ -53,7 +61,7 @@ def pull_asset(update):
     lock_path = ROOT_DIR / 'assets.lock'
     temp_assets_folder = ROOT_DIR / "temp_assets"
 
-    if os.path.exists(assets_folder) and not update:
+    if _is_asset_version_file_ready() and not update:
         logger.warning(
             "Fail to update assets. Assets already exists, version: {}. Expected version: {}. "
             "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
@@ -76,6 +84,8 @@ def pull_asset(update):
             if os.path.exists(assets_folder):
                 logger.info("Remove existing assets, version: {}..".format(asset_version()))
                 shutil.rmtree(assets_folder, ignore_errors=True)
+            if os.path.exists(temp_assets_folder):
+                shutil.rmtree(temp_assets_folder, ignore_errors=True)
 
             # Extract to temporary directory
             logger.info("Extracting assets.")
@@ -100,8 +110,10 @@ def pull_asset(update):
                     os.remove(path)
 
     # Final check
-    if not os.path.exists(assets_folder):
+    if not assets_folder.exists():
         raise ValueError("Assets folder does not exist! Files: {}".format(os.listdir(ROOT_DIR)))
+    if not _is_asset_version_file_ready():
+        raise ValueError("Assets version misses! Files: {}".format(os.listdir(assets_folder)))
 
     logger.info("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
 
