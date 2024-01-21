@@ -60,12 +60,7 @@ def pull_asset(update):
             logger.info("Pull assets from {} to {}".format(ASSET_URL, zip_path))
             extra_arg = [MyProgressBar()] if logger.level == logging.INFO else []
             urllib.request.urlretrieve(ASSET_URL, zip_path, *extra_arg)
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(ROOT_DIR)
-            logger.info(
-                "Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION)
-            )
-
+            shutil.unpack_archive(filename=zip_path, extract_dir=ROOT_DIR)
     except Timeout:
         logger.info(
             "Another instance of this program is already running. "
@@ -83,6 +78,12 @@ def pull_asset(update):
             os.remove(zip_path)
         if os.path.exists(zip_lock):
             os.remove(zip_lock)
+
+    # Final check
+    if not os.path.exists(assets_folder):
+        raise ValueError("Assets folder does not exist! Files: {}".format(os.listdir(ROOT_DIR)))
+
+    logger.info("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
 
 
 if __name__ == '__main__':

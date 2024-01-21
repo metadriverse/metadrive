@@ -9,7 +9,8 @@ def asset_version():
 
     if not os.path.isfile(asset_version):
         raise ValueError(
-            "Asset version file version.txt does not exist! Existing files: {}".format(os.listdir(asset_path)))
+            "Asset version file version.txt does not exist! Existing files: {}".format(os.listdir(asset_path))
+        )
 
     with open(asset_version, "r") as file:
         lines = file.readlines()

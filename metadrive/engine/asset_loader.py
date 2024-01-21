@@ -101,8 +101,9 @@ class AssetLoader:
         )
 
         # TODO: DEBUG REMOVE THIS:
-        print("asset_version_match: ", asset_version_match)
-        print("grass_texture_exists: ", grass_texture_exists)
+        # print("asset_version_match: ", asset_version_match)
+        # print("grass_texture_exists: ", grass_texture_exists)
+        assert grass_texture_exists, os.listdir(AssetLoader.asset_path)
 
         return (not asset_version_match) or (not grass_texture_exists)
 
