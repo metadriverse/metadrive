@@ -100,6 +100,10 @@ class AssetLoader:
             AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg", unix_style=False)
         )
 
+        # TODO: DEBUG REMOVE THIS:
+        print("asset_version_match: ", asset_version_match)
+        print("grass_texture_exists: ", grass_texture_exists)
+
         return (not asset_version_match) or (not grass_texture_exists)
 
 
