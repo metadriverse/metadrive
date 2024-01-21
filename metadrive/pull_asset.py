@@ -12,7 +12,7 @@ from filelock import Timeout
 
 from metadrive.constants import VERSION
 from metadrive.engine.logger import get_logger
-from metadrive.version import asset_version, ASSET_LOCK
+from metadrive.version import asset_version
 
 ROOT_DIR = Path(__file__).parent
 ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
@@ -34,58 +34,70 @@ class MyProgressBar():
             self.pbar.finish()
 
 
+def wait_asset_lock():
+    lock_path = ROOT_DIR / 'assets.lock'
+    # Another instance of this program is already running. Wait for the asset pulling finished from another program...
+    if lock_path.exists():
+        import time
+        while lock_path.exists():
+            # Assets not pulled yet. Waiting for 10 seconds...
+            time.sleep(10)
+    # Assets are now available.
+
+
 def pull_asset(update):
     logger = get_logger()
 
     assets_folder = ROOT_DIR / "assets"
     zip_path = ROOT_DIR / 'assets.zip'
-    lock_path = ROOT_DIR / ASSET_LOCK
+    lock_path = ROOT_DIR / 'assets.lock'
+    temp_assets_folder = ROOT_DIR / "temp_assets"
 
-    should_remove_existing_assets = False
-    if os.path.exists(assets_folder):
-        if not update:
-            logger.warning(
-                "Fail to update assets. Assets already exists, version: {}. Expected version: {}. "
-                "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
-                    asset_version(), VERSION
-                )
+    if os.path.exists(assets_folder) and not update:
+        logger.warning(
+            "Fail to update assets. Assets already exists, version: {}. Expected version: {}. "
+            "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
+                asset_version(), VERSION
             )
-            return
-        else:
-            should_remove_existing_assets = True
+        )
+        return
 
     lock = filelock.FileLock(lock_path, timeout=1)
 
-    # Extract the zip file to the desired location
+    # Download the file
     try:
-        with lock.acquire():
-            # Fetch the zip file
+        with lock:
+            # Download assets
             logger.info("Pull assets from {} to {}".format(ASSET_URL, zip_path))
             extra_arg = [MyProgressBar()] if logger.level == logging.INFO else []
             urllib.request.urlretrieve(ASSET_URL, zip_path, *extra_arg)
 
-            if should_remove_existing_assets:
+            # Prepare for extraction
+            if os.path.exists(assets_folder):
                 logger.info("Remove existing assets, version: {}..".format(asset_version()))
                 shutil.rmtree(assets_folder, ignore_errors=True)
 
-            shutil.unpack_archive(filename=zip_path, extract_dir=ROOT_DIR)
+            # Extract to temporary directory
+            logger.info("Extracting assets.")
+            shutil.unpack_archive(filename=zip_path, extract_dir=temp_assets_folder)
+            shutil.move(str(temp_assets_folder), str(assets_folder))
+
     except Timeout:  # Timeout will be raised if the lock can not be acquired in 1s.
         logger.info(
             "Another instance of this program is already running. "
             "Wait for the asset pulling finished from another program..."
         )
-        while os.path.exists(lock_path):
-            logger.info("Assets not pulled yet. Waiting for 10 seconds...")
-            time.sleep(10)
-
+        wait_asset_lock()
         logger.info("Assets are now available.")
 
     finally:
-        # Remove the downloaded zip file (optional)
-        if os.path.exists(zip_path):
-            os.remove(zip_path)
-        if os.path.exists(lock_path):
-            os.remove(lock_path)
+        # Cleanup
+        for path in [zip_path, lock_path, temp_assets_folder]:
+            if os.path.exists(path):
+                if os.path.isdir(path):
+                    shutil.rmtree(path, ignore_errors=True)
+                else:
+                    os.remove(path)
 
     # Final check
     if not os.path.exists(assets_folder):
