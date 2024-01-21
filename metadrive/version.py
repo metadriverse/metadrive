@@ -1,14 +1,13 @@
 from pathlib import Path
 
 ASSET_LOCK = 'assets.lock'
-ROOT_DIR = Path(__file__).parent
-
 VERSION = "0.4.2.1"
 
 
 def asset_version():
-    lock_path = ROOT_DIR / ASSET_LOCK
-    asset_path = ROOT_DIR / "assets"
+    root_dir = Path(__file__).parent
+    lock_path = root_dir / ASSET_LOCK
+    asset_path = root_dir / "assets"
     asset_version_path = asset_path / "version.txt"
 
     # Another instance of this program is already running. Wait for the asset pulling finished from another program...
