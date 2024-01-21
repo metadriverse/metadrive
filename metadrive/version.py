@@ -12,4 +12,7 @@ def asset_version():
         raise ValueError("Asset version file does not exist! Files: {}".format(os.listdir(asset_path)))
     with open(asset_version_path, "r") as file:
         lines = file.readlines()
-    return lines[0]
+    ret = lines[0]
+    ret = ret.replace('\n', '')
+    ret = ret.replace(' ', '')
+    return ret

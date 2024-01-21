@@ -82,7 +82,7 @@ def pull_asset(update):
 
             # Prepare for extraction
             if os.path.exists(assets_folder):
-                logger.info("Remove existing assets, version: {}..".format(asset_version()))
+                logger.info("Remove existing assets. Files: {}".format(os.listdir(assets_folder)))
                 shutil.rmtree(assets_folder, ignore_errors=True)
             if os.path.exists(temp_assets_folder):
                 shutil.rmtree(temp_assets_folder, ignore_errors=True)
@@ -90,7 +90,7 @@ def pull_asset(update):
             # Extract to temporary directory
             logger.info("Extracting assets.")
             shutil.unpack_archive(filename=zip_path, extract_dir=temp_assets_folder)
-            shutil.move(str(temp_assets_folder), str(assets_folder))
+            shutil.move(str(temp_assets_folder / 'assets'), str(ROOT_DIR))
 
     except Timeout:  # Timeout will be raised if the lock can not be acquired in 1s.
         logger.info(
