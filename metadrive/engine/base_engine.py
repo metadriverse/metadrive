@@ -752,7 +752,6 @@ class BaseEngine(EngineCore, Randomizable):
     @staticmethod
     def try_pull_asset():
         from metadrive.engine.asset_loader import AssetLoader
-        wait_asset_lock()
         msg = "Assets folder doesn't exist. Begin to download assets..."
         if not os.path.exists(AssetLoader.asset_path):
             AssetLoader.logger.warning(msg)
