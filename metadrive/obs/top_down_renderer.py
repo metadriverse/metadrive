@@ -22,12 +22,12 @@ color_white = (255, 255, 255)
 
 
 def draw_top_down_map_native(
-        map,
-        semantic_map=True,
-        return_surface=False,
-        film_size=(2000, 2000),
-        scaling=None,
-        semantic_broken_line=True
+    map,
+    semantic_map=True,
+    return_surface=False,
+    film_size=(2000, 2000),
+    scaling=None,
+    semantic_broken_line=True
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     """
     Draw the top_down map on a pygame surface
@@ -104,7 +104,7 @@ def draw_top_down_map_native(
 
 
 def draw_top_down_trajectory(
-        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -163,21 +163,21 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-            self,
-            film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
-            scaling=5,  # None for auto-scale
-            screen_size=(800, 800),
-            num_stack=15,
-            history_smooth=0,
-            show_agent_name=False,
-            camera_position=None,
-            target_vehicle_heading_up=False,
-            draw_target_vehicle_trajectory=False,
-            semantic_map=False,
-            semantic_broken_line=True,
-            draw_contour=True,
-            window=True,
-            screen_record=False,
+        self,
+        film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
+        scaling=5,  # None for auto-scale
+        screen_size=(800, 800),
+        num_stack=15,
+        history_smooth=0,
+        show_agent_name=False,
+        camera_position=None,
+        target_vehicle_heading_up=False,
+        draw_target_vehicle_trajectory=False,
+        semantic_map=False,
+        semantic_broken_line=True,
+        draw_contour=True,
+        window=True,
+        screen_record=False,
     ):
         """
         Launch a top-down renderer for current episode. Usually, it is launched by env.render(mode="topdown") and will
