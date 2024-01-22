@@ -1,4 +1,5 @@
 import copy
+from metadrive.engine.logger import get_logger
 
 from metadrive.utils import generate_gif
 import math
@@ -21,12 +22,12 @@ color_white = (255, 255, 255)
 
 
 def draw_top_down_map_native(
-    map,
-    semantic_map=True,
-    return_surface=False,
-    film_size=(2000, 2000),
-    scaling=None,
-    semantic_broken_line=True
+        map,
+        semantic_map=True,
+        return_surface=False,
+        film_size=(2000, 2000),
+        scaling=None,
+        semantic_broken_line=True
 ) -> Optional[Union[np.ndarray, pygame.Surface]]:
     """
     Draw the top_down map on a pygame surface
@@ -103,7 +104,7 @@ def draw_top_down_map_native(
 
 
 def draw_top_down_trajectory(
-    surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
+        surface: WorldSurface, episode_data: dict, entry_differ_color=False, exit_differ_color=False, color_list=None
 ):
     if entry_differ_color or exit_differ_color:
         assert color_list is not None
@@ -162,21 +163,21 @@ def draw_top_down_trajectory(
 
 class TopDownRenderer:
     def __init__(
-        self,
-        film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
-        scaling=5,  # None for auto-scale
-        screen_size=(1000, 1000),
-        num_stack=15,
-        history_smooth=0,
-        show_agent_name=False,
-        camera_position=None,
-        target_vehicle_heading_up=False,
-        draw_target_vehicle_trajectory=False,
-        semantic_map=False,
-        semantic_broken_line=True,
-        draw_contour=True,
-        window=True,
-        screen_record=False,
+            self,
+            film_size=(2000, 2000),  # draw map in size = film_size/scaling. By default, it is set to 400m
+            scaling=5,  # None for auto-scale
+            screen_size=(800, 800),
+            num_stack=15,
+            history_smooth=0,
+            show_agent_name=False,
+            camera_position=None,
+            target_vehicle_heading_up=False,
+            draw_target_vehicle_trajectory=False,
+            semantic_map=False,
+            semantic_broken_line=True,
+            draw_contour=True,
+            window=True,
+            screen_record=False,
     ):
         """
         Launch a top-down renderer for current episode. Usually, it is launched by env.render(mode="topdown") and will
@@ -191,7 +192,7 @@ class TopDownRenderer:
 
             screen_size: The size of the window popped up. It shows a region with width and length = screen_size/scaling
 
-            num_stack: How many history steps to keep. History trajectory will show in faded color
+            num_stack: How many history steps to keep. History trajectory will show in faded color. It should be > 1
 
             history_smooth: Smoothing the trajectory by drawing less history positions. This value determines the sample
             rate. By default, this value is 0, meaning positions in previous num_stack steps will be shown.
@@ -221,6 +222,11 @@ class TopDownRenderer:
         # LQY: do not delete the above line !!!!!
 
         # Setup some useful flags
+        self.logger = get_logger()
+        if num_stack < 1:
+            self.logger.warning("num_stack should be greater than 0. Current value: {}. Set to 1".format(num_stack))
+            num_stack = 1
+
         self.position = camera_position
         self.target_vehicle_heading_up = target_vehicle_heading_up
         self.show_agent_name = show_agent_name
