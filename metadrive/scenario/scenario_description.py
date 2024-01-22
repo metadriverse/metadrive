@@ -47,7 +47,7 @@ Example:
         "tracks": {
             "vehicle1": {
 
-                # The type string in metadrive.scenario.MetaDriveType
+                # The type string in metadrive.type.MetaDriveType
                 "type": "VEHICLE",
 
                 # The state dict. All values must have T elements.
@@ -81,7 +81,7 @@ Example:
         "dynamic_map_states": {
             "trafficlight1": {
 
-                # The type string in metadrive.scenario.MetaDriveType
+                # The type string in metadrive.type.MetaDriveType
                 "type": "TRAFFIC_LIGHT",
 
                 # The state dict. All values must have T elements.
