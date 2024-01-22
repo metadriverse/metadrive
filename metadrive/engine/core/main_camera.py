@@ -412,7 +412,10 @@ class MainCamera(BaseSensor):
     def _move_to_pointer(self):
         if self.engine.task_manager.hasTaskNamed(self.TOP_DOWN_TASK_NAME):
             # Get to and from pos in camera coordinates
-            pMouse = self.engine.mouseWatcherNode.getMouse()
+            try:
+                pMouse = self.engine.mouseWatcherNode.getMouse()
+            except:
+                return
             pFrom = Point3()
             pTo = Point3()
             self.engine.cam.node().getLens().extrude(pMouse, pFrom, pTo)
