@@ -123,9 +123,11 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 7. Upload to production channel 
     twine upload dist/*
 
-8. Upload the generated .whl file to release files
+8. Upload the generated .whl files and the assets.zip to the Github release
 
-9. merge this branch into main
+9. Publish the release
+
+10. merge this branch into main
 
 !!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
 
