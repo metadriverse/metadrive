@@ -21,7 +21,7 @@ if __name__ == "__main__":
             # "need_lane_localization": False,
             # "image_observation": True,
             "show_logo": False,
-            "no_traffic": True,
+            "no_traffic": False,
             "store_data": False,
             "sequential_seed": True,
             # "pstats": True,
