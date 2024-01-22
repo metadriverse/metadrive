@@ -174,7 +174,7 @@ BASE_DEFAULT_CONFIG = dict(
     ),
 
     # ===== Sensors =====
-    sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar,), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
     # ===== Engine Core config =====
     # If true pop a window to render
@@ -348,7 +348,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"] and config["show_interface"] and "main_camera" in config["sensors"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -457,6 +457,12 @@ class BaseEnv(gym.Env):
         self.engine.step(self.config["decision_repeat"])
         # update states, if restore from episode data, position and heading will be force set in update_state() function
         scene_manager_after_step_infos = self.engine.after_step()
+
+        #  Do rendering
+        self.engine.task_manager.step()
+        if self.engine.on_screen_message is not None:
+            self.engine.on_screen_message.render()
+
         # Note that we use shallow update for info dict in this function! This will accelerate system.
         return merge_dicts(
             scene_manager_after_step_infos, scene_manager_before_step_infos, allow_new_keys=True, without_copy=True
@@ -773,19 +779,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
