@@ -305,8 +305,8 @@ class BaseAgentManager(BaseManager):
         return step_infos
 
     def after_step(self, *args, **kwargs):
-        step_infos = self.for_each_active_agents(lambda v: v.after_step())
-        step_infos = self.try_actuate_agent(step_infos, stage="after_step")
+        step_infos = self.try_actuate_agent({}, stage="after_step")
+        step_infos.update(self.for_each_active_agents(lambda v: v.after_step()))
         return step_infos
 
     def _translate(self, d):
