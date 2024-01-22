@@ -12,7 +12,7 @@ from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.engine.logger import get_logger, reset_logger
 
-from metadrive.pull_asset import pull_asset
+from metadrive.pull_asset import pull_asset, wait_asset_lock
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
 from metadrive.version import VERSION, asset_version
@@ -752,6 +752,7 @@ class BaseEngine(EngineCore, Randomizable):
     @staticmethod
     def try_pull_asset():
         from metadrive.engine.asset_loader import AssetLoader
+        wait_asset_lock()
         msg = "Assets folder doesn't exist. Begin to download assets..."
         if not os.path.exists(AssetLoader.asset_path):
             AssetLoader.logger.warning(msg)

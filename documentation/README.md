@@ -4,7 +4,7 @@ documentation: [https://metadrive-simulator.readthedocs.io/](https://metadrive-s
 To build documents locally, please run the following codes:
 
 ```bash
-pip install sphinx sphinx_rtd_theme mst-nb
+pip install sphinx sphinx_rtd_theme myst-nb
 pip install sphinx-copybutton
 cd metadrive/documentation
 rm -rf build/ && make html
@@ -19,7 +19,7 @@ This tool can only check some external links. For checking cross-reference, usin
 
 ### How to reference a section of an `.ipynb` file in an RST file?
 
-Supposing you want to reference a section called TopDwnObservation in obs_action.ipynb, use
+Supposing you want to reference a section called `TopDwnObservation` in `obs_action.ipynb`, use
 
 ```
 `TopDownObservation <obs_action.html#topdownobservation>`_

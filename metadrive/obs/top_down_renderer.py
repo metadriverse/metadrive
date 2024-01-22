@@ -32,7 +32,6 @@ def draw_top_down_map_native(
     Draw the top_down map on a pygame surface
     Args:
         map: MetaDrive.BaseMap instance
-        resolution: The resolution of the returned image. It will resize the image from film_size to resolution
         semantic_map: return semantic map
         return_surface: Return the pygame.Surface in fime_size instead of cv2.image
         film_size: The size of the film to draw the map

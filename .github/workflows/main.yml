@@ -74,9 +74,6 @@ jobs:
               body: `${{env.ROBOTMSG}}`
             })
 
-
-
-
   test_functionality:
     runs-on: ubuntu-latest
     steps:

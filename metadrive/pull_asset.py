@@ -1,17 +1,20 @@
 import argparse
 import logging
-import time
 import os
-import progressbar
 import shutil
+import time
 import urllib.request
-import zipfile
+from pathlib import Path
+
 import filelock
+import progressbar
 from filelock import Timeout
+
 from metadrive.constants import VERSION
 from metadrive.engine.logger import get_logger
 from metadrive.version import asset_version
 
+ROOT_DIR = Path(__file__).parent
 ASSET_URL = "https://github.com/metadriverse/metadrive/releases/download/MetaDrive-{}/assets.zip".format(VERSION)
 
 
@@ -31,56 +34,88 @@ class MyProgressBar():
             self.pbar.finish()
 
 
+def _is_asset_version_file_ready():
+    asset_version_path = ROOT_DIR / 'assets' / 'version.txt'
+    return asset_version_path.exists()
+
+
+def wait_asset_lock():
+    logger = get_logger()
+    logger.info(
+        "Another instance of this program is already running. "
+        "Wait for the asset pulling finished from another program..."
+    )
+    if not _is_asset_version_file_ready():
+        import time
+        while not _is_asset_version_file_ready():
+            logger.info("Assets not pulled yet. Waiting for 10 seconds...")
+            time.sleep(10)
+    logger.info("Assets are now available.")
+
+
 def pull_asset(update):
     logger = get_logger()
-    TARGET_DIR = os.path.join(os.path.dirname(__file__))
-    if os.path.exists(os.path.join(TARGET_DIR, "assets")):
-        if not update:
-            logger.warning(
-                "Fail to pull. Assets already exists, version: {}. Expected version: {}. "
-                "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
-                    asset_version(), VERSION
-                )
-            )
-            return
-        else:
-            logger.info("Remove existing assets, version: {}..".format(asset_version()))
-            shutil.rmtree(os.path.join(TARGET_DIR, "assets"))
 
-    zip_path = os.path.join(TARGET_DIR, 'assets.zip')
-    zip_lock = os.path.join(TARGET_DIR, 'assets.zip.lock')
-    # filelock
-    lock = filelock.FileLock(zip_lock, timeout=1)
-    # Extract the zip file to the desired location
+    assets_folder = ROOT_DIR / "assets"
+    zip_path = ROOT_DIR / 'assets.zip'
+    lock_path = ROOT_DIR / 'assets.lock'
+    temp_assets_folder = ROOT_DIR / "temp_assets"
+
+    if _is_asset_version_file_ready() and not update:
+        logger.warning(
+            "Fail to update assets. Assets already exists, version: {}. Expected version: {}. "
+            "To overwrite existing assets and update, add flag '--update' and rerun this script".format(
+                asset_version(), VERSION
+            )
+        )
+        return
+
+    lock = filelock.FileLock(lock_path, timeout=1)
+
+    # Download the file
     try:
-        with lock.acquire():
-            # Fetch the zip file
+        with lock:
+            # Download assets
             logger.info("Pull assets from {} to {}".format(ASSET_URL, zip_path))
             extra_arg = [MyProgressBar()] if logger.level == logging.INFO else []
             urllib.request.urlretrieve(ASSET_URL, zip_path, *extra_arg)
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(TARGET_DIR)
-            logger.info(
-                "Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION)
-            )
 
-    except Timeout:
+            # Prepare for extraction
+            if os.path.exists(assets_folder):
+                logger.info("Remove existing assets. Files: {}".format(os.listdir(assets_folder)))
+                shutil.rmtree(assets_folder, ignore_errors=True)
+            if os.path.exists(temp_assets_folder):
+                shutil.rmtree(temp_assets_folder, ignore_errors=True)
+
+            # Extract to temporary directory
+            logger.info("Extracting assets.")
+            shutil.unpack_archive(filename=zip_path, extract_dir=temp_assets_folder)
+            shutil.move(str(temp_assets_folder / 'assets'), str(ROOT_DIR))
+
+    except Timeout:  # Timeout will be raised if the lock can not be acquired in 1s.
         logger.info(
             "Another instance of this program is already running. "
             "Wait for the asset pulling finished from another program..."
         )
-        while os.path.exists(zip_lock):
-            logger.info("Assets not pulled yet. Waiting for 10 seconds...")
-            time.sleep(10)
-
+        wait_asset_lock()
         logger.info("Assets are now available.")
 
     finally:
-        # Remove the downloaded zip file (optional)
-        if os.path.exists(zip_path):
-            os.remove(zip_path)
-        if os.path.exists(zip_lock):
-            os.remove(zip_lock)
+        # Cleanup
+        for path in [zip_path, lock_path, temp_assets_folder]:
+            if os.path.exists(path):
+                if os.path.isdir(path):
+                    shutil.rmtree(path, ignore_errors=True)
+                else:
+                    os.remove(path)
+
+    # Final check
+    if not assets_folder.exists():
+        raise ValueError("Assets folder does not exist! Files: {}".format(os.listdir(ROOT_DIR)))
+    if not _is_asset_version_file_ready():
+        raise ValueError("Assets version misses! Files: {}".format(os.listdir(assets_folder)))
+
+    logger.info("Successfully download assets, version: {}. MetaDrive version: {}".format(asset_version(), VERSION))
 
 
 if __name__ == '__main__':
