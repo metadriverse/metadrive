@@ -28,7 +28,7 @@ if __name__ == "__main__":
         random_lane_num=True,
         on_continuous_line_done=False,
         out_of_route_done=True,
-        vehicle_config=dict(show_lidar=True, show_navi_mark=False),
+        vehicle_config=dict(show_lidar=True, show_navi_mark=False, show_line_to_navi_mark=False),
         # debug=True,
         # debug_static_world=True,
         map=4,  # seven block
@@ -45,8 +45,6 @@ if __name__ == "__main__":
                 interface_panel=["rgb_camera", "dashboard"]
             )
         )
-    else:
-        config["vehicle_config"]["show_lidar"] = True
     env = MetaDriveEnv(config)
     try:
         o, _ = env.reset(seed=21)
