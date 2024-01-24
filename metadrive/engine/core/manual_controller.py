@@ -107,17 +107,9 @@ class KeyboardController(Controller):
         elif up_key_pressed:
             self.throttle_brake = max(self.throttle_brake, 0.)
             self.throttle_brake += self.THROTTLE_INCREMENT
-            # if self.throttle_brake >= 0.0:  # increment throttle a little.
-            #     self.throttle_brake += self.THROTTLE_INCREMENT
-            # else:
-            #     self.throttle_brake += self.THROTTLE_INCREMENT_WHEN_BRAKE  # increment throttle a little more.
         elif down_key_pressed:
             self.throttle_brake = min(self.throttle_brake, 0.)
             self.throttle_brake -= self.BRAKE_INCREMENT
-            # if self.throttle_brake <= 0.0:
-            #     self.throttle_brake -= self.BRAKE_INCREMENT
-            # else:
-            #     self.throttle_brake -= self.BRAKE_INCREMENT_WHEN_THROTTLE
 
         rand = self.np_random.rand() / 10000
         self.steering += rand
