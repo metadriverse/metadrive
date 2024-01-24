@@ -198,17 +198,23 @@ class SteeringWheelController(Controller):
 class XboxController(Controller):
     """Control class for Xbox wireless controller
     Accept both wired and wireless connection
-    Max steering, throttle, and break are bound by _discount
+    Max steering, throttle, and break are bound by _discount.
+
+    See https://www.pygame.org/docs/ref/joystick.html#xbox-360-controller-pygame-2-x for key mapping.
     """
     STEERING_DISCOUNT = 0.5
-    THROTTLE_DISCOUNT = 0.5
+    THROTTLE_DISCOUNT = 0.4
     BREAK_DISCOUNT = 0.5
-    BUTTON_X_MAP = 2
-    BUTTON_Y_MAP = 3
+
     BUTTON_A_MAP = 0
     BUTTON_B_MAP = 1
-    TRIGGER_RIGHT_MAP = 5
-    TRIGGER_LEFT_MAP = 2
+    BUTTON_X_MAP = 2
+    BUTTON_Y_MAP = 3
+
+    STEERING_AXIS = 0  # Left stick left-right direction.
+    THROTTLE_AXIS = 3  # Right stick up-down direction.
+    TAKEOVER_AXIS_2 = 4  # Right trigger
+    TAKEOVER_AXIS_1 = 5  # Left trigger
 
     def __init__(self):
         try:
@@ -240,19 +246,25 @@ class XboxController(Controller):
 
     def process_input(self, vehicle):
         pygame.event.pump()
-        steering = -self.joystick.get_axis(0)
+        steering = -self.joystick.get_axis(self.STEERING_AXIS)
         if abs(steering) < 0.05:
             steering = 0
         elif steering < 0:
             steering = -(math.pow(2, abs(steering) * self.STEERING_DISCOUNT) - 1)
         else:
             steering = math.pow(2, abs(steering) * self.STEERING_DISCOUNT) - 1
-        raw_throttle = self.joystick.get_axis(self.TRIGGER_RIGHT_MAP)
-        raw_brake = self.joystick.get_axis(self.TRIGGER_LEFT_MAP)
-        # 1+raw_throttle will map throttle between 0,2 need *0.5 to bound it between 0,1
-        throttle = (1 + raw_throttle) * 0.5 * self.THROTTLE_DISCOUNT
-        brake = (1 + raw_brake) * 0.5 * self.BREAK_DISCOUNT
-        throttle_brake = throttle - brake
+
+        raw_throttle_brake = -self.joystick.get_axis(self.THROTTLE_AXIS)
+        if abs(raw_throttle_brake) < 0.05:
+            throttle_brake = 0
+        elif raw_throttle_brake < 0:
+            throttle_brake = -(math.pow(2, abs(raw_throttle_brake) * self.BREAK_DISCOUNT) - 1)
+        else:
+            throttle_brake = math.pow(2, abs(raw_throttle_brake) * self.THROTTLE_DISCOUNT) - 1
+
+        self.takeover = (
+            self.joystick.get_axis(self.TAKEOVER_AXIS_2) > -0.9 or self.joystick.get_axis(self.TAKEOVER_AXIS_1) > -0.9
+        )
 
         self.button_x = True if self.joystick.get_button(self.BUTTON_X_MAP) else False
         self.button_y = True if self.joystick.get_button(self.BUTTON_Y_MAP) else False

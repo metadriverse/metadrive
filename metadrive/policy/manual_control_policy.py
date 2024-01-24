@@ -6,6 +6,8 @@ from metadrive.policy.env_input_policy import EnvInputPolicy
 
 logger = get_logger()
 
+JOYSTICK_DEADZONE = 0.025
+
 
 def get_controller(controller_name, pygame_control):
     """Get the controller object.
@@ -20,9 +22,10 @@ def get_controller(controller_name, pygame_control):
     controller_name = str(controller_name).lower()
     if controller_name == "keyboard":
         return KeyboardController(pygame_control=pygame_control)
-    elif controller_name in ["xboxController", "xboxcontroller", "xbox", "steering_wheel"]:
+    elif controller_name in ["xboxController", "xboxcontroller", "xbox", "gamepad", "joystick", "steering_wheel",
+                             "wheel"]:
         try:
-            if controller_name == "steering_wheel":
+            if controller_name in ["steering_wheel", "wheel"]:
                 return SteeringWheelController()
             else:
                 return XboxController()
@@ -97,7 +100,6 @@ class TakeoverPolicy(EnvInputPolicy):
     Takeover policy shares the control between RL agent (whose action is input via env.step) and
     external control device (whose action is input via controller).
     """
-
     def __init__(self, obj, seed):
         super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()
@@ -115,12 +117,14 @@ class TakeoverPolicy(EnvInputPolicy):
                 # if expert_action[0]*agent_action[0]< 0 or expert_action[1]*agent_action[1] < 0:
                 self.takeover = True
                 return expert_action
-            elif isinstance(self.controller, KeyboardController) and (
-                    self.controller.takeover or abs(sum(expert_action)) > 1e-2
-            ):
+            elif isinstance(self.controller, KeyboardController) and (self.controller.takeover
+                                                                      or abs(sum(expert_action)) > 0.01):
                 self.takeover = True
                 return expert_action
-            elif isinstance(self.controller, XboxController) and (self.controller.button_x or self.controller.button_y):
+            elif isinstance(self.controller, XboxController) and (self.controller.takeover or self.controller.button_a
+                                                                  or self.controller.button_b or
+                                                                  self.controller.button_x or self.controller.button_y
+                                                                  or abs(sum(expert_action)) > JOYSTICK_DEADZONE):
                 self.takeover = True
                 return expert_action
         self.takeover = False
@@ -133,7 +137,6 @@ class TakeoverPolicyWithoutBrake(TakeoverPolicy):
     external control device (whose action is input via controller).
     Note that this policy will discard brake in human's action.
     """
-
     def act(self, agent_id):
         action = super(TakeoverPolicyWithoutBrake, self).act(agent_id=agent_id)
         if self.takeover and action[1] < 0.0:
