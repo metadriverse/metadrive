@@ -3,7 +3,7 @@ from metadrive.engine.logger import get_logger
 from metadrive.manager.base_manager import BaseAgentManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
-from metadrive.policy.manual_control_policy import ManualControlPolicy
+from metadrive.policy.manual_control_policy import ManualControlPolicy, TakeoverPolicy
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 
 logger = get_logger()
@@ -53,12 +53,18 @@ class VehicleAgentManager(BaseAgentManager):
 
     @property
     def agent_policy(self):
-        """
-        Return the agent policy
-        Returns: Agent Poicy class
+        """Get the agent policy class
+
         Make sure you access the global config via get_global_config() instead of self.engine.global_config
+
+        Returns:
+            Agent Policy class
         """
         from metadrive.engine.engine_utils import get_global_config
+        # Takeover policy shares the control between RL agent (whose action is input via env.step)
+        # and external control device (whose action is input via controller).
+        if get_global_config()["agent_policy"] in [TakeoverPolicy]:
+            return get_global_config()["agent_policy"]
         if get_global_config()["manual_control"]:
             if get_global_config().get("use_AI_protector", False):
                 policy = AIProtectPolicy
