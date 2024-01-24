@@ -151,7 +151,6 @@ class TrafficBarrier(TrafficObject):
                 TrafficBarrier.MODEL = model
             TrafficBarrier.MODEL.instanceTo(self.origin)
 
-
     @property
     def LENGTH(self):
         return 2.0
