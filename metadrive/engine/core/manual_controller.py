@@ -48,8 +48,10 @@ class KeyboardController(Controller):
             self.inputs.watchWithModifiers('reverse', 's')
             self.inputs.watchWithModifiers('turnLeft', 'a')
             self.inputs.watchWithModifiers('turnRight', 'd')
+            self.inputs.watchWithModifiers('takeover', 'space')
         self.steering = 0.
         self.throttle_brake = 0.
+        self.takeover = False
         self.np_random = np.random.RandomState(None)
 
     def process_input(self, vehicle):
@@ -63,12 +65,17 @@ class KeyboardController(Controller):
                 up_key_pressed = True
             if self.inputs.isSet('reverse'):
                 down_key_pressed = True
+            if self.inputs.isSet('takeover'):
+                self.takeover = True
+            else:
+                self.takeover = False
         else:
             key_press = pygame.key.get_pressed()
             left_key_pressed = key_press[pygame.K_a]
             right_key_pressed = key_press[pygame.K_d]
             up_key_pressed = key_press[pygame.K_w]
             down_key_pressed = key_press[pygame.K_s]
+            # TODO: We haven't implement takeover event when using Pygame renderer.
 
         # If no left or right is pressed, steering decays to the center.
         if not (left_key_pressed or right_key_pressed):

@@ -114,7 +114,8 @@ class TakeoverPolicy(EnvInputPolicy):
                 # if expert_action[0]*agent_action[0]< 0 or expert_action[1]*agent_action[1] < 0:
                 self.takeover = True
                 return expert_action
-            elif isinstance(self.controller, KeyboardController) and abs(sum(expert_action)) > 1e-2:
+            # elif isinstance(self.controller, KeyboardController) and abs(sum(expert_action)) > 1e-2:
+            elif isinstance(self.controller, KeyboardController) and self.controller.takeover:
                 self.takeover = True
                 return expert_action
             elif isinstance(self.controller, XboxController) and (self.controller.button_x or self.controller.button_y):
