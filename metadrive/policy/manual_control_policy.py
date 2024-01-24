@@ -97,6 +97,7 @@ class TakeoverPolicy(EnvInputPolicy):
     Takeover policy shares the control between RL agent (whose action is input via env.step) and
     external control device (whose action is input via controller).
     """
+
     def __init__(self, obj, seed):
         super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()
@@ -124,3 +125,17 @@ class TakeoverPolicy(EnvInputPolicy):
                 return expert_action
         self.takeover = False
         return agent_action
+
+
+class TakeoverPolicyWithoutBrake(TakeoverPolicy):
+    """
+    Takeover policy shares the control between RL agent (whose action is input via env.step) and
+    external control device (whose action is input via controller).
+    Note that this policy will discard brake in human's action.
+    """
+
+    def act(self, agent_id):
+        action = super(TakeoverPolicyWithoutBrake, self).act(agent_id=agent_id)
+        if self.takeover and action[1] < 0.0:
+            action[1] = 0.0
+        return action
