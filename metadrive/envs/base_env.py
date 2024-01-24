@@ -711,12 +711,12 @@ class BaseEnv(gym.Env):
         Return all active vehicles
         :return: Dict[agent_id:vehicle]
         """
-        self.logger.warning("env.agents will be deprecated soon. Use env.agents instead", extra={"log_once": True})
+        self.logger.warning("env.vehicles will be deprecated soon. Use env.agents instead", extra={"log_once": True})
         return self.agents
 
     @property
     def vehicle(self):
-        self.logger.warning("env.agent will be deprecated soon. Use env.agent instead", extra={"log_once": True})
+        self.logger.warning("env.vehicle will be deprecated soon. Use env.agent instead", extra={"log_once": True})
         return self.agent
 
     @property
