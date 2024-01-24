@@ -7,7 +7,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "manual_control": True,
-            "num_scenarios": 100,
+            "num_scenarios": 1,
             "show_coordinates": True,
             "map": "SSSS",
             "accident_prob": 1.0,

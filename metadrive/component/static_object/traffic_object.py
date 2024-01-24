@@ -23,6 +23,7 @@ class TrafficObject(BaseStaticObject):
     CLASS_NAME = MetaDriveType.TRAFFIC_OBJECT
     COLLISION_MASK = CollisionGroup.TrafficObject
     SEMANTIC_LABEL = Semantics.FENCE.label
+    MODEL = None
 
     COST_ONCE = True  # cost will give at the first time
 
@@ -57,11 +58,13 @@ class TrafficCone(TrafficObject):
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.set_static(static)
         if self.render:
-            model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
-            # model.node().setTag("semantic", "vehicle")
-            model.setScale(0.02, 0.02, 0.025)
-            model.setPos(0, 0, -self.HEIGHT / 2)
-            model.reparentTo(self.origin)
+            if TrafficCone.MODEL is None:
+                model = self.loader.loadModel(AssetLoader.file_path("models", "traffic_cone", "scene.gltf"))
+                # model.node().setTag("semantic", "vehicle")
+                model.setScale(0.02, 0.02, 0.025)
+                model.setPos(0, 0, -self.HEIGHT / 2)
+                TrafficCone.MODEL = model
+            TrafficCone.MODEL.instanceTo(self.origin)
 
     @property
     def top_down_length(self):
@@ -100,11 +103,13 @@ class TrafficWarning(TrafficObject):
         self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
         self.set_static(static)
         if self.render:
-            model = self.loader.loadModel(AssetLoader.file_path("models", "warning", "warning.gltf"))
-            model.setScale(0.02)
-            model.setH(-90)
-            model.setPos(0, 0, -self.HEIGHT / 2 - 0.1)
-            model.reparentTo(self.origin)
+            if TrafficWarning.MODEL is None:
+                model = self.loader.loadModel(AssetLoader.file_path("models", "warning", "warning.gltf"))
+                model.setScale(0.02)
+                model.setH(-90)
+                model.setPos(0, 0, -self.HEIGHT / 2 - 0.1)
+                TrafficWarning.MODEL = model
+            TrafficWarning.MODEL.instanceTo(self.origin)
 
     @property
     def top_down_length(self):
@@ -138,11 +143,14 @@ class TrafficBarrier(TrafficObject):
         self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.height / 2)))
         self.set_static(static)
         if self.render:
-            model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
-            model.setH(-90)
-            model.setPos(0, 0, -1.05)
-            model.setScale(0.7)
-            model.reparentTo(self.origin)
+            if TrafficBarrier.MODEL is None:
+                model = self.loader.loadModel(AssetLoader.file_path("models", "barrier", "scene.gltf"))
+                model.setH(-90)
+                model.setPos(0, 0, -1.05)
+                model.setScale(0.7)
+                TrafficBarrier.MODEL = model
+            TrafficBarrier.MODEL.instanceTo(self.origin)
+
 
     @property
     def LENGTH(self):

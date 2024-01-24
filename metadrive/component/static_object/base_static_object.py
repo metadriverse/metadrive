@@ -44,6 +44,8 @@ class BaseStaticObject(BaseObject):
     def reset(self, position, heading_theta, lane=None, random_seed=None, name=None, *args, **kwargs):
         self.seed(random_seed)
         self.rename(name)
+        self.set_pitch(0)
+        self.set_roll(0)
         self.set_position(position, self.HEIGHT / 2 if hasattr(self, "HEIGHT") else 0)
         self.set_heading_theta(heading_theta)
         self.lane = lane
