@@ -97,7 +97,6 @@ class TakeoverPolicy(EnvInputPolicy):
     Takeover policy shares the control between RL agent (whose action is input via env.step) and
     external control device (whose action is input via controller).
     """
-
     def __init__(self, obj, seed):
         super(TakeoverPolicy, self).__init__(obj, seed)
         config = get_global_config()
