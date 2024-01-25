@@ -54,6 +54,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    :caption: Concepts and Customization
 
    system_design.ipynb
+   new_env.ipynb
    sensors.ipynb
    top_down_render.ipynb
    panda_render.ipynb
@@ -61,7 +62,6 @@ Please feel free to contact us if you have any suggestions or ideas!
    navigation.ipynb
    scenario_description.ipynb
    record_replay.ipynb
-   development.rst
 
 .. toctree::
    :hidden:
