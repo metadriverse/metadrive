@@ -32,11 +32,9 @@ class KeyboardController(Controller):
 
     THROTTLE_INCREMENT = 0.1
     THROTTLE_DECAY = 0.2
-    THROTTLE_INCREMENT_WHEN_BRAKE = 0.5
 
     BRAKE_INCREMENT = 0.5
     BRAKE_DECAY = 0.5
-    BRAKE_INCREMENT_WHEN_THROTTLE = 0.5
 
     def __init__(self, pygame_control):
         self.pygame_control = pygame_control
