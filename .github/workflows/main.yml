@@ -86,7 +86,7 @@ jobs:
       - name: tests
         run: |
           export PYTHON_VERSION=${{ matrix.version }}
-          export TEST=${{ matrix.test }}
+          export TEST="tests/${{ matrix.test }}"
           ./tests/run.sh
 
   test_ipynb:

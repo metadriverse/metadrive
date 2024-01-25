@@ -7,4 +7,4 @@ set -e
 sleep 2
 
 cd metadrive
-pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/$TEST
+pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv $TEST
