@@ -80,7 +80,7 @@ jobs:
       fail-fast: false
       matrix:
         version: ["3.9", "3.10", "3.11"]
-        test: [test_functionality, test_env, test_policy, test_component, test_export_record_scenario, test_sensors, test_examples, test_ipynb]
+        test: [test_functionality, test_env, test_policy, test_component, test_export_record_scenario, test_sensors, test_examples]
     steps:
       - uses: actions/checkout@v2
       - name: tests
@@ -89,15 +89,27 @@ jobs:
           export TEST=${{ matrix.test }}
           ./tests/run.sh
 
+  test_ipynb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: tests
+        run: |
+          mkdir ./tests/test_ipynb
+          cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/test_ipynb/
+          export PYTHON_VERSION="3.9"
+          export TEST="--nbmake -n=auto --nbmake -n=auto ./tests/test_ipynb/"
+          ./tests/run.sh
+
   test_doc_code:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: tests
         run: |
-          export PYTHON_VERSION=${{ matrix.version }}
-          export TEST=${{ matrix.test }}
-          ./tests/run.sh documentation/source
+          export PYTHON_VERSION="3.9"
+          export TEST="--nbmake -n=auto ./documentation/source/""
+          ./tests/run.sh
 
   test_policy_windows:
     runs-on: windows-latest
