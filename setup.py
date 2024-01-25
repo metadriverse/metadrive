@@ -38,8 +38,8 @@ print("We will install the following packages: ", packages)
 
 install_requires = [
     "requests",
-    "gymnasium>=0.28, <0.29",
-    "numpy>=1.21.6, <=1.24.2",
+    "gymnasium",
+    "numpy",
     "matplotlib",
     "pandas",
     "pygame",
@@ -48,9 +48,8 @@ install_requires = [
     "seaborn",
     "tqdm",
     "progressbar",
-    # "panda3d==1.10.8",
-    "panda3d==1.10.13",
-    "panda3d-gltf==0.13",  # 0.14 will bring some problems
+    "panda3d",
+    "panda3d-gltf<=0.13",
     "pillow",
     "pytest",
     "opencv-python",
@@ -65,10 +64,10 @@ install_requires = [
 
 
 cuda_requirement = [
-    "cuda-python==12.0.0",
-    "PyOpenGL==3.1.6",
-    "PyOpenGL-accelerate==3.1.6",
-    "pyrr==0.10.3",
+    "cuda-python",
+    "PyOpenGL",
+    "PyOpenGL-accelerate",
+    "pyrr",
     "glfw",
 ]
 
@@ -78,6 +77,10 @@ gym_requirement = [
 
 ros_requirement = [
     "zmq"
+]
+
+remote_requirement = [
+    "ray"
 ]
 
 setup(
@@ -94,6 +97,7 @@ setup(
         "cuda": cuda_requirement,
         "gym": gym_requirement,
         "ros": ros_requirement,
+        "remote": remote_requirement,
     },
     include_package_data=True,
     license="Apache 2.0",
