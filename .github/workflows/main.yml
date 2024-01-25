@@ -95,8 +95,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: tests
         run: |
-          mkdir ./tests/test_ipynb
-          cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/test_ipynb/
+          mkdir ./metadrive/tests/test_ipynb
+          cp ./metadrive/examples/Basic_MetaDrive_Usages.ipynb ./metadrive/tests/test_ipynb/
           export PYTHON_VERSION="3.9"
           export TEST="--nbmake -n=auto --nbmake -n=auto ./tests/test_ipynb/"
           ./tests/run.sh
@@ -108,7 +108,7 @@ jobs:
       - name: tests
         run: |
           export PYTHON_VERSION="3.9"
-          export TEST="--nbmake -n=auto ./documentation/source/""
+          export TEST="--nbmake -n=auto ./documentation/source/"
           ./tests/run.sh
 
   test_policy_windows:
