@@ -51,3 +51,4 @@
 **/**.mp4
 /documentation/jupyter_execute/
 /documentation/**/**.gif
+/documentation/source/img.png
