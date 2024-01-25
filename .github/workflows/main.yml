@@ -79,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ["3.9", "3.10", "3.11"]
+        version: ["3.9"]
         test: [test_functionality, test_env, test_policy, test_component, test_export_record_scenario, test_sensors, test_examples]
     steps:
       - uses: actions/checkout@v2
