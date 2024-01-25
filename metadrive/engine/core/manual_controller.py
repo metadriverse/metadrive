@@ -1,4 +1,5 @@
 import math
+
 import numpy as np
 from direct.controls.InputState import InputState
 
@@ -27,6 +28,7 @@ class Controller:
 class KeyboardController(Controller):
     STEERING_INCREMENT = 0.04
     STEERING_DECAY = 0.25
+    STEERING_INCREMENT_WHEN_INVERSE_DIRECTION = 0.25
 
     THROTTLE_INCREMENT = 0.1
     THROTTLE_DECAY = 0.2
@@ -44,73 +46,76 @@ class KeyboardController(Controller):
             self.inputs.watchWithModifiers('reverse', 's')
             self.inputs.watchWithModifiers('turnLeft', 'a')
             self.inputs.watchWithModifiers('turnRight', 'd')
+            self.inputs.watchWithModifiers('takeover', 'space')
         self.steering = 0.
         self.throttle_brake = 0.
+        self.takeover = False
         self.np_random = np.random.RandomState(None)
 
     def process_input(self, vehicle):
         if not self.pygame_control:
-            steering = 0.
-            throttle_brake = 0.
-            if not self.inputs.isSet('turnLeft') and not self.inputs.isSet('turnRight'):
-                steering = 0.
+            left_key_pressed = right_key_pressed = up_key_pressed = down_key_pressed = False
+            if self.inputs.isSet('turnLeft'):
+                left_key_pressed = True
+            if self.inputs.isSet('turnRight'):
+                right_key_pressed = True
+            if self.inputs.isSet('forward'):
+                up_key_pressed = True
+            if self.inputs.isSet('reverse'):
+                down_key_pressed = True
+            if self.inputs.isSet('takeover'):
+                self.takeover = True
             else:
-                if self.inputs.isSet('turnLeft'):
-                    steering = 1.0
-                if self.inputs.isSet('turnRight'):
-                    steering = -1.0
-            if not self.inputs.isSet('forward') and not self.inputs.isSet("reverse"):
-                throttle_brake = 0.
-            else:
-                if self.inputs.isSet('forward'):
-                    throttle_brake = 1.0
-                if self.inputs.isSet('reverse'):
-                    throttle_brake = -1.0
+                self.takeover = False
         else:
-            steering = 0.
-            throttle_brake = 0.
             key_press = pygame.key.get_pressed()
-            throttle_brake += key_press[pygame.K_w] - key_press[pygame.K_s]
-            steering += key_press[pygame.K_a] - key_press[pygame.K_d]
+            left_key_pressed = key_press[pygame.K_a]
+            right_key_pressed = key_press[pygame.K_d]
+            up_key_pressed = key_press[pygame.K_w]
+            down_key_pressed = key_press[pygame.K_s]
+            # TODO: We haven't implement takeover event when using Pygame renderer.
 
-        self.further_process(steering, throttle_brake)
-
-        return np.array([self.steering, self.throttle_brake], dtype=np.float64)
-
-    def further_process(self, steering, throttle_brake):
-        if steering == 0.:
+        # If no left or right is pressed, steering decays to the center.
+        if not (left_key_pressed or right_key_pressed):
             if self.steering > 0.:
                 self.steering -= self.STEERING_DECAY
                 self.steering = max(0., self.steering)
             elif self.steering < 0.:
                 self.steering += self.STEERING_DECAY
                 self.steering = min(0., self.steering)
-        if throttle_brake == 0.:
+        elif left_key_pressed:
+            if self.steering >= 0.0:  # If left is pressed and steering is in left, increment the steering a little bit.
+                self.steering += self.STEERING_INCREMENT
+            else:  # If left is pressed but steering is in right, steering back to left side a little faster.
+                self.steering += self.STEERING_INCREMENT_WHEN_INVERSE_DIRECTION
+        elif right_key_pressed:
+            if self.steering <= 0.:  # If right is pressed and steering is in right, increment the steering a little
+                self.steering -= self.STEERING_INCREMENT
+            else:  # If right is pressed but steering is in left, steering back to right side a little faster.
+                self.steering -= self.STEERING_INCREMENT_WHEN_INVERSE_DIRECTION
+
+        # If no up or down is pressed, throttle decays to the center.
+        if not (up_key_pressed or down_key_pressed):
             if self.throttle_brake > 0.:
                 self.throttle_brake -= self.THROTTLE_DECAY
                 self.throttle_brake = max(self.throttle_brake, 0.)
             elif self.throttle_brake < 0.:
                 self.throttle_brake += self.BRAKE_DECAY
                 self.throttle_brake = min(0., self.throttle_brake)
-
-        if steering > 0.:
-            self.steering += self.STEERING_INCREMENT if self.steering > 0. else self.STEERING_DECAY
-        elif steering < 0.:
-            self.steering -= self.STEERING_INCREMENT if self.steering < 0. else self.STEERING_DECAY
-
-        if throttle_brake > 0.:
+        elif up_key_pressed:
             self.throttle_brake = max(self.throttle_brake, 0.)
             self.throttle_brake += self.THROTTLE_INCREMENT
-        elif throttle_brake < 0.:
+        elif down_key_pressed:
             self.throttle_brake = min(self.throttle_brake, 0.)
             self.throttle_brake -= self.BRAKE_INCREMENT
 
         rand = self.np_random.rand() / 10000
-        # self.throttle_brake += rand[0]
         self.steering += rand
 
         self.throttle_brake = min(max(-1., self.throttle_brake), 1.)
         self.steering = min(max(-1., self.steering), 1.)
+
+        return np.array([self.steering, self.throttle_brake], dtype=np.float64)
 
     def process_others(self, takeover_callback=None):
         """This function allows the outer loop to call callback if some signal is received by the controller."""
@@ -191,17 +196,23 @@ class SteeringWheelController(Controller):
 class XboxController(Controller):
     """Control class for Xbox wireless controller
     Accept both wired and wireless connection
-    Max steering, throttle, and break are bound by _discount
+    Max steering, throttle, and break are bound by _discount.
+
+    See https://www.pygame.org/docs/ref/joystick.html#xbox-360-controller-pygame-2-x for key mapping.
     """
     STEERING_DISCOUNT = 0.5
-    THROTTLE_DISCOUNT = 0.5
+    THROTTLE_DISCOUNT = 0.4
     BREAK_DISCOUNT = 0.5
-    BUTTON_X_MAP = 2
-    BUTTON_Y_MAP = 3
+
     BUTTON_A_MAP = 0
     BUTTON_B_MAP = 1
-    TRIGGER_RIGHT_MAP = 5
-    TRIGGER_LEFT_MAP = 2
+    BUTTON_X_MAP = 2
+    BUTTON_Y_MAP = 3
+
+    STEERING_AXIS = 0  # Left stick left-right direction.
+    THROTTLE_AXIS = 3  # Right stick up-down direction.
+    TAKEOVER_AXIS_2 = 4  # Right trigger
+    TAKEOVER_AXIS_1 = 5  # Left trigger
 
     def __init__(self):
         try:
@@ -233,19 +244,25 @@ class XboxController(Controller):
 
     def process_input(self, vehicle):
         pygame.event.pump()
-        steering = -self.joystick.get_axis(0)
+        steering = -self.joystick.get_axis(self.STEERING_AXIS)
         if abs(steering) < 0.05:
             steering = 0
         elif steering < 0:
             steering = -(math.pow(2, abs(steering) * self.STEERING_DISCOUNT) - 1)
         else:
             steering = math.pow(2, abs(steering) * self.STEERING_DISCOUNT) - 1
-        raw_throttle = self.joystick.get_axis(self.TRIGGER_RIGHT_MAP)
-        raw_brake = self.joystick.get_axis(self.TRIGGER_LEFT_MAP)
-        # 1+raw_throttle will map throttle between 0,2 need *0.5 to bound it between 0,1
-        throttle = (1 + raw_throttle) * 0.5 * self.THROTTLE_DISCOUNT
-        brake = (1 + raw_brake) * 0.5 * self.BREAK_DISCOUNT
-        throttle_brake = throttle - brake
+
+        raw_throttle_brake = -self.joystick.get_axis(self.THROTTLE_AXIS)
+        if abs(raw_throttle_brake) < 0.05:
+            throttle_brake = 0
+        elif raw_throttle_brake < 0:
+            throttle_brake = -(math.pow(2, abs(raw_throttle_brake) * self.BREAK_DISCOUNT) - 1)
+        else:
+            throttle_brake = math.pow(2, abs(raw_throttle_brake) * self.THROTTLE_DISCOUNT) - 1
+
+        self.takeover = (
+            self.joystick.get_axis(self.TAKEOVER_AXIS_2) > -0.9 or self.joystick.get_axis(self.TAKEOVER_AXIS_1) > -0.9
+        )
 
         self.button_x = True if self.joystick.get_button(self.BUTTON_X_MAP) else False
         self.button_y = True if self.joystick.get_button(self.BUTTON_Y_MAP) else False
