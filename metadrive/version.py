@@ -1,6 +1,6 @@
 from pathlib import Path
 
-VERSION = "0.4.2.2"
+VERSION = "0.4.2.3"
 
 
 def asset_version():
