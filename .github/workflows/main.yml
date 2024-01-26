@@ -74,156 +74,42 @@ jobs:
               body: `${{env.ROBOTMSG}}`
             })
 
-  test_functionality:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["3.9"]
+        test: [test_functionality, test_env, test_policy, test_component, test_export_record_scenario, test_sensors, test_examples]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Blackbox tests
+      - name: tests
         run: |
-          pip install cython
-          pip install numpy
-          pip install -e .
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          pip install ray
-          cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_functionality
+          export PYTHON_VERSION=${{ matrix.version }}
+          export TEST="metadrive/tests/${{ matrix.test }}"
+          ./tests/run.sh
 
-  test_environment:
+  test_ipynb:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Blackbox tests
+      - name: tests
         run: |
-          pip install cython
-          pip install numpy
-          pip install gym
-          pip install -e .
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          pip install ray
-          cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_env
+          mkdir ./metadrive/tests/test_ipynb
+          cp ./metadrive/examples/Basic_MetaDrive_Usages.ipynb ./metadrive/tests/test_ipynb/
+          export PYTHON_VERSION="3.9"
+          export TEST="--nbmake -n=auto --nbmake -n=auto ./metadrive/tests/test_ipynb/"
+          ./tests/run.sh
 
-  test_policy:
+  test_doc_code:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Blackbox tests
+      - name: tests
         run: |
-          pip install cython
-          pip install numpy
-          pip install -e .
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          pip install ray
-          cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
-
-  test_component:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Blackbox tests
-        run: |
-          pip install cython
-          pip install numpy
-          pip install -e .
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          pip install ray
-          cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_component
-
-  test_export_record_scenario:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Blackbox tests
-        run: |
-          pip install cython
-          pip install numpy
-          pip install -e .
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          pip install ray
-          cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_export_record_scenario
-
-  test_sensor_pipeline:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Prepare OpenGL
-        run: |
-          sudo apt-get -y install xvfb
-          sudo /usr/bin/Xvfb :0 -screen 0 1280x1024x24 &
-      - name: Blackbox tests
-        run: |
-          pip install cython
-          pip install numpy
-          pip install -e .
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          pip install ray
-          cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/
-
-  test_examples:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Prepare OpenGL
-        run: |
-          sudo apt-get -y install xvfb
-          sudo /usr/bin/Xvfb :0 -screen 0 1280x1024x24 &
-      - name: Blackbox tests
-        run: |
-          pip install cython
-          pip install numpy
-          pip install mediapy
-          conda install ffmpeg
-          pip install -e .
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          pip install ray
-          cd metadrive/
-          pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_examples
+          export PYTHON_VERSION="3.9"
+          export TEST="--nbmake -n=auto ./documentation/source/"
+          ./tests/run.sh
 
   test_policy_windows:
     runs-on: windows-latest
@@ -244,58 +130,6 @@ jobs:
           pip install ray
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
-
-  test_ipynb:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Prepare OpenGL
-        run: |
-          sudo apt-get -y install xvfb
-          sudo /usr/bin/Xvfb :0 -screen 0 1280x1024x24 &
-      - name: Blackbox tests
-        run: |
-          pip install cython
-          pip install numpy
-          pip install -e .
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          pip install ray
-          cd metadrive/
-          pip install nbmake pytest-xdist
-          mkdir ./tests/test_ipynb
-          cp ./examples/Basic_MetaDrive_Usages.ipynb ./tests/test_ipynb/
-          TEST_IPYNB=1 pytest --nbmake -n=auto ./tests/test_ipynb/
-
-  test_doc_code:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      - name: Prepare OpenGL
-        run: |
-          sudo apt-get -y install xvfb
-          sudo /usr/bin/Xvfb :0 -screen 0 1280x1024x24 &
-      - name: Blackbox tests
-        run: |
-          pip install cython
-          pip install numpy
-          pip install -e .
-          pip install -e .[gym]
-          python -m metadrive.pull_asset
-          pip install pytest
-          pip install pytest-cov
-          cd documentation
-          pip install nbmake pytest-xdist
-          TEST_DOC=1 pytest --nbmake -n=auto ./source
 
   test_ros:
     runs-on: ubuntu-22.04
