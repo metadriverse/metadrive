@@ -86,7 +86,7 @@ jobs:
       - name: tests
         run: |
           export PYTHON_VERSION=${{ matrix.version }}
-          export TEST="tests/${{ matrix.test }}"
+          export TEST="metadrive/tests/${{ matrix.test }}"
           ./tests/run.sh
 
   test_ipynb:
@@ -98,7 +98,7 @@ jobs:
           mkdir ./metadrive/tests/test_ipynb
           cp ./metadrive/examples/Basic_MetaDrive_Usages.ipynb ./metadrive/tests/test_ipynb/
           export PYTHON_VERSION="3.9"
-          export TEST="--nbmake -n=auto --nbmake -n=auto ./tests/test_ipynb/"
+          export TEST="--nbmake -n=auto --nbmake -n=auto ./metadrive/tests/test_ipynb/"
           ./tests/run.sh
 
   test_doc_code:
