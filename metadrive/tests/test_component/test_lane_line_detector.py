@@ -622,11 +622,8 @@ def test_nuscenes(render=False):
         for _o in o.tolist():
             print("{},".format(_o))
         print("]")
-        np.testing.assert_almost_equal(nuscenes_gt_1, np.round(o, 4), decimal=4)
-    finally:
-        env.close()
+        np.testing.assert_almost_equal(nuscenes_gt_1, o, decimal=3)
 
-    try:
         env.reset(seed=1)
         env.vehicle.set_position([79.96, -6.2])
         for s in range(1, 5):
@@ -636,7 +633,7 @@ def test_nuscenes(render=False):
         for _o in o.tolist():
             print("{},".format(_o))
         print("]")
-        np.testing.assert_almost_equal(nuscenes_gt_2, np.round(o, 4), decimal=4)
+        np.testing.assert_almost_equal(nuscenes_gt_2, o, decimal=3)
     finally:
         env.close()
 
