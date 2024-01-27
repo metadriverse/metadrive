@@ -108,26 +108,24 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 
 1. Rename VERSION in metadrive/version.py to x.y.z
 
-2. Revise the version in metadrive/assets/version.txt, and compress the folder: zip -r assets.zip assets
+2. Revise the version in metadrive/assets/version.txt to x.y.z, and compress the folder: zip -r assets.zip assets
 
-3. commit changes and push this branch to remote
+3. Commit changes and push this branch to remote
 
-4. Draft a release on github with new version number and upload assets.zip 
-
-5. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
+4. Remove old files and ext_modules from setup() to get a clean wheel for all platforms in py3-none-any.wheel
     rm -rf dist/ build/ documentation/build/ metadrive_simulator.egg-info/ docs/build/
 
-6. Get wheel
+5. Get wheel
     python setup.py sdist bdist_wheel
 
-7. Upload to production channel 
+6. Upload to production channel 
     twine upload dist/*
 
-8. Upload the generated .whl files and the assets.zip to the Github release
+7. Draft a release on github with new version number and upload assets.zip and the generated .whl files to the release.
 
-9. Publish the release
+8. Publish the release
 
-10. merge this branch into main
+9. Merge this branch into main
 
 !!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
 

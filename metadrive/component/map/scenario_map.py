@@ -57,6 +57,9 @@ class ScenarioMap(BaseMap):
         # print("[ScenarioMap] Map is Released")
 
     def get_boundary_line_vector(self, interval):
+        """
+        Get the polylines of the map, represented by a set of points
+        """
         ret = {}
         for lane_id, data in self.blocks[-1].map_data.items():
             type = data.get("type", None)
