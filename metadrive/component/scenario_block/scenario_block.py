@@ -57,21 +57,21 @@ class ScenarioBlock(BaseBlock):
                 continue
             if MetaDriveType.is_road_line(type):
                 if MetaDriveType.is_broken_line(type):
-                    self.construct_broken_line(
+                    self._construct_broken_line(
                         np.asarray(data[ScenarioDescription.POLYLINE]),
                         PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
                 else:
-                    self.construct_continuous_line(
+                    self._construct_continuous_line(
                         np.asarray(data[ScenarioDescription.POLYLINE]),
                         PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
             elif MetaDriveType.is_road_boundary_line(type):
-                self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
+                self._construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
         self._construct_sidewalk()
         self._construct_crosswalk()
 
-    def construct_continuous_line(self, polyline, color):
+    def _construct_continuous_line(self, polyline, color):
         line = InterpolatingLine(polyline)
         segment_num = int(line.length / PGDrivableAreaProperty.STRIPE_LENGTH)
         for segment in range(segment_num):
@@ -84,7 +84,7 @@ class ScenarioBlock(BaseBlock):
             node_path_list = self._construct_lane_line_segment(start, end, color, PGLineType.CONTINUOUS)
             self._node_path_list.extend(node_path_list)
 
-    def construct_broken_line(self, polyline, color):
+    def _construct_broken_line(self, polyline, color):
         line = InterpolatingLine(polyline)
         segment_num = int(line.length / (2 * PGDrivableAreaProperty.STRIPE_LENGTH))
         for segment in range(segment_num):
