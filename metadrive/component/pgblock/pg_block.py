@@ -22,6 +22,7 @@ class PGBlockSocket:
     Positive_road is right road, and Negative road is left road on which cars drive in reverse direction
     BlockSocket is a part of block used to connect other blocks
     """
+
     def __init__(self, positive_road: Road, negative_road: Road = None):
         self.positive_road = positive_road
         self.negative_road = negative_road if negative_road else None
@@ -74,16 +75,17 @@ class PGBlock(BaseBlock):
     When single-direction block created, road_2 in block socket is useless.
     But it's helpful when a town is created.
     """
+
     def __init__(
-        self,
-        block_index: int,
-        pre_block_socket: PGBlockSocket,
-        global_network: NodeRoadNetwork,
-        random_seed,
-        ignore_intersection_checking=False,
-        remove_negative_lanes=False,
-        side_lane_line_type=None,
-        center_line_type=None,
+            self,
+            block_index: int,
+            pre_block_socket: PGBlockSocket,
+            global_network: NodeRoadNetwork,
+            random_seed,
+            ignore_intersection_checking=False,
+            remove_negative_lanes=False,
+            side_lane_line_type=None,
+            center_line_type=None,
     ):
 
         # Specify the lane line type
@@ -250,9 +252,12 @@ class PGBlock(BaseBlock):
         for _from, to_dict in graph.items():
             for _to, lanes in to_dict.items():
                 for _id, lane in enumerate(lanes):
-                    pos_road = not Road(_from, _to).is_negative_road()
+
                     self._construct_lane(lane, (_from, _to, _id))
-                    choose_side = [True, True] if _id == len(lanes) - 1 and pos_road else [True, False]
+                    choose_side = [True, True] if _id == len(lanes) - 1 else [True, False]
+                    if Road(_from, _to).is_negative_road() and _id == 0:
+                        # draw center line with positive road
+                        choose_side = [False, False]
                     self._construct_lane_line_in_block(lane, choose_side)
         self._construct_sidewalk()
         self._construct_crosswalk()
