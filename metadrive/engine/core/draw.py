@@ -36,16 +36,28 @@ class ColorLineNodePath(LineNodePath):
 
 
 class ColorSphereNodePath(NodePath):
+    """
+    It is used to draw points in the scenes for debugging
+    """
     def __init__(self, parent=None, scale=1):
         super(ColorSphereNodePath, self).__init__("Point Debugger")
         scale /= 10
-        from metadrive.engine.engine_utils import get_engine
         self.scale = scale
-        self.engine = get_engine()
         self.hide(CamMask.Shadow)
         self.reparentTo(self.engine.render if parent is None else parent)
         self._existing_points = []
         self._dying_points = []
+        self._engine = None
+
+    @property
+    def engine(self):
+        """
+        Return Engine
+        """
+        if self._engine is None:
+            from metadrive.engine.engine_utils import get_engine
+            self._engine = get_engine()
+        return self._engine
 
     def draw_points(self, points, colors=None):
         """
