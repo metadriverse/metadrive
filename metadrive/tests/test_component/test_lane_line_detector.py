@@ -265,19 +265,22 @@ pg_gt_2 = [
 
 
 def test_pg_map(render=False):
-    env = MetaDriveEnv({"use_render": render,
-                        "debug_static_world": render,
-                        "debug": render,
-                        "num_scenarios": 1,
-                        "traffic_density": 0,
-                        "start_seed": 74,
-                        "map": 1,
-                        "vehicle_config": {
-                            "lidar": dict(num_lasers=10, distance=50),
-                            "side_detector": dict(num_lasers=50, distance=50),
-                            "lane_line_detector": dict(num_lasers=50, distance=50),
-                        },
-                        })
+    env = MetaDriveEnv(
+        {
+            "use_render": render,
+            "debug_static_world": render,
+            "debug": render,
+            "num_scenarios": 1,
+            "traffic_density": 0,
+            "start_seed": 74,
+            "map": 1,
+            "vehicle_config": {
+                "lidar": dict(num_lasers=10, distance=50),
+                "side_detector": dict(num_lasers=50, distance=50),
+                "lane_line_detector": dict(num_lasers=50, distance=50),
+            },
+        }
+    )
     try:
         env.reset()
         env.vehicle.set_position([73, 12])

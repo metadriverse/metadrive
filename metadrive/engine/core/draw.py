@@ -39,7 +39,6 @@ class ColorSphereNodePath(NodePath):
     """
     It is used to draw points in the scenes for debugging
     """
-
     def __init__(self, parent=None, scale=1):
         super(ColorSphereNodePath, self).__init__("Point Debugger")
         scale /= 10

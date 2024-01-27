@@ -9,7 +9,6 @@ class InterpolatingLine:
     """
     This class provides point set with interpolating function
     """
-
     def __init__(self, points):
         points = np.asarray(points)[..., :2]
         self.segment_property, self._start_points, self._end_points = self._get_properties(points)
@@ -286,7 +285,6 @@ if __name__ == '__main__':
 
     plt.gca().set_aspect('equal')
 
-
     def draw_polyline(polyline, colors, points, point_colors):
         for i in range(len(polyline) - 1):
             segment = [polyline[i], polyline[i + 1]]
@@ -296,7 +294,6 @@ if __name__ == '__main__':
             plt.scatter(*point, color=point_colors[i])
 
         plt.show()
-
 
     line = InterpolatingLine(test_p)
     point = (619.8480533594889 + 10, 1847.4039950466793 - 4.5)
