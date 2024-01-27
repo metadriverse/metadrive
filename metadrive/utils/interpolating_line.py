@@ -9,6 +9,7 @@ class InterpolatingLine:
     """
     This class provides point set with interpolating function
     """
+
     def __init__(self, points):
         points = np.asarray(points)[..., :2]
         self.segment_property, self._start_points, self._end_points = self._get_properties(points)
@@ -215,6 +216,16 @@ class InterpolatingLine:
         self.segment_property = []
         self.length = None
 
+    def get_polyline(self, interval=2, lateral=0):
+        """
+        This method will return the center line of this Lane in a discrete vector representation
+        """
+        ret = []
+        for i in np.arange(0, self.length, interval):
+            ret.append(self.position(i, lateral))
+        ret.append(self.position(self.length, lateral))
+        return np.array(ret)
+
     @staticmethod
     def min_lineseg_dist(p, a, b, d_ba=None):
         """Cartesian distance from point to line segment
@@ -275,6 +286,7 @@ if __name__ == '__main__':
 
     plt.gca().set_aspect('equal')
 
+
     def draw_polyline(polyline, colors, points, point_colors):
         for i in range(len(polyline) - 1):
             segment = [polyline[i], polyline[i + 1]]
@@ -284,6 +296,7 @@ if __name__ == '__main__':
             plt.scatter(*point, color=point_colors[i])
 
         plt.show()
+
 
     line = InterpolatingLine(test_p)
     point = (619.8480533594889 + 10, 1847.4039950466793 - 4.5)
