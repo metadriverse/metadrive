@@ -245,7 +245,13 @@ class VehicleAgentManager(BaseAgentManager):
         return ret
 
     def get_agent(self, agent_name, raise_error=True):
-        object_name = self.agent_to_object(agent_name)
+        try:
+            object_name = self.agent_to_object(agent_name)
+        except KeyError:
+            if raise_error:
+                raise ValueError("Object {} not found!".format(object_name))
+            else:
+                return None
         if object_name in self._active_objects:
             return self._active_objects[object_name]
         elif object_name in self._dying_objects:

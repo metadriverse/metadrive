@@ -8,7 +8,7 @@ from metadrive.constants import PGLineType, PGLineColor
 from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.type import MetaDriveType
 from metadrive.utils.interpolating_line import InterpolatingLine
-from metadrive.utils.math import norm
+from metadrive.utils.math import resample_polyline, get_polyline_length
 
 
 class ScenarioBlock(BaseBlock):
@@ -55,47 +55,46 @@ class ScenarioBlock(BaseBlock):
             type = data.get("type", None)
             if ScenarioDescription.POLYLINE in data and len(data[ScenarioDescription.POLYLINE]) <= 1:
                 continue
+
+            if not (MetaDriveType.is_road_line(type) or MetaDriveType.is_road_boundary_line(type)):
+                continue
+
+            interval = 2
+            line = np.asarray(np.asarray(data[ScenarioDescription.POLYLINE]))[..., :2]
+            length = get_polyline_length(line)
+            points = resample_polyline(line, interval) if length > interval * 2 else line
+
             if MetaDriveType.is_road_line(type):
                 if MetaDriveType.is_broken_line(type):
-                    self.construct_broken_line(
-                        np.asarray(data[ScenarioDescription.POLYLINE]),
-                        PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
+                    self._construct_broken_line(
+                        points, PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
                 else:
-                    self.construct_continuous_line(
-                        np.asarray(data[ScenarioDescription.POLYLINE]),
-                        PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
+                    self._construct_continuous_line(
+                        points, PGLineColor.YELLOW if MetaDriveType.is_yellow_line(type) else PGLineColor.GREY
                     )
             elif MetaDriveType.is_road_boundary_line(type):
-                self.construct_continuous_line(np.asarray(data[ScenarioDescription.POLYLINE]), color=PGLineColor.GREY)
+                self._construct_continuous_line(points, color=PGLineColor.GREY)
         self._construct_sidewalk()
         self._construct_crosswalk()
 
-    def construct_continuous_line(self, polyline, color):
-        line = InterpolatingLine(polyline)
-        segment_num = int(line.length / PGDrivableAreaProperty.STRIPE_LENGTH)
-        for segment in range(segment_num):
-            start = line.get_point(PGDrivableAreaProperty.STRIPE_LENGTH * segment)
-
-            if segment == segment_num - 1:
-                end = line.get_point(line.length)
-            else:
-                end = line.get_point((segment + 1) * PGDrivableAreaProperty.STRIPE_LENGTH)
-            node_path_list = self._construct_lane_line_segment(start, end, color, PGLineType.CONTINUOUS)
-            self._node_path_list.extend(node_path_list)
-
-    def construct_broken_line(self, polyline, color):
-        line = InterpolatingLine(polyline)
-        segment_num = int(line.length / (2 * PGDrivableAreaProperty.STRIPE_LENGTH))
-        for segment in range(segment_num):
-            start = line.get_point(segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2)
-            end = line.get_point(
-                segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH
+    def _construct_continuous_line(self, points, color):
+        for index in range(0, len(points) - 1):
+            node_path_list = self._construct_lane_line_segment(
+                points[index], points[index + 1], color, PGLineType.BROKEN
             )
-            if segment == segment_num - 1:
-                end = line.get_point(line.length - PGDrivableAreaProperty.STRIPE_LENGTH)
-            node_path_list = self._construct_lane_line_segment(start, end, color, PGLineType.BROKEN)
             self._node_path_list.extend(node_path_list)
+
+    def _construct_broken_line(self, points, color):
+        """
+        Resample and rebuild the line
+        """
+        for index in range(0, len(points) - 1, 2):
+            if index + 1 < len(points) - 1:
+                node_path_list = self._construct_lane_line_segment(
+                    points[index], points[index + 1], color, PGLineType.BROKEN
+                )
+                self._node_path_list.extend(node_path_list)
 
     @property
     def block_network_type(self):

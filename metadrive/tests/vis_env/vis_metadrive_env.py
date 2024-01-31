@@ -10,9 +10,9 @@ if __name__ == "__main__":
             "start_seed": 74,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
-            # "debug": True,
+            "debug": True,
             # "global_light": False,
-            # "debug_static_world": True,
+            "debug_static_world": True,
             "static_traffic_object": False,
             "show_interface": True,
             "random_agent_model": True,
@@ -63,8 +63,9 @@ if __name__ == "__main__":
                 # "destination":"2R1_3_",
                 # "show_side_detector": True,
                 # "show_lane_line_detector": True,
-                # "side_detector": dict(num_lasers=2, distance=50),
-                # "lane_line_detector": dict(num_lasers=2, distance=50),
+                "side_detector": dict(num_lasers=2, distance=50),
+                "lane_line_detector": dict(num_lasers=50, distance=50),
+                "show_lane_line_detector": True,
                 "show_line_to_navi_mark": True,
                 "show_line_to_dest": True,
                 "show_navi_mark": True,
@@ -130,6 +131,7 @@ if __name__ == "__main__":
     for s in range(1, 100000):
         # env.agent.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
+        env.render(text={"pos": env.agent.position})
         # env.render(
         #     text={
         #         "pos": env.engine.terrain.mesh_collision_terrain.getPos(),

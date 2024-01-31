@@ -197,6 +197,7 @@ class BaseMap(BaseRunnable, ABC):
         :param pixels_per_meter: the returned map will be in (size*pixels_per_meter * size*pixels_per_meter) size
         :param color_setting: color palette for different attribute. When generating terrain, make sure using
         :param line_sample_interval: [m] It determines the resolution of sampled points.
+        :param polyline_thickness: [m] The width of the road lines
         :param layer: layer to get
         MapTerrainAttribute
         :return: semantic map

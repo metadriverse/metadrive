@@ -215,6 +215,16 @@ class InterpolatingLine:
         self.segment_property = []
         self.length = None
 
+    def get_polyline(self, interval=2, lateral=0):
+        """
+        This method will return the center line of this Lane in a discrete vector representation
+        """
+        ret = []
+        for i in np.arange(0, self.length, interval):
+            ret.append(self.position(i, lateral))
+        ret.append(self.position(self.length, lateral))
+        return np.array(ret)
+
     @staticmethod
     def min_lineseg_dist(p, a, b, d_ba=None):
         """Cartesian distance from point to line segment

@@ -250,9 +250,13 @@ class PGBlock(BaseBlock):
         for _from, to_dict in graph.items():
             for _to, lanes in to_dict.items():
                 for _id, lane in enumerate(lanes):
-                    pos_road = not Road(_from, _to).is_negative_road()
+
                     self._construct_lane(lane, (_from, _to, _id))
-                    self._construct_lane_line_in_block(lane, [True, True] if _id == 0 and pos_road else [False, True])
+                    choose_side = [True, True] if _id == len(lanes) - 1 else [True, False]
+                    if Road(_from, _to).is_negative_road() and _id == 0:
+                        # draw center line with positive road
+                        choose_side = [False, False]
+                    self._construct_lane_line_in_block(lane, choose_side)
         self._construct_sidewalk()
         self._construct_crosswalk()
 
@@ -260,16 +264,14 @@ class PGBlock(BaseBlock):
         """
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
-        segment_num = int(lane.length / (2 * PGDrivableAreaProperty.STRIPE_LENGTH))
-        for segment in range(segment_num):
-            start = lane.position(segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2, lateral)
-            end = lane.position(
-                segment * PGDrivableAreaProperty.STRIPE_LENGTH * 2 + PGDrivableAreaProperty.STRIPE_LENGTH, lateral
-            )
-            if segment == segment_num - 1:
-                end = lane.position(lane.length - PGDrivableAreaProperty.STRIPE_LENGTH, lateral)
-            node_path_list = self._construct_lane_line_segment(start, end, line_color, line_type)
-            self._node_path_list.extend(node_path_list)
+        assert MetaDriveType.is_broken_line(line_type)
+        points = lane.get_polyline(2, lateral)
+        for index in range(0, len(points) - 1, 2):
+            if index + 1 < len(points):
+                node_path_list = self._construct_lane_line_segment(
+                    points[index], points[index + 1], line_color, line_type
+                )
+                self._node_path_list.extend(node_path_list)
 
     def _construct_continuous_line(self, lane, lateral, line_color, line_type):
         """
