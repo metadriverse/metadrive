@@ -55,10 +55,10 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
 
         if "throttle_brake" in info:
             if hasattr(self.control_object, "set_throttle_brake"):
-                self.control_object.set_throttle_brake(float(info["throttle_brake"]))
+                self.control_object.set_throttle_brake(float(info["throttle_brake"].item()))
         if "steering" in info:
             if hasattr(self.control_object, "set_steering"):
-                self.control_object.set_steering(float(info["steering"]))
+                self.control_object.set_steering(float(info["steering"].item()))
         self.control_object.set_position(info["position"])
         self.control_object.set_velocity(info["velocity"], in_local_frame=self._velocity_local_frame)
         self.control_object.set_heading_theta(info["heading"])
