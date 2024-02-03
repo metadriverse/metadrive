@@ -38,7 +38,7 @@ print("We will install the following packages: ", packages)
 
 install_requires = [
     "requests",
-    "gymnasium>=0.28, <0.29",
+    "gymnasium>=0.28",
     "numpy>=1.21.6",
     "matplotlib",
     "pandas",
