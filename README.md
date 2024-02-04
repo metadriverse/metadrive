@@ -4,7 +4,7 @@
 
 <br>
 
-# MetaDrive: AI Research for Generalizable and Interpretable Machine Autonomy
+# MetaDrive: an Open-source Driving Simulator for AI and Autonomy Research
 
 [![build](https://github.com/metadriverse/metadrive/workflows/test/badge.svg)](http://github.com/metadriverse/metadrive/actions)
 [![Documentation](https://readthedocs.org/projects/metadrive-simulator/badge/?version=latest)](https://metadrive-simulator.readthedocs.io)

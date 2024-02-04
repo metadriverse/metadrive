@@ -131,6 +131,7 @@ if __name__ == "__main__":
     for s in range(1, 100000):
         # env.agent.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
+        env.render(text={"pos": env.agent.position})
         # env.render(
         #     text={
         #         "pos": env.engine.terrain.mesh_collision_terrain.getPos(),

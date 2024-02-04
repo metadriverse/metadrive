@@ -736,6 +736,16 @@ class BaseEnv(gym.Env):
         )
         return self.agents[DEFAULT_AGENT]
 
+    @property
+    def agents_including_just_terminated(self):
+        """
+        Return all agents that occupy some space in current environments
+        :return: Dict[agent_id:vehicle]
+        """
+        ret = self.agent_manager.active_agents
+        ret.update(self.agent_manager.just_terminated_agents)
+        return ret
+
     def setup_engine(self):
         """
         Engine setting after launching
