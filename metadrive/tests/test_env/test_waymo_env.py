@@ -19,6 +19,8 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
                 "no_traffic": True if policy == TrajectoryIDMPolicy else False,
                 "use_render": render,
                 "agent_policy": policy,
+                "show_crosswalk": True,
+                "show_sidewalk": True,
                 "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
                 "num_scenarios": num_scenarios
             }
