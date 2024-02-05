@@ -1,4 +1,5 @@
 import copy
+import warnings
 
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.utils.math import compute_angular_velocity
@@ -50,7 +51,7 @@ def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_i
     # optional keys with scalar value:
     for k in ["length", "width", "height"]:
         if k in states:
-            ret[k] = float(states[k][time_idx])
+            ret[k] = float(states[k][time_idx].item())
 
     ret["valid"] = states["valid"][time_idx]
     if time_idx < len(states["position"]) - 1 and states["valid"][time_idx] and states["valid"][time_idx + 1]:
