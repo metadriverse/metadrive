@@ -53,8 +53,8 @@ Please feel free to contact us if you have any suggestions or ideas!
    :maxdepth: 2
    :caption: Concepts and Customization
 
-   system_design.ipynb
    new_env.ipynb
+   system_design.ipynb
    sensors.ipynb
    top_down_render.ipynb
    panda_render.ipynb
