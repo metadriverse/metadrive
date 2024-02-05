@@ -2,7 +2,7 @@ from typing import Optional, Union, Iterable
 
 import numpy as np
 import cv2
-from metadrive.obs.top_down_renderer import draw_top_down_map_native as native_draw
+from metadrive.engine.top_down_renderer import draw_top_down_map_native as native_draw
 from metadrive.utils.utils import import_pygame
 
 pygame, gfxdraw = import_pygame()

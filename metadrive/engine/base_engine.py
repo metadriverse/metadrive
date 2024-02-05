@@ -12,7 +12,7 @@ from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.engine.logger import get_logger, reset_logger
 
-from metadrive.pull_asset import pull_asset, wait_asset_lock
+from metadrive.pull_asset import pull_asset
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
 from metadrive.version import VERSION, asset_version
@@ -693,7 +693,7 @@ class BaseEngine(EngineCore, Randomizable):
 
     def render_topdown(self, text, *args, **kwargs):
         if self.top_down_renderer is None:
-            from metadrive.obs.top_down_renderer import TopDownRenderer
+            from metadrive.engine.top_down_renderer import TopDownRenderer
             self.top_down_renderer = TopDownRenderer(*args, **kwargs)
         return self.top_down_renderer.render(text, *args, **kwargs)
 

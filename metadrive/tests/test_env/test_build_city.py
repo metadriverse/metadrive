@@ -3,7 +3,7 @@ import pygame
 from metadrive import MetaDriveEnv
 from metadrive.component.map.city_map import CityMap
 from metadrive.engine.engine_utils import initialize_engine, close_engine
-from metadrive.obs.top_down_renderer import draw_top_down_map_native
+from metadrive.engine.top_down_renderer import draw_top_down_map_native
 
 
 def _t(num_blocks):

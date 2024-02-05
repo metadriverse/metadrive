@@ -351,7 +351,7 @@ def _long_run():
 
 def show_map_and_traj():
     import matplotlib.pyplot as plt
-    from metadrive.obs.top_down_renderer import draw_top_down_map_native, draw_top_down_trajectory
+    from metadrive.engine.top_down_renderer import draw_top_down_map_native, draw_top_down_trajectory
     import json
     import cv2
     import pygame
