@@ -528,7 +528,7 @@ class BaseEnv(gym.Env):
                 "env.reset() to rescue this environment. However, a better and safer solution is to check the "
                 "singleton of MetaDrive and restart your program."
             )
-        self.engine.reset()
+        reset_info = self.engine.reset()
         self.reset_sensors()
         # render the scene
         self.engine.taskMgr.step()
@@ -543,7 +543,7 @@ class BaseEnv(gym.Env):
         assert (len(self.agents) == self.num_agents) or (self.num_agents == -1), \
             "Agents: {} != Num_agents: {}".format(len(self.agents), self.num_agents)
         assert self.config is self.engine.global_config is get_global_config(), "Inconsistent config may bring errors!"
-        return self._get_reset_return()
+        return self._get_reset_return(reset_info)
 
     def reset_sensors(self):
         """
@@ -566,9 +566,9 @@ class BaseEnv(gym.Env):
                     if hasattr(sensor, "track") and name != "main_camera":
                         sensor.track(current_track_agent.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
 
-    def _get_reset_return(self):
+    def _get_reset_return(self, reset_info):
         # TODO: figure out how to get the information of the before step
-        scene_manager_before_step_infos = {}
+        scene_manager_before_step_infos = reset_info
         scene_manager_after_step_infos = self.engine.after_step()
 
         obses = {}

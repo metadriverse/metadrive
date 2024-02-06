@@ -151,7 +151,7 @@ class MixWaymoPGEnv(ScenarioEnv):
                 "env.reset() to rescue this environment. However, a better and safer solution is to check the "
                 "singleton of MetaDrive and restart your program."
             )
-        self.engine.reset()
+        reset_info = self.engine.reset()
         if self.top_down_renderer is not None:
             self.top_down_renderer.clear()
         self.engine.top_down_renderer = None
@@ -166,7 +166,7 @@ class MixWaymoPGEnv(ScenarioEnv):
         if not self.is_current_real_data:
             # give a initial speed when on metadrive
             self.agent.set_velocity(self.agent.heading, self.engine.np_random.randint(10))
-        return self._get_reset_return()
+        return self._get_reset_return(reset_info)
 
     def _reset_global_seed(self, force_seed=None):
         current_seed = force_seed if force_seed is not None else get_np_random(None).randint(
