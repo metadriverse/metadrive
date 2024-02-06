@@ -104,7 +104,7 @@ class MetaDriveEnv(BaseEnv):
 
         # scenario setting
         self.start_seed = self.start_index = self.config["start_seed"]
-        self.env_num = self.num_scenarios = self.config["num_scenarios"]
+        self.env_num = self.num_scenarios
 
     def _post_process_config(self, config):
         config = super(MetaDriveEnv, self)._post_process_config(config)
