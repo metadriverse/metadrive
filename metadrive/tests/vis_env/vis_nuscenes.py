@@ -22,8 +22,7 @@ class MyMapManager(BaseManager):
         idx = self.engine.global_random_seed % 3
         if self.all_maps[idx] is None:
             # create maps on the fly
-            new_map = PGMap(map_config=dict(type=PGMap.BLOCK_SEQUENCE,
-                                            config=self._map_shape[idx]))
+            new_map = PGMap(map_config=dict(type=PGMap.BLOCK_SEQUENCE, config=self._map_shape[idx]))
             self.all_maps[idx] = new_map
 
         # attach map in the world
@@ -51,7 +50,6 @@ MY_CONFIG = dict(agent_configs={"default_agent": dict(spawn_lane_index=(FirstPGB
 
 
 class MyEnv(BaseEnv):
-
     @classmethod
     def default_config(cls):
         config = super(MyEnv, cls).default_config()
@@ -81,22 +79,28 @@ if __name__ == "__main__":
     frames = []
 
     # create env
-    env = MyEnv(dict(use_render=False,
-                     # if you have a screen and OpenGL suppor, you can set use_render=True to use 3D rendering
-                     manual_control=True,  # we usually manually control the car to test environment
-                     num_scenarios=4,
-                     log_level=logging.CRITICAL))  # suppress logging message
+    env = MyEnv(
+        dict(
+            use_render=False,
+            # if you have a screen and OpenGL suppor, you can set use_render=True to use 3D rendering
+            manual_control=True,  # we usually manually control the car to test environment
+            num_scenarios=4,
+            log_level=logging.CRITICAL
+        )
+    )  # suppress logging message
     for i in range(4):
         # reset
         o, info = env.reset(seed=i)
         print("Load map with shape: {}".format(info["current_map"]))
-        # you can set window=True and remove generate_gif() if you have a screen. 
-        # Or just use 3D rendering and remove all stuff related to env.render()  
-        frame = env.render(mode="topdown",
-                           window=False,  # turn me on, if you have screen
-                           scaling=3,
-                           camera_position=(50, 0),
-                           screen_size=(400, 400))
+        # you can set window=True and remove generate_gif() if you have a screen.
+        # Or just use 3D rendering and remove all stuff related to env.render()
+        frame = env.render(
+            mode="topdown",
+            window=False,  # turn me on, if you have screen
+            scaling=3,
+            camera_position=(50, 0),
+            screen_size=(400, 400)
+        )
         frames.append(frame)
     cv2.imwrite("demo.png", cv2.cvtColor(cv2.hconcat(frames), cv2.COLOR_RGB2BGR))
     env.close()

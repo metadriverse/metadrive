@@ -189,6 +189,6 @@ def list_files(path, prefix='', depth=2, current_depth=0):
     if path.is_dir() and current_depth < depth:
         print(prefix + path.name + '/')
         for child in path.iterdir():
-            list_files(child, prefix + '    ', depth, current_depth=current_depth+1)
+            list_files(child, prefix + '    ', depth, current_depth=current_depth + 1)
     else:
         print(prefix + path.name)
