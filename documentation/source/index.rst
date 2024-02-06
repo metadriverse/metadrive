@@ -58,6 +58,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    sensors.ipynb
    top_down_render.ipynb
    panda_render.ipynb
+   map.ipynb
    vehicle.ipynb
    navigation.ipynb
    scenario_description.ipynb
