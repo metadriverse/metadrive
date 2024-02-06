@@ -7,6 +7,9 @@ from metadrive.utils.math import norm
 
 
 def get_max_valid_indicis(track, current_index):
+    """
+    Find the invalid timestep and get the trajectory before that step
+    """
     states = track["state"]
     assert states["valid"][current_index], "Current index should be valid"
     end = len(states["valid"])
@@ -23,6 +26,9 @@ def get_idm_route(traj_points, width=2):
 
 
 def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_interval=0.1):
+    """
+    Parse object state of one time step
+    """
     states = object_dict["state"]
 
     epi_length = len(states["position"])
@@ -77,6 +83,9 @@ def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_i
 
 
 def parse_full_trajectory(object_dict):
+    """
+    Parse object states for a whole trajectory
+    """
     positions = object_dict["state"]["position"]
     index = len(positions)
     for current_idx in range(len(positions) - 1):

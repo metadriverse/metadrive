@@ -362,8 +362,8 @@ class MultiAgentTinyInter(MultiAgentIntersectionEnv):
         )
         return MultiAgentIntersectionEnv.default_config().update(tiny_config, allow_add_new_key=True)
 
-    def _get_reset_return(self):
-        org = super(MultiAgentTinyInter, self)._get_reset_return()
+    def _get_reset_return(self, reset_info):
+        org = super(MultiAgentTinyInter, self)._get_reset_return(reset_info)
 
         # if self.num_RL_agents == self.num_agents:
         #     return org

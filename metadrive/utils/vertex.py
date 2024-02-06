@@ -63,8 +63,8 @@ def is_anticlockwise(points):
     sum = 0
     n = len(points)
     for i in range(n):
-        x1, y1 = points[i]
-        x2, y2 = points[(i + 1) % n]  # The next point, wrapping around to the first
+        x1, y1 = points[i][:2]
+        x2, y2 = points[(i + 1) % n][:2]  # The next point, wrapping around to the first
         sum += (x2 - x1) * (y2 + y1)
     return sum > 0
 

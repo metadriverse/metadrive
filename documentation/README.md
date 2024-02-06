@@ -80,3 +80,7 @@ And you need to skip all cells you don't want to run with cell tags:
 ```python
 {"tags": ["skip-execution"]}
 ```
+
+### Preprocess-Add colab link
+Everytime the `make html` is called, all `ipynb` file will have corresponding colab link in it by modifying the source
+code. So you will find that your source code is modified in git. Please commit that changes as well.
