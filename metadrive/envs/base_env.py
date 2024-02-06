@@ -174,7 +174,7 @@ BASE_DEFAULT_CONFIG = dict(
     ),
 
     # ===== Sensors =====
-    sensors=dict(lidar=(Lidar, ), side_detector=(SideDetector, ), lane_line_detector=(LaneLineDetector, )),
+    sensors=dict(lidar=(Lidar,), side_detector=(SideDetector,), lane_line_detector=(LaneLineDetector,)),
 
     # ===== Engine Core config =====
     # If true pop a window to render
@@ -351,7 +351,7 @@ class BaseEnv(gym.Env):
         if not config["render_pipeline"] and config["show_interface"] and "main_camera" in config["sensors"]:
             for panel in config["interface_panel"]:
                 if panel == "dashboard":
-                    config["sensors"]["dashboard"] = (DashBoard, )
+                    config["sensors"]["dashboard"] = (DashBoard,)
                 if panel not in config["sensors"]:
                     self.logger.warning(
                         "Fail to add sensor: {} to the interface. Remove it from panel list!".format(panel)
@@ -588,9 +588,17 @@ class BaseEnv(gym.Env):
         step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
 
         if self.is_multi_agent:
-            return (obses, step_infos)
+            return obses, step_infos
         else:
-            return (self._wrap_as_single_agent(obses), step_infos)
+            return self._wrap_as_single_agent(obses), self._wrap_info_as_single_agent(step_infos)
+
+    def _wrap_info_as_single_agent(self, data):
+        """
+        Wrap to single agent info
+        """
+        agent_info = data.pop(next(iter(self.agents.keys())))
+        data.update(agent_info)
+        return data
 
     def _get_step_return(self, actions, engine_info):
         # update obs, dones, rewards, costs, calculate done at first !
@@ -627,7 +635,7 @@ class BaseEnv(gym.Env):
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
                    self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(
-                truncateds), step_infos
+                truncateds), self._wrap_info_as_single_agent(step_infos)
         else:
             return obses, rewards, terminateds, truncateds, step_infos
 
@@ -795,19 +803,20 @@ class BaseEnv(gym.Env):
         return self.engine.episode_step if self.engine is not None else 0
 
     def export_scenarios(
-        self,
-        policies: Union[dict, Callable],
-        scenario_index: Union[list, int],
-        max_episode_length=None,
-        verbose=False,
-        suppress_warning=False,
-        render_topdown=False,
-        return_done_info=True,
-        to_dict=True
+            self,
+            policies: Union[dict, Callable],
+            scenario_index: Union[list, int],
+            max_episode_length=None,
+            verbose=False,
+            suppress_warning=False,
+            render_topdown=False,
+            return_done_info=True,
+            to_dict=True
     ):
         """
         We export scenarios into a unified format with 10hz sample rate
         """
+
         def _act(observation):
             if isinstance(policies, dict):
                 ret = {}
