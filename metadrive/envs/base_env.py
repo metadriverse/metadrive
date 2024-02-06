@@ -651,8 +651,11 @@ class BaseEnv(gym.Env):
         return self.agent_manager.for_each_active_agents(func, *args, **kwargs)
 
     def get_single_observation(self):
+        """
+        Get the observation for one object
+        """
         if self.__class__ is BaseEnv:
-            o = DummyObservation({})
+            o = DummyObservation()
         else:
             if self.config["agent_observation"]:
                 o = self.config["agent_observation"](self.config)

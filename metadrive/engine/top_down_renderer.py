@@ -42,8 +42,12 @@ def draw_top_down_map_native(
     Returns: cv2.image or pygame.Surface
 
     """
-    import cv2
     surface = WorldSurface(film_size, 0, pygame.Surface(film_size))
+    if map is None:
+        surface.move_display_window_to([0, 0])
+        surface.fill([230, 230, 230])
+        return surface if return_surface else WorldSurface.to_cv2_image(surface)
+
     b_box = map.road_network.get_bounding_box()
     x_len = b_box[1] - b_box[0]
     y_len = b_box[3] - b_box[2]
