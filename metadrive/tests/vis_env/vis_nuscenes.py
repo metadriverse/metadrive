@@ -1,116 +1,106 @@
-import time
-from panda3d.core import PNMImage
-from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.scenario_env import ScenarioEnv
-from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.component.sensors.semantic_camera import SemanticCamera
-from metadrive.component.sensors.depth_camera import DepthCamera
-from metadrive.component.sensors.rgb_camera import RGBCamera
-from metadrive.component.sensors.instance_camera import InstanceCamera
+from metadrive.envs import BaseEnv
+from metadrive.obs.observation_base import DummyObservation
+import logging
 
-NuScenesEnv = ScenarioEnv
+# ======================================== new content ===============================================
+import cv2
+from metadrive.component.map.pg_map import PGMap
+from metadrive.manager.base_manager import BaseManager
+from metadrive.component.pgblock.first_block import FirstPGBlock
+
+
+class MyMapManager(BaseManager):
+    PRIORITY = 0
+
+    def __init__(self):
+        super(MyMapManager, self).__init__()
+        self.current_map = None
+        self.all_maps = {idx: None for idx in range(3)}  # store the created map
+        self._map_shape = ["X", "T", "O"]  # three types of maps
+
+    def reset(self):
+        idx = self.engine.global_random_seed % 3
+        if self.all_maps[idx] is None:
+            # create maps on the fly
+            new_map = PGMap(map_config=dict(type=PGMap.BLOCK_SEQUENCE,
+                                            config=self._map_shape[idx]))
+            self.all_maps[idx] = new_map
+
+        # attach map in the world
+        map = self.all_maps[idx]
+        map.attach_to_world()
+        self.current_map = map
+        return dict(current_map=self._map_shape[idx])
+
+    def before_reset(self):
+        if self.current_map is not None:
+            self.current_map.detach_from_world()
+            self.current_map = None
+
+    def destroy(self):
+        # clear all maps when this manager is destroyed
+        super(MyMapManager, self).destroy()
+        for map in self.all_maps.values():
+            if map is not None:
+                map.destroy()
+        self.all_maps = None
+
+
+# Expand the default config system, specify where to spawn the car
+MY_CONFIG = dict(agent_configs={"default_agent": dict(spawn_lane_index=(FirstPGBlock.NODE_1, FirstPGBlock.NODE_2, 0))})
+
+
+class MyEnv(BaseEnv):
+
+    @classmethod
+    def default_config(cls):
+        config = super(MyEnv, cls).default_config()
+        config.update(MY_CONFIG)
+        return config
+
+    def setup_engine(self):
+        super(MyEnv, self).setup_engine()
+        self.engine.register_manager("map_manager", MyMapManager())
+
+    # ======================================== new content ===============================================
+
+    def reward_function(self, agent):
+        return 0, {}
+
+    def cost_function(self, agent):
+        return 0, {}
+
+    def done_function(self, agent):
+        return False, {}
+
+    def get_single_observation(self):
+        return DummyObservation()
+
 
 if __name__ == "__main__":
-    env = NuScenesEnv(
-        {
-            "use_render": True,
-            "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
-            "show_interface": True,
-            # "debug_static_world": True,
-            # "need_lane_localization": False,
-            # "image_observation": True,
-            "show_logo": False,
-            "no_traffic": False,
-            "store_data": False,
-            "sequential_seed": True,
-            # "pstats": True,
-            # "debug_static_world": True,
-            # "sequential_seed": True,
-            # "reactive_traffic": True,
-            "curriculum_level": 1,
-            "show_fps": True,
-            "show_sidewalk": True,
-            "show_crosswalk": True,
-            # "show_coordinates": True,
-            "sensors": {
-                "semantic": (SemanticCamera, 400, 300),
-                "depth": (DepthCamera, 400, 300),
-                "rgb": (RGBCamera, 400, 300),
-            },
-            # "pstats": True,
-            # "use_mesh_terrain": True,
-            "debug": True,
-            # "no_static_vehicles": False,
-            # "pstats": True,
-            # "render_pipeline": True,
-            # "window_size": (1600, 900),
-            "camera_dist": 9,
-            "interface_panel": ["semantic", "depth", "rgb"],
-            "start_scenario_index": 0,
-            "num_scenarios": 10,
-            # "force_reuse_object_name": True,
-            "horizon": 1000,
-            "vehicle_config": dict(
-                # light=True,
-                # random_color=True,
-                show_navi_mark=False,
-                # no_wheel_friction=True,
-                lidar=dict(num_lasers=120, distance=50),
-                lane_line_detector=dict(num_lasers=0, distance=50),
-                side_detector=dict(num_lasers=12, distance=50)
-            ),
-            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
-            # "drivable_area_extension": 0,
-        }
-    )
+    frames = []
 
-    # 0,1,3,4,5,6
+    # create env
+    env = MyEnv(dict(use_render=False,
+                     # if you have a screen and OpenGL suppor, you can set use_render=True to use 3D rendering
+                     manual_control=True,  # we usually manually control the car to test environment
+                     num_scenarios=4,
+                     log_level=logging.CRITICAL))  # suppress logging message
+    for i in range(4):
+        # reset
+        o, info = env.reset(seed=i)
+        print("Load map with shape: {}".format(info["current_map"]))
+        # you can set window=True and remove generate_gif() if you have a screen. 
+        # Or just use 3D rendering and remove all stuff related to env.render()  
+        frame = env.render(mode="topdown",
+                           window=False,  # turn me on, if you have screen
+                           scaling=3,
+                           camera_position=(50, 0),
+                           screen_size=(400, 400))
+        frames.append(frame)
+    cv2.imwrite("demo.png", cv2.cvtColor(cv2.hconcat(frames), cv2.COLOR_RGB2BGR))
+    env.close()
 
-    success = []
-    reset_num = 0
-    start = time.time()
-    reset_used_time = 0
-    s = 0
-    # while True:
-    # for i in range(10):
-    start_reset = time.time()
-    env.reset(seed=0)
+from IPython.display import Image
 
-    def reload_shader():
-        env.engine.pbrpipe._recompile_pbr()
-        env.engine.pssm.set_shader_inputs(env.engine.render)
-
-    env.engine.accept("`", reload_shader)
-    env.engine.accept("9", env.engine.terrain.reload_terrain_shader)
-    env.engine.accept("0", env.engine.bufferViewer.toggleEnable)
-
-    reset_used_time += time.time() - start_reset
-    reset_num += 1
-    for t in range(1000000):
-        o, r, tm, tc, info = env.step([1, 0.88])
-        env.engine.terrain.origin.set_shader_input('is_terrain', 1)
-        assert env.observation_space.contains(o)
-        s += 1
-        # if env.config["use_render"]:
-        #     env.render(
-        #         text={
-        #             "seed": env.current_seed,
-        #             "num_map": info["num_stored_maps"],
-        #             "data_coverage": info["data_coverage"],
-        #             "reward": r,
-        #             "heading_r": info["step_reward_heading"],
-        #             "lateral_r": info["step_reward_lateral"],
-        #             "smooth_action_r": info["step_reward_action_smooth"]
-        #         },
-        #         # mode="topdown"
-        #     )
-        # if tm or tc:
-        #     print(
-        #         "Time elapse: {:.4f}. Average FPS: {:.4f}, AVG_Reset_time: {:.4f}".format(
-        #             time.time() - start, s / (time.time() - start - reset_used_time), reset_used_time / reset_num
-        #         )
-        #     )
-        #     print("seed:{}, success".format(env.engine.global_random_seed))
-        #     print(list(env.engine.curriculum_manager.recent_success.dict.values()))
-        #     break
+Image(open("demo.png", 'rb').read())

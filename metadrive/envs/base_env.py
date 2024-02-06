@@ -590,7 +590,7 @@ class BaseEnv(gym.Env):
         if self.is_multi_agent:
             return (obses, step_infos)
         else:
-            return (self._wrap_as_single_agent(obses), self._wrap_as_single_agent(step_infos))
+            return (self._wrap_as_single_agent(obses), step_infos)
 
     def _get_step_return(self, actions, engine_info):
         # update obs, dones, rewards, costs, calculate done at first !
@@ -627,7 +627,7 @@ class BaseEnv(gym.Env):
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
                    self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(
-                truncateds), self._wrap_as_single_agent(step_infos)
+                truncateds), step_infos
         else:
             return obses, rewards, terminateds, truncateds, step_infos
 
