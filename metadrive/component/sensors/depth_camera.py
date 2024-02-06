@@ -18,7 +18,7 @@ class DepthCamera(BaseCamera):
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
-        self.shader_local_size = (16, 16)
+        self.shader_local_size = (32, 32)
         # factors of the log algorithm used to process distance to object
         self.log_b = np.log(16)
         self.log_base = np.log(5)
