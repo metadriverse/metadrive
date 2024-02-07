@@ -176,7 +176,7 @@ class Terrain(BaseObject, ABC):
 
         self.plane_collision_terrain = self.origin.attachNewNode(node)
         self.plane_collision_terrain.setZ(-self.origin.getZ())
-        self._node_path_list.append(np)
+        self._node_path_list.append(self.plane_collision_terrain)
 
     def _generate_mesh_vis_terrain(
             self,
@@ -626,6 +626,34 @@ class Terrain(BaseObject, ABC):
         dummy_np = NodePath("Dummy")
         dummy_np.setShader(terrain_shader)
         return dummy_np.getState()
+
+    def destroy(self):
+        """
+        Clean all terrain related stuff
+        """
+        super(Terrain, self).destroy()
+        self.heightfield_tex.clearImage()
+        self.semantic_tex.clearImage()
+        self.heightfield_tex.clearRamImage()
+        self.semantic_tex.clearRamImage()
+        self.heightfield_tex.clear()
+        self.semantic_tex.clear()
+
+        # self.terrain_texture.clear()
+        # self.grass_tex.clear()
+        # self.grass_normal.clear()
+        # self.grass_rough.clear()
+        # self.rock_tex.clear()
+        # self.rock_normal.clear()
+        # self.rock_rough.clear()
+        #
+        # self.terrain_texture = None
+        # self.grass_tex = None
+        # self.grass_normal = None
+        # self.grass_rough = None
+        # self.rock_tex = None
+        # self.rock_normal = None
+        # self.rock_rough = None
 
 # Some useful threads
 # GeoMipTerrain:

@@ -394,6 +394,7 @@ class EngineCore(ShowBase.ShowBase):
                 self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
             )
         )
+        self.terrain.destroy()
         self.physics_world.dynamic_world.clearContactAddedCallback()
         self.physics_world.destroy()
         self.destroy()
