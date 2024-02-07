@@ -395,6 +395,7 @@ class EngineCore(ShowBase.ShowBase):
             )
         )
         self.terrain.destroy()
+        self.sky_box.destroy()
         self.physics_world.dynamic_world.clearContactAddedCallback()
         self.physics_world.destroy()
         self.destroy()

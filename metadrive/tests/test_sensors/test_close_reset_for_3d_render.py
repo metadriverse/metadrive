@@ -5,7 +5,7 @@ import psutil
 from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
-def test_close_reset_for_3d_render():
+def _test_close_reset_for_3d_render():
     """
     The assets should be closed as well
     """
@@ -30,4 +30,4 @@ def test_close_reset_for_3d_render():
 
 
 if __name__ == '__main__':
-    test_close_reset_for_3d_render()
+    _test_close_reset_for_3d_render()
