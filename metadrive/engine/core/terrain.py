@@ -632,12 +632,13 @@ class Terrain(BaseObject, ABC):
         Clean all terrain related stuff
         """
         super(Terrain, self).destroy()
-        self.heightfield_tex.clearImage()
-        self.semantic_tex.clearImage()
-        self.heightfield_tex.clearRamImage()
-        self.semantic_tex.clearRamImage()
-        self.heightfield_tex.clear()
-        self.semantic_tex.clear()
+        if self.render:
+            self.heightfield_tex.clearImage()
+            self.semantic_tex.clearImage()
+            self.heightfield_tex.clearRamImage()
+            self.semantic_tex.clearRamImage()
+            self.heightfield_tex.clear()
+            self.semantic_tex.clear()
 
         # self.terrain_texture.clear()
         # self.grass_tex.clear()
