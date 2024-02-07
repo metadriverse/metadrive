@@ -293,9 +293,9 @@ class EngineCore(ShowBase.ShowBase):
 
                 # setup pssm shadow
                 # init shadow if required
-                if not self.global_config["debug_physics_world"]:
-                    self.pssm = PSSM(self)
-                    self.pssm.init()
+                # if not self.global_config["debug_physics_world"]:
+                self.pssm = PSSM(self)
+                self.pssm.init()
 
             # set main cam
             self.cam.node().setCameraMask(CamMask.MainCam)
