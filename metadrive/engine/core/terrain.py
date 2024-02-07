@@ -8,6 +8,9 @@ import sys
 #
 #
 from abc import ABC
+
+import numpy
+
 from metadrive.constants import TerrainProperty, CameraTagStateKey
 import cv2
 import numpy as np
@@ -70,17 +73,25 @@ class Terrain(BaseObject, ABC):
 
         self.render = self.render and show_terrain
 
+        if self.use_mesh_terrain or self.render:
+            self._load_height_field_image(engine)
+
         if self.render:
             # if engine.use_render_pipeline:
             self._load_mesh_terrain_textures(engine)
             self._mesh_terrain_node = ShaderTerrainMesh()
+            # prepare semantic texture
+            semantic_size = self._semantic_map_size * self._semantic_map_pixel_per_meter
+            self.semantic_tex = Texture()
+            self.semantic_tex.setup2dTexture(semantic_size, semantic_size, Texture.TFloat, Texture.F_red)
+            # prepare height field texture
+            self.heightfield_tex = Texture()
+            self.heightfield_tex.setup2dTexture(*self.heightfield_img.shape[:2], Texture.TShort, Texture.FLuminance)
+
             # disable env probe as some vehicle models may break it
             # self.probe = engine.render_pipeline.add_environment_probe()
             # self.probe.set_pos(0, 0, self.PROBE_HEIGHT)
             # self.probe.set_scale(self.PROBE_SIZE * 2, self.PROBE_SIZE * 2, 1000)
-
-        if self.use_mesh_terrain or self.render:
-            self._load_height_field_image(engine)
 
     def before_reset(self):
         """
@@ -128,7 +139,7 @@ class Terrain(BaseObject, ABC):
                 ).astype(np.uint16)
                 heightfield_to_modify = heightfield_base[start:end, start:end, ...]
                 heightfield_base[start:end, start:end,
-                                 ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+                ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -138,18 +149,11 @@ class Terrain(BaseObject, ABC):
 
             if self.render:
                 # Make semantics for shader terrain
-                semantics = self.get_terrain_semantics(center_point)
-                semantic_tex = Texture()
-                semantic_tex.setup2dTexture(*semantics.shape[:2], Texture.TFloat, Texture.F_red)
-                semantic_tex.setRamImage(semantics)
-
-                # to panda texture
-                heightfield_tex = Texture()
-                heightfield_tex.setup2dTexture(*heightfield_base.shape[:2], Texture.TShort, Texture.FLuminance)
-                heightfield_tex.setRamImage(heightfield_base)
-
+                self.semantic_tex.setRamImage(self.get_terrain_semantics(center_point))
+                # Makre height field
+                self.heightfield_tex.setRamImage(heightfield_base)
                 # generate terrain visualization
-                self._generate_mesh_vis_terrain(self._terrain_size, heightfield_tex, semantic_tex)
+                self._generate_mesh_vis_terrain(self._terrain_size, self.heightfield_tex, self.semantic_tex)
         # reset position
         self.set_position(center_point)
         self.attach_to_world(self.engine.render, self.engine.physics_world)
@@ -175,12 +179,12 @@ class Terrain(BaseObject, ABC):
         self._node_path_list.append(np)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -385,6 +389,7 @@ class Terrain(BaseObject, ABC):
         heightfield_tex = engine.loader.loadTexture(AssetLoader.file_path("textures", "terrain", "heightfield.png"))
         heightfield_img = np.frombuffer(heightfield_tex.getRamImage().getData(), dtype=np.uint16)
         heightfield_img = heightfield_img.reshape((heightfield_tex.getYSize(), heightfield_tex.getXSize(), 1))
+        # heightfield_img = numpy.rot90(heightfield_img)
         down_sample_rate = int(heightfield_tex.getYSize() / self._terrain_size)  # downsample to 2048 m
         self.heightfield_img = np.array(heightfield_img[::down_sample_rate, ::down_sample_rate])
 
@@ -621,7 +626,6 @@ class Terrain(BaseObject, ABC):
         dummy_np = NodePath("Dummy")
         dummy_np.setShader(terrain_shader)
         return dummy_np.getState()
-
 
 # Some useful threads
 # GeoMipTerrain:

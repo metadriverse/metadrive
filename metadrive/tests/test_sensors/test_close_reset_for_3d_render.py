@@ -16,9 +16,11 @@ def test_close_reset_for_3d_render():
         # env = MetaDriveEnv({"image_observation": True, "use_render": False, "force_destroy": True, "preload_models": False, "sensors": sensors, "log_level": logging.CRITICAL})
         ## onscreen
         env = MetaDriveEnv({"use_render": True,
-                            "debug_physics_world": True,
+                            # "show_terrain": False,
                             "log_level": logging.CRITICAL})
         obs, _ = env.reset()
+        # for _ in range(1000000):
+        #     env.step(env.action_space.sample())
         env.close()
 
         del env
