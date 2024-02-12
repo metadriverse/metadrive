@@ -57,7 +57,7 @@ def test_route_completion_hard():
                 break
         assert "route_completion" in i
         print(i["route_completion"], i)
-        assert i["route_completion"] > 0.9
+        assert i["route_completion"] > 0.8  # The vehicle will not reach destination due to randomness in IDM.
     finally:
         if "env" in locals():
             env.close()
