@@ -1,28 +1,57 @@
 from metadrive.envs import MetaDriveEnv
+
+from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.utils import setup_logger
 
 
-def test_route_completion():
-    # Crash vehicle
+def test_route_completion_easy():
+    # In easy map
     config = {}
     config["map"] = "SSS"
     config["traffic_density"] = 0
     try:
         env = MetaDriveEnv(config=config)
         o, i = env.reset()
+        assert "route_completion" in i
         rc = env.vehicle.navigation.route_completion
         epr = 0
         for _ in range(1000):
             o, r, tm, tc, i = env.step([0, 1])
             epr += r
             env.render(mode="topdown")
-            # print("R: {}, Accu R: {}".format(r, epr))
             if tm or tc:
                 epr = 0
                 break
-        # assert i[TerminationState.CRASH]
-        # assert i[TerminationState.CRASH_VEHICLE]
-        print(1111)
+        assert "route_completion" in i
+        print(i["route_completion"])
+        assert i["route_completion"] > 0.95
+    finally:
+        if "env" in locals():
+            env.close()
+
+
+def test_route_completion_hard():
+    # In hard map
+    config = {}
+    config["map"] = "SCXTO"
+    config["agent_policy"] = IDMPolicy
+    config["traffic_density"] = 0
+    try:
+        env = MetaDriveEnv(config=config)
+        o, i = env.reset()
+        assert "route_completion" in i
+        rc = env.vehicle.navigation.route_completion
+        epr = 0
+        for _ in range(1000):
+            o, r, tm, tc, i = env.step([0, 0])
+            epr += r
+            env.render(mode="topdown")
+            if tm or tc:
+                epr = 0
+                break
+        assert "route_completion" in i
+        print(i["route_completion"], i)
+        assert i["route_completion"] > 0.9
     finally:
         if "env" in locals():
             env.close()
@@ -30,4 +59,4 @@ def test_route_completion():
 
 if __name__ == '__main__':
     setup_logger(True)
-    test_route_completion()
+    test_route_completion_hard()

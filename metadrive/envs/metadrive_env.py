@@ -276,6 +276,9 @@ class MetaDriveEnv(BaseEnv):
             reward = -self.config["crash_vehicle_penalty"]
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
+
+        step_info["route_completion"] = vehicle.navigation.route_completion
+
         return reward, step_info
 
     def setup_engine(self):
