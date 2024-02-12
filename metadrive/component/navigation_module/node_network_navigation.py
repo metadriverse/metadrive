@@ -131,12 +131,27 @@ class NodeNetworkNavigation(BaseNavigation):
             check_point = ref_lane.position(ref_lane.length, later_middle)
             self._dest_node_path.setPos(panda_vector(check_point[0], check_point[1], self.MARK_HEIGHT))
 
+        # Compute the total length of the route for computing route completion
+        self.total_length = 0.0
+        self.travelled_length = 0.0
+        self._last_long_in_ref_lane = 0.0
+        for ckpt1, ckpt2 in zip(self.checkpoints[:-1], self.checkpoints[1:]):
+            self.total_length += self.map.road_network.graph[ckpt1][ckpt2][0].length
+
     def update_localization(self, ego_vehicle):
         position = ego_vehicle.position
         lane, lane_index = self._update_current_lane(ego_vehicle)
         long, _ = lane.local_coordinates(position)
         need_update = self._update_target_checkpoints(lane_index, long)
         assert len(self.checkpoints) >= 2
+
+        # Update travelled_length for route completion
+        long_in_ref_lane, _ = self.current_ref_lanes[0].local_coordinates(position)
+        travelled = long_in_ref_lane - self._last_long_in_ref_lane
+        self.travelled_length += travelled
+        self._last_long_in_ref_lane = long_in_ref_lane
+        # print(f"{self.travelled_length=}, {travelled=}, {long_in_ref_lane=}, "
+        #       f"{self.route_completion=}, {self._last_long_in_ref_lane=}")
 
         # target_road_1 is the road segment the vehicle is driving on.
         if need_update:
@@ -145,6 +160,8 @@ class NodeNetworkNavigation(BaseNavigation):
             target_lanes_1 = self.map.road_network.graph[target_road_1_start][target_road_1_end]
             self.current_ref_lanes = target_lanes_1
             self.current_road = Road(target_road_1_start, target_road_1_end)
+
+            self._last_long_in_ref_lane = self.current_ref_lanes[0].local_coordinates(position)[0]
 
             # target_road_2 is next road segment the vehicle should drive on.
             target_road_2_start = self.checkpoints[self._target_checkpoints_index[1]]
@@ -161,10 +178,12 @@ class NodeNetworkNavigation(BaseNavigation):
 
         self._navi_info.fill(0.0)
         half = self.CHECK_POINT_INFO_DIM
+        # Put the next checkpoint's information into the first half of the navi_info
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
             lanes_id=0, ref_lane=self.current_ref_lanes[0], ego_vehicle=ego_vehicle
         )
 
+        # Put the next of the next checkpoint's information into the first half of the navi_info
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
             lanes_id=1,
             ref_lane=self.next_ref_lanes[0] if self.next_ref_lanes is not None else self.current_ref_lanes[0],
@@ -323,5 +342,4 @@ class NodeNetworkNavigation(BaseNavigation):
 
     @property
     def route_completion(self):
-        print(1)
-
+        return self.travelled_length / self.total_length

@@ -15,6 +15,7 @@ def test_route_completion():
         for _ in range(1000):
             o, r, tm, tc, i = env.step([0, 1])
             epr += r
+            env.render(mode="topdown")
             # print("R: {}, Accu R: {}".format(r, epr))
             if tm or tc:
                 epr = 0
