@@ -243,9 +243,12 @@ class NodeRoadNetwork(BaseRoadNetwork):
         """
         Breadth-first search of all routes from start to goal.
 
-        :param start: starting node
-        :param goal: goal node
-        :return: list of paths from start to goal.
+        Args:
+            start: starting node
+            goal: goal node
+
+        Returns:
+            list of paths from start to goal.
         """
         queue = [(start, [start])]
         while queue:
@@ -260,11 +263,14 @@ class NodeRoadNetwork(BaseRoadNetwork):
 
     def shortest_path(self, start: str, goal: str) -> List[str]:
         """
-        Breadth-first search of shortest checkpoints from start to goal.
+        Breadth-first search of the shortest checkpoints from start to goal.
 
-        :param start: starting node
-        :param goal: goal node
-        :return: shortest checkpoints from start to goal.
+        Args:
+            start: starting node
+            goal: goal node
+
+        Returns:
+            The shortest checkpoints from start to goal.
         """
         start_road_node = start[0]
         assert start != goal

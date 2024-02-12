@@ -92,10 +92,14 @@ class NodeNetworkNavigation(BaseNavigation):
 
     def set_route(self, current_lane_index: str, destination: str):
         """
-        Find a shortest path from start road to end road
-        :param current_lane_index: start road node
-        :param destination: end road node or end lane index
-        :return: None
+        Find the shortest path from start road to the end road.
+
+        Args:
+            current_lane_index: start road node
+            destination: end road node or end lane index
+
+        Returns:
+            None
         """
         self.spawn_road = current_lane_index[:-1]
         self.checkpoints = self.map.road_network.shortest_path(current_lane_index, destination)
@@ -127,12 +131,36 @@ class NodeNetworkNavigation(BaseNavigation):
             check_point = ref_lane.position(ref_lane.length, later_middle)
             self._dest_node_path.setPos(panda_vector(check_point[0], check_point[1], self.MARK_HEIGHT))
 
+        # Compute the total length of the route for computing route completion
+        self.total_length = 0.0
+        self.travelled_length = 0.0
+        self._last_long_in_ref_lane = 0.0
+        for ckpt1, ckpt2 in zip(self.checkpoints[:-1], self.checkpoints[1:]):
+            self.total_length += self.map.road_network.graph[ckpt1][ckpt2][0].length
+
     def update_localization(self, ego_vehicle):
+        """
+        Update current position, route completion and checkpoints according to current position.
+
+        Args:
+            ego_vehicle: a vehicle object
+
+        Returns:
+            None
+        """
         position = ego_vehicle.position
         lane, lane_index = self._update_current_lane(ego_vehicle)
         long, _ = lane.local_coordinates(position)
         need_update = self._update_target_checkpoints(lane_index, long)
         assert len(self.checkpoints) >= 2
+
+        # Update travelled_length for route completion
+        long_in_ref_lane, _ = self.current_ref_lanes[0].local_coordinates(position)
+        travelled = long_in_ref_lane - self._last_long_in_ref_lane
+        self.travelled_length += travelled
+        self._last_long_in_ref_lane = long_in_ref_lane
+        # print(f"{self.travelled_length=}, {travelled=}, {long_in_ref_lane=}, "
+        #       f"{self.route_completion=}, {self._last_long_in_ref_lane=}")
 
         # target_road_1 is the road segment the vehicle is driving on.
         if need_update:
@@ -141,6 +169,8 @@ class NodeNetworkNavigation(BaseNavigation):
             target_lanes_1 = self.map.road_network.graph[target_road_1_start][target_road_1_end]
             self.current_ref_lanes = target_lanes_1
             self.current_road = Road(target_road_1_start, target_road_1_end)
+
+            self._last_long_in_ref_lane = self.current_ref_lanes[0].local_coordinates(position)[0]
 
             # target_road_2 is next road segment the vehicle should drive on.
             target_road_2_start = self.checkpoints[self._target_checkpoints_index[1]]
@@ -157,10 +187,12 @@ class NodeNetworkNavigation(BaseNavigation):
 
         self._navi_info.fill(0.0)
         half = self.CHECK_POINT_INFO_DIM
+        # Put the next checkpoint's information into the first half of the navi_info
         self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
             lanes_id=0, ref_lane=self.current_ref_lanes[0], ego_vehicle=ego_vehicle
         )
 
+        # Put the next of the next checkpoint's information into the first half of the navi_info
         self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
             lanes_id=1,
             ref_lane=self.next_ref_lanes[0] if self.next_ref_lanes is not None else self.current_ref_lanes[0],
@@ -241,7 +273,17 @@ class NodeNetworkNavigation(BaseNavigation):
         return (*possible_lanes[0][:-1], on_lane) if len(possible_lanes) > 0 else (None, None, on_lane)
 
     def _get_info_for_checkpoint(self, lanes_id, ref_lane, ego_vehicle):
+        """
+        Return the information of checkpoints for state observation.
 
+        Args:
+            lanes_id: the lane index of current lane. (lanes is a list so each lane has an index in this list)
+            ref_lane: the reference lane.
+            ego_vehicle: the vehicle object.
+
+        Returns:
+            navi_information, lanes_heading, check_point
+        """
         navi_information = []
         # Project the checkpoint position into the target vehicle's coordination, where
         # +x is the heading and +y is the right hand side.
@@ -304,5 +346,11 @@ class NodeNetworkNavigation(BaseNavigation):
         return lane, lane_index
 
     def get_state(self):
+        """Return the navigation information for recording/replaying."""
         final_road = self.final_road
         return {"spawn_road": self.spawn_road, "destination": (final_road.start_node, final_road.end_node)}
+
+    @property
+    def route_completion(self):
+        """Return the route completion at this moment."""
+        return self.travelled_length / self.total_length
