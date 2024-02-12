@@ -139,6 +139,15 @@ class NodeNetworkNavigation(BaseNavigation):
             self.total_length += self.map.road_network.graph[ckpt1][ckpt2][0].length
 
     def update_localization(self, ego_vehicle):
+        """
+        Update current position, route completion and checkpoints according to current position.
+
+        Args:
+            ego_vehicle: a vehicle object
+
+        Returns:
+            None
+        """
         position = ego_vehicle.position
         lane, lane_index = self._update_current_lane(ego_vehicle)
         long, _ = lane.local_coordinates(position)
@@ -268,12 +277,12 @@ class NodeNetworkNavigation(BaseNavigation):
         Return the information of checkpoints for state observation.
 
         Args:
-            lanes_id:
-            ref_lane:
-            ego_vehicle:
+            lanes_id: the lane index of current lane. (lanes is a list so each lane has an index in this list)
+            ref_lane: the reference lane.
+            ego_vehicle: the vehicle object.
 
         Returns:
-
+            navi_information, lanes_heading, check_point
         """
         navi_information = []
         # Project the checkpoint position into the target vehicle's coordination, where
@@ -337,9 +346,11 @@ class NodeNetworkNavigation(BaseNavigation):
         return lane, lane_index
 
     def get_state(self):
+        """Return the navigation information for recording/replaying."""
         final_road = self.final_road
         return {"spawn_road": self.spawn_road, "destination": (final_road.start_node, final_road.end_node)}
 
     @property
     def route_completion(self):
+        """Return the route completion at this moment."""
         return self.travelled_length / self.total_length

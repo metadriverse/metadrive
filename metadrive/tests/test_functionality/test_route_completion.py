@@ -5,6 +5,9 @@ from metadrive.utils import setup_logger
 
 
 def test_route_completion_easy():
+    """
+    Use an easy map to test whether the route completion is computed correctly.
+    """
     # In easy map
     config = {}
     config["map"] = "SSS"
@@ -31,6 +34,9 @@ def test_route_completion_easy():
 
 
 def test_route_completion_hard():
+    """
+    Use a hard map to test whether the route completion is computed correctly.
+    """
     # In hard map
     config = {}
     config["map"] = "SCXTO"
