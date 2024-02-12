@@ -92,10 +92,14 @@ class NodeNetworkNavigation(BaseNavigation):
 
     def set_route(self, current_lane_index: str, destination: str):
         """
-        Find a shortest path from start road to end road
-        :param current_lane_index: start road node
-        :param destination: end road node or end lane index
-        :return: None
+        Find the shortest path from start road to the end road.
+
+        Args:
+            current_lane_index: start road node
+            destination: end road node or end lane index
+
+        Returns:
+            None
         """
         self.spawn_road = current_lane_index[:-1]
         self.checkpoints = self.map.road_network.shortest_path(current_lane_index, destination)
@@ -241,7 +245,17 @@ class NodeNetworkNavigation(BaseNavigation):
         return (*possible_lanes[0][:-1], on_lane) if len(possible_lanes) > 0 else (None, None, on_lane)
 
     def _get_info_for_checkpoint(self, lanes_id, ref_lane, ego_vehicle):
+        """
+        Return the information of checkpoints for state observation.
 
+        Args:
+            lanes_id:
+            ref_lane:
+            ego_vehicle:
+
+        Returns:
+
+        """
         navi_information = []
         # Project the checkpoint position into the target vehicle's coordination, where
         # +x is the heading and +y is the right hand side.
@@ -306,3 +320,8 @@ class NodeNetworkNavigation(BaseNavigation):
     def get_state(self):
         final_road = self.final_road
         return {"spawn_road": self.spawn_road, "destination": (final_road.start_node, final_road.end_node)}
+
+    @property
+    def route_completion(self):
+        print(1)
+
