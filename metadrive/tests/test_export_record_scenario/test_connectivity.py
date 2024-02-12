@@ -1,7 +1,6 @@
-import os
 import copy
 import os
-import pickle
+import pathlib
 import shutil
 
 from metadrive.component.map.base_map import BaseMap
@@ -10,6 +9,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.idm_policy import IDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.scenario.utils import save_dataset
 
 
 def test_search_path(render_export_env=False, render_load_env=False):
@@ -34,11 +34,11 @@ def test_search_path(render_export_env=False, render_load_env=False):
 
     try:
         scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(1)])
-        dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
-        os.makedirs(dir, exist_ok=True)
-        for i, data in scenarios.items():
-            with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
-                pickle.dump(data, file)
+
+        dir = pathlib.Path(os.path.dirname(__file__)) / "../test_component/test_export"
+        save_dataset(
+            scenario_list=list(scenarios.values()), dataset_name="reconstructed", dataset_version="v0", dataset_dir=dir
+        )
         node_roadnet = copy.deepcopy(env.current_map.road_network)
         env.close()
 
@@ -47,11 +47,11 @@ def test_search_path(render_export_env=False, render_load_env=False):
             dict(agent_policy=ReplayEgoCarPolicy, data_directory=dir, use_render=render_load_env, num_scenarios=1)
         )
         scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(1)])
-        dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
-        os.makedirs(dir, exist_ok=True)
-        for i, data in scenarios.items():
-            with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
-                pickle.dump(data, file)
+
+        dir = pathlib.Path(os.path.dirname(__file__)) / "../test_component/test_export"
+        save_dataset(
+            scenario_list=list(scenarios.values()), dataset_name="reconstructed", dataset_version="v0", dataset_dir=dir
+        )
         env.close()
 
         # reload
