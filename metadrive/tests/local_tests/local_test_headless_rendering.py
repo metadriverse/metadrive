@@ -69,6 +69,7 @@ if __name__ == "__main__":
             screen_size=(1600, 900),
             film_size=(9000, 9000),
             target_vehicle_heading_up=True,
+            semantic_map=True,
         )
 
         for t in range(10000):
@@ -81,6 +82,7 @@ if __name__ == "__main__":
                 screen_size=(1600, 900),
                 film_size=(9000, 9000),
                 target_vehicle_heading_up=True,
+                semantic_map=True,
                 to_image=False
             )
             pygame.image.save(ret, str(file_dir / "bev_{}.png".format(t)))
