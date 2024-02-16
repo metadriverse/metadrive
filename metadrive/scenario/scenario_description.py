@@ -644,6 +644,7 @@ class ScenarioDescription(dict):
             if "polygon" in map_feature:
                 map_feature["polygon"] = np.asarray(map_feature["polygon"])
                 map_feature["polygon"][..., :2] -= initial_pos
+        scenario["metadata"]["offset"] = initial_pos
         return scenario
 
 
