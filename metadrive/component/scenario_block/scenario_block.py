@@ -31,7 +31,7 @@ class ScenarioBlock(BaseBlock):
             elif MetaDriveType.is_sidewalk(data["type"]):
                 self.sidewalks[object_id] = {
                     ScenarioDescription.TYPE: MetaDriveType.BOUNDARY_SIDEWALK,
-                    ScenarioDescription.POLYGON: np.asarray(data[ScenarioDescription.POLYGON])[...,:2]
+                    ScenarioDescription.POLYGON: np.asarray(data[ScenarioDescription.POLYGON])[..., :2]
                 }
             elif MetaDriveType.is_crosswalk(data["type"]):
                 self.crosswalks[object_id] = {

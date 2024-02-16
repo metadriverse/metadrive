@@ -631,6 +631,8 @@ class ScenarioDescription(dict):
         """
         sdc_id = scenario[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
         initial_pos = np.array(scenario[ScenarioDescription.TRACKS][sdc_id]["state"]["position"][0], copy=True)[:2]
+        if abs(np.sum(initial_pos)) < 1e-3:
+            return scenario
         for track in scenario[ScenarioDescription.TRACKS].values():
             track["state"]["position"] = np.asarray(track["state"]["position"])
             track["state"]["position"][..., :2] -= initial_pos
@@ -643,7 +645,6 @@ class ScenarioDescription(dict):
                 map_feature["polygon"] = np.asarray(map_feature["polygon"])
                 map_feature["polygon"][..., :2] -= initial_pos
         return scenario
-
 
 
 def _recursive_check_type(obj, allow_types, depth=0):
