@@ -347,6 +347,7 @@ def read_scenario_data(file_path):
         # unpickler = CustomUnpickler(f)
         data = pickle.load(f)
     data = ScenarioDescription(data)
+    data = ScenarioDescription.centralize_to_ego_car_initial_position(data)
     return data
 
 

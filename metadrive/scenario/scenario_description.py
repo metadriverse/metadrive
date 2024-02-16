@@ -623,6 +623,28 @@ class ScenarioDescription(dict):
                 break
         return float(max - min)
 
+    @staticmethod
+    def centralize_to_ego_car_initial_position(scenario):
+        """
+        All positions of polylines/polygons/objects are offset to ego car's first frame position.
+        Returns: a modified scenario file
+        """
+        sdc_id = scenario[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
+        initial_pos = np.array(scenario[ScenarioDescription.TRACKS][sdc_id]["state"]["position"][0], copy=True)[:2]
+        for track in scenario[ScenarioDescription.TRACKS].values():
+            track["state"]["position"] = np.asarray(track["state"]["position"])
+            track["state"]["position"][..., :2] -= initial_pos
+
+        for map_feature in scenario[ScenarioDescription.MAP_FEATURES].values():
+            if "polyline" in map_feature:
+                map_feature["polyline"] = np.asarray(map_feature["polyline"])
+                map_feature["polyline"][..., :2] -= initial_pos
+            if "polygon" in map_feature:
+                map_feature["polygon"] = np.asarray(map_feature["polygon"])
+                map_feature["polygon"][..., :2] -= initial_pos
+        return scenario
+
+
 
 def _recursive_check_type(obj, allow_types, depth=0):
     if isinstance(obj, dict):
