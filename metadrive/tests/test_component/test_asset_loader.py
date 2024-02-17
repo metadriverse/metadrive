@@ -13,7 +13,7 @@ def test_asset_loader():
         # print(AssetLoader.file_path("aaa"))
     # # print(AssetLoader.get_loader())
     finally:
-        world.close_world()
+        world.close_engine()
 
 
 if __name__ == '__main__':
