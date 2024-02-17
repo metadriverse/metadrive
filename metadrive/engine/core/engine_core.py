@@ -424,6 +424,7 @@ class EngineCore(ShowBase.ShowBase):
                 # Recursively find subclasses of the current subclass
                 subclasses.extend(find_all_subclasses(subclass))
             return subclasses
+
         gc.collect()
         all_classes = find_all_subclasses(BaseObject)
         for cls in all_classes:
