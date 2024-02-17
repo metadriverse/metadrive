@@ -18,6 +18,7 @@ class DepthCamera(BaseCamera):
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
+        self.shader_local_size = (16, 16)
         # factors of the log algorithm used to process distance to object
         self.log_b = np.log(16)
         self.log_base = np.log(5)
@@ -139,8 +140,10 @@ class DepthCamera(BaseCamera):
         """
         Call me per frame when you want to access the depth texture result with cuda enabled
         """
+        work_group_x = int(np.ceil(self.depth_tex.getXSize() / self.shader_local_size[0]))
+        work_group_y = int(np.ceil(self.depth_tex.getYSize() / self.shader_local_size[1]))
         self.engine.graphicsEngine.dispatch_compute(
-            (64, 64, 1), self.compute_node.get_attrib(ShaderAttrib), self.engine.win.get_gsg()
+            (work_group_x, work_group_y, 1), self.compute_node.get_attrib(ShaderAttrib), self.engine.win.get_gsg()
         )
         # self.engine.graphicsEngine.extractTextureData(self.output_tex, self.engine.win.get_gsg())
         # self.output_tex.write("{}.png".format(self.engine.episode_step))

@@ -27,6 +27,7 @@ from metadrive.engine.core.sky_box import SkyBox
 from metadrive.engine.core.terrain import Terrain
 from metadrive.engine.logger import get_logger
 from metadrive.utils.utils import is_mac, setup_logger
+import logging
 
 logger = get_logger()
 
@@ -40,6 +41,7 @@ def _suppress_warning():
     loadPrcFileData("", "notify-level-device fatal")
     loadPrcFileData("", "notify-level-bullet fatal")
     loadPrcFileData("", "notify-level-display fatal")
+    logging.getLogger('shapely.geos').setLevel(logging.CRITICAL)
 
 
 def _free_warning():

@@ -175,7 +175,8 @@ class TopDownRenderer:
         history_smooth=0,
         show_agent_name=False,
         camera_position=None,
-        target_vehicle_heading_up=False,
+        target_agent_heading_up=False,
+        target_vehicle_heading_up=None,
         draw_target_vehicle_trajectory=False,
         semantic_map=False,
         semantic_broken_line=True,
@@ -206,8 +207,10 @@ class TopDownRenderer:
             camera_position: Set the (x,y) position of the top_down camera. If it is not specified, the camera will move
             with the ego car.
 
-            target_vehicle_heading_up: Whether to rotate the camera according to the ego car's heading. When enabled,
+            target_agent_heading_up: Whether to rotate the camera according to the ego agent's heading. When enabled,
             The ego car always faces upwards.
+
+            target_vehicle_heading_up: Deprecated, use target_agent_heading_up instead!
 
             draw_target_vehicle_trajectory: Whether to draw the ego car's whole trajectory without faded color
 
@@ -231,8 +234,13 @@ class TopDownRenderer:
             self.logger.warning("num_stack should be greater than 0. Current value: {}. Set to 1".format(num_stack))
             num_stack = 1
 
+        if target_vehicle_heading_up is not None:
+            self.logger.warning("target_vehicle_heading_up is deprecated! Use target_agent_heading_up instead!")
+            assert target_agent_heading_up is False
+            target_agent_heading_up = target_vehicle_heading_up
+
         self.position = camera_position
-        self.target_vehicle_heading_up = target_vehicle_heading_up
+        self.target_agent_heading_up = target_agent_heading_up
         self.show_agent_name = show_agent_name
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
         self.contour = draw_contour
@@ -251,7 +259,7 @@ class TopDownRenderer:
         self.history_target_vehicle = []
         self.history_smooth = history_smooth
         # self.current_track_agent = current_track_agent
-        if self.target_vehicle_heading_up:
+        if self.target_agent_heading_up:
             assert self.current_track_agent is not None, "Specify which vehicle to track"
         self._text_render_pos = [50, 50]
         self._font_size = 25
@@ -259,9 +267,11 @@ class TopDownRenderer:
         self.semantic_map = semantic_map
         self.scaling = scaling
         self.film_size = film_size
+        self._screen_size = screen_size
 
         # Setup the canvas
-        # (1) background is the underlying layer. It is fixed and will never change unless the map changes.
+        # (1) background is the underlying layer that draws map.
+        # It is fixed and will never change unless the map changes.
         self._background_canvas = draw_top_down_map_native(
             self.map,
             scaling=self.scaling,
@@ -270,22 +280,18 @@ class TopDownRenderer:
             film_size=self.film_size,
             semantic_broken_line=self.semantic_broken_line
         )
-        # (2) runtime is a copy of the background so you can draw movable things on it. It is super large
-        # and our vehicles can draw on this large canvas.
+
+        # (2) frame is a copy of the background so you can draw movable things on it.
+        # It is super large as the background.
         self._frame_canvas = self._background_canvas.copy()
 
-        # (3) it is only used for track vehicle
-        self.receptive_field_double = (
-            int(self._frame_canvas.pix(100 * np.sqrt(2))) * 2, int(self._frame_canvas.pix(100 * np.sqrt(2))) * 2
-        )
-        self.canvas_rotate = pygame.Surface(self.receptive_field_double)
-        # self._runtime_output = self._background_canvas.copy()  # TODO(pzh) what is this?
+        # (3) canvas_rotate is only used when target_vehicle_heading_up=True and is use to center the tracked agent.
+        if self.target_agent_heading_up:
+            max_screen_size = max(self._screen_size[0], self._screen_size[1])
+            self.canvas_rotate = pygame.Surface((max_screen_size * 2, max_screen_size * 2))
 
-        # Setup some runtime variables
-        self._screen_size = screen_size
-
-        # screen and canvas are a regional surface where only part of the super large background will draw.
-        # (3) screen is the popup window and canvas is a wrapper to screen but with more features
+        # (4) screen_canvas is a regional surface where only part of the super large background will draw.
+        # This will be used to as the final image shown in the screen & saved.
         self._screen_canvas = pygame.Surface(self._screen_size
                                              ) if self.no_window else pygame.display.set_mode(self._screen_size)
         self._screen_canvas.set_alpha(None)
@@ -504,7 +510,7 @@ class TopDownRenderer:
         v = self.current_track_agent
         canvas = self._frame_canvas
         field = self._screen_canvas.get_size()
-        if not self.target_vehicle_heading_up:
+        if not self.target_agent_heading_up:
             if self.position is not None or v is not None:
                 cam_pos = (self.position or v.position)
                 position = self._frame_canvas.pos2pix(*cam_pos)
@@ -514,14 +520,14 @@ class TopDownRenderer:
             self.screen_canvas.blit(source=canvas, dest=(0, 0), area=(off[0], off[1], field[0], field[1]))
         else:
             position = self._frame_canvas.pos2pix(*v.position)
-            self.canvas_rotate.blit(
-                canvas, (0, 0), (
-                    position[0] - self.receptive_field_double[0] / 2, position[1] - self.receptive_field_double[1] / 2,
-                    self.receptive_field_double[0], self.receptive_field_double[1]
-                )
+            area = (
+                position[0] - self.canvas_rotate.get_size()[0] / 2, position[1] - self.canvas_rotate.get_size()[1] / 2,
+                self.canvas_rotate.get_size()[0], self.canvas_rotate.get_size()[1]
             )
+            self.canvas_rotate.fill(color_white)
+            self.canvas_rotate.blit(source=canvas, dest=(0, 0), area=area)
 
-            rotation = np.rad2deg(v.heading_theta) + 90
+            rotation = -np.rad2deg(v.heading_theta) + 90
             new_canvas = pygame.transform.rotozoom(self.canvas_rotate, rotation, 1)
 
             size = self._screen_canvas.get_size()

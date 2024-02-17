@@ -1,4 +1,6 @@
 import os
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
+import pathlib
 import pickle
 import shutil
 
@@ -12,6 +14,7 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.scenario.utils import NP_ARRAY_DECIMAL
 from metadrive.scenario.utils import assert_scenario_equal
 from metadrive.scenario.utils import read_dataset_summary
+from metadrive.scenario.utils import save_dataset
 from metadrive.type import MetaDriveType
 from metadrive.utils.math import wrap_to_pi
 
@@ -24,11 +27,14 @@ def test_export_metadrive_scenario_reproduction(num_scenarios=3, render_export_e
     dir1 = None
     try:
         scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
-        dir1 = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
-        os.makedirs(dir1, exist_ok=True)
-        for i, data in scenarios.items():
-            with open(os.path.join(dir1, "{}.pkl".format(i)), "wb+") as file:
-                pickle.dump(data, file)
+        dir1 = pathlib.Path(os.path.dirname(__file__)) / "../test_component/test_export"
+        save_dataset(
+            scenario_list=list(scenarios.values()),
+            dataset_name="reconstructed",
+            dataset_version="v0",
+            dataset_dir=dir1
+        )
+
     finally:
         env.close()
 
@@ -60,11 +66,13 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
     dir1 = None
     try:
         scenarios, done_info = env.export_scenarios(policy, scenario_index=[i for i in range(num_scenarios)])
-        dir1 = os.path.join(os.path.dirname(__file__), "test_export_scenario_consistancy")
-        os.makedirs(dir1, exist_ok=True)
-        for i, data in scenarios.items():
-            with open(os.path.join(dir1, "{}.pkl".format(i)), "wb+") as file:
-                pickle.dump(data, file)
+        dir1 = pathlib.Path(os.path.dirname(__file__)) / "test_export_scenario_consistency"
+        save_dataset(
+            scenario_list=list(scenarios.values()),
+            dataset_name="reconstructed",
+            dataset_version="v0",
+            dataset_dir=dir1
+        )
     finally:
         env.close()
         # pass
@@ -99,6 +107,12 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
     if dir1 is not None:
         shutil.rmtree(dir1)
 
+    for scenario_id in scenarios_restored:
+        o = scenarios_restored[scenario_id]["metadata"]["history_metadata"].get(
+            "old_origin_in_current_coordinate", np.array([0, 0])
+        )
+        scenarios_restored[scenario_id] = SD.offset_scenario_with_new_origin(scenarios_restored[scenario_id], o)
+
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
 
@@ -119,11 +133,13 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
         scenarios, done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(start_seed, start_seed + num_scenarios)]
         )
-        dir1 = os.path.join(os.path.dirname(__file__), "test_export_metadrive_scenario_hard")
-        os.makedirs(dir1, exist_ok=True)
-        for i, data in scenarios.items():
-            with open(os.path.join(dir1, "{}.pkl".format(i)), "wb+") as file:
-                pickle.dump(data, file)
+        dir1 = pathlib.Path(os.path.dirname(__file__)) / "test_export_metadrive_scenario_hard"
+        save_dataset(
+            scenario_list=list(scenarios.values()),
+            dataset_name="reconstructed",
+            dataset_version="v0",
+            dataset_dir=dir1
+        )
     finally:
         env.close()
         # pass
@@ -159,6 +175,12 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
     if dir1 is not None:
         shutil.rmtree(dir1)
 
+    for scenario_id in scenarios_restored:
+        o = scenarios_restored[scenario_id]["metadata"]["history_metadata"].get(
+            "old_origin_in_current_coordinate", np.array([0, 0])
+        )
+        scenarios_restored[scenario_id] = SD.offset_scenario_with_new_origin(scenarios_restored[scenario_id], o)
+
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
 
@@ -178,11 +200,10 @@ def test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_
         scenarios, done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
         )
-        dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
-        os.makedirs(dir, exist_ok=True)
-        for i, data in scenarios.items():
-            with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
-                pickle.dump(data, file)
+        dir = pathlib.Path(os.path.dirname(__file__)) / "../test_component/test_export"
+        save_dataset(
+            scenario_list=list(scenarios.values()), dataset_name="reconstructed", dataset_version="v0", dataset_dir=dir
+        )
     finally:
         env.close()
 
@@ -229,11 +250,10 @@ def test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, rend
         scenarios, done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
         )
-        dir = os.path.join(os.path.dirname(__file__), "../test_component/test_export")
-        os.makedirs(dir, exist_ok=True)
-        for i, data in scenarios.items():
-            with open(os.path.join(dir, "{}.pkl".format(i)), "wb+") as file:
-                pickle.dump(data, file)
+        dir = pathlib.Path(os.path.dirname(__file__)) / "../test_component/test_export"
+        save_dataset(
+            scenario_list=list(scenarios.values()), dataset_name="reconstructed", dataset_version="v0", dataset_dir=dir
+        )
     finally:
         env.close()
 
@@ -372,6 +392,11 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
         scenarios, done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
         )
+        for scenario_id in scenarios:
+            o = scenarios[scenario_id]["metadata"]["history_metadata"].get(
+                "old_origin_in_current_coordinate", np.array([0, 0])
+            )
+            scenarios[scenario_id] = SD.offset_scenario_with_new_origin(scenarios[scenario_id], o)
         compare_exported_scenario_with_origin(scenarios, env.engine.data_manager)
     finally:
         env.close()
@@ -401,9 +426,9 @@ def test_nuscenes_export_and_original_consistency(num_scenarios=7, render_export
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
-    # test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False)
     # test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)
     # test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, render_load_env=False)
-    test_nuscenes_export_and_original_consistency()
+    # test_nuscenes_export_and_original_consistency()
