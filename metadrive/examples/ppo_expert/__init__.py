@@ -1,5 +1,7 @@
-import importlib
-if importlib.util.find_spec("torch") is not None:
+try:
+    import torch
+
+    assert hasattr(torch, "device")
     from metadrive.examples.ppo_expert.torch_expert import torch_expert as expert
-else:
+except:
     from metadrive.examples.ppo_expert.numpy_expert import expert
