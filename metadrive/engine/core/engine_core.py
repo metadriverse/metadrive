@@ -398,7 +398,8 @@ class EngineCore(ShowBase.ShowBase):
                 self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
             )
         )
-        self._window_logo.removeNode()
+        if hasattr(self, "_window_logo"):
+            self._window_logo.removeNode()
         self.terrain.destroy()
         self.sky_box.destroy()
         self.physics_world.dynamic_world.clearContactAddedCallback()
