@@ -444,6 +444,11 @@ class BaseEngine(EngineCore, Randomizable):
             if self.force_fps.real_time_simulation and i < step_num - 1:
                 self.task_manager.step()
 
+        #  Do rendering
+        self.task_manager.step()
+        if self.on_screen_message is not None:
+            self.on_screen_message.render()
+
     def after_step(self, *args, **kwargs) -> Dict:
         """
         Update states after finishing movement

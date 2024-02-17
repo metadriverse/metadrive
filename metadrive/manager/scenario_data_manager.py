@@ -65,9 +65,8 @@ class ScenarioDataManager(BaseManager):
         assert i < len(self.summary_lookup)
         scenario_id = self.summary_lookup[i]
         file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
-        ret = read_scenario_data(file_path)
+        ret = read_scenario_data(file_path, centralize=True)
         assert isinstance(ret, SD)
-        self.coverage[i - self.start_scenario_index] = 1
         return ret
 
     def before_reset(self):
@@ -76,44 +75,14 @@ class ScenarioDataManager(BaseManager):
             self._scenarios = {}
 
     def get_scenario(self, i, should_copy=False):
-
-        _debug_memory_leak = False
-
         if i not in self._scenarios:
-
-            if _debug_memory_leak:
-                # inner psutil function
-                def process_memory():
-                    import psutil
-                    import os
-                    process = psutil.Process(os.getpid())
-                    mem_info = process.memory_info()
-                    return mem_info.rss
-
-                cm = process_memory()
-
-            # self._scenarios.clear_if_necessary()
-
-            if _debug_memory_leak:
-                lm = process_memory()
-                print("{}:  Reset! Mem Change {:.3f}MB".format("data manager clear scenario", (lm - cm) / 1e6))
-                cm = lm
-
             ret = self._get_scenario(i)
             self._scenarios[i] = ret
-
-            if _debug_memory_leak:
-                lm = process_memory()
-                print("{}:  Reset! Mem Change {:.3f}MB".format("data manager read scenario", (lm - cm) / 1e6))
-                cm = lm
-
         else:
             ret = self._scenarios[i]
-            # print("===Don't need to get new scenario. Just return: ", i)
-
+        self.coverage[i - self.start_scenario_index] = 1
         if should_copy:
             return copy.deepcopy(self._scenarios[i])
-
         # Data Manager is the first manager that accesses  data.
         # It is proper to let it validate the metadata and change the global config if needed.
 
@@ -146,7 +115,7 @@ class ScenarioDataManager(BaseManager):
 
         def _score(scenario_id):
             file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
-            scenario = read_scenario_data(file_path)
+            scenario = read_scenario_data(file_path, centralize=True)
             obj_weight = 0
 
             # calculate curvature
@@ -160,14 +129,18 @@ class ScenarioDataManager(BaseManager):
 
             sdc_moving_dist = SD.sdc_moving_dist(scenario)
             num_moving_objs = SD.num_moving_object(scenario, object_type=MetaDriveType.VEHICLE)
-            return sdc_moving_dist * curvature + num_moving_objs * obj_weight
+            return sdc_moving_dist * curvature + num_moving_objs * obj_weight, scenario
 
         start = self.start_scenario_index
         end = self.start_scenario_index + self.num_scenarios
-        id_scores = [(s_id, _score(s_id)) for s_id in self.summary_lookup[start:end]]
-        id_scores = sorted(id_scores, key=lambda scenario: scenario[-1])
-        self.summary_lookup[start:end] = [id_score[0] for id_score in id_scores]
-        self.scenario_difficulty = {id_score[0]: id_score[1] for id_score in id_scores}
+        id_score_scenarios = [(s_id, *_score(s_id)) for s_id in self.summary_lookup[start:end]]
+        id_score_scenarios = sorted(id_score_scenarios, key=lambda scenario: scenario[-2])
+        self.summary_lookup[start:end] = [id_score_scenario[0] for id_score_scenario in id_score_scenarios]
+        self.scenario_difficulty = {
+            id_score_scenario[0]: id_score_scenario[1]
+            for id_score_scenario in id_score_scenarios
+        }
+        self._scenarios = {i + start: id_score_scenario[-1] for i, id_score_scenario in enumerate(id_score_scenarios)}
 
     def clear_stored_scenarios(self):
         self._scenarios = {}

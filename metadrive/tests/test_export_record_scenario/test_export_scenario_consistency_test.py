@@ -1,4 +1,5 @@
 import os
+from metadrive.scenario.scenario_description import ScenarioDescription as SD
 import pathlib
 import pickle
 import shutil
@@ -106,6 +107,12 @@ def test_export_metadrive_scenario_easy(num_scenarios=5, render_export_env=False
     if dir1 is not None:
         shutil.rmtree(dir1)
 
+    for scenario_id in scenarios_restored:
+        o = scenarios_restored[scenario_id]["metadata"]["history_metadata"].get(
+            "old_origin_in_current_coordinate", np.array([0, 0])
+        )
+        scenarios_restored[scenario_id] = SD.offset_scenario_with_new_origin(scenarios_restored[scenario_id], o)
+
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
 
@@ -167,6 +174,12 @@ def test_export_metadrive_scenario_hard(start_seed=0, num_scenarios=3, render_ex
 
     if dir1 is not None:
         shutil.rmtree(dir1)
+
+    for scenario_id in scenarios_restored:
+        o = scenarios_restored[scenario_id]["metadata"]["history_metadata"].get(
+            "old_origin_in_current_coordinate", np.array([0, 0])
+        )
+        scenarios_restored[scenario_id] = SD.offset_scenario_with_new_origin(scenarios_restored[scenario_id], o)
 
     assert_scenario_equal(scenarios, scenarios_restored, only_compare_sdc=False)
 
@@ -379,6 +392,11 @@ def test_waymo_export_and_original_consistency(num_scenarios=3, render_export_en
         scenarios, done_info = env.export_scenarios(
             policy, scenario_index=[i for i in range(num_scenarios)], verbose=True
         )
+        for scenario_id in scenarios:
+            o = scenarios[scenario_id]["metadata"]["history_metadata"].get(
+                "old_origin_in_current_coordinate", np.array([0, 0])
+            )
+            scenarios[scenario_id] = SD.offset_scenario_with_new_origin(scenarios[scenario_id], o)
         compare_exported_scenario_with_origin(scenarios, env.engine.data_manager)
     finally:
         env.close()
@@ -408,9 +426,9 @@ def test_nuscenes_export_and_original_consistency(num_scenarios=7, render_export
 
 if __name__ == "__main__":
     # test_export_metadrive_scenario_reproduction(num_scenarios=10)
-    # test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
+    test_export_metadrive_scenario_easy(render_export_env=False, render_load_env=False)
     # test_export_metadrive_scenario_hard(num_scenarios=3, render_export_env=True, render_load_env=True)
     # test_export_waymo_scenario(num_scenarios=3, render_export_env=False, render_load_env=False)
     # test_waymo_export_and_original_consistency(num_scenarios=3, render_export_env=False)
     # test_export_nuscenes_scenario(num_scenarios=2, render_export_env=False, render_load_env=False)
-    test_nuscenes_export_and_original_consistency()
+    # test_nuscenes_export_and_original_consistency()
