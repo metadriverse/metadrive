@@ -27,13 +27,12 @@ jobs:
     if: github.event_name != 'push' || github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: convictional/trigger-workflow-and-wait@v1.6.1
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
         with:
-          owner: metadriverse
-          repo: scenarionet
-          github_token: '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'
-          workflow_file_name: main.yml
-          github_user: QuanyiLi
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          repository: metadriverse/scenarionet
+          event-type: metadrive-update
 
   docstring_coverage:
     if: github.event_name != 'push' || github.ref != 'refs/heads/main'
