@@ -1,4 +1,6 @@
 import os
+import gc
+from panda3d.core import TexturePool, ModelPool
 import sys
 import time
 from typing import Optional, Union, Tuple
@@ -381,7 +383,7 @@ class EngineCore(ShowBase.ShowBase):
         logger.debug(self.physics_world.report_bodies())
         return task.done
 
-    def close_world(self):
+    def close_engine(self):
         self.taskMgr.stop()
         logger.debug(
             "Before del taskMgr: task_chain_num={}, all_tasks={}".format(
@@ -396,6 +398,7 @@ class EngineCore(ShowBase.ShowBase):
                 self.taskMgr.mgr.getNumTaskChains(), self.taskMgr.getAllTasks()
             )
         )
+        self._window_logo.removeNode()
         self.terrain.destroy()
         self.sky_box.destroy()
         self.physics_world.dynamic_world.clearContactAddedCallback()
@@ -412,6 +415,35 @@ class EngineCore(ShowBase.ShowBase):
             import __builtin__ as builtins
         if hasattr(builtins, "base"):
             del builtins.base
+        from metadrive.base_class.base_object import BaseObject
+
+        def find_all_subclasses(cls):
+            """Find all subclasses of a given class, including subclasses of subclasses."""
+            subclasses = cls.__subclasses__()
+            for subclass in subclasses:
+                # Recursively find subclasses of the current subclass
+                subclasses.extend(find_all_subclasses(subclass))
+            return subclasses
+        gc.collect()
+        all_classes = find_all_subclasses(BaseObject)
+        for cls in all_classes:
+            if hasattr(cls, "MODEL"):
+                cls.MODEL = None
+            elif hasattr(cls, "model_collections"):
+                for node_path in cls.model_collections.values():
+                    node_path.removeNode()
+                cls.model_collections = {}
+            elif hasattr(cls, "_MODEL"):
+                for node_path in cls._MODEL.values():
+                    node_path.cleanup()
+                cls._MODEL = {}
+            elif hasattr(cls, "TRAFFIC_LIGHT_MODEL"):
+                for node_path in cls.TRAFFIC_LIGHT_MODEL.values():
+                    node_path.removeNode()
+                cls.TRAFFIC_LIGHT_MODEL = {}
+        gc.collect()
+        ModelPool.releaseAllModels()
+        TexturePool.releaseAllTextures()
 
     def clear_world(self):
         self.worldNP.removeNode()
@@ -442,6 +474,7 @@ class EngineCore(ShowBase.ShowBase):
         alpha = self._loading_logo.getColor()[-1]
         if alpha < 0.1:
             self._loading_logo.destroy()
+            self._loading_logo = None
             return task.done
         else:
             new_alpha = alpha - 0.08

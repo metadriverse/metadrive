@@ -1,4 +1,5 @@
 import logging
+from panda3d.core import TexturePool, ModelPool
 
 import psutil
 
@@ -27,7 +28,7 @@ def _test_close_reset_for_3d_render():
             }
         )
         obs, _ = env.reset()
-        # for _ in range(1000000):
+        # for _ in range(50):
         #     env.step(env.action_space.sample())
         env.close()
 

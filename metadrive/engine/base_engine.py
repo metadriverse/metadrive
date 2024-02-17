@@ -514,10 +514,11 @@ class BaseEngine(EngineCore, Randomizable):
             for obj in pending_obj:
                 self._clean_color(obj.id)
                 obj.destroy()
+        self._dying_objects = {}
         if self.main_camera is not None:
             self.main_camera.destroy()
         self.interface.destroy()
-        self.close_world()
+        self.close_engine()
 
         if self.top_down_renderer is not None:
             self.top_down_renderer.close()
