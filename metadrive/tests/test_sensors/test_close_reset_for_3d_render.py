@@ -20,9 +20,9 @@ def _test_close_reset_for_3d_render():
             {
                 "use_render": True,
                 "traffic_density": 0.0,
-                "show_skybox": False,
+                "show_skybox": True,
                 # "show_terrain": False,
-                "show_sidewalk": False,
+                "show_sidewalk": True,
                 # "show_terrain": False,
                 "log_level": logging.CRITICAL
             }
