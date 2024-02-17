@@ -235,9 +235,9 @@ class ScenarioDescription(dict):
             )
             # position heading check
             assert ScenarioDescription.HEADING in obj_state[ScenarioDescription.STATE
-                                                            ], "heading is required for an object"
+            ], "heading is required for an object"
             assert ScenarioDescription.POSITION in obj_state[ScenarioDescription.STATE
-                                                             ], "position is required for an object"
+            ], "position is required for an object"
 
         # Check dynamic_map_state
         assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
@@ -254,7 +254,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
 
     @classmethod
     def _check_map_features(cls, map_feature):
@@ -299,7 +299,7 @@ class ScenarioDescription(dict):
             assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
             if state_array.ndim == 2:
                 assert state_array.shape[
-                    1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+                           1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
             if state_key == "valid" and valid_check:
                 assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
@@ -488,16 +488,16 @@ class ScenarioDescription(dict):
                 dynamic_object_states_types.add(step_state)
                 dynamic_object_states_counter[step_state] += 1
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS
-                            ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
+        ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHT_TYPES] = dynamic_object_states_types
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS_EACH_STEP
-                            ] = dict(dynamic_object_states_counter)
+        ] = dict(dynamic_object_states_counter)
 
         # map
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_MAP_FEATURES
-                            ] = len(scenario[ScenarioDescription.MAP_FEATURES])
+        ] = len(scenario[ScenarioDescription.MAP_FEATURES])
         number_summary_dict[ScenarioDescription.SUMMARY.MAP_HEIGHT_DIFF
-                            ] = ScenarioDescription.map_height_diff(scenario[ScenarioDescription.MAP_FEATURES])
+        ] = ScenarioDescription.map_height_diff(scenario[ScenarioDescription.MAP_FEATURES])
         return number_summary_dict
 
     @staticmethod
@@ -633,18 +633,33 @@ class ScenarioDescription(dict):
         initial_pos = np.array(scenario[ScenarioDescription.TRACKS][sdc_id]["state"]["position"][0], copy=True)[:2]
         if abs(np.sum(initial_pos)) < 1e-3:
             return scenario
+        return ScenarioDescription.offset_scenario_with_new_origin(scenario, initial_pos)
+
+    @staticmethod
+    def offset_scenario_with_new_origin(scenario, new_origin):
+        """
+        Set a new origin for the whole scenario. The new origin's position in old coordinate system is recorded, so you
+        can add it back and restore the raw data
+        Args:
+            scenario: The scenario description
+            new_origin: The new origin's coordinate in old coordinate system
+
+        Returns: modified data
+
+        """
+        new_origin = np.copy(np.asarray(new_origin))
         for track in scenario[ScenarioDescription.TRACKS].values():
             track["state"]["position"] = np.asarray(track["state"]["position"])
-            track["state"]["position"][..., :2] -= initial_pos
+            track["state"]["position"][..., :2] -= new_origin
 
         for map_feature in scenario[ScenarioDescription.MAP_FEATURES].values():
             if "polyline" in map_feature:
                 map_feature["polyline"] = np.asarray(map_feature["polyline"])
-                map_feature["polyline"][..., :2] -= initial_pos
+                map_feature["polyline"][..., :2] -= new_origin
             if "polygon" in map_feature:
                 map_feature["polygon"] = np.asarray(map_feature["polygon"])
-                map_feature["polygon"][..., :2] -= initial_pos
-        scenario["metadata"]["offset"] = initial_pos
+                map_feature["polygon"][..., :2] -= new_origin
+        scenario["metadata"]["old_origin_in_current_coordinate"] = -new_origin
         return scenario
 
 

@@ -333,11 +333,12 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     return result
 
 
-def read_scenario_data(file_path):
+def read_scenario_data(file_path, centralize=False):
     """Read a scenario pkl file and return the Scenario Description instance.
 
     Args:
         file_path: the path to a scenario file (usually ends with `.pkl`).
+        centralize: whether to centralize all elements to the ego car's initial position
 
     Returns:
         The Scenario Description instance of that scenario.
@@ -347,6 +348,8 @@ def read_scenario_data(file_path):
         # unpickler = CustomUnpickler(f)
         data = pickle.load(f)
     data = ScenarioDescription(data)
+    if centralize:
+        data = ScenarioDescription.centralize_to_ego_car_initial_position(data)
     return data
 
 

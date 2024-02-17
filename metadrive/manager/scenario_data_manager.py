@@ -65,7 +65,7 @@ class ScenarioDataManager(BaseManager):
         assert i < len(self.summary_lookup)
         scenario_id = self.summary_lookup[i]
         file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
-        ret = read_scenario_data(file_path)
+        ret = read_scenario_data(file_path, centralize=True)
         assert isinstance(ret, SD)
         return ret
 
@@ -115,7 +115,7 @@ class ScenarioDataManager(BaseManager):
 
         def _score(scenario_id):
             file_path = os.path.join(self.directory, self.mapping[scenario_id], scenario_id)
-            scenario = read_scenario_data(file_path)
+            scenario = read_scenario_data(file_path, centralize=True)
             obj_weight = 0
 
             # calculate curvature
