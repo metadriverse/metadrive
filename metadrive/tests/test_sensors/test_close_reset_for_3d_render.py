@@ -28,8 +28,8 @@ def _test_close_reset_for_3d_render():
             }
         )
         obs, _ = env.reset()
-        # for _ in range(50):
-        #     env.step(env.action_space.sample())
+        for _ in range(50):
+            env.step(env.action_space.sample())
         env.close()
 
         del env

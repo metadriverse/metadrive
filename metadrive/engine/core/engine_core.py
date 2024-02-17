@@ -441,9 +441,9 @@ class EngineCore(ShowBase.ShowBase):
                 for node_path in cls.TRAFFIC_LIGHT_MODEL.values():
                     node_path.removeNode()
                 cls.TRAFFIC_LIGHT_MODEL = {}
-        gc.collect()
-        ModelPool.releaseAllModels()
-        TexturePool.releaseAllTextures()
+        # gc.collect()
+        # ModelPool.releaseAllModels()
+        # TexturePool.releaseAllTextures()
 
     def clear_world(self):
         self.worldNP.removeNode()
