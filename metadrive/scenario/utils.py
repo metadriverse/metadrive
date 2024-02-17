@@ -347,7 +347,6 @@ def read_scenario_data(file_path):
         # unpickler = CustomUnpickler(f)
         data = pickle.load(f)
     data = ScenarioDescription(data)
-    data = ScenarioDescription.centralize_to_ego_car_initial_position(data)
     return data
 
 
@@ -377,19 +376,15 @@ def read_dataset_summary(file_folder, check_file_existence=True):
             summary_dict = pickle.load(f)
 
     else:
-        raise ValueError(f"Summary file is not found at {summary_file}!")
+        logger.warning(f"Summary file is not found at {summary_file}! Generate a dummy one.")
 
         # === The following is deprecated ===
         # Create a fake one
-        # files = []
-        # for file in os.listdir(file_folder):
-        #     if SD.is_scenario_file(os.path.basename(file)):
-        #         files.append(file)
-        # try:
-        #     files = sorted(files, key=lambda file_name: int(file_name.replace(".pkl", "")))
-        # except ValueError:
-        #     files = sorted(files, key=lambda file_name: file_name.replace(".pkl", ""))
-        # summary_dict = {f: read_scenario_data(os.path.join(file_folder, f))["metadata"] for f in files}
+        files = []
+        for file in os.listdir(file_folder):
+            if SD.is_scenario_file(os.path.basename(file)):
+                files.append(file)
+        summary_dict = {f: {} for f in files}
 
     mapping = None
     if os.path.exists(mapping_file):
