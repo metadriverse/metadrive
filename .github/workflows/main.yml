@@ -31,7 +31,7 @@ jobs:
         with:
           owner: metadriverse
           repo: scenarionet
-          github_token: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
+          github_token: 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
           workflow_file_name: main.yml
           github_user: QuanyiLi
 
