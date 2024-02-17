@@ -23,6 +23,18 @@ jobs:
           pip install "yapf==0.30.0"
           bash format.sh --test
 
+  scenarionet_test:
+    if: github.event_name != 'push' || github.ref != 'refs/heads/main'
+      runs-on: ubuntu-latest
+      steps:
+        - uses: convictional/trigger-workflow-and-wait@v1.6.1
+          with:
+            owner: metadriverse
+            repo: scenarionet
+            github_token: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
+            workflow_file_name: main.yml
+            github_user: QuanyiLi
+
   docstring_coverage:
     if: github.event_name != 'push' || github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
