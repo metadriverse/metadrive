@@ -401,7 +401,8 @@ class EngineCore(ShowBase.ShowBase):
         if hasattr(self, "_window_logo"):
             self._window_logo.removeNode()
         self.terrain.destroy()
-        self.sky_box.destroy()
+        if self.sky_box:
+            self.sky_box.destroy()
         self.physics_world.dynamic_world.clearContactAddedCallback()
         self.physics_world.destroy()
         self.destroy()
