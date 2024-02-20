@@ -73,8 +73,8 @@ class BaseMap(BaseRunnable, ABC):
         self.detach_from_world()
 
         # save a backup
-        self._semantic_map = None
-        self._height_map = None
+        # self._semantic_map = None
+        # self._height_map = None
 
     def _generate(self):
         """Key function! Please overwrite it! This func aims at fill the self.road_network adn self.blocks"""
@@ -105,12 +105,12 @@ class BaseMap(BaseRunnable, ABC):
 
     def destroy(self):
         self.detach_from_world()
-        if self._semantic_map is not None:
-            del self._semantic_map
-            self._semantic_map = None
-        if self._height_map is not None:
-            del self._height_map
-            self._height_map = None
+        # if self._semantic_map is not None:
+        #     del self._semantic_map
+        #     self._semantic_map = None
+        # if self._height_map is not None:
+        #     del self._height_map
+        #     self._height_map = None
 
         for block in self.blocks:
             block.destroy()
@@ -203,77 +203,79 @@ class BaseMap(BaseRunnable, ABC):
         :return: semantic map
         """
         center_p = center_point
-        if self._semantic_map is None:
-            all_lanes = self.get_map_features(interval=line_sample_interval)
-            polygons = []
-            polylines = []
 
-            points_to_skip = math.floor(PGDrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval)
-            for obj in all_lanes.values():
-                if MetaDriveType.is_lane(obj["type"]) and "lane" in layer:
-                    polygons.append((obj["polygon"], MapTerrainSemanticColor.get_color(obj["type"])))
-                elif "lane_line" in layer and (MetaDriveType.is_road_line(obj["type"])
-                                               or MetaDriveType.is_road_boundary_line(obj["type"])):
-                    if MetaDriveType.is_broken_line(obj["type"]):
-                        for index in range(0, len(obj["polyline"]) - 1, points_to_skip * 2):
-                            if index + points_to_skip < len(obj["polyline"]):
-                                polylines.append(
-                                    (
-                                        [obj["polyline"][index], obj["polyline"][index + points_to_skip]],
-                                        MapTerrainSemanticColor.get_color(obj["type"])
-                                    )
+        # if self._semantic_map is None:
+        all_lanes = self.get_map_features(interval=line_sample_interval)
+        polygons = []
+        polylines = []
+
+        points_to_skip = math.floor(PGDrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval)
+        for obj in all_lanes.values():
+            if MetaDriveType.is_lane(obj["type"]) and "lane" in layer:
+                polygons.append((obj["polygon"], MapTerrainSemanticColor.get_color(obj["type"])))
+            elif "lane_line" in layer and (MetaDriveType.is_road_line(obj["type"])
+                                           or MetaDriveType.is_road_boundary_line(obj["type"])):
+                if MetaDriveType.is_broken_line(obj["type"]):
+                    for index in range(0, len(obj["polyline"]) - 1, points_to_skip * 2):
+                        if index + points_to_skip < len(obj["polyline"]):
+                            polylines.append(
+                                (
+                                    [obj["polyline"][index], obj["polyline"][index + points_to_skip]],
+                                    MapTerrainSemanticColor.get_color(obj["type"])
                                 )
-                    else:
-                        polylines.append((obj["polyline"], MapTerrainSemanticColor.get_color(obj["type"])))
+                            )
+                else:
+                    polylines.append((obj["polyline"], MapTerrainSemanticColor.get_color(obj["type"])))
 
-            size = int(size * pixels_per_meter)
-            mask = np.zeros([size, size, 1], dtype=np.float32)
-            mask[..., 0] = color_setting.get_color(MetaDriveType.GROUND)
-            # create an example bounding box polygon
-            # for idx in range(len(polygons)):
-            for polygon, color in polygons:
+        size = int(size * pixels_per_meter)
+        mask = np.zeros([size, size, 1], dtype=np.float32)
+        mask[..., 0] = color_setting.get_color(MetaDriveType.GROUND)
+        # create an example bounding box polygon
+        # for idx in range(len(polygons)):
+        for polygon, color in polygons:
+            points = [
+                [
+                    int((x - center_p[0]) * pixels_per_meter + size / 2),
+                    int((y - center_p[1]) * pixels_per_meter) + size / 2
+                ] for x, y in polygon
+            ]
+            cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=color)
+        for line, color in polylines:
+            points = [
+                [
+                    int((p[0] - center_p[0]) * pixels_per_meter + size / 2),
+                    int((p[1] - center_p[1]) * pixels_per_meter) + size / 2
+                ] for p in line
+            ]
+            thickness = polyline_thickness * 2 if color == MapTerrainSemanticColor.YELLOW else polyline_thickness
+            thickness = min(thickness, 2)  # clip
+            cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, thickness)
+
+        if "crosswalk" in layer:
+            for id, sidewalk in self.crosswalks.items():
+                polygon = sidewalk["polygon"]
                 points = [
                     [
                         int((x - center_p[0]) * pixels_per_meter + size / 2),
                         int((y - center_p[1]) * pixels_per_meter) + size / 2
                     ] for x, y in polygon
                 ]
-                cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=color)
-            for line, color in polylines:
-                points = [
-                    [
-                        int((p[0] - center_p[0]) * pixels_per_meter + size / 2),
-                        int((p[1] - center_p[1]) * pixels_per_meter) + size / 2
-                    ] for p in line
-                ]
-                thickness = polyline_thickness * 2 if color == MapTerrainSemanticColor.YELLOW else polyline_thickness
-                thickness = min(thickness, 2)  # clip
-                cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, thickness)
+                # edges = find_longest_parallel_edges(polygon)
+                # p_1, p_2 = edges[0]
+                p_1, p_2 = find_longest_edge(polygon)[0]
+                dir = (
+                    p_2[0] - p_1[0],
+                    p_2[1] - p_1[1],
+                )
+                # 0-2pi
+                angle = np.arctan2(*dir) / np.pi * 180 + 180
+                # normalize to 0.4-0.714
+                angle = angle / 1000 + MapTerrainSemanticColor.get_color(MetaDriveType.CROSSWALK)
+                cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=angle)
 
-            if "crosswalk" in layer:
-                for id, sidewalk in self.crosswalks.items():
-                    polygon = sidewalk["polygon"]
-                    points = [
-                        [
-                            int((x - center_p[0]) * pixels_per_meter + size / 2),
-                            int((y - center_p[1]) * pixels_per_meter) + size / 2
-                        ] for x, y in polygon
-                    ]
-                    # edges = find_longest_parallel_edges(polygon)
-                    # p_1, p_2 = edges[0]
-                    p_1, p_2 = find_longest_edge(polygon)[0]
-                    dir = (
-                        p_2[0] - p_1[0],
-                        p_2[1] - p_1[1],
-                    )
-                    # 0-2pi
-                    angle = np.arctan2(*dir) / np.pi * 180 + 180
-                    # normalize to 0.4-0.714
-                    angle = angle / 1000 + MapTerrainSemanticColor.get_color(MetaDriveType.CROSSWALK)
-                    cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=angle)
-
-            self._semantic_map = mask
-        return self._semantic_map
+        #     self._semantic_map = mask
+        # return self._semantic_map
+        return mask
 
     # @time_me
     def get_height_map(
@@ -294,40 +296,42 @@ class BaseMap(BaseRunnable, ABC):
         :return: heightfield image in uint 16 nparray
         """
         center_p = center_point
-        if self._height_map is None:
-            extension = max(1, extension)
-            all_lanes = self.get_map_features()
-            polygons = []
 
-            for obj in all_lanes.values():
-                if MetaDriveType.is_lane(obj["type"]):
-                    polygons.append(obj["polygon"])
+        # if self._height_map is None:
+        extension = max(1, extension)
+        all_lanes = self.get_map_features()
+        polygons = []
 
-            size = int(size * pixels_per_meter)
-            mask = np.zeros([size, size, 1])
+        for obj in all_lanes.values():
+            if MetaDriveType.is_lane(obj["type"]):
+                polygons.append(obj["polygon"])
 
-            need_scale = abs(extension - 1) > 1e-1
+        size = int(size * pixels_per_meter)
+        mask = np.zeros([size, size, 1])
 
-            for sidewalk in self.sidewalks.values():
-                polygons.append(sidewalk["polygon"])
+        need_scale = abs(extension - 1) > 1e-1
 
-            for polygon in polygons:
-                points = [
-                    [
-                        int((x - center_p[0]) * pixels_per_meter + size / 2),
-                        int((y - center_p[1]) * pixels_per_meter) + size / 2
-                    ] for x, y in polygon
-                ]
-                cv2.fillPoly(mask, np.asarray([points]).astype(np.int32), color=[height])
-            if need_scale:
-                # Define a kernel. A 3x3 rectangle kernel
-                kernel = np.ones(((extension + 1) * pixels_per_meter, (extension + 1) * pixels_per_meter), np.uint8)
+        for sidewalk in self.sidewalks.values():
+            polygons.append(sidewalk["polygon"])
 
-                # Apply dilation
-                mask = cv2.dilate(mask, kernel, iterations=1)
-                mask = np.expand_dims(mask, axis=-1)
-            self._height_map = mask
-        return self._height_map
+        for polygon in polygons:
+            points = [
+                [
+                    int((x - center_p[0]) * pixels_per_meter + size / 2),
+                    int((y - center_p[1]) * pixels_per_meter) + size / 2
+                ] for x, y in polygon
+            ]
+            cv2.fillPoly(mask, np.asarray([points]).astype(np.int32), color=[height])
+        if need_scale:
+            # Define a kernel. A 3x3 rectangle kernel
+            kernel = np.ones(((extension + 1) * pixels_per_meter, (extension + 1) * pixels_per_meter), np.uint8)
+
+            # Apply dilation
+            mask = cv2.dilate(mask, kernel, iterations=1)
+            mask = np.expand_dims(mask, axis=-1)
+        #     self._height_map = mask
+        # return self._height_map
+        return mask
 
     def show_bounding_box(self):
         """
