@@ -23,6 +23,17 @@ jobs:
           pip install "yapf==0.30.0"
           bash format.sh --test
 
+  scenarionet_test:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.APP_REPO_TOKEN }}
+          repository: metadriverse/scenarionet
+          event-type: metadrive-update
+
   docstring_coverage:
     if: github.event_name != 'push' || github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest

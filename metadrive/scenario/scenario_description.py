@@ -623,6 +623,45 @@ class ScenarioDescription(dict):
                 break
         return float(max - min)
 
+    @staticmethod
+    def centralize_to_ego_car_initial_position(scenario):
+        """
+        All positions of polylines/polygons/objects are offset to ego car's first frame position.
+        Returns: a modified scenario file
+        """
+        sdc_id = scenario[ScenarioDescription.METADATA][ScenarioDescription.SDC_ID]
+        initial_pos = np.array(scenario[ScenarioDescription.TRACKS][sdc_id]["state"]["position"][0], copy=True)[:2]
+        if abs(np.sum(initial_pos)) < 1e-3:
+            return scenario
+        return ScenarioDescription.offset_scenario_with_new_origin(scenario, initial_pos)
+
+    @staticmethod
+    def offset_scenario_with_new_origin(scenario, new_origin):
+        """
+        Set a new origin for the whole scenario. The new origin's position in old coordinate system is recorded, so you
+        can add it back and restore the raw data
+        Args:
+            scenario: The scenario description
+            new_origin: The new origin's coordinate in old coordinate system
+
+        Returns: modified data
+
+        """
+        new_origin = np.copy(np.asarray(new_origin))
+        for track in scenario[ScenarioDescription.TRACKS].values():
+            track["state"]["position"] = np.asarray(track["state"]["position"])
+            track["state"]["position"][..., :2] -= new_origin
+
+        for map_feature in scenario[ScenarioDescription.MAP_FEATURES].values():
+            if "polyline" in map_feature:
+                map_feature["polyline"] = np.asarray(map_feature["polyline"])
+                map_feature["polyline"][..., :2] -= new_origin
+            if "polygon" in map_feature:
+                map_feature["polygon"] = np.asarray(map_feature["polygon"])
+                map_feature["polygon"][..., :2] -= new_origin
+        scenario["metadata"]["old_origin_in_current_coordinate"] = -new_origin
+        return scenario
+
 
 def _recursive_check_type(obj, allow_types, depth=0):
     if isinstance(obj, dict):
