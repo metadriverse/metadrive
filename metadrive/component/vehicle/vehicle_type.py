@@ -288,7 +288,8 @@ vehicle_type = {
     "xl": XLVehicle,
     "default": DefaultVehicle,
     "static_default": StaticDefaultVehicle,
-    "varying_dynamics": VaryingDynamicsVehicle
+    "varying_dynamics": VaryingDynamicsVehicle,
+    "traffic_default": TrafficDefaultVehicle
 }
 
 vehicle_class_to_type = inv_map = {v: k for k, v in vehicle_type.items()}
