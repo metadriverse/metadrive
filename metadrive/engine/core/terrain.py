@@ -149,8 +149,11 @@ class Terrain(BaseObject, ABC):
 
             if self.render:
                 # Make semantics for shader terrain
-                self.semantic_tex.setRamImage(self.get_terrain_semantics(center_point))
-                # Makre height field
+                self.semantic_tex.clearRamImage()
+                rrr = self.get_terrain_semantics(center_point)
+                self.semantic_tex.setRamImage(rrr)
+                # Make height field
+                self.heightfield_tex.clearRamImage()
                 self.heightfield_tex.setRamImage(heightfield_base)
                 # generate terrain visualization
                 self._generate_mesh_vis_terrain(self._terrain_size, self.heightfield_tex, self.semantic_tex)
@@ -328,6 +331,7 @@ class Terrain(BaseObject, ABC):
         self.dynamic_nodes.append(node)
 
         self.mesh_collision_terrain = self.origin.attachNewNode(node)
+        self._node_path_list.append(self.mesh_collision_terrain)
 
     def set_position(self, position, height=None):
         """
