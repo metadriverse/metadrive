@@ -1,13 +1,20 @@
+#!/usr/bin/env python
 import argparse
 import time
 
+torch_available = True
 import cv2
-import torch
-from torch.utils.dlpack import from_dlpack
+try:
+    import torch
+    from torch.utils.dlpack import from_dlpack
+except ImportError:
+    torch_available = False
+    print("Can not find torch")
 from metadrive.component.sensors.depth_camera import DepthCamera
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive import MetaDriveEnv
+import os
 from metadrive.policy.idm_policy import IDMPolicy
 
 
@@ -30,6 +37,7 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
 
     env = MetaDriveEnv(
         dict(
+            show_terrain="METADRIVE_TEST_EXAMPLE" not in os.environ,
             num_scenarios=1,
             start_seed=1010,
             agent_policy=IDMPolicy,
@@ -67,7 +75,7 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
             start = time.time()
         if image_on_cuda:
             torch_tensor = from_dlpack(o["image"].toDlpack())
-        else:
+        elif torch_available:
             torch_tensor = torch.Tensor(o["image"])
 
         if debug:
@@ -92,6 +100,8 @@ if __name__ == "__main__":
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--camera", default="main", choices=["main", "rgb", "depth", "semantic"])
     args = parser.parse_args()
+    if args.cuda:
+        assert torch_available, "You have to install torch to use CUDA"
     _test_rgb_camera_as_obs(args.render, image_on_cuda=args.cuda, debug=args.debug, camera=args.camera)
     print(
         "Test Successful !! The FPS should go beyond 400 FPS, if you are using CUDA in offscreen mode "

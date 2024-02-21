@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from metadrive.tests.vis_block.vis_big import vis_big
 
 from metadrive.utils import setup_logger

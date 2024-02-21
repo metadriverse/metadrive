@@ -114,7 +114,9 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.cam.setPos(*position)
         self.cam.setHpr(*hpr)
 
-    def perceive(self, clip=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None) -> np.ndarray:
+    def perceive(
+        self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
+    ) -> np.ndarray:
         """
         When clip is set to False, the image will be represented by unit8 with component value ranging from [0-255].
         Otherwise, it will be float type with component value ranging from [0.-1.]. By default, the reset parameters are
@@ -163,7 +165,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
             self.cam.setHpr(original_hpr)
             self.cam.setPos(original_position)
 
-        if not clip:
+        if not to_float:
             return ret.astype(np.uint8, copy=False, order="C")
         else:
             return ret / 255

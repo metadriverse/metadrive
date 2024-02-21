@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from panda3d.core import loadPrcFileData
 from metadrive.tests.test_installation import verify_installation
 import argparse
