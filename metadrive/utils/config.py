@@ -1,4 +1,5 @@
 import copy
+import pathlib
 from typing import Union, Any
 
 import numpy as np
@@ -236,6 +237,8 @@ class Config:
                 value = float(value)
             if isinstance(value, (np.int32, np.int64, np.uint)):
                 value = int(value)
+        if isinstance(value, pathlib.Path):
+            value = str(value)
         if self._unchangeable:
             raise ValueError("This config is not changeable!")
         if (not allow_overwrite) and (self._config[key] is not None and value is not None):

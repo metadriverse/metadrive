@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This script demonstrates how to use the environment where traffic and road map are loaded from Waymo dataset.
 """

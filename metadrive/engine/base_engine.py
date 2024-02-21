@@ -12,7 +12,7 @@ from metadrive.engine.core.engine_core import EngineCore
 from metadrive.engine.interface import Interface
 from metadrive.engine.logger import get_logger, reset_logger
 
-from metadrive.pull_asset import pull_asset, wait_asset_lock
+from metadrive.pull_asset import pull_asset
 from metadrive.utils import concat_step_infos
 from metadrive.utils.utils import is_map_related_class
 from metadrive.version import VERSION, asset_version
@@ -309,6 +309,7 @@ class BaseEngine(EngineCore, Randomizable):
         """
         # reset logger
         reset_logger()
+        step_infos = {}
 
         # initialize
         self._episode_start_time = time.time()
@@ -337,8 +338,8 @@ class BaseEngine(EngineCore, Randomizable):
         # reset manager
         for manager_name, manager in self._managers.items():
             # clean all manager
-            manager.before_reset()
-
+            new_step_infos = manager.before_reset()
+            step_infos = concat_step_infos([step_infos, new_step_infos])
             if _debug_memory_usage:
                 lm = process_memory()
                 if lm - cm != 0:
@@ -351,7 +352,8 @@ class BaseEngine(EngineCore, Randomizable):
             if self.replay_episode and self.only_reset_when_replay and manager is not self.replay_manager:
                 # The scene will be generated from replay manager in only reset replay mode
                 continue
-            manager.reset()
+            new_step_infos = manager.reset()
+            step_infos = concat_step_infos([step_infos, new_step_infos])
 
             if _debug_memory_usage:
                 lm = process_memory()
@@ -360,7 +362,8 @@ class BaseEngine(EngineCore, Randomizable):
                 cm = lm
 
         for manager_name, manager in self.managers.items():
-            manager.after_reset()
+            new_step_infos = manager.after_reset()
+            step_infos = concat_step_infos([step_infos, new_step_infos])
 
             if _debug_memory_usage:
                 lm = process_memory()
@@ -398,6 +401,7 @@ class BaseEngine(EngineCore, Randomizable):
         # print(len(BaseEngine.COLORS_FREE), len(BaseEngine.COLORS_OCCUPIED))
         self.c_id = new_c2i
         self.id_c = new_i2c
+        return step_infos
 
     def before_step(self, external_actions: Dict[AnyStr, np.array]):
         """
@@ -439,6 +443,11 @@ class BaseEngine(EngineCore, Randomizable):
 
             if self.force_fps.real_time_simulation and i < step_num - 1:
                 self.task_manager.step()
+
+        #  Do rendering
+        self.task_manager.step()
+        if self.on_screen_message is not None:
+            self.on_screen_message.render()
 
     def after_step(self, *args, **kwargs) -> Dict:
         """
@@ -505,10 +514,11 @@ class BaseEngine(EngineCore, Randomizable):
             for obj in pending_obj:
                 self._clean_color(obj.id)
                 obj.destroy()
+        self._dying_objects = {}
         if self.main_camera is not None:
             self.main_camera.destroy()
         self.interface.destroy()
-        self.close_world()
+        self.close_engine()
 
         if self.top_down_renderer is not None:
             self.top_down_renderer.close()
@@ -693,7 +703,7 @@ class BaseEngine(EngineCore, Randomizable):
 
     def render_topdown(self, text, *args, **kwargs):
         if self.top_down_renderer is None:
-            from metadrive.obs.top_down_renderer import TopDownRenderer
+            from metadrive.engine.top_down_renderer import TopDownRenderer
             self.top_down_renderer = TopDownRenderer(*args, **kwargs)
         return self.top_down_renderer.render(text, *args, **kwargs)
 

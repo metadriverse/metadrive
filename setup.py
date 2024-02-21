@@ -122,7 +122,7 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 5. Get wheel
     python setup.py sdist bdist_wheel
 
-6. Upload to production channel 
+6. Upload to production channel
     twine upload dist/*
 
 7. Draft a release on github with new version number and upload assets.zip and the generated .whl files to the release.
@@ -131,6 +131,6 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 
 9. Merge this branch into main
 
-!!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files  
+!!!!!!!!!!!!! NOTE: please make sure that unzip assets.zip will generate a folder called assets instead of files
 
 """

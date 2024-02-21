@@ -263,6 +263,9 @@ BASE_DEFAULT_CONFIG = dict(
     only_reset_when_replay=False,
     # If True, when creating and replaying object trajectories, use the same ID as in dataset
     force_reuse_object_name=False,
+
+    # ===== randomization =====
+    num_scenarios=1  # the number of scenarios in this environment
 )
 
 
@@ -310,7 +313,7 @@ class BaseEnv(gym.Env):
 
         # scenarios
         self.start_index = 0
-        self.num_scenarios = 1
+        self.num_scenarios = self.config["num_scenarios"]
 
     def _post_process_config(self, config):
         """Add more special process to merged config"""
@@ -458,11 +461,6 @@ class BaseEnv(gym.Env):
         # update states, if restore from episode data, position and heading will be force set in update_state() function
         scene_manager_after_step_infos = self.engine.after_step()
 
-        #  Do rendering
-        self.engine.task_manager.step()
-        if self.engine.on_screen_message is not None:
-            self.engine.on_screen_message.render()
-
         # Note that we use shallow update for info dict in this function! This will accelerate system.
         return merge_dicts(
             scene_manager_after_step_infos, scene_manager_before_step_infos, allow_new_keys=True, without_copy=True
@@ -525,7 +523,7 @@ class BaseEnv(gym.Env):
                 "env.reset() to rescue this environment. However, a better and safer solution is to check the "
                 "singleton of MetaDrive and restart your program."
             )
-        self.engine.reset()
+        reset_info = self.engine.reset()
         self.reset_sensors()
         # render the scene
         self.engine.taskMgr.step()
@@ -540,7 +538,7 @@ class BaseEnv(gym.Env):
         assert (len(self.agents) == self.num_agents) or (self.num_agents == -1), \
             "Agents: {} != Num_agents: {}".format(len(self.agents), self.num_agents)
         assert self.config is self.engine.global_config is get_global_config(), "Inconsistent config may bring errors!"
-        return self._get_reset_return()
+        return self._get_reset_return(reset_info)
 
     def reset_sensors(self):
         """
@@ -563,9 +561,9 @@ class BaseEnv(gym.Env):
                     if hasattr(sensor, "track") and name != "main_camera":
                         sensor.track(current_track_agent.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
 
-    def _get_reset_return(self):
+    def _get_reset_return(self, reset_info):
         # TODO: figure out how to get the information of the before step
-        scene_manager_before_step_infos = {}
+        scene_manager_before_step_infos = reset_info
         scene_manager_after_step_infos = self.engine.after_step()
 
         obses = {}
@@ -585,9 +583,17 @@ class BaseEnv(gym.Env):
         step_infos = concat_step_infos([engine_info, done_infos, reward_infos, cost_infos])
 
         if self.is_multi_agent:
-            return (obses, step_infos)
+            return obses, step_infos
         else:
-            return (self._wrap_as_single_agent(obses), self._wrap_as_single_agent(step_infos))
+            return self._wrap_as_single_agent(obses), self._wrap_info_as_single_agent(step_infos)
+
+    def _wrap_info_as_single_agent(self, data):
+        """
+        Wrap to single agent info
+        """
+        agent_info = data.pop(next(iter(self.agents.keys())))
+        data.update(agent_info)
+        return data
 
     def _get_step_return(self, actions, engine_info):
         # update obs, dones, rewards, costs, calculate done at first !
@@ -624,7 +630,7 @@ class BaseEnv(gym.Env):
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
                    self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(
-                truncateds), self._wrap_as_single_agent(step_infos)
+                truncateds), self._wrap_info_as_single_agent(step_infos)
         else:
             return obses, rewards, terminateds, truncateds, step_infos
 
@@ -651,8 +657,11 @@ class BaseEnv(gym.Env):
         return self.agent_manager.for_each_active_agents(func, *args, **kwargs)
 
     def get_single_observation(self):
+        """
+        Get the observation for one object
+        """
         if self.__class__ is BaseEnv:
-            o = DummyObservation({})
+            o = DummyObservation()
         else:
             if self.config["agent_observation"]:
                 o = self.config["agent_observation"](self.config)

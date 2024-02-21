@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This file will run environment for one episode and generate two videos:
 
@@ -30,6 +31,7 @@ if __name__ == '__main__':
 
     env = MetaDriveEnv(
         dict(
+            show_terrain="METADRIVE_TEST_EXAMPLE" not in os.environ,
             num_scenarios=num_scenarios,
             start_seed=start_seed,
             random_traffic=False,
@@ -52,18 +54,18 @@ if __name__ == '__main__':
     while True:
         o, r, tm, tc, info = env.step(env.action_space.sample())
 
-        img_interface = env.render(mode="rgb_array")
+        img_interface = env.main_camera.perceive(to_float=False)
+        # BGR to RGB
+        img_interface = img_interface[..., ::-1]
         img_bev = env.render(
             mode="topdown",
             target_vehicle_heading_up=False,
             draw_target_vehicle_trajectory=True,
             film_size=(3000, 3000),
-            screen_size=(3000, 3000),
-            crash_vehicle_done=False,
+            screen_size=(800, 800),
         )
 
         if generate_video:
-            img_bev = pygame.surfarray.array3d(img_bev)
             img_bev = img_bev.swapaxes(0, 1)
             video_bev.append(img_bev)
             video_interface.append(img_interface)

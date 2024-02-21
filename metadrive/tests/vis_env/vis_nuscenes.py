@@ -15,7 +15,7 @@ if __name__ == "__main__":
         {
             "use_render": True,
             "agent_policy": ReplayEgoCarPolicy,
-            "manual_control": True,
+            # "manual_control": True,
             "show_interface": True,
             # "debug_static_world": True,
             # "need_lane_localization": False,
@@ -40,7 +40,7 @@ if __name__ == "__main__":
             },
             # "pstats": True,
             # "use_mesh_terrain": True,
-            "debug": True,
+            # "debug": True,
             # "no_static_vehicles": False,
             # "pstats": True,
             # "render_pipeline": True,

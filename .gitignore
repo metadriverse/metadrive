@@ -54,3 +54,5 @@
 
 .coverage
 coverage.xml
+/documentation/source/img.png
+/documentation/source/demo.png

@@ -104,7 +104,7 @@ class MetaDriveEnv(BaseEnv):
 
         # scenario setting
         self.start_seed = self.start_index = self.config["start_seed"]
-        self.env_num = self.num_scenarios = self.config["num_scenarios"]
+        self.env_num = self.num_scenarios
 
     def _post_process_config(self, config):
         config = super(MetaDriveEnv, self)._post_process_config(config)
@@ -276,6 +276,9 @@ class MetaDriveEnv(BaseEnv):
             reward = -self.config["crash_vehicle_penalty"]
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
+
+        step_info["route_completion"] = vehicle.navigation.route_completion
+
         return reward, step_info
 
     def setup_engine(self):

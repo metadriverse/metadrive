@@ -53,15 +53,16 @@ Please feel free to contact us if you have any suggestions or ideas!
    :maxdepth: 2
    :caption: Concepts and Customization
 
+   new_env.ipynb
    system_design.ipynb
    sensors.ipynb
    top_down_render.ipynb
    panda_render.ipynb
+   map.ipynb
    vehicle.ipynb
    navigation.ipynb
    scenario_description.ipynb
    record_replay.ipynb
-   development.rst
 
 .. toctree::
    :hidden:

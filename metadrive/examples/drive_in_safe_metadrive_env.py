@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This script demonstrates how to setup the Safe RL environments.
 
