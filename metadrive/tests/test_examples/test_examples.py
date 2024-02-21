@@ -3,6 +3,9 @@ import subprocess
 from metadrive import MetaDrive_PACKAGE_DIR
 import time
 import pytest
+import os
+
+os.environ['CUDA_VISIBLE_DEVICES'] = ""
 
 examples = [
     "draw_maps.py", "drive_in_multi_agent_env.py --top_down", "drive_in_real_env.py --top_down",
@@ -26,17 +29,26 @@ def test_script(script, timeout=60):
     Returns: None
 
     """
-    start_time = time.time()
-
     # Run your script using subprocess
     process = subprocess.Popen(['python', script])
 
     # Wait for the script to finish or timeout after 60 seconds
+    killed = False
     try:
         process.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
         # If the script is still running after 60 seconds, terminate it and pass the test
         process.kill()
+        killed = True
     finally:
-        runtime = time.time() - start_time
-        assert runtime >= 0, "Script terminated unexpectedly"
+        if killed:
+            return
+            # Check if the process was terminated by a signal
+        if process.returncode < 0:
+            raise ValueError(f"Process terminated by signal {-process.returncode}.")
+        elif process.returncode > 0:
+            raise ValueError(f"Process exited with error code {process.returncode}.")
+
+
+if __name__ == '__main__':
+    test_script(scripts[0])
