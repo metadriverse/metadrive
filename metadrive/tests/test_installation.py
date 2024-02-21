@@ -11,6 +11,14 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 
 
 def capture_headless_image(cuda, image_source="main_camera"):
+    if image_source == "main_camera":
+        sensors = {"main_camera": ()}
+    elif image_source == "rgb_camera":
+        sensors = {"rgb_camera": (RGBCamera, 256, 256)}
+    elif image_source == "depth_camera":
+        sensors = {"depth_camera": (DepthCamera, 256, 256)}
+    else:
+        sensors = {}
     env = MetaDriveEnv(
         dict(
             use_render=False,
@@ -20,11 +28,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
             traffic_density=0.1,
             image_observation=True,
             window_size=(600, 400),
-            sensors={
-                "rgb_camera": (RGBCamera, 256, 256),
-                "depth_camera": (DepthCamera, 256, 256),
-                "main_camera": (),
-            },
+            sensors=sensors,
             interface_panel=[],
             vehicle_config={
                 "image_source": image_source,

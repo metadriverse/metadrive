@@ -75,7 +75,7 @@ def _test_rgb_camera_as_obs(render=False, image_on_cuda=True, debug=False, camer
             start = time.time()
         if image_on_cuda:
             torch_tensor = from_dlpack(o["image"].toDlpack())
-        else:
+        elif torch_available:
             torch_tensor = torch.Tensor(o["image"])
 
         if debug:
