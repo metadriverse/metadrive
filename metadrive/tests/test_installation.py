@@ -14,6 +14,7 @@ def capture_headless_image(cuda, image_source="main_camera"):
     env = MetaDriveEnv(
         dict(
             use_render=False,
+            show_terrain="METADRIVE_TEST_EXAMPLE" not in os.environ,
             start_seed=666,
             image_on_cuda=cuda,
             traffic_density=0.1,

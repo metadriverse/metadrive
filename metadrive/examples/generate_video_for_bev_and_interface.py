@@ -59,7 +59,6 @@ if __name__ == '__main__':
             draw_target_vehicle_trajectory=True,
             film_size=(3000, 3000),
             screen_size=(3000, 3000),
-            crash_vehicle_done=False,
         )
 
         if generate_video:
