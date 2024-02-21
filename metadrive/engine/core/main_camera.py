@@ -447,7 +447,9 @@ class MainCamera(BaseSensor):
     def mouse_into_window(self):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
-    def perceive(self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None) -> np.ndarray:
+    def perceive(
+        self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
+    ) -> np.ndarray:
         """
         When clip is set to False, the image will be represented by unit8 with component value ranging from [0-255].
         Otherwise, it will be float type with component value ranging from [0.-1.]. By default, the reset parameters are
