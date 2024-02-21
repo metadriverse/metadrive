@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This file will run environment for one episode and generate two videos:
 

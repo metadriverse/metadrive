@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This file illustrate how to use top-down renderer to provide observation in form of multiple channels of semantic maps.
 

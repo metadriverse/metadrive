@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os.path
 import subprocess
 from metadrive import MetaDrive_PACKAGE_DIR

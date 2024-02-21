@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This script defines a custom environment with single block: inramp.
 """

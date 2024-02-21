@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse
 import time
 
@@ -5,10 +6,10 @@ torch_available = True
 import cv2
 try:
     import torch
+    from torch.utils.dlpack import from_dlpack
 except ImportError:
     torch_available = False
     print("Can not find torch")
-from torch.utils.dlpack import from_dlpack
 from metadrive.component.sensors.depth_camera import DepthCamera
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.component.sensors.rgb_camera import RGBCamera

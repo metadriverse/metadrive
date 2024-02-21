@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Please feel free to run this script to enjoy a journey by keyboard!
 Remember to press H to see help message!
