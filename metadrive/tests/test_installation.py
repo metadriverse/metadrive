@@ -21,7 +21,8 @@ def capture_headless_image(cuda, image_source="main_camera"):
             window_size=(600, 400),
             sensors={
                 "rgb_camera": (RGBCamera, 256, 256),
-                "depth_camera": (DepthCamera, 256, 256)
+                "depth_camera": (DepthCamera, 256, 256),
+                "main_camera": (),
             },
             interface_panel=[],
             vehicle_config={
