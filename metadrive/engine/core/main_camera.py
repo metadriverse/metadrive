@@ -23,6 +23,7 @@ try:
 except ImportError:
     _cuda_enable = False
 from metadrive.component.sensors.base_sensor import BaseSensor
+from metadrive import constants
 
 
 class MainCamera(BaseSensor):
@@ -468,7 +469,10 @@ class MainCamera(BaseSensor):
         """
 
         if new_parent_node:
-            assert position and hpr, "When new_parent_node is set, both position and hpr should be set as well"
+            if position is None:
+                position = constants.DEFAULT_SENSOR_OFFSET
+            if hpr is None:
+                position = constants.DEFAULT_SENSOR_HPR
 
             # return camera to original state
             original_object = self.camera.getParent()

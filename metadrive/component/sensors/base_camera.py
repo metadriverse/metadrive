@@ -1,7 +1,9 @@
-import numpy as np
 from typing import Union
-from panda3d.core import NodePath
+
 import cv2
+import numpy as np
+from panda3d.core import NodePath
+
 from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.utils.cuda import check_cudart_err
 
@@ -17,6 +19,7 @@ except ImportError:
 from panda3d.core import Vec3
 
 from metadrive.engine.core.image_buffer import ImageBuffer
+from metadrive import constants
 
 
 class BaseCamera(ImageBuffer, BaseSensor):
@@ -135,7 +138,10 @@ class BaseCamera(ImageBuffer, BaseSensor):
         """
 
         if new_parent_node:
-            assert position and hpr, "When new_parent_node is set, both position and hpr should be set as well"
+            if position is None:
+                position = constants.DEFAULT_SENSOR_OFFSET
+            if hpr is None:
+                position = constants.DEFAULT_SENSOR_HPR
 
             # return camera to original state
             original_object = self.cam.getParent()
