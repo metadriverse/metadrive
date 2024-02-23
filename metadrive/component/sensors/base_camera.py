@@ -1,7 +1,9 @@
-import numpy as np
 from typing import Union
-from panda3d.core import NodePath
+
 import cv2
+import numpy as np
+from panda3d.core import NodePath
+
 from metadrive.component.sensors.base_sensor import BaseSensor
 from metadrive.utils.cuda import check_cudart_err
 
@@ -17,6 +19,7 @@ except ImportError:
 from panda3d.core import Vec3
 
 from metadrive.engine.core.image_buffer import ImageBuffer
+from metadrive import constants
 
 
 class BaseCamera(ImageBuffer, BaseSensor):
@@ -118,7 +121,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
     ) -> np.ndarray:
         """
-        When clip is set to False, the image will be represented by unit8 with component value ranging from [0-255].
+        When to_float is set to False, the image will be represented by unit8 with component value ranging from [0-255].
         Otherwise, it will be float type with component value ranging from [0.-1.]. By default, the reset parameters are
         all None. In this case, the camera will render the result with poses and position set by track() function.
 
@@ -127,15 +130,29 @@ class BaseCamera(ImageBuffer, BaseSensor):
         camera to capture a new image and return the camera to the owner. This usually happens when using one camera to
         render multiple times from different positions and poses.
 
-        new_parent_node should be a NodePath like object.origin and vehicle.origin or self.engine.origin, which
-        means the world origin. When new_parent_node is set, both position and hpr have to be set as well. The position 
+        new_parent_node should be a NodePath like object.origin or vehicle.origin or self.engine.origin, which
+        means the world origin. When new_parent_node is set, both position and hpr have to be set as well. The position
         and hpr are all 3-dim vector representing:
             1) the relative position to the reparent node
             2) the heading/pitch/roll of the sensor
-        """
 
+        Args:
+            to_float: When to_float is set to False, the image will be represented by unit8 with component value ranging
+                from [0-255]. Otherwise, it will be float type with component value ranging from [0.-1.].
+            new_parent_node: new_parent_node should be a NodePath like object.origin or vehicle.origin or
+                self.engine.origin, which means the world origin. When new_parent_node is set, both position and hpr
+                have to be set as well. The position and hpr are all 3-dim vector representing:
+            position: the relative position to the reparent node
+            hpr: the heading/pitch/roll of the sensor
+
+        Return:
+            Array representing the image.
+        """
         if new_parent_node:
-            assert position and hpr, "When new_parent_node is set, both position and hpr should be set as well"
+            if position is None:
+                position = constants.DEFAULT_SENSOR_OFFSET
+            if hpr is None:
+                position = constants.DEFAULT_SENSOR_HPR
 
             # return camera to original state
             original_object = self.cam.getParent()
