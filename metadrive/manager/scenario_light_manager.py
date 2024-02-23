@@ -43,12 +43,13 @@ class ScenarioLightManager(BaseManager):
                     )
             lane_info = self.engine.current_map.road_network.graph[str(scenario_lane_id)]
             position = self._get_light_position(light_info)
-            name = self.OBJECT_PREFIX + scenario_lane_id if self.engine.global_config["force_reuse_object_name"] else None
+            name = self.OBJECT_PREFIX + scenario_lane_id if self.engine.global_config["force_reuse_object_name"
+                                                                                      ] else None
             traffic_light = self.spawn_object(ScenarioTrafficLight, lane=lane_info.lane, position=position, name=name)
             self._scenario_id_to_obj_id[scenario_lane_id] = traffic_light.id
             self._obj_id_to_scenario_id[traffic_light.id] = scenario_lane_id
             if self.engine.global_config["force_reuse_object_name"]:
-                assert self.OBJECT_PREFIX +  scenario_lane_id == traffic_light.id, (
+                assert self.OBJECT_PREFIX + scenario_lane_id == traffic_light.id, (
                     "Original id should be assigned to traffic lights"
                 )
             self._lane_index_to_obj[lane_info.lane.index] = traffic_light
