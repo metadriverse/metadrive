@@ -270,9 +270,9 @@ class ScenarioDescription(dict):
                 line_centroid = np.mean(feature["polyline"], axis=0)[:2]
                 polygon_centroid = np.mean(feature["polygon"], axis=0)[:2]
                 diff = line_centroid - polygon_centroid
-                assert norm(diff[0], diff[1]) < 100, "The distance between centroids of polyline and polygon is greater than 100m. " \
-                                                     "The map converter should be wrong!"
-
+                assert norm(diff[0], diff[
+                    1]) < 100, "The distance between centroids of polyline and polygon is greater than 100m. " \
+                               "The map converter should be wrong!"
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
@@ -667,6 +667,11 @@ class ScenarioDescription(dict):
             if "polygon" in map_feature:
                 map_feature["polygon"] = np.asarray(map_feature["polygon"])
                 map_feature["polygon"][..., :2] -= new_origin
+
+        for light in scenario[ScenarioDescription.DYNAMIC_MAP_STATES].values():
+            if ScenarioDescription.TRAFFIC_LIGHT_POSITION in light:
+                light[ScenarioDescription.TRAFFIC_LIGHT_POSITION][..., :2] -= new_origin
+
         scenario["metadata"]["old_origin_in_current_coordinate"] = -new_origin
         return scenario
 
