@@ -236,9 +236,9 @@ class ScenarioDescription(dict):
             )
             # position heading check
             assert ScenarioDescription.HEADING in obj_state[ScenarioDescription.STATE
-                                                            ], "heading is required for an object"
+            ], "heading is required for an object"
             assert ScenarioDescription.POSITION in obj_state[ScenarioDescription.STATE
-                                                             ], "position is required for an object"
+            ], "position is required for an object"
 
         # Check dynamic_map_state
         assert isinstance(scenario_dict[cls.DYNAMIC_MAP_STATES], dict)
@@ -255,7 +255,7 @@ class ScenarioDescription(dict):
             "You lack these keys in metadata: {}".format(
                 cls.METADATA_KEYS.difference(set(scenario_dict[cls.METADATA].keys()))
             )
-        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length, )
+        assert scenario_dict[cls.METADATA][cls.TIMESTEP].shape == (scenario_length,)
 
     @classmethod
     def _check_map_features(cls, map_feature):
@@ -270,9 +270,9 @@ class ScenarioDescription(dict):
                 line_centroid = np.mean(feature["polyline"], axis=0)[:2]
                 polygon_centroid = np.mean(feature["polygon"], axis=0)[:2]
                 diff = line_centroid - polygon_centroid
-                assert norm(diff[0], diff[1]) < 100, "The distance between centroids of polyline and polygon is greater than 100m. " \
-                                                     "The map converter should be wrong!"
-
+                assert norm(diff[0], diff[
+                    1]) < 100, "The distance between centroids of polyline and polygon is greater than 100m. " \
+                               "The map converter should be wrong!"
 
     @classmethod
     def _check_object_state_dict(cls, obj_state, scenario_length, object_id, valid_check=True):
@@ -307,7 +307,7 @@ class ScenarioDescription(dict):
             assert state_array.ndim in [1, 2], "Haven't implemented test array with dim {} yet".format(state_array.ndim)
             if state_array.ndim == 2:
                 assert state_array.shape[
-                    1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
+                           1] != 0, "Please convert all state with dim 1 to a 1D array instead of 2D array."
 
             if state_key == "valid" and valid_check:
                 assert np.sum(state_array) >= 1, "No frame valid for this object. Consider removing it"
@@ -496,16 +496,16 @@ class ScenarioDescription(dict):
                 dynamic_object_states_types.add(step_state)
                 dynamic_object_states_counter[step_state] += 1
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS
-                            ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
+        ] = len(scenario[ScenarioDescription.DYNAMIC_MAP_STATES])
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHT_TYPES] = dynamic_object_states_types
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_TRAFFIC_LIGHTS_EACH_STEP
-                            ] = dict(dynamic_object_states_counter)
+        ] = dict(dynamic_object_states_counter)
 
         # map
         number_summary_dict[ScenarioDescription.SUMMARY.NUM_MAP_FEATURES
-                            ] = len(scenario[ScenarioDescription.MAP_FEATURES])
+        ] = len(scenario[ScenarioDescription.MAP_FEATURES])
         number_summary_dict[ScenarioDescription.SUMMARY.MAP_HEIGHT_DIFF
-                            ] = ScenarioDescription.map_height_diff(scenario[ScenarioDescription.MAP_FEATURES])
+        ] = ScenarioDescription.map_height_diff(scenario[ScenarioDescription.MAP_FEATURES])
         return number_summary_dict
 
     @staticmethod
@@ -667,6 +667,11 @@ class ScenarioDescription(dict):
             if "polygon" in map_feature:
                 map_feature["polygon"] = np.asarray(map_feature["polygon"])
                 map_feature["polygon"][..., :2] -= new_origin
+
+        for light in scenario[ScenarioDescription.DYNAMIC_MAP_STATES].values():
+            if ScenarioDescription.TRAFFIC_LIGHT_POSITION in light:
+                light[ScenarioDescription.TRAFFIC_LIGHT_POSITION][..., :2] -= new_origin
+
         scenario["metadata"]["old_origin_in_current_coordinate"] = -new_origin
         return scenario
 
