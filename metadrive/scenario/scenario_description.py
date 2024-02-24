@@ -670,6 +670,7 @@ class ScenarioDescription(dict):
 
         for light in scenario[ScenarioDescription.DYNAMIC_MAP_STATES].values():
             if ScenarioDescription.TRAFFIC_LIGHT_POSITION in light:
+                light["stop_point"] = np.asarray(light["stop_point"])
                 light[ScenarioDescription.TRAFFIC_LIGHT_POSITION][..., :2] -= new_origin
 
         scenario["metadata"]["old_origin_in_current_coordinate"] = -new_origin
