@@ -29,6 +29,7 @@ class BaseMap(BaseRunnable, ABC):
     BLOCK_ID = "id"
     BLOCK_SEQUENCE = "block_sequence"
     PRE_BLOCK_SOCKET_INDEX = "pre_block_socket_index"
+    START_POSITION = "start_position"
 
     # generate_method
     GENERATE_CONFIG = "config"

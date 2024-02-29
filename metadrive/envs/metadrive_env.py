@@ -29,6 +29,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
         BaseMap.LANE_WIDTH: 3.5,
         BaseMap.LANE_NUM: 3,
         "exit_length": 50,
+        "start_position": [0, 0],
     },
     store_map=True,
 
