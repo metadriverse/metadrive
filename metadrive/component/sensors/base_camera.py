@@ -97,9 +97,9 @@ class BaseCamera(ImageBuffer, BaseSensor):
     def enable_cuda(self):
         return self is not None and self._enable_cuda
 
-    def save_image(self, base_object, name="debug.png"):
+    def get_image(self, base_object):
         """
-        Put camera to an object and save the image to the disk
+        Put camera to an object and get the image.
         """
         original_parent = self.cam.getParent()
         original_position = self.cam.getPos()
@@ -107,6 +107,13 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.cam.reparentTo(base_object.origin)
         img = self.get_rgb_array_cpu()
         self.track(original_parent, original_position, original_hpr)
+        return img
+
+    def save_image(self, base_object, name="debug.png"):
+        """
+        Put camera to an object and save the image to the disk
+        """
+        img = self.get_image(base_object)
         cv2.imwrite(name, img)
 
     def track(self, new_parent_node: NodePath, position, hpr):
