@@ -9,7 +9,7 @@ class Nameable:
     """
     def __init__(self, name=None):
         # ID for object
-        self.name = random_string() if name is None else name
+        self.name = "{}_{}".format(self.class_name, random_string()) if name is None else name
         self.id = self.name  # name = id
 
     @property
