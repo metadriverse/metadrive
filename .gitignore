@@ -51,5 +51,8 @@
 **/**.mp4
 /documentation/jupyter_execute/
 /documentation/**/**.gif
+
+.coverage
+coverage.xml
 /documentation/source/img.png
 /documentation/source/demo.png
