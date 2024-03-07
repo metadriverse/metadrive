@@ -542,3 +542,7 @@ class CameraTagStateKey:
     RGB = "rgb"
     Depth = "depth"
     Semantic = "semantic"
+
+
+DEFAULT_SENSOR_OFFSET = (0., 0.8, 1.5)
+DEFAULT_SENSOR_HPR = (0., 0.0, 0.0)
