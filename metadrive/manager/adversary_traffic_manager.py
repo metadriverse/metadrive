@@ -1,18 +1,7 @@
-import copy
 import logging
 from collections import namedtuple
-from typing import Dict
-
-import math
-import numpy as np
 from metadrive.manager.traffic_manager import TrafficMode
-from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.map.base_map import BaseMap
-from metadrive.component.road_network import Road
-from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.constants import TARGET_VEHICLES, TRAFFIC_VEHICLES, OBJECT_TO_AGENT, AGENT_TO_OBJECT
-from metadrive.manager.base_manager import BaseManager
-from metadrive.utils import merge_dicts
 from metadrive.manager.traffic_manager import PGTrafficManager
 BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 
@@ -68,16 +57,9 @@ class PGAdversaryVehicleManager(PGTrafficManager):
         return {"spawn_lane_index": lane.index, "spawn_longitude": long, "enable_reverse": False}
 
 
-
-    # TODO: implement the function for obtaining an agent policy
-    def get_adv_policy(self):
-        from metadrive.policy.idm_policy import IDMPolicy
-        return IDMPolicy
-
-
     def _create_adversary_vehicles(self, map: BaseMap, num_adversaries: int):
         """
-            I also checked agent_manager.py, especially the _create_agents() function
+           I also checked agent_manager.py, especially the _create_agents() function
            Trigger mode, vehicles will be triggered only once, and disappear when arriving destination
            :param map: Map
            :param traffic_density: it can be adjusted each episode
@@ -91,19 +73,20 @@ class PGAdversaryVehicleManager(PGTrafficManager):
 
         # for lane in spawn_lanes: # TODO: how to choose the lane to spawn the vehicle??
         for i in range(num_adversaries):
-            vehicle_type = self.random_vehicle_type() # TODO: double check; adversaries should have their own vehicle type?? Not sure...
+            vehicle_type = self.random_vehicle_type() # TODO: adversaries should have their own vehicle type?? Not sure...
             # adv_start_long =  None    #TODO: should we consider about what's the position being trained? Maybe not....
             # adv_config = self.get_adv_config(lane, adv_start_long)
-            adv_vehicle_config = self.engine.global_config["agent_configs"]["default_agent"].items()[1] # in the single agent case, this is the same as agent0
+            adv_vehicle_config = self.engine.global_config["agent_configs"]["default_agent"] # in the single agent case, this is the same as agent0
 
             # adv_vehicle_config.update(self.engine.global_config["traffic_vehicle_config"]) # TODO: not necessary??
             random_v = self.spawn_object(vehicle_type, vehicle_config=adv_vehicle_config)
+            self._traffic_vehicles.append(random_v)
 
-            from metadrive.policy.idm_policy import IDMPolicy
-            self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
+            from metadrive.policy.adv_policy import AdvPolicy
+            self.add_policy(random_v.id, AdvPolicy, random_v, self.generate_seed())
             vehicles_on_block.append(random_v.name)
 
-        # TODO: copied  below block lines from _create_vehivle_once(), what does this do? maybe we should remove this.....
+        #TODO: copied  below block lines from _create_vehivle_once(), what does this do? maybe we should remove this.....
         trigger_road = first_real_block.pre_block_socket.positive_road
         block_vehicles = BlockVehicles(trigger_road=trigger_road, vehicles=vehicles_on_block)
         self.block_triggered_vehicles.append(block_vehicles)
