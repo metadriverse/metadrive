@@ -8,16 +8,19 @@ from metadrive.constants import HELP_MESSAGE
 from metadrive.policy.idm_policy import IDMPolicy
 from typing import Union
 from metadrive.utils import Config
-from metadrive.envs.intersection_env import IntersectionEnv
+# from metadrive.envs.intersection_env import IntersectionEnv # TODO: convert this to a single agent environment
+# from metadrive.policy.adv_policy import AdvPolicy
 
-class AdversaryEnv(Inter):
+
+
+class AdversaryEnv(MetaDriveEnv): # TODO: Implement single agent intersection environment using the adversary manager
     # TODO: Implement testing environment using the adversary manager
     def __init__(self, config: Union[dict, None] = None):
         super(AdversaryEnv, self).__init__(config)
 
     @staticmethod
     def default_config() -> Config:
-        AdversaryConfig = {"num_adversary_vehicles": 0, "traffic_mode":"adversary",}
+        AdversaryConfig = {"num_adversary_vehicles": 0, "traffic_mode":"adversary", "need_inverse_traffic":True}
         assert isinstance(AdversaryConfig["num_adversary_vehicles"], int) and AdversaryConfig["num_adversary_vehicles"] >=0
         return MetaDriveEnv.default_config().update(AdversaryConfig, allow_add_new_key=True)
 
@@ -33,39 +36,28 @@ class AdversaryEnv(Inter):
 
 if __name__ == '__main__':
     # running the adversary environment directly in here; rightnow the policy is IDMPolicy
-    config = dict(
-        use_render=False,
-        manual_control=True,
-        # debug=True,
-        # debug_static_world=True,
-        agent_policy=IDMPolicy,
-        num_adversary_vehicles=2,
-        num_scenarios=20,
-        traffic_mode="adversary",
-    )
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--observation", type=str, default="lidar", choices=["lidar", "rgb_camera"])
-    args = parser.parse_args()
-    if args.observation == "rgb_camera":
-        config.update(
-            dict(
-                image_observation=True,
-                sensors=dict(rgb_camera=(RGBCamera, 400, 300)),
-                interface_panel=["rgb_camera", "dashboard"],
-                num_adversary_vehicles=2,
-            )
-        )
-    env = AdversaryEnv(config)
+    default_config = AdversaryEnv.default_config()
+    env_config = dict(crash_vehicle_penalty=-1.0,
+                      success_reward=10.0,
+
+                      # traffic_vehicle_config=dict(
+                      #
+                      # ),
+                      num_adversary_vehicles=5,
+                      agent_policy=IDMPolicy,
+                      )
+
+    default_config.update(env_config)
+
+
+
+    env = AdversaryEnv(env_config)
     try:
-        o, _ = env.reset(seed=1)
+        o, _ = env.reset()
         print(HELP_MESSAGE)
         env.agent.expert_takeover = True
-        if args.observation == "rgb_camera":
-            assert isinstance(o, dict)
-            print("The observation is a dict with numpy arrays as values: ", {k: v.shape for k, v in o.items()})
-        else:
-            assert isinstance(o, np.ndarray)
-            print("The observation is an numpy array with shape: ", o.shape)
+
+
         for i in range(1, 1000000000):
             o, r, tm, tc, info = env.step([0, 0])
             env.render(mode="top_down")
@@ -76,12 +68,10 @@ if __name__ == '__main__':
             #         "Keyboard Control": "W,A,S,D",
             #     }
             # )
-            if args.observation == "rgb_camera":
-                cv2.imshow('RGB Image in Observation', o["image"][..., -1])
-                cv2.waitKey(1)
+
             if (tm or tc) and info["arrive_dest"]:
-                env.reset(env.current_seed + 1)
+                env.reset()
                 env.current_track_agent.expert_takeover = True
     finally:
         env.close()
-
+    #

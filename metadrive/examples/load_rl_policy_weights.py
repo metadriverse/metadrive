@@ -6,6 +6,7 @@ from copo_scenario.torch_copo.algo_copo import CoPOTrainer
 
 
 
+
 """
 load a trained rl policy with a fixed network architecture;
 the policy can be trained by RLlib or PyTorch;
@@ -27,11 +28,11 @@ class RLPolicy:
 
         assert self.trainer is not None  # You need to restore the trainer before loading the policy
         try:
-            trainer.restore(self.policy_ckpt_path)
+            self.trainer.restore(self.policy_ckpt_path)
         except Exception as e:
             print("Cannot load the policy: ", e)
             raise e
-        self.policy = trainer.get_policy()
+        self.policy = self.trainer.get_policy()
 
         # self.model = self.policy.model
         # self.state_dict = self.model.state_dict()
