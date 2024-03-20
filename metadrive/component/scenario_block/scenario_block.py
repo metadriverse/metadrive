@@ -81,7 +81,7 @@ class ScenarioBlock(BaseBlock):
     def _construct_continuous_line(self, points, color):
         for index in range(0, len(points) - 1):
             node_path_list = self._construct_lane_line_segment(
-                points[index], points[index + 1], color, PGLineType.BROKEN
+                points[index], points[index + 1], color, MetaDriveType.LINE_SOLID_SINGLE_WHITE
             )
             self._node_path_list.extend(node_path_list)
 
@@ -92,7 +92,7 @@ class ScenarioBlock(BaseBlock):
         for index in range(0, len(points) - 1, 2):
             if index + 1 < len(points) - 1:
                 node_path_list = self._construct_lane_line_segment(
-                    points[index], points[index + 1], color, PGLineType.BROKEN
+                    points[index], points[index + 1], color, MetaDriveType.LINE_BROKEN_SINGLE_WHITE
                 )
                 self._node_path_list.extend(node_path_list)
 
