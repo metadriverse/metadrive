@@ -50,12 +50,12 @@ def torch_expert(vehicle, deterministic=False, need_obs=False):
     global _expert_observation
     expert_obs_cfg = dict(
         lidar=dict(num_lasers=240, distance=50, num_others=4, gaussian_noise=0.0, dropout_prob=0.0),
+        side_detector=dict(num_lasers=0, distance=50, gaussian_noise=0.0, dropout_prob=0.0),
+        lane_line_detector=dict(num_lasers=0, distance=20, gaussian_noise=0.0, dropout_prob=0.0),
         random_agent_model=False
     )
-    origin_obs_cfg = dict(
-        lidar=dict(num_lasers=240, distance=50, num_others=0, gaussian_noise=0.0, dropout_prob=0.0),
-        random_agent_model=False
-    )
+    origin_obs_cfg = vehicle.config.copy()
+    # TODO: some setting in origin cfg will not be covered, then they may change the obs shape
     with torch.no_grad():  # Disable gradient computation
         if _expert_weights is None:
             _expert_weights = numpy_to_torch(np.load(ckpt_path), device)
