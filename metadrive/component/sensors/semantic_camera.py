@@ -37,10 +37,25 @@ class SemanticCamera(BaseCamera):
                     label, Terrain.make_render_state(self.engine, "terrain.vert.glsl", "terrain_semantics.frag.glsl")
                 )
             else:
-                cam.setTagState(
-                    label,
-                    RenderState.make(
-                        ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),
-                        ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1
+
+                if label == Semantics.PEDESTRIAN.label:
+                    # PZH: This is a workaround fix to make pedestrians animated.
+                    cam.setTagState(
+                        label,
+                        RenderState.make(
+                            # ShaderAttrib.makeOff(),
+                            LightAttrib.makeAllOff(),
+                            TextureAttrib.makeOff(),
+                            ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)),
+                            1
+                        )
                     )
-                )
+
+                else:
+                    cam.setTagState(
+                        label,
+                        RenderState.make(
+                            ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),
+                            ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1
+                        )
+                    )
