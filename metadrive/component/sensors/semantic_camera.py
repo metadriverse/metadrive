@@ -55,10 +55,7 @@ class SemanticCamera(BaseCamera):
                     cam.setTagState(
                         label,
                         RenderState.make(
-                            ShaderAttrib.makeOff(),
-                            LightAttrib.makeAllOff(),
-                            TextureAttrib.makeOff(),
-                            ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)),
-                            1
+                            ShaderAttrib.makeOff(), LightAttrib.makeAllOff(), TextureAttrib.makeOff(),
+                            ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)), 1
                         )
                     )
