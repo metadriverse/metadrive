@@ -38,7 +38,7 @@ class SemanticCamera(BaseCamera):
                 )
             else:
 
-                if label == "PEDESTRIAN":
+                if label == Semantics.PEDESTRIAN.label:
                     # PZH: This is a workaround fix to make pedestrians animated.
                     cam.setTagState(
                         label,
@@ -55,7 +55,7 @@ class SemanticCamera(BaseCamera):
                     cam.setTagState(
                         label,
                         RenderState.make(
-                            # ShaderAttrib.makeOff(),
+                            ShaderAttrib.makeOff(),
                             LightAttrib.makeAllOff(),
                             TextureAttrib.makeOff(),
                             ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)),
