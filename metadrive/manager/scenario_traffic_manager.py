@@ -8,7 +8,7 @@ from metadrive.component.traffic_participants.cyclist import Cyclist
 from metadrive.component.traffic_participants.pedestrian import Pedestrian
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import SVehicle, LVehicle, MVehicle, XLVehicle, \
-    TrafficDefaultVehicle
+    TrafficDefaultVehicle, VaryingDynamicsBoundingBoxVehicle
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
@@ -171,6 +171,9 @@ class ScenarioTrafficManager(BaseManager):
     def spawn_vehicle(self, v_id, track):
         state = parse_object_state(track, self.episode_step)
 
+        use_bounding_box = self.engine.global_config["vehicle_config"]["vehicle_model"
+                                                                       ] == "varying_dynamics_bounding_box"
+
         # for each vehicle, we would like to know if it is static
         if v_id not in self._static_car_id and v_id not in self._moving_car_id:
             valid_points = track["state"]["position"][np.where(track["state"]["valid"])]
@@ -195,10 +198,18 @@ class ScenarioTrafficManager(BaseManager):
             vehicle_class = state["vehicle_class"]
         else:
             vehicle_class = get_vehicle_type(
-                float(state["length"]), None if self.even_sample_v else self.np_random, self.need_default_vehicle
+                float(state["length"]),
+                None if self.even_sample_v else self.np_random,
+                self.need_default_vehicle,
+                use_bounding_box=use_bounding_box
             )
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v_cfg = copy.copy(self._traffic_v_config)
+        if use_bounding_box:
+            v_cfg["width"] = state["width"]
+            v_cfg["length"] = state["length"]
+            v_cfg["height"] = state["height"]
+
         if self.engine.global_config["top_down_show_real_size"]:
             v_cfg["top_down_length"] = track["state"]["length"][self.episode_step]
             v_cfg["top_down_width"] = track["state"]["width"][self.episode_step]
@@ -336,7 +347,9 @@ class ScenarioTrafficManager(BaseManager):
 type_count = [0 for i in range(3)]
 
 
-def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
+def get_vehicle_type(length, np_random=None, need_default_vehicle=False, use_bounding_box=False):
+    if use_bounding_box:
+        return VaryingDynamicsBoundingBoxVehicle
     if np_random is not None:
         if length <= 4:
             return SVehicle

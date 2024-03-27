@@ -3,12 +3,12 @@ This environment can load all scenarios exported from other environments via env
 """
 
 import numpy as np
-from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
+
 from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
-from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
+from metadrive.manager.scenario_agent_manager import ScenarioAgentManager
 from metadrive.manager.scenario_curriculum_manager import ScenarioCurriculumManager
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
@@ -115,6 +115,9 @@ class ScenarioEnv(BaseEnv):
         self.start_index = self.config["start_scenario_index"]
         self.num_scenarios = self.config["num_scenarios"]
 
+    def _get_agent_manager(self):
+        return ScenarioAgentManager(init_observations=self._get_observations())
+
     def setup_engine(self):
         super(ScenarioEnv, self).setup_engine()
         self.engine.register_manager("data_manager", ScenarioDataManager())
@@ -179,7 +182,7 @@ class ScenarioEnv(BaseEnv):
                 done = True
             self.logger.info(msg("max step"), extra={"log_once": True})
         elif self.config["allowed_more_steps"] and self.episode_lengths[vehicle_id] >= \
-                self.engine.data_manager.current_scenario_length + self.config["allowed_more_steps"]:
+            self.engine.data_manager.current_scenario_length + self.config["allowed_more_steps"]:
             if self.config["truncate_as_terminate"]:
                 done = True
             done_info[TerminationState.MAX_STEP] = True
