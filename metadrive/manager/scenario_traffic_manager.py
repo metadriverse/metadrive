@@ -225,7 +225,9 @@ class ScenarioTrafficManager(BaseManager):
             vehicle_class,
             # PZH Note: We are using 3D position (including Z) to spawn object.
             position=position,
-            heading=state["heading"], vehicle_config=v_cfg, name=obj_name
+            heading=state["heading"],
+            vehicle_config=v_cfg,
+            name=obj_name
         )
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id
