@@ -165,8 +165,7 @@ class PedestrainBoundingBox(BaseTrafficParticipant):
             material = Material()
             material.setBaseColor(
                 (
-                    self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
-                    self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
+                    self.panda_color[0] * self.MATERIAL_COLOR_COEFF, self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
                     self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.
                 )
             )
@@ -180,11 +179,7 @@ class PedestrainBoundingBox(BaseTrafficParticipant):
 
     def reset(self, position, heading_theta: float = 0., random_seed=None, name=None, *args, **kwargs):
         super(PedestrainBoundingBox, self).reset(position, heading_theta, random_seed, name, *args, **kwargs)
-        config = {
-            "width": kwargs["width"],
-            "length": kwargs["length"],
-            "height": kwargs["height"]
-        }
+        config = {"width": kwargs["width"], "length": kwargs["length"], "height": kwargs["height"]}
         self.update_config(config)
         if self._instance is not None:
             self._instance.detachNode()

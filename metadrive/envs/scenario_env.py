@@ -119,8 +119,8 @@ class ScenarioEnv(BaseEnv):
     def _post_process_config(self, config):
         config = super(ScenarioEnv, self)._post_process_config(config)
         if config["use_bounding_box"]:
-            config["vehicle_config"]["random_color"] =True
-            config["vehicle_config"]["vehicle_model"] ="varying_dynamics_bounding_box"
+            config["vehicle_config"]["random_color"] = True
+            config["vehicle_config"]["vehicle_model"] = "varying_dynamics_bounding_box"
             config["agent_configs"]["default_agent"]["use_special_color"] = True
             config["agent_configs"]["default_agent"]["vehicle_model"] = "varying_dynamics_bounding_box"
         return config

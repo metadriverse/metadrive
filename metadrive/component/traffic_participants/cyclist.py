@@ -9,6 +9,7 @@ from metadrive.constants import CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 
+
 class Cyclist(BaseTrafficParticipant):
     MASS = 80  # kg
     TYPE_NAME = MetaDriveType.CYCLIST
@@ -60,11 +61,7 @@ class CyclistBoundingBox(BaseTrafficParticipant):
     MATERIAL_SPECULAR_COLOR = (3, 3, 3, 3)
 
     def __init__(self, position, heading_theta, random_seed, name=None, **kwargs):
-        config = {
-            "width": kwargs["width"],
-            "length": kwargs["length"],
-            "height": kwargs["height"]
-        }
+        config = {"width": kwargs["width"], "length": kwargs["length"], "height": kwargs["height"]}
         super(CyclistBoundingBox, self).__init__(position, heading_theta, random_seed, name=name, config=config)
         self.set_metadrive_type(self.TYPE_NAME)
         n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
@@ -89,8 +86,7 @@ class CyclistBoundingBox(BaseTrafficParticipant):
             material = Material()
             material.setBaseColor(
                 (
-                    self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
-                    self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
+                    self.panda_color[0] * self.MATERIAL_COLOR_COEFF, self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
                     self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.
                 )
             )
@@ -104,11 +100,7 @@ class CyclistBoundingBox(BaseTrafficParticipant):
 
     def reset(self, position, heading_theta: float = 0., random_seed=None, name=None, *args, **kwargs):
         super(CyclistBoundingBox, self).reset(position, heading_theta, random_seed, name, *args, **kwargs)
-        config = {
-            "width": kwargs["width"],
-            "length": kwargs["length"],
-            "height": kwargs["height"]
-        }
+        config = {"width": kwargs["width"], "length": kwargs["length"], "height": kwargs["height"]}
         self.update_config(config)
         if self._instance is not None:
             self._instance.detachNode()
@@ -130,8 +122,7 @@ class CyclistBoundingBox(BaseTrafficParticipant):
             material = Material()
             material.setBaseColor(
                 (
-                    self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
-                    self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
+                    self.panda_color[0] * self.MATERIAL_COLOR_COEFF, self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
                     self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.
                 )
             )
