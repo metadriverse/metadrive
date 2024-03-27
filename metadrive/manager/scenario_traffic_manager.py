@@ -169,7 +169,7 @@ class ScenarioTrafficManager(BaseManager):
         return list(self.engine.get_objects(filter=lambda o: isinstance(o, BaseVehicle)).values())
 
     def spawn_vehicle(self, v_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=True)
 
         use_bounding_box = self.engine.global_config["vehicle_config"]["vehicle_model"
                                                                        ] == "varying_dynamics_bounding_box"
@@ -187,7 +187,7 @@ class ScenarioTrafficManager(BaseManager):
 
         # if collision don't generate, unless ego car is in replay mode
         ego_pos = self.ego_vehicle.position
-        heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"], ego_pos)
+        heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"][:2], ego_pos)
         if not self.is_ego_vehicle_replay and self._filter_overlapping_car and \
                 abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT and \
                 abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
@@ -218,8 +218,14 @@ class ScenarioTrafficManager(BaseManager):
                     "Scenario ID: {}. The top_down size of vehicle {} is weird: "
                     "{}".format(self.engine.current_seed, v_id, [v_cfg["length"], v_cfg["width"]])
                 )
+
+        position = list(state["position"])
+        position[-1] /= 2  # half height
         v = self.spawn_object(
-            vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_cfg, name=obj_name
+            vehicle_class,
+            # PZH Note: We are using 3D position (including Z) to spawn object.
+            position=position,
+            heading=state["heading"], vehicle_config=v_cfg, name=obj_name
         )
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id
@@ -247,7 +253,7 @@ class ScenarioTrafficManager(BaseManager):
             self.idm_policy_count += 1
 
     def spawn_pedestrian(self, scenario_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
         if not state["valid"]:
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
@@ -257,10 +263,12 @@ class ScenarioTrafficManager(BaseManager):
         else:
             cls = Pedestrian
             force_spawn = False
+
+        position = list(state["position"])
         obj = self.spawn_object(
             cls,
             name=obj_name,
-            position=state["position"],
+            position=position,
             heading_theta=state["heading"],
             width=state["width"],
             length=state["length"],
@@ -273,7 +281,7 @@ class ScenarioTrafficManager(BaseManager):
         policy.act()
 
     def spawn_cyclist(self, scenario_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
         if not state["valid"]:
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
@@ -283,10 +291,12 @@ class ScenarioTrafficManager(BaseManager):
         else:
             cls = Cyclist
             force_spawn = False
+
+        position = list(state["position"])
         obj = self.spawn_object(
             cls,
             name=obj_name,
-            position=state["position"],
+            position=position,
             heading_theta=state["heading"],
             width=state["width"],
             length=state["length"],
