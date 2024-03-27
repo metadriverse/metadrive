@@ -38,10 +38,7 @@ if __name__ == "__main__":
                 ),
                 "num_scenarios": 3 if use_waymo else 10,
                 "debug": True,
-                "vehicle_config": dict(random_color=True, vehicle_model="varying_dynamics_bounding_box"),
-                "agent_configs": {
-                    "default_agent": dict(use_special_color=True, vehicle_model="varying_dynamics_bounding_box")
-                },
+                "use_bounding_box": True,
             }
         )
         o, _ = env.reset()

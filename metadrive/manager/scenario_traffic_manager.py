@@ -4,8 +4,8 @@ from metadrive.utils.math import norm
 import numpy as np
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
-from metadrive.component.traffic_participants.cyclist import Cyclist
-from metadrive.component.traffic_participants.pedestrian import Pedestrian
+from metadrive.component.traffic_participants.cyclist import Cyclist, CyclistBoundingBox
+from metadrive.component.traffic_participants.pedestrian import Pedestrian, PedestrainBoundingBox
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import SVehicle, LVehicle, MVehicle, XLVehicle, \
     TrafficDefaultVehicle, VaryingDynamicsBoundingBoxVehicle
@@ -251,11 +251,21 @@ class ScenarioTrafficManager(BaseManager):
         if not state["valid"]:
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
+        if self.global_config["use_bounding_box"]:
+            cls = PedestrainBoundingBox
+            force_spawn = True
+        else:
+            cls = Pedestrian
+            force_spawn = False
         obj = self.spawn_object(
-            Pedestrian,
+            cls,
             name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
+            width=state["width"],
+            length=state["length"],
+            height=state["height"],
+            force_spawn=force_spawn
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id
@@ -267,11 +277,21 @@ class ScenarioTrafficManager(BaseManager):
         if not state["valid"]:
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
+        if self.global_config["use_bounding_box"]:
+            cls = CyclistBoundingBox
+            force_spawn = True
+        else:
+            cls = Cyclist
+            force_spawn = False
         obj = self.spawn_object(
-            Cyclist,
+            cls,
             name=obj_name,
             position=state["position"],
             heading_theta=state["heading"],
+            width=state["width"],
+            length=state["length"],
+            height=state["height"],
+            force_spawn=force_spawn
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id

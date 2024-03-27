@@ -90,7 +90,8 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== others =====
     allowed_more_steps=None,  # horizon, None=infinite
-    top_down_show_real_size=False
+    top_down_show_real_size=False,
+    use_bounding_box=False,  # Set True to use a cube in visualization to represent every dynamic objects.
 )
 
 
@@ -114,6 +115,15 @@ class ScenarioEnv(BaseEnv):
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
         self.start_index = self.config["start_scenario_index"]
         self.num_scenarios = self.config["num_scenarios"]
+
+    def _post_process_config(self, config):
+        config = super(ScenarioEnv, self)._post_process_config(config)
+        if config["use_bounding_box"]:
+            config["vehicle_config"]["random_color"] =True
+            config["vehicle_config"]["vehicle_model"] ="varying_dynamics_bounding_box"
+            config["agent_configs"]["default_agent"]["use_special_color"] = True
+            config["agent_configs"]["default_agent"]["vehicle_model"] = "varying_dynamics_bounding_box"
+        return config
 
     def _get_agent_manager(self):
         return ScenarioAgentManager(init_observations=self._get_observations())

@@ -1,5 +1,5 @@
 from direct.actor.Actor import Actor
-from panda3d.bullet import BulletCylinderShape
+from panda3d.bullet import BulletCylinderShape, BulletBoxShape
 from panda3d.core import LVector3
 
 from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
@@ -21,7 +21,7 @@ class Pedestrian(BaseTrafficParticipant):
     # SPEED_LIST = [0.6, 1.2, 2.2] Too much speed choice jeopardise the performance
     SPEED_LIST = [0.4, 1.2]
 
-    def __init__(self, position, heading_theta, random_seed=None, name=None):
+    def __init__(self, position, heading_theta, random_seed=None, name=None, *args, **kwargs):
         super(Pedestrian, self).__init__(position, heading_theta, random_seed, name=name)
         self.set_metadrive_type(self.TYPE_NAME)
         # self.origin.setDepthOffset(1)
@@ -116,3 +116,114 @@ class Pedestrian(BaseTrafficParticipant):
     @property
     def top_down_length(self):
         return self.RADIUS * 2
+
+
+class PedestrainBoundingBox(BaseTrafficParticipant):
+    MASS = 70  # kg
+    TYPE_NAME = MetaDriveType.PEDESTRIAN
+    SEMANTIC_LABEL = Semantics.PEDESTRIAN.label
+
+    # for random color choosing
+    MATERIAL_COLOR_COEFF = 1.6  # to resist other factors, since other setting may make color dark
+    MATERIAL_METAL_COEFF = 0.1  # 0-1
+    MATERIAL_ROUGHNESS = 0.8  # smaller to make it more smooth, and reflect more light
+    MATERIAL_SHININESS = 128  # 0-128 smaller to make it more smooth, and reflect more light
+    MATERIAL_SPECULAR_COLOR = (3, 3, 3, 3)
+
+    def __init__(self, position, heading_theta, width, length, height, random_seed=None, name=None):
+        config = {}
+        config["width"] = width
+        config["length"] = length
+        config["height"] = height
+
+        super(PedestrainBoundingBox, self).__init__(position, heading_theta, random_seed, name=name, config=config)
+        self.set_metadrive_type(self.TYPE_NAME)
+        n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
+        self.add_body(n)
+
+        # PZH: Use BoxShape instead of CylinderShape
+        # self.body.addShape(BulletCylinderShape(self.RADIUS, self.HEIGHT))
+        self.body.addShape(BulletBoxShape(LVector3(width / 2, length / 2, height / 2)))
+
+        self._instance = None
+        if self.render:
+            # PZH: Load a box model and resize it to the vehicle size
+            model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            model.setScale((self.WIDTH, self.LENGTH, self.HEIGHT))
+            model.setTwoSided(False)
+            self._instance = model.instanceTo(self.origin)
+
+            # Add some color to help debug
+            from panda3d.core import Material, LVecBase4
+            import seaborn as sns
+            color = sns.color_palette("colorblind")
+            color.remove(color[2])  # Remove the green and leave it for special vehicle
+            idx = 0
+            rand_c = color[idx]
+            rand_c = (0.0, 1.0, 0.0)
+            self._panda_color = rand_c
+            material = Material()
+            material.setBaseColor(
+                (
+                    self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
+                    self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
+                    self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.
+                )
+            )
+            material.setMetallic(self.MATERIAL_METAL_COEFF)
+            material.setSpecular(self.MATERIAL_SPECULAR_COLOR)
+            material.setRefractiveIndex(1.5)
+            material.setRoughness(self.MATERIAL_ROUGHNESS)
+            material.setShininess(self.MATERIAL_SHININESS)
+            material.setTwoside(False)
+            self.origin.setMaterial(material, True)
+
+    def reset(self, position, heading_theta: float = 0., random_seed=None, name=None, *args, **kwargs):
+        super(PedestrainBoundingBox, self).reset(position, heading_theta, random_seed, name, *args, **kwargs)
+        config = {
+            "width": kwargs["width"],
+            "length": kwargs["length"],
+            "height": kwargs["height"]
+        }
+        self.update_config(config)
+        if self._instance is not None:
+            self._instance.detachNode()
+        if self.render:
+            model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            model.setScale((self.WIDTH, self.LENGTH, self.HEIGHT))
+            model.setTwoSided(False)
+            self._instance = model.instanceTo(self.origin)
+
+    def set_velocity(self, direction: list, value=None, in_local_frame=False):
+        self.set_roll(0)
+        self.set_pitch(0)
+        if in_local_frame:
+            from metadrive.engine.engine_utils import get_engine
+            engine = get_engine()
+            direction = LVector3(*direction, 0.)
+            direction[1] *= -1
+            ret = engine.worldNP.getRelativeVector(self.origin, direction)
+            direction = ret
+        speed = (norm(direction[0], direction[1]) + 1e-6)
+        if value is not None:
+            norm_ratio = value / speed
+        else:
+            norm_ratio = 1
+
+        self._body.setLinearVelocity(
+            LVector3(direction[0] * norm_ratio, direction[1] * norm_ratio,
+                     self._body.getLinearVelocity()[-1])
+        )
+        self.standup()
+
+    @property
+    def HEIGHT(self):
+        return self.config["height"]
+
+    @property
+    def LENGTH(self):
+        return self.config["length"]
+
+    @property
+    def WIDTH(self):
+        return self.config["width"]
