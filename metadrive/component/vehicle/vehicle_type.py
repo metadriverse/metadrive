@@ -1,8 +1,11 @@
 import platform
 
-from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
+from panda3d.core import Material, Vec3
+
+from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Semantics
+from metadrive.engine.asset_loader import AssetLoader
 
 
 class DefaultVehicle(BaseVehicle):
@@ -208,25 +211,25 @@ class VaryingDynamicsVehicle(DefaultVehicle):
             if vehicle_config["length"] is not None and vehicle_config["length"] != self.LENGTH:
                 should_force_reset = True
             if "max_engine_force" in vehicle_config and \
-                    vehicle_config["max_engine_force"] is not None and \
-                    vehicle_config["max_engine_force"] != self.config["max_engine_force"]:
+                vehicle_config["max_engine_force"] is not None and \
+                vehicle_config["max_engine_force"] != self.config["max_engine_force"]:
                 should_force_reset = True
             if "max_brake_force" in vehicle_config and \
-                    vehicle_config["max_brake_force"] is not None and \
-                    vehicle_config["max_brake_force"] != self.config["max_brake_force"]:
+                vehicle_config["max_brake_force"] is not None and \
+                vehicle_config["max_brake_force"] != self.config["max_brake_force"]:
                 should_force_reset = True
             if "wheel_friction" in vehicle_config and \
-                    vehicle_config["wheel_friction"] is not None and \
-                    vehicle_config["wheel_friction"] != self.config["wheel_friction"]:
+                vehicle_config["wheel_friction"] is not None and \
+                vehicle_config["wheel_friction"] != self.config["wheel_friction"]:
                 should_force_reset = True
             if "max_steering" in vehicle_config and \
-                    vehicle_config["max_steering"] is not None and \
-                    vehicle_config["max_steering"] != self.config["max_steering"]:
+                vehicle_config["max_steering"] is not None and \
+                vehicle_config["max_steering"] != self.config["max_steering"]:
                 self.max_steering = vehicle_config["max_steering"]
                 should_force_reset = True
             if "mass" in vehicle_config and \
-                    vehicle_config["mass"] is not None and \
-                    vehicle_config["mass"] != self.config["mass"]:
+                vehicle_config["mass"] is not None and \
+                vehicle_config["mass"] != self.config["mass"]:
                 should_force_reset = True
 
         # def process_memory():
@@ -266,6 +269,74 @@ class VaryingDynamicsVehicle(DefaultVehicle):
         return ret
 
 
+class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
+    def _add_visualization(self):
+        if self.render:
+            [path, scale, offset, HPR] = self.path
+
+            # PZH: Note that we do not use model_collection as a buffer here.
+            # if path not in BaseVehicle.model_collection:
+
+            # PZH: Load a box model and resize it to the vehicle size
+            car_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+            car_model.setTwoSided(False)
+            BaseVehicle.model_collection[path] = car_model
+            car_model.setScale((self.WIDTH, self.LENGTH, self.HEIGHT))
+            car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + self.HEIGHT / 2)
+            # model default, face to y
+            car_model.setHpr(*HPR)
+
+            # else:
+            #     car_model = BaseVehicle.model_collection[path]
+
+            car_model.instanceTo(self.origin)
+            if self.config["random_color"]:
+                material = Material()
+                material.setBaseColor(
+                    (
+                        self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
+                        self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
+                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.
+                    )
+                )
+                material.setMetallic(self.MATERIAL_METAL_COEFF)
+                material.setSpecular(self.MATERIAL_SPECULAR_COLOR)
+                material.setRefractiveIndex(1.5)
+                material.setRoughness(self.MATERIAL_ROUGHNESS)
+                material.setShininess(self.MATERIAL_SHININESS)
+                material.setTwoside(False)
+                self.origin.setMaterial(material, True)
+
+    def _add_wheel(self, pos: Vec3, radius: float, front: bool, left):
+        wheel_np = self.origin.attachNewNode("wheel")
+        self._node_path_list.append(wheel_np)
+
+        # PZH: Skip the wheel model
+        # if self.render:
+        #     model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
+        #     model_path = AssetLoader.file_path("models", os.path.dirname(self.path[0]), model)
+        #     wheel_model = self.loader.loadModel(model_path)
+        #     wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
+        #     wheel_model.reparentTo(wheel_np)
+        #     wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
+        wheel = self.system.createWheel()
+        wheel.setNode(wheel_np.node())
+        wheel.setChassisConnectionPointCs(pos)
+        wheel.setFrontWheel(front)
+        wheel.setWheelDirectionCs(Vec3(0, 0, -1))
+        wheel.setWheelAxleCs(Vec3(1, 0, 0))
+
+        wheel.setWheelRadius(radius)
+        wheel.setMaxSuspensionTravelCm(self.SUSPENSION_LENGTH)
+        wheel.setSuspensionStiffness(self.SUSPENSION_STIFFNESS)
+        wheel.setWheelsDampingRelaxation(4.8)
+        wheel.setWheelsDampingCompression(1.2)
+        wheel_friction = self.config["wheel_friction"] if not self.config["no_wheel_friction"] else 0
+        wheel.setFrictionSlip(wheel_friction)
+        wheel.setRollInfluence(0.5)
+        return wheel
+
+
 def random_vehicle_type(np_random, p=None):
     v_type = {
         "s": SVehicle,
@@ -289,6 +360,7 @@ vehicle_type = {
     "default": DefaultVehicle,
     "static_default": StaticDefaultVehicle,
     "varying_dynamics": VaryingDynamicsVehicle,
+    "varying_dynamics_bounding_box": VaryingDynamicsBoundingBoxVehicle,
     "traffic_default": TrafficDefaultVehicle
 }
 

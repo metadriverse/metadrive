@@ -53,9 +53,16 @@ class ScenarioMapManager(BaseManager):
 
         sdc_traj = parse_full_trajectory(sdc_track)
 
-        init_state = parse_object_state(sdc_track, 0, check_last_state=False)
+        init_state = parse_object_state(sdc_track, 0, check_last_state=False, include_z_position=True)
+
+        # TODO(PZH): I hate this but we have to workaround this for a weird nuscenes bug...
+        if data["version"].startswith("nuscenesv1.0") or data["metadata"]["dataset"] == "nuscenes":
+            init_state["width"], init_state["length"] = init_state["length"], init_state["width"]
+
         last_state = parse_object_state(sdc_track, -1, check_last_state=True)
         init_position = init_state["position"]
+        init_position[-1] = 0
+
         init_yaw = init_state["heading"]
         last_position = last_state["position"]
         last_yaw = last_state["heading"]
@@ -69,7 +76,12 @@ class ScenarioMapManager(BaseManager):
                 dict(
                     agent_configs={
                         DEFAULT_AGENT: dict(
-                            spawn_position_heading=(init_position, init_yaw), spawn_velocity=init_state["velocity"]
+                            # Add a fake Z axis so that the object will not fall from the sky.
+                            spawn_position_heading=(list(init_position), init_yaw),
+                            spawn_velocity=init_state["velocity"],
+                            width=init_state["width"],
+                            length=init_state["length"],
+                            height=init_state["height"],
                         )
                     }
                 )
