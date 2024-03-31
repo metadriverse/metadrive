@@ -265,12 +265,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             cross_product = np.cross(dir_1, dir_0)
             navigation_turn_left = True if cross_product[-1] < 0 else False
             navigation_turn_right = not navigation_turn_left
-        step_info.update({
-            "navigation_command": "forward" if navigation_straight else ("left" if navigation_turn_left else "right"),
-            "navigation_forward": navigation_straight,
-            "navigation_turn_left": navigation_turn_left,
-            "navigation_turn_right": navigation_turn_right
-        })
+        step_info.update(
+            {
+                "navigation_command": "forward" if navigation_straight else
+                ("left" if navigation_turn_left else "right"),
+                "navigation_forward": navigation_straight,
+                "navigation_turn_left": navigation_turn_left,
+                "navigation_turn_right": navigation_turn_right
+            }
+        )
         return step_info
 
     def _out_of_route(self):
