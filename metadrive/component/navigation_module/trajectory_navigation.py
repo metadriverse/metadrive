@@ -223,3 +223,9 @@ class TrajectoryNavigation(BaseNavigation):
     @property
     def current_heading_theta_at_long(self):
         return self.last_current_heading_theta_at_long[1]
+
+class MultiAgentTrajectoryNavigation(TrajectoryNavigation):
+    @property
+    def reference_trajectory(self):
+        print(111111)
+        return self.engine.map_manager.current_sdc_route
