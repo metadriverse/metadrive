@@ -154,7 +154,7 @@ class PedestrainBoundingBox(BaseTrafficParticipant):
             self._instance = model.instanceTo(self.origin)
 
             # Add some color to help debug
-            from panda3d.core import Material, LVecBase4
+            from panda3d.core import Material
             import seaborn as sns
             color = sns.color_palette("colorblind")
             color.remove(color[2])  # Remove the green and leave it for special vehicle
