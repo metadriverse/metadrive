@@ -270,8 +270,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "navigation_command": "forward" if navigation_straight else
                 ("left" if navigation_turn_left else "right"),
                 "navigation_forward": navigation_straight,
-                "navigation_turn_left": navigation_turn_left,
-                "navigation_turn_right": navigation_turn_right
+                "navigation_left": navigation_turn_left,
+                "navigation_right": navigation_turn_right
             }
         )
         return step_info
