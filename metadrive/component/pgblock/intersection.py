@@ -40,8 +40,6 @@ class InterSection(PGBlock):
     ANGLE = 90  # may support other angle in the future
     EXIT_PART_LENGTH = 35
 
-    _enable_u_turn_flag = False
-
     # LEFT_TURN_NUM = 1 now it is useless
 
     def __init__(self, *args, **kwargs):
@@ -49,6 +47,10 @@ class InterSection(PGBlock):
             self.radius = kwargs.pop("radius")
         else:
             self.radius = None
+        if "enable_u_turn" in kwargs:
+            self._enable_u_turn_flag = kwargs.pop("enable_u_turn")
+        else:
+            self._enable_u_turn_flag = False
         super(InterSection, self).__init__(*args, **kwargs)
         if self.radius is None:
             self.radius = self.get_config(copy=False)[Parameter.radius]
@@ -245,9 +247,6 @@ class InterSection(PGBlock):
             ignore_intersection_checking=self.ignore_intersection_checking,
             metadrive_lane_type=MetaDriveType.LANE_SURFACE_UNSTRUCTURE
         )
-
-    def enable_u_turn(self, enable_u_turn: bool):
-        self._enable_u_turn_flag = enable_u_turn
 
     def get_intermediate_spawn_lanes(self):
         """Override this function for intersection so that we won't spawn vehicles in the center of intersection."""
