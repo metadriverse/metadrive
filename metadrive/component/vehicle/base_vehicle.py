@@ -250,6 +250,30 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "policy": my_policy.name if my_policy is not None else my_policy
             }
         )
+
+        lanes_heading = self.navigation.navi_arrow_dir
+        lane_0_heading = lanes_heading[0]
+        lane_1_heading = lanes_heading[1]
+        navigation_straight = False
+        navigation_turn_left = False
+        navigation_turn_right = False
+        if abs(wrap_to_pi(lane_0_heading - lane_1_heading)) < 10 / 180 * math.pi:
+            navigation_straight = True
+        else:
+            dir_0 = np.array([math.cos(lane_0_heading), math.sin(lane_0_heading), 0])
+            dir_1 = np.array([math.cos(lane_1_heading), math.sin(lane_1_heading), 0])
+            cross_product = np.cross(dir_1, dir_0)
+            navigation_turn_left = True if cross_product[-1] < 0 else False
+            navigation_turn_right = not navigation_turn_left
+        step_info.update(
+            {
+                "navigation_command": "forward" if navigation_straight else
+                ("left" if navigation_turn_left else "right"),
+                "navigation_forward": navigation_straight,
+                "navigation_left": navigation_turn_left,
+                "navigation_right": navigation_turn_right
+            }
+        )
         return step_info
 
     def _out_of_route(self):

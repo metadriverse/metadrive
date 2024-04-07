@@ -66,6 +66,7 @@ if __name__ == "__main__":
                     "Keyboard Control": "W,A,S,D",
                 }
             )
+            print("Navigation information: ", info["navigation_command"])
 
             if args.observation == "rgb_camera":
                 cv2.imshow('RGB Image in Observation', o["image"][..., -1])
