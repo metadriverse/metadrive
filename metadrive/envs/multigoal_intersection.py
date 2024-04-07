@@ -11,22 +11,153 @@ from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.component.pgblock.intersection import InterSection
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.road_network import Road
+import copy
+from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
+from typing import Union
+import seaborn as sns
 
-logger = get_logger()
+import numpy as np
+
+from metadrive.component.algorithm.blocks_prob_dist import PGBlockDistConfig
+from metadrive.component.map.base_map import BaseMap
+from metadrive.component.map.pg_map import parse_map_config, MapGenerateMethod
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.constants import DEFAULT_AGENT, TerminationState
+from metadrive.envs.base_env import BaseEnv
+from metadrive.manager.traffic_manager import TrafficMode
+from metadrive.utils import clip, Config
 
 
 
 from metadrive import MetaDriveEnv
 
 from metadrive.utils import clip
+import copy
+
+from metadrive.component.map.pg_map import PGMap
+from metadrive.component.pgblock.first_block import FirstPGBlock
+from metadrive.component.pgblock.intersection import InterSection
+from metadrive.component.road_network import Road
+from metadrive.envs.marl_envs.multi_agent_metadrive import MultiAgentMetaDrive
+from metadrive.manager.pg_map_manager import PGMapManager
+from metadrive.manager.base_manager import BaseManager
+
+from metadrive.manager.spawn_manager import SpawnManager
+from metadrive.utils import Config
+#
+# MAIntersectionConfig = dict(
+#     spawn_roads=[
+#         Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
+#         -Road(InterSection.node(1, 0, 0), InterSection.node(1, 0, 1)),
+#         -Road(InterSection.node(1, 1, 0), InterSection.node(1, 1, 1)),
+#         -Road(InterSection.node(1, 2, 0), InterSection.node(1, 2, 1)),
+#     ],
+#     num_agents=30,
+#     map_config=dict(exit_length=60, lane_num=2),
+#     top_down_camera_initial_x=80,
+#     top_down_camera_initial_y=0,
+#     top_down_camera_initial_z=120
+# )
 
 
-GOALS = [
-Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
--Road(InterSection.node(1, 0, 0), InterSection.node(1, 0, 1)),
--Road(InterSection.node(1, 1, 0), InterSection.node(1, 1, 1)),
--Road(InterSection.node(1, 2, 0), InterSection.node(1, 2, 1)),
-]
+
+
+
+logger = get_logger()
+
+
+class MultiGoalIntersectionNavigationManager(BaseManager):
+
+    GOALS = {
+        # TODO: Double check the meanings
+        "u_turn": Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3),
+        "left_turn": -Road(InterSection.node(1, 0, 0), InterSection.node(1, 0, 1)),
+        "right_turn": -Road(InterSection.node(1, 1, 0), InterSection.node(1, 1, 1)),
+        "go_straight": -Road(InterSection.node(1, 2, 0), InterSection.node(1, 2, 1)),
+    }
+
+    def __init__(self):
+        super().__init__()
+
+        config = self.engine.global_config
+        vehicle_config = config["vehicle_config"]
+        self.navigations = {}
+        navi = NodeNetworkNavigation
+
+        colors = sns.color_palette("colorblind")
+        for c, (dest_name, road) in enumerate(self.GOALS.items()):
+            self.navigations[dest_name] = navi(
+                # self.engine,
+                show_navi_mark=vehicle_config["show_navi_mark"],
+                show_dest_mark=vehicle_config["show_dest_mark"],
+                show_line_to_dest=vehicle_config["show_line_to_dest"],
+                panda_color=colors[c],  # color for navigation marker
+                name=dest_name,
+                vehicle_config=vehicle_config
+            )
+
+
+    def reset(self):
+        print(1111)
+
+
+
+
+
+
+
+
+
+
+
+
+class MultiGoalIntersectionMap(PGMap):
+    """This class does nothing but turn on the U-turn."""
+    def _generate(self):
+        length = self.config["exit_length"]
+        parent_node_path, physics_world = self.engine.worldNP, self.engine.physics_world
+        assert len(self.road_network.graph) == 0, "These Map is not empty, please create a new map to read config"
+        # Build a first-block
+        last_block = FirstPGBlock(
+            self.road_network,
+            self.config[self.LANE_WIDTH],
+            self.config[self.LANE_NUM],
+            parent_node_path,
+            physics_world,
+            length=length
+        )
+        self.blocks.append(last_block)
+        # Build Intersection
+        InterSection.EXIT_PART_LENGTH = length
+        if "radius" in self.config and self.config["radius"]:
+            extra_kwargs = dict(radius=self.config["radius"])
+        else:
+            extra_kwargs = {}
+        last_block = InterSection(
+            1,
+            last_block.get_socket(index=0),
+            self.road_network,
+            random_seed=1,
+            ignore_intersection_checking=False,
+            **extra_kwargs
+        )
+        assert self.config["lane_num"] > 1
+        last_block.enable_u_turn(True)  # <<<<<<<<<< We turn on U turn here
+        last_block.construct_block(parent_node_path, physics_world)
+        self.blocks.append(last_block)
+
+
+class MultiGoalPGMapManager(PGMapManager):
+    """This class simply does nothing but load MultiGoalIntersectionMap."""
+    def reset(self):
+        config = self.engine.global_config
+        if len(self.spawned_objects) == 0:
+            _map = self.spawn_object(MultiGoalIntersectionMap, map_config=config["map_config"], random_seed=None)
+        else:
+            assert len(self.spawned_objects) == 1, "It is supposed to contain one map in this manager"
+            _map = self.spawned_objects.values()[0]
+        self.load_map(_map)
+        # self.current_map.spawn_roads = config["spawn_roads"]
 
 
 class MultiGoalIntersectionEnv(MetaDriveEnv):
@@ -35,12 +166,39 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         config = MetaDriveEnv.default_config()
         config.update(
             {
+
+                # Set the map to an Intersection
                 "start_seed": 0,
                 "num_scenarios": 1,
                 "map": "X",
+
+                "vehicle_config": {
+
+                    # Turn off vehicle's own navigation module.
+                    "navigation_module": None,
+
+
+                    "side_detector": dict(num_lasers=4, distance=50),  # laser num, distance
+
+                    # To avoid goal-dependent lane detection, we use Lidar to detect distance to nearby lane lines.
+                    # Otherwise, we will ask the navigation module to provide current lane and extract the lateral
+                    # distance directly on this lane.
+                    "lane_line_detector": dict(num_lasers=4, distance=20)
+                }
+
             }
         )
         return config
+
+    def setup_engine(self):
+        super().setup_engine()
+
+        # We use MultiGoalPGMapManager here
+        self.engine.update_manager("map_manager", MultiGoalPGMapManager())
+
+        # Introducing a new navigation manager
+        self.engine.register_manager("goal_manager", MultiGoalIntersectionNavigationManager())
+
 
     def reward_function(self, vehicle_id: str):
         """
@@ -48,29 +206,24 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         :param vehicle_id: id of BaseVehicle
         :return: reward
         """
+        reward = 0.0
         vehicle = self.agents[vehicle_id]
         step_info = dict()
 
         # Reward for moving forward in current lane
-        if vehicle.lane in vehicle.navigation.current_ref_lanes:
-            current_lane = vehicle.lane
-            positive_road = 1
-        else:
-            current_lane = vehicle.navigation.current_ref_lanes[0]
-            current_road = vehicle.navigation.current_road
-            positive_road = 1 if not current_road.is_negative_road() else -1
-        long_last, _ = current_lane.local_coordinates(vehicle.last_position)
-        long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+        # TODO: Remove this part for now.
+        # if vehicle.lane in vehicle.navigation.current_ref_lanes:
+        #     current_lane = vehicle.lane
+        #     positive_road = 1
+        # else:
+        #     current_lane = vehicle.navigation.current_ref_lanes[0]
+        #     current_road = vehicle.navigation.current_road
+        #     positive_road = 1 if not current_road.is_negative_road() else -1
+        # long_last, _ = current_lane.local_coordinates(vehicle.last_position)
+        # long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+        # reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
+        # reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
 
-        # reward for lane keeping, without it vehicle can learn to overtake but fail to keep in lane
-        if self.config["use_lateral_reward"]:
-            lateral_factor = clip(1 - 2 * abs(lateral_now) / vehicle.navigation.get_current_lane_width(), 0.0, 1.0)
-        else:
-            lateral_factor = 1.0
-
-        reward = 0.0
-        reward += self.config["driving_reward"] * (long_now - long_last) * lateral_factor * positive_road
-        reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
 
         step_info["step_reward"] = reward
         if self._is_arrive_destination(vehicle):
@@ -83,6 +236,22 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
             reward = -self.config["crash_object_penalty"]
         step_info["route_completion"] = vehicle.navigation.route_completion
         return reward, step_info
+
+    @staticmethod
+    def _is_arrive_destination(vehicle):
+        """
+        Args:
+            vehicle: The BaseVehicle instance.
+
+        Returns:
+            flag: Whether this vehicle arrives its destination.
+        """
+        long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
+        flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
+            vehicle.navigation.get_current_lane_width() / 2 >= lat >=
+            (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
+        )
+        return flag
 
 
 if __name__ == "__main__":
