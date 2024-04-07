@@ -250,7 +250,9 @@ class NodeNetworkNavigation(BaseNavigation):
 
     def _get_current_lane(self, ego_vehicle):
         """
-        Called in update_localization to find current lane information
+        Called in update_localization to find current lane information. If the vehicle is in the current reference lane,
+        meaning it is not yet moving to the next road segment, then return the current reference lane. Otherwise, return
+        the next reference lane. If the vehicle is not in any of the reference lanes, then return the closest lane.
         """
         possible_lanes, on_lane = ray_localization(
             ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_on_lane=True
