@@ -159,7 +159,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
             if position is None:
                 position = constants.DEFAULT_SENSOR_OFFSET
             if hpr is None:
-                position = constants.DEFAULT_SENSOR_HPR
+                hpr = constants.DEFAULT_SENSOR_HPR
 
             # return camera to original state
             original_object = self.cam.getParent()
