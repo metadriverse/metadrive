@@ -96,11 +96,28 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
                 vehicle_config=vehicle_config
             )
 
+    @property
+    def agent(self):
+        return self.engine.agents[DEFAULT_AGENT]
 
-    def reset(self):
-        print(1111)
+    @property
+    def goals(self):
+        return self.GOALS
 
+    def after_reset(self):
+        print("[DEBUG]: after_reset in MultiGoalIntersectionNavigationManager")
+        for name, navi in self.navigations.items():
+            navi.reset(self.agent, dest=self.GOALS[name])
+            navi.update_localization(self.agent)
 
+    def after_step(self):
+        print("[DEBUG]: after_step in MultiGoalIntersectionNavigationManager")
+        for name, navi in self.navigations.items():
+            navi.update_localization(self.agent)
+
+    def get_navigation(self, goal_name):
+        assert goal_name in self.GOALS, "Invalid goal name!"
+        return self.navigations[goal_name]
 
 
 
@@ -210,46 +227,58 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         vehicle = self.agents[vehicle_id]
         step_info = dict()
 
-        # Reward for moving forward in current lane
-        # TODO: Remove this part for now.
-        # if vehicle.lane in vehicle.navigation.current_ref_lanes:
-        #     current_lane = vehicle.lane
-        #     positive_road = 1
-        # else:
-        #     current_lane = vehicle.navigation.current_ref_lanes[0]
-        #     current_road = vehicle.navigation.current_road
-        #     positive_road = 1 if not current_road.is_negative_road() else -1
-        # long_last, _ = current_lane.local_coordinates(vehicle.last_position)
-        # long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
-        # reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
-        # reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
+
+        for goal_name in self.engine.goal_manager.goals.keys():
+
+            # Reward for moving forward in current lane
+            # TODO: Remove this part for now.
+            # if vehicle.lane in vehicle.navigation.current_ref_lanes:
+            #     current_lane = vehicle.lane
+            #     positive_road = 1
+            # else:
+            #     current_lane = vehicle.navigation.current_ref_lanes[0]
+            #     current_road = vehicle.navigation.current_road
+            #     positive_road = 1 if not current_road.is_negative_road() else -1
+            # long_last, _ = current_lane.local_coordinates(vehicle.last_position)
+            # long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+            # reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
+            # reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
 
 
-        step_info["step_reward"] = reward
-        if self._is_arrive_destination(vehicle):
-            reward = +self.config["success_reward"]
-        elif self._is_out_of_road(vehicle):
-            reward = -self.config["out_of_road_penalty"]
-        elif vehicle.crash_vehicle:
-            reward = -self.config["crash_vehicle_penalty"]
-        elif vehicle.crash_object:
-            reward = -self.config["crash_object_penalty"]
-        step_info["route_completion"] = vehicle.navigation.route_completion
-        return reward, step_info
+            step_info["step_reward"] = reward
+            if self._is_arrive_destination(vehicle, goal_name):
+                reward = +self.config["success_reward"]
+            elif self._is_out_of_road(vehicle):
+                reward = -self.config["out_of_road_penalty"]
+            elif vehicle.crash_vehicle:
+                reward = -self.config["crash_vehicle_penalty"]
+            elif vehicle.crash_object:
+                reward = -self.config["crash_object_penalty"]
+            step_info["route_completion"] = vehicle.navigation.route_completion
+            # TODO Finish this part! =======================
+            # TODO Finish this part! =======================
+            # TODO Finish this part! =======================
+            # TODO Finish this part! =======================
+            # TODO Finish this part! =======================
+            # TODO Finish this part! =======================
+            # TODO Finish this part! =======================
+            # TODO Finish this part! =======================
+            # return reward, step_info
 
-    @staticmethod
-    def _is_arrive_destination(vehicle):
+    def _is_arrive_destination(self, vehicle, goal_name):
         """
         Args:
             vehicle: The BaseVehicle instance.
+            goal_name: The name of the goal.
 
         Returns:
             flag: Whether this vehicle arrives its destination.
         """
-        long, lat = vehicle.navigation.final_lane.local_coordinates(vehicle.position)
-        flag = (vehicle.navigation.final_lane.length - 5 < long < vehicle.navigation.final_lane.length + 5) and (
-            vehicle.navigation.get_current_lane_width() / 2 >= lat >=
-            (0.5 - vehicle.navigation.get_current_lane_num()) * vehicle.navigation.get_current_lane_width()
+        navi = self.engine.goal_manager.get_navigation(goal_name)
+        long, lat = navi.final_lane.local_coordinates(vehicle.position)
+        flag = (navi.final_lane.length - 5 < long < navi.final_lane.length + 5) and (
+            navi.get_current_lane_width() / 2 >= lat >=
+            (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
         )
         return flag
 

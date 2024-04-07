@@ -40,7 +40,7 @@ class NodeNetworkNavigation(BaseNavigation):
         self.current_road = None
         self.next_road = None
 
-    def reset(self, vehicle):
+    def reset(self, vehicle, dest=None):
         possible_lanes = ray_localization(vehicle.heading, vehicle.spawn_place, self.engine, use_heading_filter=False)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
 
@@ -56,7 +56,8 @@ class NodeNetworkNavigation(BaseNavigation):
             assert len(possible_lanes) > 0
             lane, new_l_index = possible_lanes[0][:-1]
 
-        dest = vehicle.config["destination"]
+        if dest is None:
+            dest = vehicle.config["destination"]
 
         current_lane = lane
         destination = dest if dest is not None else None
