@@ -3,6 +3,7 @@ This file implement an intersection environment with multiple goals.
 """
 from collections import defaultdict
 
+import numpy as np
 import seaborn as sns
 
 from metadrive import MetaDriveEnv
@@ -115,6 +116,22 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         # Introducing a new navigation manager
         self.engine.register_manager("goal_manager", MultiGoalIntersectionNavigationManager())
 
+    def _get_step_return(self, actions, engine_info):
+        o, r, tm, tc, i = super(MultiGoalIntersectionEnv, self)._get_step_return(actions, engine_info)
+        for goal_name in self.engine.goal_manager.goals.keys():
+            navi = self.engine.goal_manager.get_navigation(goal_name)
+            navi_info = navi.get_navi_info()
+            i["goals/{}/obs".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
+        return o, r, tm, tc, i
+
+    def _get_reset_return(self, reset_info):
+        o, i = super(MultiGoalIntersectionEnv, self)._get_reset_return(reset_info)
+        for goal_name in self.engine.goal_manager.goals.keys():
+            navi = self.engine.goal_manager.get_navigation(goal_name)
+            navi_info = navi.get_navi_info()
+            i["goals/{}/obs".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
+        return o, i
+
     def reward_function(self, vehicle_id: str):
         """
         Override this func to get a new reward function
@@ -224,7 +241,16 @@ if __name__ == "__main__":
     env = MultiGoalIntersectionEnv(config)
     episode_rewards = defaultdict(float)
     try:
-        o, _ = env.reset()
+        o, info = env.reset()
+
+        print('=======================')
+        print("Goal-agnostic observation shape:\n\t", o.shape)
+        print("Observation shape for each goals: ")
+        for k in sorted(info.keys()):
+            if k.startswith("goals/") and k.endswith("obs"):
+                print(f"\t{k}: {info[k].shape}")
+        print('=======================')
+
         s = 0
         for i in range(1, 1000000000):
             o, r, tm, tc, info = env.step([0, 1])
@@ -241,7 +267,7 @@ if __name__ == "__main__":
                 info = {k: info[k] for k in sorted(info.keys())}
                 print('\n===== timestep {} ====='.format(s))
                 for k, v in info.items():
-                    if k.startswith("goals/"):
+                    if k.startswith("goals/") and not k.endswith('obs'):
                         print(f"{k}: {v:.2f}")
                 print('=======================')
 
