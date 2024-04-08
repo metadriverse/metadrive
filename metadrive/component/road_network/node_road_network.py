@@ -272,6 +272,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
         Returns:
             The shortest checkpoints from start to goal.
         """
+        assert isinstance(goal, str)
         start_road_node = start[0]
         assert start != goal
         return next(self.bfs_paths(start_road_node, goal), [])
