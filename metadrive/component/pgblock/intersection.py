@@ -263,3 +263,8 @@ class InterSection(PGBlock):
         """Override this function for intersection so that we won't spawn vehicles in the center of intersection."""
         respawn_lanes = self.get_respawn_lanes()
         return respawn_lanes
+
+
+class InterSectionWithUTurn(InterSection):
+    ID = "U"
+    _enable_u_turn_flag = True
