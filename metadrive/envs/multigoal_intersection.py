@@ -19,6 +19,10 @@ logger = get_logger()
 
 
 class MultiGoalIntersectionNavigationManager(BaseManager):
+    """
+    This manager is responsible for managing multiple navigation modules, each of which is responsible for guiding the
+    agent to a specific goal.
+    """
     GOALS = {
         "u_turn": (-Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3)).end_node,
         "right_turn": Road(
@@ -62,22 +66,29 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
         return self.GOALS
 
     def after_reset(self):
+        """Reset all navigation modules."""
         # print("[DEBUG]: after_reset in MultiGoalIntersectionNavigationManager")
         for name, navi in self.navigations.items():
             navi.reset(self.agent, dest=self.goals[name])
             navi.update_localization(self.agent)
 
     def after_step(self):
+        """Update all navigation modules."""
         # print("[DEBUG]: after_step in MultiGoalIntersectionNavigationManager")
         for name, navi in self.navigations.items():
             navi.update_localization(self.agent)
 
     def get_navigation(self, goal_name):
+        """Return the navigation module for the given goal."""
         assert goal_name in self.goals, "Invalid goal name!"
         return self.navigations[goal_name]
 
 
 class MultiGoalIntersectionEnv(MetaDriveEnv):
+    """
+    This environment is an intersection with multiple goals. We provide the reward function, observation, termination
+    conditions for each goal in the info dict returned by env.reset and env.step, with prefix "goals/{goal_name}/".
+    """
     @classmethod
     def default_config(cls):
         config = MetaDriveEnv.default_config()
@@ -114,6 +125,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         self.engine.register_manager("goal_manager", MultiGoalIntersectionNavigationManager())
 
     def _get_step_return(self, actions, engine_info):
+        """Add goal-dependent observation to the info dict."""
         o, r, tm, tc, i = super(MultiGoalIntersectionEnv, self)._get_step_return(actions, engine_info)
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
@@ -122,6 +134,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         return o, r, tm, tc, i
 
     def _get_reset_return(self, reset_info):
+        """Add goal-dependent observation to the info dict."""
         o, i = super(MultiGoalIntersectionEnv, self)._get_reset_return(reset_info)
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
@@ -131,9 +144,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
     def reward_function(self, vehicle_id: str):
         """
-        Override this func to get a new reward function
-        :param vehicle_id: id of BaseVehicle
-        :return: reward
+        Compared to the original reward_function, we add goal-dependent reward to info dict.
         """
         vehicle = self.agents[vehicle_id]
         step_info = dict()
