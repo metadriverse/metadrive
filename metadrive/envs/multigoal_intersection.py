@@ -92,12 +92,10 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 # Remove all traffic vehicles for now.
                 # TODO: Revert this back.
                 "traffic_density": 0.0,
-
                 "vehicle_config": {
 
                     # Turn off vehicle's own navigation module.
                     "navigation_module": None,
-
                     "side_detector": dict(num_lasers=4, distance=50),  # laser num, distance
 
                     # To avoid goal-dependent lane detection, we use Lidar to detect distance to nearby lane lines.
@@ -105,7 +103,6 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                     # distance directly on this lane.
                     "lane_line_detector": dict(num_lasers=4, distance=20)
                 }
-
             }
         )
         return config
