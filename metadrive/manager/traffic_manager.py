@@ -80,12 +80,12 @@ class PGTrafficManager(BaseManager):
         engine = self.engine
         if self.mode != TrafficMode.Respawn:
             for v in engine.agent_manager.active_agents.values():
-                ego_lane_idx = v.lane_index[:-1]
-                ego_road = Road(ego_lane_idx[0], ego_lane_idx[1])
-                if len(self.block_triggered_vehicles) > 0 and \
-                        ego_road == self.block_triggered_vehicles[-1].trigger_road:
-                    block_vehicles = self.block_triggered_vehicles.pop()
-                    self._traffic_vehicles += list(self.get_objects(block_vehicles.vehicles).values())
+                if len(self.block_triggered_vehicles) > 0:
+                    ego_lane_idx = v.lane_index[:-1]
+                    ego_road = Road(ego_lane_idx[0], ego_lane_idx[1])
+                    if ego_road == self.block_triggered_vehicles[-1].trigger_road:
+                        block_vehicles = self.block_triggered_vehicles.pop()
+                        self._traffic_vehicles += list(self.get_objects(block_vehicles.vehicles).values())
         for v in self._traffic_vehicles:
             p = self.engine.get_policy(v.name)
             v.before_step(p.act())
@@ -310,8 +310,7 @@ class PGTrafficManager(BaseManager):
         # current map
 
         # traffic vehicle list
-        self._traffic_vehicles = None
-        self.block_triggered_vehicles = None
+        self.block_triggered_vehicles = []
 
         # traffic property
         self.mode = None
