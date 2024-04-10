@@ -1,12 +1,12 @@
 import platform
 
-from panda3d.core import Material, Vec3
+from panda3d.core import Material, Vec3, LVecBase4
 
 from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Semantics
 from metadrive.engine.asset_loader import AssetLoader
-
+from panda3d.core import TransparencyAttrib, LineSegs, NodePath, BoundingHexahedron
 
 class DefaultVehicle(BaseVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.DEFAULT_VEHICLE)
@@ -270,6 +270,35 @@ class VaryingDynamicsVehicle(DefaultVehicle):
 
 
 class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
+
+    # def after_step(self):
+    #     r = super(VaryingDynamicsBoundingBoxVehicle, self).after_step()
+    #
+    #     line_seg = self._line_seg
+    #     line_color = (1.0, 1.0, 1.0)
+    #     line_seg.setColor(line_color[0], line_color[1], line_color[2], 1.0)
+    #     line_seg.setThickness(10)
+    #     line_offset = 0
+    #     # Draw the bottom of the car first
+    #     line_seg.moveTo(-self.WIDTH / 2 - line_offset, -self.LENGTH / 2 - line_offset, -self.HEIGHT / 2 - line_offset)
+    #     line_seg.drawTo(self.WIDTH / 2 + line_offset, -self.LENGTH / 2 - line_offset, -self.HEIGHT / 2 - line_offset)
+    #     line_seg.drawTo(self.WIDTH / 2 + line_offset, -self.LENGTH / 2 - line_offset, self.HEIGHT / 2 + line_offset)
+    #     line_seg.drawTo(-self.WIDTH / 2 - line_offset, -self.LENGTH / 2 - line_offset, self.HEIGHT / 2 + line_offset)
+    #
+    #     self._line_seg_node.removeNode()
+    #     self._node_path_list.remove(self._line_seg_node)
+    #     self._line_seg_node = NodePath(line_seg.create(True))
+    #     self._node_path_list.append(self._line_seg_node)
+    #     self._line_seg_node.reparentTo(self.origin)
+    #
+    #
+    #
+    #
+    #
+    #
+    #     return r
+
+
     def _add_visualization(self):
         if self.render:
             [path, scale, offset, HPR] = self.path
@@ -279,17 +308,36 @@ class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
 
             # PZH: Load a box model and resize it to the vehicle size
             car_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+
             car_model.setTwoSided(False)
             BaseVehicle.model_collection[path] = car_model
             car_model.setScale((self.WIDTH, self.LENGTH, self.HEIGHT))
             car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + self.HEIGHT / 2)
             # model default, face to y
             car_model.setHpr(*HPR)
-
-            # else:
-            #     car_model = BaseVehicle.model_collection[path]
-
             car_model.instanceTo(self.origin)
+
+            # ========== Draw the contour of the bounding box ==========
+            # Draw the bottom of the car first
+            line_seg = LineSegs("bounding_box_contour1")
+            zoffset = car_model.getZ()
+            line_seg.setThickness(5)
+            line_color = [1.0, 0.0, 0.0]
+            out_offset = 0.02
+            w = self.WIDTH / 2 + out_offset
+            l = self.LENGTH / 2 + out_offset
+            h = self.HEIGHT / 2 + out_offset
+            line_seg.moveTo(-w, -l, -h + zoffset)
+            line_seg.drawTo(w, -l, -h + zoffset)
+            line_seg.drawTo(w, -l, h + zoffset)
+            line_seg.drawTo(-w, -l, h + zoffset)
+            line_seg.drawTo(-w, -l, -h + zoffset)
+            line_np = NodePath(line_seg.create(True))
+            line_material = Material()
+            line_material.setBaseColor(LVecBase4(*line_color[:3], 1))
+            line_np.setMaterial(line_material, True)
+            line_np.reparentTo(self.origin)
+
             if self.config["random_color"]:
                 material = Material()
                 material.setBaseColor(
