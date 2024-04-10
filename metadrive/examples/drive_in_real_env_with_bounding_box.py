@@ -43,7 +43,6 @@ if __name__ == "__main__":
                     "show_line_to_dest": True,
                     "show_line_to_navi_mark": True,
                 },
-
                 "disable_collision": True,
             }
         )
