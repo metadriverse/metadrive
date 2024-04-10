@@ -169,7 +169,7 @@ class ScenarioTrafficManager(BaseManager):
         return list(self.engine.get_objects(filter=lambda o: isinstance(o, BaseVehicle)).values())
 
     def spawn_vehicle(self, v_id, track):
-        state = parse_object_state(track, self.episode_step, include_z_position=True)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
 
         use_bounding_box = self.engine.global_config["vehicle_config"]["vehicle_model"
                                                                        ] == "varying_dynamics_bounding_box"
@@ -220,7 +220,10 @@ class ScenarioTrafficManager(BaseManager):
                 )
 
         position = list(state["position"])
-        position[-1] /= 2  # half height
+
+        # Add z to make it stick to the ground:
+        position.append(state['height'] / 2)
+
         v = self.spawn_object(
             vehicle_class,
             # PZH Note: We are using 3D position (including Z) to spawn object.

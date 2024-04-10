@@ -312,7 +312,8 @@ class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
             car_model.setTwoSided(False)
             BaseVehicle.model_collection[path] = car_model
             car_model.setScale((self.WIDTH, self.LENGTH, self.HEIGHT))
-            car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + self.HEIGHT / 2)
+            # car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + self.HEIGHT / 2)
+            car_model.setZ(0)
             # model default, face to y
             car_model.setHpr(*HPR)
             car_model.instanceTo(self.origin)
