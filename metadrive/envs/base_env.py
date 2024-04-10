@@ -209,6 +209,8 @@ BASE_DEFAULT_CONFIG = dict(
     preload_models=True,
     # model compression increasing the launch time
     disable_model_compression=True,
+    # Whether to disable the collision detection (useful for debugging / replay logged scenarios)
+    disable_collision=False,
 
     # ===== Terrain =====
     # The size of the square map region, which is centered at [0, 0]. The map objects outside it are culled.

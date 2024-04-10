@@ -232,11 +232,13 @@ class CollisionGroup(Mask):
         ]
 
     @classmethod
-    def set_collision_rule(cls, world: BulletWorld):
+    def set_collision_rule(cls, world: BulletWorld, disable_collision: bool = False):
         for rule in cls.collision_rules():
             group_1 = int(math.log(rule[0].getWord(), 2))
             group_2 = int(math.log(rule[1].getWord(), 2))
             relation = rule[-1]
+            if disable_collision:
+                relation = False
             world.setGroupCollisionFlag(group_1, group_2, relation)
 
     @classmethod

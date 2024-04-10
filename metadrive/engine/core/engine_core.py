@@ -259,7 +259,9 @@ class EngineCore(ShowBase.ShowBase):
         self.common_filter = None
 
         # physics world
-        self.physics_world = PhysicsWorld(self.global_config["debug_static_world"])
+        self.physics_world = PhysicsWorld(
+            self.global_config["debug_static_world"], disable_collision=self.global_config["disable_collision"]
+        )
 
         # collision callback
         self.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(collision_callback))
