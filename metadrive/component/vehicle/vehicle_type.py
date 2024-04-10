@@ -8,6 +8,7 @@ from metadrive.constants import Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from panda3d.core import TransparencyAttrib, LineSegs, NodePath, BoundingHexahedron
 
+
 class DefaultVehicle(BaseVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.DEFAULT_VEHICLE)
     # LENGTH = 4.51
@@ -297,7 +298,6 @@ class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
     #
     #
     #     return r
-
 
     def _add_visualization(self):
         if self.render:

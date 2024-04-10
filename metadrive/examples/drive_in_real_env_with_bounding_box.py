@@ -39,7 +39,6 @@ if __name__ == "__main__":
                 "num_scenarios": 3 if use_waymo else 10,
                 "debug": True,
                 "use_bounding_box": True,
-
                 "vehicle_config": {
                     "show_line_to_dest": True,
                     "show_line_to_navi_mark": True,
