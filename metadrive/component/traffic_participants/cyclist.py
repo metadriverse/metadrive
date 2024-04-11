@@ -8,7 +8,8 @@ from metadrive.constants import MetaDriveType, Semantics
 from metadrive.constants import CollisionGroup
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
-
+from panda3d.core import TransparencyAttrib, LineSegs, NodePath, BoundingHexahedron
+from panda3d.core import Material, Vec3, LVecBase4
 
 class Cyclist(BaseTrafficParticipant):
     MASS = 80  # kg
@@ -62,6 +63,7 @@ class CyclistBoundingBox(BaseTrafficParticipant):
 
     def __init__(self, position, heading_theta, random_seed, name=None, **kwargs):
         config = {"width": kwargs["width"], "length": kwargs["length"], "height": kwargs["height"]}
+        # config = {"width": kwargs["length"], "length": kwargs["width"], "height": kwargs["height"]}
         super(CyclistBoundingBox, self).__init__(position, heading_theta, random_seed, name=name, config=config)
         self.set_metadrive_type(self.TYPE_NAME)
         n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
@@ -71,12 +73,63 @@ class CyclistBoundingBox(BaseTrafficParticipant):
         if self.render:
             model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
             model.setScale((self.WIDTH, self.LENGTH, self.HEIGHT))
+            # model.setScale((self.LENGTH, self.WIDTH, self.LENGTH))
+            print("CyclistBoundingBox: ", self.LENGTH, self.WIDTH, self.HEIGHT)
             model.setTwoSided(False)
             self._instance = model.instanceTo(self.origin)
 
             # Add some color to help debug
             from panda3d.core import Material, LVecBase4
             import seaborn as sns
+
+            # ========== Draw the contour of the bounding box ==========
+            # Draw the bottom of the car first
+            line_seg = LineSegs("bounding_box_contour1")
+            zoffset = model.getZ()
+            line_seg.setThickness(2)
+            line_color = [0.0, 0.0, 0.0]
+            out_offset = 0.02
+            w = self.WIDTH / 2 + out_offset
+            l = self.LENGTH / 2 + out_offset
+            h = self.HEIGHT / 2 + out_offset
+            line_seg.moveTo(w, l, h + zoffset)
+            line_seg.drawTo(-w, l, h + zoffset)
+            line_seg.drawTo(-w, l, -h + zoffset)
+            line_seg.drawTo(w, l, -h + zoffset)
+            line_seg.drawTo(w, l, h + zoffset)
+
+            # draw cross line
+            line_seg.moveTo(w, l, h + zoffset)
+            line_seg.drawTo(w, -l, -h + zoffset)
+            line_seg.moveTo(w, -l, h + zoffset)
+            line_seg.drawTo(w, l, -h + zoffset)
+
+            line_seg.moveTo(w, -l, h + zoffset)
+            line_seg.drawTo(-w, -l, h + zoffset)
+            line_seg.drawTo(-w, -l, -h + zoffset)
+            line_seg.drawTo(w, -l, -h + zoffset)
+            line_seg.drawTo(w, -l, h + zoffset)
+
+            # draw vertical & horizontal line
+            line_seg.moveTo(-w, l, 0 + zoffset)
+            line_seg.drawTo(-w, -l, 0 + zoffset)
+            line_seg.moveTo(-w, 0, h + zoffset)
+            line_seg.drawTo(-w, 0, -h + zoffset)
+
+            line_seg.moveTo(w, l, h + zoffset)
+            line_seg.drawTo(w, -l, h + zoffset)
+            line_seg.moveTo(-w, l, h + zoffset)
+            line_seg.drawTo(-w, -l, h + zoffset)
+            line_seg.moveTo(-w, l, -h + zoffset)
+            line_seg.drawTo(-w, -l, -h + zoffset)
+            line_seg.moveTo(w, l, -h + zoffset)
+            line_seg.drawTo(w, -l, -h + zoffset)
+            line_np = NodePath(line_seg.create(True))
+            line_material = Material()
+            line_material.setBaseColor(LVecBase4(*line_color[:3], 1))
+            line_np.setMaterial(line_material, True)
+            line_np.reparentTo(self.origin)
+
             color = sns.color_palette("colorblind")
             color.remove(color[2])  # Remove the green and leave it for special vehicle
             idx = 0
