@@ -140,7 +140,8 @@ class CyclistBoundingBox(BaseTrafficParticipant):
 
     @property
     def WIDTH(self):
-        return self.config["width"]
+        # return self.config["width"]
+        return self.config["length"]
 
     @property
     def HEIGHT(self):
@@ -148,4 +149,5 @@ class CyclistBoundingBox(BaseTrafficParticipant):
 
     @property
     def LENGTH(self):
-        return self.config["length"]
+        # return self.config["length"]
+        return self.config["width"]

@@ -322,17 +322,39 @@ class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
             # Draw the bottom of the car first
             line_seg = LineSegs("bounding_box_contour1")
             zoffset = car_model.getZ()
-            line_seg.setThickness(5)
+            line_seg.setThickness(2)
             line_color = [1.0, 0.0, 0.0]
             out_offset = 0.02
             w = self.WIDTH / 2 + out_offset
             l = self.LENGTH / 2 + out_offset
             h = self.HEIGHT / 2 + out_offset
-            line_seg.moveTo(-w, -l, -h + zoffset)
-            line_seg.drawTo(w, -l, -h + zoffset)
-            line_seg.drawTo(w, -l, h + zoffset)
+            line_seg.moveTo(w, l, h + zoffset)
+            line_seg.drawTo(-w, l, h + zoffset)
+            line_seg.drawTo(-w, l, -h + zoffset)
+            line_seg.drawTo(w, l, -h + zoffset)
+            line_seg.drawTo(w, l, h + zoffset)
+            line_seg.drawTo(-w, l, -h + zoffset)
+            line_seg.moveTo(-w, l, h + zoffset)
+            line_seg.drawTo(w, l, -h + zoffset)
+
+            line_seg.moveTo(w, -l, h + zoffset)
             line_seg.drawTo(-w, -l, h + zoffset)
             line_seg.drawTo(-w, -l, -h + zoffset)
+            line_seg.drawTo(w, -l, -h + zoffset)
+            line_seg.drawTo(w, -l, h + zoffset)
+            line_seg.moveTo(-w, -l, 0 + zoffset)
+            line_seg.drawTo(w, -l, 0 + zoffset)
+            line_seg.moveTo(0, -l, h + zoffset)
+            line_seg.drawTo(0, -l, -h + zoffset)
+
+            line_seg.moveTo(w, l, h + zoffset)
+            line_seg.drawTo(w, -l, h + zoffset)
+            line_seg.moveTo(-w, l, h + zoffset)
+            line_seg.drawTo(-w, -l, h + zoffset)
+            line_seg.moveTo(-w, l, -h + zoffset)
+            line_seg.drawTo(-w, -l, -h + zoffset)
+            line_seg.moveTo(w, l, -h + zoffset)
+            line_seg.drawTo(w, -l, -h + zoffset)
             line_np = NodePath(line_seg.create(True))
             line_material = Material()
             line_material.setBaseColor(LVecBase4(*line_color[:3], 1))
