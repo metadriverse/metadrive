@@ -158,53 +158,55 @@ class PedestrainBoundingBox(BaseTrafficParticipant):
             from panda3d.core import Material
             import seaborn as sns
 
-            # ========== Draw the contour of the bounding box ==========
-            # Draw the bottom of the car first
-            line_seg = LineSegs("bounding_box_contour1")
-            zoffset = model.getZ()
-            line_seg.setThickness(2)
-            line_color = [0.0, 0.0, 1.0]
-            out_offset = 0.02
-            w = self.WIDTH / 2 + out_offset
-            l = self.LENGTH / 2 + out_offset
-            h = self.HEIGHT / 2 + out_offset
-            line_seg.moveTo(w, l, h + zoffset)
-            line_seg.drawTo(-w, l, h + zoffset)
-            line_seg.drawTo(-w, l, -h + zoffset)
-            line_seg.drawTo(w, l, -h + zoffset)
-            line_seg.drawTo(w, l, h + zoffset)
+            show_contour = self.config["show_contour"] if "show_contour" in self.config else False
+            if show_contour:
+                # ========== Draw the contour of the bounding box ==========
+                # Draw the bottom of the car first
+                line_seg = LineSegs("bounding_box_contour1")
+                zoffset = model.getZ()
+                line_seg.setThickness(2)
+                line_color = [0.0, 0.0, 1.0]
+                out_offset = 0.02
+                w = self.WIDTH / 2 + out_offset
+                l = self.LENGTH / 2 + out_offset
+                h = self.HEIGHT / 2 + out_offset
+                line_seg.moveTo(w, l, h + zoffset)
+                line_seg.drawTo(-w, l, h + zoffset)
+                line_seg.drawTo(-w, l, -h + zoffset)
+                line_seg.drawTo(w, l, -h + zoffset)
+                line_seg.drawTo(w, l, h + zoffset)
 
-            # draw cross line
-            line_seg.moveTo(w, l, h + zoffset)
-            line_seg.drawTo(w, -l, -h + zoffset)
-            line_seg.moveTo(w, -l, h + zoffset)
-            line_seg.drawTo(w, l, -h + zoffset)
+                # draw cross line
+                line_seg.moveTo(w, l, h + zoffset)
+                line_seg.drawTo(w, -l, -h + zoffset)
+                line_seg.moveTo(w, -l, h + zoffset)
+                line_seg.drawTo(w, l, -h + zoffset)
 
-            line_seg.moveTo(w, -l, h + zoffset)
-            line_seg.drawTo(-w, -l, h + zoffset)
-            line_seg.drawTo(-w, -l, -h + zoffset)
-            line_seg.drawTo(w, -l, -h + zoffset)
-            line_seg.drawTo(w, -l, h + zoffset)
+                line_seg.moveTo(w, -l, h + zoffset)
+                line_seg.drawTo(-w, -l, h + zoffset)
+                line_seg.drawTo(-w, -l, -h + zoffset)
+                line_seg.drawTo(w, -l, -h + zoffset)
+                line_seg.drawTo(w, -l, h + zoffset)
 
-            # draw vertical & horizontal line
-            line_seg.moveTo(-w, l, 0 + zoffset)
-            line_seg.drawTo(-w, -l, 0 + zoffset)
-            line_seg.moveTo(-w, 0, h + zoffset)
-            line_seg.drawTo(-w, 0, -h + zoffset)
+                # draw vertical & horizontal line
+                line_seg.moveTo(-w, l, 0 + zoffset)
+                line_seg.drawTo(-w, -l, 0 + zoffset)
+                line_seg.moveTo(-w, 0, h + zoffset)
+                line_seg.drawTo(-w, 0, -h + zoffset)
 
-            line_seg.moveTo(w, l, h + zoffset)
-            line_seg.drawTo(w, -l, h + zoffset)
-            line_seg.moveTo(-w, l, h + zoffset)
-            line_seg.drawTo(-w, -l, h + zoffset)
-            line_seg.moveTo(-w, l, -h + zoffset)
-            line_seg.drawTo(-w, -l, -h + zoffset)
-            line_seg.moveTo(w, l, -h + zoffset)
-            line_seg.drawTo(w, -l, -h + zoffset)
-            line_np = NodePath(line_seg.create(True))
-            line_material = Material()
-            line_material.setBaseColor(LVecBase4(*line_color[:3], 1))
-            line_np.setMaterial(line_material, True)
-            line_np.reparentTo(self.origin)
+                line_seg.moveTo(w, l, h + zoffset)
+                line_seg.drawTo(w, -l, h + zoffset)
+                line_seg.moveTo(-w, l, h + zoffset)
+                line_seg.drawTo(-w, -l, h + zoffset)
+                line_seg.moveTo(-w, l, -h + zoffset)
+                line_seg.drawTo(-w, -l, -h + zoffset)
+                line_seg.moveTo(w, l, -h + zoffset)
+                line_seg.drawTo(w, -l, -h + zoffset)
+                line_np = NodePath(line_seg.create(True))
+                line_material = Material()
+                line_material.setBaseColor(LVecBase4(*line_color[:3], 1))
+                line_np.setMaterial(line_material, True)
+                line_np.reparentTo(self.origin)
 
             color = sns.color_palette("colorblind")
             color.remove(color[2])  # Remove the green and leave it for special vehicle

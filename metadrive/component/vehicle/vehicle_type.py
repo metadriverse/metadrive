@@ -318,48 +318,50 @@ class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
             car_model.setHpr(*HPR)
             car_model.instanceTo(self.origin)
 
-            # ========== Draw the contour of the bounding box ==========
-            # Draw the bottom of the car first
-            line_seg = LineSegs("bounding_box_contour1")
-            zoffset = car_model.getZ()
-            line_seg.setThickness(2)
-            line_color = [1.0, 0.0, 0.0]
-            out_offset = 0.02
-            w = self.WIDTH / 2 + out_offset
-            l = self.LENGTH / 2 + out_offset
-            h = self.HEIGHT / 2 + out_offset
-            line_seg.moveTo(w, l, h + zoffset)
-            line_seg.drawTo(-w, l, h + zoffset)
-            line_seg.drawTo(-w, l, -h + zoffset)
-            line_seg.drawTo(w, l, -h + zoffset)
-            line_seg.drawTo(w, l, h + zoffset)
-            line_seg.drawTo(-w, l, -h + zoffset)
-            line_seg.moveTo(-w, l, h + zoffset)
-            line_seg.drawTo(w, l, -h + zoffset)
+            show_contour = self.config["show_contour"] if "show_contour" in self.config else False
+            if show_contour:
+                # ========== Draw the contour of the bounding box ==========
+                # Draw the bottom of the car first
+                line_seg = LineSegs("bounding_box_contour1")
+                zoffset = car_model.getZ()
+                line_seg.setThickness(2)
+                line_color = [1.0, 0.0, 0.0]
+                out_offset = 0.02
+                w = self.WIDTH / 2 + out_offset
+                l = self.LENGTH / 2 + out_offset
+                h = self.HEIGHT / 2 + out_offset
+                line_seg.moveTo(w, l, h + zoffset)
+                line_seg.drawTo(-w, l, h + zoffset)
+                line_seg.drawTo(-w, l, -h + zoffset)
+                line_seg.drawTo(w, l, -h + zoffset)
+                line_seg.drawTo(w, l, h + zoffset)
+                line_seg.drawTo(-w, l, -h + zoffset)
+                line_seg.moveTo(-w, l, h + zoffset)
+                line_seg.drawTo(w, l, -h + zoffset)
 
-            line_seg.moveTo(w, -l, h + zoffset)
-            line_seg.drawTo(-w, -l, h + zoffset)
-            line_seg.drawTo(-w, -l, -h + zoffset)
-            line_seg.drawTo(w, -l, -h + zoffset)
-            line_seg.drawTo(w, -l, h + zoffset)
-            line_seg.moveTo(-w, -l, 0 + zoffset)
-            line_seg.drawTo(w, -l, 0 + zoffset)
-            line_seg.moveTo(0, -l, h + zoffset)
-            line_seg.drawTo(0, -l, -h + zoffset)
+                line_seg.moveTo(w, -l, h + zoffset)
+                line_seg.drawTo(-w, -l, h + zoffset)
+                line_seg.drawTo(-w, -l, -h + zoffset)
+                line_seg.drawTo(w, -l, -h + zoffset)
+                line_seg.drawTo(w, -l, h + zoffset)
+                line_seg.moveTo(-w, -l, 0 + zoffset)
+                line_seg.drawTo(w, -l, 0 + zoffset)
+                line_seg.moveTo(0, -l, h + zoffset)
+                line_seg.drawTo(0, -l, -h + zoffset)
 
-            line_seg.moveTo(w, l, h + zoffset)
-            line_seg.drawTo(w, -l, h + zoffset)
-            line_seg.moveTo(-w, l, h + zoffset)
-            line_seg.drawTo(-w, -l, h + zoffset)
-            line_seg.moveTo(-w, l, -h + zoffset)
-            line_seg.drawTo(-w, -l, -h + zoffset)
-            line_seg.moveTo(w, l, -h + zoffset)
-            line_seg.drawTo(w, -l, -h + zoffset)
-            line_np = NodePath(line_seg.create(True))
-            line_material = Material()
-            line_material.setBaseColor(LVecBase4(*line_color[:3], 1))
-            line_np.setMaterial(line_material, True)
-            line_np.reparentTo(self.origin)
+                line_seg.moveTo(w, l, h + zoffset)
+                line_seg.drawTo(w, -l, h + zoffset)
+                line_seg.moveTo(-w, l, h + zoffset)
+                line_seg.drawTo(-w, -l, h + zoffset)
+                line_seg.moveTo(-w, l, -h + zoffset)
+                line_seg.drawTo(-w, -l, -h + zoffset)
+                line_seg.moveTo(w, l, -h + zoffset)
+                line_seg.drawTo(w, -l, -h + zoffset)
+                line_np = NodePath(line_seg.create(True))
+                line_material = Material()
+                line_material.setBaseColor(LVecBase4(*line_color[:3], 1))
+                line_np.setMaterial(line_material, True)
+                line_np.reparentTo(self.origin)
 
             if self.config["random_color"]:
                 material = Material()
