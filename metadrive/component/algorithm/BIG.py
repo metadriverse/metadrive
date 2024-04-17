@@ -73,9 +73,17 @@ class BIG:
             assert isinstance(parameter, int), "When generating map by assigning block num, the parameter should be int"
             self.block_num = parameter + 1
         elif generate_method == BigGenerateMethod.BLOCK_SEQUENCE:
-            assert isinstance(parameter, str), "When generating map from block sequence, the parameter should be a str"
-            self.block_num = len(parameter) + 1
-            self._block_sequence = FirstPGBlock.ID + parameter
+            if isinstance(parameter, list):
+                self.block_num = len(parameter) + 1
+                self._block_sequence = [FirstPGBlock] + parameter
+            else:
+                assert isinstance(
+                    parameter, str
+                ), "When generating map from block sequence, the parameter should be a str. But got {}".format(
+                    type(parameter)
+                )
+                self.block_num = len(parameter) + 1
+                self._block_sequence = FirstPGBlock.ID + parameter
         while True:
             if self.big_helper_func():
                 break
@@ -104,8 +112,11 @@ class BIG:
             block_type = self.np_random.choice(block_types, p=block_probabilities)
             block_type = get_metadrive_class(block_type)
         else:
-            type_id = self._block_sequence[len(self.blocks)]
-            block_type = self.block_dist_config.get_block(type_id)
+            if isinstance(self._block_sequence[0], str):
+                type_id = self._block_sequence[len(self.blocks)]
+                block_type = self.block_dist_config.get_block(type_id)
+            else:
+                block_type = self._block_sequence[len(self.blocks)]
 
         socket = self.np_random.choice(self.blocks[-1].get_socket_indices())
         block = block_type(
