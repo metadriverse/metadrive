@@ -40,7 +40,7 @@ class NodeNetworkNavigation(BaseNavigation):
         self.current_road = None
         self.next_road = None
 
-    def reset(self, vehicle, dest=None):
+    def reset(self, vehicle, dest=None, random_seed=None):
         possible_lanes = ray_localization(vehicle.heading, vehicle.spawn_place, self.engine, use_heading_filter=False)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
 
@@ -61,7 +61,7 @@ class NodeNetworkNavigation(BaseNavigation):
 
         current_lane = lane
         destination = dest if dest is not None else None
-        random_seed = self.engine.global_random_seed
+        random_seed = self.engine.global_random_seed if random_seed is None else random_seed
         assert current_lane is not None, "spawn place is not on road!"
         super(NodeNetworkNavigation, self).reset(current_lane)
         assert self.map.road_network_type == NodeRoadNetwork, "This Navigation module only support NodeRoadNetwork type"

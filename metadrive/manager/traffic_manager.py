@@ -266,7 +266,8 @@ class PGTrafficManager(BaseManager):
                 vehicle_type = self.random_vehicle_type()
                 v_config.update(self.engine.global_config["traffic_vehicle_config"])
                 random_v = self.spawn_object(vehicle_type, vehicle_config=v_config)
-                self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
+                seed = self.generate_seed()
+                self.add_policy(random_v.id, IDMPolicy, random_v, seed)
                 vehicles_on_block.append(random_v.name)
 
             trigger_road = block.pre_block_socket.positive_road
