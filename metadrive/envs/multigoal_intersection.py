@@ -15,6 +15,8 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.engine.logger import get_logger
 from metadrive.manager.base_manager import BaseManager
 
+from metadrive.envs.varying_dynamics_env import VaryingDynamicsAgentManager, VaryingDynamicsConfig
+
 logger = get_logger()
 
 
@@ -89,24 +91,30 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
     This environment is an intersection with multiple goals. We provide the reward function, observation, termination
     conditions for each goal in the info dict returned by env.reset and env.step, with prefix "goals/{goal_name}/".
     """
+
     @classmethod
     def default_config(cls):
         config = MetaDriveEnv.default_config()
+        config.update(VaryingDynamicsConfig)
         config.update(
             {
 
                 # Set the map to an Intersection
                 "start_seed": 0,
-                "num_scenarios": 1,
                 "map": "U",
 
+                # Even though the map will not change, the traffic flow will change.
+                "num_scenarios": 1000,
+
                 # Remove all traffic vehicles for now.
-                # TODO: Revert this back.
-                "traffic_density": 0.0,
+                "traffic_density": 0.2,
+
                 "vehicle_config": {
 
+                    # Remove navigation arrows in the window as we are in multi-goal environment.
+                    "show_navigation_arrow": False,
+
                     # Turn off vehicle's own navigation module.
-                    "navigation_module": None,
                     "side_detector": dict(num_lasers=4, distance=50),  # laser num, distance
 
                     # To avoid goal-dependent lane detection, we use Lidar to detect distance to nearby lane lines.
@@ -117,6 +125,9 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
             }
         )
         return config
+
+    def _get_agent_manager(self):
+        return VaryingDynamicsAgentManager(init_observations=self._get_observations())
 
     def setup_engine(self):
         super().setup_engine()
@@ -245,6 +256,14 @@ if __name__ == "__main__":
         use_render=True,
         manual_control=True,
         vehicle_config=dict(show_lidar=False, show_navi_mark=True, show_line_to_navi_mark=True),
+        map_config=dict(
+            type="block_sequence",
+            config="U",
+            lane_num=2,
+            lane_width=3.5
+        ),
+        accident_prob=1.0,
+        decision_repeat=1,
     )
     env = MultiGoalIntersectionEnv(config)
     episode_rewards = defaultdict(float)
