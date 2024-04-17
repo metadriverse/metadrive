@@ -268,3 +268,4 @@ class InterSection(PGBlock):
 class InterSectionWithUTurn(InterSection):
     ID = "U"
     _enable_u_turn_flag = True
+    SOCKET_NUM = 4
