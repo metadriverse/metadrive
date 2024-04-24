@@ -271,34 +271,6 @@ class VaryingDynamicsVehicle(DefaultVehicle):
 
 
 class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
-
-    # def after_step(self):
-    #     r = super(VaryingDynamicsBoundingBoxVehicle, self).after_step()
-    #
-    #     line_seg = self._line_seg
-    #     line_color = (1.0, 1.0, 1.0)
-    #     line_seg.setColor(line_color[0], line_color[1], line_color[2], 1.0)
-    #     line_seg.setThickness(10)
-    #     line_offset = 0
-    #     # Draw the bottom of the car first
-    #     line_seg.moveTo(-self.WIDTH / 2 - line_offset, -self.LENGTH / 2 - line_offset, -self.HEIGHT / 2 - line_offset)
-    #     line_seg.drawTo(self.WIDTH / 2 + line_offset, -self.LENGTH / 2 - line_offset, -self.HEIGHT / 2 - line_offset)
-    #     line_seg.drawTo(self.WIDTH / 2 + line_offset, -self.LENGTH / 2 - line_offset, self.HEIGHT / 2 + line_offset)
-    #     line_seg.drawTo(-self.WIDTH / 2 - line_offset, -self.LENGTH / 2 - line_offset, self.HEIGHT / 2 + line_offset)
-    #
-    #     self._line_seg_node.removeNode()
-    #     self._node_path_list.remove(self._line_seg_node)
-    #     self._line_seg_node = NodePath(line_seg.create(True))
-    #     self._node_path_list.append(self._line_seg_node)
-    #     self._line_seg_node.reparentTo(self.origin)
-    #
-    #
-    #
-    #
-    #
-    #
-    #     return r
-
     def _add_visualization(self):
         if self.render:
             [path, scale, offset, HPR] = self.path
