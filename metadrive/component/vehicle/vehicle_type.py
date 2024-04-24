@@ -271,6 +271,33 @@ class VaryingDynamicsVehicle(DefaultVehicle):
 
 
 class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
+
+    def __init__(self,
+                 vehicle_config: dict = None,
+                 name: str = None,
+                 random_seed=None,
+                 position=None,
+                 heading=None,
+                 **kwargs
+                 ):
+
+        # TODO: for @yunsong, change the rules here:
+        #  vehicle_config has 'width' 'length' and 'height'
+        if vehicle_config["width"] < 0.0:
+            self.SEMANTIC_LABEL = Semantics.CAR.label
+        else:
+            self.SEMANTIC_LABEL = Semantics.BUS.label
+
+        super(VaryingDynamicsBoundingBoxVehicle, self).__init__(
+            vehicle_config=vehicle_config,
+            name=name,
+            random_seed=random_seed,
+            position=position,
+            heading=heading,
+            **kwargs
+        )
+
+
     def _add_visualization(self):
         if self.render:
             [path, scale, offset, HPR] = self.path
