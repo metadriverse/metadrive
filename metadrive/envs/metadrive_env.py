@@ -236,7 +236,7 @@ class MetaDriveEnv(BaseEnv):
             ret = ret or vehicle.out_of_route
         elif self.config["on_continuous_line_done"]:
             ret = ret or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
-        elif self.config["on_broken_line_done"]:
+        if self.config["on_broken_line_done"]:
             ret = ret or vehicle.on_broken_line
         return ret
 
