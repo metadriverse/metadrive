@@ -1,15 +1,12 @@
-from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
-from typing import Tuple
-
 from panda3d.bullet import BulletBoxShape
-from panda3d.bullet import BulletCylinderShape
+from panda3d.core import LineSegs, NodePath
 
-from metadrive.constants import MetaDriveType, Semantics
+from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
 from metadrive.constants import CollisionGroup
+from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
-from panda3d.core import TransparencyAttrib, LineSegs, NodePath, BoundingHexahedron
-from panda3d.core import Material, Vec3, LVecBase4
+
 
 class Cyclist(BaseTrafficParticipant):
     MASS = 80  # kg

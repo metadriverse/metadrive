@@ -1,14 +1,15 @@
 from direct.actor.Actor import Actor
 from panda3d.bullet import BulletCylinderShape, BulletBoxShape
+from panda3d.core import LVecBase4
 from panda3d.core import LVector3
+from panda3d.core import LineSegs, NodePath
 
 from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
 from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils.math import norm
-from panda3d.core import TransparencyAttrib, LineSegs, NodePath, BoundingHexahedron
-from panda3d.core import Material, Vec3, LVecBase4
+
 
 class Pedestrian(BaseTrafficParticipant):
     MASS = 70  # kg

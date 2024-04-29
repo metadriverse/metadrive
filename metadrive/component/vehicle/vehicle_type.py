@@ -70,6 +70,7 @@ class XLVehicle(BaseVehicle):
     DEFAULT_LENGTH = 5.74  # meters
     DEFAULT_HEIGHT = 2.8  # meters
     DEFAULT_WIDTH = 2.3  # meters
+
     @property
     def LENGTH(self):
         return self.DEFAULT_LENGTH
@@ -81,6 +82,7 @@ class XLVehicle(BaseVehicle):
     @property
     def WIDTH(self):
         return self.DEFAULT_WIDTH
+
 
 class LVehicle(BaseVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.L_VEHICLE)
@@ -285,15 +287,9 @@ class VaryingDynamicsVehicle(DefaultVehicle):
 
 
 class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
-
-    def __init__(self,
-                 vehicle_config: dict = None,
-                 name: str = None,
-                 random_seed=None,
-                 position=None,
-                 heading=None,
-                 **kwargs
-                 ):
+    def __init__(
+        self, vehicle_config: dict = None, name: str = None, random_seed=None, position=None, heading=None, **kwargs
+    ):
 
         # TODO: for @yunsong, change the rules here:
         #  vehicle_config has 'width' 'length' and 'height'
@@ -310,7 +306,6 @@ class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
             heading=heading,
             **kwargs
         )
-
 
     def _add_visualization(self):
         if self.render:

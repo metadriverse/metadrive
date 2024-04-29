@@ -210,8 +210,7 @@ class ScenarioTrafficManager(BaseManager):
         v_cfg["length"] = state["length"]
         v_cfg["height"] = state["height"]
         v_cfg["scale"] = (
-            v_cfg["width"] / vehicle_class.DEFAULT_WIDTH,
-            v_cfg["length"] / vehicle_class.DEFAULT_LENGTH,
+            v_cfg["width"] / vehicle_class.DEFAULT_WIDTH, v_cfg["length"] / vehicle_class.DEFAULT_LENGTH,
             v_cfg["height"] / vehicle_class.DEFAULT_HEIGHT
         )
 

@@ -617,13 +617,11 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 extra_offset = -self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS
                 if self.config['scale'] is not None:
                     scale = (
-                        scale[0] * self.config['scale'][0],
-                        scale[1] * self.config['scale'][1],
+                        scale[0] * self.config['scale'][0], scale[1] * self.config['scale'][1],
                         scale[2] * self.config['scale'][2]
                     )
                     offset = (
-                        offset[0] * self.config['scale'][0],
-                        offset[1] * self.config['scale'][1],
+                        offset[0] * self.config['scale'][0], offset[1] * self.config['scale'][1],
                         offset[2] * self.config['scale'][2]
                     )
                     # A quick workaround here.
