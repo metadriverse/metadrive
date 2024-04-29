@@ -205,10 +205,15 @@ class ScenarioTrafficManager(BaseManager):
             )
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v_cfg = copy.copy(self._traffic_v_config)
-        if use_bounding_box:
-            v_cfg["width"] = state["width"]
-            v_cfg["length"] = state["length"]
-            v_cfg["height"] = state["height"]
+
+        v_cfg["width"] = state["width"]
+        v_cfg["length"] = state["length"]
+        v_cfg["height"] = state["height"]
+        v_cfg["scale"] = (
+            v_cfg["width"] / vehicle_class.DEFAULT_WIDTH,
+            v_cfg["length"] / vehicle_class.DEFAULT_LENGTH,
+            v_cfg["height"] / vehicle_class.DEFAULT_HEIGHT
+        )
 
         if self.engine.global_config["top_down_show_real_size"]:
             v_cfg["top_down_length"] = track["state"]["length"][self.episode_step]

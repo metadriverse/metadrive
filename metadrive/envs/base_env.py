@@ -156,6 +156,7 @@ BASE_DEFAULT_CONFIG = dict(
         length=None,
         height=None,
         mass=None,
+        scale=None,  # triplet (x, y, z)
 
         # Set the vehicle size only for pygame top-down renderer. It doesn't affect the physical size!
         top_down_width=None,
