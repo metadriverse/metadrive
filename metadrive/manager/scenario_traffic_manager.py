@@ -194,15 +194,16 @@ class ScenarioTrafficManager(BaseManager):
             return
 
         # create vehicle
-        if state["vehicle_class"]:
-            vehicle_class = state["vehicle_class"]
-        else:
-            vehicle_class = get_vehicle_type(
-                float(state["length"]),
-                None if self.even_sample_v else self.np_random,
-                self.need_default_vehicle,
-                use_bounding_box=use_bounding_box
-            )
+        # if state["vehicle_class"]:
+        #     vehicle_class = state["vehicle_class"]
+        # else:
+        vehicle_class = get_vehicle_type(
+            float(state["length"]),
+            None if self.even_sample_v else self.np_random,
+            self.need_default_vehicle,
+            use_bounding_box=use_bounding_box
+        )
+        # print("vehicle_class: ", vehicle_class)
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v_cfg = copy.copy(self._traffic_v_config)
 
@@ -387,6 +388,7 @@ type_count = [0 for i in range(3)]
 
 
 def get_vehicle_type(length, np_random=None, need_default_vehicle=False, use_bounding_box=False):
+    return XLVehicle
     if use_bounding_box:
         return VaryingDynamicsBoundingBoxVehicle
     if np_random is not None:
