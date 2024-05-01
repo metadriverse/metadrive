@@ -71,6 +71,24 @@ class XLVehicle(BaseVehicle):
     DEFAULT_HEIGHT = 2.8  # meters
     DEFAULT_WIDTH = 2.3  # meters
 
+    def __init__(
+        self, vehicle_config: dict = None, name: str = None, random_seed=None, position=None, heading=None, **kwargs
+    ):
+
+        # TODO: for @yunsong, change the rules here:
+        #  vehicle_config has 'width' 'length' and 'height'
+        if vehicle_config["length"] > 8.5:
+            self.SEMANTIC_LABEL = Semantics.BUS.label
+
+        super(XLVehicle, self).__init__(
+            vehicle_config=vehicle_config,
+            name=name,
+            random_seed=random_seed,
+            position=position,
+            heading=heading,
+            **kwargs
+        )
+
     @property
     def LENGTH(self):
         return self.DEFAULT_LENGTH

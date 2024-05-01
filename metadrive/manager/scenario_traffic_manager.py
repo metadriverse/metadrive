@@ -387,33 +387,45 @@ class ScenarioTrafficManager(BaseManager):
 type_count = [0 for i in range(3)]
 
 
+# def get_vehicle_type(length, np_random=None, need_default_vehicle=False, use_bounding_box=False):
+#     # return XLVehicle
+#     if use_bounding_box:
+#         return VaryingDynamicsBoundingBoxVehicle
+#     if np_random is not None:
+#         if length <= 4:
+#             return SVehicle
+#         elif length <= 5.5:
+#             return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
+#         else:
+#             return [LVehicle, XLVehicle][np_random.randint(2)]
+#     else:
+#         global type_count
+#         # evenly sample
+#         if length <= 4:
+#             return SVehicle
+#         elif length <= 5.5:
+#             type_count[1] += 1
+#             vs = [LVehicle, MVehicle, SVehicle]
+#             # vs = [SVehicle, LVehicle, MVehicle]
+#             if need_default_vehicle:
+#                 vs.append(TrafficDefaultVehicle)
+#             return vs[type_count[1] % len(vs)]
+#         else:
+#             type_count[2] += 1
+#             vs = [LVehicle, XLVehicle]
+#             return vs[type_count[2] % len(vs)]
+
 def get_vehicle_type(length, np_random=None, need_default_vehicle=False, use_bounding_box=False):
-    return XLVehicle
+    # return XLVehicle
     if use_bounding_box:
         return VaryingDynamicsBoundingBoxVehicle
-    if np_random is not None:
-        if length <= 4:
-            return SVehicle
-        elif length <= 5.5:
-            return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
-        else:
-            return [LVehicle, XLVehicle][np_random.randint(2)]
+    if length <= 5.2:
+        return MVehicle
+    elif length <= 6.2:
+        return LVehicle
     else:
-        global type_count
-        # evenly sample
-        if length <= 4:
-            return SVehicle
-        elif length <= 5.5:
-            type_count[1] += 1
-            vs = [LVehicle, MVehicle, SVehicle]
-            # vs = [SVehicle, LVehicle, MVehicle]
-            if need_default_vehicle:
-                vs.append(TrafficDefaultVehicle)
-            return vs[type_count[1] % len(vs)]
-        else:
-            type_count[2] += 1
-            vs = [LVehicle, XLVehicle]
-            return vs[type_count[2] % len(vs)]
+        return XLVehicle
+
 
 
 def reset_vehicle_type_count(np_random=None):

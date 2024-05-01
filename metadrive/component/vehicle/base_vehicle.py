@@ -148,8 +148,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         if self.config["scale"] is not None:
             w, l, h = self.config["scale"]
-            self.FRONT_WHEELBASE *= w
-            self.REAR_WHEELBASE *= w
+            self.FRONT_WHEELBASE *= l
+            self.REAR_WHEELBASE *= l
             self.LATERAL_TIRE_TO_CENTER *= w
             self.TIRE_RADIUS *= h
             self.CHASSIS_TO_WHEEL_AXIS *= h
@@ -617,7 +617,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
             extra_offset = -self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS
             # print(scale, self.config['scale'])
-            print(self.config['length'], self.config['width'], self.config['height'])
+            # print(self.config['length'], self.config['width'], self.config['height'])
             # print(offset)
             # assert self.config['length'] > self.config['width'], "Please set the length and width in vehicle config"
             # assert self.config['length'] > self.config['height'], "Please set the length and height in vehicle config"
@@ -711,15 +711,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             tire_scale = 1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT
 
             if self.config['scale'] is not None:
-                # tire_scale = (
-                #     self.config['scale'][0] * tire_scale, self.config['scale'][1] * tire_scale, self.config['scale'][2] * tire_scale
-                # )
+                tire_scale = (
+                    self.config['scale'][0] * tire_scale, self.config['scale'][1] * tire_scale, self.config['scale'][2] * tire_scale
+                )
 
                 # A quick workaround here.
                 # The model position is set to height/2 in ScenarioMapManager.
                 # Now we set this offset to -height/2, so that the model will be placed on the ground.
                 # For the wheel, the bottom of it is not z=0, so we add two more terms to correct it.
-                extra_offset = -self.config["height"] / 2  + self.TIRE_RADIUS + self.CHASSIS_TO_WHEEL_AXIS
+                extra_offset = -self.config["height"] / 2  + self.TIRE_RADIUS/self.config['scale'][2] + self.CHASSIS_TO_WHEEL_AXIS/self.config['scale'][2]
                 wheel_model.setPos(0, 0, extra_offset)
 
             wheel_model.set_scale(tire_scale)

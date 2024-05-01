@@ -390,11 +390,14 @@ class Semantics:
     TRAFFIC_SIGN = label_color("TRAFFIC_SIGN", (220, 220, 0))
 
     # customized
-    LANE_LINE = label_color("LANE_LINE", (255, 255, 255))
-    CROSSWALK = label_color("CROSSWALK", (55, 176, 189))
+    # LANE_LINE = label_color("LANE_LINE", (255, 255, 255))
+    # CROSSWALK = label_color("CROSSWALK", (55, 176, 189))
+
+    LANE_LINE = label_color("LANE_LINE", (128, 64, 128))
+    CROSSWALK = label_color("CROSSWALK", (128, 64, 128))
 
     # TODO: for @yunsong, add more classes here.
-    BUS = label_color("BUS", (100, 100, 142))  # I just randomly choose a color.
+    BUS = label_color("BUS", (0, 60, 100))  # I just randomly choose a color.
 
 
 class MapTerrainSemanticColor:
