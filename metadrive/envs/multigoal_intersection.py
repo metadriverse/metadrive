@@ -3,9 +3,10 @@ This file implement an intersection environment with multiple goals.
 """
 from collections import defaultdict
 
+import gymnasium as gym
 import numpy as np
 import seaborn as sns
-
+from metadrive.utils.math import clip, norm
 from metadrive import MetaDriveEnv
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.component.pg_space import ParameterSpace, Parameter, ConstantSpace, DiscreteSpace
@@ -16,8 +17,114 @@ from metadrive.constants import DEFAULT_AGENT
 from metadrive.engine.logger import get_logger
 from metadrive.envs.varying_dynamics_env import VaryingDynamicsAgentManager, VaryingDynamicsConfig
 from metadrive.manager.base_manager import BaseManager
+from metadrive.obs.state_obs import LidarStateObservation, BaseObservation, StateObservation
 
 logger = get_logger()
+
+EGO_STATE_DIM = 5
+SIDE_DETECT = 36
+LANE_DETECT = 36
+VEHICLE_DETECT = 72
+NAVI_DIM = 10
+
+
+class CustomizedObservation(BaseObservation):
+    def __init__(self, config):
+        self.state_obs = StateObservation(config)
+        super(CustomizedObservation, self).__init__(config)
+        self.latest_observation = {}
+
+    @property
+    def observation_space(self):
+        shape = (EGO_STATE_DIM + SIDE_DETECT + LANE_DETECT + VEHICLE_DETECT + NAVI_DIM, )
+        return gym.spaces.Box(-1.0, 1.0, shape=shape, dtype=np.float32)
+
+    def observe(self, vehicle):
+        ego = self.state_observe(vehicle)
+        assert ego.shape[0] == EGO_STATE_DIM
+
+        side = self.side_detector_observe(vehicle)
+        assert side.shape[0] == SIDE_DETECT
+
+        lane = self.lane_line_detector_observe(vehicle)
+        assert lane.shape[0] == LANE_DETECT
+
+        veh = self.vehicle_detector_observe(vehicle)
+        assert veh.shape[0] == VEHICLE_DETECT
+
+        navi = vehicle.navigation.get_navi_info()
+        assert len(navi) == NAVI_DIM
+
+        obs = np.concatenate([ego, side, lane, veh, navi])
+
+        self.latest_observation["state"] = ego
+        self.latest_observation["side_detect"] = side
+        self.latest_observation["lane_detect"] = lane
+        self.latest_observation["vehicle_detect"] = veh
+        self.latest_observation["raw_navi"] = navi
+
+        return obs
+
+    def state_observe(self, vehicle):
+        # update out of road
+        info = np.zeros([EGO_STATE_DIM, ])
+
+        # The velocity of target vehicle
+        info[0] = clip((vehicle.speed_km_h + 1) / (vehicle.max_speed_km_h + 1), 0.0, 1.0)
+
+        # Current steering
+        info[1] = clip((vehicle.steering / vehicle.MAX_STEERING + 1) / 2, 0.0, 1.0)
+
+        # The normalized actions at last steps
+        info[2] = clip((vehicle.last_current_action[1][0] + 1) / 2, 0.0, 1.0)
+        info[3] = clip((vehicle.last_current_action[1][1] + 1) / 2, 0.0, 1.0)
+
+        # Current angular acceleration (yaw rate)
+        heading_dir_last = vehicle.last_heading_dir
+        heading_dir_now = vehicle.heading
+        cos_beta = heading_dir_now.dot(heading_dir_last) / (norm(*heading_dir_now) * norm(*heading_dir_last))
+        beta_diff = np.arccos(clip(cos_beta, 0.0, 1.0))
+        yaw_rate = beta_diff / 0.1
+        info[4] = clip(yaw_rate, 0.0, 1.0)
+
+        return info
+
+    def side_detector_observe(self, vehicle):
+        return np.asarray(self.engine.get_sensor("side_detector").perceive(
+            vehicle,
+            num_lasers=vehicle.config["side_detector"]["num_lasers"],
+            distance=vehicle.config["side_detector"]["distance"],
+            physics_world=vehicle.engine.physics_world.static_world,
+            show=vehicle.config["show_side_detector"],
+        ).cloud_points)
+
+    def lane_line_detector_observe(self, vehicle):
+        return np.asarray(self.engine.get_sensor("lane_line_detector").perceive(
+            vehicle,
+            vehicle.engine.physics_world.static_world,
+            num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
+            distance=vehicle.config["lane_line_detector"]["distance"],
+            show=vehicle.config["show_lane_line_detector"],
+        ).cloud_points)
+
+    def vehicle_detector_observe(self, vehicle):
+        cloud_points, detected_objects = self.engine.get_sensor("lidar").perceive(
+            vehicle,
+            physics_world=self.engine.physics_world.dynamic_world,
+            num_lasers=vehicle.config["lidar"]["num_lasers"],
+            distance=vehicle.config["lidar"]["distance"],
+            show=vehicle.config["show_lidar"],
+        )
+        return np.asarray(cloud_points)
+
+    def destroy(self):
+        """
+        Clear allocated memory
+        """
+        self.state_obs.destroy()
+        super(CustomizedObservation, self).destroy()
+        self.cloud_points = None
+        self.detected_objects = None
 
 
 class CustomizedIntersection(InterSectionWithUTurn):
@@ -123,6 +230,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                     ], lane_num=2, lane_width=3.5
                 ),
 
+                "agent_observation": CustomizedObservation,
+
                 # Even though the map will not change, the traffic flow will change.
                 "num_scenarios": 1000,
 
@@ -134,12 +243,14 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                     "show_navigation_arrow": False,
 
                     # Turn off vehicle's own navigation module.
-                    "side_detector": dict(num_lasers=4, distance=50),  # laser num, distance
+                    "side_detector": dict(num_lasers=SIDE_DETECT, distance=50),  # laser num, distance
+
+                    "lidar": dict(num_lasers=VEHICLE_DETECT, distance=50),
 
                     # To avoid goal-dependent lane detection, we use Lidar to detect distance to nearby lane lines.
                     # Otherwise, we will ask the navigation module to provide current lane and extract the lateral
                     # distance directly on this lane.
-                    "lane_line_detector": dict(num_lasers=4, distance=20)
+                    "lane_line_detector": dict(num_lasers=LANE_DETECT, distance=20)
                 }
             }
         )
@@ -160,7 +271,9 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
             navi_info = navi.get_navi_info()
-            i["goals/{}/obs".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
+            i["obs/goals/{}".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
+            for k, v in self.observations["default_agent"].latest_observation.items():
+                i[f"obs/ego/{k}"] = v
         return o, r, tm, tc, i
 
     def _get_reset_return(self, reset_info):
@@ -169,7 +282,10 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
             navi_info = navi.get_navi_info()
-            i["goals/{}/obs".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
+            i["obs/goals/{}".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
+            for k, v in self.observations["default_agent"].latest_observation.items():
+                i[f"obs/ego/{k}"] = v
+
         return o, i
 
     def reward_function(self, vehicle_id: str):
@@ -198,7 +314,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         # Compute goal-dependent reward and saved to step_info
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
-            prefix = "goals/{}".format(goal_name)
+            prefix = goal_name
             reward = 0.0
 
             # Get goal-dependent information
@@ -226,8 +342,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 reward = -self.config["crash_vehicle_penalty"]
             elif vehicle.crash_object:
                 reward = -self.config["crash_object_penalty"]
-            step_info[f"{prefix}/step_reward"] = reward
-            step_info[f"{prefix}/route_completion"] = navi.route_completion
+            step_info[f"reward/goals/{prefix}"] = reward
+            step_info[f"route_completion/goals/{prefix}"] = navi.route_completion
 
         return goal_agnostic_reward, step_info
 
@@ -264,16 +380,15 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         vehicle = self.agents[vehicle_id]
 
         for goal_name in self.engine.goal_manager.goals.keys():
-            prefix = "goals/{}".format(goal_name)
-            done_info[f"{prefix}/arrive_dest"] = self._is_arrive_destination(vehicle, goal_name)
+            done_info[f"arrive_dest/goals/{goal_name}"] = self._is_arrive_destination(vehicle, goal_name)
 
         return done, done_info
 
 
 if __name__ == "__main__":
     config = dict(
-        use_render=True,
-        manual_control=True,
+        use_render=False,
+        manual_control=False,
         vehicle_config=dict(show_lidar=False, show_navi_mark=True, show_line_to_navi_mark=True),
         accident_prob=1.0,
         decision_repeat=5,
@@ -284,56 +399,70 @@ if __name__ == "__main__":
         o, info = env.reset()
 
         print('=======================')
-        print("Goal-agnostic observation shape:\n\t", o.shape)
+        print("Full observation shape:\n\t", o.shape)
+        print("Goal-agnostic observation shape:\n\t", {k: v.shape for k, v in info.items() if k.startswith("obs/ego")})
         print("Observation shape for each goals: ")
         for k in sorted(info.keys()):
-            if k.startswith("goals/") and k.endswith("obs"):
+            if k.startswith("obs/goals/"):
                 print(f"\t{k}: {info[k].shape}")
         print('=======================')
+
+        obs_recorder = defaultdict(list)
 
         s = 0
         for i in range(1, 1000000000):
             o, r, tm, tc, info = env.step([0, 1])
             done = tm or tc
             s += 1
-            env.render()
+            # env.render()
             env.render(mode="topdown")
 
+            for k in info.keys():
+                if k.startswith("obs/goals"):
+                    obs_recorder[k].append(info[k])
+
             for k, v in info.items():
-                if k.startswith("goals/") and k.endswith("reward"):
+                if k.startswith("reward/goals"):
                     episode_rewards[k] += v
 
-            if s % 20 == 0:
-                info = {k: info[k] for k in sorted(info.keys())}
-                print('\n===== timestep {} ====='.format(s))
-                for k, v in info.items():
-                    if k.startswith("goals/") and not k.endswith('obs'):
-                        print(f"{k}: {v:.2f}")
-                print('=======================')
+            # if s % 20 == 0:
+            #     info = {k: info[k] for k in sorted(info.keys())}
+            #     print('\n===== timestep {} ====='.format(s))
+            #     for k, v in info.items():
+            #         if k.startswith("obs/goals/"):
+            #             print(f"{k}: {v:.2f}")
+            #     print('=======================')
 
             if done:
                 print('\n===== timestep {} ====='.format(s))
                 print("EPISODE DONE\n")
                 print('route completion:')
                 for k in sorted(info.keys()):
-                    kk = k.replace("/route_completion", "")
-                    if k.startswith("goals/") and k.endswith("route_completion"):
-                        print(f"\t{kk}: {info[k]:.2f}")
+                    # kk = k.replace("/route_completion", "")
+                    if k.startswith("route_completion/goals/"):
+                        print(f"\t{k}: {info[k]:.2f}")
 
                 print('\narrive destination (success):')
                 for k in sorted(info.keys()):
-                    kk = k.replace("/arrive_dest", "")
-                    if k.startswith("goals/") and k.endswith("arrive_dest"):
-                        print(f"\t{kk}: {info[k]:.2f}")
+                    # kk = k.replace("/arrive_dest", "")
+                    if k.startswith("arrive_dest/goals/"):
+                        print(f"\t{k}: {info[k]:.2f}")
 
                 print('\nepisode_rewards:')
                 for k in sorted(episode_rewards.keys()):
-                    kk = k.replace("/step_reward", "")
-                    print(f"\t{kk}: {episode_rewards[k]:.2f}")
+                    # kk = k.replace("/step_reward", "")
+                    print(f"\t{k}: {episode_rewards[k]:.2f}")
                 episode_rewards.clear()
                 print('=======================')
 
             if done:
+
+                import numpy as np
+
+                # for t in range(i):
+                #     # avg = [v[t] for k, v in obs_recorder.items()]
+                #     v = np.stack([v[0] for k, v in obs_recorder.items()])
+
                 print('\n\n\n')
                 env.reset()
                 s = 0
