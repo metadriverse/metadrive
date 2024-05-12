@@ -288,6 +288,38 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
         return o, i
 
+    def _reward_per_navigation(self, vehicle, navi, goal_name):
+        """Compute the reward for the given goal. goal_name='default' means we use the vehicle's own navigation."""
+        reward = 0.0
+
+        # Get goal-dependent information
+        if navi.current_lane in navi.current_ref_lanes:
+            current_lane = navi.current_lane
+            positive_road = 1
+        else:
+            current_lane = navi.current_ref_lanes[0]
+            current_road = navi.current_road
+            positive_road = 1 if not current_road.is_negative_road() else -1
+        long_last, _ = current_lane.local_coordinates(vehicle.last_position)
+        long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+
+        # Reward for moving forward in current lane
+        reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
+
+        # Reward for speed, sign determined by whether in the correct lanes (instead of driving in the wrong
+        # direction).
+        reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
+        if self._is_arrive_destination(vehicle, goal_name):
+            reward = +self.config["success_reward"]
+        elif self._is_out_of_road(vehicle):
+            reward = -self.config["out_of_road_penalty"]
+        elif vehicle.crash_vehicle:
+            reward = -self.config["crash_vehicle_penalty"]
+        elif vehicle.crash_object:
+            reward = -self.config["crash_object_penalty"]
+        return reward, navi.route_completion
+
+
     def reward_function(self, vehicle_id: str):
         """
         Compared to the original reward_function, we add goal-dependent reward to info dict.
@@ -315,37 +347,19 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
             prefix = goal_name
-            reward = 0.0
+            reward, route_completion = self._reward_per_navigation(vehicle, navi, goal_name)
+            step_info[f"reward/goals/{prefix}"] = reward + goal_agnostic_reward
+            step_info[f"route_completion/goals/{prefix}"] = route_completion
 
-            # Get goal-dependent information
-            if navi.current_lane in navi.current_ref_lanes:
-                current_lane = navi.current_lane
-                positive_road = 1
-            else:
-                current_lane = navi.current_ref_lanes[0]
-                current_road = navi.current_road
-                positive_road = 1 if not current_road.is_negative_road() else -1
-            long_last, _ = current_lane.local_coordinates(vehicle.last_position)
-            long_now, lateral_now = current_lane.local_coordinates(vehicle.position)
+        default_reward, default_rc = self._reward_per_navigation(vehicle, vehicle.navigation, "default")
+        step_info[f"reward/goals/default"] = default_reward + goal_agnostic_reward
+        step_info[f"route_completion/goals/default"] = default_rc
 
-            # Reward for moving forward in current lane
-            reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
+        default_reward = goal_agnostic_reward + default_reward
+        step_info[f"reward/goal_agnostic_reward"] = goal_agnostic_reward
+        step_info[f"reward/default_reward"] = default_reward
 
-            # Reward for speed, sign determined by whether in the correct lanes (instead of driving in the wrong
-            # direction).
-            reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
-            if self._is_arrive_destination(vehicle, goal_name):
-                reward = +self.config["success_reward"]
-            elif self._is_out_of_road(vehicle):
-                reward = -self.config["out_of_road_penalty"]
-            elif vehicle.crash_vehicle:
-                reward = -self.config["crash_vehicle_penalty"]
-            elif vehicle.crash_object:
-                reward = -self.config["crash_object_penalty"]
-            step_info[f"reward/goals/{prefix}"] = reward
-            step_info[f"route_completion/goals/{prefix}"] = navi.route_completion
-
-        return goal_agnostic_reward, step_info
+        return default_reward, step_info
 
     def _is_arrive_destination(self, vehicle, goal_name=None):
         """
@@ -364,7 +378,11 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 ret = ret or self._is_arrive_destination(vehicle, name)
             return ret
 
-        navi = self.engine.goal_manager.get_navigation(goal_name)
+        if goal_name == "default":
+            navi = self.vehicle.navigation
+        else:
+            navi = self.engine.goal_manager.get_navigation(goal_name)
+
         long, lat = navi.final_lane.local_coordinates(vehicle.position)
         flag = (navi.final_lane.length - 5 < long < navi.final_lane.length + 5) and (
             navi.get_current_lane_width() / 2 >= lat >=
@@ -387,8 +405,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
 if __name__ == "__main__":
     config = dict(
-        use_render=False,
-        manual_control=False,
+        use_render=True,
+        manual_control=True,
         vehicle_config=dict(show_lidar=False, show_navi_mark=True, show_line_to_navi_mark=True),
         accident_prob=1.0,
         decision_repeat=5,
@@ -425,13 +443,18 @@ if __name__ == "__main__":
                 if k.startswith("reward/goals"):
                     episode_rewards[k] += v
 
-            # if s % 20 == 0:
-            #     info = {k: info[k] for k in sorted(info.keys())}
-            #     print('\n===== timestep {} ====='.format(s))
-            #     for k, v in info.items():
-            #         if k.startswith("obs/goals/"):
-            #             print(f"{k}: {v:.2f}")
-            #     print('=======================')
+            if s % 20 == 0:
+                print('\n===== timestep {} ====='.format(s))
+                print('route completion:')
+                for k in sorted(info.keys()):
+                    if k.startswith("route_completion/goals/"):
+                        print(f"\t{k}: {info[k]:.2f}")
+
+                print('\nreward:')
+                for k in sorted(info.keys()):
+                    if k.startswith("reward/"):
+                        print(f"\t{k}: {info[k]:.2f}")
+                print('=======================')
 
             if done:
                 print('\n===== timestep {} ====='.format(s))
