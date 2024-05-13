@@ -233,7 +233,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "map_config": dict(
                     type="block_sequence", config=[
                         CustomizedIntersection,
-                    ], lane_num=2, lane_width=3.5
+                    ], lane_num=1, lane_width=3.5
                 ),
                 "agent_observation": CustomizedObservation,
 
