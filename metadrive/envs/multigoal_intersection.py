@@ -403,6 +403,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         for goal_name in self.engine.goal_manager.goals.keys():
             done_info[f"arrive_dest/goals/{goal_name}"] = self._is_arrive_destination(vehicle, goal_name)
 
+        done_info["arrive_dest/goals/default"] = self._is_arrive_destination(vehicle, "default")
+
         return done, done_info
 
 
