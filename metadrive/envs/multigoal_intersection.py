@@ -43,7 +43,7 @@ class CustomizedObservation(BaseObservation):
         ego = self.state_observe(vehicle)
         assert ego.shape[0] == EGO_STATE_DIM
 
-        obs = []
+        obs = [ego]
 
         if vehicle.config["side_detector"]["num_lasers"] > 0:
             side = self.side_detector_observe(vehicle)
