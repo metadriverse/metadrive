@@ -221,7 +221,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
     @classmethod
     def default_config(cls):
         config = MetaDriveEnv.default_config()
-        config.update(VaryingDynamicsConfig)
+        # config.update(VaryingDynamicsConfig)
         config.update(
             {
 
@@ -233,7 +233,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "map_config": dict(
                     type="block_sequence", config=[
                         CustomizedIntersection,
-                    ], lane_num=1, lane_width=3.5
+                    ], lane_num=2, lane_width=3.5
                 ),
                 "agent_observation": CustomizedObservation,
 
@@ -260,8 +260,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         )
         return config
 
-    def _get_agent_manager(self):
-        return VaryingDynamicsAgentManager(init_observations=self._get_observations())
+    # def _get_agent_manager(self):
+    #     return VaryingDynamicsAgentManager(init_observations=self._get_observations())
 
     def setup_engine(self):
         super().setup_engine()
@@ -408,9 +408,14 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
 if __name__ == "__main__":
     config = dict(
-        use_render=False,
-        manual_control=False,
-        vehicle_config=dict(show_lidar=False, show_navi_mark=True, show_line_to_navi_mark=True),
+        use_render=True,
+        manual_control=True,
+        vehicle_config=dict(
+             show_navi_mark=True, show_line_to_navi_mark=True,
+            show_lidar=False,
+            show_side_detector=False,
+            show_lane_line_detector=True,
+        ),
         accident_prob=1.0,
         decision_repeat=5,
     )
