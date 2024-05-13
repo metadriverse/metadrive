@@ -39,7 +39,7 @@ class CustomizedObservation(BaseObservation):
         shape = (EGO_STATE_DIM + SIDE_DETECT + LANE_DETECT + VEHICLE_DETECT + NAVI_DIM, )
         return gym.spaces.Box(-1.0, 1.0, shape=shape, dtype=np.float32)
 
-    def observe(self, vehicle):
+    def observe(self, vehicle, navigation=None):
         ego = self.state_observe(vehicle)
         assert ego.shape[0] == EGO_STATE_DIM
 
@@ -52,7 +52,9 @@ class CustomizedObservation(BaseObservation):
         veh = self.vehicle_detector_observe(vehicle)
         assert veh.shape[0] == VEHICLE_DETECT
 
-        navi = vehicle.navigation.get_navi_info()
+        if navigation is None:
+            navigation = vehicle.navigation
+        navi = navigation.get_navi_info()
         assert len(navi) == NAVI_DIM
 
         obs = np.concatenate([ego, side, lane, veh, navi])
@@ -272,12 +274,13 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
     def _get_step_return(self, actions, engine_info):
         """Add goal-dependent observation to the info dict."""
         o, r, tm, tc, i = super(MultiGoalIntersectionEnv, self)._get_step_return(actions, engine_info)
+
+        for k, v in self.observations["default_agent"].latest_observation.items():
+            i[f"obs/ego/{k}"] = v
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
-            navi_info = navi.get_navi_info()
-            i["obs/goals/{}".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
-            for k, v in self.observations["default_agent"].latest_observation.items():
-                i[f"obs/ego/{k}"] = v
+            o = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
+            i["obs/goals/{}".format(goal_name)] = o
 
         # print('\n===== timestep {} ====='.format(self.episode_step))
         # print('route completion:')
