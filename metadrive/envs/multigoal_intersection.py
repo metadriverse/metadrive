@@ -1,3 +1,4 @@
+
 """
 This file implement an intersection environment with multiple goals.
 """
@@ -135,8 +136,8 @@ class CustomizedIntersection(InterSectionWithUTurn):
             Parameter.radius: ConstantSpace(8),
 
             # unchanged:
-            Parameter.change_lane_num: DiscreteSpace(min=0, max=1),
-            Parameter.decrease_increase: DiscreteSpace(min=0, max=1)
+            Parameter.change_lane_num: DiscreteSpace(min=0, max=0),
+            Parameter.decrease_increase: DiscreteSpace(min=0, max=0)
         }
     )
 
@@ -227,7 +228,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "map_config": dict(
                     type="block_sequence", config=[
                         CustomizedIntersection,
-                    ], lane_num=2, lane_width=3.5
+                    ], lane_num=1, lane_width=3.5
                 ),
 
                 "agent_observation": CustomizedObservation,
@@ -405,8 +406,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
 if __name__ == "__main__":
     config = dict(
-        use_render=True,
-        manual_control=True,
+        use_render=False,
+        manual_control=False,
         vehicle_config=dict(show_lidar=False, show_navi_mark=True, show_line_to_navi_mark=True),
         accident_prob=1.0,
         decision_repeat=5,
