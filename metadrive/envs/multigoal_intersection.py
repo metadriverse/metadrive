@@ -1,4 +1,3 @@
-
 """
 This file implement an intersection environment with multiple goals.
 """
@@ -68,7 +67,9 @@ class CustomizedObservation(BaseObservation):
 
     def state_observe(self, vehicle):
         # update out of road
-        info = np.zeros([EGO_STATE_DIM, ])
+        info = np.zeros([
+            EGO_STATE_DIM,
+        ])
 
         # The velocity of target vehicle
         info[0] = clip((vehicle.speed_km_h + 1) / (vehicle.max_speed_km_h + 1), 0.0, 1.0)
@@ -91,22 +92,26 @@ class CustomizedObservation(BaseObservation):
         return info
 
     def side_detector_observe(self, vehicle):
-        return np.asarray(self.engine.get_sensor("side_detector").perceive(
-            vehicle,
-            num_lasers=vehicle.config["side_detector"]["num_lasers"],
-            distance=vehicle.config["side_detector"]["distance"],
-            physics_world=vehicle.engine.physics_world.static_world,
-            show=vehicle.config["show_side_detector"],
-        ).cloud_points)
+        return np.asarray(
+            self.engine.get_sensor("side_detector").perceive(
+                vehicle,
+                num_lasers=vehicle.config["side_detector"]["num_lasers"],
+                distance=vehicle.config["side_detector"]["distance"],
+                physics_world=vehicle.engine.physics_world.static_world,
+                show=vehicle.config["show_side_detector"],
+            ).cloud_points
+        )
 
     def lane_line_detector_observe(self, vehicle):
-        return np.asarray(self.engine.get_sensor("lane_line_detector").perceive(
-            vehicle,
-            vehicle.engine.physics_world.static_world,
-            num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
-            distance=vehicle.config["lane_line_detector"]["distance"],
-            show=vehicle.config["show_lane_line_detector"],
-        ).cloud_points)
+        return np.asarray(
+            self.engine.get_sensor("lane_line_detector").perceive(
+                vehicle,
+                vehicle.engine.physics_world.static_world,
+                num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
+                distance=vehicle.config["lane_line_detector"]["distance"],
+                show=vehicle.config["show_lane_line_detector"],
+            ).cloud_points
+        )
 
     def vehicle_detector_observe(self, vehicle):
         cloud_points, detected_objects = self.engine.get_sensor("lidar").perceive(
@@ -230,7 +235,6 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                         CustomizedIntersection,
                     ], lane_num=1, lane_width=3.5
                 ),
-
                 "agent_observation": CustomizedObservation,
 
                 # Even though the map will not change, the traffic flow will change.
@@ -245,7 +249,6 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
                     # Turn off vehicle's own navigation module.
                     "side_detector": dict(num_lasers=SIDE_DETECT, distance=50),  # laser num, distance
-
                     "lidar": dict(num_lasers=VEHICLE_DETECT, distance=50),
 
                     # To avoid goal-dependent lane detection, we use Lidar to detect distance to nearby lane lines.
@@ -319,7 +322,6 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
         return reward, navi.route_completion
-
 
     def reward_function(self, vehicle_id: str):
         """
