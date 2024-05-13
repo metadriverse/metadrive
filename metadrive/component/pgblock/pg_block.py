@@ -253,9 +253,9 @@ class PGBlock(BaseBlock):
 
                     self._construct_lane(lane, (_from, _to, _id))
                     choose_side = [True, True] if _id == len(lanes) - 1 else [True, False]
-                    if Road(_from, _to).is_negative_road() and _id == 0:
-                        # draw center line with positive road
-                        choose_side = [False, False]
+                    # if Road(_from, _to).is_negative_road() and _id == 0:
+                    #     # draw center line with positive road
+                    #     choose_side = [False, False]
                     self._construct_lane_line_in_block(lane, choose_side)
         self._construct_sidewalk()
         self._construct_crosswalk()
