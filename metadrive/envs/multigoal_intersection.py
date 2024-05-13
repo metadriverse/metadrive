@@ -278,6 +278,19 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
             i["obs/goals/{}".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
             for k, v in self.observations["default_agent"].latest_observation.items():
                 i[f"obs/ego/{k}"] = v
+
+        # print('\n===== timestep {} ====='.format(self.episode_step))
+        # print('route completion:')
+        # for k in sorted(i.keys()):
+        #     if k.startswith("route_completion/goals/"):
+        #         print(f"\t{k}: {i[k]:.2f}")
+        #
+        # print('\nreward:')
+        # for k in sorted(i.keys()):
+        #     if k.startswith("reward/"):
+        #         print(f"\t{k}: {i[k]:.2f}")
+        # print('=======================')
+
         return o, r, tm, tc, i
 
     def _get_reset_return(self, reset_info):
@@ -355,10 +368,11 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
             step_info[f"route_completion/goals/{prefix}"] = route_completion
 
         default_reward, default_rc = self._reward_per_navigation(vehicle, vehicle.navigation, "default")
-        step_info[f"reward/goals/default"] = default_reward + goal_agnostic_reward
+        default_reward = goal_agnostic_reward + default_reward
+
+        step_info[f"reward/goals/default"] = default_reward
         step_info[f"route_completion/goals/default"] = default_rc
 
-        default_reward = goal_agnostic_reward + default_reward
         step_info[f"reward/goal_agnostic_reward"] = goal_agnostic_reward
         step_info[f"reward/default_reward"] = default_reward
 
