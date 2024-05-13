@@ -22,9 +22,9 @@ from metadrive.obs.state_obs import LidarStateObservation, BaseObservation, Stat
 logger = get_logger()
 
 EGO_STATE_DIM = 5
-SIDE_DETECT = 36
-LANE_DETECT = 36
-VEHICLE_DETECT = 72
+SIDE_DETECT = 240
+LANE_DETECT = 0
+VEHICLE_DETECT = 0
 NAVI_DIM = 10
 
 
@@ -43,26 +43,34 @@ class CustomizedObservation(BaseObservation):
         ego = self.state_observe(vehicle)
         assert ego.shape[0] == EGO_STATE_DIM
 
-        side = self.side_detector_observe(vehicle)
-        assert side.shape[0] == SIDE_DETECT
+        obs = []
 
-        lane = self.lane_line_detector_observe(vehicle)
-        assert lane.shape[0] == LANE_DETECT
+        if vehicle.config["side_detector"]["num_lasers"] > 0:
+            side = self.side_detector_observe(vehicle)
+            assert side.shape[0] == SIDE_DETECT
+            obs.append(side)
+            self.latest_observation["side_detect"] = side
 
-        veh = self.vehicle_detector_observe(vehicle)
-        assert veh.shape[0] == VEHICLE_DETECT
+        if vehicle.config["lane_line_detector"]["num_lasers"] > 0:
+            lane = self.lane_line_detector_observe(vehicle)
+            assert lane.shape[0] == LANE_DETECT
+            obs.append(lane)
+            self.latest_observation["lane_detect"] = lane
 
+        if vehicle.config["lidar"]["num_lasers"] > 0:
+            veh = self.vehicle_detector_observe(vehicle)
+            assert veh.shape[0] == VEHICLE_DETECT
+            obs.append(veh)
+            self.latest_observation["vehicle_detect"] = veh
         if navigation is None:
             navigation = vehicle.navigation
         navi = navigation.get_navi_info()
         assert len(navi) == NAVI_DIM
+        obs.append(navi)
 
-        obs = np.concatenate([ego, side, lane, veh, navi])
+        obs = np.concatenate(obs)
 
         self.latest_observation["state"] = ego
-        self.latest_observation["side_detect"] = side
-        self.latest_observation["lane_detect"] = lane
-        self.latest_observation["vehicle_detect"] = veh
         self.latest_observation["raw_navi"] = navi
 
         return obs
@@ -432,10 +440,11 @@ if __name__ == "__main__":
         vehicle_config=dict(
             show_navi_mark=True,
             show_line_to_navi_mark=True,
-            show_lidar=True,
-            show_side_detector=False,
-            show_lane_line_detector=False,
+            show_lidar=False,
+            show_side_detector=True,
+            show_lane_line_detector=True,
         ),
+        traffic_density=0.0,
         accident_prob=1.0,
         decision_repeat=5,
     )
