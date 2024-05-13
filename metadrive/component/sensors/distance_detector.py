@@ -196,7 +196,7 @@ class SideDetector(DistanceDetector):
         super(SideDetector, self).__init__(engine)
         self.set_start_phase_offset(90)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
-        self.mask = CollisionGroup.ContinuousLaneLine
+        self.mask = CollisionGroup.ContinuousLaneLine | CollisionGroup.Sidewalk
 
 
 class LaneLineDetector(SideDetector):
@@ -206,4 +206,4 @@ class LaneLineDetector(SideDetector):
         super(SideDetector, self).__init__(engine)
         self.set_start_phase_offset(90)
         self.origin.hide(CamMask.RgbCam | CamMask.Shadow | CamMask.Shadow | CamMask.DepthCam | CamMask.SemanticCam)
-        self.mask = CollisionGroup.ContinuousLaneLine | CollisionGroup.BrokenLaneLine
+        self.mask = CollisionGroup.ContinuousLaneLine | CollisionGroup.BrokenLaneLine | CollisionGroup.Sidewalk
