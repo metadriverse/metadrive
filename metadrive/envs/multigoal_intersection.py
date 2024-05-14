@@ -26,9 +26,9 @@ from metadrive.utils import Config
 logger = get_logger()
 
 EGO_STATE_DIM = 5
-SIDE_DETECT = 240
+SIDE_DETECT = 120
 LANE_DETECT = 0
-VEHICLE_DETECT = 0
+VEHICLE_DETECT = 120
 NAVI_DIM = 10
 GOAL_DEPENDENT_STATE_DIM = 3
 
@@ -276,7 +276,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "num_scenarios": 1000,
 
                 # Remove all traffic vehicles for now.
-                "traffic_density": 0.0,
+                "traffic_density": 0.1,
 
                 # If the vehicle does not reach the default destination, it will receive a penalty.
                 "wrong_way_penalty": 10.0,
