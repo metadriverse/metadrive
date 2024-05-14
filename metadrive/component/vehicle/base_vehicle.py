@@ -514,14 +514,16 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def update_dist_to_left_right(self):
         self.dist_to_left_side, self.dist_to_right_side = self._dist_to_route_left_right()
 
-    def _dist_to_route_left_right(self):
+    def _dist_to_route_left_right(self, navigation=None):
         # TODO
         if self.navigation is None or self.navigation.current_ref_lanes is None:
             return 0, 0
-        current_reference_lane = self.navigation.current_ref_lanes[0]
+        if navigation is None:
+            navigation = self.navigation
+        current_reference_lane = navigation.current_ref_lanes[0]
         _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
-        lateral_to_left = lateral_to_reference + self.navigation.get_current_lane_width() / 2
-        lateral_to_right = self.navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
+        lateral_to_left = lateral_to_reference + navigation.get_current_lane_width() / 2
+        lateral_to_right = navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
         return lateral_to_left, lateral_to_right
 
     # @property

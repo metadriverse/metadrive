@@ -344,6 +344,9 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         # Reward for moving forward in current lane
         reward += self.config["driving_reward"] * (long_now - long_last) * positive_road
 
+        left, right = vehicle._dist_to_route_left_right(navigation=navi)
+        out_of_route = (right < 0) or (left < 0)
+
         # Reward for speed, sign determined by whether in the correct lanes (instead of driving in the wrong
         # direction).
         reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
@@ -361,6 +364,9 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 reward = -self.config["crash_object_penalty"]
             elif vehicle.crash_sidewalk:
                 reward = -self.config["crash_sidewalk_penalty"]
+            elif out_of_route:
+                reward = -self.config["out_of_road_penalty"]
+
         return reward, navi.route_completion
 
     def reward_function(self, vehicle_id: str):
