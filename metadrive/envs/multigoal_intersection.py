@@ -18,6 +18,10 @@ from metadrive.engine.logger import get_logger
 from metadrive.envs.varying_dynamics_env import VaryingDynamicsAgentManager, VaryingDynamicsConfig
 from metadrive.manager.base_manager import BaseManager
 from metadrive.obs.state_obs import LidarStateObservation, BaseObservation, StateObservation
+from metadrive.envs.metadrive_env import MetaDriveEnv
+from metadrive.obs.top_down_obs import TopDownObservation
+from metadrive.obs.top_down_obs_multi_channel import TopDownMultiChannel
+from metadrive.utils import Config
 
 logger = get_logger()
 
@@ -26,6 +30,7 @@ SIDE_DETECT = 240
 LANE_DETECT = 0
 VEHICLE_DETECT = 0
 NAVI_DIM = 10
+GOAL_DEPENDENT_STATE_DIM = 3
 
 
 class CustomizedObservation(BaseObservation):
@@ -36,7 +41,7 @@ class CustomizedObservation(BaseObservation):
 
     @property
     def observation_space(self):
-        shape = (EGO_STATE_DIM + SIDE_DETECT + LANE_DETECT + VEHICLE_DETECT + NAVI_DIM, )
+        shape = (EGO_STATE_DIM + SIDE_DETECT + LANE_DETECT + VEHICLE_DETECT + NAVI_DIM + GOAL_DEPENDENT_STATE_DIM, )
         return gym.spaces.Box(-1.0, 1.0, shape=shape, dtype=np.float32)
 
     def observe(self, vehicle, navigation=None):
@@ -67,6 +72,25 @@ class CustomizedObservation(BaseObservation):
         navi = navigation.get_navi_info()
         assert len(navi) == NAVI_DIM
         obs.append(navi)
+
+        # Goal-dependent infos
+        goal_dependent_info = []
+        lateral_to_left, lateral_to_right = vehicle._dist_to_route_left_right(navigation=navigation)
+        if self.engine.current_map:
+            total_width = float((self.engine.current_map.MAX_LANE_NUM + 1) * self.engine.current_map.MAX_LANE_WIDTH)
+        else:
+            total_width = 100
+        lateral_to_left /= total_width
+        lateral_to_right /= total_width
+        goal_dependent_info += [clip(lateral_to_left, 0.0, 1.0), clip(lateral_to_right, 0.0, 1.0)]
+        current_reference_lane = navigation.current_ref_lanes[-1]
+        goal_dependent_info += [
+            # The angular difference between vehicle's heading and the lane heading at this location.
+            vehicle.heading_diff(current_reference_lane),
+        ]
+        goal_dependent_info = np.asarray(goal_dependent_info)
+        assert goal_dependent_info.shape[0] == GOAL_DEPENDENT_STATE_DIM
+        obs.append(goal_dependent_info)
 
         obs = np.concatenate(obs)
 
@@ -216,6 +240,7 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
         # print("[DEBUG]: after_step in MultiGoalIntersectionNavigationManager")
         for name, navi in self.navigations.items():
             navi.update_localization(self.agent)
+            # print("Navigation {} next checkpoint: {}".format(name, navi.get_checkpoints()))
 
     def get_navigation(self, goal_name):
         """Return the navigation module for the given goal."""
