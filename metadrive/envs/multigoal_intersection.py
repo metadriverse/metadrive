@@ -251,7 +251,11 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "num_scenarios": 1000,
 
                 # Remove all traffic vehicles for now.
-                "traffic_density": 0.2,
+                "traffic_density": 0.0,
+
+                # If the vehicle does not reach the default destination, it will receive a penalty.
+                "wrong_way_penalty": 0.0,
+
                 "vehicle_config": {
 
                     # Remove navigation arrows in the window as we are in multi-goal environment.
@@ -299,7 +303,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         #     if k.startswith("reward/"):
         #         print(f"\t{k}: {i[k]:.2f}")
         # print('=======================')
-
+        assert r == i["reward/default_reward"]
+        assert i["route_completion"] == i["route_completion/goals/default"]
         return o, r, tm, tc, i
 
     def _get_reset_return(self, reset_info):
@@ -333,14 +338,11 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         # Reward for speed, sign determined by whether in the correct lanes (instead of driving in the wrong
         # direction).
         reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h) * positive_road
-        if self._is_arrive_destination(vehicle, goal_name):
-            reward = +self.config["success_reward"]
-        elif self._is_out_of_road(vehicle):
-            reward = -self.config["out_of_road_penalty"]
-        elif vehicle.crash_vehicle:
-            reward = -self.config["crash_vehicle_penalty"]
-        elif vehicle.crash_object:
-            reward = -self.config["crash_object_penalty"]
+        if self._is_arrive_destination(vehicle):
+            if self._is_arrive_destination(vehicle, goal_name):
+                reward += self.config["success_reward"]
+            else:
+                reward = -self.config["wrong_way_penalty"]
         return reward, navi.route_completion
 
     def reward_function(self, vehicle_id: str):
@@ -364,7 +366,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         elif vehicle.crash_object:
             goal_agnostic_reward = -self.config["crash_object_penalty"]
         step_info["step_reward"] = goal_agnostic_reward
-        step_info[f"route_completion"] = float("nan")  # Can't report this value if goal is not known.
+        step_info[f"route_completion"] = vehicle.navigation.route_completion
 
         # Compute goal-dependent reward and saved to step_info
         for goal_name in self.engine.goal_manager.goals.keys():
@@ -488,6 +490,7 @@ if __name__ == "__main__":
 
             if s % 20 == 0:
                 print('\n===== timestep {} ====='.format(s))
+                print('goal: ', goal)
                 print('route completion:')
                 for k in sorted(info.keys()):
                     if k.startswith("route_completion/goals/"):
