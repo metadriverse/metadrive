@@ -163,7 +163,7 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
     agent to a specific goal.
     """
     GOALS = {
-        "u_turn": (-Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3)).end_node,
+        # "u_turn": (-Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3)).end_node,
         "right_turn": Road(
             CustomizedIntersection.node(block_idx=1, part_idx=0, road_idx=0),
             CustomizedIntersection.node(block_idx=1, part_idx=0, road_idx=1)
