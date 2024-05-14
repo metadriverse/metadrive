@@ -254,7 +254,14 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "traffic_density": 0.0,
 
                 # If the vehicle does not reach the default destination, it will receive a penalty.
-                "wrong_way_penalty": 0.0,
+                "wrong_way_penalty": 10.0,
+                "crash_sidewalk_penalty": 2.0,
+                "crash_vehicle_penalty": 10.0,
+                "crash_object_penalty": 10.0,
+                "out_of_road_penalty": 2.0,
+                "success_reward": 10.0,
+                "driving_reward": 2.0,
+                "on_continuous_line_done": False,
 
                 "vehicle_config": {
 
@@ -343,6 +350,15 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 reward += self.config["success_reward"]
             else:
                 reward = -self.config["wrong_way_penalty"]
+        else:
+            if self._is_out_of_road(vehicle):
+                reward = -self.config["out_of_road_penalty"]
+            elif vehicle.crash_vehicle:
+                reward = -self.config["crash_vehicle_penalty"]
+            elif vehicle.crash_object:
+                reward = -self.config["crash_object_penalty"]
+            elif vehicle.crash_sidewalk:
+                reward = -self.config["crash_sidewalk_penalty"]
         return reward, navi.route_completion
 
     def reward_function(self, vehicle_id: str):
@@ -445,6 +461,8 @@ if __name__ == "__main__":
         traffic_density=0.0,
         accident_prob=1.0,
         decision_repeat=5,
+        wrong_way_penalty=10.0,
+        on_continuous_line_done=False,
     )
     env = MultiGoalIntersectionEnv(config)
     episode_rewards = defaultdict(float)
