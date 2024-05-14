@@ -283,12 +283,10 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         """Add goal-dependent observation to the info dict."""
         o, r, tm, tc, i = super(MultiGoalIntersectionEnv, self)._get_step_return(actions, engine_info)
 
-        for k, v in self.observations["default_agent"].latest_observation.items():
-            i[f"obs/ego/{k}"] = v
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
-            o = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
-            i["obs/goals/{}".format(goal_name)] = o
+            goal_obs = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
+            i["obs/goals/{}".format(goal_name)] = goal_obs
 
         # print('\n===== timestep {} ====='.format(self.episode_step))
         # print('route completion:')
@@ -309,10 +307,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         o, i = super(MultiGoalIntersectionEnv, self)._get_reset_return(reset_info)
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
-            navi_info = navi.get_navi_info()
-            i["obs/goals/{}".format(goal_name)] = np.asarray(navi_info).astype(np.float32)
-            for k, v in self.observations["default_agent"].latest_observation.items():
-                i[f"obs/ego/{k}"] = v
+            goal_obs = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
+            i["obs/goals/{}".format(goal_name)] = goal_obs
 
         return o, i
 
@@ -453,6 +449,12 @@ if __name__ == "__main__":
     try:
         o, info = env.reset()
 
+        default_ckpt = env.vehicle.navigation.checkpoints[-1]
+        for goal, navi in env.engine.goal_manager.navigations.items():
+            if navi.checkpoints[-1] == default_ckpt:
+                break
+        assert np.all(o == info["obs/goals/{}".format(goal)])
+
         print('=======================')
         print("Full observation shape:\n\t", o.shape)
         print("Goal-agnostic observation shape:\n\t", {k: v.shape for k, v in info.items() if k.startswith("obs/ego")})
@@ -467,6 +469,10 @@ if __name__ == "__main__":
         s = 0
         for i in range(1, 1000000000):
             o, r, tm, tc, info = env.step([0, 1])
+
+            assert np.all(o == info["obs/goals/{}".format(goal)])
+            assert np.all(r == info["reward/goals/{}".format(goal)])
+
             done = tm or tc
             s += 1
             # env.render()
@@ -524,7 +530,15 @@ if __name__ == "__main__":
                 #     v = np.stack([v[0] for k, v in obs_recorder.items()])
 
                 print('\n\n\n')
-                env.reset()
+                o, info = env.reset()
+
+                default_ckpt = env.vehicle.navigation.checkpoints[-1]
+                for goal, navi in env.engine.goal_manager.navigations.items():
+                    if navi.checkpoints[-1] == default_ckpt:
+                        break
+
+                assert np.all(o == info["obs/goals/{}".format(goal)])
+
                 s = 0
     finally:
         env.close()
