@@ -147,8 +147,8 @@ class CustomizedIntersection(InterSectionWithUTurn):
     PARAMETER_SPACE = ParameterSpace(
         {
 
-            # changed from 10 to 8:
-            Parameter.radius: ConstantSpace(8),
+            # TODO(PZH): The radius might be too large.
+            Parameter.radius: ConstantSpace(12),
 
             # unchanged:
             Parameter.change_lane_num: DiscreteSpace(min=0, max=0),
