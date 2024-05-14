@@ -262,6 +262,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "success_reward": 10.0,
                 "driving_reward": 2.0,
                 "on_continuous_line_done": False,
+                "out_of_road_done": False,
+
 
                 "vehicle_config": {
 
