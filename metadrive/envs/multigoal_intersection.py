@@ -355,6 +355,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
             if self._is_arrive_destination(vehicle, goal_name):
                 reward += self.config["success_reward"]
             else:
+                # if goal_name == "default":
+                #     print("WRONG WAY")
                 reward = -self.config["wrong_way_penalty"]
         else:
             if self._is_out_of_road(vehicle):
@@ -366,6 +368,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
             elif vehicle.crash_sidewalk:
                 reward = -self.config["crash_sidewalk_penalty"]
             elif out_of_route:
+                # if goal_name == "default":
+                #     print("OUT OF ROUTE")
                 reward = -self.config["out_of_route_penalty"]
 
         return reward, navi.route_completion
@@ -377,38 +381,19 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         vehicle = self.agents[vehicle_id]
         step_info = dict()
 
-        # Compute goal-agnostic reward
-        goal_agnostic_reward = 0.0
-        goal_agnostic_reward += self.config["speed_reward"] * (vehicle.speed_km_h / vehicle.max_speed_km_h)
-
-        # Can't assign arrive-destination reward if goal is not known.
-        # if self._is_arrive_destination(vehicle, goal_name):
-        #     reward = +self.config["success_reward"]
-        if self._is_out_of_road(vehicle):
-            goal_agnostic_reward = -self.config["out_of_road_penalty"]
-        elif vehicle.crash_vehicle:
-            goal_agnostic_reward = -self.config["crash_vehicle_penalty"]
-        elif vehicle.crash_object:
-            goal_agnostic_reward = -self.config["crash_object_penalty"]
-        step_info["step_reward"] = goal_agnostic_reward
-        step_info[f"route_completion"] = vehicle.navigation.route_completion
-
         # Compute goal-dependent reward and saved to step_info
         for goal_name in self.engine.goal_manager.goals.keys():
             navi = self.engine.goal_manager.get_navigation(goal_name)
             prefix = goal_name
             reward, route_completion = self._reward_per_navigation(vehicle, navi, goal_name)
-            step_info[f"reward/goals/{prefix}"] = reward + goal_agnostic_reward
+            step_info[f"reward/goals/{prefix}"] = reward
             step_info[f"route_completion/goals/{prefix}"] = route_completion
 
         default_reward, default_rc = self._reward_per_navigation(vehicle, vehicle.navigation, "default")
-        default_reward = goal_agnostic_reward + default_reward
-
         step_info[f"reward/goals/default"] = default_reward
         step_info[f"route_completion/goals/default"] = default_rc
-
-        step_info[f"reward/goal_agnostic_reward"] = goal_agnostic_reward
         step_info[f"reward/default_reward"] = default_reward
+        step_info[f"route_completion"] = vehicle.navigation.route_completion
 
         return default_reward, step_info
 
