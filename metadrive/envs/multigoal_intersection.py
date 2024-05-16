@@ -9,7 +9,7 @@ import seaborn as sns
 from metadrive.utils.math import clip, norm
 from metadrive import MetaDriveEnv
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
-from metadrive.component.pg_space import ParameterSpace, Parameter, ConstantSpace, DiscreteSpace
+from metadrive.component.pg_space import ParameterSpace, Parameter, ConstantSpace, DiscreteSpace, BoxSpace
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSectionWithUTurn
 from metadrive.component.road_network import Road
@@ -170,12 +170,8 @@ class CustomizedObservation(BaseObservation):
 class CustomizedIntersection(InterSectionWithUTurn):
     PARAMETER_SPACE = ParameterSpace(
         {
-
-            # TODO(PZH): The radius might be too large.
-            Parameter.radius: ConstantSpace(12),
-
-            # unchanged:
-            Parameter.change_lane_num: DiscreteSpace(min=0, max=0),
+            Parameter.radius: BoxSpace(min=9, max=20.0),
+            Parameter.change_lane_num: DiscreteSpace(min=0, max=2),
             Parameter.decrease_increase: DiscreteSpace(min=0, max=0)
         }
     )
@@ -268,7 +264,9 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "map_config": dict(
                     type="block_sequence", config=[
                         CustomizedIntersection,
-                    ], lane_num=1, lane_width=3.5
+                    ],
+                    lane_num=2,
+                    lane_width=3.5
                 ),
                 "agent_observation": CustomizedObservation,
 
@@ -276,20 +274,19 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "num_scenarios": 1000,
 
                 # Remove all traffic vehicles for now.
-                "traffic_density": 0.1,
+                "traffic_density": 0.2,
 
                 # If the vehicle does not reach the default destination, it will receive a penalty.
                 "wrong_way_penalty": 10.0,
-                "crash_sidewalk_penalty": 0.5,
+                "crash_sidewalk_penalty": 10.0,
                 "crash_vehicle_penalty": 10.0,
                 "crash_object_penalty": 10.0,
-                "out_of_road_penalty": 0.5,
-                "out_of_route_penalty": 2.0,
+                "out_of_road_penalty": 10.0,
+                "out_of_route_penalty": 0.5,
                 "success_reward": 10.0,
                 "driving_reward": 1.0,
                 "on_continuous_line_done": False,
-                "out_of_road_done": False,
-
+                "out_of_road_done": True,
 
                 "vehicle_config": {
 
@@ -477,6 +474,12 @@ if __name__ == "__main__":
             show_side_detector=True,
             show_lane_line_detector=True,
         ),
+        # **{
+            # "map_config": dict(
+            #     lane_num=5,
+            #     lane_width=3.5
+            # ),
+        # }
     )
     env = MultiGoalIntersectionEnv(config)
     episode_rewards = defaultdict(float)
