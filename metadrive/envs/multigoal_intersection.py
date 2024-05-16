@@ -183,7 +183,7 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
     agent to a specific goal.
     """
     GOALS = {
-        # "u_turn": (-Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3)).end_node,
+        "u_turn": (-Road(FirstPGBlock.NODE_2, FirstPGBlock.NODE_3)).end_node,
         "right_turn": Road(
             CustomizedIntersection.node(block_idx=1, part_idx=0, road_idx=0),
             CustomizedIntersection.node(block_idx=1, part_idx=0, road_idx=1)
@@ -282,10 +282,10 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "crash_vehicle_penalty": 10.0,
                 "crash_object_penalty": 10.0,
                 "out_of_road_penalty": 10.0,
-                "out_of_route_penalty": 0.5,
+                "out_of_route_penalty": 0.0,
                 "success_reward": 10.0,
                 "driving_reward": 1.0,
-                "on_continuous_line_done": False,
+                "on_continuous_line_done": True,
                 "out_of_road_done": True,
 
                 "vehicle_config": {
