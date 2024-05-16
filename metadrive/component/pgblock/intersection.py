@@ -110,7 +110,6 @@ class InterSection(PGBlock):
 
         # u-turn
         if self._enable_u_turn_flag:
-            adverse_road = -attach_road
             self._create_u_turn(attach_road, part_idx)
 
         # go forward part
@@ -221,6 +220,17 @@ class InterSection(PGBlock):
             )
 
     def _create_u_turn(self, attach_road, part_idx):
+        """
+        Create a U turn.
+
+        Args:
+            attach_road: the road where the U turn starts.
+            part_idx: in [0, 1, 2, 3]. When part_idx!=0, we grab the lanes from road network. Otherwise we use the
+                initial lanes (positive_lanes).
+
+        Returns:
+            None.
+        """
         # set to CONTINUOUS to debug
         line_type = PGLineType.NONE
         lanes = attach_road.get_lanes(self.block_network) if part_idx != 0 else self.positive_lanes
@@ -253,3 +263,9 @@ class InterSection(PGBlock):
         """Override this function for intersection so that we won't spawn vehicles in the center of intersection."""
         respawn_lanes = self.get_respawn_lanes()
         return respawn_lanes
+
+
+class InterSectionWithUTurn(InterSection):
+    ID = "U"
+    _enable_u_turn_flag = True
+    SOCKET_NUM = 4

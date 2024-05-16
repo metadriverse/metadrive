@@ -13,7 +13,7 @@ def _initialize_registry():
     from metadrive.component.pgblock.parking_lot import ParkingLot
     from metadrive.component.pgblock.ramp import InRampOnStraight, OutRampOnStraight
     from metadrive.component.pgblock.roundabout import Roundabout
-    from metadrive.component.pgblock.std_intersection import StdInterSection
+    from metadrive.component.pgblock.std_intersection import StdInterSection, StdInterSectionWithUTurn
     from metadrive.component.pgblock.std_t_intersection import StdTInterSection
     from metadrive.component.pgblock.straight import Straight
     from metadrive.component.pgblock.tollgate import TollGate
@@ -21,7 +21,7 @@ def _initialize_registry():
     _metadrive_class_list.extend(
         [
             Merge, Split, Curve, InFork, OutFork, ParkingLot, InRampOnStraight, OutRampOnStraight, Roundabout,
-            StdInterSection, StdTInterSection, Straight, TollGate, Bidirection
+            StdInterSection, StdTInterSection, StdInterSectionWithUTurn, Straight, TollGate, Bidirection
         ]
     )
 

@@ -251,29 +251,31 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             }
         )
 
-        lanes_heading = self.navigation.navi_arrow_dir
-        lane_0_heading = lanes_heading[0]
-        lane_1_heading = lanes_heading[1]
-        navigation_straight = False
-        navigation_turn_left = False
-        navigation_turn_right = False
-        if abs(wrap_to_pi(lane_0_heading - lane_1_heading)) < 10 / 180 * math.pi:
-            navigation_straight = True
-        else:
-            dir_0 = np.array([math.cos(lane_0_heading), math.sin(lane_0_heading), 0])
-            dir_1 = np.array([math.cos(lane_1_heading), math.sin(lane_1_heading), 0])
-            cross_product = np.cross(dir_1, dir_0)
-            navigation_turn_left = True if cross_product[-1] < 0 else False
-            navigation_turn_right = not navigation_turn_left
-        step_info.update(
-            {
-                "navigation_command": "forward" if navigation_straight else
-                ("left" if navigation_turn_left else "right"),
-                "navigation_forward": navigation_straight,
-                "navigation_left": navigation_turn_left,
-                "navigation_right": navigation_turn_right
-            }
-        )
+        if self.navigation is not None and hasattr(self.navigation, "navi_arrow_dir"):
+            lanes_heading = self.navigation.navi_arrow_dir
+            lane_0_heading = lanes_heading[0]
+            lane_1_heading = lanes_heading[1]
+            navigation_straight = False
+            navigation_turn_left = False
+            navigation_turn_right = False
+            if abs(wrap_to_pi(lane_0_heading - lane_1_heading)) < 10 / 180 * math.pi:
+                navigation_straight = True
+            else:
+                dir_0 = np.array([math.cos(lane_0_heading), math.sin(lane_0_heading), 0])
+                dir_1 = np.array([math.cos(lane_1_heading), math.sin(lane_1_heading), 0])
+                cross_product = np.cross(dir_1, dir_0)
+                navigation_turn_left = True if cross_product[-1] < 0 else False
+                navigation_turn_right = not navigation_turn_left
+            step_info.update(
+                {
+                    "navigation_command": "forward" if navigation_straight else
+                    ("left" if navigation_turn_left else "right"),
+                    "navigation_forward": navigation_straight,
+                    "navigation_left": navigation_turn_left,
+                    "navigation_right": navigation_turn_right
+                }
+            )
+
         return step_info
 
     def _out_of_route(self):
@@ -512,14 +514,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def update_dist_to_left_right(self):
         self.dist_to_left_side, self.dist_to_right_side = self._dist_to_route_left_right()
 
-    def _dist_to_route_left_right(self):
-        # TODO
-        if self.navigation is None or self.navigation.current_ref_lanes is None:
+    def _dist_to_route_left_right(self, navigation=None):
+        if navigation is None:
+            navigation = self.navigation
+        if navigation is None or navigation.current_ref_lanes is None:
             return 0, 0
-        current_reference_lane = self.navigation.current_ref_lanes[0]
+        current_reference_lane = navigation.current_ref_lanes[0]
         _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
-        lateral_to_left = lateral_to_reference + self.navigation.get_current_lane_width() / 2
-        lateral_to_right = self.navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
+        lateral_to_left = lateral_to_reference + navigation.get_current_lane_width() / 2
+        lateral_to_right = navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
         return lateral_to_left, lateral_to_right
 
     # @property
