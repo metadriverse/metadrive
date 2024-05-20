@@ -62,6 +62,7 @@ class MetaDriveType:
     # ===== Agent type =====
     UNSET = "UNSET"
     VEHICLE = "VEHICLE"
+    EGO_VEHICLE = "EGO_VEHICLE"  # currently for top-down view
     PEDESTRIAN = "PEDESTRIAN"
     CYCLIST = "CYCLIST"
     OTHER = "OTHER"
@@ -176,6 +177,10 @@ class MetaDriveType:
     @classmethod
     def is_vehicle(cls, type):
         return type == cls.VEHICLE
+
+    @classmethod
+    def is_ego_vehicle(cls, type):
+        return type == cls.EGO_VEHICLE
 
     @classmethod
     def is_pedestrian(cls, type):
