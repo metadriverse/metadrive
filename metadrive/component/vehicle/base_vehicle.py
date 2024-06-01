@@ -114,13 +114,13 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     path = None
 
     def __init__(
-        self,
-        vehicle_config: Union[dict, Config] = None,
-        name: str = None,
-        random_seed=None,
-        position=None,
-        heading=None,
-        _calling_reset=True,
+            self,
+            vehicle_config: Union[dict, Config] = None,
+            name: str = None,
+            random_seed=None,
+            position=None,
+            heading=None,
+            _calling_reset=True,
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -232,13 +232,37 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_info
 
     def after_step(self):
+        step_info = {}
         if self.navigation and self.config["navigation_module"]:
             self.navigation.update_localization(self)
+            lanes_heading = self.navigation.navi_arrow_dir
+            lane_0_heading = lanes_heading[0]
+            lane_1_heading = lanes_heading[1]
+            navigation_straight = False
+            navigation_turn_left = False
+            navigation_turn_right = False
+            if abs(wrap_to_pi(lane_0_heading - lane_1_heading)) < 10 / 180 * math.pi:
+                navigation_straight = True
+            else:
+                dir_0 = np.array([math.cos(lane_0_heading), math.sin(lane_0_heading), 0])
+                dir_1 = np.array([math.cos(lane_1_heading), math.sin(lane_1_heading), 0])
+                cross_product = np.cross(dir_1, dir_0)
+                navigation_turn_left = True if cross_product[-1] < 0 else False
+                navigation_turn_right = not navigation_turn_left
+            step_info.update(
+                {
+                    "navigation_command": "forward" if navigation_straight else
+                    ("left" if navigation_turn_left else "right"),
+                    "navigation_forward": navigation_straight,
+                    "navigation_left": navigation_turn_left,
+                    "navigation_right": navigation_turn_right
+                }
+            )
         self._state_check()
         self.update_dist_to_left_right()
         step_energy, episode_energy = self._update_energy_consumption()
         self.out_of_route = self._out_of_route()
-        step_info = self._update_overtake_stat()
+        step_info.update(self._update_overtake_stat())
         my_policy = self.engine.get_policy(self.name)
         step_info.update(
             {
@@ -248,30 +272,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 "step_energy": step_energy,
                 "episode_energy": episode_energy,
                 "policy": my_policy.name if my_policy is not None else my_policy
-            }
-        )
-
-        lanes_heading = self.navigation.navi_arrow_dir
-        lane_0_heading = lanes_heading[0]
-        lane_1_heading = lanes_heading[1]
-        navigation_straight = False
-        navigation_turn_left = False
-        navigation_turn_right = False
-        if abs(wrap_to_pi(lane_0_heading - lane_1_heading)) < 10 / 180 * math.pi:
-            navigation_straight = True
-        else:
-            dir_0 = np.array([math.cos(lane_0_heading), math.sin(lane_0_heading), 0])
-            dir_1 = np.array([math.cos(lane_1_heading), math.sin(lane_1_heading), 0])
-            cross_product = np.cross(dir_1, dir_0)
-            navigation_turn_left = True if cross_product[-1] < 0 else False
-            navigation_turn_right = not navigation_turn_left
-        step_info.update(
-            {
-                "navigation_command": "forward" if navigation_straight else
-                ("left" if navigation_turn_left else "right"),
-                "navigation_forward": navigation_straight,
-                "navigation_left": navigation_turn_left,
-                "navigation_right": navigation_turn_right
             }
         )
         return step_info
@@ -295,14 +295,14 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_energy, self.energy_consumption
 
     def reset(
-        self,
-        vehicle_config=None,
-        name=None,
-        random_seed=None,
-        position: np.ndarray = None,
-        heading: float = 0.0,
-        *args,
-        **kwargs
+            self,
+            vehicle_config=None,
+            name=None,
+            random_seed=None,
+            position: np.ndarray = None,
+            heading: float = 0.0,
+            *args,
+            **kwargs
     ):
         """
         pos is a 2-d array, and heading is a float (unit degree)
@@ -568,8 +568,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if not lateral_norm * forward_direction_norm:
             return 0
         cos = (
-            (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
-            (lateral_norm * forward_direction_norm)
+                (forward_direction[0] * lateral[0] + forward_direction[1] * lateral[1]) /
+                (lateral_norm * forward_direction_norm)
         )
         # return cos
         # Normalize to 0, 1
@@ -902,7 +902,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
                 if surrounding_v.lane_index[:-1] == (routing.checkpoints[ckpt_idx[0]], routing.checkpoints[ckpt_idx[1]
-                                                                                                           ]):
+                ]):
                     if self.lane.local_coordinates(self.position)[0] - \
                             self.lane.local_coordinates(surrounding_v.position)[0] < 0:
                         self.front_vehicles.add(surrounding_v)
@@ -937,9 +937,9 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     @property
     def replay_done(self):
         return self._replay_done if hasattr(self, "_replay_done") else (
-            self.crash_building or self.crash_vehicle or
-            # self.on_white_continuous_line or
-            self.on_yellow_continuous_line
+                self.crash_building or self.crash_vehicle or
+                # self.on_white_continuous_line or
+                self.on_yellow_continuous_line
         )
 
     @property
