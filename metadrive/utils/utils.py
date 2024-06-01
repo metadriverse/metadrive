@@ -23,6 +23,7 @@ def is_port_occupied(port, host='127.0.0.1'):
         result = sock.connect_ex((host, port))
         return result == 0
 
+
 def import_pygame():
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
     import pygame

@@ -129,11 +129,15 @@ class EngineCore(ShowBase.ShowBase):
             loadPrcFileData("", "want-pstats 1")
             if not is_port_occupied(5185):
                 self.pstats_process = subprocess.Popen(['pstats'])
-                logger.info("pstats is launched successfully, tutorial is at: "
-                            "https://docs.panda3d.org/1.10/python/optimization/using-pstats")
+                logger.info(
+                    "pstats is launched successfully, tutorial is at: "
+                    "https://docs.panda3d.org/1.10/python/optimization/using-pstats"
+                )
             else:
-                logger.warning("pstats is already launched! tutorial is at: "
-                               "https://docs.panda3d.org/1.10/python/optimization/using-pstats")
+                logger.warning(
+                    "pstats is already launched! tutorial is at: "
+                    "https://docs.panda3d.org/1.10/python/optimization/using-pstats"
+                )
 
         # Setup onscreen render
         if self.global_config["use_render"]:
