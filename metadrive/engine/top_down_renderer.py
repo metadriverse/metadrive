@@ -409,10 +409,14 @@ class TopDownRenderer:
         """
         frame_objects = []
         for name, obj in objects.items():
+            obj_type = obj.metadrive_type if hasattr(obj, "metadrive_type") else MetaDriveType.OTHER
+            if obj_type == MetaDriveType.VEHICLE:
+                obj_type = 'EGO_VEHICLE' if obj.class_name == 'DefaultVehicle' else MetaDriveType.VEHICLE
+
             frame_objects.append(
                 history_object(
                     name=name,
-                    type=obj.metadrive_type if hasattr(obj, "metadrive_type") else MetaDriveType.OTHER,
+                    type=obj_type,
                     heading_theta=obj.heading_theta,
                     WIDTH=obj.top_down_width,
                     LENGTH=obj.top_down_length,
