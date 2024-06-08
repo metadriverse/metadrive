@@ -96,7 +96,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_functionality
 
@@ -120,7 +120,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_env
 
@@ -143,7 +143,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
 
@@ -166,7 +166,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_component
 
@@ -189,7 +189,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_export_record_scenario
 
@@ -216,7 +216,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/
 
@@ -245,7 +245,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_examples
 
@@ -268,7 +268,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
 
@@ -295,7 +295,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pip install nbmake pytest-xdist
           mkdir ./tests/test_ipynb
