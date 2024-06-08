@@ -47,7 +47,6 @@ install_requires = [
     "yapf",
     "seaborn",
     "tqdm",
-    "ray>=2.24.0",
     "progressbar",
     "panda3d==1.10.14",
     "panda3d-gltf==0.13",  # 0.14 will bring some problems
