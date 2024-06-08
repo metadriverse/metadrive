@@ -53,7 +53,7 @@ jobs:
       - name: Install software
         run: |
           sudo apt update && sudo apt install -y bc
-          pip install "docstr-coverage==2.3.0"
+          pip install "docstr-coverage"
       - name: Get post-PR docstring coverage
         run: |
           after=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
