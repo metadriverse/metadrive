@@ -9,6 +9,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils import get_np_random
 from metadrive.utils.coordinates_shift import panda_vector
 
+
 class BaseNavigation:
     """
     Implement all NotImplemented method for customizing a new navigation module.
@@ -47,7 +48,7 @@ class BaseNavigation:
         # self.current_lane = None
 
         self.vehicle_config = vehicle_config if vehicle_config is not None else {}
-        
+
         self._target_checkpoints_index = None
         self._navi_info = np.zeros((self.get_navigation_info_dim(), ), dtype=np.float32)  # navi information res
 
@@ -67,7 +68,7 @@ class BaseNavigation:
         if panda_color is not None:
             assert len(panda_color) == 3 and 0 <= panda_color[0] <= 1
             self.navi_mark_color = tuple(panda_color)
-        
+
         self.navi_arrow_dir = [0, 0]
         self._dest_node_path = None
         self._goal_node_path = None
@@ -266,4 +267,3 @@ class BaseNavigation:
     @classmethod
     def get_navigation_info_dim(cls):
         return cls.NUM_WAY_POINT * cls.CHECK_POINT_INFO_DIM
-
