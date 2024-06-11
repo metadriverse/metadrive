@@ -42,12 +42,7 @@ class InRampOnStraight(Ramp):
 
     def _get_merge_part(self, att_lane: StraightLane, length: float):
         start = att_lane.end
-        merge_part = create_extension(
-            start,
-            length,
-            ExtensionDirection.SHRINK,
-            width=self.lane_width
-        )
+        merge_part = create_extension(start, length, ExtensionDirection.SHRINK, width=self.lane_width)
         return merge_part
 
     def _try_plug_into_previous_block(self) -> bool:
@@ -234,12 +229,7 @@ class OutRampOnStraight(Ramp):
 
     def _get_merge_part(self, att_lane: StraightLane, length: float):
         start = att_lane.position(0, self.lane_width)
-        merge_part = create_extension(
-            start,
-            length,
-            ExtensionDirection.EXTEND,
-            width=self.lane_width
-        )
+        merge_part = create_extension(start, length, ExtensionDirection.EXTEND, width=self.lane_width)
         return merge_part
 
     def _try_plug_into_previous_block(self) -> bool:
@@ -308,14 +298,13 @@ class OutRampOnStraight(Ramp):
         self.block_network.add_lane(Decoration.start, Decoration.end, merge_part_lane)
 
         deacc_lane_end = dec_right_lane.position(dec_right_lane.length, self.lane_width)
-        deacc_lane = StraightLane(merge_part_lane.end, deacc_lane_end, self.lane_width, (PGLineType.BROKEN, PGLineType.CONTINUOUS))
+        deacc_lane = StraightLane(
+            merge_part_lane.end, deacc_lane_end, self.lane_width, (PGLineType.BROKEN, PGLineType.CONTINUOUS)
+        )
         self.block_network.add_lane(dec_road.start_node, dec_road.end_node, deacc_lane)
         no_cross = (
             not check_lane_on_road(
-                self._global_network,
-                deacc_lane,
-                0.95,
-                ignore_intersection_checking=self.ignore_intersection_checking
+                self._global_network, deacc_lane, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
             )
         ) and no_cross
 
