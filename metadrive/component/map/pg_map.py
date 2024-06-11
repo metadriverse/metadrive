@@ -143,7 +143,7 @@ class PGMap(BaseMap):
                             continue
                         color = l.line_colors[side]
                         line_type = self.get_line_type(type, color)
-                        lateral = l.width_at(0) / 2
+                        lateral = l.width / 2
                         if side == 0:
                             lateral *= -1
                         ret["{}_{}".format(l.index, side)] = {

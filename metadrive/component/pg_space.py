@@ -199,6 +199,7 @@ class Parameter:
     change_lane_num = "change_lane_num"
     decrease_increase = "decrease_increase"
     one_side_vehicle_num = "one_side_vehicle_number"
+    extension_length = "extension_length"
 
     # vehicle
     # vehicle_length = "v_len"
@@ -304,7 +305,8 @@ class BlockParameterSpace:
         Parameter.decrease_increase: DiscreteSpace(min=0, max=1)  # 0, decrease, 1 increase
     }
     RAMP_PARAMETER = {
-        Parameter.length: BoxSpace(min=20, max=40)  # accelerate/decelerate part length
+        Parameter.length: BoxSpace(min=20, max=40),  # accelerate/decelerate part length
+        Parameter.extension_length: BoxSpace(min=20, max=40)
     }
     FORK_PARAMETER = {
         Parameter.length: BoxSpace(min=20, max=40),  # accelerate/decelerate part length
