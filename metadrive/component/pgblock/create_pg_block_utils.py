@@ -28,7 +28,7 @@ def create_extension(
 ):
     extension_end = start_position + [extension_lane_length, 0.0]
     extension = ExtendingLane(
-        direction, start_position, extension_end, width, [PGLineType.NONE, PGLineType.NONE], forbidden, speed_limit,
+        direction, start_position, extension_end, width, [PGLineType.NONE, PGLineType.CONTINUOUS], forbidden, speed_limit,
         priority
     )
     return extension
