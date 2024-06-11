@@ -64,6 +64,14 @@ class ScenarioTrafficManager(BaseManager):
         # config
         self._traffic_v_config = self.get_traffic_v_config()
 
+        self.v_map = {}
+        self.adv_name = None
+        self.adv_traj = []
+
+    def set_adv_info(self,adv_name,adv_traj):
+        self.adv_name = adv_name
+        self.adv_traj = adv_traj
+
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
         for v in self.spawned_objects.values():
@@ -123,11 +131,23 @@ class ScenarioTrafficManager(BaseManager):
                         logger.info("Do not support {}".format(track["type"]))
                 elif self.has_policy(self._scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
                     # static object will not be cleaned!
+
+                    vname = self._scenario_id_to_obj_id[scenario_id]
                     policy = self.get_policy(self._scenario_id_to_obj_id[scenario_id])
-                    if policy.is_current_step_valid:
-                        policy.act()
+
+                    if vname == self.adv_name and len(self.adv_traj):
+                        sample = self.adv_traj.pop(0)
+                        v = self.v_map[vname]
+                        v.set_position(sample[:2])
+                        v.set_velocity(sample[2:4])
+                        v.set_heading_theta(sample[-1])
                     else:
-                        self._obj_to_clean_this_frame.append(scenario_id)
+                        policy = self.get_policy(vname)
+                        if policy.is_current_step_valid:
+                            policy.act()
+                        else:
+                            self._obj_to_clean_this_frame.append(scenario_id)
+
         else:
             replay_done = True
             # clean replay vehicle
@@ -212,6 +232,8 @@ class ScenarioTrafficManager(BaseManager):
         )
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id
+
+        self.v_map[obj_name] = v
 
         # add policy
         start_index, end_index = get_max_valid_indicis(track, self.episode_step)  # real end_index is end_index-1
