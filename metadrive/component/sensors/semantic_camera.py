@@ -38,7 +38,7 @@ class SemanticCamera(BaseCamera):
                 )
             else:
 
-                if label == Semantics.PEDESTRIAN.label:
+                if label == Semantics.PEDESTRIAN.label and not self.engine.global_config.get("use_bounding_box", False):
                     # PZH: This is a workaround fix to make pedestrians animated.
                     cam.setTagState(
                         label,
