@@ -358,6 +358,10 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 navi = self.engine.goal_manager.get_navigation(goal_name)
                 goal_obs = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
                 i["obs/goals/{}".format(goal_name)] = goal_obs
+
+        else:
+            i["obs/goals/default"] = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT])
+
         return o, i
 
     def _reward_per_navigation(self, vehicle, navi, goal_name):
