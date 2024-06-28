@@ -1,27 +1,28 @@
 """
-This file implement an intersection environment with multiple goals.
+This file provides a multi-goal environment based on the intersection environment. The environment fully support
+conventional MetaDrive PG maps, where there is a special config['use_pg_map'] to enable the PG maps and all config are
+the same as MetaDriveEnv.
+If config['use_pg_map'] is False, the environment will use the default intersection map.
+
+In all cases, we will additionally
 """
 from collections import defaultdict
 
 import gymnasium as gym
 import numpy as np
 import seaborn as sns
-from metadrive.utils.math import clip, norm
-from metadrive import MetaDriveEnv
+
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
-from metadrive.component.pg_space import ParameterSpace, Parameter, ConstantSpace, DiscreteSpace, BoxSpace
+from metadrive.component.pg_space import ParameterSpace, Parameter, DiscreteSpace, BoxSpace
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSectionWithUTurn
 from metadrive.component.road_network import Road
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.engine.logger import get_logger
-from metadrive.envs.varying_dynamics_env import VaryingDynamicsAgentManager, VaryingDynamicsConfig
-from metadrive.manager.base_manager import BaseManager
-from metadrive.obs.state_obs import LidarStateObservation, BaseObservation, StateObservation
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.obs.top_down_obs import TopDownObservation
-from metadrive.obs.top_down_obs_multi_channel import TopDownMultiChannel
-from metadrive.utils import Config
+from metadrive.manager.base_manager import BaseManager
+from metadrive.obs.state_obs import BaseObservation, StateObservation
+from metadrive.utils.math import clip, norm
 
 logger = get_logger()
 
@@ -41,7 +42,7 @@ class CustomizedObservation(BaseObservation):
 
     @property
     def observation_space(self):
-        shape = (EGO_STATE_DIM + SIDE_DETECT + LANE_DETECT + VEHICLE_DETECT + NAVI_DIM + GOAL_DEPENDENT_STATE_DIM, )
+        shape = (EGO_STATE_DIM + SIDE_DETECT + LANE_DETECT + VEHICLE_DETECT + NAVI_DIM + GOAL_DEPENDENT_STATE_DIM,)
         return gym.spaces.Box(-1.0, 1.0, shape=shape, dtype=np.float32)
 
     def observe(self, vehicle, navigation=None):
@@ -249,6 +250,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
     This environment is an intersection with multiple goals. We provide the reward function, observation, termination
     conditions for each goal in the info dict returned by env.reset and env.step, with prefix "goals/{goal_name}/".
     """
+
     @classmethod
     def default_config(cls):
         config = MetaDriveEnv.default_config()
@@ -256,19 +258,10 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         config.update(
             {
 
+                "use_multigoal_intersection": True,
+
                 # Set the map to an Intersection
                 "start_seed": 0,
-
-                # Disable the shortcut config for map.
-                "map": None,
-                "map_config": dict(
-                    type="block_sequence", config=[
-                        CustomizedIntersection,
-                    ],
-                    lane_num=2,
-                    lane_width=3.5
-                ),
-                "agent_observation": CustomizedObservation,
 
                 # Even though the map will not change, the traffic flow will change.
                 "num_scenarios": 1000,
@@ -306,47 +299,65 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         )
         return config
 
+    def _post_process_config(self, config):
+        config = super()._post_process_config(config)
+        if config["use_multigoal_intersection"]:
+            config['map'] = None
+            config['map_config'] = dict(
+                type="block_sequence", config=[
+                    CustomizedIntersection,
+                ],
+                lane_num=2,
+                lane_width=3.5
+            )
+        return config
+
     # def _get_agent_manager(self):
     #     return VaryingDynamicsAgentManager(init_observations=self._get_observations())
+
+
+    # def get_single_observation(self):
+    #     if self.config["use_multigoal_intersection"]:
+    #         return CustomizedObservation(self.config)
+    #     else:
+    #         return super().get_single_observation()
+    #         img_obs = self.config["image_observation"]
+    #         o = ImageStateObservation(self.config) if img_obs else LidarStateObservation(self.config)
+
+
 
     def setup_engine(self):
         super().setup_engine()
 
         # Introducing a new navigation manager
-        self.engine.register_manager("goal_manager", MultiGoalIntersectionNavigationManager())
+        if self.config["use_multigoal_intersection"]:
+            self.engine.register_manager("goal_manager", MultiGoalIntersectionNavigationManager())
 
     def _get_step_return(self, actions, engine_info):
         """Add goal-dependent observation to the info dict."""
         o, r, tm, tc, i = super(MultiGoalIntersectionEnv, self)._get_step_return(actions, engine_info)
 
-        for goal_name in self.engine.goal_manager.goals.keys():
-            navi = self.engine.goal_manager.get_navigation(goal_name)
-            goal_obs = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
-            i["obs/goals/{}".format(goal_name)] = goal_obs
+        if self.config["use_multigoal_intersection"]:
+            for goal_name in self.engine.goal_manager.goals.keys():
+                navi = self.engine.goal_manager.get_navigation(goal_name)
+                goal_obs = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
+                i["obs/goals/{}".format(goal_name)] = goal_obs
+            assert r == i["reward/default_reward"]
+            assert i["route_completion"] == i["route_completion/goals/default"]
 
-        # print('\n===== timestep {} ====='.format(self.episode_step))
-        # print('route completion:')
-        # for k in sorted(i.keys()):
-        #     if k.startswith("route_completion/goals/"):
-        #         print(f"\t{k}: {i[k]:.2f}")
-        #
-        # print('\nreward:')
-        # for k in sorted(i.keys()):
-        #     if k.startswith("reward/"):
-        #         print(f"\t{k}: {i[k]:.2f}")
-        # print('=======================')
-        assert r == i["reward/default_reward"]
-        assert i["route_completion"] == i["route_completion/goals/default"]
+        else:
+            i["obs/goals/default"] = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT])
         return o, r, tm, tc, i
 
     def _get_reset_return(self, reset_info):
         """Add goal-dependent observation to the info dict."""
         o, i = super(MultiGoalIntersectionEnv, self)._get_reset_return(reset_info)
-        for goal_name in self.engine.goal_manager.goals.keys():
-            navi = self.engine.goal_manager.get_navigation(goal_name)
-            goal_obs = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
-            i["obs/goals/{}".format(goal_name)] = goal_obs
 
+        if self.config["use_multigoal_intersection"]:
+            for goal_name in self.engine.goal_manager.goals.keys():
+                navi = self.engine.goal_manager.get_navigation(goal_name)
+                goal_obs = self.observations["default_agent"].observe(self.agents[DEFAULT_AGENT], navi)
+                i["obs/goals/{}".format(goal_name)] = goal_obs
         return o, i
 
     def _reward_per_navigation(self, vehicle, navi, goal_name):
@@ -404,12 +415,20 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         step_info = dict()
 
         # Compute goal-dependent reward and saved to step_info
-        for goal_name in self.engine.goal_manager.goals.keys():
-            navi = self.engine.goal_manager.get_navigation(goal_name)
-            prefix = goal_name
+        if self.config["use_multigoal_intersection"]:
+            for goal_name in self.engine.goal_manager.goals.keys():
+                navi = self.engine.goal_manager.get_navigation(goal_name)
+                prefix = goal_name
+                reward, route_completion = self._reward_per_navigation(vehicle, navi, goal_name)
+                step_info[f"reward/goals/{prefix}"] = reward
+                step_info[f"route_completion/goals/{prefix}"] = route_completion
+
+        else:
+            navi = vehicle.navigation
+            goal_name = "default"
             reward, route_completion = self._reward_per_navigation(vehicle, navi, goal_name)
-            step_info[f"reward/goals/{prefix}"] = reward
-            step_info[f"route_completion/goals/{prefix}"] = route_completion
+            step_info[f"reward/goals/{goal_name}"] = reward
+            step_info[f"route_completion/goals/{goal_name}"] = route_completion
 
         default_reward, default_rc = self._reward_per_navigation(vehicle, vehicle.navigation, "default")
         step_info[f"reward/goals/default"] = default_reward
@@ -430,21 +449,26 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         Returns:
             flag: Whether this vehicle arrives its destination.
         """
-        if goal_name is None:
-            ret = False
-            for name in self.engine.goal_manager.goals.keys():
-                ret = ret or self._is_arrive_destination(vehicle, name)
-            return ret
 
-        if goal_name == "default":
-            navi = self.vehicle.navigation
+        if self.config["use_multigoal_intersection"]:
+            if goal_name is None:
+                ret = False
+                for name in self.engine.goal_manager.goals.keys():
+                    ret = ret or self._is_arrive_destination(vehicle, name)
+                return ret
+
+            if goal_name == "default":
+                navi = self.vehicle.navigation
+            else:
+                navi = self.engine.goal_manager.get_navigation(goal_name)
+
         else:
-            navi = self.engine.goal_manager.get_navigation(goal_name)
+            navi = vehicle.navigation
 
         long, lat = navi.final_lane.local_coordinates(vehicle.position)
         flag = (navi.final_lane.length - 5 < long < navi.final_lane.length + 5) and (
-            navi.get_current_lane_width() / 2 >= lat >=
-            (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
+                navi.get_current_lane_width() / 2 >= lat >=
+                (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
         )
         return flag
 
@@ -455,8 +479,12 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         done, done_info = super(MultiGoalIntersectionEnv, self).done_function(vehicle_id)
         vehicle = self.agents[vehicle_id]
 
-        for goal_name in self.engine.goal_manager.goals.keys():
-            done_info[f"arrive_dest/goals/{goal_name}"] = self._is_arrive_destination(vehicle, goal_name)
+        if self.config["use_multigoal_intersection"]:
+            for goal_name in self.engine.goal_manager.goals.keys():
+                done_info[f"arrive_dest/goals/{goal_name}"] = self._is_arrive_destination(vehicle, goal_name)
+
+        else:
+            done_info[f"arrive_dest/goals/default"] = done
 
         done_info["arrive_dest/goals/default"] = self._is_arrive_destination(vehicle, "default")
 
@@ -474,11 +502,16 @@ if __name__ == "__main__":
             show_side_detector=True,
             show_lane_line_detector=True,
         ),
+
+        # ********************************************
+        use_multigoal_intersection=False
+        # ********************************************
+
         # **{
-            # "map_config": dict(
-            #     lane_num=5,
-            #     lane_width=3.5
-            # ),
+        # "map_config": dict(
+        #     lane_num=5,
+        #     lane_width=3.5
+        # ),
         # }
     )
     env = MultiGoalIntersectionEnv(config)
@@ -486,11 +519,13 @@ if __name__ == "__main__":
     try:
         o, info = env.reset()
 
-        default_ckpt = env.vehicle.navigation.checkpoints[-1]
-        for goal, navi in env.engine.goal_manager.navigations.items():
-            if navi.checkpoints[-1] == default_ckpt:
-                break
-        assert np.all(o == info["obs/goals/{}".format(goal)])
+        # default_ckpt = env.vehicle.navigation.checkpoints[-1]
+        # for goal, navi in env.engine.goal_manager.navigations.items():
+        #     if navi.checkpoints[-1] == default_ckpt:
+        #         break
+        # assert np.all(o == info["obs/goals/{}".format(goal)])
+
+        goal = "default"
 
         print('=======================')
         print("Full observation shape:\n\t", o.shape)
@@ -571,11 +606,11 @@ if __name__ == "__main__":
                 o, info = env.reset()
 
                 default_ckpt = env.vehicle.navigation.checkpoints[-1]
-                for goal, navi in env.engine.goal_manager.navigations.items():
-                    if navi.checkpoints[-1] == default_ckpt:
-                        break
-
-                assert np.all(o == info["obs/goals/{}".format(goal)])
+                # for goal, navi in env.engine.goal_manager.navigations.items():
+                #     if navi.checkpoints[-1] == default_ckpt:
+                #         break
+                #
+                # assert np.all(o == info["obs/goals/{}".format(goal)])
 
                 s = 0
     finally:
