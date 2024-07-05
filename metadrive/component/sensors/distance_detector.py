@@ -89,7 +89,6 @@ class DistanceDetector(BaseSensor):
     """
     It is a module like lidar, used to detect sidewalk/center line or other static things
     """
-    Lidar_point_cloud_obs_dim = 240
     DEFAULT_HEIGHT = 0.2
 
     # for vis debug

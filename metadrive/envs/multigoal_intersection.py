@@ -2,9 +2,8 @@
 This file provides a multi-goal environment based on the intersection environment. The environment fully support
 conventional MetaDrive PG maps, where there is a special config['use_pg_map'] to enable the PG maps and all config are
 the same as MetaDriveEnv.
-If config['use_pg_map'] is False, the environment will use the default intersection map.
-
-In all cases, we will additionally
+If config['use_pg_map'] is False, the environment will use an intersection map and the goals information for all
+possible destinations will be provided.
 """
 from collections import defaultdict
 
@@ -315,10 +314,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
     # def _get_agent_manager(self):
     #     return VaryingDynamicsAgentManager(init_observations=self._get_observations())
 
-
-    # def get_single_observation(self):
-    #     if self.config["use_multigoal_intersection"]:
-    #         return CustomizedObservation(self.config)
+    def get_single_observation(self):
+        return CustomizedObservation(self.config)
     #     else:
     #         return super().get_single_observation()
     #         img_obs = self.config["image_observation"]

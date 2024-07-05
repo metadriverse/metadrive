@@ -15,7 +15,6 @@ from metadrive.utils.utils import get_object_from_node
 
 class Lidar(DistanceDetector):
     ANGLE_FACTOR = True
-    Lidar_point_cloud_obs_dim = 240
     DEFAULT_HEIGHT = 1.2
 
     BROAD_PHASE_EXTRA_DIST = 0
