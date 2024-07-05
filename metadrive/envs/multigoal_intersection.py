@@ -26,9 +26,6 @@ from metadrive.utils.math import clip, norm
 logger = get_logger()
 
 EGO_STATE_DIM = 5
-SIDE_DETECT = 120
-LANE_DETECT = 0
-VEHICLE_DETECT = 120
 NAVI_DIM = 10
 GOAL_DEPENDENT_STATE_DIM = 3
 
@@ -39,9 +36,14 @@ class CustomizedObservation(BaseObservation):
         super(CustomizedObservation, self).__init__(config)
         self.latest_observation = {}
 
+        self.lane_detect_dim = self.config['vehicle_config']['lane_line_detector']['num_lasers']
+        self.side_detect_dim = self.config['vehicle_config']['side_detector']['num_lasers']
+        self.vehicle_detect_dim = self.config['vehicle_config']['lidar']['num_lasers']
+
+
     @property
     def observation_space(self):
-        shape = (EGO_STATE_DIM + SIDE_DETECT + LANE_DETECT + VEHICLE_DETECT + NAVI_DIM + GOAL_DEPENDENT_STATE_DIM,)
+        shape = (EGO_STATE_DIM + self.side_detect_dim + self.lane_detect_dim + self.vehicle_detect_dim + NAVI_DIM + GOAL_DEPENDENT_STATE_DIM,)
         return gym.spaces.Box(-1.0, 1.0, shape=shape, dtype=np.float32)
 
     def observe(self, vehicle, navigation=None):
@@ -52,19 +54,19 @@ class CustomizedObservation(BaseObservation):
 
         if vehicle.config["side_detector"]["num_lasers"] > 0:
             side = self.side_detector_observe(vehicle)
-            assert side.shape[0] == SIDE_DETECT
+            assert side.shape[0] == self.side_detect_dim
             obs.append(side)
             self.latest_observation["side_detect"] = side
 
         if vehicle.config["lane_line_detector"]["num_lasers"] > 0:
             lane = self.lane_line_detector_observe(vehicle)
-            assert lane.shape[0] == LANE_DETECT
+            assert lane.shape[0] == self.lane_detect_dim
             obs.append(lane)
             self.latest_observation["lane_detect"] = lane
 
         if vehicle.config["lidar"]["num_lasers"] > 0:
             veh = self.vehicle_detector_observe(vehicle)
-            assert veh.shape[0] == VEHICLE_DETECT
+            assert veh.shape[0] == self.vehicle_detect_dim
             obs.append(veh)
             self.latest_observation["vehicle_detect"] = veh
         if navigation is None:
@@ -286,13 +288,13 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                     "show_navigation_arrow": False,
 
                     # Turn off vehicle's own navigation module.
-                    "side_detector": dict(num_lasers=SIDE_DETECT, distance=50),  # laser num, distance
-                    "lidar": dict(num_lasers=VEHICLE_DETECT, distance=50),
+                    "side_detector": dict(num_lasers=120, distance=50),  # laser num, distance
+                    "lidar": dict(num_lasers=120, distance=50),
 
                     # To avoid goal-dependent lane detection, we use Lidar to detect distance to nearby lane lines.
                     # Otherwise, we will ask the navigation module to provide current lane and extract the lateral
                     # distance directly on this lane.
-                    "lane_line_detector": dict(num_lasers=LANE_DETECT, distance=20)
+                    "lane_line_detector": dict(num_lasers=0, distance=20)
                 }
             }
         )
