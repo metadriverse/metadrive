@@ -199,12 +199,12 @@ class NodeNetworkNavigation(BaseNavigation):
             ego_vehicle=ego_vehicle
         )
 
+        self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
         if self._show_navi_info:
             # Whether to visualize little boxes in the scene denoting the checkpoints
             pos_of_goal = checkpoint
             self._goal_node_path.setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], self.MARK_HEIGHT))
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
-            self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], dest_pos[1]))
             navi_pos = self._goal_node_path.getPos()
