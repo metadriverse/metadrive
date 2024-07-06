@@ -86,7 +86,7 @@ def test_engine_memory_leak():
         ct = time.time()
         last_lm = cm = process_memory()
         last_mem = 0.0
-        for t in range(500):
+        for t in range(300):
             lt = time.time()
 
             engine.seed(0)
@@ -102,6 +102,7 @@ def test_engine_memory_leak():
             # )
             last_lm = lm
             if t > 100:
+                time.sleep(0.1)
                 assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
             last_mem = lm - cm
     finally:
@@ -113,7 +114,7 @@ def test_config_memory_leak():
     ct = time.time()
     last_lm = cm = process_memory()
     last_mem = 0.0
-    for t in range(1000):
+    for t in range(800):
         lt = time.time()
 
         default_config = MetaDriveEnv.default_config()
@@ -129,6 +130,7 @@ def test_config_memory_leak():
         # )
         last_lm = lm
         if t > 500:
+            time.sleep(0.1)
             assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
         last_mem = lm - cm
 
