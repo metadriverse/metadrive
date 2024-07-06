@@ -276,7 +276,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 # "crash_vehicle_penalty": 10.0,
                 # "crash_object_penalty": 10.0,
                 # "out_of_road_penalty": 10.0,
-                # "out_of_route_penalty": 0.0,
+                "out_of_route_penalty": 0.0,
                 # "success_reward": 10.0,
                 # "driving_reward": 1.0,
                 # "on_continuous_line_done": True,
