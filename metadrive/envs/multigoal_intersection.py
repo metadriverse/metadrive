@@ -268,19 +268,19 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 "num_scenarios": 1000,
 
                 # Remove all traffic vehicles for now.
-                "traffic_density": 0.2,
+                # "traffic_density": 0.2,
 
                 # If the vehicle does not reach the default destination, it will receive a penalty.
-                "wrong_way_penalty": 10.0,
-                "crash_sidewalk_penalty": 10.0,
-                "crash_vehicle_penalty": 10.0,
-                "crash_object_penalty": 10.0,
-                "out_of_road_penalty": 10.0,
-                "out_of_route_penalty": 0.0,
-                "success_reward": 10.0,
-                "driving_reward": 1.0,
-                "on_continuous_line_done": True,
-                "out_of_road_done": True,
+                # "wrong_way_penalty": 10.0,
+                # "crash_sidewalk_penalty": 10.0,
+                # "crash_vehicle_penalty": 10.0,
+                # "crash_object_penalty": 10.0,
+                # "out_of_road_penalty": 10.0,
+                # "out_of_route_penalty": 0.0,
+                # "success_reward": 10.0,
+                # "driving_reward": 1.0,
+                # "on_continuous_line_done": True,
+                # "out_of_road_done": True,
 
                 "vehicle_config": {
 
