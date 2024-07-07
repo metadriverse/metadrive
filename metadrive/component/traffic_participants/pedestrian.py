@@ -120,7 +120,7 @@ class Pedestrian(BaseTrafficParticipant):
         return self.RADIUS * 2
 
 
-class PedestrainBoundingBox(BaseTrafficParticipant):
+class PedestrianBoundingBox(BaseTrafficParticipant):
     MASS = 70  # kg
     TYPE_NAME = MetaDriveType.PEDESTRIAN
     SEMANTIC_LABEL = Semantics.PEDESTRIAN.label
@@ -138,7 +138,7 @@ class PedestrainBoundingBox(BaseTrafficParticipant):
         config["length"] = length
         config["height"] = height
 
-        super(PedestrainBoundingBox, self).__init__(position, heading_theta, random_seed, name=name, config=config)
+        super(PedestrianBoundingBox, self).__init__(position, heading_theta, random_seed, name=name, config=config)
         self.set_metadrive_type(self.TYPE_NAME)
         n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
         self.add_body(n)

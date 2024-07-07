@@ -23,6 +23,7 @@ class Cyclist(BaseTrafficParticipant):
         n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
         self.add_body(n)
 
+        # FIXME(2024-07-06): Double check
         self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
         if self.render:
             if Cyclist.MODEL is None:

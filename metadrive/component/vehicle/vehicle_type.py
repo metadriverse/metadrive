@@ -75,6 +75,8 @@ class XLVehicle(BaseVehicle):
         self, vehicle_config: dict = None, name: str = None, random_seed=None, position=None, heading=None, **kwargs
     ):
 
+        # FIXME(2024-07-06): Hardcoded
+
         # TODO: for @yunsong, change the rules here:
         #  vehicle_config has 'width' 'length' and 'height'
         if vehicle_config["length"] > 8.5:
@@ -308,6 +310,7 @@ class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
     def __init__(
         self, vehicle_config: dict = None, name: str = None, random_seed=None, position=None, heading=None, **kwargs
     ):
+        # FIXME(2024-07-06): Hardcoded
 
         # TODO: for @yunsong, change the rules here:
         #  vehicle_config has 'width' 'length' and 'height'

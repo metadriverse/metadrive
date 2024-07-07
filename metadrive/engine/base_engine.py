@@ -21,6 +21,8 @@ logger = get_logger()
 
 
 def generate_distinct_rgb_values():
+    # FIXME(2024-07-06): What is this?
+
     distinct_rgb_values = []
     step = 256 // 16  # 8 intervals for each RGB component (0-31, 32-63, ..., 224-255)
 
