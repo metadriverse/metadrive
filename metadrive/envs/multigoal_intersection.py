@@ -271,7 +271,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 # "traffic_density": 0.2,
 
                 # If the vehicle does not reach the default destination, it will receive a penalty.
-                # "wrong_way_penalty": 10.0,
+                "wrong_way_penalty": 10.0,
                 # "crash_sidewalk_penalty": 10.0,
                 # "crash_vehicle_penalty": 10.0,
                 # "crash_object_penalty": 10.0,
