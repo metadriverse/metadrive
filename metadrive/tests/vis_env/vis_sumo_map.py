@@ -9,18 +9,23 @@ from metadrive.engine.asset_loader import AssetLoader
 
 class MyEnv(BaseEnv):
     def reward_function(self, agent):
+        """Dummy reward function."""
         return 0, {}
 
     def cost_function(self, agent):
+        """Dummy cost function."""
         return 0, {}
 
     def done_function(self, agent):
+        """Dummy done function."""
         return False, {}
 
     def get_single_observation(self):
+        """Dummy observation function."""
         return DummyObservation()
 
     def setup_engine(self):
+        """Register the map manager"""
         super().setup_engine()
         map_path = AssetLoader.file_path("carla", "CARLA_town01.net.xml", unix_style=False)
         self.engine.register_manager("map_manager", SumoMapManager(map_path))

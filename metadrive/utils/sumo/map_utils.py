@@ -43,6 +43,9 @@ class LaneShape:
         shape,
         width: float,
     ):
+        """
+        Lane shape
+        """
         shape = buffered_shape(shape.getShape(), shape.getWidth())
         self.shape = shape
 
@@ -53,11 +56,16 @@ class RoadShape:
     right_border: np.ndarray
 
     def __post_init__(self):
+        """
+        post process
+        """
         self.polygon = self.left_border + list(reversed(self.right_border))
 
 
 class JunctionNode:
+
     def __init__(self, sumolib_obj):
+        """Node for junction node."""
         self.sumolib_obj: sumolib.net.node = sumolib_obj
         self.name = sumolib_obj.getID()
         self.type = sumolib_obj.getType()
@@ -73,6 +81,9 @@ class JunctionNode:
 
 class LaneNode:
     def __init__(self, sumolib_obj):
+        """
+        Node for a lane
+        """
         self.sumolib_obj: sumolib.net.lane = sumolib_obj
         self.name: str = sumolib_obj.getID()
         self.edge_type: str = sumolib_obj.getEdge().getType()
@@ -111,6 +122,9 @@ class RoadNode:
         from_junction,
         to_junction,
     ):
+        """
+        Node for a road
+        """
         self.sumolib_obj: sumolib.net.edge = sumolib_obj
         self.name: str = sumolib_obj.getID()
         self.type = sumolib_obj.getType()
@@ -147,6 +161,7 @@ class RoadLaneJunctionGraph:
         self,
         sumo_net_path,
     ):
+        """Init the graph"""
 
         self.sumo_net = sumolib.net.readNet(
             sumo_net_path, withInternal=True, withPedestrianConnections=True, withPrograms=True
@@ -247,6 +262,7 @@ class RoadLaneJunctionGraph:
         self.edge_dividers = edge_dividers
 
     def _compute_traffic_dividers(self, threshold=1):
+        """Find the road dividers"""
         lane_dividers = []  # divider between lanes with same traffic direction
         edge_dividers = []  # divider between lanes with opposite traffic direction
         edge_borders = []
@@ -283,23 +299,15 @@ class RoadLaneJunctionGraph:
         return lane_dividers, edge_dividers
 
 
-class StreetMap:
-    def __init__(self):
-        self.graph = None
-
-    def reset(self, sumo_net_path: str):
-        self.sumo_net_path = sumo_net_path
-        self.graph = RoadLaneJunctionGraph(self.sumo_net_path)
-
-
-def extract_map_features(street_map: StreetMap):
+def extract_map_features(graph):
+    """This func extracts the map features like lanes/lanelines from the SUMO map"""
     from shapely.geometry import Polygon
 
     ret = {}
     # # build map boundary
     polygons = []
 
-    for junction_id, junction in street_map.graph.junctions.items():
+    for junction_id, junction in graph.junctions.items():
         if len(junction.shape) <= 2:
             continue
         boundary_polygon = Polygon(junction.shape)
@@ -312,7 +320,7 @@ def extract_map_features(street_map: StreetMap):
         }
 
     # build map lanes
-    for road_id, road in street_map.graph.roads.items():
+    for road_id, road in graph.roads.items():
         for lane in road.lanes:
 
             id = "lane_{}".format(lane.name)
@@ -341,11 +349,11 @@ def extract_map_features(street_map: StreetMap):
                     SD.POLYGON: boundary_polygon,
                 }
 
-    for lane_divider_id, lane_divider in enumerate(street_map.graph.lane_dividers):
+    for lane_divider_id, lane_divider in enumerate(graph.lane_dividers):
         id = "lane_divider_{}".format(lane_divider_id)
         ret[id] = {SD.TYPE: MetaDriveType.LINE_BROKEN_SINGLE_WHITE, SD.POLYLINE: lane_divider}
 
-    for edge_divider_id, edge_divider in enumerate(street_map.graph.edge_dividers):
+    for edge_divider_id, edge_divider in enumerate(graph.edge_dividers):
         id = "edge_divider_{}".format(edge_divider_id)
         ret[id] = {SD.TYPE: MetaDriveType.LINE_SOLID_SINGLE_YELLOW, SD.POLYLINE: edge_divider}
 
