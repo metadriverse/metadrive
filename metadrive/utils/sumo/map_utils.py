@@ -39,9 +39,9 @@ def buffered_shape(shape, width: float = 1.0) -> Polygon:
 
 class LaneShape:
     def __init__(
-            self,
-            shape,
-            width: float,
+        self,
+        shape,
+        width: float,
     ):
         shape = buffered_shape(shape.getShape(), shape.getWidth())
         self.shape = shape
@@ -88,10 +88,7 @@ class LaneNode:
         self.width: float = sumolib_obj.getWidth()
         self.length: float = sumolib_obj.getLength()
 
-        self.shape: LaneShape = LaneShape(
-            sumolib_obj,
-            self.width
-        )
+        self.shape: LaneShape = LaneShape(sumolib_obj, self.width)
 
         if sumolib_obj.getEdge().getFunction() == 'walkingarea':
             shape = [[p[0], p[1]] for p in sumolib_obj.getShape()]
@@ -108,11 +105,11 @@ class LaneNode:
 
 class RoadNode:
     def __init__(
-            self,
-            sumolib_obj,
-            lanes,
-            from_junction,
-            to_junction,
+        self,
+        sumolib_obj,
+        lanes,
+        from_junction,
+        to_junction,
     ):
         self.sumolib_obj: sumolib.net.edge = sumolib_obj
         self.name: str = sumolib_obj.getID()
@@ -147,8 +144,8 @@ class RoadNode:
 
 class RoadLaneJunctionGraph:
     def __init__(
-            self,
-            sumo_net_path,
+        self,
+        sumo_net_path,
     ):
 
         self.sumo_net = sumolib.net.readNet(
@@ -205,7 +202,8 @@ class RoadLaneJunctionGraph:
 
         for junction_id, junction in self.junctions.items():
             junction.sumolib_obj.setShape(
-                [(x - center_x, y - center_y, z) for x, y, z in junction.sumolib_obj.getShape3D()])
+                [(x - center_x, y - center_y, z) for x, y, z in junction.sumolib_obj.getShape3D()]
+            )
             junction.shape = junction.sumolib_obj.getShape()
 
         for junction_id, junction in self.junctions.items():

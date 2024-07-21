@@ -1,6 +1,5 @@
 """use netconvert --opendrive-files CARLA_town01.net.xml first"""
 
-
 from metadrive.envs import BaseEnv
 from metadrive.obs.observation_base import DummyObservation
 import logging
@@ -9,7 +8,6 @@ from metadrive.engine.asset_loader import AssetLoader
 
 
 class MyEnv(BaseEnv):
-
     def reward_function(self, agent):
         return 0, {}
 
@@ -30,12 +28,16 @@ class MyEnv(BaseEnv):
 
 if __name__ == "__main__":
     # create env
-    env = MyEnv(dict(use_render=True,
-                     # if you have a screen and OpenGL suppor, you can set use_render=True to use 3D rendering
-                     vehicle_config={"spawn_position_heading": [(0, 0), 0]},
-                     manual_control=True,  # we usually manually control the car to test environment
-                     use_mesh_terrain=True,
-                     log_level=logging.CRITICAL))  # suppress logging message
+    env = MyEnv(
+        dict(
+            use_render=True,
+            # if you have a screen and OpenGL suppor, you can set use_render=True to use 3D rendering
+            vehicle_config={"spawn_position_heading": [(0, 0), 0]},
+            manual_control=True,  # we usually manually control the car to test environment
+            use_mesh_terrain=True,
+            log_level=logging.CRITICAL
+        )
+    )  # suppress logging message
     env.reset()
     for i in range(10000):
         # step
