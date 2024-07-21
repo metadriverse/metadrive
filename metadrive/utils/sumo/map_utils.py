@@ -63,7 +63,6 @@ class RoadShape:
 
 
 class JunctionNode:
-
     def __init__(self, sumolib_obj):
         """Node for junction node."""
         self.sumolib_obj: sumolib.net.node = sumolib_obj
