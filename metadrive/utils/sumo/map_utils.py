@@ -306,17 +306,17 @@ def extract_map_features(graph):
     # # build map boundary
     polygons = []
 
-    for junction_id, junction in graph.junctions.items():
-        if len(junction.shape) <= 2:
-            continue
-        boundary_polygon = Polygon(junction.shape)
-        boundary_polygon = [(x, y) for x, y in boundary_polygon.exterior.coords]
-        id = "junction_{}".format(junction.name)
-        ret[id] = {
-            SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
-            SD.POLYLINE: junction.shape,
-            SD.POLYGON: boundary_polygon,
-        }
+    # for junction_id, junction in graph.junctions.items():
+    #     if len(junction.shape) <= 2:
+    #         continue
+    #     boundary_polygon = Polygon(junction.shape)
+    #     boundary_polygon = [(x, y) for x, y in boundary_polygon.exterior.coords]
+    #     id = "junction_{}".format(junction.name)
+    #     ret[id] = {
+    #         SD.TYPE: MetaDriveType.LANE_SURFACE_STREET,
+    #         SD.POLYLINE: junction.shape,
+    #         SD.POLYGON: boundary_polygon,
+    #     }
 
     # build map lanes
     for road_id, road in graph.roads.items():
