@@ -33,13 +33,17 @@ class SimpleTrafficManager(BaseManager):
             path_to_follow.append(self.engine.current_map.road_network.get_lane(lane_index).get_polyline())
         path_to_follow = np.concatenate(path_to_follow, axis=0)
 
-        self.generated_v = self.spawn_object(SVehicle,
-                                             vehicle_config=dict(),
-                                             position=path_to_follow[60],
-                                             heading=-np.pi)
+        self.generated_v = self.spawn_object(
+            SVehicle, vehicle_config=dict(), position=path_to_follow[60], heading=-np.pi
+        )
         TrajectoryIDMPolicy.NORMAL_SPEED = 20
-        self.add_policy(self.generated_v.id, TrajectoryIDMPolicy, control_object=self.generated_v,
-                        random_seed=0, traj_to_follow=PointLane(path_to_follow, 2))
+        self.add_policy(
+            self.generated_v.id,
+            TrajectoryIDMPolicy,
+            control_object=self.generated_v,
+            random_seed=0,
+            traj_to_follow=PointLane(path_to_follow, 2)
+        )
 
     def before_step(self):
         """
@@ -86,7 +90,7 @@ if __name__ == "__main__":
     env = MyEnv(
         dict(
             use_render=True,
-            vehicle_config={"spawn_position_heading": [(0, 0), np.pi/2]},
+            vehicle_config={"spawn_position_heading": [(0, 0), np.pi / 2]},
             manual_control=True,  # we usually manually control the car to test environment
             use_mesh_terrain=True,
             log_level=logging.CRITICAL
@@ -96,10 +100,10 @@ if __name__ == "__main__":
     for i in range(10000):
         # step
         obs, reward, termination, truncate, info, = env.step(env.action_space.sample())
-        current_lane_indices = [info[1] for info in ray_localization(env.vehicle.heading,
-                                                                     env.vehicle.position,
-                                                                     env.engine,
-                                                                     use_heading_filter=True)]
+        current_lane_indices = [
+            info[1] for info in
+            ray_localization(env.vehicle.heading, env.vehicle.position, env.engine, use_heading_filter=True)
+        ]
 
         env.render(text={"current_lane_indices": current_lane_indices})
     env.close()
