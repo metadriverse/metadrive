@@ -15,12 +15,18 @@ from metadrive.utils.pg.utils import ray_localization
 
 
 class SimpleTrafficManager(BaseManager):
+    """
+    A simple traffic creator, which creates one vehicle to follow a specified route with IDM policy.
+    """
     def __init__(self):
         super(SimpleTrafficManager, self).__init__()
         self.generated_v = None
         self.arrive_dest = False
 
     def after_reset(self):
+        """
+        Create vehicle and use IDM for controlling it. When there are objects in front of the vehicle, it will yield
+        """
         self.arrive_dest = False
         path_to_follow = []
         for lane_index in ["lane_4_0", "lane_:306_0_0", "lane_22_0"]:
@@ -36,6 +42,9 @@ class SimpleTrafficManager(BaseManager):
                         random_seed=0, traj_to_follow=PointLane(path_to_follow, 2))
 
     def before_step(self):
+        """
+        When arrive destination, stop
+        """
         policy = self.get_policy(self.generated_v.id)
         if policy.arrive_destination:
             self.arrive_dest = True
