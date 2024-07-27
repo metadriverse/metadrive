@@ -24,10 +24,10 @@ class EdgeRoadNetwork(BaseRoadNetwork):
         assert lane.index is not None, "Lane index can not be None"
         self.graph[lane.index] = lane_info(
             lane=lane,
-            entry_lanes=lane.entry_lanes,
-            exit_lanes=lane.exit_lanes,
-            left_lanes=lane.left_lanes,
-            right_lanes=lane.right_lanes
+            entry_lanes=lane.entry_lanes or [],
+            exit_lanes=lane.exit_lanes or [],
+            left_lanes=lane.left_lanes or [],
+            right_lanes=lane.right_lanes or []
         )
 
     def get_lane(self, index: LaneIndex):
