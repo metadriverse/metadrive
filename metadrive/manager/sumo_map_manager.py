@@ -38,5 +38,5 @@ class SumoMapManager(BaseManager):
         Rebuild the map and load it into the scene
         """
         if not self.current_map:
-            self.current_map = ScenarioMap(map_index=0, map_data=self.map_feature)
+            self.current_map = ScenarioMap(map_index=0, map_data=self.map_feature, need_lane_localization=True)
         self.current_map.attach_to_world()
