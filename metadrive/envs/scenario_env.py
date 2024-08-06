@@ -380,6 +380,57 @@ class ScenarioEnv(BaseEnv):
         self.seed(current_seed)
 
 
+
+class ScenarioTrafficManagerwithCAT(ScenarioTrafficManager):
+    def __init__(self):
+        # Load CAT data
+        super().__init__()
+
+        import pickle
+        with open(f'{self.engine.global_config["CAT_dir"]}/save.pkl', 'rb') as f:
+            cat_res = pickle.load(f)
+
+
+        self.cat_traj = cat_res
+
+    def after_reset(self):
+        scenario_id = self.engine.data_manager.current_scenario['metadata']['scenario_id']
+        adv_agent = self.cat_traj[scenario_id]['adv_agent']
+
+        adv_traj = self.cat_traj[scenario_id]['adv_traj_raw']
+        # Change data
+        def func(scenario_dict):
+            assert scenario_dict['tracks'][adv_agent]['state']['position'][:, :2].shape == adv_traj[:, :2].shape
+
+            scenario_dict['tracks'][adv_agent]['state']['position'][:, :2] = adv_traj[:, :2]
+            scenario_dict['tracks'][adv_agent]['state']['velocity'][:] = adv_traj[:, 2:4]
+            scenario_dict['tracks'][adv_agent]['state']['heading'][:] = adv_traj[:, 4]
+            scenario_dict['tracks'][adv_agent]['state']['valid'] = np.ones(91)
+
+        self.engine.data_manager.overwrite_data(func, i=self.engine.global_random_seed)
+
+        ret = super().after_reset()
+        return ret
+
+
+
+
+class ScenarioEnvWithCAT(ScenarioEnv):
+    @classmethod
+    def default_config(cls):
+        config = super(ScenarioEnvWithCAT, cls).default_config()
+        config.update({
+            "CAT_dir": "",
+        })
+        return config
+
+    def setup_engine(self):
+        super(ScenarioEnvWithCAT, self).setup_engine()
+        if not self.config["no_traffic"]:
+            self.engine.update_manager("traffic_manager", ScenarioTrafficManagerwithCAT())
+
+
+
 if __name__ == "__main__":
     env = ScenarioEnv(
         {
