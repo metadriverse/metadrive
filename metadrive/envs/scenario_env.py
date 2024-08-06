@@ -395,6 +395,8 @@ class ScenarioTrafficManagerwithCAT(ScenarioTrafficManager):
 
     def after_reset(self):
         scenario_id = self.engine.data_manager.current_scenario['metadata']['scenario_id']
+        if scenario_id not in self.cat_traj:
+            return None
         adv_agent = self.cat_traj[scenario_id]['adv_agent']
 
         adv_traj = self.cat_traj[scenario_id]['adv_traj_raw']

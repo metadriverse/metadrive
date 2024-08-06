@@ -69,6 +69,9 @@ class ScenarioDataManager(BaseManager):
         assert isinstance(ret, SD)
         return ret
 
+    def overwrite_data(self, func, i):
+        func(self._scenarios[i])
+
     def before_reset(self):
         if not self.store_data:
             assert len(self._scenarios) <= 1, "It seems you access multiple scenarios in one episode"
