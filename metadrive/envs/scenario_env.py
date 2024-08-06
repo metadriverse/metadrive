@@ -379,9 +379,7 @@ class ScenarioEnv(BaseEnv):
             self.config["start_scenario_index"] + self.config["num_scenarios"])
         self.seed(current_seed)
 
-
-
-class ScenarioTrafficManagerwithCAT(ScenarioTrafficManager):
+class ScenarioTrafficManagerWithCAT(ScenarioTrafficManager):
     def __init__(self):
         # Load CAT data
         super().__init__()
@@ -392,6 +390,7 @@ class ScenarioTrafficManagerwithCAT(ScenarioTrafficManager):
 
 
         self.cat_traj = cat_res
+
 
     def after_reset(self):
         scenario_id = self.engine.data_manager.current_scenario['metadata']['scenario_id']
@@ -414,9 +413,6 @@ class ScenarioTrafficManagerwithCAT(ScenarioTrafficManager):
         ret = super().after_reset()
         return ret
 
-
-
-
 class ScenarioEnvWithCAT(ScenarioEnv):
     @classmethod
     def default_config(cls):
@@ -429,7 +425,7 @@ class ScenarioEnvWithCAT(ScenarioEnv):
     def setup_engine(self):
         super(ScenarioEnvWithCAT, self).setup_engine()
         if not self.config["no_traffic"]:
-            self.engine.update_manager("traffic_manager", ScenarioTrafficManagerwithCAT())
+            self.engine.update_manager("traffic_manager", ScenarioTrafficManagerWithCAT())
 
 
 

@@ -61,11 +61,6 @@ class ScenarioTrafficManager(BaseManager):
         self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
         self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
 
-
-        self.v_map = {}
-        self.adv_name = None
-        self.adv_traj = []
-
         # config
         self._traffic_v_config = self.get_traffic_v_config()
 
@@ -128,26 +123,11 @@ class ScenarioTrafficManager(BaseManager):
                         logger.info("Do not support {}".format(track["type"]))
                 elif self.has_policy(self._scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
                     # static object will not be cleaned!
-
-                    # ===begin changes for CAT=======
-                    vname = self._scenario_id_to_obj_id[scenario_id]
-                    if vname == self.adv_name and len(self.adv_traj):
-                        sample = self.adv_traj.pop(0)
-                        v = self.v_map[vname]
-
-                        v.set_position(sample[:2])
-                        v.set_velocity(sample[2:4])
-                        v.set_heading_theta(sample[-1])
-
+                    policy = self.get_policy(self._scenario_id_to_obj_id[scenario_id])
+                    if policy.is_current_step_valid:
+                        policy.act()
                     else:
-                        policy = self.get_policy(vname)
-                        if policy.is_current_step_valid:
-                            policy.act()
-                        else:
-                            self._obj_to_clean_this_frame.append(scenario_id)
-
-                    # === end of changes for CAT=======
-
+                        self._obj_to_clean_this_frame.append(scenario_id)
         else:
             replay_done = True
             # clean replay vehicle
@@ -183,11 +163,6 @@ class ScenarioTrafficManager(BaseManager):
     @property
     def current_scenario_length(self):
         return self.engine.data_manager.current_scenario_length
-
-
-    def set_adv_info(self,adv_name,adv_traj): # added for CAT generation
-        self.adv_name = adv_name
-        self.adv_traj = adv_traj
 
     @property
     def vehicles(self):
@@ -235,7 +210,6 @@ class ScenarioTrafficManager(BaseManager):
         v = self.spawn_object(
             vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_cfg, name=obj_name
         )
-        self.v_map[obj_name] = v  # added for CAT generation
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id
 
