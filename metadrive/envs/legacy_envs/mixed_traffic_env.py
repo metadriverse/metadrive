@@ -23,7 +23,7 @@ if __name__ == '__main__':
         {
             "rl_agent_ratio": 0.5,
             "manual_control": True,
-            # "use_render": True,
+            "use_render": True,
             "disable_model_compression": True,
             # "map": "SS",
             "num_scenarios": 100,

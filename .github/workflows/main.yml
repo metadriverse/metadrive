@@ -317,6 +317,7 @@ jobs:
           pip install gymnasium==0.28
           ls -al
           pip install -e .
+          pip install numpy==1.24
           python -m metadrive.pull_asset
           
           cd bridges/ros_bridge
