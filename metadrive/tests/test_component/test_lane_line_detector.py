@@ -781,4 +781,4 @@ def test_nuscenes(render=False):
 
 if __name__ == '__main__':
     # test_nuscenes(True)
-    test_pg_map(True)
+    test_pg_map(False)
