@@ -100,27 +100,37 @@ class EdgeNetworkNavigation(BaseNavigation):
 
         self._navi_info.fill(0.0)
         half = self.CHECK_POINT_INFO_DIM
-        self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
+        self._navi_info[:half], lanes_heading1, next_checkpoint = self._get_info_for_checkpoint(
             lanes_id=0,
             ref_lane=self.map.road_network.get_lane(self.current_checkpoint_lane_index),
             ego_vehicle=ego_vehicle
         )
 
-        self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
+        self._navi_info[half:], lanes_heading2, next_next_checkpoint = self._get_info_for_checkpoint(
             lanes_id=1,
             ref_lane=self.map.road_network.get_lane(self.next_checkpoint_lane_index),
             ego_vehicle=ego_vehicle
         )
 
         if self._show_navi_info:  # Whether to visualize little boxes in the scene denoting the checkpoints
-            pos_of_goal = checkpoint
+            pos_of_goal = next_checkpoint
             self._goal_node_path.setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], self.MARK_HEIGHT))
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
+
+            pos_of_goal = next_next_checkpoint
+            self._goal_node_path2.setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], self.MARK_HEIGHT))
+            self._goal_node_path2.setH(self._goal_node_path2.getH() + 3)
+
             self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], dest_pos[1]))
             navi_pos = self._goal_node_path.getPos()
-            self._draw_line_to_navi(start_position=ego_vehicle.position, end_position=(navi_pos[0], navi_pos[1]))
+            next_navi_pos = self._goal_node_path2.getPos()
+            self._draw_line_to_navi(
+                start_position=ego_vehicle.position,
+                end_position=(navi_pos[0], navi_pos[1]),
+                next_checkpoint=(next_navi_pos[0], next_navi_pos[1])
+            )
 
     def _update_target_checkpoints(self, ego_lane_index) -> bool:
         """

@@ -232,9 +232,26 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         return step_info
 
     def after_step(self):
-        step_info = {}
         if self.navigation and self.config["navigation_module"]:
             self.navigation.update_localization(self)
+        self._state_check()
+        self.update_dist_to_left_right()
+        step_energy, episode_energy = self._update_energy_consumption()
+        self.out_of_route = self._out_of_route()
+        step_info = self._update_overtake_stat()
+        my_policy = self.engine.get_policy(self.name)
+        step_info.update(
+            {
+                "velocity": float(self.speed),
+                "steering": float(self.steering),
+                "acceleration": float(self.throttle_brake),
+                "step_energy": step_energy,
+                "episode_energy": episode_energy,
+                "policy": my_policy.name if my_policy is not None else my_policy
+            }
+        )
+
+        if self.navigation is not None and hasattr(self.navigation, "navi_arrow_dir"):
             lanes_heading = self.navigation.navi_arrow_dir
             lane_0_heading = lanes_heading[0]
             lane_1_heading = lanes_heading[1]
@@ -258,22 +275,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     "navigation_right": navigation_turn_right
                 }
             )
-        self._state_check()
-        self.update_dist_to_left_right()
-        step_energy, episode_energy = self._update_energy_consumption()
-        self.out_of_route = self._out_of_route()
-        step_info.update(self._update_overtake_stat())
-        my_policy = self.engine.get_policy(self.name)
-        step_info.update(
-            {
-                "velocity": float(self.speed),
-                "steering": float(self.steering),
-                "acceleration": float(self.throttle_brake),
-                "step_energy": step_energy,
-                "episode_energy": episode_energy,
-                "policy": my_policy.name if my_policy is not None else my_policy
-            }
-        )
+
         return step_info
 
     def _out_of_route(self):
@@ -512,14 +514,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def update_dist_to_left_right(self):
         self.dist_to_left_side, self.dist_to_right_side = self._dist_to_route_left_right()
 
-    def _dist_to_route_left_right(self):
-        # TODO
-        if self.navigation is None or self.navigation.current_ref_lanes is None:
+    def _dist_to_route_left_right(self, navigation=None):
+        if navigation is None:
+            navigation = self.navigation
+        if navigation is None or navigation.current_ref_lanes is None:
             return 0, 0
-        current_reference_lane = self.navigation.current_ref_lanes[0]
+        current_reference_lane = navigation.current_ref_lanes[0]
         _, lateral_to_reference = current_reference_lane.local_coordinates(self.position)
-        lateral_to_left = lateral_to_reference + self.navigation.get_current_lane_width() / 2
-        lateral_to_right = self.navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
+        lateral_to_left = lateral_to_reference + navigation.get_current_lane_width() / 2
+        lateral_to_right = navigation.get_current_lateral_range(self.position, self.engine) - lateral_to_left
         return lateral_to_left, lateral_to_right
 
     # @property

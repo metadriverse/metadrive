@@ -15,7 +15,7 @@ class StateObservation(BaseObservation):
         if config["vehicle_config"]["navigation_module"]:
             navi_dim = config["vehicle_config"]["navigation_module"].get_navigation_info_dim()
         else:
-            navi_dim = NodeNetworkNavigation.get_navigation_info_dim()
+            navi_dim = 0
         self.navi_dim = navi_dim
         super(StateObservation, self).__init__(config)
 
@@ -56,9 +56,12 @@ class StateObservation(BaseObservation):
         :param vehicle: BaseVehicle
         :return: Vehicle State + Navigation information
         """
-        navi_info = vehicle.navigation.get_navi_info()
         ego_state = self.vehicle_state(vehicle)
-        ret = np.concatenate([ego_state, navi_info])
+        if self.navi_dim > 0:
+            navi_info = vehicle.navigation.get_navi_info()
+            ret = np.concatenate([ego_state, navi_info])
+        else:
+            ret = np.asarray(ego_state)
         return ret.astype(np.float32)
 
     def vehicle_state(self, vehicle):
@@ -89,8 +92,8 @@ class StateObservation(BaseObservation):
 
             # If the side detector is turn off, then add the distance to left and right road borders as state.
             lateral_to_left, lateral_to_right, = vehicle.dist_to_left_side, vehicle.dist_to_right_side
-            if vehicle.navigation.map:
-                total_width = float((vehicle.navigation.map.MAX_LANE_NUM + 1) * vehicle.navigation.map.MAX_LANE_WIDTH)
+            if self.engine.current_map:
+                total_width = float((self.engine.current_map.MAX_LANE_NUM + 1) * self.engine.current_map.MAX_LANE_WIDTH)
             else:
                 total_width = 100
             lateral_to_left /= total_width

@@ -3,7 +3,12 @@ This script demonstrates how to train a set of policies under different number o
 in the same test set using rllib.
 
 We verified this script with ray==2.2.0. Please report to use if you find newer version of ray is not compatible with
-this script.
+this script. Installation guide:
+
+    pip install ray[rllib]==2.2.0
+    pip install tensorflow_probability==0.24.0
+    pip install torch
+
 """
 import argparse
 import copy

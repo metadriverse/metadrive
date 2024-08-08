@@ -188,6 +188,8 @@ class Interface:
                 self.left_panel.destroy()
 
     def _update_navi_arrow(self, lanes_heading):
+        if not self.engine.global_config["vehicle_config"]["show_navigation_arrow"]:
+            return
         lane_0_heading = lanes_heading[0]
         lane_1_heading = lanes_heading[1]
         if abs(lane_0_heading - lane_1_heading) < 0.01:
