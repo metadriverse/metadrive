@@ -280,6 +280,8 @@ jobs:
         run: |
           sudo apt-get -y install xvfb
           sudo /usr/bin/Xvfb :0 -screen 0 1280x1024x24 &
+      - name: Setup FFmpeg
+        uses: federicocarboni/setup-ffmpeg@v3.1
       - name: Blackbox tests
         run: |
           pip install cython
