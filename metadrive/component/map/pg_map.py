@@ -87,6 +87,7 @@ class PGMap(BaseMap):
             render_root_np=parent_node_path,
             physics_world=physics_world,
             length=self._config.get("exit_length", 50),
+            start_point=self._config.get("start_position", [0, 0]),
             ignore_intersection_checking=True
         )
         self.blocks.append(last_block)

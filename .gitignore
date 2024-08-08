@@ -53,3 +53,7 @@
 /documentation/**/**.gif
 /documentation/source/img.png
 /documentation/source/demo.png
+
+# ignore documentation build output
+**/filtered_dataset
+**/semantics.png

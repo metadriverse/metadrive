@@ -4,11 +4,24 @@ import logging
 import os
 import sys
 import time
-
+import socket
 import numpy as np
 from panda3d.bullet import BulletBodyNode
 
 from metadrive.constants import MetaDriveType
+
+
+def is_port_occupied(port, host='127.0.0.1'):
+    """
+    Check if a given port is occupied on the specified host.
+
+    :param port: Port number to check.
+    :param host: Host address to check the port on. Default is '127.0.0.1'.
+    :return: True if the port is occupied, False otherwise.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        result = sock.connect_ex((host, port))
+        return result == 0
 
 
 def import_pygame():

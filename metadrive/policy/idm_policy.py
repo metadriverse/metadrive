@@ -459,7 +459,7 @@ class TrajectoryIDMPolicy(IDMPolicy):
         lane_heading = target_lane.heading_theta_at(long + 1)
         v_heading = ego_vehicle.heading_theta
         steering = self.heading_pid.get_result(-wrap_to_pi(lane_heading - v_heading))
-        # steering += self.lateral_pid.get_result(-lat)
+        steering += self.lateral_pid.get_result(-lat)
         return float(steering)
 
     def act(self, do_speed_control, *args, **kwargs):

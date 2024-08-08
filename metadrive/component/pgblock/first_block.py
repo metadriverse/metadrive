@@ -1,4 +1,7 @@
+from typing import Sequence, Union
 from panda3d.core import NodePath
+
+import numpy as np
 
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pg_space import ParameterSpace
@@ -30,6 +33,7 @@ class FirstPGBlock(PGBlock):
         render_root_np: NodePath,
         physics_world: PhysicsWorld,
         length: float = 30,
+        start_point: Union[np.ndarray, Sequence[float]] = [0, 0],
         ignore_intersection_checking=False,
         remove_negative_lanes=False,
         side_lane_line_type=None,
@@ -48,9 +52,15 @@ class FirstPGBlock(PGBlock):
         )
         if length < self.ENTRANCE_LENGTH:
             print("Warning: first block length is two small", length, "<", self.ENTRANCE_LENGTH)
+        if not isinstance(start_point, np.ndarray):
+            start_point = np.array(start_point)
+
         self._block_objects = []
         basic_lane = StraightLane(
-            [0, 0], [self.ENTRANCE_LENGTH, 0], line_types=(PGLineType.BROKEN, PGLineType.SIDE), width=lane_width
+            start_point,
+            start_point + [self.ENTRANCE_LENGTH, 0],
+            line_types=(PGLineType.BROKEN, PGLineType.SIDE),
+            width=lane_width
         )
         ego_v_spawn_road = Road(self.NODE_1, self.NODE_2)
         CreateRoadFrom(
