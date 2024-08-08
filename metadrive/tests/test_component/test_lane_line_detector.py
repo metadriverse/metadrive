@@ -435,8 +435,8 @@ def test_pg_map(render=False):
         for s in range(1, 5):
             o, r, tm, tc, info = env.step([0, 0])
         print("[")
-        for _o in o:
-            print("{},".format(round(_o, 2)))
+        for ind, _o in enumerate(o):
+            print("{:.2f}, GT: {:.2f}".format(_o, pg_gt_3[ind]))
         print("]")
         np.testing.assert_almost_equal(np.array(pg_gt_3), o, decimal=2)
     finally:
