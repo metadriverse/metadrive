@@ -40,10 +40,12 @@ class CustomizedObservation(BaseObservation):
         self.side_detect_dim = self.config['vehicle_config']['side_detector']['num_lasers']
         self.vehicle_detect_dim = self.config['vehicle_config']['lidar']['num_lasers']
 
-
     @property
     def observation_space(self):
-        shape = (EGO_STATE_DIM + self.side_detect_dim + self.lane_detect_dim + self.vehicle_detect_dim + NAVI_DIM + GOAL_DEPENDENT_STATE_DIM,)
+        shape = (
+            EGO_STATE_DIM + self.side_detect_dim + self.lane_detect_dim + self.vehicle_detect_dim + NAVI_DIM +
+            GOAL_DEPENDENT_STATE_DIM,
+        )
         return gym.spaces.Box(-1.0, 1.0, shape=shape, dtype=np.float32)
 
     def observe(self, vehicle, navigation=None):
@@ -251,14 +253,12 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
     This environment is an intersection with multiple goals. We provide the reward function, observation, termination
     conditions for each goal in the info dict returned by env.reset and env.step, with prefix "goals/{goal_name}/".
     """
-
     @classmethod
     def default_config(cls):
         config = MetaDriveEnv.default_config()
         # config.update(VaryingDynamicsConfig)
         config.update(
             {
-
                 "use_multigoal_intersection": True,
 
                 # Set the map to an Intersection
@@ -281,7 +281,6 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 # "driving_reward": 1.0,
                 # "on_continuous_line_done": True,
                 # "out_of_road_done": True,
-
                 "vehicle_config": {
 
                     # Remove navigation arrows in the window as we are in multi-goal environment.
@@ -307,9 +306,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
             config['map_config'] = dict(
                 type="block_sequence", config=[
                     CustomizedIntersection,
-                ],
-                lane_num=2,
-                lane_width=3.5
+                ], lane_num=2, lane_width=3.5
             )
         return config
 
@@ -318,12 +315,11 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
     def get_single_observation(self):
         return CustomizedObservation(self.config)
+
     #     else:
     #         return super().get_single_observation()
     #         img_obs = self.config["image_observation"]
     #         o = ImageStateObservation(self.config) if img_obs else LidarStateObservation(self.config)
-
-
 
     def setup_engine(self):
         super().setup_engine()
@@ -470,8 +466,8 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
         long, lat = navi.final_lane.local_coordinates(vehicle.position)
         flag = (navi.final_lane.length - 5 < long < navi.final_lane.length + 5) and (
-                navi.get_current_lane_width() / 2 >= lat >=
-                (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
+            navi.get_current_lane_width() / 2 >= lat >=
+            (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
         )
         return flag
 

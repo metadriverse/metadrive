@@ -126,7 +126,11 @@ class EdgeNetworkNavigation(BaseNavigation):
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], dest_pos[1]))
             navi_pos = self._goal_node_path.getPos()
             next_navi_pos = self._goal_node_path2.getPos()
-            self._draw_line_to_navi(start_position=ego_vehicle.position, end_position=(navi_pos[0], navi_pos[1]), next_checkpoint=(next_navi_pos[0], next_navi_pos[1]))
+            self._draw_line_to_navi(
+                start_position=ego_vehicle.position,
+                end_position=(navi_pos[0], navi_pos[1]),
+                next_checkpoint=(next_navi_pos[0], next_navi_pos[1])
+            )
 
     def _update_target_checkpoints(self, ego_lane_index) -> bool:
         """
