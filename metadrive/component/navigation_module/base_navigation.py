@@ -47,7 +47,7 @@ class BaseNavigation:
         # self.final_lane = None
         # self.current_lane = None
 
-        self.vehicle_config = vehicle_config
+        self.vehicle_config = vehicle_config if vehicle_config is not None else {}
 
         self._target_checkpoints_index = None
         self._navi_info = np.zeros((self.get_navigation_info_dim(), ), dtype=np.float32)  # navi information res
@@ -62,9 +62,13 @@ class BaseNavigation:
             self.origin.setShaderAuto()
         else:
             self.origin = None
+
+        # Ensure navi_mark_color is defined
+        self.navi_mark_color = (1.0, 0.0, 0.0)  # Default to red if not provided
         if panda_color is not None:
             assert len(panda_color) == 3 and 0 <= panda_color[0] <= 1
             self.navi_mark_color = tuple(panda_color)
+
         self.navi_arrow_dir = [0, 0]
         self._dest_node_path = None
         self._goal_node_path = None
@@ -101,7 +105,7 @@ class BaseNavigation:
                 self._dynamic_line_np.reparentTo(self.origin)
                 self._line_to_dest = line_seg
 
-            show_line_to_navi_mark = self.vehicle_config["show_line_to_navi_mark"]
+            show_line_to_navi_mark = self.vehicle_config.get("show_line_to_navi_mark", False)
             self._show_line_to_navi_mark = show_line_to_navi_mark
             if show_line_to_navi_mark:
                 line_seg = LineSegs("line_to_dest")
@@ -124,8 +128,6 @@ class BaseNavigation:
                 self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 0.7
             )
             self.origin.hide(CamMask.AllOn)
-            # self.origin.hide(CamMask.AllOn)
-            # self.origin.show(CamMask.MainCam)
             self.origin.show(CamMask.MainCam)
         logging.debug("Load Vehicle Module: {}".format(self.__class__.__name__))
 
@@ -184,8 +186,6 @@ class BaseNavigation:
         for np in self._node_path_list:
             np.detachNode()
             np.removeNode()
-        # self.next_ref_lanes = None
-        # self.current_ref_lanes = None
 
     def set_force_calculate_lane_index(self, force: bool):
         self.FORCE_CALCULATE = force
