@@ -5,7 +5,7 @@ import cv2
 from metadrive.engine.top_down_renderer import draw_top_down_map_native as native_draw
 from metadrive.utils.utils import import_pygame
 
-pygame, gfxdraw = import_pygame()
+pygame = import_pygame()
 
 
 def draw_top_down_map(map,

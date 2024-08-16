@@ -1,7 +1,7 @@
 import copy
 from metadrive.engine.logger import get_logger
 
-from metadrive.utils import generate_gif
+from metadrive.utils.doc_utils import generate_gif
 import math
 from collections import deque
 from typing import Optional, Union, Iterable
@@ -16,7 +16,7 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.utils import import_pygame
 from metadrive.utils.utils import is_map_related_instance
 
-pygame, gfxdraw = import_pygame()
+pygame = import_pygame()
 
 color_white = (255, 255, 255)
 

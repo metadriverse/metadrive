@@ -11,7 +11,7 @@ from metadrive.constants import PGDrivableAreaProperty
 from collections import namedtuple
 
 PositionType = Union[Tuple[float, float], np.ndarray]
-pygame, gfxdraw = import_pygame()
+pygame = import_pygame()
 COLOR_BLACK = pygame.Color("black")
 history_object = namedtuple("history_object", "name position heading_theta WIDTH LENGTH color done type")
 
