@@ -55,7 +55,6 @@ install_requires = [
     "pytest",
     "opencv-python",
     "lxml",
-    "scipy",
     "psutil",
     "geopandas",
     "shapely",
@@ -64,6 +63,9 @@ install_requires = [
     "mediapy"
 ]
 
+test_requirement = [
+    "scipy"
+]
 
 cuda_requirement = [
     "cuda-python==12.0.0",
