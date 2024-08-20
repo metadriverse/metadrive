@@ -86,6 +86,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     out_of_route_done=False,
     out_of_road_done=True,
     on_continuous_line_done=True,
+    on_broken_line_done=False,
     crash_vehicle_done=True,
     crash_object_done=True,
     crash_human_done=True,
@@ -237,6 +238,8 @@ class MetaDriveEnv(BaseEnv):
             ret = ret or vehicle.out_of_route
         elif self.config["on_continuous_line_done"]:
             ret = ret or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
+        if self.config["on_broken_line_done"]:
+            ret = ret or vehicle.on_broken_line
         return ret
 
     def reward_function(self, vehicle_id: str):
