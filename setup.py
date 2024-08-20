@@ -61,6 +61,7 @@ install_requires = [
     "shapely",
     "filelock",
     "Pygments",
+    "mediapy"
 ]
 
 

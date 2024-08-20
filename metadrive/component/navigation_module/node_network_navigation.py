@@ -40,7 +40,7 @@ class NodeNetworkNavigation(BaseNavigation):
         self.current_road = None
         self.next_road = None
 
-    def reset(self, vehicle):
+    def reset(self, vehicle, dest=None, random_seed=None):
         possible_lanes = ray_localization(vehicle.heading, vehicle.spawn_place, self.engine, use_heading_filter=False)
         possible_lane_indexes = [lane_index for lane, lane_index, dist in possible_lanes]
 
@@ -56,11 +56,12 @@ class NodeNetworkNavigation(BaseNavigation):
             assert len(possible_lanes) > 0
             lane, new_l_index = possible_lanes[0][:-1]
 
-        dest = vehicle.config["destination"]
+        if dest is None:
+            dest = vehicle.config["destination"]
 
         current_lane = lane
         destination = dest if dest is not None else None
-        random_seed = self.engine.global_random_seed
+        random_seed = self.engine.global_random_seed if random_seed is None else random_seed
         assert current_lane is not None, "spawn place is not on road!"
         super(NodeNetworkNavigation, self).reset(current_lane)
         assert self.map.road_network_type == NodeRoadNetwork, "This Navigation module only support NodeRoadNetwork type"
@@ -188,12 +189,12 @@ class NodeNetworkNavigation(BaseNavigation):
         self._navi_info.fill(0.0)
         half = self.CHECK_POINT_INFO_DIM
         # Put the next checkpoint's information into the first half of the navi_info
-        self._navi_info[:half], lanes_heading1, checkpoint = self._get_info_for_checkpoint(
+        self._navi_info[:half], lanes_heading1, next_checkpoint = self._get_info_for_checkpoint(
             lanes_id=0, ref_lane=self.current_ref_lanes[0], ego_vehicle=ego_vehicle
         )
 
         # Put the next of the next checkpoint's information into the first half of the navi_info
-        self._navi_info[half:], lanes_heading2, _ = self._get_info_for_checkpoint(
+        self._navi_info[half:], lanes_heading2, next_next_checkpoint = self._get_info_for_checkpoint(
             lanes_id=1,
             ref_lane=self.next_ref_lanes[0] if self.next_ref_lanes is not None else self.current_ref_lanes[0],
             ego_vehicle=ego_vehicle
@@ -202,13 +203,23 @@ class NodeNetworkNavigation(BaseNavigation):
         self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
         if self._show_navi_info:
             # Whether to visualize little boxes in the scene denoting the checkpoints
-            pos_of_goal = checkpoint
+            pos_of_goal = next_checkpoint
             self._goal_node_path.setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], self.MARK_HEIGHT))
             self._goal_node_path.setH(self._goal_node_path.getH() + 3)
+
+            pos_of_goal = next_next_checkpoint
+            self._goal_node_path2.setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], self.MARK_HEIGHT))
+            self._goal_node_path2.setH(self._goal_node_path2.getH() + 3)
+
             dest_pos = self._dest_node_path.getPos()
             self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], dest_pos[1]))
             navi_pos = self._goal_node_path.getPos()
-            self._draw_line_to_navi(start_position=ego_vehicle.position, end_position=(navi_pos[0], navi_pos[1]))
+            next_navi_pos = self._goal_node_path2.getPos()
+            self._draw_line_to_navi(
+                start_position=ego_vehicle.position,
+                end_position=(navi_pos[0], navi_pos[1]),
+                next_checkpoint=(next_navi_pos[0], next_navi_pos[1])
+            )
 
     def _update_target_checkpoints(self, ego_lane_index, ego_lane_longitude) -> bool:
         """
@@ -250,7 +261,9 @@ class NodeNetworkNavigation(BaseNavigation):
 
     def _get_current_lane(self, ego_vehicle):
         """
-        Called in update_localization to find current lane information
+        Called in update_localization to find current lane information. If the vehicle is in the current reference lane,
+        meaning it is not yet moving to the next road segment, then return the current reference lane. Otherwise, return
+        the next reference lane. If the vehicle is not in any of the reference lanes, then return the closest lane.
         """
         possible_lanes, on_lane = ray_localization(
             ego_vehicle.heading, ego_vehicle.position, ego_vehicle.engine, return_on_lane=True

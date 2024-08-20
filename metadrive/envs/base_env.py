@@ -120,6 +120,8 @@ BASE_DEFAULT_CONFIG = dict(
         show_line_to_dest=False,
         # Whether to draw a line from current vehicle position to the next navigation point
         show_line_to_navi_mark=False,
+        # Whether to draw left / right arrow in the interface to denote the navigation direction
+        show_navigation_arrow=True,
         # If set to True, the vehicle will be in color green in top-down renderer or MARL setting
         use_special_color=False,
         # Clear wheel friction, so it can not move by setting steering and throttle/brake. Used for ReplayPolicy
