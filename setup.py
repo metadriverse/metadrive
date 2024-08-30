@@ -43,7 +43,6 @@ install_requires = [
     "matplotlib",
     "pandas",
     "pygame",
-    "tqdm",
     "yapf",
     "seaborn",
     "tqdm",
