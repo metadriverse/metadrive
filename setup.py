@@ -41,7 +41,6 @@ install_requires = [
     "gymnasium>=0.28",
     "numpy>=1.21.6",
     "matplotlib",
-    "pandas",
     "pygame",
     "tqdm",
     "yapf",
@@ -52,18 +51,20 @@ install_requires = [
     "panda3d==1.10.13",
     "panda3d-gltf==0.13",  # 0.14 will bring some problems
     "pillow",
-    "pytest",
     "opencv-python",
     "lxml",
     "scipy",
     "psutil",
-    "geopandas",
     "shapely",
     "filelock",
     "Pygments",
     "mediapy"
 ]
 
+test_requirement = [
+    "pandas",
+    "pytest",
+]
 
 cuda_requirement = [
     "cuda-python==12.0.0",
