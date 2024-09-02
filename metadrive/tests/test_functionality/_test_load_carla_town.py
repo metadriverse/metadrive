@@ -4,9 +4,13 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.asset_loader import initialize_asset_loader
 from metadrive.tests.vis_block.vis_block_base import TestBlock
 from metadrive.utils.opendrive.map_load import load_opendrive_map
+"""
+AS we now add opendrive support through SUMO API, this test script is deprecated
+
+"""
 
 
-def test_load_carla_town():
+def _test_load_carla_town():
     """
     Test opendrive related feature
     Returns: None

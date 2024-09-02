@@ -6,8 +6,8 @@ if __name__ == "__main__":
     env = MetaDriveEnv(
         {
             "num_scenarios": 1,
-            "traffic_density": 0,
-            "start_seed": 74,
+            "traffic_density": 0.1,
+            "start_seed": 0,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "debug": True,
@@ -23,7 +23,7 @@ if __name__ == "__main__":
             # "debug_static_world": True,
             "manual_control": True,
             "use_render": True,
-            "use_mesh_terrain": False,
+            # "use_mesh_terrain": True,
             "full_size_mesh": True,
             "accident_prob": 0,
             "decision_repeat": 5,
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             "interface_panel": [],
             "need_inverse_traffic": False,
             "norm_pixel": True,
-            "map": 1,
+            "map": "rrRRr",
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
             "map_region_size": 1024,
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o, _ = env.reset(seed=74)
+    o, _ = env.reset()
     env.engine.accept("~", env.engine.terrain.reload_terrain_shader)
     # if env.config["render_pipeline"]:
     # env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
