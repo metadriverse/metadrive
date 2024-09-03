@@ -73,12 +73,14 @@ class Terrain(BaseObject, ABC):
 
         self.render = self.render and show_terrain
 
+        self.use_anisotropic_filtering = engine.global_config["anisotropic_filtering"]
+
         if self.use_mesh_terrain or self.render:
             self._load_height_field_image(engine)
 
         if self.render:
             # if engine.use_render_pipeline:
-            self._load_mesh_terrain_textures(engine)
+            self._load_mesh_terrain_textures(engine, anisotropic_degree= 16 if self.use_anisotropic_filtering else 1)
             self._mesh_terrain_node = ShaderTerrainMesh()
             # prepare semantic texture
             semantic_size = self._semantic_map_size * self._semantic_map_pixel_per_meter
@@ -385,7 +387,7 @@ class Terrain(BaseObject, ABC):
         card.setTexture(self.ts_color, self.terrain_texture)
         # card.setTexture(self.ts_normal, self.terrain_normal)
         self.terrain_texture.setMinfilter(SamplerState.FT_linear_mipmap_linear)
-        self.terrain_texture.setAnisotropicDegree(8)
+        self.terrain_texture.setAnisotropicDegree(8 if self.use_anisotropic_filtering else 1)
         card.setQuat(LQuaternionf(math.cos(-math.pi / 4), math.sin(-math.pi / 4), 0, 0))
 
     def _load_height_field_image(self, engine):
@@ -490,7 +492,6 @@ class Terrain(BaseObject, ABC):
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
         filter_type = Texture.FTLinearMipmapLinear
-        anisotropic_degree = 16
         for tex in [self.road_texture_rough, self.road_texture, self.road_texture_normal]:
             tex.set_wrap_u(u_warp)
             tex.set_wrap_v(v_wrap)
