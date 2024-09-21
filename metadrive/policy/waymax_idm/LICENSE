@@ -1,0 +1,182 @@
+Waymax License Agreement for Non-Commercial Use
+October 17, 2023
+
+To aid the research community in making advancements in the domain of planning
+and simulation agents, Waymo has made publicly available the Waymax Licensed
+Materials (defined below), free of charge for Non-commercial Purposes (defined
+below) under certain terms and conditions.
+
+Your use, including downloading, of any portion or element of the Waymax
+Licensed Materials is conditioned upon the terms and conditions of this license
+agreement (the “Waymax License” or the “Agreement”).
+
+1. Definitions.
+
+“Convey” or “Conveyance” means to propagate in a manner that enables a third
+party to make or receive one or more copies.
+“Derivative IP” means any derivative work of the Waymax Licensed Materials, any
+other work or data made or developed using the Waymax Licensed Materials,
+including the output or data extracted from the Waymax Licensed Materials, or
+any invention conceived or reduced to practice, directly or indirectly, through
+the use of the Waymax Licensed Materials.
+
+“Documentation” means the specifications, manuals, and documentation
+accompanying Waymax made available by Waymo at
+https://github.com/waymo-research/waymax.
+
+“Intellectual Property Rights” means all registered or unregistered
+intellectual property rights throughout the world, including (a) rights in
+patents, copyrights, trademarks, designs, and databases, and (b) moral rights.
+
+“Non-commercial Purposes” means research, teaching, scientific publication and
+personal experimentation. Non-commercial Purposes include use of the Waymax
+Licensed Materials or Derivative IP to perform benchmarking for purposes of
+academic or applied research publication. Non-commercial Purposes does not
+include purposes primarily intended for or directed towards commercial
+advantage or monetary compensation, or purposes intended for or directed
+towards litigation, licensing, or enforcement, in whole or in part.
+
+“Production Systems” means computer, network, and system architecture, and
+other systems primarily intended to provide a product or service to customers
+or other third parties, even if no monetary compensation is received for such a
+product or service.
+
+“Waymax” means one or more software libraries and any and all computer
+programs, source code, object code, data, and other elements of the foregoing
+made available by Waymo at https://github.com/waymo-research/waymax.
+“Waymax Licensed Materials” means Waymax and Documentation (and any portion
+thereof) made available to You under this Agreement.
+“Waymo” means Waymo LLC.
+
+“You” means the individual or entity exercising the rights granted under this
+Agreement.
+
+2. License Rights and Restrictions.
+
+a. License Grant.  Subject to the terms and conditions of this Agreement, Waymo
+grants You a non-exclusive, royalty-free, worldwide, non-transferrable,
+non-sublicensable (except as permitted under Section 2.c.), revocable and
+personal license, under Waymo’s Intellectual Property Rights in the Waymax
+Licensed Materials, to use, reproduce, and modify and create (subject to
+Section 2.c.) derivative works of the Waymax Licensed Materials for
+Non-commercial Purposes only.
+
+b. Additional Non-commercial Purposes Restrictions:  You agree You will not, and
+will not permit, assist, or cause any third party to, use, reproduce, modify,
+distribute or otherwise Convey the Waymax Licensed Materials or Derivative IP,
+in whole or in part, including any output or results of the Waymax Licensed
+Materials or Derivative IP, for (i) any real-world operation, or development of
+software or hardware for any real-world operation, of vehicles; (ii) testing or
+validating performance of any real-world vehicle, (iii) simulating driving
+scenarios for any commercial purposes; (iv) any use in Production Systems, or
+(v) any other primarily commercial purposes.
+
+c. Derivative IP Conveyance: You may not Convey unmodified Waymax Licensed
+Materials, but You may publish results of research conducted using Waymax
+Licensed Materials or otherwise Convey Your Derivative IP to third parties,
+provided that You meet all of the following conditions:
+
+i. You must include the following notice with each copy of the Derivative IP:
+This [type of work, e.g., publication, software, model] was made using the
+Waymax Licensed Materials, provided by Waymo LLC under the Waymax License
+Agreement for Non-Commercial Use, available at
+https://github.com/waymo-research/waymax/blob/main/LICENSE,
+and your access and use of the Waymx Licensed Materials are governed by the
+terms and conditions contained therein.
+
+@inproceedings{waymax, title={Waymax: An Accelerated, Data-Driven Simulator for
+Large-Scale Autonomous Driving Research}, author={Cole Gulino and Justin Fu and
+Wenjie Luo and George Tucker and Eli Bronstein and Yiren Lu and Jean Harb and
+Xinlei Pan and Yan Wang and Xiangyu Chen and John D. Co-Reyes and Rishabh
+Agarwal and Rebecca Roelofs and Yao Lu and Nico Montali and Paul Mougin and
+Zoey Yang and Brandyn White and Aleksandra Faust, and Rowan McAllister and
+Dragomir Anguelov and Benjamin Sapp}, booktitle={Proceedings of the Neural
+Information Processing Systems Track on Datasets and Benchmarks},year={2023}}
+
+ii. In any license granting or any agreement governing use or access to Your
+Derivative IP, You must, and must require recipients of Your Derivative IP to
+comply with all terms and conditions of this Agreement, including with the
+following effects: Upon use of Derivative IP for any purpose that is not a
+Non-commercial Purpose, or is otherwise in breach of this Agreement, (w) any
+rights in the Waymax Licensed Materials or Derivative IP, granted by You or
+Your recipients to third parties, shall be null and void ab initio; (x) any
+rights granted under this Agreement or the license or agreement Conveying your
+Derivative IP to any third party recipient of Your Derivative IP is terminated
+automatically; (y) such third party recipient of Your Derivative IP shall cease
+use of and delete the Waymax Licensed Materials and Derivative IP and any
+copies thereof; and (z) the license granted in Section 2.d.(ii) immediately
+becomes effective.
+
+iii. In the event Your Conveyance of Derivative IP does not meet the conditions
+above, You acknowledge and agree that Your Conveyance of Derivative IP is not
+authorized and, upon such unauthorized Conveyance, (m) the license granted to
+You under this Agreement is automatically suspended; (n) any right granted to
+you to create Derivative IP will be null and void ab initio; (o) You will cease
+any use of and delete the Waymax Licensed Materials and Derivative IP and any
+copies thereof; and (p) and the license granted in Section 2.d.(ii) immediately
+becomes effective.
+
+d. Limited Non-Assert: In consideration for access to the Waymax Licensed
+Materials and rights granted to you by Waymo under this Agreement, You (also on
+behalf of Your successors and assignees of any rights protecting Your
+Derivative IP) (i) agree not to prepare, initiate, assert, or otherwise support
+any claim against (m) Waymo or any of its affiliates, successors, or assignees
+(collectively, the “Waymo Parties”) or products or services thereof, or (n) any
+authorized use or Conveyance of the Waymax Licensed Materials by any licensee
+thereof (an “Authorized Licensee”), for infringement or other violation of
+Intellectual Property Rights arising out of Your access or use of the Waymax
+Licensed Materials, including any rights protecting Your Derivative IP, and
+(ii) grant the Waymo Parties and Authorized Licensees a license to such rights
+protecting Your Derivative IP, with such license becoming effective only if You
+breach the obligations of Section 2.d.(i).
+
+e. Artificial Intelligence Prohibition: You may not use the Waymax source code 
+or Documentation (or any derivative thereof) to train or otherwise develop or
+improve (directly or indirectly) an artificial intelligence foundation model
+(including LLMs, VFMs, multimodal model, or any model capable of generative AI
+output), or any model distilled or fine-tuned therefrom.
+
+3. DISCLAIMER: YOU AGREE WAYMAX LICENSED MATERIALS AND ANY DERIVATIVE IP IS
+PROVIDED “AS-IS” AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING WITHOUT
+LIMITATION WARRANTIES OF TITLE, MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, AND NON-INFRINGEMENT.  WAYMO DOES NOT REPRESENT OR WARRANT THAT THE
+WAYMAX LICENSED MATERIALS ARE ACCURATE, COMPLETE, RELIABLE, CURRENT, OR
+ERROR-FREE.  YOU ASSUME THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF
+THE WAYMAX LICENSED MATERIALS.  THE WAYMAX LICENSED MATERIALS ARE NOT DESIGNED
+OR INTENDED FOR USE IN ANY APPLICATION OR SITUATION WHERE FAILURE OR FAULT OF
+THE WAYMAX LICENSED MATERIALS COULD LEAD TO INJURY OF ANY PERSON OR TO
+PHYSICAL, PROPERTY, OR ENVIRONMENTAL DAMAGE.
+
+4. LIMITATION OF LIABILITY AND INDEMNIFICATION. TO THE FULLEST EXTENT PERMITTED
+BY LAW, IN NO EVENT SHALL THE WAYMO PARTIES, AND EACH OF THEIR RESPECTIVE
+OFFICERS, DIRECTORS, AGENTS, PARTNERS, AND EMPLOYEES BE LIABLE UNDER ANY LEGAL
+THEORY WITH RESPECT TO WAYMAX LICENSED MATERIALS AND ANY DERIVATIVE IP, OR YOUR
+USE OF THE WAYMAX LICENSED MATERIALS OR ANY DERIVATIVE IP, FOR ANY DIRECT,
+INDIRECT, CONSEQUENTIAL, EXEMPLARY, INCIDENTAL, PUNITIVE, OR SPECIAL DAMAGES OR
+LOST PROFITS. YOU WILL INDEMNIFY AND HOLD HARMLESS THE WAYMO PARTIES FROM AND
+AGAINST ANY CLAIM BY ANY THIRD PARTY AND ANY ASSOCIATED LOSSES, DAMAGES, COSTS
+OR EXPENSES ARISING OUT OF OR RELATED TO YOUR USE OF THE WAYMAX LICENSED
+MATERIALS OR DERIVATIVE IP OR YOUR BREACH OF THIS AGREEMENT.
+
+5. Applicable Laws: You may not use the Waymax Licensed Materials in any manner
+that violates any applicable laws and regulations, including privacy or
+security laws and all applicable export control and sanctions laws and
+regulations, such as the Export Administration Regulations maintained by the
+U.S. Department of Commerce, trade and economic sanctions maintained by the
+U.S. Treasury Department's Office of Foreign Assets Control, and the
+International Traffic in Arms Regulations maintained by the U.S. Department of
+State, as well as all amendments and successor laws to any of the foregoing.
+
+6. Waymo reserves all rights not expressly granted.
+
+7. If You fail to comply with the terms and conditions of this Agreement, then
+any rights granted to You hereunder terminate automatically and You agree to
+cease use of and delete any copy of the Waymax Licensed Materials.
+By accessing or using the Waymax Licensed Materials, You affirm that you are of
+legal age under applicable laws, or if You are not, that You are under the
+supervision of a parent or legal guardian who agrees to be bound by this
+Agreement.  If You access or use the Waymax Licensed Materials on behalf of
+another person or entity, (a) all references to “You” throughout this Agreement
+will include that person or entity and (b) You represent and warrant that You
+are authorized and have the legal authority to bind such other person or entity
+to this Agreement.
