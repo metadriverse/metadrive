@@ -1,7 +1,8 @@
 import copy
-from metadrive.engine.logger import get_logger
-from metadrive.utils.math import norm
+
+import jax
 import numpy as np
+from jax import numpy as jnp
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.traffic_participants.cyclist import Cyclist
@@ -10,13 +11,21 @@ from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import SVehicle, LVehicle, MVehicle, XLVehicle, \
     TrafficDefaultVehicle
 from metadrive.constants import DEFAULT_AGENT
+from metadrive.engine.logger import get_logger
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
+from metadrive.policy.waymax_idm import datatypes
+from metadrive.policy.waymax_idm.actor_core import merge_actions
+from metadrive.policy.waymax_idm.datatypes import SimulatorState, operations
+from metadrive.policy.waymax_idm.state_dynamics import StateDynamics
+from metadrive.policy.waymax_idm.expert import create_expert_actor
+from metadrive.policy.waymax_idm.waypoint_following_agent import IDMRoutePolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
+from metadrive.utils.math import norm
 from metadrive.utils.math import wrap_to_pi
 
 logger = get_logger()
@@ -64,16 +73,39 @@ class ScenarioTrafficManager(BaseManager):
         # config
         self._traffic_v_config = self.get_traffic_v_config()
 
+        # for waymo parallel IDM policy
+        self._dynamics = StateDynamics()
+        self._current_simulator_state = None
+        self._current_agent_ids = None
+        self._current_agent_id_to_index = None
+        self._parallel_idm_select_action = None
+        self._replay_select_action = None
+
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
+
+        # policy forward
+        idm_action = self._parallel_idm_select_action({}, self._current_simulator_state, None, None)
+        replay = self._replay_select_action({}, self._current_simulator_state, None, None)
+        action = merge_actions([replay, idm_action])
+        self._current_simulator_state = self._dynamics.step(self._current_simulator_state, action)
+
+        current_trajectory = self._current_simulator_state.current_sim_trajectory
         for v in self.spawned_objects.values():
             if self.engine.has_policy(v.id, TrajectoryIDMPolicy):
                 p = self.engine.get_policy(v.name)
                 if p.arrive_destination:
                     self._obj_to_clean_this_frame.append(self._obj_id_to_scenario_id[v.id])
-                else:
-                    do_speed_control = self.episode_step % self.IDM_ACT_BATCH_SIZE == p.policy_index
-                    v.before_step(p.act(do_speed_control))
+                index = self._current_agent_id_to_index[self.obj_id_to_scenario_id[v.id]]
+                position = [current_trajectory.x[index].tolist()[0], current_trajectory.y[index].tolist()[0]]
+                v.set_position(position)
+                v.set_heading_theta(current_trajectory.yaw[index].tolist()[0])
+                velocity = [current_trajectory.vel_x[index].tolist()[0], current_trajectory.vel_y[index].tolist()[0]]
+                v.set_velocity(velocity)
+
+                # else:
+                #     do_speed_control = self.episode_step % self.IDM_ACT_BATCH_SIZE == p.policy_index
+                #     v.before_step(p.act(do_speed_control))
 
     def before_reset(self):
         super(ScenarioTrafficManager, self).before_reset()
@@ -102,6 +134,80 @@ class ScenarioTrafficManager(BaseManager):
                 self.spawn_static_object(cls, scenario_id, track)
             else:
                 logger.warning("Do not support {}".format(track["type"]))
+
+        log_trajectory, agent_ids = self._waymax_get_log_trajectory()
+        sim_traj_uninitialized = datatypes.fill_invalid_trajectory(log_trajectory)
+        self._current_agent_ids = agent_ids
+        self._current_agent_id_to_index = {agent_id: i for i, agent_id in enumerate(agent_ids)}
+        self._current_simulator_state = SimulatorState(timestep=jnp.array(-1), sim_trajectory=sim_traj_uninitialized,
+                                                       log_trajectory=log_trajectory, log_traffic_light=None,
+                                                       object_metadata=None)
+        self._current_simulator_state = self._current_simulator_state.replace(
+            timestep=0,
+            sim_trajectory=operations.update_by_slice_in_dim(
+                inputs=self._current_simulator_state.sim_trajectory,
+                updates=self._current_simulator_state.log_trajectory,
+                inputs_start_idx=self._current_simulator_state.timestep + 1,
+                slice_size=1,
+                axis=-1))
+
+        idm_obj_idx = []
+        for idx, scenario_id in enumerate(self._current_agent_ids):
+            if (scenario_id in self._scenario_id_to_obj_id and
+                    self.has_policy(self._scenario_id_to_obj_id[scenario_id], TrajectoryIDMPolicy)):
+                idm_obj_idx.append(idx)
+        idm_obj_idx = jnp.array(idm_obj_idx)
+        obj_mask = jnp.zeros(self._current_simulator_state.log_trajectory.num_objects, dtype=bool)
+        _parallel_idm = IDMRoutePolicy(is_controlled_func=lambda state: obj_mask.at[idm_obj_idx].set(True))
+        _replay = create_expert_actor(is_controlled_func=lambda state: ~(obj_mask.at[idm_obj_idx].set(True)))
+        # _replay = create_expert_actor(is_controlled_func=lambda state: ~obj_mask)
+
+        self._parallel_idm_select_action = jax.jit(_parallel_idm.select_action)
+        self._replay_select_action = jax.jit(_replay.select_action)
+
+    def _waymax_get_log_trajectory(self):
+        x = list()
+        y = list()
+        vel_x = list()
+        vel_y = list()
+        yaw = list()
+        valid = list()
+        length = list()
+        width = list()
+        sdc_id = self.engine.data_manager.current_scenario["metadata"]["sdc_id"]
+        agent_ids = list(self.engine.data_manager.current_scenario["tracks"].keys())
+        agent_ids.remove(sdc_id)
+        agent_ids = [sdc_id] + agent_ids
+        filtered_agent_ids = []
+
+        for obj_id in agent_ids:
+            obj = self.engine.data_manager.current_scenario["tracks"][obj_id]
+            if not MetaDriveType.is_vehicle(obj["type"]):
+                continue  # only keep vehicle trajectories from the waymo data
+            filtered_agent_ids.append(obj_id)
+            obj = self.engine.data_manager.current_scenario["tracks"][obj_id]
+            x.append(obj["state"]["position"][..., 0])
+            y.append(obj["state"]["position"][..., 1])
+            vel_x.append(obj["state"]["velocity"][..., 0])
+            vel_y.append(obj["state"]["velocity"][..., 1])
+            yaw.append(jnp.squeeze(obj["state"]["heading"]))
+            valid.append(jnp.squeeze(obj["state"]["valid"]))
+            length.append(jnp.squeeze(obj["state"]["length"]))
+            width.append(jnp.squeeze(obj["state"]["width"]))
+        x = jnp.stack(x)
+        length = jnp.stack(length)
+        log_trajectory = datatypes.Trajectory(x=x,
+                                              y=jnp.stack(y),
+                                              z=jnp.zeros_like(x),
+                                              vel_x=jnp.stack(vel_x),
+                                              vel_y=jnp.stack(vel_y),
+                                              yaw=jnp.stack(yaw),
+                                              valid=jnp.stack(valid),
+                                              length=length,
+                                              width=jnp.stack(width),
+                                              height=jnp.ones_like(length),
+                                              timestamp_micros=jnp.zeros_like(length, dtype=int))
+        return log_trajectory, filtered_agent_ids
 
     def after_step(self, *args, **kwargs):
         if self.episode_step < self.current_scenario_length:

@@ -23,11 +23,13 @@ if __name__ == "__main__":
     env = DemoScenarioEnv(
         {
             "manual_control": False,
+            "show_policy_mark": True,
             "agent_policy": ReplayEgoCarPolicy,
+            "reactive_traffic": True,
             "use_render": True,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
-            "num_scenarios": 3,
-            "start_scenario_index": 0,
+            "num_scenarios": 1,
+            "start_scenario_index": 1,
             "crash_vehicle_done": False,
             "crash_vehicle_penalty": 0,
             "vehicle_config": {
@@ -37,7 +39,7 @@ if __name__ == "__main__":
             }
         }
     )
-    o, _ = env.reset(seed=0)
+    o, _ = env.reset(seed=1)
 
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([1.0, 0.])
