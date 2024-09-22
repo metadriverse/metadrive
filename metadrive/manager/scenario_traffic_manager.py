@@ -1,4 +1,6 @@
+from metadrive.utils import time_me
 import copy
+import time
 
 import jax
 import numpy as np
@@ -81,6 +83,7 @@ class ScenarioTrafficManager(BaseManager):
         self._parallel_idm_select_action = None
         self._replay_select_action = None
 
+    @time_me
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
 
@@ -88,6 +91,7 @@ class ScenarioTrafficManager(BaseManager):
         idm_action = self._parallel_idm_select_action({}, self._current_simulator_state, None, None)
         replay = self._replay_select_action({}, self._current_simulator_state, None, None)
         action = merge_actions([replay, idm_action])
+        action = self._write_ego_car_action(action)
         self._current_simulator_state = self._dynamics.step(self._current_simulator_state, action)
 
         current_trajectory = self._current_simulator_state.current_sim_trajectory
@@ -208,6 +212,14 @@ class ScenarioTrafficManager(BaseManager):
                                               height=jnp.ones_like(length),
                                               timestamp_micros=jnp.zeros_like(length, dtype=int))
         return log_trajectory, filtered_agent_ids
+
+    def _write_ego_car_action(self, action):
+        ego_car = self.engine.agent_manager.active_agents["default_agent"]
+        x,y = ego_car.position
+        vel_x, vel_y = ego_car.velocity
+        heading = ego_car.heading_theta
+        action.data = action.data.at[0].set(jax.numpy.array([x,y, heading, vel_x, vel_y]))
+        return action
 
     def after_step(self, *args, **kwargs):
         if self.episode_step < self.current_scenario_length:

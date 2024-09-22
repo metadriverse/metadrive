@@ -11,22 +11,22 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
 class DemoScenarioEnv(ScenarioEnv):
     def reset(self, seed=None):
-        if self.engine is not None and seed is None:
-            seeds = [i for i in range(self.config["num_scenarios"])]
-            seeds.remove(self.current_seed)
-            seed = random.choice(seeds)
-        return super(DemoScenarioEnv, self).reset(seed=seed)
+        # if self.engine is not None and seed is None:
+        #     seeds = [i for i in range(self.config["num_scenarios"])]
+        #     seeds.remove(self.current_seed)
+        #     seed = random.choice(seeds)
+        return super(DemoScenarioEnv, self).reset(seed=1)
 
 
 if __name__ == "__main__":
     asset_path = AssetLoader.asset_path
     env = DemoScenarioEnv(
         {
-            "manual_control": False,
-            "show_policy_mark": True,
+            "manual_control": True,
+            "show_policy_mark": False,
             "agent_policy": ReplayEgoCarPolicy,
             "reactive_traffic": True,
-            "use_render": True,
+            "use_render": False,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
             "num_scenarios": 1,
             "start_scenario_index": 1,
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     o, _ = env.reset(seed=1)
 
     for i in range(1, 100000):
-        o, r, tm, tc, info = env.step([1.0, 0.])
+        o, r, tm, tc, info = env.step([0.0, -1])
         # print(env.agent.height)
         env.render(text={"seed": env.current_seed, "reward": r})
         if tm or tc:
