@@ -23,10 +23,10 @@ if __name__ == "__main__":
     env = DemoScenarioEnv(
         {
             "manual_control": True,
-            "show_policy_mark": False,
-            "agent_policy": ReplayEgoCarPolicy,
+            "show_policy_mark": True,
+            # "agent_policy": ReplayEgoCarPolicy,
             "reactive_traffic": True,
-            "use_render": False,
+            "use_render": True,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
             "num_scenarios": 1,
             "start_scenario_index": 1,
@@ -44,7 +44,9 @@ if __name__ == "__main__":
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0.0, -1])
         # print(env.agent.height)
-        env.render(text={"seed": env.current_seed, "reward": r}, mode="topdown")
+        env.render(text={"seed": env.current_seed, "reward": r},
+                   # mode="topdown"
+                   )
         if tm or tc:
             # print(info["arrive_dest"])
             env.reset()
