@@ -88,11 +88,13 @@ class ScenarioTrafficManager(BaseManager):
         self._obj_to_clean_this_frame = []
 
         # policy forward
+        current_time = time.time()
         idm_action = self._parallel_idm_select_action({}, self._current_simulator_state, None, None)
         replay = self._replay_select_action({}, self._current_simulator_state, None, None)
         action = merge_actions([replay, idm_action])
         action = self._write_ego_car_action(action)
         self._current_simulator_state = self._dynamics.step(self._current_simulator_state, action)
+        print(time.time() - current_time)
 
         current_trajectory = self._current_simulator_state.current_sim_trajectory
         for v in self.spawned_objects.values():
