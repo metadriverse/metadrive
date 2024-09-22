@@ -19,14 +19,15 @@ class DemoScenarioEnv(ScenarioEnv):
 
 
 if __name__ == "__main__":
+    render = False
     asset_path = AssetLoader.asset_path
     env = DemoScenarioEnv(
         {
             "manual_control": True,
-            "show_policy_mark": True,
+            "show_policy_mark": render,
             # "agent_policy": ReplayEgoCarPolicy,
             "reactive_traffic": True,
-            # "use_render": True,
+            # "use_render": render,
             "data_directory": AssetLoader.file_path(asset_path, "waymo", unix_style=False),
             "num_scenarios": 1,
             "start_scenario_index": 1,
