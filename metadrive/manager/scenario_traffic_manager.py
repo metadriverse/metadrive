@@ -178,9 +178,14 @@ class ScenarioTrafficManager(BaseManager):
                 idm_obj_idx.append(idx)
         idm_obj_idx = jnp.array(idm_obj_idx)
         obj_mask = jnp.zeros(self._current_simulator_state.log_trajectory.num_objects, dtype=bool)
+
+        # IDM some vehicles
         _parallel_idm = IDMRoutePolicy(is_controlled_func=lambda state: obj_mask.at[idm_obj_idx].set(True))
         _replay = create_expert_actor(is_controlled_func=lambda state: ~(obj_mask.at[idm_obj_idx].set(True)))
-        # _replay = create_expert_actor(is_controlled_func=lambda state: ~obj_mask)
+
+        # Note: Turn on me to use IDM for all
+        # _parallel_idm = IDMRoutePolicy(is_controlled_func=lambda state:~obj_mask)
+        # _replay = create_expert_actor(is_controlled_func=lambda state: obj_mask)
 
         self._parallel_idm_select_action = jax.jit(_parallel_idm.select_action)
         self._replay_select_action = jax.jit(_replay.select_action)
