@@ -33,6 +33,12 @@ from metadrive.utils.math import wrap_to_pi
 logger = get_logger()
 
 
+@jax.jit
+def _write_ego_car_action(action, x, y, heading, vel_x, vel_y):
+    action.data = action.data.at[0].set(jax.numpy.array([x, y, heading, vel_x, vel_y]))
+    return action
+
+
 class ScenarioTrafficManager(BaseManager):
     STATIC_THRESHOLD = 3  # m, static if moving distance < 5
     IDM_ACT_BATCH_SIZE = 5
@@ -94,15 +100,19 @@ class ScenarioTrafficManager(BaseManager):
         replay = self._replay_select_action({}, self._current_simulator_state, None, None)
         action = merge_actions([replay, idm_action])
         print("=============== {} ===============".format(self.engine.episode_step))
-        print("time:", time.time() - current_time)
-        action = self._write_ego_car_action(action)
-        print("time with write:", time.time() - current_time)
+        ego_car = self.engine.agent_manager.active_agents["default_agent"]
+        x, y = ego_car.position
+        vel_x, vel_y = ego_car.velocity
+        heading = ego_car.heading_theta
+        action = _write_ego_car_action(action, x, y, heading, vel_x, vel_y)
         self._current_simulator_state = self._dynamics_step(self._current_simulator_state, action)
         print("time with write and forward:", time.time() - current_time)
 
         current_trajectory = self._current_simulator_state.current_sim_trajectory
+        curren_idm = 0
         for v in self.spawned_objects.values():
             if self.engine.has_policy(v.id, TrajectoryIDMPolicy):
+                curren_idm += 1
                 p = self.engine.get_policy(v.name)
                 if p.arrive_destination:
                     self._obj_to_clean_this_frame.append(self._obj_id_to_scenario_id[v.id])
@@ -112,10 +122,10 @@ class ScenarioTrafficManager(BaseManager):
                 v.set_heading_theta(current_trajectory.yaw[index].tolist()[0])
                 velocity = [current_trajectory.vel_x[index].tolist()[0], current_trajectory.vel_y[index].tolist()[0]]
                 v.set_velocity(velocity)
-
-                # else:
-                #     do_speed_control = self.episode_step % self.IDM_ACT_BATCH_SIZE == p.policy_index
-                #     v.before_step(p.act(do_speed_control))
+        print("num of idm", curren_idm)
+        # else:
+        #     do_speed_control = self.episode_step % self.IDM_ACT_BATCH_SIZE == p.policy_index
+        #     v.before_step(p.act(do_speed_control))
 
     def before_reset(self):
         super(ScenarioTrafficManager, self).before_reset()
@@ -218,14 +228,6 @@ class ScenarioTrafficManager(BaseManager):
                                               height=jnp.ones_like(length),
                                               timestamp_micros=jnp.zeros_like(length, dtype=int))
         return log_trajectory, filtered_agent_ids
-
-    def _write_ego_car_action(self, action):
-        ego_car = self.engine.agent_manager.active_agents["default_agent"]
-        x, y = ego_car.position
-        vel_x, vel_y = ego_car.velocity
-        heading = ego_car.heading_theta
-        action.data = action.data.at[0].set(jax.numpy.array([x, y, heading, vel_x, vel_y]))
-        return action
 
     def after_step(self, *args, **kwargs):
         if self.episode_step < self.current_scenario_length:
