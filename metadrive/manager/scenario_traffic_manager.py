@@ -1,4 +1,3 @@
-from metadrive.utils import time_me
 import copy
 import time
 
@@ -21,12 +20,13 @@ from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.policy.waymax_idm import datatypes
 from metadrive.policy.waymax_idm.actor_core import merge_actions
 from metadrive.policy.waymax_idm.datatypes import SimulatorState, operations
-from metadrive.policy.waymax_idm.state_dynamics import StateDynamics
 from metadrive.policy.waymax_idm.expert import create_expert_actor
+from metadrive.policy.waymax_idm.state_dynamics import StateDynamics
 from metadrive.policy.waymax_idm.waypoint_following_agent import IDMRoutePolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
+from metadrive.utils import time_me
 from metadrive.utils.math import norm
 from metadrive.utils.math import wrap_to_pi
 
@@ -77,6 +77,7 @@ class ScenarioTrafficManager(BaseManager):
 
         # for waymo parallel IDM policy
         self._dynamics = StateDynamics()
+        self._dynamics_step = jax.jit(self._dynamics.step)
         self._current_simulator_state = None
         self._current_agent_ids = None
         self._current_agent_id_to_index = None
@@ -92,9 +93,12 @@ class ScenarioTrafficManager(BaseManager):
         idm_action = self._parallel_idm_select_action({}, self._current_simulator_state, None, None)
         replay = self._replay_select_action({}, self._current_simulator_state, None, None)
         action = merge_actions([replay, idm_action])
+        print("=============== {} ===============".format(self.engine.episode_step))
+        print("time:", time.time() - current_time)
         action = self._write_ego_car_action(action)
-        self._current_simulator_state = self._dynamics.step(self._current_simulator_state, action)
-        print(time.time() - current_time)
+        print("time with write:", time.time() - current_time)
+        self._current_simulator_state = self._dynamics_step(self._current_simulator_state, action)
+        print("time with write and forward:", time.time() - current_time)
 
         current_trajectory = self._current_simulator_state.current_sim_trajectory
         for v in self.spawned_objects.values():
@@ -217,10 +221,10 @@ class ScenarioTrafficManager(BaseManager):
 
     def _write_ego_car_action(self, action):
         ego_car = self.engine.agent_manager.active_agents["default_agent"]
-        x,y = ego_car.position
+        x, y = ego_car.position
         vel_x, vel_y = ego_car.velocity
         heading = ego_car.heading_theta
-        action.data = action.data.at[0].set(jax.numpy.array([x,y, heading, vel_x, vel_y]))
+        action.data = action.data.at[0].set(jax.numpy.array([x, y, heading, vel_x, vel_y]))
         return action
 
     def after_step(self, *args, **kwargs):
@@ -423,7 +427,7 @@ class ScenarioTrafficManager(BaseManager):
 
     def is_static_object(self, obj_id):
         return isinstance(self.spawned_objects[obj_id], TrafficBarrier) \
-               or isinstance(self.spawned_objects[obj_id], TrafficCone)
+            or isinstance(self.spawned_objects[obj_id], TrafficCone)
 
     @property
     def obj_id_to_scenario_id(self):
