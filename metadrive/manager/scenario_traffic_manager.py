@@ -5,7 +5,7 @@ import numpy as np
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
 from metadrive.component.traffic_participants.cyclist import Cyclist, CyclistBoundingBox
-from metadrive.component.traffic_participants.pedestrian import Pedestrian, PedestrainBoundingBox
+from metadrive.component.traffic_participants.pedestrian import Pedestrian, PedestrianBoundingBox
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import SVehicle, LVehicle, MVehicle, XLVehicle, \
     TrafficDefaultVehicle, VaryingDynamicsBoundingBoxVehicle
@@ -268,7 +268,7 @@ class ScenarioTrafficManager(BaseManager):
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
         if self.global_config["use_bounding_box"]:
-            cls = PedestrainBoundingBox
+            cls = PedestrianBoundingBox
             force_spawn = True
         else:
             cls = Pedestrian
