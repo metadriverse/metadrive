@@ -8,10 +8,9 @@ import math
 from typing import Dict
 
 import numpy as np
-import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode, BulletVehicle
 from panda3d.core import LVector3, NodePath, PandaNode
-from metadrive.constants import Semantics, CameraTagStateKey
+from metadrive.constants import Semantics, CameraTagStateKey, COLOR_PALETTE
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import ObjectState
 from metadrive.engine.asset_loader import AssetLoader
@@ -151,8 +150,8 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
                 self.loader.__init__()
 
         # add color setting for visualization
-        color = sns.color_palette("colorblind")
-        color.remove(color[2])  # Remove the green and leave it for special vehicle
+        color = COLOR_PALETTE.copy()
+        color.pop(2)  # Remove the green and leave it for special vehicle
         idx = get_np_random().randint(len(color))
         rand_c = color[idx]
         self._panda_color = rand_c
