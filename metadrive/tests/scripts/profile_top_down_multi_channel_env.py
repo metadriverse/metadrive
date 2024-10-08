@@ -1,6 +1,6 @@
 import time
 
-from metadrive import TopDownMetaDriveEnvV2
+from metadrive.envs.top_down_env import TopDownMetaDriveEnvV2
 
 if __name__ == '__main__':
     env = TopDownMetaDriveEnvV2(dict(num_scenarios=10, frame_stack=10, frame_skip=3))
