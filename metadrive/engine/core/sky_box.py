@@ -13,7 +13,7 @@ class SkyBox(BaseObject):
     ROTATION_MAX = 5000
     SEMANTIC_LABEL = Semantics.SKY.label
 
-    def __init__(self, pure_background: bool = False):
+    def __init__(self, pure_background: bool = False, use_anisotropic_filtering: bool = True):
         super(SkyBox, self).__init__(random_seed=0)
         self._accumulate = 0
         self.f = 1
@@ -30,7 +30,7 @@ class SkyBox(BaseObject):
         skybox_texture.set_magfilter(SamplerState.FT_linear)
         skybox_texture.set_wrap_u(SamplerState.WM_repeat)
         skybox_texture.set_wrap_v(SamplerState.WM_mirror)
-        skybox_texture.set_anisotropic_degree(16)
+        skybox_texture.set_anisotropic_degree(16 if use_anisotropic_filtering else 1)
         skybox.set_texture(skybox_texture)
 
         gles = ConfigVariableString("load-display").getValue()

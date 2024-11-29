@@ -301,7 +301,7 @@ class EngineCore(ShowBase.ShowBase):
                     use_330=False
                 )
 
-                self.sky_box = SkyBox(not self.global_config["show_skybox"])
+                self.sky_box = SkyBox(not self.global_config["show_skybox"], self.global_config["anisotropic_filtering"])
                 self.sky_box.attach_to_world(self.render, self.physics_world)
 
                 self.world_light = Light()
