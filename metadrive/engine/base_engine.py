@@ -187,11 +187,14 @@ class BaseEngine(EngineCore, Randomizable):
         """
         if id in self.id_c.keys():
             my_color = self.id_c[id]
-            BaseEngine.COLORS_OCCUPIED.remove(my_color)
+            if my_color in BaseEngine.COLORS_OCCUPIED:
+                BaseEngine.COLORS_OCCUPIED.remove(my_color)
             BaseEngine.COLORS_FREE.add(my_color)
             # print("After cleaning:,", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
-            self.id_c.pop(id)
-            self.c_id.pop(my_color)
+            if id in self.id_c.keys():
+                self.id_c.pop(id)
+            if my_color in self.c_id.keys():
+                self.c_id.pop(my_color)
 
     def id_to_color(self, id):
         if id in self.id_c.keys():
@@ -261,6 +264,7 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             raise ValueError("filter should be a list or a function")
         for id, obj in exclude_objects.items():
+            self._clean_color(id)
             self._spawned_objects.pop(id)
             if id in self._object_tasks:
                 self._object_tasks.pop(id)
@@ -268,7 +272,7 @@ class BaseEngine(EngineCore, Randomizable):
                 policy = self._object_policies.pop(id)
                 policy.destroy()
             if force_destroy_this_obj:
-                self._clean_color(obj.id)
+                #self._clean_color(obj.id)
                 obj.destroy()
             else:
                 obj.detach_from_world(self.physics_world)
@@ -283,7 +287,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if len(self._dying_objects[obj.class_name]) < self.global_config["num_buffering_objects"]:
                     self._dying_objects[obj.class_name].append(obj)
                 else:
-                    self._clean_color(obj.id)
+                    #self._clean_color(obj.id)
                     obj.destroy()
             if self.global_config["record_episode"] and not self.replay_episode and record:
                 self.record_manager.add_clear_info(obj)
