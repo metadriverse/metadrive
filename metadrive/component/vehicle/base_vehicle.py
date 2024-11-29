@@ -4,7 +4,6 @@ from collections import deque
 from typing import Union, Optional
 
 import numpy as np
-import seaborn as sns
 from panda3d._rplight import RPSpotLight
 from panda3d.bullet import BulletVehicle, BulletBoxShape, ZUp
 from panda3d.core import Material, Vec3, TransformState
@@ -17,7 +16,7 @@ from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
-from metadrive.constants import CamMask
+from metadrive.constants import CamMask, COLOR_PALETTE
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.constants import Semantics
 from metadrive.engine.asset_loader import AssetLoader
@@ -995,7 +994,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def panda_color(self):
         c = super(BaseVehicle, self).panda_color
         if self._use_special_color:
-            color = sns.color_palette("colorblind")
+            color = COLOR_PALETTE
             rand_c = color[2]  # A pretty green
             c = rand_c
         return c
