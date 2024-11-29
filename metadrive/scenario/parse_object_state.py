@@ -25,7 +25,7 @@ def get_idm_route(traj_points, width=2):
     return traj
 
 
-def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_interval=0.1):
+def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_interval=0.1, include_z_position=False):
     """
     Parse object state of one time step
     """
@@ -47,7 +47,11 @@ def parse_object_state(object_dict, time_idx, check_last_state=False, sim_time_i
 
     ret = {k: v[time_idx] for k, v in states.items()}
 
-    ret["position"] = states["position"][time_idx, :2]
+    if include_z_position:
+        ret["position"] = states["position"][time_idx]
+    else:
+        ret["position"] = states["position"][time_idx, :2]
+
     ret["velocity"] = states["velocity"][time_idx]
 
     ret["heading_theta"] = states["heading"][time_idx]
