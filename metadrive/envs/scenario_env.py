@@ -3,12 +3,12 @@ This environment can load all scenarios exported from other environments via env
 """
 
 import numpy as np
-from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
+
 from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
-from metadrive.constants import DEFAULT_AGENT
 from metadrive.constants import TerminationState
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
+from metadrive.manager.scenario_agent_manager import ScenarioAgentManager
 from metadrive.manager.scenario_curriculum_manager import ScenarioCurriculumManager
 from metadrive.manager.scenario_data_manager import ScenarioDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
@@ -46,11 +46,11 @@ SCENARIO_ENV_CONFIG = dict(
     no_light=False,  # no traffic light
     reactive_traffic=False,  # turn on to enable idm traffic
     filter_overlapping_car=True,  # If in one frame a traffic vehicle collides with ego car, it won't be created.
-    even_sample_vehicle_class=True,  # to make the scene more diverse
     default_vehicle_in_traffic=False,
     skip_missing_light=True,
     static_traffic_object=True,
     show_sidewalk=False,
+    even_sample_vehicle_class=None,  # Deprecated.
 
     # ===== Agent config =====
     vehicle_config=dict(
@@ -90,7 +90,8 @@ SCENARIO_ENV_CONFIG = dict(
 
     # ===== others =====
     allowed_more_steps=None,  # horizon, None=infinite
-    top_down_show_real_size=False
+    top_down_show_real_size=False,
+    use_bounding_box=False,  # Set True to use a cube in visualization to represent every dynamic objects.
 )
 
 
@@ -114,6 +115,18 @@ class ScenarioEnv(BaseEnv):
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
         self.start_index = self.config["start_scenario_index"]
         self.num_scenarios = self.config["num_scenarios"]
+
+    def _post_process_config(self, config):
+        config = super(ScenarioEnv, self)._post_process_config(config)
+        if config["use_bounding_box"]:
+            config["vehicle_config"]["random_color"] = True
+            config["vehicle_config"]["vehicle_model"] = "varying_dynamics_bounding_box"
+            config["agent_configs"]["default_agent"]["use_special_color"] = True
+            config["agent_configs"]["default_agent"]["vehicle_model"] = "varying_dynamics_bounding_box"
+        return config
+
+    def _get_agent_manager(self):
+        return ScenarioAgentManager(init_observations=self._get_observations())
 
     def setup_engine(self):
         super(ScenarioEnv, self).setup_engine()
@@ -179,7 +192,7 @@ class ScenarioEnv(BaseEnv):
                 done = True
             self.logger.info(msg("max step"), extra={"log_once": True})
         elif self.config["allowed_more_steps"] and self.episode_lengths[vehicle_id] >= \
-                self.engine.data_manager.current_scenario_length + self.config["allowed_more_steps"]:
+            self.engine.data_manager.current_scenario_length + self.config["allowed_more_steps"]:
             if self.config["truncate_as_terminate"]:
                 done = True
             done_info[TerminationState.MAX_STEP] = True
