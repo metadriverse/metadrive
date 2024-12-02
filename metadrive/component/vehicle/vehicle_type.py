@@ -286,6 +286,138 @@ class VaryingDynamicsVehicle(DefaultVehicle):
         return ret
 
 
+class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
+    def __init__(
+        self, vehicle_config: dict = None, name: str = None, random_seed=None, position=None, heading=None, **kwargs
+    ):
+
+        # TODO(pzh): The above code is removed for now. How we get BUS label?
+        #  vehicle_config has 'width' 'length' and 'height'
+        # if vehicle_config["width"] < 0.0:
+        #     self.SEMANTIC_LABEL = Semantics.CAR.label
+        # else:
+        #     self.SEMANTIC_LABEL = Semantics.BUS.label
+
+        super(VaryingDynamicsBoundingBoxVehicle, self).__init__(
+            vehicle_config=vehicle_config,
+            name=name,
+            random_seed=random_seed,
+            position=position,
+            heading=heading,
+            **kwargs
+        )
+
+    def _add_visualization(self):
+        if self.render:
+            [path, scale, offset, HPR] = self.path
+
+            # PZH: Note that we do not use model_collection as a buffer here.
+            # if path not in BaseVehicle.model_collection:
+
+            # PZH: Load a box model and resize it to the vehicle size
+            car_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+
+            car_model.setTwoSided(False)
+            BaseVehicle.model_collection[path] = car_model
+            car_model.setScale((self.WIDTH, self.LENGTH, self.HEIGHT))
+            # car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + self.HEIGHT / 2)
+            car_model.setZ(0)
+            # model default, face to y
+            car_model.setHpr(*HPR)
+            car_model.instanceTo(self.origin)
+
+            show_contour = self.config["show_contour"] if "show_contour" in self.config else False
+            if show_contour:
+                # ========== Draw the contour of the bounding box ==========
+                # Draw the bottom of the car first
+                line_seg = LineSegs("bounding_box_contour1")
+                zoffset = car_model.getZ()
+                line_seg.setThickness(2)
+                line_color = [1.0, 0.0, 0.0]
+                out_offset = 0.02
+                w = self.WIDTH / 2 + out_offset
+                l = self.LENGTH / 2 + out_offset
+                h = self.HEIGHT / 2 + out_offset
+                line_seg.moveTo(w, l, h + zoffset)
+                line_seg.drawTo(-w, l, h + zoffset)
+                line_seg.drawTo(-w, l, -h + zoffset)
+                line_seg.drawTo(w, l, -h + zoffset)
+                line_seg.drawTo(w, l, h + zoffset)
+                line_seg.drawTo(-w, l, -h + zoffset)
+                line_seg.moveTo(-w, l, h + zoffset)
+                line_seg.drawTo(w, l, -h + zoffset)
+
+                line_seg.moveTo(w, -l, h + zoffset)
+                line_seg.drawTo(-w, -l, h + zoffset)
+                line_seg.drawTo(-w, -l, -h + zoffset)
+                line_seg.drawTo(w, -l, -h + zoffset)
+                line_seg.drawTo(w, -l, h + zoffset)
+                line_seg.moveTo(-w, -l, 0 + zoffset)
+                line_seg.drawTo(w, -l, 0 + zoffset)
+                line_seg.moveTo(0, -l, h + zoffset)
+                line_seg.drawTo(0, -l, -h + zoffset)
+
+                line_seg.moveTo(w, l, h + zoffset)
+                line_seg.drawTo(w, -l, h + zoffset)
+                line_seg.moveTo(-w, l, h + zoffset)
+                line_seg.drawTo(-w, -l, h + zoffset)
+                line_seg.moveTo(-w, l, -h + zoffset)
+                line_seg.drawTo(-w, -l, -h + zoffset)
+                line_seg.moveTo(w, l, -h + zoffset)
+                line_seg.drawTo(w, -l, -h + zoffset)
+                line_np = NodePath(line_seg.create(True))
+                line_material = Material()
+                line_material.setBaseColor(LVecBase4(*line_color[:3], 1))
+                line_np.setMaterial(line_material, True)
+                line_np.reparentTo(self.origin)
+
+            if self.config["random_color"]:
+                material = Material()
+                material.setBaseColor(
+                    (
+                        self.panda_color[0] * self.MATERIAL_COLOR_COEFF,
+                        self.panda_color[1] * self.MATERIAL_COLOR_COEFF,
+                        self.panda_color[2] * self.MATERIAL_COLOR_COEFF, 0.
+                    )
+                )
+                material.setMetallic(self.MATERIAL_METAL_COEFF)
+                material.setSpecular(self.MATERIAL_SPECULAR_COLOR)
+                material.setRefractiveIndex(1.5)
+                material.setRoughness(self.MATERIAL_ROUGHNESS)
+                material.setShininess(self.MATERIAL_SHININESS)
+                material.setTwoside(False)
+                self.origin.setMaterial(material, True)
+
+    def _add_wheel(self, pos: Vec3, radius: float, front: bool, left):
+        wheel_np = self.origin.attachNewNode("wheel")
+        self._node_path_list.append(wheel_np)
+
+        # PZH: Skip the wheel model
+        # if self.render:
+        #     model = 'right_tire_front.gltf' if front else 'right_tire_back.gltf'
+        #     model_path = AssetLoader.file_path("models", os.path.dirname(self.path[0]), model)
+        #     wheel_model = self.loader.loadModel(model_path)
+        #     wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
+        #     wheel_model.reparentTo(wheel_np)
+        #     wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
+        wheel = self.system.createWheel()
+        wheel.setNode(wheel_np.node())
+        wheel.setChassisConnectionPointCs(pos)
+        wheel.setFrontWheel(front)
+        wheel.setWheelDirectionCs(Vec3(0, 0, -1))
+        wheel.setWheelAxleCs(Vec3(1, 0, 0))
+
+        wheel.setWheelRadius(radius)
+        wheel.setMaxSuspensionTravelCm(self.SUSPENSION_LENGTH)
+        wheel.setSuspensionStiffness(self.SUSPENSION_STIFFNESS)
+        wheel.setWheelsDampingRelaxation(4.8)
+        wheel.setWheelsDampingCompression(1.2)
+        wheel_friction = self.config["wheel_friction"] if not self.config["no_wheel_friction"] else 0
+        wheel.setFrictionSlip(wheel_friction)
+        wheel.setRollInfluence(0.5)
+        return wheel
+
+
 def random_vehicle_type(np_random, p=None):
     v_type = {
         "s": SVehicle,
