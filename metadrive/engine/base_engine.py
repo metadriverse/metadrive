@@ -21,15 +21,17 @@ logger = get_logger()
 
 
 def generate_distinct_rgb_values():
-    distinct_rgb_values = []
-    step = 256 // 32  # 8 intervals for each RGB component (0-31, 32-63, ..., 224-255)
+    r = np.linspace(0, 256, 16)
+    g = np.linspace(0, 256, 16)
+    b = np.linspace(0, 256, 16)
 
-    for r in range(step, 256, step):
-        for g in range(0, 256, step):
-            for b in range(0, 256, step):
-                distinct_rgb_values.append((round(r / 255, 5), round(g / 255, 5), round(b / 255, 5)))
+    # Create a meshgrid and reshape to get all combinations of r, g, b
+    rgbs = np.array(np.meshgrid(r, g, b)).T.reshape(-1, 3)
 
-    return distinct_rgb_values[:4096]  # Return the first 4096 values
+    # Normalize the values to be between 0 and 1
+    rgbs = rgbs / 255.0
+
+    return rgbs.tolist()
 
 
 COLOR_SPACE = generate_distinct_rgb_values()
