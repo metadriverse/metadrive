@@ -18,17 +18,21 @@ class DefaultVehicle(BaseVehicle):
     REAR_WHEELBASE = 1.4166
     path = ['ferra/vehicle.gltf', (1, 1, 1), (0, 0.075, 0.), (0, 0, 0)]
 
+    DEFAULT_LENGTH = 4.515  # meters
+    DEFAULT_HEIGHT = 1.19  # meters
+    DEFAULT_WIDTH = 1.852  # meters
+
     @property
     def LENGTH(self):
-        return 4.515  # meters
+        return self.DEFAULT_LENGTH
 
     @property
     def HEIGHT(self):
-        return 1.19  # meters
+        return self.DEFAULT_HEIGHT
 
     @property
     def WIDTH(self):
-        return 1.852  # meters
+        return self.DEFAULT_WIDTH
 
 
 # When using DefaultVehicle as traffic, please use this class.
@@ -61,15 +65,15 @@ class XLVehicle(BaseVehicle):
 
     @property
     def LENGTH(self):
-        return 5.74  # meters
+        return self.DEFAULT_LENGTH
 
     @property
     def HEIGHT(self):
-        return 2.8  # meters
+        return self.DEFAULT_HEIGHT
 
     @property
     def WIDTH(self):
-        return 2.3  # meters
+        return self.DEFAULT_WIDTH
 
 
 class LVehicle(BaseVehicle):
@@ -84,20 +88,23 @@ class LVehicle(BaseVehicle):
     TIRE_WIDTH = 0.35
     MASS = 1300
     LIGHT_POSITION = (-0.65, 2.13, 0.3)
+    DEFAULT_LENGTH = 4.87  # meters
+    DEFAULT_HEIGHT = 1.85  # meters
+    DEFAULT_WIDTH = 2.046  # meters
 
     path = ['lada/vehicle.gltf', (1.1, 1.1, 1.1), (0, -0.27, 0.07), (0, 0, 0)]
 
     @property
     def LENGTH(self):
-        return 4.87  # meters
+        return self.DEFAULT_LENGTH
 
     @property
     def HEIGHT(self):
-        return 1.85  # meters
+        return self.DEFAULT_HEIGHT
 
     @property
     def WIDTH(self):
-        return 2.046  # meters
+        return self.DEFAULT_WIDTH
 
 
 class MVehicle(BaseVehicle):
@@ -112,20 +119,22 @@ class MVehicle(BaseVehicle):
     TIRE_WIDTH = 0.3
     MASS = 1200
     LIGHT_POSITION = (-0.67, 1.86, 0.22)
-
+    DEFAULT_LENGTH = 4.6  # meters
+    DEFAULT_HEIGHT = 1.37  # meters
+    DEFAULT_WIDTH = 1.85  # meters
     path = ['130/vehicle.gltf', (1, 1, 1), (0, -0.05, 0.1), (0, 0, 0)]
 
     @property
     def LENGTH(self):
-        return 4.6  # meters
+        return self.DEFAULT_LENGTH
 
     @property
     def HEIGHT(self):
-        return 1.37  # meters
+        return self.DEFAULT_HEIGHT
 
     @property
     def WIDTH(self):
-        return 1.85  # meters
+        return self.DEFAULT_WIDTH
 
 
 class SVehicle(BaseVehicle):
@@ -141,6 +150,9 @@ class SVehicle(BaseVehicle):
     TIRE_WIDTH = 0.25
     MASS = 800
     LIGHT_POSITION = (-0.57, 1.86, 0.23)
+    DEFAULT_LENGTH = 4.3  # meters
+    DEFAULT_HEIGHT = 1.7  # meters
+    DEFAULT_WIDTH = 1.7  # meters
 
     @property
     def path(self):
@@ -154,15 +166,15 @@ class SVehicle(BaseVehicle):
 
     @property
     def LENGTH(self):
-        return 4.3  # meters
+        return self.DEFAULT_LENGTH
 
     @property
     def HEIGHT(self):
-        return 1.70  # meters
+        return self.DEFAULT_HEIGHT
 
     @property
     def WIDTH(self):
-        return 1.70  # meters
+        return self.DEFAULT_WIDTH
 
 
 class VaryingDynamicsVehicle(DefaultVehicle):

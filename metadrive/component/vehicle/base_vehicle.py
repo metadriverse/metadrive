@@ -145,6 +145,15 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_body(vehicle_chassis.getChassis())
         self.system = vehicle_chassis
         self.chassis = self.origin
+
+        if self.config["scale"] is not None:
+            w, l, h = self.config["scale"]
+            self.FRONT_WHEELBASE *= l
+            self.REAR_WHEELBASE *= l
+            self.LATERAL_TIRE_TO_CENTER *= w
+            self.TIRE_RADIUS *= h
+            self.CHASSIS_TO_WHEEL_AXIS *= h
+
         self.wheels = self._create_wheel()
 
         # light experimental!
