@@ -202,9 +202,7 @@ class ScenarioTrafficManager(BaseManager):
             vehicle_class = state["vehicle_class"]
         else:
             vehicle_class = get_vehicle_type(
-                float(state["length"]),
-                self.need_default_vehicle,
-                use_bounding_box=use_bounding_box
+                float(state["length"]), self.need_default_vehicle, use_bounding_box=use_bounding_box
             )
         # print("vehicle_class: ", vehicle_class)
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None

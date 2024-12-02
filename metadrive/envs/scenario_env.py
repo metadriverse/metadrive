@@ -50,7 +50,6 @@ SCENARIO_ENV_CONFIG = dict(
     skip_missing_light=True,
     static_traffic_object=True,
     show_sidewalk=False,
-
     even_sample_vehicle_class=None,  # Deprecated.
 
     # ===== Agent config =====
