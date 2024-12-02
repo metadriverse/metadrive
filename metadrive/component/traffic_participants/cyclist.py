@@ -1,11 +1,9 @@
-from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
-from typing import Tuple
-
 from panda3d.bullet import BulletBoxShape
-from panda3d.bullet import BulletCylinderShape
+from panda3d.core import LineSegs, NodePath
 
-from metadrive.constants import MetaDriveType, Semantics
+from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
 from metadrive.constants import CollisionGroup
+from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 
@@ -19,13 +17,13 @@ class Cyclist(BaseTrafficParticipant):
 
     HEIGHT = 1.75
 
-    def __init__(self, position, heading_theta, random_seed, name=None):
+    def __init__(self, position, heading_theta, random_seed, name=None, **kwargs):
         super(Cyclist, self).__init__(position, heading_theta, random_seed, name=name)
         self.set_metadrive_type(self.TYPE_NAME)
         n = BaseRigidBodyNode(self.name, self.TYPE_NAME)
         self.add_body(n)
 
-        self.body.addShape(BulletBoxShape((self.LENGTH / 2, self.WIDTH / 2, self.HEIGHT / 2)))
+        self.body.addShape(BulletBoxShape((self.WIDTH / 2, self.LENGTH / 2, self.HEIGHT / 2)))
         if self.render:
             if Cyclist.MODEL is None:
                 model = self.loader.loadModel(AssetLoader.file_path("models", "bicycle", "scene.gltf"))
