@@ -4,6 +4,9 @@ from metadrive.component.map.scenario_map import ScenarioMap
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.manager.base_manager import BaseManager
 from metadrive.scenario.parse_object_state import parse_full_trajectory, parse_object_state, get_idm_route
+from metadrive.engine.logger import get_logger, set_log_level
+
+logger = get_logger()
 
 
 class ScenarioMapManager(BaseManager):
@@ -54,6 +57,21 @@ class ScenarioMapManager(BaseManager):
         sdc_traj = parse_full_trajectory(sdc_track)
 
         init_state = parse_object_state(sdc_track, 0, check_last_state=False, include_z_position=True)
+
+        # PZH: There is a wierd bug in the nuscene's source data, the width and length of the object is not consistent.
+        # Maybe this should be handle in ScenarioNet. But for now, we have to handle it here.
+        # As a workaround, we swap the width and length if the width is larger than length.
+        if data["version"].startswith("nuscenesv1.0") or data["metadata"]["dataset"] == "nuscenes":
+            if init_state["width"] > init_state["length"]:
+                init_state["width"], init_state["length"] = init_state["length"], init_state["width"]
+
+        if max(init_state["width"], init_state["length"]) > 2 and (init_state["width"] > init_state["length"]):
+            logger.warning(
+                "The width of the object {} is larger than length {}. Are you sure?".format(
+                    init_state["width"], init_state["length"]
+                )
+            )
+
         last_state = parse_object_state(sdc_track, -1, check_last_state=True)
         init_position = init_state["position"]
 
