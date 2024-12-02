@@ -1,15 +1,15 @@
 import copy
-from metadrive.engine.logger import get_logger
-from metadrive.utils.math import norm
+
 import numpy as np
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
-from metadrive.component.traffic_participants.cyclist import Cyclist
-from metadrive.component.traffic_participants.pedestrian import Pedestrian
+from metadrive.component.traffic_participants.cyclist import Cyclist, CyclistBoundingBox
+from metadrive.component.traffic_participants.pedestrian import Pedestrian, PedestrianBoundingBox
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.component.vehicle.vehicle_type import SVehicle, LVehicle, MVehicle, XLVehicle, \
-    TrafficDefaultVehicle
+from metadrive.component.vehicle.vehicle_type import LVehicle, MVehicle, XLVehicle, \
+    VaryingDynamicsBoundingBoxVehicle
 from metadrive.constants import DEFAULT_AGENT
+from metadrive.engine.logger import get_logger
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -17,6 +17,7 @@ from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
+from metadrive.utils.math import norm
 from metadrive.utils.math import wrap_to_pi
 
 logger = get_logger()
@@ -169,7 +170,10 @@ class ScenarioTrafficManager(BaseManager):
         return list(self.engine.get_objects(filter=lambda o: isinstance(o, BaseVehicle)).values())
 
     def spawn_vehicle(self, v_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
+        use_bounding_box = (
+                self.engine.global_config["vehicle_config"]["vehicle_model"] == "varying_dynamics_bounding_box"
+        )
 
         # for each vehicle, we would like to know if it is static
         if v_id not in self._static_car_id and v_id not in self._moving_car_id:
@@ -184,7 +188,7 @@ class ScenarioTrafficManager(BaseManager):
 
         # if collision don't generate, unless ego car is in replay mode
         ego_pos = self.ego_vehicle.position
-        heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"], ego_pos)
+        heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"][:2], ego_pos)
         if not self.is_ego_vehicle_replay and self._filter_overlapping_car and \
                 abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT and \
                 abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
@@ -236,15 +240,27 @@ class ScenarioTrafficManager(BaseManager):
             self.idm_policy_count += 1
 
     def spawn_pedestrian(self, scenario_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
         if not state["valid"]:
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
+        if self.global_config["use_bounding_box"]:
+            cls = PedestrianBoundingBox
+            force_spawn = True
+        else:
+            cls = Pedestrian
+            force_spawn = False
+
+        position = list(state["position"])
         obj = self.spawn_object(
-            Pedestrian,
+            cls,
             name=obj_name,
-            position=state["position"],
+            position=position,
             heading_theta=state["heading"],
+            width=state["width"],
+            length=state["length"],
+            height=state["height"],
+            force_spawn=force_spawn
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id
@@ -252,15 +268,27 @@ class ScenarioTrafficManager(BaseManager):
         policy.act()
 
     def spawn_cyclist(self, scenario_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
         if not state["valid"]:
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
+        if self.global_config["use_bounding_box"]:
+            cls = CyclistBoundingBox
+            force_spawn = True
+        else:
+            cls = Cyclist
+            force_spawn = False
+
+        position = list(state["position"])
         obj = self.spawn_object(
-            Cyclist,
+            cls,
             name=obj_name,
-            position=state["position"],
+            position=position,
             heading_theta=state["heading"],
+            width=state["width"],
+            length=state["length"],
+            height=state["height"],
+            force_spawn=force_spawn
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id
