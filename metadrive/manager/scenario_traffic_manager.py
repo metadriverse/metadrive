@@ -195,14 +195,27 @@ class ScenarioTrafficManager(BaseManager):
             return
 
         # create vehicle
-        if state["vehicle_class"]:
+        if state["vehicle_class"] and not use_bounding_box:
             vehicle_class = state["vehicle_class"]
         else:
             vehicle_class = get_vehicle_type(
-                float(state["length"]), None if self.even_sample_v else self.np_random, self.need_default_vehicle
+                float(state["length"]),
+                None if self.even_sample_v else self.np_random,
+                self.need_default_vehicle,
+                use_bounding_box=use_bounding_box
             )
+        # print("vehicle_class: ", vehicle_class)
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v_cfg = copy.copy(self._traffic_v_config)
+
+        v_cfg["width"] = state["width"]
+        v_cfg["length"] = state["length"]
+        v_cfg["height"] = state["height"]
+        v_cfg["scale"] = (
+            v_cfg["width"] / vehicle_class.DEFAULT_WIDTH, v_cfg["length"] / vehicle_class.DEFAULT_LENGTH,
+            v_cfg["height"] / vehicle_class.DEFAULT_HEIGHT
+        )
+
         if self.engine.global_config["top_down_show_real_size"]:
             v_cfg["top_down_length"] = track["state"]["length"][self.episode_step]
             v_cfg["top_down_width"] = track["state"]["width"][self.episode_step]
@@ -211,8 +224,19 @@ class ScenarioTrafficManager(BaseManager):
                     "Scenario ID: {}. The top_down size of vehicle {} is weird: "
                     "{}".format(self.engine.current_seed, v_id, [v_cfg["length"], v_cfg["width"]])
                 )
+
+        position = list(state["position"])
+
+        # Add z to make it stick to the ground:
+        assert len(position) == 2
+        position.append(state['height'] / 2)
+
         v = self.spawn_object(
-            vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_cfg, name=obj_name
+            vehicle_class,
+            position=position,
+            heading=state["heading"],
+            vehicle_config=v_cfg,
+            name=obj_name
         )
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id
