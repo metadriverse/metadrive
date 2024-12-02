@@ -7,7 +7,7 @@ from metadrive.component.traffic_participants.cyclist import Cyclist, CyclistBou
 from metadrive.component.traffic_participants.pedestrian import Pedestrian, PedestrianBoundingBox
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.component.vehicle.vehicle_type import LVehicle, MVehicle, XLVehicle, \
-    VaryingDynamicsBoundingBoxVehicle
+    VaryingDynamicsBoundingBoxVehicle, SVehicle, DefaultVehicle
 from metadrive.constants import DEFAULT_AGENT
 from metadrive.engine.logger import get_logger
 from metadrive.manager.base_manager import BaseManager
@@ -79,7 +79,7 @@ class ScenarioTrafficManager(BaseManager):
     def before_reset(self):
         super(ScenarioTrafficManager, self).before_reset()
         self._obj_to_clean_this_frame = []
-        reset_vehicle_type_count(self.np_random)
+        # reset_vehicle_type_count(self.np_random)
 
     def after_reset(self):
         self._scenario_id_to_obj_id = {}
@@ -172,7 +172,7 @@ class ScenarioTrafficManager(BaseManager):
     def spawn_vehicle(self, v_id, track):
         state = parse_object_state(track, self.episode_step, include_z_position=False)
         use_bounding_box = (
-                self.engine.global_config["vehicle_config"]["vehicle_model"] == "varying_dynamics_bounding_box"
+            self.engine.global_config["vehicle_config"]["vehicle_model"] == "varying_dynamics_bounding_box"
         )
 
         # for each vehicle, we would like to know if it is static
@@ -232,11 +232,7 @@ class ScenarioTrafficManager(BaseManager):
         position.append(state['height'] / 2)
 
         v = self.spawn_object(
-            vehicle_class,
-            position=position,
-            heading=state["heading"],
-            vehicle_config=v_cfg,
-            name=obj_name
+            vehicle_class, position=position, heading=state["heading"], vehicle_config=v_cfg, name=obj_name
         )
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id
@@ -355,7 +351,7 @@ class ScenarioTrafficManager(BaseManager):
 
     def is_static_object(self, obj_id):
         return isinstance(self.spawned_objects[obj_id], TrafficBarrier) \
-               or isinstance(self.spawned_objects[obj_id], TrafficCone)
+            or isinstance(self.spawned_objects[obj_id], TrafficCone)
 
     @property
     def obj_id_to_scenario_id(self):
@@ -385,38 +381,38 @@ class ScenarioTrafficManager(BaseManager):
         return v_config
 
 
-type_count = [0 for i in range(3)]
+# type_count = [0 for i in range(3)]
 
 
-def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
+def get_vehicle_type(length, np_random=None, need_default_vehicle=False, use_bounding_box=False):
+    if use_bounding_box:
+        return VaryingDynamicsBoundingBoxVehicle
+    if need_default_vehicle:
+        return DefaultVehicle
     if np_random is not None:
-        if length <= 4:
-            return SVehicle
-        elif length <= 5.5:
-            return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
-        else:
-            return [LVehicle, XLVehicle][np_random.randint(2)]
+        raise DeprecationWarning("To avoid unexpected behavior, please set even_sample_vehicle_class=False.")
+        # if length <= 4:
+        #     return SVehicle
+        # elif length <= 5.5:
+        #     return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
+        # else:
+        #     return [LVehicle, XLVehicle][np_random.randint(2)]
+    # else:
+    # global type_count
+    # evenly sample
+    if length <= 4:
+        return SVehicle
+    elif length <= 5.2:
+        return MVehicle
+    elif length <= 6.2:
+        return LVehicle
     else:
-        global type_count
-        # evenly sample
-        if length <= 4:
-            return SVehicle
-        elif length <= 5.5:
-            type_count[1] += 1
-            vs = [LVehicle, MVehicle, SVehicle]
-            # vs = [SVehicle, LVehicle, MVehicle]
-            if need_default_vehicle:
-                vs.append(TrafficDefaultVehicle)
-            return vs[type_count[1] % len(vs)]
-        else:
-            type_count[2] += 1
-            vs = [LVehicle, XLVehicle]
-            return vs[type_count[2] % len(vs)]
+        return XLVehicle
 
 
-def reset_vehicle_type_count(np_random=None):
-    global type_count
-    if np_random is None:
-        type_count = [0 for i in range(3)]
-    else:
-        type_count = [np_random.randint(100) for i in range(3)]
+# def reset_vehicle_type_count(np_random=None):
+#     global type_count
+#     if np_random is None:
+#         type_count = [0 for i in range(3)]
+#     else:
+#         type_count = [np_random.randint(100) for i in range(3)]
