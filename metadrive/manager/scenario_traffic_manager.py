@@ -386,6 +386,7 @@ class ScenarioTrafficManager(BaseManager):
 
 type_count = [0 for i in range(3)]
 
+
 # FIXME(2024-07-06): Hardcoded
 # def get_vehicle_type(length, np_random=None, need_default_vehicle=False, use_bounding_box=False):
 #     # return XLVehicle
@@ -425,7 +426,6 @@ def get_vehicle_type(length, np_random=None, need_default_vehicle=False, use_bou
         return LVehicle
     else:
         return XLVehicle
-
 
 
 def reset_vehicle_type_count(np_random=None):

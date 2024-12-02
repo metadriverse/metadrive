@@ -24,7 +24,6 @@ class InstanceCamera(BaseCamera):
         """
         self._setup_effect()
         super().track(new_parent_node, position, hpr)
-        
 
     def perceive(
         self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
@@ -46,12 +45,11 @@ class InstanceCamera(BaseCamera):
         else:
             mapping = get_engine().id_c
             spawned_objects = get_engine().get_objects()
-            
+
             ##Ensure consistency between color mapping and the objects actually active in the engine.
-            mapping_set, object_set = set(list(mapping.keys())),set(list(spawned_objects.keys()))
-            assert(len(mapping_set.difference(object_set))==0)
-            
-            
+            mapping_set, object_set = set(list(mapping.keys())), set(list(spawned_objects.keys()))
+            assert (len(mapping_set.difference(object_set)) == 0)
+
             for id, obj in spawned_objects.items():
                 obj.origin.setTag(CameraTagStateKey.ID, id)
             cam = self.get_cam().node()
@@ -62,7 +60,7 @@ class InstanceCamera(BaseCamera):
                     ColorAttrib.makeFlat((0, 0, 0, 1)), 1
                 )
             )
-            
+
             for id in spawned_objects.keys():
                 c = mapping[id]
                 cam.setTagState(id, RenderState.make(ColorAttrib.makeFlat((c[0], c[1], c[2], 1)), 1))

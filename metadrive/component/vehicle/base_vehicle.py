@@ -650,7 +650,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             # assert self.config['length'] > self.config['height'], "Please set the length and height in vehicle config"
 
             assert self.config['scale'] is not None, "Please set the scale in vehicle config"
-            
+
             if self.config['scale'] is not None:
                 # scale = (
                 #     scale[0] * self.config['scale'][0], scale[1] * self.config['scale'][1],
@@ -660,9 +660,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     offset[0] * self.config['scale'][0], offset[1] * self.config['scale'][1],
                     offset[2] * self.config['scale'][2]
                 )
-                scale = (   
-                    self.config['scale'][0], self.config['scale'][1], self.config['scale'][2]
-                )
+                scale = (self.config['scale'][0], self.config['scale'][1], self.config['scale'][2])
 
                 # A quick workaround here.
                 # The model position is set to height/2 in ScenarioMapManager.
@@ -679,12 +677,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             car_model.setZ(extra_offset + offset[2])
             # car_model.setZ(extra_offset)
 
-            BaseVehicle.model_collection[path] = car_model                
+            BaseVehicle.model_collection[path] = car_model
 
             # else:
             #     car_model = BaseVehicle.model_collection[path]
             # print(car_model.getScale())
-                
+
             car_model.instanceTo(self.origin)
             if self.config["random_color"]:
                 material = Material()
@@ -713,12 +711,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # print(self.TIRE_RADIUS, self.CHASSIS_TO_WHEEL_AXIS, 'radius')
         # print(self.config["scale"])
         # if self.config["scale"] is not None:
-            # scale 0 width, 1 length 2 height
-            # f_l *= self.config["scale"][1]
-            # r_l *= self.config["scale"][1]
-            # lateral *= self.config["scale"][0]
-            # axis_height = self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS * self.config["scale"][2]
-            # radius *= self.config["scale"][2]
+        # scale 0 width, 1 length 2 height
+        # f_l *= self.config["scale"][1]
+        # r_l *= self.config["scale"][1]
+        # lateral *= self.config["scale"][0]
+        # axis_height = self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS * self.config["scale"][2]
+        # radius *= self.config["scale"][2]
         for k, pos in enumerate([Vec3(lateral, f_l, axis_height), Vec3(-lateral, f_l, axis_height),
                                  Vec3(lateral, r_l, axis_height), Vec3(-lateral, r_l, axis_height)]):
             wheel = self._add_wheel(pos, radius, True if k < 2 else False, True if k == 0 or k == 2 else False)
@@ -739,14 +737,16 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
             if self.config['scale'] is not None:
                 tire_scale = (
-                    self.config['scale'][0] * tire_scale, self.config['scale'][1] * tire_scale, self.config['scale'][2] * tire_scale
+                    self.config['scale'][0] * tire_scale, self.config['scale'][1] * tire_scale,
+                    self.config['scale'][2] * tire_scale
                 )
 
                 # A quick workaround here.
                 # The model position is set to height/2 in ScenarioMapManager.
                 # Now we set this offset to -height/2, so that the model will be placed on the ground.
                 # For the wheel, the bottom of it is not z=0, so we add two more terms to correct it.
-                extra_offset = -self.config["height"] / 2  + self.TIRE_RADIUS/self.config['scale'][2] + self.CHASSIS_TO_WHEEL_AXIS/self.config['scale'][2]
+                extra_offset = -self.config["height"] / 2 + self.TIRE_RADIUS / self.config['scale'][
+                    2] + self.CHASSIS_TO_WHEEL_AXIS / self.config['scale'][2]
                 wheel_model.setPos(0, 0, extra_offset)
 
             wheel_model.set_scale(tire_scale)
