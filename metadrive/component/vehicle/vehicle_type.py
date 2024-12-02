@@ -20,7 +20,7 @@ class DefaultVehicle(BaseVehicle):
     LATERAL_TIRE_TO_CENTER = 0.815
     FRONT_WHEELBASE = 1.05234
     REAR_WHEELBASE = 1.4166
-    path = ['ferra/vehicle.gltf', (1, 1, 1), (0, 0.075, 0.), (0, 0, 0)]
+    path = ('ferra/vehicle.gltf', (1, 1, 1), (0, 0.075, 0.), (0, 0, 0))  # asset path, scale, offset, HPR
 
     DEFAULT_LENGTH = 4.515  # meters
     DEFAULT_HEIGHT = 1.19  # meters
@@ -65,7 +65,7 @@ class XLVehicle(BaseVehicle):
     MASS = 1600
     LIGHT_POSITION = (-0.75, 2.7, 0.2)
     SEMANTIC_LABEL = Semantics.TRUCK.label
-    path = ['truck/vehicle.gltf', (1, 1, 1), (0, 0.25, 0.04), (0, 0, 0)]
+    path = ('truck/vehicle.gltf', (1, 1, 1), (0, 0.25, 0.04), (0, 0, 0))
 
     DEFAULT_LENGTH = 5.74  # meters
     DEFAULT_HEIGHT = 2.8  # meters
@@ -309,7 +309,7 @@ class VaryingDynamicsBoundingBoxVehicle(VaryingDynamicsVehicle):
 
     def _add_visualization(self):
         if self.render:
-            [path, scale, offset, HPR] = self.path
+            path, scale, offset, HPR = self.path
 
             # PZH: Note that we do not use model_collection as a buffer here.
             # if path not in BaseVehicle.model_collection:

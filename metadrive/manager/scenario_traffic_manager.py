@@ -57,7 +57,10 @@ class ScenarioTrafficManager(BaseManager):
         self._obj_to_clean_this_frame = []
 
         # some flags
-        self.even_sample_v = self.engine.global_config["even_sample_vehicle_class"]
+        self.even_sample_v = self.engine.global_config.get("even_sample_vehicle_class", None)
+        if self.even_sample_v is not None:
+            raise DeprecationWarning("even_sample_vehicle_class is deprecated!")
+
         self.need_default_vehicle = self.engine.global_config["default_vehicle_in_traffic"]
         self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
         self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
@@ -200,7 +203,6 @@ class ScenarioTrafficManager(BaseManager):
         else:
             vehicle_class = get_vehicle_type(
                 float(state["length"]),
-                None if self.even_sample_v else self.np_random,
                 self.need_default_vehicle,
                 use_bounding_box=use_bounding_box
             )
@@ -384,22 +386,11 @@ class ScenarioTrafficManager(BaseManager):
 # type_count = [0 for i in range(3)]
 
 
-def get_vehicle_type(length, np_random=None, need_default_vehicle=False, use_bounding_box=False):
+def get_vehicle_type(length, need_default_vehicle=False, use_bounding_box=False):
     if use_bounding_box:
         return VaryingDynamicsBoundingBoxVehicle
     if need_default_vehicle:
         return DefaultVehicle
-    if np_random is not None:
-        raise DeprecationWarning("To avoid unexpected behavior, please set even_sample_vehicle_class=False.")
-        # if length <= 4:
-        #     return SVehicle
-        # elif length <= 5.5:
-        #     return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
-        # else:
-        #     return [LVehicle, XLVehicle][np_random.randint(2)]
-    # else:
-    # global type_count
-    # evenly sample
     if length <= 4:
         return SVehicle
     elif length <= 5.2:
