@@ -31,7 +31,7 @@ def generate_distinct_rgb_values():
     # Normalize the values to be between 0 and 1
     rgbs = rgbs / 255.0
 
-    return rgbs.tolist()
+    return tuple(tuple(v) for v in rgbs.tolist())
 
 
 COLOR_SPACE = generate_distinct_rgb_values()
