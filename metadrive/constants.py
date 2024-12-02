@@ -393,6 +393,12 @@ class Semantics:
     LANE_LINE = label_color("LANE_LINE", (255, 255, 255))
     CROSSWALK = label_color("CROSSWALK", (55, 176, 189))
 
+    # These color might be prettier?
+    # LANE_LINE = label_color("LANE_LINE", (128, 64, 128))
+    # CROSSWALK = label_color("CROSSWALK", (128, 64, 128))
+
+    BUS = label_color("BUS", (0, 60, 100))  # PZH: I just randomly choose a color.
+
 
 class MapTerrainSemanticColor:
     """
