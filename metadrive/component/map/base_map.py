@@ -271,7 +271,7 @@ class BaseMap(BaseRunnable, ABC):
                 angle = np.arctan2(*dir) / np.pi * 180 + 180
                 # normalize to 0.4-0.714
                 angle = angle / 1000 + MapTerrainSemanticColor.get_color(MetaDriveType.CROSSWALK)
-                cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=angle)
+                cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=angle.tolist())
 
         #     self._semantic_map = mask
         # return self._semantic_map

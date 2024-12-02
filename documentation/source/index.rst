@@ -47,6 +47,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    action.ipynb
    reward_cost_done.ipynb
    training.ipynb
+   multigoal_intersection.ipynb
 
 .. toctree::
    :hidden:

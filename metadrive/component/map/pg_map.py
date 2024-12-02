@@ -20,7 +20,7 @@ def parse_map_config(easy_map_config, new_map_config, default_config):
     assert isinstance(default_config, Config)
 
     # Return the user specified config if overwritten
-    if not default_config["map_config"].is_identical(new_map_config):
+    if easy_map_config is None or not default_config["map_config"].is_identical(new_map_config):
         new_map_config = default_config["map_config"].copy(unchangeable=False).update(new_map_config)
         assert default_config["map"] == easy_map_config
         return new_map_config
@@ -143,7 +143,7 @@ class PGMap(BaseMap):
                             continue
                         color = l.line_colors[side]
                         line_type = self.get_line_type(type, color)
-                        lateral = l.width_at(0) / 2
+                        lateral = l.width / 2
                         if side == 0:
                             lateral *= -1
                         ret["{}_{}".format(l.index, side)] = {

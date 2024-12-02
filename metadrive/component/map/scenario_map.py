@@ -12,10 +12,12 @@ from metadrive.utils.math import resample_polyline, get_polyline_length
 
 
 class ScenarioMap(BaseMap):
-    def __init__(self, map_index, map_data, random_seed=None):
+    def __init__(self, map_index, map_data, random_seed=None, need_lane_localization=False):
         self.map_index = map_index
         self.map_data = map_data
-        self.need_lane_localization = self.engine.global_config["need_lane_localization"]
+        self.need_lane_localization = need_lane_localization or self.engine.global_config.get(
+            "need_lane_localization", False
+        )
         super(ScenarioMap, self).__init__(dict(id=self.map_index), random_seed=random_seed)
 
     def show_coordinates(self):
