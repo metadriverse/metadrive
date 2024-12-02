@@ -53,7 +53,6 @@ class ScenarioMapManager(BaseManager):
 
         sdc_traj = parse_full_trajectory(sdc_track)
 
-        init_state = parse_object_state(sdc_track, 0, check_last_state=False)
         init_state = parse_object_state(sdc_track, 0, check_last_state=False, include_z_position=True)
         last_state = parse_object_state(sdc_track, -1, check_last_state=True)
         init_position = init_state["position"]
