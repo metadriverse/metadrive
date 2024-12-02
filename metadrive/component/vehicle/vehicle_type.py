@@ -220,25 +220,25 @@ class VaryingDynamicsVehicle(DefaultVehicle):
             if vehicle_config["length"] is not None and vehicle_config["length"] != self.LENGTH:
                 should_force_reset = True
             if "max_engine_force" in vehicle_config and \
-                    vehicle_config["max_engine_force"] is not None and \
-                    vehicle_config["max_engine_force"] != self.config["max_engine_force"]:
+                vehicle_config["max_engine_force"] is not None and \
+                vehicle_config["max_engine_force"] != self.config["max_engine_force"]:
                 should_force_reset = True
             if "max_brake_force" in vehicle_config and \
-                    vehicle_config["max_brake_force"] is not None and \
-                    vehicle_config["max_brake_force"] != self.config["max_brake_force"]:
+                vehicle_config["max_brake_force"] is not None and \
+                vehicle_config["max_brake_force"] != self.config["max_brake_force"]:
                 should_force_reset = True
             if "wheel_friction" in vehicle_config and \
-                    vehicle_config["wheel_friction"] is not None and \
-                    vehicle_config["wheel_friction"] != self.config["wheel_friction"]:
+                vehicle_config["wheel_friction"] is not None and \
+                vehicle_config["wheel_friction"] != self.config["wheel_friction"]:
                 should_force_reset = True
             if "max_steering" in vehicle_config and \
-                    vehicle_config["max_steering"] is not None and \
-                    vehicle_config["max_steering"] != self.config["max_steering"]:
+                vehicle_config["max_steering"] is not None and \
+                vehicle_config["max_steering"] != self.config["max_steering"]:
                 self.max_steering = vehicle_config["max_steering"]
                 should_force_reset = True
             if "mass" in vehicle_config and \
-                    vehicle_config["mass"] is not None and \
-                    vehicle_config["mass"] != self.config["mass"]:
+                vehicle_config["mass"] is not None and \
+                vehicle_config["mass"] != self.config["mass"]:
                 should_force_reset = True
 
         # def process_memory():
@@ -301,6 +301,7 @@ vehicle_type = {
     "default": DefaultVehicle,
     "static_default": StaticDefaultVehicle,
     "varying_dynamics": VaryingDynamicsVehicle,
+    "varying_dynamics_bounding_box": VaryingDynamicsBoundingBoxVehicle,
     "traffic_default": TrafficDefaultVehicle
 }
 
