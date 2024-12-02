@@ -1,8 +1,12 @@
 import platform
 
-from metadrive.component.pg_space import ParameterSpace, VehicleParameterSpace
+from panda3d.core import LineSegs, NodePath
+from panda3d.core import Material, Vec3, LVecBase4
+
+from metadrive.component.pg_space import VehicleParameterSpace, ParameterSpace
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
 from metadrive.constants import Semantics
+from metadrive.engine.asset_loader import AssetLoader
 
 
 class DefaultVehicle(BaseVehicle):
@@ -62,6 +66,10 @@ class XLVehicle(BaseVehicle):
     LIGHT_POSITION = (-0.75, 2.7, 0.2)
     SEMANTIC_LABEL = Semantics.TRUCK.label
     path = ['truck/vehicle.gltf', (1, 1, 1), (0, 0.25, 0.04), (0, 0, 0)]
+
+    DEFAULT_LENGTH = 5.74  # meters
+    DEFAULT_HEIGHT = 2.8  # meters
+    DEFAULT_WIDTH = 2.3  # meters
 
     @property
     def LENGTH(self):
