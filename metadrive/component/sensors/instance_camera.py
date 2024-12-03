@@ -33,9 +33,8 @@ class InstanceCamera(BaseCamera):
 
     def _setup_effect(self):
         """
-        Use tag to apply color to different objects(instances)
+        Use tag to apply color to different objects (instances)
         Returns: None
-
         """
         # setup camera
 
@@ -62,4 +61,5 @@ class InstanceCamera(BaseCamera):
 
             for id in spawned_objects.keys():
                 c = mapping[id]
+                assert c in self.engine.COLORS_OCCUPIED
                 cam.setTagState(id, RenderState.make(ColorAttrib.makeFlat((c[0], c[1], c[2], 1)), 1))

@@ -156,8 +156,11 @@ class BaseEngine(EngineCore, Randomizable):
         self._spawned_objects[obj.id] = obj
         color = self._pick_color(obj.id)
         if color == (-1, -1, -1):
-            print("FK!~")
-            exit()
+            raise ValueError(
+                "No color available for object: {} instance segment mask. We already used all {} colors...".format(
+                    obj.id, BaseEngine.MAX_COLOR
+                )
+            )
 
         obj.attach_to_world(self.worldNP, self.physics_world)
         return obj
@@ -191,15 +194,15 @@ class BaseEngine(EngineCore, Randomizable):
 
         """
         if id in self.id_c.keys():
-            my_color = self.id_c[id]
+            my_color = self.id_c.pop(id)
             if my_color in BaseEngine.COLORS_OCCUPIED:
                 BaseEngine.COLORS_OCCUPIED.remove(my_color)
             BaseEngine.COLORS_FREE.add(my_color)
             # print("After cleaning:,", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
-            if id in self.id_c.keys():
-                self.id_c.pop(id)
-            if my_color in self.c_id.keys():
-                self.c_id.pop(my_color)
+            # if id in self.id_c.keys():
+            #     self.id_c.pop(id)
+            assert my_color in self.c_id.keys()
+            self.c_id.pop(my_color)
 
     def id_to_color(self, id):
         if id in self.id_c.keys():
