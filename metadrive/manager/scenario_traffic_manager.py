@@ -229,7 +229,8 @@ class ScenarioTrafficManager(BaseManager):
 
         # Add z to make it stick to the ground:
         assert len(position) == 2
-        position.append(state['height'] / 2)
+        if use_bounding_box:
+            position.append(state['height'] / 2)
 
         v = self.spawn_object(
             vehicle_class, position=position, heading=state["heading"], vehicle_config=v_cfg, name=obj_name
