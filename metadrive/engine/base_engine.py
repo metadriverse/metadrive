@@ -21,9 +21,10 @@ logger = get_logger()
 
 
 def generate_distinct_rgb_values():
-    r = np.linspace(0, 256, 16)
-    g = np.linspace(0, 256, 16)
-    b = np.linspace(0, 256, 16)
+    # Try to avoid (0,0,0) and (255,255,255) to avoid confusion with the background and other objects.
+    r = np.linspace(16, 256 - 16, 16).astype(int)
+    g = np.linspace(16, 256 - 16, 16).astype(int)
+    b = np.linspace(16, 256 - 16, 16).astype(int)
 
     # Create a meshgrid and reshape to get all combinations of r, g, b
     rgbs = np.array(np.meshgrid(r, g, b)).T.reshape(-1, 3)
@@ -31,10 +32,7 @@ def generate_distinct_rgb_values():
     # Normalize the values to be between 0 and 1
     rgbs = rgbs / 255.0
 
-    # Round to 5 decimal places to avoid floating point errors
-    rgbs = np.round(rgbs, 5)
-
-    return tuple(tuple(v) for v in rgbs.tolist())
+    return tuple(tuple(round(vv, 5) for vv in v) for v in rgbs)
 
 
 COLOR_SPACE = generate_distinct_rgb_values()
