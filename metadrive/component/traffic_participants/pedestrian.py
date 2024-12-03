@@ -1,3 +1,5 @@
+from typing import Dict
+
 from direct.actor.Actor import Actor
 from panda3d.bullet import BulletCylinderShape, BulletBoxShape
 from panda3d.core import LVecBase4
@@ -118,6 +120,16 @@ class Pedestrian(BaseTrafficParticipant):
     @property
     def top_down_length(self):
         return self.RADIUS * 2
+
+    def get_state(self) -> Dict:
+        state = super(Pedestrian, self).get_state()
+        state.update({
+            "length": self.RADIUS * 2,
+            "width": self.RADIUS * 2,
+            "height": self.HEIGHT,
+            "radius": self.RADIUS,
+        })
+        return state
 
 
 class PedestrianBoundingBox(BaseTrafficParticipant):

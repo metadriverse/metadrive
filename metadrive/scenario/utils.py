@@ -175,6 +175,10 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 velocity=np.zeros(shape=(episode_len, 2)),
                 valid=np.zeros(shape=(episode_len, )),
 
+                width=np.zeros(shape=(episode_len,)),
+                length=np.zeros(shape=(episode_len,)),
+                height=np.zeros(shape=(episode_len,)),
+
                 # Add these items when the object has them.
                 # throttle_brake=np.zeros(shape=(episode_len, 1)),
                 # steering=np.zeros(shape=(episode_len, 1)),
@@ -245,6 +249,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 tracks[id]["state"]["position"][frame_idx] = state["position"]
                 tracks[id]["state"]["heading"][frame_idx] = state["heading_theta"]
                 tracks[id]["state"]["velocity"][frame_idx] = state["velocity"]
+                tracks[id]["state"]["width"][frame_idx] = state["width"]
+                tracks[id]["state"]["length"][frame_idx] = state["length"]
+                tracks[id]["state"]["height"][frame_idx] = state["height"]
                 tracks[id]["state"]["valid"][frame_idx] = 1
 
                 if "throttle_brake" in state:

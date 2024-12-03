@@ -17,6 +17,22 @@ class Cyclist(BaseTrafficParticipant):
 
     HEIGHT = 1.75
 
+    DEFAULT_LENGTH = 1.75  # meters
+    DEFAULT_HEIGHT = 1.75  # meters
+    DEFAULT_WIDTH = 0.4  # meters
+
+    @property
+    def LENGTH(self):
+        return self.DEFAULT_LENGTH
+
+    @property
+    def HEIGHT(self):
+        return self.DEFAULT_HEIGHT
+
+    @property
+    def WIDTH(self):
+        return self.DEFAULT_WIDTH
+
     def __init__(self, position, heading_theta, random_seed, name=None, **kwargs):
         super(Cyclist, self).__init__(position, heading_theta, random_seed, name=name)
         self.set_metadrive_type(self.TYPE_NAME)
@@ -36,13 +52,14 @@ class Cyclist(BaseTrafficParticipant):
         super(Cyclist, self).set_velocity(direction, value, in_local_frame)
         self.standup()
 
-    @property
-    def WIDTH(self):
-        return 0.4
-
-    @property
-    def LENGTH(self):
-        return 1.75
+    def get_state(self):
+        state = super(Cyclist, self).get_state()
+        state.update({
+            "length": self.LENGTH,
+            "width": self.WIDTH,
+            "height": self.HEIGHT,
+        })
+        return state
 
 
 class CyclistBoundingBox(BaseTrafficParticipant):
