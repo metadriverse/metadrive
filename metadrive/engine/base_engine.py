@@ -31,6 +31,9 @@ def generate_distinct_rgb_values():
     # Normalize the values to be between 0 and 1
     rgbs = rgbs / 255.0
 
+    # Round to 5 decimal places to avoid floating point errors
+    rgbs = np.round(rgbs, 5)
+
     return tuple(tuple(v) for v in rgbs.tolist())
 
 

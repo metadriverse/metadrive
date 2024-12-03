@@ -63,7 +63,13 @@ def test_instance_cam(config, render=False):
                     color = unique_color.tolist()
                     color = (
                         round(color[2], 5), round(color[1], 5), round(color[0], 5)
-                    )  #In engine, we use 5-diigt float for keys
+                    )  #In engine, we use 5-digit float for keys
+                    if color not in env.engine.COLORS_OCCUPIED:
+                        import matplotlib.pyplot as plt
+                        plt.imshow(o["image"][..., -1])
+                        plt.show()
+                        print("Unique colors:", unique_colors)
+                        print("Occupied colors:", env.engine.COLORS_OCCUPIED)
                     assert color in env.engine.COLORS_OCCUPIED
                     assert color not in env.engine.COLORS_FREE
                     assert color in env.engine.c_id.keys()
@@ -84,4 +90,4 @@ def test_instance_cam(config, render=False):
 
 if __name__ == '__main__':
     test_instance_cam(config=blackbox_test_configs["small"], render=True)
-    my_dict = {(0, 0, 0): "Hello, World!"}
+    # my_dict = {(0, 0, 0): "Hello, World!"}
