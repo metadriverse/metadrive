@@ -42,7 +42,7 @@ def test_instance_cam(config, render=False):
         env.reset()
         base_free = len(env.engine.COLORS_FREE)
         base_occupied = len(env.engine.COLORS_OCCUPIED)
-        assert base_free + base_occupied == 4096
+        assert base_free + base_occupied == env.engine.MAX_COLOR
         import cv2
         import time
         start = time.time()
@@ -63,14 +63,20 @@ def test_instance_cam(config, render=False):
                     color = unique_color.tolist()
                     color = (
                         round(color[2], 5), round(color[1], 5), round(color[0], 5)
-                    )  #In engine, we use 5-diigt float for keys
+                    )  #In engine, we use 5-digit float for keys
+                    if color not in env.engine.COLORS_OCCUPIED:
+                        import matplotlib.pyplot as plt
+                        plt.imshow(o["image"][..., -1])
+                        plt.show()
+                        print("Unique colors:", unique_colors)
+                        print("Occupied colors:", env.engine.COLORS_OCCUPIED)
                     assert color in env.engine.COLORS_OCCUPIED
                     assert color not in env.engine.COLORS_FREE
                     assert color in env.engine.c_id.keys()
                     assert env.engine.id_c[env.engine.c_id[color]] == color  #Making sure the color-id is a bijection
                     assert len(env.engine.c_id.keys()) == len(env.engine.COLORS_OCCUPIED)
                     assert len(env.engine.id_c.keys()) == len(env.engine.COLORS_OCCUPIED)
-                    assert len(env.engine.COLORS_FREE) + len(env.engine.COLORS_OCCUPIED) == 4096
+                    assert len(env.engine.COLORS_FREE) + len(env.engine.COLORS_OCCUPIED) == env.engine.MAX_COLOR
             #Making sure every object in the engine(not necessarily observable) have corresponding color
             for id, object in env.engine.get_objects().items():
                 assert id in env.engine.id_c.keys()
@@ -84,4 +90,4 @@ def test_instance_cam(config, render=False):
 
 if __name__ == '__main__':
     test_instance_cam(config=blackbox_test_configs["small"], render=True)
-    my_dict = {(0, 0, 0): "Hello, World!"}
+    # my_dict = {(0, 0, 0): "Hello, World!"}
