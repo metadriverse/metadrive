@@ -174,10 +174,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 heading=np.zeros(shape=(episode_len, )),
                 velocity=np.zeros(shape=(episode_len, 2)),
                 valid=np.zeros(shape=(episode_len, )),
-
-                width=np.zeros(shape=(episode_len,)),
-                length=np.zeros(shape=(episode_len,)),
-                height=np.zeros(shape=(episode_len,)),
+                width=np.zeros(shape=(episode_len, )),
+                length=np.zeros(shape=(episode_len, )),
+                height=np.zeros(shape=(episode_len, )),
 
                 # Add these items when the object has them.
                 # throttle_brake=np.zeros(shape=(episode_len, 1)),

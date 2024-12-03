@@ -123,12 +123,14 @@ class Pedestrian(BaseTrafficParticipant):
 
     def get_state(self) -> Dict:
         state = super(Pedestrian, self).get_state()
-        state.update({
-            "length": self.RADIUS * 2,
-            "width": self.RADIUS * 2,
-            "height": self.HEIGHT,
-            "radius": self.RADIUS,
-        })
+        state.update(
+            {
+                "length": self.RADIUS * 2,
+                "width": self.RADIUS * 2,
+                "height": self.HEIGHT,
+                "radius": self.RADIUS,
+            }
+        )
         return state
 
 
