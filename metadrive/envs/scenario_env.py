@@ -59,6 +59,12 @@ SCENARIO_ENV_CONFIG = dict(
         lane_line_detector=dict(num_lasers=0, distance=50),
         side_detector=dict(num_lasers=12, distance=50),
     ),
+    # If set_static=True, then the agent will not "fall from the sky". This will be helpful if you want to
+    # capture per-frame data for the agent (for example for collecting static sensor data).
+    # However, the physics engine will not update the position of the agent. So in the visualization, the image will be
+    # very chunky as the agent will not suddenly move to the next position for each step.
+    # Set to False for better visualization.
+    set_static=False,
 
     # ===== Reward Scheme =====
     # See: https://github.com/metadriverse/metadrive/issues/283
@@ -428,7 +434,8 @@ if __name__ == "__main__":
             # "no_traffic":True,
             # "start_scenario_index": 192,
             # "start_scenario_index": 1000,
-            "num_scenarios": 30,
+            "num_scenarios": 3,
+            "set_static": True,
             # "force_reuse_object_name": True,
             # "data_directory": "/home/shady/Downloads/test_processed",
             "horizon": 1000,
@@ -442,7 +449,7 @@ if __name__ == "__main__":
                 lane_line_detector=dict(num_lasers=12, distance=50),
                 side_detector=dict(num_lasers=160, distance=50)
             ),
-            "data_directory": AssetLoader.file_path("nuplan", unix_style=False),
+            "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
         }
     )
     success = []
