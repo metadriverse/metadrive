@@ -188,6 +188,7 @@ class ScenarioOnlineDataManager(BaseManager):
 
     def set_scenario(self, scenario_description):
         SD.sanity_check(scenario_description)
+        scenario_description = SD.centralize_to_ego_car_initial_position(scenario_description)
         self._scenario = scenario_description
 
     def get_scenario(self, seed=None, should_copy=False):
