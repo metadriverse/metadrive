@@ -10,7 +10,7 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.base_env import BaseEnv
 from metadrive.manager.scenario_agent_manager import ScenarioAgentManager
 from metadrive.manager.scenario_curriculum_manager import ScenarioCurriculumManager
-from metadrive.manager.scenario_data_manager import ScenarioDataManager
+from metadrive.manager.scenario_data_manager import ScenarioDataManager, ScenarioOnlineDataManager
 from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.scenario_traffic_manager import ScenarioTrafficManager
@@ -397,6 +397,24 @@ class ScenarioEnv(BaseEnv):
             current_seed, self.config["start_scenario_index"],
             self.config["start_scenario_index"] + self.config["num_scenarios"])
         self.seed(current_seed)
+
+
+class ScenarioOnlineEnv(ScenarioEnv):
+    """
+    This environment allow the user to pass in scenario data directly.
+    """
+    def __init__(self, config=None):
+        super(ScenarioOnlineEnv, self).__init__(config)
+        self.lazy_init()
+
+    def setup_engine(self):
+        """Overwrite the data_manager by ScenarioOnlineDataManager"""
+        super().setup_engine()
+        self.engine.update_manager("data_manager", ScenarioOnlineDataManager())
+
+    def set_scenario(self, scenario_data):
+        """Please call this function before env.reset()"""
+        self.engine.data_manager.set_scenario(scenario_data)
 
 
 if __name__ == "__main__":
