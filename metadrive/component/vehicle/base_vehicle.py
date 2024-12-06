@@ -145,15 +145,6 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         self.add_body(vehicle_chassis.getChassis())
         self.system = vehicle_chassis
         self.chassis = self.origin
-
-        if self.config["scale"] is not None:
-            w, l, h = self.config["scale"]
-            self.FRONT_WHEELBASE *= l
-            self.REAR_WHEELBASE *= l
-            self.LATERAL_TIRE_TO_CENTER *= w
-            self.TIRE_RADIUS *= h
-            self.CHASSIS_TO_WHEEL_AXIS *= h
-
         self.wheels = self._create_wheel()
 
         # light experimental!
@@ -635,7 +626,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
     def _add_visualization(self):
         if self.render:
-            path, scale, offset, HPR = self.path
+            [path, scale, offset, HPR] = self.path
             should_update = (path not in BaseVehicle.model_collection) or (self.config["scale"] is not None)
 
             if should_update:
@@ -659,10 +650,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 car_model.setHpr(*HPR)
                 car_model.setPos(offset[0], offset[1], offset[2] + extra_offset_z)
                 BaseVehicle.model_collection[path] = car_model
-
             else:
                 car_model = BaseVehicle.model_collection[path]
-
             car_model.instanceTo(self.origin)
             if self.config["random_color"]:
                 material = Material()
@@ -704,23 +693,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             wheel_model = self.loader.loadModel(model_path)
             wheel_model.setTwoSided(self.TIRE_TWO_SIDED)
             wheel_model.reparentTo(wheel_np)
-            tire_scale = 1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT
-
-            if self.config['scale'] is not None:
-                tire_scale = (
-                    self.config['scale'][0] * tire_scale, self.config['scale'][1] * tire_scale,
-                    self.config['scale'][2] * tire_scale
-                )
-
-                # A quick workaround here.
-                # The model position is set to height/2 in ScenarioMapManager.
-                # Now we set this offset to -height/2, so that the model will be placed on the ground.
-                # For the wheel, the bottom of it is not z=0, so we add two more terms to correct it.
-                extra_offset = -self.config["height"] / 2 + self.TIRE_RADIUS / self.config['scale'][
-                    2] + self.CHASSIS_TO_WHEEL_AXIS / self.config['scale'][2]
-                wheel_model.setPos(0, 0, extra_offset)
-
-            wheel_model.set_scale(tire_scale)
+            wheel_model.set_scale(1 * self.TIRE_MODEL_CORRECT if left else -1 * self.TIRE_MODEL_CORRECT)
         wheel = self.system.createWheel()
         wheel.setNode(wheel_np.node())
         wheel.setChassisConnectionPointCs(pos)
