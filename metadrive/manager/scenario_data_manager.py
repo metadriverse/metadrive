@@ -191,6 +191,7 @@ class ScenarioOnlineDataManager(BaseManager):
         self._scenario = scenario_description
 
     def get_scenario(self, seed=None, should_copy=False):
+        assert self._scenario is not None, "Please set scenario first via env.set_scenario(scenario_description)!"
         if should_copy:
             return copy.deepcopy(self._scenario)
         return self._scenario
