@@ -397,8 +397,18 @@ class ScenarioOnlineEnv(ScenarioEnv):
     """
     This environment allow the user to pass in scenario data directly.
     """
+    def __init__(self, config=None):
+        super(ScenarioOnlineEnv, self).__init__(config)
+        self.lazy_init()
+
     def setup_engine(self):
+        """Overwrite the data_manager by ScenarioOnlineDataManager"""
+        super().setup_engine()
         self.engine.update_manager("data_manager", ScenarioOnlineDataManager())
+
+    def set_scenario(self, scenario_data):
+        """Please call this function before env.reset()"""
+        self.engine.data_manager.set_scenario(scenario_data)
 
 
 if __name__ == "__main__":
