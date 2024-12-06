@@ -48,11 +48,6 @@ cd metadrive
 pip install -e .
 ```
 
-or
-
-```bash
-pip install metadrive-simulator
-```
 *Note that the program is tested on both Linux and Windows. Some control and display issues in MacOS wait to be solved*
 
 You can verify the installation of MetaDrive via running the testing script:

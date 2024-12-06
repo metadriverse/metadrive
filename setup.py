@@ -122,7 +122,10 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 6. Upload to production channel
     twine upload dist/*
 
-7. Draft a release on github with new version number and upload assets.zip and the generated .whl files to the release.
+7. Draft a release on github with new version number.
+Create new tag. 
+Set target to main.
+Upload assets.zip and the generated .whl files to the release.
 
 8. Publish the release
 
