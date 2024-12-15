@@ -42,17 +42,14 @@ def test_first_frame_depth_cam():
             "camera_height": 1.5,
             "camera_pitch": None,
             "camera_fov": 60,
-            "interface_panel": ["semantic_camera"],
+
+            # "interface_panel": ["semantic_camera"],
+            # "show_interface": True,
             "sensors": dict(
                 # semantic_camera=(SemanticCamera, 1600, 900),
                 depth_camera=(DepthCamera, 800, 600),
                 # rgb_camera=(RGBCamera, 800, 600),
             ),
-
-            # ===== Remove useless items in the images =====
-            "show_logo": False,
-            "show_fps": False,
-            "show_interface": True,
         }
     )
 
