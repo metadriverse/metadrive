@@ -10,11 +10,11 @@ def test_first_frame_depth_cam():
     env = ScenarioEnv(
         {
             # To enable onscreen rendering, set this config to True.
-            "use_render": False,
+            # "use_render": False,
 
             # !!!!! To enable offscreen rendering, set this config to True !!!!!
             "image_observation": True,
-            "render_pipeline": False,
+            # "render_pipeline": False,
 
             # ===== The scenario and MetaDrive config =====
             "agent_policy": ReplayEgoCarPolicy,
@@ -23,25 +23,25 @@ def test_first_frame_depth_cam():
             "reactive_traffic": False,
             "start_scenario_index": 0,
             "num_scenarios": 10,
-            "horizon": 1000,
-            "no_static_vehicles": False,
+            # "horizon": 1000,
+            # "no_static_vehicles": False,
             "vehicle_config": dict(
-                show_navi_mark=False,
-                use_special_color=False,
+                # show_navi_mark=False,
+                # use_special_color=False,
                 image_source="depth_camera",
-                lidar=dict(num_lasers=120, distance=50),
-                lane_line_detector=dict(num_lasers=0, distance=50),
-                side_detector=dict(num_lasers=12, distance=50)
+                # lidar=dict(num_lasers=120, distance=50),
+                # lane_line_detector=dict(num_lasers=0, distance=50),
+                # side_detector=dict(num_lasers=12, distance=50)
             ),
             "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
 
             # ===== Set some sensor and visualization configs =====
-            "daytime": "08:10",
-            "window_size": (800, 450),
-            "camera_dist": 0.8,
-            "camera_height": 1.5,
-            "camera_pitch": None,
-            "camera_fov": 60,
+            # "daytime": "08:10",
+            # "window_size": (800, 450),
+            # "camera_dist": 0.8,
+            # "camera_height": 1.5,
+            # "camera_pitch": None,
+            # "camera_fov": 60,
 
             # "interface_panel": ["semantic_camera"],
             # "show_interface": True,
@@ -56,7 +56,10 @@ def test_first_frame_depth_cam():
     for ep in tqdm.trange(5):
         env.reset()
         for t in range(10000):
-            img = env.engine.get_sensor("depth_camera").get_image(env.agent)
+
+            img = env.engine.get_sensor("depth_camera").perceive(False)
+            # img = env.engine.get_sensor("depth_camera").get_image(env.agent)
+
             assert not (img == 255).all()
             if t == 5:
                 break
