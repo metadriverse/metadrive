@@ -160,6 +160,8 @@ class BaseCamera(ImageBuffer, BaseSensor):
         Return:
             Array representing the image.
         """
+
+        different_pos_hpr = False
         if new_parent_node:
             if position is None:
                 position = constants.DEFAULT_SENSOR_OFFSET
@@ -180,6 +182,14 @@ class BaseCamera(ImageBuffer, BaseSensor):
             assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing " \
                                   "the heading/pitch/roll."
             self.cam.setHpr(Vec3(*hpr))
+
+            different_pos_hpr = (original_hpr != Vec3(*hpr)) or (original_position != Vec3(*position))
+
+            self.engine.taskMgr.step()
+
+        if different_pos_hpr:
+            # Step the engine to call a new "self.engine.graphicsEngine.renderFrame()"
+            # (not sure why need to step twice...
             self.engine.taskMgr.step()
 
         if self.enable_cuda:
