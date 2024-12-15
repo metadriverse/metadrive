@@ -506,8 +506,19 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     self.system.applyEngineForce(max_engine_force * throttle_brake, wheel_index)
                     self.system.setBrake(0, wheel_index)
                 else:
-                    self.system.applyEngineForce(0.0, wheel_index)
-                    self.system.setBrake(abs(throttle_brake) * max_brake_force, wheel_index)
+                    DEADZONE = 0.01
+
+                    # Speed m/s in car's heading:
+                    heading = self.heading
+                    velocity = self.velocity
+                    speed_in_heading = velocity[0] * heading[0] + velocity[1] * heading[1]
+
+                    if speed_in_heading < DEADZONE:
+                        self.system.applyEngineForce(0.0, wheel_index)
+                        self.system.setBrake(2, wheel_index)
+                    else:
+                        self.system.applyEngineForce(0.0, wheel_index)
+                        self.system.setBrake(abs(throttle_brake) * max_brake_force, wheel_index)
 
     """---------------------------------------- vehicle info ----------------------------------------------"""
 
