@@ -1,5 +1,6 @@
 """
 Issue from: https://github.com/metadriverse/metadrive/issues/775
+Fixed by: https://github.com/metadriverse/metadrive/pull/788
 """
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
@@ -97,7 +98,7 @@ try:
     # generate_gif(frames if os.getenv('TEST_DOC') else frames[-100:])  # only show -100 frames
 
     # Save image to disk
-    cv2.imwrite("multiview_observation_image_on_cuda.png", frames[-1])
+    cv2.imwrite("multiview_observation_with_image_on_cuda_no_fix.png", frames[-1])
 
 finally:
     env.close()

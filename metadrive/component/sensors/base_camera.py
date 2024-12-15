@@ -188,7 +188,9 @@ class BaseCamera(ImageBuffer, BaseSensor):
             self.engine.taskMgr.step()
 
         if different_pos_hpr:
-            self.engine.graphicsEngine.renderFrame()
+            # Step the engine to call a new "self.engine.graphicsEngine.renderFrame()"
+            # (not sure why need to step twice...
+            self.engine.taskMgr.step()
 
         if self.enable_cuda:
             assert self.cuda_rendered_result is not None
