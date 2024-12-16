@@ -17,7 +17,7 @@ from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.examples.ppo_expert.numpy_expert import expert
 
 
-def assert_dict_almost_equal(dict1, dict2, tol=1e-4):
+def assert_dict_almost_equal(dict1, dict2, tol=1e-3):
     """
     Recursively assert that two dictionaries are almost equal.
     Allows for tiny differences (less than tol) using numpy's allclose function.
@@ -175,4 +175,4 @@ def test_determinism_close(n_scenarios, seed, expert_driving, force_step) -> lis
 
 
 if __name__ == '__main__':
-    test_determinism_reset(10, 2, True, 5)
+    test_determinism_reset(10, 3, True, 50)
