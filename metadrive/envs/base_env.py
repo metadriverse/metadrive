@@ -566,6 +566,8 @@ class BaseEnv(gym.Env):
                 for name, sensor in self.engine.sensors.items():
                     if hasattr(sensor, "track") and name != "main_camera":
                         sensor.track(current_track_agent.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
+        # Step the env to avoid the black screen in the first frame.
+        self.engine.taskMgr.step()
 
     def _get_reset_return(self, reset_info):
         # TODO: figure out how to get the information of the before step
