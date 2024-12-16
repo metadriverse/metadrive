@@ -53,17 +53,21 @@ def test_first_frame_depth_cam():
         }
     )
 
-    for ep in tqdm.trange(5):
-        env.reset()
-        for t in range(10000):
+    try:
+        for ep in tqdm.trange(5):
+            env.reset()
+            for t in range(10000):
 
-            img = env.engine.get_sensor("depth_camera").perceive(False)
-            # img = env.engine.get_sensor("depth_camera").get_image(env.agent)
+                img = env.engine.get_sensor("depth_camera").perceive(False)
+                # img = env.engine.get_sensor("depth_camera").get_image(env.agent)
 
-            assert not (img == 255).all()
-            if t == 5:
-                break
-            env.step([1, 0.88])
+                assert not (img == 255).all()
+                if t == 5:
+                    break
+                env.step([1, 0.88])
+
+    finally:
+        env.close()
 
 
 if __name__ == '__main__':
