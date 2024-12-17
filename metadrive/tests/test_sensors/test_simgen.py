@@ -20,6 +20,7 @@ from metadrive.obs.image_obs import ImageObservation
 from metadrive.obs.observation_base import BaseObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
+
 def test_simgen():
     class SimGenObservation(BaseObservation):
         def __init__(self, config):
@@ -86,10 +87,9 @@ def test_simgen():
 
             return ret
 
-
     # ===== MetaDrive Setup =====
 
-    sensor_size = (80, 45) #if os.getenv('TEST_DOC') else (800, 450)
+    sensor_size = (80, 45)  #if os.getenv('TEST_DOC') else (800, 450)
 
     env = ScenarioEnv(
         {
@@ -100,7 +100,6 @@ def test_simgen():
 
             # !!!!! To enable offscreen rendering, set this config to True !!!!!
             "image_observation": True,
-
             "norm_pixel": False,
             "stack_size": 1,
 
@@ -125,7 +124,6 @@ def test_simgen():
             # "use_bounding_box": True,
             "data_directory": AssetLoader.file_path("nuscenes", unix_style=False),
             "height_scale": 1,
-
             "set_static": True,
 
             # ===== Set some sensor and visualization configs =====
@@ -138,7 +136,7 @@ def test_simgen():
             "sensors": dict(
                 depth_camera=(DepthCamera, sensor_size[0], sensor_size[1]),
                 rgb_camera=(RGBCamera, sensor_size[0], sensor_size[1]),
-                seg_camera=(SemanticCamera,sensor_size[0], sensor_size[1]),
+                seg_camera=(SemanticCamera, sensor_size[0], sensor_size[1]),
             ),
 
             # ===== Remove useless items in the images =====
@@ -174,12 +172,12 @@ def test_simgen():
                 seg_img = Image.fromarray(o["seg"], mode="RGB")
                 rgb_img = Image.fromarray(o["rgb"], mode="RGB")
 
-                assert not (o["seg"]==255).all()
-                assert not (o["seg"]==0).all()
-                assert not (o["depth"]==255).all()
-                assert not (o["depth"]==0).all()
-                assert not (o["rgb"]==255).all()
-                assert not (o["rgb"]==0).all()
+                assert not (o["seg"] == 255).all()
+                assert not (o["seg"] == 0).all()
+                assert not (o["depth"] == 255).all()
+                assert not (o["depth"] == 0).all()
+                assert not (o["rgb"] == 255).all()
+                assert not (o["rgb"] == 0).all()
 
     finally:
         env.close()
@@ -245,6 +243,7 @@ def test_simgen():
 
     finally:
         env.close()
+
 
 if __name__ == '__main__':
     test_simgen()
