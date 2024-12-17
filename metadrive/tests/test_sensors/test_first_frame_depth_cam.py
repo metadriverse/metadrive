@@ -47,23 +47,27 @@ def test_first_frame_depth_cam():
             # "show_interface": True,
             "sensors": dict(
                 # semantic_camera=(SemanticCamera, 1600, 900),
-                depth_camera=(DepthCamera, 800, 600),
+                depth_camera=(DepthCamera, 80, 60),
                 # rgb_camera=(RGBCamera, 800, 600),
             ),
         }
     )
 
-    for ep in tqdm.trange(5):
-        env.reset()
-        for t in range(10000):
+    try:
+        for ep in tqdm.trange(5):
+            env.reset()
+            for t in range(10000):
 
-            img = env.engine.get_sensor("depth_camera").perceive(False)
-            # img = env.engine.get_sensor("depth_camera").get_image(env.agent)
+                img = env.engine.get_sensor("depth_camera").perceive(False)
+                # img = env.engine.get_sensor("depth_camera").get_image(env.agent)
 
-            assert not (img == 255).all()
-            if t == 5:
-                break
-            env.step([1, 0.88])
+                assert not (img == 255).all()
+                if t == 5:
+                    break
+                env.step([1, 0.88])
+
+    finally:
+        env.close()
 
 
 if __name__ == '__main__':

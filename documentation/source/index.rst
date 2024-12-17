@@ -64,6 +64,7 @@ Please feel free to contact us if you have any suggestions or ideas!
    navigation.ipynb
    scenario_description.ipynb
    record_replay.ipynb
+   simgen_render.ipynb
 
 .. toctree::
    :hidden:
