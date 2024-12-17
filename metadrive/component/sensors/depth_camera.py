@@ -54,6 +54,8 @@ class DepthCamera(BaseCamera):
         self.compute_node.set_shader_input("toTex", self.output_tex)
         self.compute_node.set_shader_input("texSize", size)
 
+        self.shader_input_names = ["near_far_mul", "near_far_add", "near_far_minus", "log_b", "log_base_div_b", "fromTex", "toTex", "texSize"]
+
     def _create_camera(self, pos, bkg_color):
         """
         Create camera for the buffer
@@ -211,5 +213,8 @@ class DepthCamera(BaseCamera):
 
     def destroy(self):
         if self.compute_node is not None:
+            for name in self.shader_input_names:
+                self.compute_node.clear_shader_input(name)
+            self.compute_node.clear_shader()
             self.compute_node.removeNode()
         super().destroy()
