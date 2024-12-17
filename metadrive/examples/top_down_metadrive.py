@@ -18,7 +18,7 @@ import random
 
 import matplotlib.pyplot as plt
 
-from metadrive import TopDownMetaDrive
+from metadrive.envs.top_down_env import TopDownMetaDrive
 from metadrive.constants import HELP_MESSAGE
 from metadrive.examples.ppo_expert.numpy_expert import expert
 

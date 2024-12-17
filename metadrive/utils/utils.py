@@ -27,8 +27,7 @@ def is_port_occupied(port, host='127.0.0.1'):
 def import_pygame():
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
     import pygame
-    from pygame import gfxdraw
-    return pygame, gfxdraw
+    return pygame
 
 
 def get_time_str():
