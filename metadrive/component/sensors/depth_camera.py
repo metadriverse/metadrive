@@ -208,3 +208,8 @@ class DepthCamera(BaseCamera):
         Decide which texture to retrieve on GPU
         """
         self.cuda_texture = self.output_tex
+
+    def destroy(self):
+        if self.compute_node is not None:
+            self.compute_node.removeNode()
+        super().destroy()

@@ -421,6 +421,9 @@ class EngineCore(ShowBase.ShowBase):
             self.sky_box.destroy()
         self.physics_world.dynamic_world.clearContactAddedCallback()
         self.physics_world.destroy()
+        for sensor in self.sensors.values():
+            if hasattr(sensor, "destroy"):
+                sensor.destroy()
         self.destroy()
         close_asset_loader()
         # EngineCore.global_config.clear()
