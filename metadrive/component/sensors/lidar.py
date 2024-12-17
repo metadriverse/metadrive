@@ -206,6 +206,7 @@ class Lidar(DistanceDetector):
 
     def destroy(self):
         for detector in self.broad_detectors.values():
-            self.engine.physics_world.static_world.remove(detector.node())
+            if self.engine.physics_world.static_world is not None:
+                self.engine.physics_world.static_world.remove(detector.node())
             detector.removeNode()
         super(Lidar, self).destroy()

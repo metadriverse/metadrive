@@ -127,7 +127,8 @@ class DashBoard(ImageBuffer, BaseSensor):
         self.para_vis_np["Speed"].setScale(speed_value, 1, 1)
 
     def remove_display_region(self):
-        self.buffer.set_active(False)
+        if self.buffer is not None:
+            self.buffer.set_active(False)
         super(DashBoard, self).remove_display_region()
 
     def add_display_region(self, display_region, keep_height=False):
