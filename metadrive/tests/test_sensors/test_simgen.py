@@ -23,6 +23,7 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 WIN_HEIGHT = 45
 WIN_WIDTH = 80
 
+
 def test_simgen():
     class SimGenObservation(BaseObservation):
         def __init__(self, config):
@@ -134,9 +135,9 @@ def test_simgen():
             "camera_pitch": None,
             "camera_fov": 66,  # 60, 66
             "sensors": dict(
-                depth_camera=(DepthCamera, sensor_size[0], sensor_size[1]),
-                rgb_camera=(RGBCamera, sensor_size[0], sensor_size[1]),
-                seg_camera=(SemanticCamera, sensor_size[0], sensor_size[1]),
+                depth_camera=(DepthCamera, WIN_WIDTH, WIN_HEIGHT),
+                rgb_camera=(RGBCamera, WIN_WIDTH, WIN_HEIGHT),
+                seg_camera=(SemanticCamera, WIN_WIDTH, WIN_HEIGHT),
             ),
 
             # ===== Remove useless items in the images =====
@@ -212,7 +213,7 @@ def test_simgen():
 
             # ===== Set some sensor and visualization configs =====
             # "daytime": "08:10",
-            # "window_size": (800, 450),
+            "window_size": (WIN_WIDTH, WIN_HEIGHT),
             # "camera_dist": 0.8,
             # "camera_height": 1.5,
             # "camera_pitch": None,
