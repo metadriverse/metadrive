@@ -47,7 +47,7 @@ def test_first_frame_depth_cam():
             # "show_interface": True,
             "sensors": dict(
                 # semantic_camera=(SemanticCamera, 1600, 900),
-                depth_camera=(DepthCamera, 800, 600),
+                depth_camera=(DepthCamera, 80, 60),
                 # rgb_camera=(RGBCamera, 800, 600),
             ),
         }
