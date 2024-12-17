@@ -16,6 +16,8 @@ class DepthCamera(BaseCamera):
 
     num_channels = 1
 
+    shader = None
+
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
         self.shader_local_size = (16, 16)
@@ -136,7 +138,8 @@ class DepthCamera(BaseCamera):
         self.output_tex.set_clear_color((0, 0, 0, 1))
         shader = Shader.load_compute(Shader.SL_GLSL, AssetLoader.file_path("../shaders", "depth_convert.glsl"))
         self.compute_node = NodePath("dummy")
-        self.compute_node.set_shader(shader)
+        self.shader = shader
+        self.compute_node.set_shader(self.shader)
 
     def _dispatch_compute(self, task):
         """
@@ -213,6 +216,8 @@ class DepthCamera(BaseCamera):
 
     def destroy(self):
         if self.compute_node is not None:
+            if self.shader is not None:
+                self.shader.release_all()
             for name in self.shader_input_names:
                 self.compute_node.clear_shader_input(name)
             self.compute_node.clear_shader()
