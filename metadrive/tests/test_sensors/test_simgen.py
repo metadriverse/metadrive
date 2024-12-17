@@ -20,6 +20,8 @@ from metadrive.obs.image_obs import ImageObservation
 from metadrive.obs.observation_base import BaseObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
+WIN_HEIGHT = 45
+WIN_WIDTH = 80
 
 def test_simgen():
     class SimGenObservation(BaseObservation):
@@ -89,8 +91,6 @@ def test_simgen():
 
     # ===== MetaDrive Setup =====
 
-    sensor_size = (80, 45)  #if os.getenv('TEST_DOC') else (800, 450)
-
     env = ScenarioEnv(
         {
             'agent_observation': SimGenObservation,
@@ -128,7 +128,7 @@ def test_simgen():
 
             # ===== Set some sensor and visualization configs =====
             "daytime": "08:10",
-            "window_size": (800, 450),
+            "window_size": (WIN_WIDTH, WIN_HEIGHT),
             "camera_dist": 0.8,  # 0.8, 1.71
             "camera_height": 1.5,  # 1.5
             "camera_pitch": None,
@@ -222,7 +222,7 @@ def test_simgen():
             # "show_interface": True,
             "sensors": dict(
                 # semantic_camera=(SemanticCamera, 1600, 900),
-                depth_camera=(DepthCamera, 800, 600),
+                depth_camera=(DepthCamera, WIN_WIDTH, WIN_HEIGHT),
                 # rgb_camera=(RGBCamera, 800, 600),
             ),
         }
