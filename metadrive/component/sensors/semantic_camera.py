@@ -45,7 +45,7 @@ class SemanticCamera(BaseCamera):
                     material.setDiffuse((base_color[0], base_color[1], base_color[2], 1))
                     material.setSpecular((0, 0, 0, 1))
                     material.setShininess(0)
-                    
+
                     cam.setTagState(
                         label,
                         RenderState.make(

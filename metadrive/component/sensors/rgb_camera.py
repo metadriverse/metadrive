@@ -8,6 +8,7 @@ from metadrive.constants import Semantics, CameraTagStateKey
 from metadrive.third_party.simplepbr import _load_shader_str
 from metadrive.utils.utils import is_mac
 
+
 class RGBCamera(BaseCamera):
     """
     Create a new RGBCamera
@@ -42,9 +43,9 @@ class RGBCamera(BaseCamera):
         fbprops.set_rgba_bits(16, 16, 16, 16)
         fbprops.set_depth_bits(24)
         if is_mac():
-          fbprops.set_multisamples(4)
+            fbprops.set_multisamples(4)
         else:
-          fbprops.set_multisamples(16)
+            fbprops.set_multisamples(16)
         self.scene_tex = p3d.Texture()
         self.scene_tex.set_format(p3d.Texture.F_rgba16)
         self.scene_tex.set_component_type(p3d.Texture.T_float)

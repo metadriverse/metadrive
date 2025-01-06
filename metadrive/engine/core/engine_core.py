@@ -92,15 +92,15 @@ class EngineCore(ShowBase.ShowBase):
     # loadPrcFileData("", "state-cache 0")
     loadPrcFileData("", "garbage-collect-states 0")
     loadPrcFileData("", "print-pipe-types 0")
-    
+
     if is_mac():
-      # latest macOS supported openGL version
-      loadPrcFileData("", "gl-version 4 1")
-      loadPrcFileData("", "framebuffer-multisample 1")
-      loadPrcFileData("", "multisamples 4")
+        # latest macOS supported openGL version
+        loadPrcFileData("", "gl-version 4 1")
+        loadPrcFileData("", "framebuffer-multisample 1")
+        loadPrcFileData("", "multisamples 4")
     else:
-      loadPrcFileData("", "framebuffer-multisample 1")
-      loadPrcFileData("", "multisamples 8")
+        loadPrcFileData("", "framebuffer-multisample 1")
+        loadPrcFileData("", "multisamples 8")
 
     # loadPrcFileData("", "allow-incomplete-render #t")
     # loadPrcFileData("", "# even-animation #t")
@@ -302,7 +302,7 @@ class EngineCore(ShowBase.ShowBase):
             else:
                 if is_mac():
                     self.pbrpipe = init(
-                        msaa_samples = 4,
+                        msaa_samples=4,
                         # use_hardware_skinning=True,
                         use_330=True
                     )
