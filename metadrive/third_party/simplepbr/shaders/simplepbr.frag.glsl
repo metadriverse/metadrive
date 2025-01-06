@@ -125,15 +125,15 @@ float diffuse_function(FunctionParamters func_params) {
 }
 
 void main() {
-    vec4 metal_rough = texture2D(p3d_TextureMetalRoughness, v_texcoord);
+    vec4 metal_rough = texture(p3d_TextureMetalRoughness, v_texcoord);
     float metallic = clamp(p3d_Material.metallic * metal_rough.b, 0.0, 1.0);
     float perceptual_roughness = clamp(p3d_Material.roughness * metal_rough.g,  0.0, 1.0);
     float alpha_roughness = perceptual_roughness * perceptual_roughness;
-    vec4 base_color = p3d_Material.baseColor * v_color * p3d_ColorScale * texture2D(p3d_TextureBaseColor, v_texcoord);
+    vec4 base_color = p3d_Material.baseColor * v_color * p3d_ColorScale * texture(p3d_TextureBaseColor, v_texcoord);
     vec3 diffuse_color = (base_color.rgb * (vec3(1.0) - F0)) * (1.0 - metallic);
     vec3 spec_color = mix(F0, base_color.rgb, metallic);
 #ifdef USE_NORMAL_MAP
-    vec3 n = normalize(v_tbn * (2.0 * texture2D(p3d_TextureNormal, v_texcoord).rgb - 1.0));
+    vec3 n = normalize(v_tbn * (2.0 * texture(p3d_TextureNormal, v_texcoord).rgb - 1.0));
 #else
     vec3 n = normalize(v_tbn[2]);
 #endif
@@ -146,7 +146,7 @@ void main() {
 #endif
 
 #ifdef USE_EMISSION_MAP
-    vec3 emission = p3d_Material.emission.rgb * texture2D(p3d_TextureEmission, v_texcoord).rgb;
+    vec3 emission = p3d_Material.emission.rgb * texture(p3d_TextureEmission, v_texcoord).rgb;
 #else
     vec3 emission = vec3(0.0);
 #endif
@@ -207,7 +207,7 @@ void main() {
                 float radius = 0.001; // Sample radius
                 for(int x = -1; x <= 1; x++) {
                     for(int y = -1; y <= 1; y++) {
-                        float depth_sample = texture2D(PSSMShadowAtlas, projected_coord.xy + vec2(x, y) * radius).r;
+                        float depth_sample = texture(PSSMShadowAtlas, projected_coord.xy + vec2(x, y) * radius).r;
                         shadow_factor += step(ref_depth, depth_sample);
                 }
                 }

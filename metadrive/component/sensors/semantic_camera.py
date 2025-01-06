@@ -1,4 +1,4 @@
-from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, FrameBufferProperties
+from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, FrameBufferProperties, LColor, MaterialAttrib, Material
 
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
@@ -39,13 +39,20 @@ class SemanticCamera(BaseCamera):
             else:
 
                 if label == Semantics.PEDESTRIAN.label and not self.engine.global_config.get("use_bounding_box", False):
-                    # PZH: This is a workaround fix to make pedestrians animated.
+                    # rendering pedestrian with glasses, shoes, etc. [Synbody]
+                    base_color = LColor(c[0] / 255, c[1] / 255, c[2] / 255, 1)
+                    material = Material()
+                    material.setDiffuse((base_color[0], base_color[1], base_color[2], 1))
+                    material.setSpecular((0, 0, 0, 1))
+                    material.setShininess(0)
+                    
                     cam.setTagState(
                         label,
                         RenderState.make(
                             # ShaderAttrib.makeOff(),
                             LightAttrib.makeAllOff(),
                             TextureAttrib.makeOff(),
+                            MaterialAttrib.make(material),
                             ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)),
                             1
                         )
