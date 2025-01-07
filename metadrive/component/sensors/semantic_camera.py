@@ -1,5 +1,5 @@
 from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, FrameBufferProperties, LColor, MaterialAttrib, Material
-
+from metadrive.utils.utils import is_mac
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import Semantics, CameraTagStateKey
@@ -14,7 +14,7 @@ class SemanticCamera(BaseCamera):
         buffer_props.set_rgba_bits(8, 8, 8, 8)
         buffer_props.set_depth_bits(8)
         buffer_props.set_force_hardware(True)
-        buffer_props.set_multisamples(16)
+        buffer_props.set_multisamples(4 if is_mac() else 16)
         buffer_props.set_srgb_color(False)
         buffer_props.set_stereo(False)
         buffer_props.set_stencil_bits(0)
