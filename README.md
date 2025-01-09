@@ -48,7 +48,7 @@ cd metadrive
 pip install -e .
 ```
 
-*Note that the program is tested on both Linux and Windows. Some control and display issues in MacOS wait to be solved*
+*Note that the program is tested on both Linux and Windows, but some issues regarding depth camera exist when using macOS. 
 
 You can verify the installation of MetaDrive via running the testing script:
 
