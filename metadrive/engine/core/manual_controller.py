@@ -15,10 +15,13 @@ if (not is_win()) and (not is_mac()):
 from metadrive.utils import import_pygame
 
 pygame = None
+
+
 def get_pygame():
     global pygame
     if not pygame:
         pygame = import_pygame()
+
 
 class Controller:
     def process_input(self, vehicle):
