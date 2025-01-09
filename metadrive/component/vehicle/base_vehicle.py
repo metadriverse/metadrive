@@ -506,8 +506,19 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                     self.system.applyEngineForce(max_engine_force * throttle_brake, wheel_index)
                     self.system.setBrake(0, wheel_index)
                 else:
-                    self.system.applyEngineForce(0.0, wheel_index)
-                    self.system.setBrake(abs(throttle_brake) * max_brake_force, wheel_index)
+                    DEADZONE = 0.01
+
+                    # Speed m/s in car's heading:
+                    heading = self.heading
+                    velocity = self.velocity
+                    speed_in_heading = velocity[0] * heading[0] + velocity[1] * heading[1]
+
+                    if speed_in_heading < DEADZONE:
+                        self.system.applyEngineForce(0.0, wheel_index)
+                        self.system.setBrake(2, wheel_index)
+                    else:
+                        self.system.applyEngineForce(0.0, wheel_index)
+                        self.system.setBrake(abs(throttle_brake) * max_brake_force, wheel_index)
 
     """---------------------------------------- vehicle info ----------------------------------------------"""
 
@@ -627,15 +638,29 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def _add_visualization(self):
         if self.render:
             [path, scale, offset, HPR] = self.path
-            if path not in BaseVehicle.model_collection:
+            should_update = (path not in BaseVehicle.model_collection) or (self.config["scale"] is not None)
+
+            if should_update:
                 car_model = self.loader.loadModel(AssetLoader.file_path("models", path))
                 car_model.setTwoSided(False)
-                BaseVehicle.model_collection[path] = car_model
+                extra_offset_z = -self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS
+                if self.config['scale'] is not None:
+                    offset = (
+                        offset[0] * self.config['scale'][0], offset[1] * self.config['scale'][1],
+                        offset[2] * self.config['scale'][2]
+                    )
+                    scale = (self.config['scale'][0], self.config['scale'][1], self.config['scale'][2])
+
+                    # A quick workaround here.
+                    # The model position is set to height/2 in ScenarioMapManager.
+                    # Now we set this offset to -height/2, so that the model will be placed on the ground.
+                    extra_offset_z = -self.config["height"] / 2
+
                 car_model.setScale(scale)
                 # model default, face to y
                 car_model.setHpr(*HPR)
-                car_model.setPos(offset[0], offset[1], offset[-1])
-                car_model.setZ(-self.TIRE_RADIUS - self.CHASSIS_TO_WHEEL_AXIS + offset[-1])
+                car_model.setPos(offset[0], offset[1], offset[2] + extra_offset_z)
+                BaseVehicle.model_collection[path] = car_model
             else:
                 car_model = BaseVehicle.model_collection[path]
             car_model.instanceTo(self.origin)

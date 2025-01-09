@@ -67,7 +67,10 @@ def test_search_path(render_export_env=False, render_load_env=False):
         edge_roadnet = copy.deepcopy(env.current_map.road_network)
         all_node_lanes = node_roadnet.get_all_lanes()
         all_edge_lanes = edge_roadnet.get_all_lanes()
-        diff = set(["{}".format(l.index) for l in all_node_lanes]) - set(["{}".format(l.index) for l in all_edge_lanes])
+        diff = (
+            set(["{}".format(l.index) if "decoration" not in l.index else "" for l in all_node_lanes]) -
+            set(["{}".format(l.index) if "decoration" not in l.index else "" for l in all_edge_lanes])
+        )
         assert len(diff) == 0
         nodes = node_roadnet.shortest_path('>', "8S0_0_")
         print(nodes)

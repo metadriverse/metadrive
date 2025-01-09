@@ -33,9 +33,9 @@ class TrajectoryNavigation(BaseNavigation):
         if show_dest_mark or show_line_to_dest:
             get_logger().warning("show_dest_mark and show_line_to_dest are not supported in TrajectoryNavigation")
         super(TrajectoryNavigation, self).__init__(
-            show_navi_mark=False,
-            show_dest_mark=False,
-            show_line_to_dest=False,
+            show_navi_mark=show_navi_mark,
+            show_dest_mark=show_dest_mark,
+            show_line_to_dest=show_line_to_dest,
             panda_color=panda_color,
             name=name,
             vehicle_config=vehicle_config
@@ -144,6 +144,17 @@ class TrajectoryNavigation(BaseNavigation):
 
         # Use RC as the only criterion to determine arrival in Scenario env.
         self._route_completion = long / self.reference_trajectory.length
+
+        if self._show_navi_info:
+            # Whether to visualize little boxes in the scene denoting the checkpoints
+            pos_of_goal = ckpts[1]
+            self._goal_node_path.setPos(panda_vector(pos_of_goal[0], pos_of_goal[1], self.MARK_HEIGHT))
+            self._goal_node_path.setH(self._goal_node_path.getH() + 3)
+            # self.navi_arrow_dir = [lanes_heading1, lanes_heading2]
+            dest_pos = self._dest_node_path.getPos()
+            self._draw_line_to_dest(start_position=ego_vehicle.position, end_position=(dest_pos[0], dest_pos[1]))
+            navi_pos = self._goal_node_path.getPos()
+            self._draw_line_to_navi(start_position=ego_vehicle.position, end_position=(navi_pos[0], navi_pos[1]))
 
     def get_current_lateral_range(self, current_position, engine) -> float:
         return self.current_lane.width * 2

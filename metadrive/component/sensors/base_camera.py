@@ -97,7 +97,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
     def enable_cuda(self):
         return self is not None and self._enable_cuda
 
-    def get_image(self, base_object):
+    def get_image(self, base_object, mode="bgr"):
         """
         Put camera to an object and get the image.
         """
@@ -107,13 +107,18 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.cam.reparentTo(base_object.origin)
         img = self.get_rgb_array_cpu()
         self.track(original_parent, original_position, original_hpr)
-        return img
+        if mode == "bgr":
+            return img
+        elif mode == "rgb":
+            return img[..., ::-1]
+        else:
+            raise ValueError("Unknown mode: {}".format(mode))
 
     def save_image(self, base_object, name="debug.png"):
         """
         Put camera to an object and save the image to the disk
         """
-        img = self.get_image(base_object)
+        img = self.get_image(base_object, mode="bgr")
         cv2.imwrite(name, img)
 
     def track(self, new_parent_node: NodePath, position, hpr):
@@ -155,6 +160,8 @@ class BaseCamera(ImageBuffer, BaseSensor):
         Return:
             Array representing the image.
         """
+
+        different_pos_hpr = False
         if new_parent_node:
             if position is None:
                 position = constants.DEFAULT_SENSOR_OFFSET
@@ -175,6 +182,14 @@ class BaseCamera(ImageBuffer, BaseSensor):
             assert len(hpr) == 3, "The hpr parameter of camera.perceive() should be  a 3-dim vector representing " \
                                   "the heading/pitch/roll."
             self.cam.setHpr(Vec3(*hpr))
+
+            different_pos_hpr = (original_hpr != Vec3(*hpr)) or (original_position != Vec3(*position))
+
+            self.engine.taskMgr.step()
+
+        if different_pos_hpr:
+            # Step the engine to call a new "self.engine.graphicsEngine.renderFrame()"
+            # (not sure why need to step twice...
             self.engine.taskMgr.step()
 
         if self.enable_cuda:

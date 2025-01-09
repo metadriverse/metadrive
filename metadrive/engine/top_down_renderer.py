@@ -53,7 +53,10 @@ def draw_top_down_map_native(
     y_len = b_box[3] - b_box[2]
     max_len = max(x_len, y_len)
     # scaling and center can be easily found by bounding box
-    scaling = scaling if scaling is not None else (film_size[1] / max_len - 0.1)
+    if scaling is None:
+        scaling = (film_size[1] / max_len - 0.1)
+    else:
+        scaling = min(scaling, (film_size[1] / max_len - 0.1))
     surface.scaling = scaling
     centering_pos = ((b_box[0] + b_box[1]) / 2, (b_box[2] + b_box[3]) / 2)
     surface.move_display_window_to(centering_pos)
@@ -280,6 +283,7 @@ class TopDownRenderer:
             film_size=self.film_size,
             semantic_broken_line=self.semantic_broken_line
         )
+        self.scaling = self._background_canvas.scaling
 
         # (2) frame is a copy of the background so you can draw movable things on it.
         # It is super large as the background.

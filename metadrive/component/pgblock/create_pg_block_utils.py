@@ -8,12 +8,30 @@ from metadrive.component.lane.abs_lane import AbstractLane
 from metadrive.component.lane.pg_lane import PGLane
 from metadrive.component.lane.circular_lane import CircularLane
 from metadrive.component.lane.straight_lane import StraightLane
+from metadrive.component.lane.extension_lane import ExtendingLane, ExtensionDirection
 from metadrive.component.road_network import Road
 from metadrive.component.road_network.node_road_network import NodeRoadNetwork
 from metadrive.constants import PGLineType, PGLineColor, PGDrivableAreaProperty
 from metadrive.type import MetaDriveType
 from metadrive.utils.math import get_vertical_vector
 from metadrive.utils.pg.utils import check_lane_on_road
+
+
+def create_extension(
+    start_position: np.ndarray,
+    extension_lane_length: float,
+    direction: ExtensionDirection,
+    width: float = PGLane.DEFAULT_WIDTH,
+    forbidden: bool = False,
+    speed_limit: float = 20,
+    priority: int = 0
+):
+    extension_end = start_position + [extension_lane_length, 0.0]
+    extension = ExtendingLane(
+        direction, start_position, extension_end, width, [PGLineType.NONE, PGLineType.CONTINUOUS], forbidden,
+        speed_limit, priority
+    )
+    return extension
 
 
 def create_bend_straight(

@@ -201,7 +201,7 @@ void main() {
         float radius = 0.001; // Sample radius
         for(int x = -1; x <= 1; x++) {
             for(int y = -1; y <= 1; y++) {
-                float depth_sample = texture2D(PSSMShadowAtlas, projected_coord.xy + vec2(x, y) * radius).r;
+                float depth_sample = texture(PSSMShadowAtlas, projected_coord.xy + vec2(x, y) * radius).r;
                 shadow_factor += step(ref_depth, depth_sample);
         }
         }

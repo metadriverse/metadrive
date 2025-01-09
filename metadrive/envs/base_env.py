@@ -158,6 +158,7 @@ BASE_DEFAULT_CONFIG = dict(
         length=None,
         height=None,
         mass=None,
+        scale=None,  # triplet (x, y, z)
 
         # Set the vehicle size only for pygame top-down renderer. It doesn't affect the physical size!
         top_down_width=None,
@@ -211,6 +212,8 @@ BASE_DEFAULT_CONFIG = dict(
     preload_models=True,
     # model compression increasing the launch time
     disable_model_compression=True,
+    # Whether to disable the collision detection (useful for debugging / replay logged scenarios)
+    disable_collision=False,
 
     # ===== Terrain =====
     # The size of the square map region, which is centered at [0, 0]. The map objects outside it are culled.
@@ -563,6 +566,8 @@ class BaseEnv(gym.Env):
                 for name, sensor in self.engine.sensors.items():
                     if hasattr(sensor, "track") and name != "main_camera":
                         sensor.track(current_track_agent.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
+        # Step the env to avoid the black screen in the first frame.
+        self.engine.taskMgr.step()
 
     def _get_reset_return(self, reset_info):
         # TODO: figure out how to get the information of the before step
