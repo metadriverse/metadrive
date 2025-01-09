@@ -38,7 +38,7 @@ class TopDownObservation(BaseObservation):
         # self.obs_shape = (64, 64)
         self.obs_shape = self.resolution
 
-        self.pygame, _ = import_pygame()
+        self.pygame = import_pygame()
 
         self.onscreen = onscreen
         main_window_position = (0, 0)
