@@ -158,3 +158,4 @@ The simulator can not be built without the help from Panda3D community and the f
 - procedural_panda3d_model_primitives: https://github.com/Epihaius/procedural_panda3d_model_primitives
 - DiamondSquare for terrain generation: https://github.com/buckinha/DiamondSquare
 - KITSUNETSUKI-Asset-Tools: https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools
+

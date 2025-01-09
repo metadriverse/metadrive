@@ -6,6 +6,7 @@ from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import Semantics, CameraTagStateKey
 from metadrive.third_party.simplepbr import _load_shader_str
+from metadrive.utils.utils import is_mac
 
 
 class RGBCamera(BaseCamera):
@@ -41,13 +42,18 @@ class RGBCamera(BaseCamera):
         fbprops.float_color = True
         fbprops.set_rgba_bits(16, 16, 16, 16)
         fbprops.set_depth_bits(24)
-        fbprops.set_multisamples(16)
+        if is_mac():
+            fbprops.set_multisamples(4)
+        else:
+            fbprops.set_multisamples(16)
         self.scene_tex = p3d.Texture()
         self.scene_tex.set_format(p3d.Texture.F_rgba16)
         self.scene_tex.set_component_type(p3d.Texture.T_float)
         self.tonemap_quad = self.manager.render_scene_into(colortex=self.scene_tex, fbprops=fbprops)
         #
         defines = {}
+        if is_mac():
+            defines["USE_330"] = True
         #
         post_vert_str = _load_shader_str('post.vert', defines)
         post_frag_str = _load_shader_str('tonemap.frag', defines)

@@ -442,7 +442,7 @@ class Terrain(BaseObject, ABC):
             tex.set_wrap_v(v_wrap)
             tex.setMinfilter(filter_type)
             tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
+            tex.setAnisotropicDegree(1)
 
         # rock
         self.rock_tex = self.loader.loadTexture(
@@ -464,7 +464,7 @@ class Terrain(BaseObject, ABC):
             tex.set_wrap_v(v_wrap)
             tex.setMinfilter(filter_type)
             tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
+            tex.setAnisotropicDegree(1)
 
         # # sidewalk
         # self.side_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
@@ -478,7 +478,7 @@ class Terrain(BaseObject, ABC):
         #     tex.set_wrap_v(v_wrap)
         #     tex.setMinfilter(filter_type)
         #     tex.setMagfilter(filter_type)
-        #     tex.setAnisotropicDegree(anisotropic_degree)
+        #     tex.setAnisotropicDegree(1)
 
         # Road surface
         # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
@@ -496,10 +496,10 @@ class Terrain(BaseObject, ABC):
             tex.set_wrap_v(v_wrap)
             tex.setMinfilter(filter_type)
             tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
+            tex.setAnisotropicDegree(1)
         # self.road_texture_displacement = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
         # self.road_texture.setMinfilter(minfilter)
-        # self.road_texture.setAnisotropicDegree(anisotropic_degree)
+        # self.road_texture.setAnisotropicDegree(1)
 
         # lane line
         white_lane_line = PNMImage(1024, 1024, 4)
