@@ -17,6 +17,9 @@ class DepthCamera(BaseCamera):
     num_channels = 1
 
     def __init__(self, width, height, engine, *, cuda=False):
+        """
+        The depth camera needs OpenGL > 4.3 if you want to use CUDA
+        """
         self.BUFFER_W, self.BUFFER_H = width, height
         # create
         super(DepthCamera, self).__init__(engine, cuda)

@@ -10,7 +10,7 @@ blackbox_test_configs = dict(
 
 
 @pytest.mark.parametrize("config", list(blackbox_test_configs.values()), ids=list(blackbox_test_configs.keys()))
-def _test_depth_cam(config, render=False):
+def test_depth_cam(config, render=False):
     """
     Temporally disable it, as Github CI can not support compute shader
     
