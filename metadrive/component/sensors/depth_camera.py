@@ -18,15 +18,10 @@ class DepthCamera(BaseCamera):
 
     def __init__(self, width, height, engine, *, cuda=False):
         self.BUFFER_W, self.BUFFER_H = width, height
-        self.shader_local_size = (16, 16)
-        # factors of the log algorithm used to process distance to object
-        self.log_b = np.log(16)
-        self.log_base = np.log(5)
-        self.log_base_div_b = self.log_base / self.log_b
-
         # create
         super(DepthCamera, self).__init__(engine, cuda)
         if self.enable_cuda:
+            self.shader_local_size = (16, 16)
             self.engine.taskMgr.add(self._dispatch_compute)
 
         # display region
@@ -45,11 +40,6 @@ class DepthCamera(BaseCamera):
             Terrain.make_render_state(self.engine, "terrain.vert.glsl", "terrain_depth.frag.glsl")
         )
         if self.enable_cuda:
-            self.compute_node.set_shader_input("near_far_mul", self.far_near_mul)
-            self.compute_node.set_shader_input("near_far_add", self.far_near_add)
-            self.compute_node.set_shader_input("near_far_minus", self.far_near_minus)
-            self.compute_node.set_shader_input("log_b", self.log_b)
-            self.compute_node.set_shader_input("log_base_div_b", self.log_base_div_b)
             size = LVector2(self.depth_tex.getXSize(), self.depth_tex.getYSize())
             self.compute_node.set_shader_input("fromTex", self.depth_tex)
             self.compute_node.set_shader_input("toTex", self.output_tex)
@@ -65,13 +55,6 @@ class DepthCamera(BaseCamera):
         self.buffer_display_region.set_sort(25)
         self.buffer_display_region.disable_clears()
         self.buffer_display_region.set_active(True)
-
-        # for converting depth value to distance-based depth on CPU
-        near = self.lens.getNear()
-        far = self.lens.getFar()
-        self.far_near_mul = near * far
-        self.far_near_add = near + far
-        self.far_near_minus = far - near
 
     def _create_buffer(self, width, height, frame_buffer_property):
         """
@@ -102,7 +85,7 @@ class DepthCamera(BaseCamera):
             props, window_props,
             GraphicsPipe.BFRefuseWindow,
             self.engine.win.getGsg(), self.engine.win)
-        mode =  GraphicsOutput.RTMBindOrCopy if self._enable_cuda else GraphicsOutput.RTMCopyRam
+        mode = GraphicsOutput.RTMBindOrCopy if self._enable_cuda else GraphicsOutput.RTMCopyRam
         self.buffer.addRenderTexture(self.depth_tex, mode,
                                      GraphicsOutput.RTPDepth)
         buffer.set_sort(-1000)
@@ -116,13 +99,18 @@ class DepthCamera(BaseCamera):
         buffer.get_display_region(0).set_active(False)
         buffer.disable_clears()
 
+        # Set a clear on the buffer instead on all regions
+        buffer.set_clear_depth(1)
+        buffer.set_clear_depth_active(True)
+        self.buffer = buffer
+
         if self.enable_cuda:
             self.output_tex = Texture()
             self.output_tex.setup_2d_texture(
                 self.depth_tex.getXSize(), self.depth_tex.getYSize(), Texture.T_unsigned_byte, Texture.F_rgba8
             )
             self.output_tex.set_clear_color((0, 0, 0, 1))
-            shader = Shader.load_compute(Shader.SL_GLSL, AssetLoader.file_path("../shaders", "depth_convert.glsl"))
+            shader = Shader.load_compute(Shader.SL_GLSL, AssetLoader.file_path("../shaders", "depth_cuda.glsl"))
             self.compute_node = NodePath("dummy")
             self.compute_node.set_shader(shader)
 
@@ -192,8 +180,11 @@ class DepthCamera(BaseCamera):
             self.quad.removeNode()
         super(DepthCamera, self).remove_display_region()
 
-    @staticmethod
-    def _format(ret, to_float):
+    def _format(self, ret, to_float):
+        if self.enable_cuda:
+            return super()._format(ret, to_float)
+
+        # else
         if not to_float:
             ret = (ret * 255).astype(np.uint8)
         return ret

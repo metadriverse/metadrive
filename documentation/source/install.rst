@@ -109,3 +109,4 @@ Known Issues
 
 * Pygame 1.9.6 causes blank visualization window in Mac with M1 chip. Upgrading to pygame==2.0.0 solves.
 * If you are using cuda feature on Windows and encounter compiling issue when install  PyOpenGL-accelerate, lower the Python version to i.e. 3.8
+* To use cuda feature, you need OpenGL >= 4.3, which has the compute shader support

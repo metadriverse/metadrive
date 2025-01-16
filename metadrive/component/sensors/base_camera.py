@@ -205,8 +205,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
             self.cam.setPos(original_position)
         return self._format(ret, to_float)
 
-    @staticmethod
-    def _format( ret, to_float):
+    def _format(self, ret, to_float):
         """
         Format the image to the desired type, float32 or uint8
         """
