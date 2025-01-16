@@ -53,7 +53,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
             )
         self.cuda_graphics_resource = None
         if self.enable_cuda:
-            assert _cuda_enable, "Can not enable cuda rendering pipeline"
+            assert _cuda_enable, "Can not enable cuda rendering pipeline, if you are on Windows, try 'pip install pypiwin32'"
 
             # returned tensor property
             self.cuda_dtype = np.uint8

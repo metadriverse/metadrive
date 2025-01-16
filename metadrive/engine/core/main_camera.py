@@ -65,7 +65,7 @@ class MainCamera(BaseSensor):
         self.camera_queue = None
         self.camera_dist = camera_dist
         self.camera_pitch = -engine.global_config["camera_pitch"] if engine.global_config["camera_pitch"
-                                                                                          ] is not None else None
+                                                                     ] is not None else None
         self.camera_smooth = engine.global_config["camera_smooth"]
         self.camera_smooth_buffer_size = engine.global_config["camera_smooth_buffer_size"]
         self.direction_running_mean = deque(maxlen=self.camera_smooth_buffer_size if self.camera_smooth else 1)
@@ -124,7 +124,7 @@ class MainCamera(BaseSensor):
         if "main_camera" in engine.global_config["sensors"]:
             self.engine.sensors["main_camera"] = self
         if self.enable_cuda:
-            assert _cuda_enable, "Can not enable cuda rendering pipeline"
+            assert _cuda_enable, "Can not enable cuda rendering pipeline, if you are on Windows, try 'pip install pypiwin32'"
 
             # returned tensor property
             self.cuda_dtype = np.uint8
@@ -449,7 +449,7 @@ class MainCamera(BaseSensor):
         return True if not self._last_frame_has_mouse and self.has_mouse else False
 
     def perceive(
-        self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
+            self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
     ) -> np.ndarray:
         """
         When to_float is set to False, the image will be represented by unit8 with component value ranging from [0-255].
