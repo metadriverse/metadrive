@@ -130,7 +130,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.cam.setHpr(*hpr)
 
     def perceive(
-        self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
+            self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
     ) -> np.ndarray:
         """
         When to_float is set to False, the image will be represented by unit8 with component value ranging from [0-255].
@@ -203,7 +203,13 @@ class BaseCamera(ImageBuffer, BaseSensor):
             self.cam.reparentTo(original_object)
             self.cam.setHpr(original_hpr)
             self.cam.setPos(original_position)
+        return self._format(ret, to_float)
 
+    @staticmethod
+    def _format( ret, to_float):
+        """
+        Format the image to the desired type, float32 or uint8
+        """
         if not to_float:
             return ret.astype(np.uint8, copy=False, order="C")
         else:
