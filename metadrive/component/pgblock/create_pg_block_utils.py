@@ -19,16 +19,15 @@ from metadrive.utils.pg.utils import check_lane_on_road
 
 def create_extension(
     start_position: np.ndarray,
-    extension_lane_length: float,
+    end_position: np.ndarray,
     direction: ExtensionDirection,
     width: float = PGLane.DEFAULT_WIDTH,
     forbidden: bool = False,
     speed_limit: float = 20,
     priority: int = 0
 ):
-    extension_end = start_position + [extension_lane_length, 0.0]
     extension = ExtendingLane(
-        direction, start_position, extension_end, width, [PGLineType.NONE, PGLineType.CONTINUOUS], forbidden,
+        direction, start_position, end_position, width, [PGLineType.NONE, PGLineType.CONTINUOUS], forbidden,
         speed_limit, priority
     )
     return extension
