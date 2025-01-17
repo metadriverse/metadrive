@@ -130,7 +130,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
         self.cam.setHpr(*hpr)
 
     def perceive(
-            self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
+        self, to_float=True, new_parent_node: Union[NodePath, None] = None, position=None, hpr=None
     ) -> np.ndarray:
         """
         When to_float is set to False, the image will be represented by unit8 with component value ranging from [0-255].

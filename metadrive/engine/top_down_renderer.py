@@ -75,7 +75,7 @@ def draw_top_down_map_native(
                 )
 
             elif (MetaDriveType.is_road_line(obj["type"]) or MetaDriveType.is_road_boundary_line(obj["type"])
-                    or (MetaDriveType.is_lane(obj["type"]) and draw_center_line)):
+                  or (MetaDriveType.is_lane(obj["type"]) and draw_center_line)):
                 if semantic_broken_line and MetaDriveType.is_broken_line(obj["type"]):
                     points_to_skip = math.floor(PGDrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval) * 2
                 else:
