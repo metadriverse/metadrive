@@ -7,7 +7,7 @@ from metadrive.component.pgblock.create_pg_block_utils import ExtendStraightLane
 from metadrive.component.pgblock.pg_block import PGBlock
 from metadrive.component.lane.extension_lane import ExtensionDirection
 from metadrive.component.road_network import Road
-from metadrive.constants import Decoration, PGLineType
+from metadrive.constants import PGLineType
 from metadrive.utils.pg.utils import check_lane_on_road
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
@@ -42,7 +42,8 @@ class InRampOnStraight(Ramp):
 
     def _get_merge_part(self, att_lane: StraightLane, length: float):
         start = att_lane.end
-        merge_part = create_extension(start, length, ExtensionDirection.SHRINK, width=self.lane_width)
+        end = att_lane.position(att_lane.length + length, -self.lane_width)
+        merge_part = create_extension(start, end, ExtensionDirection.SHRINK, width=self.lane_width)
         return merge_part
 
     def _try_plug_into_previous_block(self) -> bool:
@@ -185,10 +186,11 @@ class InRampOnStraight(Ramp):
             self.LANE_TYPE,
             speed_limit=self.SPEED_LIMIT
         )
-        acc_lane.line_types = [PGLineType.BROKEN, PGLineType.CONTINUOUS]
+        acc_lane.line_types = [PGLineType.NONE, PGLineType.CONTINUOUS]
         bend_2_road = Road(connect_road.end_node, self.road_node(0, 0))  # end at part1 road 0, extend road
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
-        self.block_network.add_lane(acc_road.start_node, acc_road.end_node, acc_lane)
+        next_node = self.add_road_node()
+        self.block_network.add_lane(acc_road.start_node, next_node, acc_lane)
         no_cross = (
             not check_lane_on_road(
                 self._global_network, bend_2, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
@@ -202,7 +204,7 @@ class InRampOnStraight(Ramp):
 
         # p1, road 4, small circular to decorate
         merge_lane = self._get_merge_part(acc_lane, extension_length)
-        self.block_network.add_lane(Decoration.start, Decoration.end, merge_lane)
+        self.block_network.add_lane(next_node, acc_road.end_node, merge_lane)
 
         return no_cross
 
@@ -228,8 +230,9 @@ class OutRampOnStraight(Ramp):
     EXTRA_LEN = 15
 
     def _get_merge_part(self, att_lane: StraightLane, length: float):
-        start = att_lane.position(0, self.lane_width)
-        merge_part = create_extension(start, length, ExtensionDirection.EXTEND, width=self.lane_width)
+        start = att_lane.position(0, 0)
+        end = att_lane.position(length, self.lane_width)
+        merge_part = create_extension(start, end, ExtensionDirection.EXTEND, width=self.lane_width)
         return merge_part
 
     def _try_plug_into_previous_block(self) -> bool:
@@ -295,13 +298,14 @@ class OutRampOnStraight(Ramp):
         # part 1 road 0
         self.set_part_idx(1)
         merge_part_lane = self._get_merge_part(dec_right_lane, extension_len)
-        self.block_network.add_lane(Decoration.start, Decoration.end, merge_part_lane)
+        next_node = self.add_road_node()
+        self.block_network.add_lane(dec_road.start_node, next_node, merge_part_lane)
 
         deacc_lane_end = dec_right_lane.position(dec_right_lane.length, self.lane_width)
         deacc_lane = StraightLane(
-            merge_part_lane.end, deacc_lane_end, self.lane_width, (PGLineType.BROKEN, PGLineType.CONTINUOUS)
+            merge_part_lane.end, deacc_lane_end, self.lane_width, (PGLineType.NONE, PGLineType.CONTINUOUS)
         )
-        self.block_network.add_lane(dec_road.start_node, dec_road.end_node, deacc_lane)
+        self.block_network.add_lane(next_node, dec_road.end_node, deacc_lane)
         no_cross = (
             not check_lane_on_road(
                 self._global_network, deacc_lane, 0.95, ignore_intersection_checking=self.ignore_intersection_checking

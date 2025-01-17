@@ -124,7 +124,7 @@ class MainCamera(BaseSensor):
         if "main_camera" in engine.global_config["sensors"]:
             self.engine.sensors["main_camera"] = self
         if self.enable_cuda:
-            assert _cuda_enable, "Can not enable cuda rendering pipeline"
+            assert _cuda_enable, "Can not enable cuda rendering pipeline, if you are on Windows, try 'pip install pypiwin32'"
 
             # returned tensor property
             self.cuda_dtype = np.uint8
