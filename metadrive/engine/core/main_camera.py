@@ -54,7 +54,7 @@ class MainCamera(BaseSensor):
         self.camera = engine.camera
         # lens property
         lens = engine.cam.node().getLens()
-        lens.setFov(engine.global_config["camera_fov"])
+        lens.setFov(engine.global_config["camera_fov_x"],engine.global_config["camera_fov_y"])
 
         from metadrive.engine.core.terrain import Terrain
         engine.cam.node().setTagStateKey(CameraTagStateKey.RGB)
