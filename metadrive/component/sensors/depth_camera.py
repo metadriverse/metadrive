@@ -84,13 +84,11 @@ class DepthCamera(BaseCamera):
         buffer_props.set_float_depth(True)
 
         self.buffer = buffer = self.engine.graphicsEngine.makeOutput(
-            self.engine.pipe, "Depth buffer", -2,
-            props, window_props,
-            GraphicsPipe.BFRefuseWindow,
-            self.engine.win.getGsg(), self.engine.win)
+            self.engine.pipe, "Depth buffer", -2, props, window_props, GraphicsPipe.BFRefuseWindow,
+            self.engine.win.getGsg(), self.engine.win
+        )
         mode = GraphicsOutput.RTMBindOrCopy if self._enable_cuda else GraphicsOutput.RTMCopyRam
-        self.buffer.addRenderTexture(self.depth_tex, mode,
-                                     GraphicsOutput.RTPDepth)
+        self.buffer.addRenderTexture(self.depth_tex, mode, GraphicsOutput.RTPDepth)
         buffer.set_sort(-1000)
         buffer.disable_clears()
         buffer.get_display_region(0).disable_clears()

@@ -78,36 +78,29 @@ if __name__ == "__main__":
 
     speed = 0.1
 
-
     def acc_speed():
         global speed
         speed *= 2
-
 
     def de_speed():
         global speed
         speed /= 2
 
-
     def lower_terrain():
         pos = env.engine.terrain.mesh_collision_terrain.getPos()
         env.engine.terrain.mesh_collision_terrain.set_pos(pos[0], pos[1] - speed, pos[2])
-
 
     def lower_terrain_x():
         pos = env.engine.terrain.mesh_collision_terrain.getPos()
         env.engine.terrain.mesh_collision_terrain.set_pos(pos[0] - speed, pos[1], pos[2])
 
-
     def lift_terrain():
         pos = env.engine.terrain.mesh_collision_terrain.getPos()
         env.engine.terrain.mesh_collision_terrain.set_pos(pos[0], pos[1] + speed, pos[2])
 
-
     def lift_terrain_x():
         pos = env.engine.terrain.mesh_collision_terrain.getPos()
         env.engine.terrain.mesh_collision_terrain.set_pos(pos[0] + speed, pos[1], pos[2])
-
 
     init_state = {
         'position': (40.82264362985734, -509.3641208712943),
@@ -159,13 +152,13 @@ if __name__ == "__main__":
         #     env.reset()
         # info["fuel"] = env.agent.energy_consumption
         ret = env.render(mode="topdown", semantic_map=True, draw_center_line=True)
-            # text={
-            #     # "heading_diff": env.agent.heading_diff(env.agent.lane),
-            #     # "lane_width": env.agent.lane.width,
-            #     # "lane_index": env.agent.lane_index,
-            #     # "lateral": env.agent.lane.local_coordinates(env.agent.position),
-            #     "current_seed": env.current_seed
-            # }
+        # text={
+        #     # "heading_diff": env.agent.heading_diff(env.agent.lane),
+        #     # "lane_width": env.agent.lane.width,
+        #     # "lane_index": env.agent.lane_index,
+        #     # "lateral": env.agent.lane.local_coordinates(env.agent.position),
+        #     "current_seed": env.current_seed
+        # }
         # )
         # if tm or tc:
         #     env.reset()
