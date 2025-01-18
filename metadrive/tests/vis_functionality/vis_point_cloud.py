@@ -1,7 +1,7 @@
 from metadrive.component.sensors.point_cloud_lidar import PointCloudLidar
+import numpy as np
+from panda3d.core import Point3
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
-
-res = 200
 
 if __name__ == "__main__":
     env = SafeMetaDriveEnv(
@@ -12,15 +12,13 @@ if __name__ == "__main__":
             "start_seed": 4,
             "map": "SSSSS",
             "manual_control": True,
-            "camera_fov_x": 60,
-            "camera_fov_y": 60,
             # "use_render": True,
             "image_observation": True,
             # "norm_pixel": True,
             "use_render": True,
             "debug": False,
             "interface_panel": ["point_cloud"],
-            "sensors": dict(point_cloud=(PointCloudLidar, res, res)),
+            "sensors": dict(point_cloud=(PointCloudLidar, 200, 64, True)), # 64 channel lidar
             "vehicle_config": dict(image_source="point_cloud"),
             # "map_config": {
             #     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
@@ -32,14 +30,14 @@ if __name__ == "__main__":
     )
     env.reset()
     drawer = env.engine.make_line_drawer()
-
-    import cv2
+    cam = env.engine.get_sensor("point_cloud").cam
 
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])
         assert env.observation_space.contains(o)
 
-        points = o["image"][..., :, -1]
+        # to world coordinate
+        points = o["image"][..., :, -1] + np.asarray(env.engine.render.get_relative_point(cam, Point3(0, 0, 0)))
 
         drawer.reset()
         drawer.draw_lines(points)

@@ -6,18 +6,30 @@ from metadrive.component.sensors.depth_camera import DepthCamera
 
 
 class PointCloudLidar(DepthCamera):
+    """
+    This can be viewed as a special camera sensor, whose RGB channel is (x, y ,z) world coordinate of the point cloud.
+    Thus, it is compatible with all image related stuff. For example, you can use it with ImageObservation.
+    """
     num_channels = 3  # x, y, z coordinates
 
-    def __init__(self, width, height, engine, *, cuda=False):
+    def __init__(self, width, height, ego_centric, engine, *, cuda=False):
+        """
+        If ego_centric is True, the point cloud will be in the camera's ego coordinate system.
+        """
         if cuda:
             raise ValueError("LiDAR does not support CUDA acceleration for now. Ask for support if you need it.")
         super(PointCloudLidar, self).__init__(width, height, engine, cuda=False)
         lens = self.cam.node().getLens()
+        self.ego_centric = ego_centric
         self.near = lens.near
         self.far = lens.far
+
+        fov = lens.getFov()
+        f_x = width / 2 / (np.tan(fov[0] / 2 / 180 * np.pi))
+        f_y = height / 2 / (np.tan(fov[1] / 2 / 180 * np.pi))
         self.intrinsics = np.asarray(
-            [[lens.getFocalLength() * self.BUFFER_W, 0, (self.BUFFER_W - 1) / 2],
-             [0, lens.getFocalLength() * self.BUFFER_H, (self.BUFFER_H - 1) / 2],
+            [[f_x, 0, (self.BUFFER_H - 1) / 2],
+             [0, f_y, (self.BUFFER_W - 1) / 2],
              [0, 0, 1]])
 
     def get_rgb_array_cpu(self):
@@ -32,7 +44,9 @@ class PointCloudLidar(DepthCamera):
         hpr[1] *= -1  # left right handed convert
         rot = R.from_euler('ZYX', hpr, degrees=True)
         rotation_matrix = rot.as_matrix()
-        translation = np.asarray(self.engine.render.get_relative_point(self.cam, Point3(0, 0, 0)))
+        translation = Point3(0, 0, 0)
+        if not self.ego_centric:
+            translation = np.asarray(self.engine.render.get_relative_point(self.cam, Point3(0, 0, 0)))
         z_eye = 2 * n * f / ((f + n) - (2 * depth - 1) * (f - n))
         points = self.simulate_lidar_from_depth(z_eye.squeeze(-1), self.intrinsics, translation, rotation_matrix)
         return points
@@ -53,10 +67,9 @@ class PointCloudLidar(DepthCamera):
         """
         # Extract the depth channel (assuming it's grayscale or depth is in the R channel)
         # Get image dimensions
-        height, width = depth_img.shape
-
         depth_img = depth_img.T
         depth_img = depth_img[::-1, ::-1]
+        height, width = depth_img.shape
 
         # Create a grid of pixel coordinates (u, v)
         u, v = np.meshgrid(np.arange(width), np.arange(height))
@@ -82,4 +95,4 @@ class PointCloudLidar(DepthCamera):
 
         # to original shape
         world_coords = world_coords.reshape(height, width, 3)
-        return world_coords
+        return world_coords.swapaxes(0, 1)

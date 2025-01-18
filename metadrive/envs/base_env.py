@@ -98,8 +98,7 @@ BASE_DEFAULT_CONFIG = dict(
     # How many frames used to smooth the camera
     camera_smooth_buffer_size=20,
     # FOV of main camera
-    camera_fov_x=65,
-    camera_fov_y=38,
+    camera_fov=65,
     # Only available in MARL setting, choosing which agent to track. Values should be "agent0", "agent1" or so on
     prefer_track_agent=None,
     # Setting the camera position for the Top-down Camera for 3D viewer (pressing key "B" to activate it)
