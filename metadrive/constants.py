@@ -553,4 +553,4 @@ class CameraTagStateKey:
 
 
 DEFAULT_SENSOR_OFFSET = (0., 0.8, 1.5)
-DEFAULT_SENSOR_HPR = (0., 0.0, 0.0)
+DEFAULT_SENSOR_HPR = (0., -5, 0.0)
