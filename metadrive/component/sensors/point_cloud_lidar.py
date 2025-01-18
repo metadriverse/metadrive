@@ -19,25 +19,25 @@ class PointCloudLidar(DepthCamera):
         if cuda:
             raise ValueError("LiDAR does not support CUDA acceleration for now. Ask for support if you need it.")
         super(PointCloudLidar, self).__init__(width, height, engine, cuda=False)
-        lens = self.cam.node().getLens()
         self.ego_centric = ego_centric
-        self.near = lens.near
-        self.far = lens.far
-
-        fov = lens.getFov()
-        f_x = width / 2 / (np.tan(fov[0] / 2 / 180 * np.pi))
-        f_y = height / 2 / (np.tan(fov[1] / 2 / 180 * np.pi))
-        self.intrinsics = np.asarray(
-            [[f_x, 0, (self.BUFFER_H - 1) / 2],
-             [0, f_y, (self.BUFFER_W - 1) / 2],
-             [0, 0, 1]])
 
     def get_rgb_array_cpu(self):
         """
         The result of this function is now a 3D array of point cloud coord in shape (H, W, 3)
+        The lens parameters can be changed on the fly!
         """
-        n = self.near
-        f = self.far
+
+        lens = self.lens
+        fov = lens.getFov()
+        f_x = self.BUFFER_W / 2 / (np.tan(fov[0] / 2 / 180 * np.pi))
+        f_y = self.BUFFER_H / 2 / (np.tan(fov[1] / 2 / 180 * np.pi))
+        intrinsics = np.asarray(
+            [[f_x, 0, (self.BUFFER_H - 1) / 2],
+             [0, f_y, (self.BUFFER_W - 1) / 2],
+             [0, 0, 1]])
+        f = lens.getFar()
+        n = lens.getNear()
+
         depth = super(PointCloudLidar, self).get_rgb_array_cpu()
         hpr = self.cam.getHpr(self.engine.render)
         hpr[0] += 90  # pand3d's y is the camera facing direction, so we need to rotate it 90 degree
@@ -48,7 +48,7 @@ class PointCloudLidar(DepthCamera):
         if not self.ego_centric:
             translation = np.asarray(self.engine.render.get_relative_point(self.cam, Point3(0, 0, 0)))
         z_eye = 2 * n * f / ((f + n) - (2 * depth - 1) * (f - n))
-        points = self.simulate_lidar_from_depth(z_eye.squeeze(-1), self.intrinsics, translation, rotation_matrix)
+        points = self.simulate_lidar_from_depth(z_eye.squeeze(-1), intrinsics, translation, rotation_matrix)
         return points
 
     @staticmethod
