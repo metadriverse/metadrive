@@ -18,7 +18,7 @@ if __name__ == "__main__":
             "use_render": True,
             "debug": False,
             "interface_panel": ["point_cloud"],
-            "sensors": dict(point_cloud=(PointCloudLidar, 200, 64, True)), # 64 channel lidar
+            "sensors": dict(point_cloud=(PointCloudLidar, 200, 64, True)),  # 64 channel lidar
             "vehicle_config": dict(image_source="point_cloud"),
             # "map_config": {
             #     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,

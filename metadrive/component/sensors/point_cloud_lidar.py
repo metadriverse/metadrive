@@ -31,10 +31,7 @@ class PointCloudLidar(DepthCamera):
         fov = lens.getFov()
         f_x = self.BUFFER_W / 2 / (np.tan(fov[0] / 2 / 180 * np.pi))
         f_y = self.BUFFER_H / 2 / (np.tan(fov[1] / 2 / 180 * np.pi))
-        intrinsics = np.asarray(
-            [[f_x, 0, (self.BUFFER_H - 1) / 2],
-             [0, f_y, (self.BUFFER_W - 1) / 2],
-             [0, 0, 1]])
+        intrinsics = np.asarray([[f_x, 0, (self.BUFFER_H - 1) / 2], [0, f_y, (self.BUFFER_W - 1) / 2], [0, 0, 1]])
         f = lens.getFar()
         n = lens.getNear()
 

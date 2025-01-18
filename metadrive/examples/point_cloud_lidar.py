@@ -28,10 +28,8 @@ if __name__ == "__main__":
                 "use_render": True,
                 "image_observation": True,
                 "vehicle_config": dict(image_source="point_cloud"),
-                "sensors": dict(point_cloud=(PointCloudLidar, 200, 64, True)), # 64 channel lidar
-                "data_directory": AssetLoader.file_path(
-                    asset_path, "nuscenes", unix_style=False
-                ),
+                "sensors": dict(point_cloud=(PointCloudLidar, 200, 64, True)),  # 64 channel lidar
+                "data_directory": AssetLoader.file_path(asset_path, "nuscenes", unix_style=False),
                 "num_scenarios": 10
             }
         )
@@ -45,9 +43,7 @@ if __name__ == "__main__":
 
             drawer.reset()
             drawer.draw_lines(points)
-            env.render(
-                text=RENDER_MESSAGE,
-            )
+            env.render(text=RENDER_MESSAGE, )
             if tm or tc:
                 env.reset()
     finally:
