@@ -2,7 +2,7 @@ import logging
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
-
+from metadrive.constants import DEFAULT_SENSOR_HPR, DEFAULT_SENSOR_OFFSET
 import gymnasium as gym
 import numpy as np
 from panda3d.core import PNMImage
@@ -566,7 +566,7 @@ class BaseEnv(gym.Env):
                     self.main_camera.set_bird_view_pos_hpr(current_track_agent.position)
                 for name, sensor in self.engine.sensors.items():
                     if hasattr(sensor, "track") and name != "main_camera":
-                        sensor.track(current_track_agent.origin, [0., 0.8, 1.5], [0, 0.59681, 0])
+                        sensor.track(current_track_agent.origin, DEFAULT_SENSOR_OFFSET, DEFAULT_SENSOR_HPR)
         # Step the env to avoid the black screen in the first frame.
         self.engine.taskMgr.step()
 
@@ -896,8 +896,7 @@ class BaseEnv(gym.Env):
         self.main_camera.track(current_track_agent)
         for name, sensor in self.engine.sensors.items():
             if hasattr(sensor, "track") and name != "main_camera":
-                camera_video_posture = [0, 0.59681, 0]
-                sensor.track(current_track_agent.origin, constants.DEFAULT_SENSOR_OFFSET, camera_video_posture)
+                sensor.track(current_track_agent.origin, constants.DEFAULT_SENSOR_OFFSET, DEFAULT_SENSOR_HPR)
         return
 
     def next_seed_reset(self):
