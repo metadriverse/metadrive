@@ -592,6 +592,8 @@ class EngineCore(ShowBase.ShowBase):
             if sensor_id == "main_camera":
                 # It is added when initializing main_camera
                 continue
+            if sensor_id in self.sensors:
+                raise ValueError("Sensor id {} is duplicated!".format(sensor_id))
             cls = sensor_cfg[0]
             args = sensor_cfg[1:]
             assert issubclass(cls, BaseSensor), "{} is not a subclass of BaseSensor".format(cls.__name__)

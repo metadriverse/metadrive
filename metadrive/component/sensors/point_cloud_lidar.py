@@ -1,0 +1,85 @@
+import numpy as np
+from panda3d.core import Point3
+from scipy.spatial.transform import Rotation as R
+
+from metadrive.component.sensors.depth_camera import DepthCamera
+
+
+class PointCloudLidar(DepthCamera):
+    num_channels = 3  # x, y, z coordinates
+
+    def __init__(self, width, height, engine, *, cuda=False):
+        if cuda:
+            raise ValueError("LiDAR does not support CUDA acceleration for now. Ask for support if you need it.")
+        super(PointCloudLidar, self).__init__(width, height, engine, cuda=False)
+        lens = self.cam.node().getLens()
+        self.near = lens.near
+        self.far = lens.far
+        self.intrinsics = np.asarray(
+            [[lens.getFocalLength() * self.BUFFER_W, 0, (self.BUFFER_W - 1) / 2],
+             [0, lens.getFocalLength() * self.BUFFER_H, (self.BUFFER_H - 1) / 2],
+             [0, 0, 1]])
+
+    def get_rgb_array_cpu(self):
+        """
+        The result of this function is now a 3D array of point cloud coord in shape (H, W, 3)
+        """
+        n = self.near
+        f = self.far
+        depth = super(PointCloudLidar, self).get_rgb_array_cpu()
+        hpr = self.cam.getHpr(self.engine.render)
+        hpr[0] += 90  # pand3d's y is the camera facing direction, so we need to rotate it 90 degree
+        hpr[1] *= -1  # left right handed convert
+        rot = R.from_euler('ZYX', hpr, degrees=True)
+        rotation_matrix = rot.as_matrix()
+        translation = np.asarray(self.engine.render.get_relative_point(self.cam, Point3(0, 0, 0)))
+        z_eye = 2 * n * f / ((f + n) - (2 * depth - 1) * (f - n))
+        points = self.simulate_lidar_from_depth(z_eye.squeeze(-1), self.intrinsics, translation, rotation_matrix)
+        return points
+
+    @staticmethod
+    def simulate_lidar_from_depth(depth_img, camera_intrinsics, camera_translation, camera_rotation):
+        """
+        Simulate LiDAR points in the world coordinate system from a depth image.
+
+        Parameters:
+            depth_img (np.ndarray): Depth image of shape (H, W, 3), where the last dimension represents RGB or grayscale depth values.
+            camera_intrinsics (np.ndarray): Camera intrinsic matrix of shape (3, 3).
+            camera_translation (np.ndarray): Translation vector of the camera in world coordinates of shape (3,).
+            camera_rotation (np.ndarray): Rotation matrix of the camera in world coordinates of shape (3, 3).
+
+        Returns:
+            np.ndarray: LiDAR points in the world coordinate system of shape (N, 3), where N is the number of valid points.
+        """
+        # Extract the depth channel (assuming it's grayscale or depth is in the R channel)
+        # Get image dimensions
+        height, width = depth_img.shape
+
+        depth_img = depth_img.T
+        depth_img = depth_img[::-1, ::-1]
+
+        # Create a grid of pixel coordinates (u, v)
+        u, v = np.meshgrid(np.arange(width), np.arange(height))
+        uv_coords = np.stack([u, v, np.ones_like(u)], axis=-1)  # Shape: (H, W, 3)
+
+        # Reshape to (H*W, 3) for easier matrix multiplication
+        uv_coords = uv_coords.reshape(-1, 3)
+
+        # Invert the camera intrinsic matrix to project pixels to camera coordinates
+        K_inv = np.linalg.inv(camera_intrinsics)
+
+        # Compute 3D points in the camera coordinate system
+        cam_coords = (K_inv @ uv_coords.T).T  # Shape: (H*W, 3)
+        cam_coords *= depth_img.reshape(-1)[..., None]  # Scale by depth
+
+        # Remove invalid points (e.g., depth = 0)
+        # valid_mask = depth_img.flatten() > 0
+        # cam_coords = cam_coords[valid_mask]
+        cam_coords = cam_coords[..., [2, 1, 0]]
+
+        # Transform points to the world coordinate system
+        world_coords = (camera_rotation @ cam_coords.T).T + camera_translation
+
+        # to original shape
+        world_coords = world_coords.reshape(height, width, 3)
+        return world_coords

@@ -370,6 +370,8 @@ class BaseEnv(gym.Env):
         config["interface_panel"] = to_use
 
         # Merge default sensor to list
+        duplicated_sensor_id = set(self.default_config()["sensors"].keys()).intersection(config["sensors"].keys())
+        assert duplicated_sensor_id == set(), "Duplicate sensor id: {}".format(duplicated_sensor_id)
         sensor_cfg = self.default_config()["sensors"].update(config["sensors"])
         config["sensors"] = sensor_cfg
 
