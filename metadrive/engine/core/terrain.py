@@ -270,8 +270,6 @@ class Terrain(BaseObject, ABC):
             # road
             self._mesh_terrain.set_shader_input("road_tex", self.road_texture)
             self._mesh_terrain.set_shader_input("road_tex_ratio", self.road_tex_ratio)
-            self._mesh_terrain.set_shader_input("yellow_tex", self.yellow_lane_line)
-            self._mesh_terrain.set_shader_input("white_tex", self.white_lane_line)
             self._mesh_terrain.set_shader_input("road_normal", self.road_texture_normal)
             self._mesh_terrain.set_shader_input("road_rough", self.road_texture_rough)
 
@@ -515,15 +513,15 @@ class Terrain(BaseObject, ABC):
         # self.road_texture.setAnisotropicDegree(1)
 
         # lane line
-        white_lane_line = PNMImage(256, 256, 4)
-        white_lane_line.fill(1., 1., 1.)
-        self.white_lane_line = Texture("white lane line")
-        self.white_lane_line.load(white_lane_line)
-
-        yellow_lane_line = PNMImage(256, 256, 4)
-        yellow_lane_line.fill(*(255 / 255, 200 / 255, 0 / 255))
-        self.yellow_lane_line = Texture("white lane line")
-        self.yellow_lane_line.load(yellow_lane_line)
+        # white_lane_line = PNMImage(256, 256, 4)
+        # white_lane_line.fill(1., 1., 1.)
+        # self.white_lane_line = Texture("white lane line")
+        # self.white_lane_line.load(white_lane_line)
+        #
+        # yellow_lane_line = PNMImage(256, 256, 4)
+        # yellow_lane_line.fill(*(255 / 255, 200 / 255, 0 / 255))
+        # self.yellow_lane_line = Texture("white lane line")
+        # self.yellow_lane_line.load(yellow_lane_line)
 
         # crosswalk
         tex = np.frombuffer(self.road_texture.getRamImage().getData(), dtype=np.uint8)

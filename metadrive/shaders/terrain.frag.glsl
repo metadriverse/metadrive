@@ -32,27 +32,25 @@ uniform struct {
 uniform vec3 wspos_camera;
 
 // asset
-uniform sampler2D yellow_tex;
-uniform sampler2D white_tex;
 uniform sampler2D road_tex;
 uniform sampler2D road_normal;
-uniform sampler2D road_rough;
+// uniform sampler2D road_rough;
 uniform float road_tex_ratio;
 uniform sampler2D crosswalk_tex;
 
 uniform sampler2D grass_tex;
 uniform sampler2D grass_normal;
-uniform sampler2D grass_rough;
+// uniform sampler2D grass_rough;
 uniform float grass_tex_ratio;
 
 uniform sampler2D rock_tex;
 uniform sampler2D rock_normal;
-uniform sampler2D rock_rough;
+// uniform sampler2D rock_rough;
 uniform float rock_tex_ratio;
 
 uniform sampler2D rock_tex_2;
 uniform sampler2D rock_normal_2;
-uniform sampler2D rock_rough_2;
+// uniform sampler2D rock_rough_2;
 uniform float rock_tex_ratio_2;
 
 uniform sampler2D attribute_tex;
@@ -82,7 +80,7 @@ vec3 project(mat4 mvp, vec3 p) {
 }
 
 
-vec3 get_normal(vec3 diffuse, sampler2D normal_tex, sampler2D rough_tex, float tex_ratio, mat3 tbn){
+vec3 get_normal(vec3 diffuse, sampler2D normal_tex, float tex_ratio, mat3 tbn){
       vec3 normal = texture(normal_tex, terrain_uv * tex_ratio).rgb*2.0-1.0;
       normal = normalize(tbn * normal);
       return normal;
@@ -112,18 +110,18 @@ void main() {
   // get the color and terrain normal in world space
   vec3 diffuse;
   vec3 tex_normal_world;
-  float roughnessValue;
+  // float roughnessValue;
   if (attri.r > 0.01){
     float value = attri.r * 255; // Assuming it's a red channel texture
     if (value < 14) {
         // yellow
-        diffuse=texture(yellow_tex, terrain_uv * road_tex_ratio).rgb;
+        diffuse=vec3(1.0, 0.78, 0.0);
     } else if (value < 23) {
         // road
         diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb;
     } else if (value < 31) {
         // white
-        diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
+        diffuse = vec3(1.0, 1.0, 1.0);
     }  else if (value > 39 ||  value < 221) {
         // crosswalk
         float theta=(value-40) * 2/180.0*3.1415926535;
@@ -131,10 +129,10 @@ void main() {
         diffuse = texture(crosswalk_tex, new_terrain_uv * road_tex_ratio).rgb;
     } else{
         // Semantics for value 4
-        diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
+        diffuse = vec3(0.0, 0.0, 0.0);
     }
-    tex_normal_world = get_normal(diffuse, road_normal,  road_rough, road_tex_ratio, tbn);
-    roughnessValue = texture(road_rough, terrain_uv * road_tex_ratio).r;
+    tex_normal_world = get_normal(diffuse, road_normal, road_tex_ratio, tbn);
+    // roughnessValue = texture(road_rough, terrain_uv * road_tex_ratio).r;
   }
   else{
       // texture splatting
@@ -166,10 +164,10 @@ void main() {
       tex_normal_world = tex_normal_world + (texture(rock_normal_2, terrain_uv * rock_tex_ratio_2).rgb*2.0-1.0) * rock_2;
       tex_normal_world = normalize(tbn * tex_normal_world);
 
-      roughnessValue = roughnessValue + texture(grass_rough, terrain_uv * grass_tex_ratio).r * grass;
-      roughnessValue = roughnessValue + texture(rock_rough, terrain_uv * rock_tex_ratio).r * rock;
-      roughnessValue = roughnessValue + texture(rock_rough_2, terrain_uv * rock_tex_ratio_2).r * rock_2;
-      roughnessValue = saturate(roughnessValue);
+      //roughnessValue = roughnessValue + texture(grass_rough, terrain_uv * grass_tex_ratio).r * grass;
+      //roughnessValue = roughnessValue + texture(rock_rough, terrain_uv * rock_tex_ratio).r * rock;
+      //roughnessValue = roughnessValue + texture(rock_rough_2, terrain_uv * rock_tex_ratio_2).r * rock_2;
+      //roughnessValue = saturate(roughnessValue);
     }
 
 //   vec3 terrain_normal_view =  normalize(tex_normal_world);
@@ -181,13 +179,13 @@ void main() {
     vec3 light_shading = clamp(dot(normal, light_vector), 0.0, 1.0) * p3d_LightSource[i].color;
 
       // Specular (Blinn-Phong example)
-    vec3 halfDir   = normalize(light_vector + viewDir);
-    float NdotH    = max(dot(tex_normal_world, halfDir), 0.0);
-    float exponent = 2.0 + (1.0 - roughnessValue) * 256.0;
-    float spec     = pow(NdotH, exponent);
-    float specStrength = 0.4;
-    vec3 specColor = p3d_LightSource[i].color * spec * specStrength;
-    light_shading += specColor;
+    // vec3 halfDir   = normalize(light_vector + viewDir);
+    // float NdotH    = max(dot(tex_normal_world, halfDir), 0.0);
+    // float exponent = 2.0 + (1.0 - roughnessValue) * 256.0;
+    // float spec     = pow(NdotH, exponent);
+    // float specStrength = 0.4;
+    // vec3 specColor = p3d_LightSource[i].color * spec * specStrength;
+    // light_shading += specColor;
 
 
     shading += light_shading;
