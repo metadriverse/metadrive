@@ -50,7 +50,7 @@ class Terrain(BaseObject, ABC):
 
         # visualization mesh feature
         self._terrain_size = TerrainProperty.map_region_size  # [m]
-        self._height_scale = engine.global_config["height_scale"]  # [m]
+        self._height_scale = engine.global_config["height_scale"] * self._terrain_size / 2048  # [m]
         self._drivable_area_extension = engine.global_config["drivable_area_extension"]  # [m] road marin
         # it should include the whole map. Otherwise, road will have no texture!
         self._heightmap_size = self._semantic_map_size = TerrainProperty.map_region_size  # [m]

@@ -405,8 +405,8 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
-    YELLOW = 10
-    WHITE = 30
+    YELLOW = 30
+    WHITE = 10
 
     @staticmethod
     def get_color(type):
