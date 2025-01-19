@@ -132,7 +132,7 @@ void main() {
         diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
     }  else if (value > 39 ||  value < 221) {
         // crosswalk
-        float theta=(value-40)/180.0*3.1415926535;
+        float theta=(value-40) * 2/180.0*3.1415926535;
         vec2 new_terrain_uv = vec2(cos(theta)*terrain_uv.x - sin(theta)*terrain_uv.y, sin(theta)*terrain_uv.x+cos(theta)*terrain_uv.y);
         diffuse = texture(crosswalk_tex, new_terrain_uv * road_tex_ratio).rgb;
     } else{
