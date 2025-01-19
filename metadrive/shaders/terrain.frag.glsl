@@ -143,7 +143,7 @@ void main() {
       float rock_2 = 0.0;
 
       { // rock_2
-        rock_2 = saturate(2.0 * (height-0.12));
+        rock_2 = saturate(0.8 * (height-0.07));
         rock_2 *= saturate(pow(saturate(1.0 - slope), 2.0)) * 2.0;
 
         rock_2 = saturate(rock_2);
@@ -154,7 +154,7 @@ void main() {
         }
 
         { // Grass
-            grass = 1.0 - saturate(rock + rock_2);
+            grass = saturate(1.0 - saturate(rock + rock_2));
         }
 
       diffuse = diffuse + texture(grass_tex, terrain_uv * grass_tex_ratio).rgb * grass;
