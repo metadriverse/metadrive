@@ -218,7 +218,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Terrain =====
     # The size of the square map region, which is centered at [0, 0]. The map objects outside it are culled.
-    map_region_size=1024,
+    map_region_size=2048,
     # Whether to remove lanes outside the map region. If True, lane localization only applies to map region
     cull_lanes_outside_map=False,
     # Road will have a flat marin whose width is determined by this value, unit: [m]

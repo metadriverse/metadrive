@@ -16,7 +16,6 @@ if __name__ == "__main__":
             "image_observation": True,
             # "norm_pixel": True,
             "use_render": True,
-            "map_region_size": 2048,
             "use_mesh_terrain": True,
             "debug": True,
             "interface_panel": ["point_cloud"],

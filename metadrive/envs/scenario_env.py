@@ -37,7 +37,7 @@ SCENARIO_ENV_CONFIG = dict(
     store_data=True,
     need_lane_localization=True,
     no_map=False,
-    map_region_size=512,
+    map_region_size=2048,
     cull_lanes_outside_map=True,
 
     # ===== Scenario =====
