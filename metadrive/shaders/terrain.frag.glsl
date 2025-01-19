@@ -121,10 +121,10 @@ void main() {
   vec3 tex_normal_world;
   if (attri.r > 0.01){
     float value = attri.r * 255; // Assuming it's a red channel texture
-    if (value < 11) {
+    if (value < 14) {
         // yellow
         diffuse=texture(yellow_tex, terrain_uv * road_tex_ratio).rgb;
-    } else if (value < 21) {
+    } else if (value < 23) {
         // road
         diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb;
     } else if (value < 31) {
