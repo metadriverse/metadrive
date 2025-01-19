@@ -3,7 +3,7 @@
 // Number of splits in the PSSM, it must be in line with what is configured in the PSSMCameraRig
 const int split_count=2;
 uniform  vec3 light_direction;
-
+#define saturate(v) clamp(v, 0, 1)
 uniform mat3 p3d_NormalMatrix;
 
 uniform struct {
@@ -48,6 +48,12 @@ uniform float grass_tex_ratio;
 uniform sampler2D rock_tex;
 uniform sampler2D rock_normal;
 uniform sampler2D rock_rough;
+uniform float rock_tex_ratio;
+
+uniform sampler2D rock_tex_2;
+uniform sampler2D rock_normal_2;
+uniform sampler2D rock_rough_2;
+uniform float rock_tex_ratio_2;
 
 uniform sampler2D attribute_tex;
 
@@ -96,6 +102,8 @@ void main() {
   vec3 terrain_normal = normalize(cross(tangent, binormal));
   vec3 normal = normalize(p3d_NormalMatrix * terrain_normal);
   vec3 viewDir = normalize(wspos_camera - vtx_pos);
+  float height = (h_u0 + h_u1 + h_v0 + h_v1) / (4.0 * height_scale); // xxx
+  float slope = 1.0 - terrain_normal.z;
   // normal.x *= -1;
 
   mat3 tbn = mat3(tangent, binormal, terrain_normal);
@@ -129,9 +137,42 @@ void main() {
     roughnessValue = texture(road_rough, terrain_uv * road_tex_ratio).r;
   }
   else{
-      diffuse = texture(grass_tex, terrain_uv * grass_tex_ratio).rgb;
-      tex_normal_world = get_normal(diffuse, grass_normal, grass_rough, grass_tex_ratio, tbn);
-      roughnessValue = texture(grass_rough, terrain_uv * grass_tex_ratio).r;
+      // texture splatting
+      float grass = 0.0;
+      float rock = 0.0;
+      float rock_2 = 0.0;
+
+      { // rock_2
+        rock_2 = saturate(2.0 * (height-0.05));
+        rock_2 *= saturate(pow(saturate(1.0 - slope), 2.0)) * 2.0;
+
+        //rock_2 -= 0.6;
+        //rock_2 *= 0.5;
+        rock_2 = saturate(rock_2);
+        rock_2 = pow(rock_2, 2.0);
+        }
+
+        { // Rock
+            rock = saturate((pow(slope, 1.2) * 12.0 - 0.02) * 4.5);
+        }
+
+        { // Grass
+            grass = 1.0 - saturate(rock + rock_2);
+        }
+
+      diffuse = diffuse + texture(grass_tex, terrain_uv * grass_tex_ratio).rgb * grass;
+      diffuse = diffuse + texture(rock_tex, terrain_uv * rock_tex_ratio).rgb * rock;
+      diffuse = diffuse + texture(rock_tex_2, terrain_uv * rock_tex_ratio_2).rgb * rock_2;
+
+      tex_normal_world = tex_normal_world + (texture(grass_normal, terrain_uv * grass_tex_ratio).rgb*2.0-1.0) * grass;
+      tex_normal_world = tex_normal_world + (texture(rock_normal, terrain_uv * rock_tex_ratio).rgb*2.0-1.0) * rock;
+      tex_normal_world = tex_normal_world + (texture(rock_normal_2, terrain_uv * rock_tex_ratio_2).rgb*2.0-1.0) * rock_2;
+      tex_normal_world = normalize(tbn * tex_normal_world);
+
+      roughnessValue = roughnessValue + texture(grass_rough, terrain_uv * grass_tex_ratio).r * grass;
+      roughnessValue = roughnessValue + texture(rock_rough, terrain_uv * rock_tex_ratio).r * rock;
+      roughnessValue = roughnessValue + texture(rock_rough_2, terrain_uv * rock_tex_ratio_2).r * rock_2;
+      roughnessValue = saturate(roughnessValue);
     }
 
 //   vec3 terrain_normal_view =  normalize(tex_normal_world);

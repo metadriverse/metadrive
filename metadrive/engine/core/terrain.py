@@ -255,12 +255,19 @@ class Terrain(BaseObject, ABC):
             # self._mesh_terrain.set_shader_input("side_tex", self.side_tex)
             # self._mesh_terrain.set_shader_input("side_normal", self.side_normal)
 
-            # road
+            # rock
             self._mesh_terrain.set_shader_input("rock_tex", self.rock_tex)
             self._mesh_terrain.set_shader_input("rock_normal", self.rock_normal)
             self._mesh_terrain.set_shader_input("rock_rough", self.rock_rough)
             self._mesh_terrain.set_shader_input("rock_tex_ratio", self.rock_tex_ratio)
 
+            # rock 2
+            self._mesh_terrain.set_shader_input("rock_tex_2", self.rock_tex_2)
+            self._mesh_terrain.set_shader_input("rock_normal_2", self.rock_normal_2)
+            self._mesh_terrain.set_shader_input("rock_rough_2", self.rock_rough_2)
+            self._mesh_terrain.set_shader_input("rock_tex_ratio_2", self.rock_tex_ratio_2)
+
+            # road
             self._mesh_terrain.set_shader_input("road_tex", self.road_texture)
             self._mesh_terrain.set_shader_input("road_tex_ratio", self.road_tex_ratio)
             self._mesh_terrain.set_shader_input("yellow_tex", self.yellow_lane_line)
@@ -407,18 +414,6 @@ class Terrain(BaseObject, ABC):
         self.ts_normal.setMode(TextureStage.M_normal)
 
         # grass
-        # if engine.use_render_pipeline:
-        # grass
-        # self.grass_tex = self.loader.loadTexture(
-        #     AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
-        # )
-        # self.grass_normal = self.loader.loadTexture(
-        #     AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
-        # )
-        # self.grass_rough = self.loader.loadTexture(
-        #     AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
-        # )
-        # else:
         self.grass_tex = self.loader.loadTexture(
             AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
         )
@@ -452,7 +447,7 @@ class Terrain(BaseObject, ABC):
         self.rock_rough = self.loader.loadTexture(
             AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_rough_1k.png")
         )
-        self.rock_tex_ratio = 128 * self._terrain_size / 2048
+        self.rock_tex_ratio = 512 * self._terrain_size / 2048
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -463,6 +458,27 @@ class Terrain(BaseObject, ABC):
             tex.setMinfilter(filter_type)
             tex.setMagfilter(filter_type)
             tex.setAnisotropicDegree(1)
+
+        # rock 2
+        self.rock_tex_2 = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
+        )
+        self.rock_normal_2 = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
+        )
+        self.rock_rough_2 = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+        )
+        self.rock_tex_ratio_2 = 256 * self._terrain_size / 2048
+
+        v_wrap = Texture.WMRepeat
+        u_warp = Texture.WMMirror
+
+        for tex in [self.rock_tex_2, self.rock_normal_2, self.rock_rough_2]:
+            tex.set_wrap_u(u_warp)
+            tex.set_wrap_v(v_wrap)
+            tex.setMinfilter(filter_type)
+            tex.setMagfilter(filter_type)
 
         # # sidewalk
         # self.side_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
@@ -479,7 +495,6 @@ class Terrain(BaseObject, ABC):
         #     tex.setAnisotropicDegree(1)
 
         # Road surface
-        # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
         self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "diff_2k.png"))
         self.road_texture_normal = self.loader.loadTexture(
             AssetLoader.file_path("textures", "asphalt", "normal_2k.png")
@@ -489,7 +504,6 @@ class Terrain(BaseObject, ABC):
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
         filter_type = Texture.FTLinearMipmapLinear
-        anisotropic_degree = 16
         for tex in [self.road_texture_rough, self.road_texture, self.road_texture_normal]:
             tex.set_wrap_u(u_warp)
             tex.set_wrap_v(v_wrap)
