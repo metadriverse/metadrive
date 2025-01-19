@@ -408,17 +408,16 @@ class Terrain(BaseObject, ABC):
 
         # grass
         # if engine.use_render_pipeline:
-        #     # grass
-        #     self.grass_tex = self.loader.loadTexture(
-        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
-        #     )
-        #     self.grass_normal = self.loader.loadTexture(
-        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
-        #     )
-        #     self.grass_rough = self.loader.loadTexture(
-        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
-        #     )
-        #     self.grass_tex_ratio = 128.0
+        # grass
+        # self.grass_tex = self.loader.loadTexture(
+        #     AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
+        # )
+        # self.grass_normal = self.loader.loadTexture(
+        #     AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
+        # )
+        # self.grass_rough = self.loader.loadTexture(
+        #     AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+        # )
         # else:
         self.grass_tex = self.loader.loadTexture(
             AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
@@ -426,9 +425,11 @@ class Terrain(BaseObject, ABC):
         self.grass_normal = self.loader.loadTexture(
             AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_NRM_1K.jpg")
         )
-        self.grass_rough = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
-        )
+
+        white = PNMImage(256, 256, 4)
+        white.fill(1., 1., 1.)
+        self.grass_rough = Texture("grass rough")
+        self.grass_rough.load(white)
         self.grass_tex_ratio = 64 * self._terrain_size / 512
 
         v_wrap = Texture.WMRepeat

@@ -77,7 +77,7 @@ vec3 project(mat4 mvp, vec3 p) {
 
 
 vec3 get_normal(vec3 diffuse, sampler2D normal_tex, sampler2D rough_tex, float tex_ratio, mat3 tbn){
-      vec3 normal = normalize(texture(normal_tex, terrain_uv * tex_ratio).rgb*2.0-1.0);
+      vec3 normal = texture(normal_tex, terrain_uv * tex_ratio).rgb*2.0-1.0;
       normal = normalize(tbn * normal);
       return normal;
 }
@@ -98,7 +98,7 @@ void main() {
   vec3 viewDir = normalize(wspos_camera - vtx_pos);
   // normal.x *= -1;
 
-  mat3 tbn = mat3(tangent, binormal, normal);
+  mat3 tbn = mat3(tangent, binormal, terrain_normal);
   vec3 shading = vec3(0.0);
 
   // get the color and terrain normal in world space
@@ -140,14 +140,14 @@ void main() {
   for (int i = 0; i < p3d_LightSource.length(); ++i) {
     vec3 diff = p3d_LightSource[i].position.xyz - vtx_pos * p3d_LightSource[i].position.w;
     vec3 light_vector = normalize(diff);
-    vec3 light_shading = clamp(dot(tex_normal_world, light_vector), 0.0, 1.0) * p3d_LightSource[i].color;
+    vec3 light_shading = clamp(dot(normal, light_vector), 0.0, 1.0) * p3d_LightSource[i].color;
 
       // Specular (Blinn-Phong example)
     vec3 halfDir   = normalize(light_vector + viewDir);
     float NdotH    = max(dot(tex_normal_world, halfDir), 0.0);
     float exponent = 2.0 + (1.0 - roughnessValue) * 256.0;
     float spec     = pow(NdotH, exponent);
-    float specStrength = 0.2;
+    float specStrength = 0.4;
     vec3 specColor = p3d_LightSource[i].color * spec * specStrength;
     light_shading += specColor;
 
@@ -157,7 +157,7 @@ void main() {
 
   // static shadow
   vec3 light_dir = normalize(light_direction);
-  shading *= max(0.0, dot(terrain_normal, light_dir));
+  shading *= max(0.0, dot(tex_normal_world, light_dir));
   shading += vec3(0.07, 0.07, 0.1);
 
 //   dynamic shadow
