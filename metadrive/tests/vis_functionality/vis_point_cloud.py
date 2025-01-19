@@ -14,7 +14,7 @@ if __name__ == "__main__":
             "manual_control": True,
             # "use_render": True,
             "image_observation": True,
-            "map_region_size": 4096,
+            "map_region_size": 2048,
             # "norm_pixel": True,
             "use_render": True,
             "use_mesh_terrain": True,

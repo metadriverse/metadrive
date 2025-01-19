@@ -95,30 +95,16 @@ void main() {
   vec3 binormal = normalize(vec3(0, 1, h_v1 - h_v0));
   vec3 terrain_normal = normalize(cross(tangent, binormal));
   vec3 normal = normalize(p3d_NormalMatrix * terrain_normal);
+  vec3 viewDir = normalize(wspos_camera - vtx_pos);
   // normal.x *= -1;
 
-  mat3 tbn = mat3(tangent, binormal, terrain_normal);
+  mat3 tbn = mat3(tangent, binormal, normal);
   vec3 shading = vec3(0.0);
-
-  // Calculate the shading of each light in the scene
-  for (int i = 0; i < p3d_LightSource.length(); ++i) {
-    vec3 diff = p3d_LightSource[i].position.xyz - vtx_pos * p3d_LightSource[i].position.w;
-    vec3 light_vector = normalize(diff);
-    vec3 light_shading = clamp(dot(normal, light_vector), 0.0, 1.0) * p3d_LightSource[i].color;
-    // If PSSM is not used, use the shadowmap from the light
-    // This is deeply ineficient, it's only to be able to compare the rendered shadows
-    if (!use_pssm) {
-      vec4 projected = projecteds[i];
-      // Apply a bias to remove some of the self-shadow acne
-      projected.z -= fixed_bias * 0.01 * projected.w;
-      light_shading *= textureProj(p3d_LightSource[i].shadowMap, projected);
-    }
-    shading += light_shading;
-  }
 
   // get the color and terrain normal in world space
   vec3 diffuse;
   vec3 tex_normal_world;
+  float roughnessValue;
   if (attri.r > 0.01){
     float value = attri.r * 255; // Assuming it's a red channel texture
     if (value < 14) {
@@ -140,17 +126,38 @@ void main() {
         diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
     }
     tex_normal_world = get_normal(diffuse, road_normal,  road_rough, road_tex_ratio, tbn);
+    roughnessValue = texture(road_rough, terrain_uv * road_tex_ratio).r;
   }
   else{
       diffuse = texture(grass_tex, terrain_uv * grass_tex_ratio).rgb;
       tex_normal_world = get_normal(diffuse, grass_normal, grass_rough, grass_tex_ratio, tbn);
+      roughnessValue = texture(grass_rough, terrain_uv * grass_tex_ratio).r;
     }
 
 //   vec3 terrain_normal_view =  normalize(tex_normal_world);
 
+  // Calculate the shading of each light in the scene
+  for (int i = 0; i < p3d_LightSource.length(); ++i) {
+    vec3 diff = p3d_LightSource[i].position.xyz - vtx_pos * p3d_LightSource[i].position.w;
+    vec3 light_vector = normalize(diff);
+    vec3 light_shading = clamp(dot(tex_normal_world, light_vector), 0.0, 1.0) * p3d_LightSource[i].color;
+
+      // Specular (Blinn-Phong example)
+    vec3 halfDir   = normalize(light_vector + viewDir);
+    float NdotH    = max(dot(tex_normal_world, halfDir), 0.0);
+    float exponent = 2.0 + (1.0 - roughnessValue) * 256.0;
+    float spec     = pow(NdotH, exponent);
+    float specStrength = 0.2;
+    vec3 specColor = p3d_LightSource[i].color * spec * specStrength;
+    light_shading += specColor;
+
+
+    shading += light_shading;
+  }
+
   // static shadow
   vec3 light_dir = normalize(light_direction);
-  shading *= max(0.0, dot(tex_normal_world, light_dir));
+  shading *= max(0.0, dot(terrain_normal, light_dir));
   shading += vec3(0.07, 0.07, 0.1);
 
 //   dynamic shadow
