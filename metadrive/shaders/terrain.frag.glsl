@@ -111,18 +111,18 @@ void main() {
   vec3 diffuse = vec3(0.0, 0.0, 0.0);
   vec3 tex_normal_world;
   // float roughnessValue;
-  if (attri.r > 0.01){
-    float value = attri.r * 255; // Assuming it's a red channel texture
-    if (value < 14) {
-        // yellow
-        diffuse=vec3(1.0, 0.78, 0.0);
-    } else if (value < 23) {
-        // road
-        diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb;
-    } else if (value < 31) {
+  float value = attri.r * 255; // Assuming it's a red channel texture
+  if (value > 5){
+    if (value < 16) {
         // white
         diffuse = vec3(1.0, 1.0, 1.0);
-    }  else if (value > 39 ||  value < 221) {
+    } else if (value < 26) {
+        // road
+        diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb;
+    } else if (value < 34) {
+        // yellow
+        diffuse=vec3(1.0, 0.78, 0.0);
+    }  else if (value > 39 ||  value < 222) {
         // crosswalk
         float theta=(value-40) * 2/180.0*3.1415926535;
         vec2 new_terrain_uv = vec2(cos(theta)*terrain_uv.x - sin(theta)*terrain_uv.y, sin(theta)*terrain_uv.x+cos(theta)*terrain_uv.y);
