@@ -221,8 +221,8 @@ class BaseMap(BaseRunnable, ABC):
                         if index + points_to_skip < len(obj["polyline"]):
                             polylines.append(
                                 (
-                                    [obj["polyline"][index], obj["polyline"][index + points_to_skip]],
-                                    color_setting.get_color(obj["type"])
+                                    [obj["polyline"][index],
+                                     obj["polyline"][index + points_to_skip]], color_setting.get_color(obj["type"])
                                 )
                             )
                 else:
@@ -270,7 +270,7 @@ class BaseMap(BaseRunnable, ABC):
                 )
                 # 0-2pi
                 angle = np.arctan2(*dir) / np.pi * 180 + 180
-                angle = int(angle /2) + color_setting.get_color(MetaDriveType.CROSSWALK)
+                angle = int(angle / 2) + color_setting.get_color(MetaDriveType.CROSSWALK)
                 cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=angle)
 
         #     self._semantic_map = mask
