@@ -10,12 +10,14 @@ if __name__ == "__main__":
             "traffic_density": 0.,
             "accident_prob": 1.,
             "start_seed": 4,
-            "map": "SSSSS",
+            "map": "CSCSCCCCCC",
             "manual_control": True,
             # "use_render": True,
             "image_observation": True,
             # "norm_pixel": True,
             "use_render": True,
+            "map_region_size": 256,
+            "use_mesh_terrain": True,
             "debug": False,
             "interface_panel": ["point_cloud"],
             "sensors": dict(point_cloud=(PointCloudLidar, 200, 64, True)),  # 64 channel lidar
@@ -31,6 +33,7 @@ if __name__ == "__main__":
     env.reset()
     drawer = env.engine.make_line_drawer()
     cam = env.engine.get_sensor("point_cloud").cam
+    env.engine.accept("9", env.engine.terrain.reload_terrain_shader)
 
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])

@@ -1,17 +1,11 @@
 # import numpyf
 import math
-
 import os
 import pathlib
-import sys
-
 #
 #
 from abc import ABC
 
-import numpy
-
-from metadrive.constants import TerrainProperty, CameraTagStateKey
 import cv2
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
@@ -22,6 +16,7 @@ from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage, Shader,
 from metadrive.base_class.base_object import BaseObject
 from metadrive.constants import CamMask, Semantics
 from metadrive.constants import MetaDriveType, CollisionGroup
+from metadrive.constants import TerrainProperty, CameraTagStateKey
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.logger import get_logger
 from metadrive.third_party.diamond_square import diamond_square
@@ -53,7 +48,7 @@ class Terrain(BaseObject, ABC):
         self.mesh_collision_terrain = None  # a 3d mesh, Not available yet!
 
         # visualization mesh feature
-        self._terrain_size = TerrainProperty.terrain_size  # [m]
+        self._terrain_size = TerrainProperty.map_region_size  # [m]
         self._height_scale = engine.global_config["height_scale"]  # [m]
         self._drivable_area_extension = engine.global_config["drivable_area_extension"]  # [m] road marin
         # it should include the whole map. Otherwise, road will have no texture!
@@ -83,7 +78,8 @@ class Terrain(BaseObject, ABC):
             # prepare semantic texture
             semantic_size = self._semantic_map_size * self._semantic_map_pixel_per_meter
             self.semantic_tex = Texture()
-            self.semantic_tex.setup2dTexture(semantic_size, semantic_size, Texture.TFloat, Texture.F_red)
+            self.semantic_tex.setup2dTexture(semantic_size, semantic_size, Texture.TUnsignedByte, Texture.F_red)
+
             # prepare height field texture
             self.heightfield_tex = Texture()
             self.heightfield_tex.setup2dTexture(*self.heightfield_img.shape[:2], Texture.TShort, Texture.FLuminance)
@@ -139,7 +135,7 @@ class Terrain(BaseObject, ABC):
                 ).astype(np.uint16)
                 heightfield_to_modify = heightfield_base[start:end, start:end, ...]
                 heightfield_base[start:end, start:end,
-                                 ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
+                ...] = np.where(drivable_region, self._terrain_offset, heightfield_to_modify)
 
             # generate collision mesh
             if self.use_mesh_terrain:
@@ -182,12 +178,12 @@ class Terrain(BaseObject, ABC):
         self._node_path_list.append(self.plane_collision_terrain)
 
     def _generate_mesh_vis_terrain(
-        self,
-        size,
-        heightfield: Texture,
-        attribute_tex: Texture,
-        target_triangle_width=10,
-        engine=None,
+            self,
+            size,
+            heightfield: Texture,
+            attribute_tex: Texture,
+            target_triangle_width=10,
+            engine=None,
     ):
         """
         Given a height field map to generate terrain and an attribute_tex to texture terrain, so we can get road/grass
@@ -601,14 +597,14 @@ class Terrain(BaseObject, ABC):
                 center_point,
                 size=self._semantic_map_size,
                 pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=int(self._semantic_map_pixel_per_meter / 11),
+                polyline_thickness=1,
                 # 1 when map_region_size == 2048, 2 for others
                 layer=layer
             )
         else:
             logger.warning("Can not find map. Generate a square terrain")
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
-            semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
+            semantics = np.ones((size, size, 1), dtype=np.uint8) * 20  # use lane color
         return semantics
 
     @staticmethod
@@ -659,7 +655,6 @@ class Terrain(BaseObject, ABC):
         # self.rock_tex = None
         # self.rock_normal = None
         # self.rock_rough = None
-
 
 # Some useful threads
 # GeoMipTerrain:

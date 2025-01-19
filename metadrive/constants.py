@@ -405,8 +405,8 @@ class MapTerrainSemanticColor:
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
-    YELLOW = 0.1
-    WHITE = 0.3
+    YELLOW = 10
+    WHITE = 30
 
     @staticmethod
     def get_color(type):
@@ -426,10 +426,10 @@ class MapTerrainSemanticColor:
             return MapTerrainSemanticColor.YELLOW
         elif MetaDriveType.is_lane(type):
             # return (0, 1, 0, 0)
-            return 0.2
+            return 20
         elif type == MetaDriveType.GROUND:
             # return (0, 0, 1, 0)
-            return 0.0
+            return 00
         elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
             # return (0, 0, 0, 1)
             return MapTerrainSemanticColor.WHITE
@@ -437,7 +437,7 @@ class MapTerrainSemanticColor:
             # The range of crosswalk value is 0.4 <= value < 0.76,
             # so people can save the angle (degree) of the crosswalk in attribute map
             # the value * 10 = angle of crosswalk. It is a trick for saving memory.
-            return 0.4  # this value can be overwritten latter
+            return 40  # this value can be overwritten latter
         else:
             raise ValueError("Unsupported type: {}".format(type))
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -487,8 +487,7 @@ class TerrainProperty:
     """
     Define some constants/properties for the map and terrain
     """
-    map_region_size = 512
-    terrain_size = 2048
+    map_region_size = 2048
 
     @classmethod
     def get_semantic_map_pixel_per_meter(cls):
@@ -497,8 +496,8 @@ class TerrainProperty:
         Returns: a constant
 
         """
-        assert cls.terrain_size <= 2048, "Terrain size should be fixed to 2048"
-        return 22 if cls.map_region_size <= 1024 else 11
+        # assert cls.terrain_size <= 2048, "Terrain size should be fixed to 2048"
+        return 22
 
     @classmethod
     def point_in_map(cls, point):

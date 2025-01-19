@@ -129,20 +129,20 @@ void main() {
   // get the color and terrain normal in world space
   vec3 diffuse;
   vec3 tex_normal_world;
-  if ((attri.r > 0.01) && (terrain_uv.x>=r_min) && (terrain_uv.y >= r_min) && (terrain_uv.x<=r_max) && (terrain_uv.y<=r_max)){
-    float value = attri.r; // Assuming it's a red channel texture
-    if (value < 0.11) {
+  if ((attri.r > 0.00) && (terrain_uv.x>=r_min) && (terrain_uv.y >= r_min) && (terrain_uv.x<=r_max) && (terrain_uv.y<=r_max)){
+    float value = attri.r * 255; // Assuming it's a red channel texture
+    if (value < 11) {
         // yellow
         diffuse=texture(yellow_tex, terrain_uv * road_tex_ratio).rgb;
-    } else if (value < 0.21) {
+    } else if (value < 21) {
         // road
         diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb;
-    } else if (value < 0.31) {
+    } else if (value < 31) {
         // white
         diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
-    }  else if (value > 0.3999 ||  value < 0.760001) {
+    }  else if (value > 39 ||  value < 221) {
         // crosswalk
-        float theta=(value-0.39999) * 1000/180 * 3.1415926535;
+        float theta=(value-40)/180.0*3.1415926535;
         vec2 new_terrain_uv = vec2(cos(theta)*terrain_uv.x - sin(theta)*terrain_uv.y, sin(theta)*terrain_uv.x+cos(theta)*terrain_uv.y);
         diffuse = texture(crosswalk_tex, new_terrain_uv * road_tex_ratio).rgb;
     } else{
