@@ -30,6 +30,7 @@ if __name__ == "__main__":
         env = ScenarioEnv(
             {
                 "manual_control": True,
+                "map_region_size": 1024, # use a large number if your map is toooooo big
                 "sequential_seed": True,
                 "reactive_traffic": True if args.reactive_traffic else False,
                 "use_render": True if not args.top_down else False,
