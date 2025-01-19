@@ -108,7 +108,7 @@ void main() {
   vec3 shading = vec3(0.0);
 
   // get the color and terrain normal in world space
-  vec3 diffuse;
+  vec3 diffuse = vec3(0.0, 0.0, 0.0);
   vec3 tex_normal_world;
   // float roughnessValue;
   if (attri.r > 0.01){
@@ -127,9 +127,6 @@ void main() {
         float theta=(value-40) * 2/180.0*3.1415926535;
         vec2 new_terrain_uv = vec2(cos(theta)*terrain_uv.x - sin(theta)*terrain_uv.y, sin(theta)*terrain_uv.x+cos(theta)*terrain_uv.y);
         diffuse = texture(crosswalk_tex, new_terrain_uv * road_tex_ratio).rgb;
-    } else{
-        // Semantics for value 4
-        diffuse = vec3(0.0, 0.0, 0.0);
     }
     tex_normal_world = get_normal(diffuse, road_normal, road_tex_ratio, tbn);
     // roughnessValue = texture(road_rough, terrain_uv * road_tex_ratio).r;
