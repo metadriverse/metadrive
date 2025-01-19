@@ -3,7 +3,7 @@
 // Number of splits in the PSSM, it must be in line with what is configured in the PSSMCameraRig
 const int split_count=2;
 uniform  vec3 light_direction;
-
+#define saturate(v) clamp(v, 0, 1)
 uniform mat3 p3d_NormalMatrix;
 
 uniform struct {
@@ -40,7 +40,6 @@ uniform vec3 ground_semantics;
 uniform sampler2D attribute_tex;
 
 // just learned that uniform means the variable won't change in each stage, while in/out is able to do that : )
-uniform float elevation_texture_ratio;
 uniform float height_scale;
 
 uniform sampler2D PSSMShadowAtlas;
@@ -60,6 +59,7 @@ out vec4 color;
 
 
 void main() {
+    float elevation_texture_ratio = 1.0;
     float r_min = (1-1/elevation_texture_ratio)/2;
     float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
     vec4 attri;
@@ -73,21 +73,21 @@ void main() {
     // get the color and terrain normal in world space
     vec3 diffuse;
     if ((attri.r > 0.01) && (terrain_uv.x>=r_min) && (terrain_uv.y >= r_min) && (terrain_uv.x<=r_max) && (terrain_uv.y<=r_max)){
-        float value = attri.r;// Assuming it's a red channel texture
-        if (value < 0.11) {
+        float value = attri.r * 255;// Assuming it's a red channel texture
+        if (value < 14) {
             // yellow
             diffuse=lane_line_semantics;
-        } else if (value < 0.21) {
+        } else if (value < 23) {
             // road
             diffuse = road_semantics;
-        } else if (value < 0.31) {
+        } else if (value < 31) {
             // white
             diffuse = lane_line_semantics;
-        } else if (value > 0.3999 ||  value < 0.760001) {
+        } else if (value > 39 ||  value < 221) {
             // crosswalk
-            float theta=(value-0.39999) * 1000/180 * 3.1415926535;
-            vec2 new_terrain_uv = vec2(cos(theta)*terrain_uv.x - sin(theta)*terrain_uv.y, sin(theta)*terrain_uv.x+cos(theta)*terrain_uv.y);
-            diffuse = crosswalk_semantics;
+        float theta=(value-40) * 2/180.0*3.1415926535;
+        vec2 new_terrain_uv = vec2(cos(theta)*terrain_uv.x - sin(theta)*terrain_uv.y, sin(theta)*terrain_uv.x+cos(theta)*terrain_uv.y);
+        diffuse = crosswalk_semantics;
         } else {
             // Semantics for value 4
             diffuse = road_semantics;

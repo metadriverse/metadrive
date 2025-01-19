@@ -2,7 +2,7 @@ import logging
 import time
 from collections import defaultdict
 from typing import Union, Dict, AnyStr, Optional, Tuple, Callable
-from metadrive.constants import DEFAULT_SENSOR_HPR, DEFAULT_SENSOR_OFFSET
+
 import gymnasium as gym
 import numpy as np
 from panda3d.core import PNMImage
@@ -12,6 +12,7 @@ from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.component.sensors.dashboard import DashBoard
 from metadrive.component.sensors.distance_detector import LaneLineDetector, SideDetector
 from metadrive.component.sensors.lidar import Lidar
+from metadrive.constants import DEFAULT_SENSOR_HPR, DEFAULT_SENSOR_OFFSET
 from metadrive.constants import RENDER_MODE_NONE, DEFAULT_AGENT
 from metadrive.constants import RENDER_MODE_ONSCREEN, RENDER_MODE_OFFSCREEN
 from metadrive.constants import TerminationState, TerrainProperty
@@ -217,7 +218,7 @@ BASE_DEFAULT_CONFIG = dict(
 
     # ===== Terrain =====
     # The size of the square map region, which is centered at [0, 0]. The map objects outside it are culled.
-    map_region_size=1024,
+    map_region_size=2048,
     # Whether to remove lanes outside the map region. If True, lane localization only applies to map region
     cull_lanes_outside_map=False,
     # Road will have a flat marin whose width is determined by this value, unit: [m]
@@ -331,7 +332,7 @@ class BaseEnv(gym.Env):
 
         # Adjust terrain
         n = config["map_region_size"]
-        assert (n & (n - 1)) == 0 and 0 < n <= 2048, "map_region_size should be pow of 2 and < 2048."
+        assert (n & (n - 1)) == 0 and 512 <= n <= 4096, "map_region_size should be pow of 2 and < 2048."
         TerrainProperty.map_region_size = config["map_region_size"]
 
         # Multi-Thread
@@ -440,7 +441,7 @@ class BaseEnv(gym.Env):
         return self._get_step_return(actions, engine_info=engine_info)  # collect observation, reward, termination
 
     def _preprocess_actions(self, actions: Union[np.ndarray, Dict[AnyStr, np.ndarray], int]) \
-        -> Union[np.ndarray, Dict[AnyStr, np.ndarray], int]:
+            -> Union[np.ndarray, Dict[AnyStr, np.ndarray], int]:
         if not self.is_multi_agent:
             actions = {v_id: actions for v_id in self.agents.keys()}
         else:
@@ -637,7 +638,7 @@ class BaseEnv(gym.Env):
 
         if not self.is_multi_agent:
             return self._wrap_as_single_agent(obses), self._wrap_as_single_agent(rewards), \
-                   self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(
+                self._wrap_as_single_agent(terminateds), self._wrap_as_single_agent(
                 truncateds), self._wrap_info_as_single_agent(step_infos)
         else:
             return obses, rewards, terminateds, truncateds, step_infos

@@ -35,7 +35,6 @@ if __name__ == "__main__":
             "start_seed": 1010,
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
-            "map_region_size": 1024,
             # "height_scale": 100,
             # "random_lane_width": True,
             "driving_reward": 1.0,
