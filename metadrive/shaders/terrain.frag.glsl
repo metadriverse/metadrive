@@ -143,17 +143,14 @@ void main() {
       float rock_2 = 0.0;
 
       { // rock_2
-        rock_2 = saturate(2.0 * (height-0.05));
+        rock_2 = saturate(2.0 * (height-0.12));
         rock_2 *= saturate(pow(saturate(1.0 - slope), 2.0)) * 2.0;
 
-        //rock_2 -= 0.6;
-        //rock_2 *= 0.5;
         rock_2 = saturate(rock_2);
-        rock_2 = pow(rock_2, 2.0);
         }
 
         { // Rock
-            rock = saturate((pow(slope, 1.2) * 12.0 - 0.02) * 4.5);
+            rock = saturate((pow(slope, 1.2) * 15));
         }
 
         { // Grass
