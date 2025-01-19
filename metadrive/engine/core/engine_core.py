@@ -321,6 +321,7 @@ class EngineCore(ShowBase.ShowBase):
                 self.world_light.attach_to_world(self.render, self.physics_world)
                 self.render.setLight(self.world_light.direction_np)
                 self.render.setLight(self.world_light.ambient_np)
+                self.render.setAntialias(AntialiasAttrib.MMultisample)
 
                 # setup pssm shadow
                 # init shadow if required
