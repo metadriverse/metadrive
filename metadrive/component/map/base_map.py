@@ -187,7 +187,8 @@ class BaseMap(BaseRunnable, ABC):
         pixels_per_meter=8,
         color_setting=MapTerrainSemanticColor,
         line_sample_interval=2,
-        polyline_thickness=1,
+        yellow_line_thickness=1,
+        white_line_thickness=1,
         layer=("lane_line", "lane")
     ):
         """
@@ -247,7 +248,7 @@ class BaseMap(BaseRunnable, ABC):
                     int((p[1] - center_p[1]) * pixels_per_meter) + size / 2
                 ] for p in line
             ]
-            thickness = int(polyline_thickness*2) if color == MapTerrainSemanticColor.YELLOW else polyline_thickness
+            thickness = yellow_line_thickness if color == MapTerrainSemanticColor.YELLOW else white_line_thickness
             # thickness = min(thickness, 2)  # clip
             cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, thickness)
 

@@ -497,7 +497,7 @@ class TerrainProperty:
 
         """
         # assert cls.terrain_size <= 2048, "Terrain size should be fixed to 2048"
-        return 22
+        return 22 if cls.map_region_size != 4096 else 11
 
     @classmethod
     def point_in_map(cls, point):

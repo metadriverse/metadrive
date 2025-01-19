@@ -14,7 +14,7 @@ from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf, NodePa
 from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage, Shader, Filename
 
 from metadrive.base_class.base_object import BaseObject
-from metadrive.constants import CamMask, Semantics
+from metadrive.constants import CamMask, Semantics, MapTerrainSemanticColor
 from metadrive.constants import MetaDriveType, CollisionGroup
 from metadrive.constants import TerrainProperty, CameraTagStateKey
 from metadrive.engine.asset_loader import AssetLoader
@@ -261,11 +261,11 @@ class Terrain(BaseObject, ABC):
             self._mesh_terrain.set_shader_input("rock_tex_ratio", self.rock_tex_ratio)
 
             self._mesh_terrain.set_shader_input("road_tex", self.road_texture)
+            self._mesh_terrain.set_shader_input("road_tex_ratio", self.road_tex_ratio)
             self._mesh_terrain.set_shader_input("yellow_tex", self.yellow_lane_line)
             self._mesh_terrain.set_shader_input("white_tex", self.white_lane_line)
             self._mesh_terrain.set_shader_input("road_normal", self.road_texture_normal)
             self._mesh_terrain.set_shader_input("road_rough", self.road_texture_rough)
-            self._mesh_terrain.set_shader_input("elevation_texture_ratio", self._elevation_texture_ratio)
 
             # crosswalk
             self._mesh_terrain.set_shader_input("crosswalk_tex", self.crosswalk_tex)
@@ -428,7 +428,7 @@ class Terrain(BaseObject, ABC):
         self.grass_rough = self.loader.loadTexture(
             AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
         )
-        self.grass_tex_ratio = 64
+        self.grass_tex_ratio = 64 * self._terrain_size / 512
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -450,7 +450,7 @@ class Terrain(BaseObject, ABC):
         self.rock_rough = self.loader.loadTexture(
             AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_rough_1k.png")
         )
-        self.rock_tex_ratio = 128
+        self.rock_tex_ratio = 128 * self._terrain_size / 2048
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -483,6 +483,7 @@ class Terrain(BaseObject, ABC):
             AssetLoader.file_path("textures", "asphalt", "normal_2k.png")
         )
         self.road_texture_rough = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "rough_2k.png"))
+        self.road_tex_ratio = 128 * self._terrain_size / 2048
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
         filter_type = Texture.FTLinearMipmapLinear
@@ -498,12 +499,12 @@ class Terrain(BaseObject, ABC):
         # self.road_texture.setAnisotropicDegree(1)
 
         # lane line
-        white_lane_line = PNMImage(1024, 1024, 4)
+        white_lane_line = PNMImage(256, 256, 4)
         white_lane_line.fill(1., 1., 1.)
         self.white_lane_line = Texture("white lane line")
         self.white_lane_line.load(white_lane_line)
 
-        yellow_lane_line = PNMImage(1024, 1024, 4)
+        yellow_lane_line = PNMImage(256, 256, 4)
         yellow_lane_line.fill(*(255 / 255, 200 / 255, 0 / 255))
         self.yellow_lane_line = Texture("white lane line")
         self.yellow_lane_line.load(yellow_lane_line)
@@ -597,14 +598,16 @@ class Terrain(BaseObject, ABC):
                 center_point,
                 size=self._semantic_map_size,
                 pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=1,
+                white_line_thickness=1,
+                yellow_line_thickness=3,
                 # 1 when map_region_size == 2048, 2 for others
                 layer=layer
             )
         else:
             logger.warning("Can not find map. Generate a square terrain")
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
-            semantics = np.ones((size, size, 1), dtype=np.uint8) * 20  # use lane color
+            lane_color = MapTerrainSemanticColor.get_color(MetaDriveType.LANE_SURFACE_STREET)
+            semantics = np.ones((size, size, 1), dtype=np.uint8) * lane_color  # use lane color
         return semantics
 
     @staticmethod

@@ -37,6 +37,7 @@ uniform sampler2D white_tex;
 uniform sampler2D road_tex;
 uniform sampler2D road_normal;
 uniform sampler2D road_rough;
+uniform float road_tex_ratio;
 uniform sampler2D crosswalk_tex;
 
 uniform sampler2D grass_tex;
@@ -51,7 +52,6 @@ uniform sampler2D rock_rough;
 uniform sampler2D attribute_tex;
 
 // just learned that uniform means the variable won't change in each stage, while in/out is able to do that : )
-uniform float elevation_texture_ratio;
 uniform float height_scale;
 
 uniform sampler2D PSSMShadowAtlas;
@@ -83,17 +83,7 @@ vec3 get_normal(vec3 diffuse, sampler2D normal_tex, sampler2D rough_tex, float t
 }
 
 void main() {
-  float road_tex_ratio = 128;
-  float grass_tex_ratio = grass_tex_ratio * 4;
-  float r_min = (1-1/elevation_texture_ratio)/2;
-  float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
-  vec4 attri;
-  if (abs(elevation_texture_ratio - 1) < 0.001) {
-    attri = texture(attribute_tex, terrain_uv);
-  }
-  else {
-    attri = texture(attribute_tex, terrain_uv*elevation_texture_ratio+0.5);
-  }
+  vec4 attri = texture(attribute_tex, terrain_uv);
 
   // terrain normal
   vec3 pixel_size = vec3(1.0, -1.0, 0) / textureSize(ShaderTerrainMesh.heightfield, 0).xxx;
@@ -129,7 +119,7 @@ void main() {
   // get the color and terrain normal in world space
   vec3 diffuse;
   vec3 tex_normal_world;
-  if ((attri.r > 0.00) && (terrain_uv.x>=r_min) && (terrain_uv.y >= r_min) && (terrain_uv.x<=r_max) && (terrain_uv.y<=r_max)){
+  if (attri.r > 0.01){
     float value = attri.r * 255; // Assuming it's a red channel texture
     if (value < 11) {
         // yellow
@@ -152,8 +142,6 @@ void main() {
     tex_normal_world = get_normal(diffuse, road_normal,  road_rough, road_tex_ratio, tbn);
   }
   else{
-
-      // texture splatting, mixing ratio can be determined via rgba, no grass here
       diffuse = texture(grass_tex, terrain_uv * grass_tex_ratio).rgb;
       tex_normal_world = get_normal(diffuse, grass_normal, grass_rough, grass_tex_ratio, tbn);
     }

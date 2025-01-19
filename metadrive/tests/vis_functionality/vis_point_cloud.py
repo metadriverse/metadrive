@@ -16,9 +16,9 @@ if __name__ == "__main__":
             "image_observation": True,
             # "norm_pixel": True,
             "use_render": True,
-            "map_region_size": 256,
+            "map_region_size": 2048,
             "use_mesh_terrain": True,
-            "debug": False,
+            "debug": True,
             "interface_panel": ["point_cloud"],
             "sensors": dict(point_cloud=(PointCloudLidar, 200, 64, True)),  # 64 channel lidar
             "vehicle_config": dict(image_source="point_cloud"),
