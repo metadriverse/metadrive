@@ -176,6 +176,8 @@ BASE_DEFAULT_CONFIG = dict(
         show_lane_line_detector=False,
         # Whether to turn on vehicle light, only available when enabling render-pipeline
         light=False,
+        # Whether to use traffic light controller for the vehicle
+        use_traffic_light_controller=False,
     ),
 
     # ===== Sensors =====
@@ -272,7 +274,10 @@ BASE_DEFAULT_CONFIG = dict(
     force_reuse_object_name=False,
 
     # ===== randomization =====
-    num_scenarios=1  # the number of scenarios in this environment
+    num_scenarios=1,  # the number of scenarios in this environment
+
+    # ===== Traffic Light =====
+    use_traffic_light_controller=False,
 )
 
 

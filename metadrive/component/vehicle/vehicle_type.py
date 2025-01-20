@@ -9,6 +9,7 @@ from metadrive.constants import Semantics
 from metadrive.engine.asset_loader import AssetLoader
 
 
+# When using DefaultVehicle as traffic, please use this class.
 class DefaultVehicle(BaseVehicle):
     PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.DEFAULT_VEHICLE)
     # LENGTH = 4.51
@@ -39,7 +40,43 @@ class DefaultVehicle(BaseVehicle):
         return self.DEFAULT_WIDTH
 
 
-# When using DefaultVehicle as traffic, please use this class.
+class DummyVehicle(BaseVehicle):
+    PARAMETER_SPACE = ParameterSpace(VehicleParameterSpace.DEFAULT_VEHICLE)
+    # LENGTH = 4.51
+    # WIDTH = 1.852
+    # HEIGHT = 1.19
+    TIRE_RADIUS = 0.313
+    TIRE_WIDTH = 0.25
+    MASS = 1100
+    LATERAL_TIRE_TO_CENTER = 0.815
+    FRONT_WHEELBASE = 1.05234
+    REAR_WHEELBASE = 1.4166
+    path = None  #('ferra/vehicle.gltf', (0.1, 0.1, 1), (0, 0.075, 0.), (0, 0, 0))  # asset path, scale, offset, HPR
+
+    DEFAULT_LENGTH = 0.515  # meters
+    DEFAULT_HEIGHT = 1.19  # meters
+    DEFAULT_WIDTH = 1.852  # meters
+
+    render = False
+
+    def __init__(
+        self, vehicle_config=None, name=None, random_seed=None, position=None, heading=None, _calling_reset=True
+    ):
+        super(DummyVehicle, self).__init__(
+            vehicle_config, name, random_seed, position, heading, _calling_reset, render=False
+        )
+
+    @property
+    def LENGTH(self):
+        return self.DEFAULT_LENGTH
+
+    @property
+    def HEIGHT(self):
+        return self.DEFAULT_HEIGHT
+
+    @property
+    def WIDTH(self):
+        return self.DEFAULT_WIDTH
 
 
 class TrafficDefaultVehicle(DefaultVehicle):
@@ -442,7 +479,8 @@ vehicle_type = {
     "static_default": StaticDefaultVehicle,
     "varying_dynamics": VaryingDynamicsVehicle,
     "varying_dynamics_bounding_box": VaryingDynamicsBoundingBoxVehicle,
-    "traffic_default": TrafficDefaultVehicle
+    "traffic_default": TrafficDefaultVehicle,
+    'dummy': DummyVehicle
 }
 
 vehicle_class_to_type = inv_map = {v: k for k, v in vehicle_type.items()}

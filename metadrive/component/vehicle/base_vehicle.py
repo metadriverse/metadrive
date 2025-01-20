@@ -121,6 +121,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         position=None,
         heading=None,
         _calling_reset=True,
+        **kwargs
     ):
         """
         This Vehicle Config is different from self.get_config(), and it is used to define which modules to use, and
@@ -136,6 +137,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         # self.engine = get_engine()
         BaseObject.__init__(self, name, random_seed, self.engine.global_config["vehicle_config"])
         BaseVehicleState.__init__(self)
+        if 'render' in kwargs:
+            self.render = kwargs['render']
         self.update_config(vehicle_config)
         self.set_metadrive_type(MetaDriveType.VEHICLE)
         use_special_color = self.config["use_special_color"]
@@ -163,6 +166,12 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         # navigation module
         self.navigation: Optional[NodeNetworkNavigation] = None
+
+        # traffic light controller
+        if 'use_traffic_light_controller' not in self.config:
+            self.config['use_traffic_light_controller'] = False
+        self.use_traffic_light_controller = self.config['use_traffic_light_controller']
+        logger.info(f"Traffic light status controls the status of vehicle: {self.use_traffic_light_controller}")
 
         # state info
         self.throttle_brake = 0.0
@@ -352,6 +361,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
 
         self.spawn_place = position
         # print("position:", position)
+        if heading is None:
+            heading = 0.0
         self.set_heading_theta(heading)
         self.set_static(False)
         # self.set_wheel_friction(self.config["wheel_friction"])
@@ -474,6 +485,20 @@ class BaseVehicle(BaseObject, BaseVehicleState):
         if action is None:
             return
         steering = action[0]
+        if self.use_traffic_light_controller:
+            from metadrive.policy.idm_policy import IDMPolicy
+            dummy_policy = IDMPolicy(self, np.random.randint(0, 1024))
+            dummy_policy.enable_lane_change = False
+            dummy_policy.TIME_WANTED = 0.2
+            dummy_policy.DISTANCE_WANTED = 2.0
+            idm_action, acc_front_vehicle = dummy_policy.dummy_act()
+            if acc_front_vehicle is not None:
+                if not hasattr(self.engine, "dummy_vehicle"):
+                    self.engine.dummy_vehicle = []
+                if acc_front_vehicle.id in self.engine.dummy_vehicle:
+                    dummy_pos = acc_front_vehicle.position
+                    action[1] = idm_action[1]
+            #dself.add_policy(self.id, IDMPolicy, self, self.generate_seed())
         self.throttle_brake = action[1]
         self.steering = steering
         self.system.setSteeringValue(self.steering * self.max_steering, 0)
@@ -502,7 +527,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 else:
                     self.system.applyEngineForce(max_engine_force * throttle_brake, wheel_index)
             else:
-                if self.enable_reverse:
+                if self.enable_reverse and not self.red_light:
                     self.system.applyEngineForce(max_engine_force * throttle_brake, wheel_index)
                     self.system.setBrake(0, wheel_index)
                 else:
@@ -773,10 +798,16 @@ class BaseVehicle(BaseObject, BaseVehicleState):
                 light = get_object_from_node(node)
                 if light.status == MetaDriveType.LIGHT_GREEN:
                     self.green_light = True
+                    self.yellow_light = False
+                    self.red_light = False
                 elif light.status == MetaDriveType.LIGHT_RED:
                     self.red_light = True
+                    self.green_light = False
+                    self.yellow_light = False
                 elif light.status == MetaDriveType.LIGHT_YELLOW:
                     self.yellow_light = True
+                    self.green_light = False
+                    self.red_light = False
                 elif light.status == MetaDriveType.LIGHT_UNKNOWN:
                     # unknown didn't add
                     continue

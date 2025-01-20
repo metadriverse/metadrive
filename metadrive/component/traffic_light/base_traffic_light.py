@@ -6,6 +6,9 @@ from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.utils.pg.utils import generate_static_box_physics_body
+from metadrive.engine.logger import get_logger
+
+logger = get_logger()
 
 
 class BaseTrafficLight(BaseObject):
@@ -98,6 +101,13 @@ class BaseTrafficLight(BaseObject):
             self._try_draw_line([3 / 255, 255 / 255, 3 / 255])
         self.status = MetaDriveType.LIGHT_GREEN
 
+        if self.engine.global_config["use_traffic_light_controller"]:
+            try:
+                self.engine.dummy_vehicle.remove(self.dummy_vehicle.id)
+                self.engine.clear_objects([self.dummy_vehicle.id], force_destroy=True)
+            except:
+                pass
+
     def set_red(self):
         if self.render:
             if self.current_light is not None:
@@ -107,6 +117,19 @@ class BaseTrafficLight(BaseObject):
             self._try_draw_line([252 / 255, 0 / 255, 0 / 255])
         self.status = MetaDriveType.LIGHT_RED
 
+        if self.engine.global_config["use_traffic_light_controller"]:
+            from metadrive.component.vehicle.vehicle_type import DummyVehicle
+            logger.info('Traffic light controller is enabled, the throttle_brake would be overwritten by red light')
+            dummy_vehicle = self.engine.spawn_object(DummyVehicle, vehicle_config={}, position=self.position)
+            dummy_vehicle.set_static(True)
+            if not hasattr(self.engine, "dummy_vehicle"):
+                self.engine.dummy_vehicle = [dummy_vehicle.id]
+            else:
+                self.engine.dummy_vehicle.append(dummy_vehicle.id)
+
+            # save object
+            self.dummy_vehicle = dummy_vehicle
+
     def set_yellow(self):
         if self.render:
             if self.current_light is not None:
@@ -115,6 +138,13 @@ class BaseTrafficLight(BaseObject):
                 self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
             self._try_draw_line([252 / 255, 227 / 255, 3 / 255])
         self.status = MetaDriveType.LIGHT_YELLOW
+
+        if self.engine.global_config["use_traffic_light_controller"]:
+            try:
+                self.engine.dummy_vehicle.remove(self.dummy_vehicle.id)
+                self.engine.clear_objects([self.dummy_vehicle.id], force_destroy=True)
+            except:
+                pass
 
     def set_unknown(self):
         if self.render:
@@ -130,6 +160,12 @@ class BaseTrafficLight(BaseObject):
         if self._draw_line:
             self._line_drawer.reset()
             self._line_drawer.removeNode()
+        if self.engine.global_config["use_traffic_light_controller"]:
+            try:
+                self.engine.dummy_vehicle.remove(self.dummy_vehicle.id)
+                self.engine.clear_objects([self.dummy_vehicle.id], force_destroy=True)
+            except:
+                pass
 
     @property
     def top_down_color(self):

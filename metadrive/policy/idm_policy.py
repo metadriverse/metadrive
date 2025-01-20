@@ -232,6 +232,40 @@ class IDMPolicy(BasePolicy):
         self.heading_pid = PIDController(1.7, 0.01, 3.5)
         self.lateral_pid = PIDController(0.3, .002, 0.05)
 
+    def dummy_act(self, *args, **kwargs):
+        # concat lane
+        success = self.move_to_next_road()
+        all_objects = self.control_object.lidar.get_surrounding_objects(self.control_object)
+        try:
+            if success and self.enable_lane_change:
+                # perform lane change due to routing
+                acc_front_obj, acc_front_dist, steering_target_lane = self.lane_change_policy(all_objects)
+            else:
+                # can not find routing target lane
+                surrounding_objects = FrontBackObjects.get_find_front_back_objs(
+                    all_objects,
+                    self.routing_target_lane,
+                    self.control_object.position,
+                    max_distance=self.MAX_LONG_DIST
+                )
+                acc_front_obj = surrounding_objects.front_object()
+                acc_front_dist = surrounding_objects.front_min_distance()
+                steering_target_lane = self.routing_target_lane
+        except:
+            # error fallback
+            acc_front_obj = None
+            acc_front_dist = 5
+            steering_target_lane = self.routing_target_lane
+            # logging.warning("IDM bug! fall back")
+            # print("IDM bug! fall back")
+
+        # control by PID and IDM
+        steering = self.steering_control(steering_target_lane)
+        acc = self.acceleration(acc_front_obj, acc_front_dist)
+        action = [steering, acc]
+        self.action_info["action"] = action
+        return action, acc_front_obj
+
     def act(self, *args, **kwargs):
         # concat lane
         success = self.move_to_next_road()
