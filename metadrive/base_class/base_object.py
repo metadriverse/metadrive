@@ -340,8 +340,11 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         """
         Velocity, unit: m/s
         """
-        velocity = self.body.get_linear_velocity()
-        return np.asarray([velocity[0], velocity[1]])
+        if isinstance(self.body, BaseGhostBodyNode):
+            return np.array([0, 0])
+        else:
+            velocity = self.body.get_linear_velocity()
+            return np.asarray([velocity[0], velocity[1]])
 
     @property
     def velocity_km_h(self):
