@@ -23,15 +23,15 @@ class BaseTrafficLight(BaseObject):
     PLACE_LONGITUDE = 5
 
     def __init__(
-            self,
-            lane,
-            position=None,
-            name=None,
-            random_seed=None,
-            config=None,
-            escape_random_seed_assertion=False,
-            draw_line=False,
-            show_model=True,
+        self,
+        lane,
+        position=None,
+        name=None,
+        random_seed=None,
+        config=None,
+        escape_random_seed_assertion=False,
+        draw_line=False,
+        show_model=True,
     ):
         super(BaseTrafficLight, self).__init__(name, random_seed, config, escape_random_seed_assertion)
         self.set_metadrive_type(MetaDriveType.TRAFFIC_LIGHT)
@@ -50,7 +50,7 @@ class BaseTrafficLight(BaseObject):
             type_name=MetaDriveType.TRAFFIC_LIGHT,
             ghost_node=True,
         )
-        self.add_body(air_wall, add_to_static_world=False) # add to dynamic world so the lidar can detect it
+        self.add_body(air_wall, add_to_static_world=False)  # add to dynamic world so the lidar can detect it
 
         if position is None:
             # auto determining

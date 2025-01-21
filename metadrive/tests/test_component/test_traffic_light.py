@@ -121,8 +121,8 @@ def test_traffic_light_detection(render=False, manual_control=False, debug=False
             env.step([0, 1])
             if min(env.observations["default_agent"].cloud_points) < 0.5:
                 test_success = True
-                assert list(env.observations["default_agent"].detected_objects)[
-                           0].status == BaseTrafficLight.LIGHT_YELLOW
+                assert list(env.observations["default_agent"].detected_objects
+                            )[0].status == BaseTrafficLight.LIGHT_YELLOW
                 break
         assert test_success
         light.destroy()
