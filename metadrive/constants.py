@@ -170,7 +170,7 @@ class CollisionGroup(Mask):
             (cls.BrokenLaneLine, cls.TrafficParticipants, True),
             (cls.BrokenLaneLine, cls.Crosswalk, False),
 
-            # vehicle collision
+            # vehicle contact
             (cls.Vehicle, cls.Vehicle, True),
             (cls.Vehicle, cls.LaneSurface, True),
             (cls.Vehicle, cls.ContinuousLaneLine, True),
