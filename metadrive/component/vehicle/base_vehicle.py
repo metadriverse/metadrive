@@ -50,7 +50,7 @@ class BaseVehicleState:
         # traffic light
         self.red_light = False
         self.yellow_light = False
-        self.green_light = False
+        self.green_light = False  # should always be False, since we don't detect green light
 
         # lane line detection
         self.on_yellow_continuous_line = False
@@ -772,6 +772,7 @@ class BaseVehicle(BaseObject, BaseVehicleState):
             elif name == MetaDriveType.TRAFFIC_LIGHT:
                 light = get_object_from_node(node)
                 if light.status == MetaDriveType.LIGHT_GREEN:
+                    raise ValueError("Green light should not be in the contact test!")
                     self.green_light = True
                 elif light.status == MetaDriveType.LIGHT_RED:
                     self.red_light = True
