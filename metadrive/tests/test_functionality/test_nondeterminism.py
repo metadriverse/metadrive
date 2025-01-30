@@ -4,15 +4,11 @@ Issue:  https://github.com/metadriverse/metadrive/issues/758
 
 Usage: run this file. or pytest.
 """
-import copy
-import os
 
 import numpy as np
 import pandas as pd
 import pytest
-import seaborn as sns
-from metadrive import MetaDriveEnv
-from metadrive.constants import TerminationState
+
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.examples.ppo_expert.numpy_expert import expert
 
