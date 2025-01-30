@@ -8,7 +8,7 @@ from panda3d.core import LVecBase4f
 class ColorLineNodePath(LineNodePath):
     def __init__(self, parent=None, thickness=1.0):
         super(ColorLineNodePath, self).__init__(parent, name=None, thickness=thickness, colorVec=VBase4(1))
-        self.hide(CamMask.Shadow)
+        self.hide(CamMask.Shadow | CamMask.DepthCam)
         self.clearShader()
         self.setShaderAuto()
 
@@ -43,7 +43,7 @@ class ColorSphereNodePath(NodePath):
         super(ColorSphereNodePath, self).__init__("Point Debugger")
         scale /= 10
         self.scale = scale
-        self.hide(CamMask.Shadow)
+        self.hide(CamMask.Shadow | CamMask.DepthCam)
         self.reparentTo(self.engine.render if parent is None else parent)
         self._existing_points = []
         self._dying_points = []

@@ -166,8 +166,9 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
     light_manager_name = find_light_manager_name(record_episode["manager_metadata"])
     data_manager_name = find_data_manager_name(record_episode["manager_metadata"])
 
-    tracks = {
-        k: dict(
+    tracks = {}
+    for k in list(all_objs):
+        tracks[k] = dict(
             type=MetaDriveType.UNSET,
             state=dict(
                 position=np.zeros(shape=(episode_len, 3)),
@@ -182,8 +183,6 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
             ),
             metadata=dict(track_length=episode_len, type=MetaDriveType.UNSET, object_id=k, original_id=k)
         )
-        for k in list(all_objs)
-    }
 
     all_lights = set()
     if light_manager_name is not None:
@@ -245,6 +244,22 @@ def convert_recorded_scenario_exported(record_episode, scenario_log_interval=0.1
                 tracks[id]["state"]["position"][frame_idx] = state["position"]
                 tracks[id]["state"]["heading"][frame_idx] = state["heading_theta"]
                 tracks[id]["state"]["velocity"][frame_idx] = state["velocity"]
+                if "width" in state:
+                    if "width" not in tracks[id]["state"]:
+                        tracks[id]["state"]["width"] = np.zeros(shape=(episode_len, 1))
+                    tracks[id]["state"]["width"][frame_idx] = state["width"]
+                if "length" in state:
+                    if "length" not in tracks[id]["state"]:
+                        tracks[id]["state"]["length"] = np.zeros(shape=(episode_len, 1))
+                    tracks[id]["state"]["length"][frame_idx] = state["length"]
+                if "height" in state:
+                    if "height" not in tracks[id]["state"]:
+                        tracks[id]["state"]["height"] = np.zeros(shape=(episode_len, 1))
+                    tracks[id]["state"]["height"][frame_idx] = state["height"]
+                if "radius" in state:
+                    if "radius" not in tracks[id]["state"]:
+                        tracks[id]["state"]["radius"] = np.zeros(shape=(episode_len, 1))
+                    tracks[id]["state"]["radius"][frame_idx] = state["radius"]
                 tracks[id]["state"]["valid"][frame_idx] = 1
 
                 if "throttle_brake" in state:

@@ -1,10 +1,10 @@
 import numpy as np
 
 from metadrive.base_class.base_object import BaseObject
-from metadrive.constants import CamMask
-from metadrive.scenario.scenario_description import ScenarioDescription
+from metadrive.constants import CamMask, CollisionGroup
 from metadrive.constants import MetaDriveType, Semantics
 from metadrive.engine.asset_loader import AssetLoader
+from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.utils.pg.utils import generate_static_box_physics_body
 
 
@@ -50,7 +50,7 @@ class BaseTrafficLight(BaseObject):
             type_name=MetaDriveType.TRAFFIC_LIGHT,
             ghost_node=True,
         )
-        self.add_body(air_wall, add_to_static_world=True)
+        self.add_body(air_wall, add_to_static_world=False)  # add to dynamic world so the lidar can detect it
 
         if position is None:
             # auto determining
@@ -97,6 +97,7 @@ class BaseTrafficLight(BaseObject):
                 self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["green"].instanceTo(self.origin)
             self._try_draw_line([3 / 255, 255 / 255, 3 / 255])
         self.status = MetaDriveType.LIGHT_GREEN
+        self._body.setIntoCollideMask(CollisionGroup.AllOff)  # can not be detected by anything
 
     def set_red(self):
         if self.render:
@@ -106,6 +107,7 @@ class BaseTrafficLight(BaseObject):
                 self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["red"].instanceTo(self.origin)
             self._try_draw_line([252 / 255, 0 / 255, 0 / 255])
         self.status = MetaDriveType.LIGHT_RED
+        self._body.setIntoCollideMask(CollisionGroup.InvisibleWall)  # will be detected by lidar and object detector
 
     def set_yellow(self):
         if self.render:
@@ -115,6 +117,7 @@ class BaseTrafficLight(BaseObject):
                 self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["yellow"].instanceTo(self.origin)
             self._try_draw_line([252 / 255, 227 / 255, 3 / 255])
         self.status = MetaDriveType.LIGHT_YELLOW
+        self._body.setIntoCollideMask(CollisionGroup.InvisibleWall)  # will be detected by lidar and object detector
 
     def set_unknown(self):
         if self.render:
@@ -123,6 +126,7 @@ class BaseTrafficLight(BaseObject):
             if self._show_model:
                 self.current_light = BaseTrafficLight.TRAFFIC_LIGHT_MODEL["unknown"].instanceTo(self.origin)
         self.status = MetaDriveType.LIGHT_UNKNOWN
+        self._body.setIntoCollideMask(CollisionGroup.AllOff)  # can not be detected by anything
 
     def destroy(self):
         super(BaseTrafficLight, self).destroy()

@@ -21,15 +21,18 @@ logger = get_logger()
 
 
 def generate_distinct_rgb_values():
-    distinct_rgb_values = []
-    step = 256 // 32  # 8 intervals for each RGB component (0-31, 32-63, ..., 224-255)
+    # Try to avoid (0,0,0) and (255,255,255) to avoid confusion with the background and other objects.
+    r = np.linspace(16, 256 - 16, 16).astype(int)
+    g = np.linspace(16, 256 - 16, 16).astype(int)
+    b = np.linspace(16, 256 - 16, 16).astype(int)
 
-    for r in range(step, 256, step):
-        for g in range(0, 256, step):
-            for b in range(0, 256, step):
-                distinct_rgb_values.append((round(r / 255, 5), round(g / 255, 5), round(b / 255, 5)))
+    # Create a meshgrid and reshape to get all combinations of r, g, b
+    rgbs = np.array(np.meshgrid(r, g, b)).T.reshape(-1, 3)
 
-    return distinct_rgb_values[:4096]  # Return the first 4096 values
+    # Normalize the values to be between 0 and 1
+    rgbs = rgbs / 255.0
+
+    return tuple(tuple(round(vv, 5) for vv in v) for v in rgbs)
 
 
 COLOR_SPACE = generate_distinct_rgb_values()
@@ -151,8 +154,11 @@ class BaseEngine(EngineCore, Randomizable):
         self._spawned_objects[obj.id] = obj
         color = self._pick_color(obj.id)
         if color == (-1, -1, -1):
-            print("FK!~")
-            exit()
+            raise ValueError(
+                "No color available for object: {} instance segment mask. We already used all {} colors...".format(
+                    obj.id, BaseEngine.MAX_COLOR
+                )
+            )
 
         obj.attach_to_world(self.worldNP, self.physics_world)
         return obj
@@ -186,11 +192,14 @@ class BaseEngine(EngineCore, Randomizable):
 
         """
         if id in self.id_c.keys():
-            my_color = self.id_c[id]
-            BaseEngine.COLORS_OCCUPIED.remove(my_color)
+            my_color = self.id_c.pop(id)
+            if my_color in BaseEngine.COLORS_OCCUPIED:
+                BaseEngine.COLORS_OCCUPIED.remove(my_color)
             BaseEngine.COLORS_FREE.add(my_color)
             # print("After cleaning:,", len(BaseEngine.COLORS_OCCUPIED), len(BaseEngine.COLORS_FREE))
-            self.id_c.pop(id)
+            # if id in self.id_c.keys():
+            #     self.id_c.pop(id)
+            assert my_color in self.c_id.keys()
             self.c_id.pop(my_color)
 
     def id_to_color(self, id):
@@ -261,6 +270,7 @@ class BaseEngine(EngineCore, Randomizable):
         else:
             raise ValueError("filter should be a list or a function")
         for id, obj in exclude_objects.items():
+            self._clean_color(id)
             self._spawned_objects.pop(id)
             if id in self._object_tasks:
                 self._object_tasks.pop(id)
@@ -268,7 +278,7 @@ class BaseEngine(EngineCore, Randomizable):
                 policy = self._object_policies.pop(id)
                 policy.destroy()
             if force_destroy_this_obj:
-                self._clean_color(obj.id)
+                #self._clean_color(obj.id)
                 obj.destroy()
             else:
                 obj.detach_from_world(self.physics_world)
@@ -283,7 +293,7 @@ class BaseEngine(EngineCore, Randomizable):
                 if len(self._dying_objects[obj.class_name]) < self.global_config["num_buffering_objects"]:
                     self._dying_objects[obj.class_name].append(obj)
                 else:
-                    self._clean_color(obj.id)
+                    #self._clean_color(obj.id)
                     obj.destroy()
             if self.global_config["record_episode"] and not self.replay_episode and record:
                 self.record_manager.add_clear_info(obj)
@@ -542,8 +552,8 @@ class BaseEngine(EngineCore, Randomizable):
         :param manager_name: name shouldn't exist in self._managers and not be same as any class attribute
         :param manager: subclass of BaseManager
         """
-        assert manager_name not in self._managers, "Manager already exists in BaseEngine, Use update_manager() to " \
-                                                   "overwrite"
+        assert manager_name not in self._managers, "Manager {} already exists in BaseEngine, Use update_manager() to " \
+                                                   "overwrite".format(manager_name)
         assert not hasattr(self, manager_name), "Manager name can not be same as the attribute in BaseEngine"
         self._managers[manager_name] = manager
         setattr(self, manager_name, manager)

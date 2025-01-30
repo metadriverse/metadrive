@@ -1,5 +1,5 @@
-from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, FrameBufferProperties
-
+from panda3d.core import RenderState, LightAttrib, ColorAttrib, ShaderAttrib, TextureAttrib, FrameBufferProperties, LColor, MaterialAttrib, Material
+from metadrive.utils.utils import is_mac
 from metadrive.component.sensors.base_camera import BaseCamera
 from metadrive.constants import CamMask
 from metadrive.constants import Semantics, CameraTagStateKey
@@ -14,7 +14,7 @@ class SemanticCamera(BaseCamera):
         buffer_props.set_rgba_bits(8, 8, 8, 8)
         buffer_props.set_depth_bits(8)
         buffer_props.set_force_hardware(True)
-        buffer_props.set_multisamples(16)
+        buffer_props.set_multisamples(0)
         buffer_props.set_srgb_color(False)
         buffer_props.set_stereo(False)
         buffer_props.set_stencil_bits(0)
@@ -38,14 +38,21 @@ class SemanticCamera(BaseCamera):
                 )
             else:
 
-                if label == Semantics.PEDESTRIAN.label:
-                    # PZH: This is a workaround fix to make pedestrians animated.
+                if label == Semantics.PEDESTRIAN.label and not self.engine.global_config.get("use_bounding_box", False):
+                    # rendering pedestrian with glasses, shoes, etc. [Synbody]
+                    base_color = LColor(c[0] / 255, c[1] / 255, c[2] / 255, 1)
+                    material = Material()
+                    material.setDiffuse((base_color[0], base_color[1], base_color[2], 1))
+                    material.setSpecular((0, 0, 0, 1))
+                    material.setShininess(0)
+
                     cam.setTagState(
                         label,
                         RenderState.make(
                             # ShaderAttrib.makeOff(),
                             LightAttrib.makeAllOff(),
                             TextureAttrib.makeOff(),
+                            MaterialAttrib.make(material),
                             ColorAttrib.makeFlat((c[0] / 255, c[1] / 255, c[2] / 255, 1)),
                             1
                         )

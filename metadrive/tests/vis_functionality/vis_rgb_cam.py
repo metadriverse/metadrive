@@ -19,7 +19,7 @@ if __name__ == "__main__":
             },
             "interface_panel": ["dashboard", "rgb_camera"],
             "manual_control": True,
-            "use_render": True,
+            "use_render": False,
             "image_observation": True,  # it is a switch telling metadrive to use rgb as observation
             "norm_pixel": True,  # clip rgb to range(0,1) instead of (0, 255)
             # "pstats": True,

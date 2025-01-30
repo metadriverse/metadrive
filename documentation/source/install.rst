@@ -18,9 +18,7 @@ We recommend to use the command following to install::
 .. note:: Using ``git clone https://github.com/metadriverse/metadrive.git --single-branch``
   will only pull the main branch and bypass other branches, saving disk space.
 
-It is also allowed to install MetaDrive via pip.However, it is possible that some latest features and bug fixings are not available through PyPI installation::
-
-    pip install metadrive-simulator
+.. note:: We don't recommend installing MetaDrive with ``pip install metadrive-simulator`` because it will download the source code from PyPI, which may not be the latest version.
 
 
 
@@ -109,5 +107,6 @@ Known Issues
 ######################
 
 
-* We find that Mac with M1 chip is incompatible with Panda3D rendering utilities.
 * Pygame 1.9.6 causes blank visualization window in Mac with M1 chip. Upgrading to pygame==2.0.0 solves.
+* If you are using cuda feature on Windows and encounter compiling issue when install  PyOpenGL-accelerate, lower the Python version to i.e. 3.8
+* To use cuda feature, you need OpenGL >= 4.3, which has the compute shader support
