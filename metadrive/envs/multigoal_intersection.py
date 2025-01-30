@@ -8,6 +8,7 @@ possible destinations will be provided.
 from collections import defaultdict
 
 import gymnasium as gym
+import numpy as np
 
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.component.pg_space import ParameterSpace, Parameter, DiscreteSpace, BoxSpace
@@ -657,8 +658,6 @@ if __name__ == "__main__":
                 print('=======================')
 
             if done:
-                import numpy as np
-
                 # for t in range(i):
                 #     # avg = [v[t] for k, v in obs_recorder.items()]
                 #     v = np.stack([v[0] for k, v in obs_recorder.items()])
