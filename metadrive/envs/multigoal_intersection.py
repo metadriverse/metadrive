@@ -251,7 +251,6 @@ class MultiGoalIntersectionEnvBase(MetaDriveEnv):
     This environment is an intersection with multiple goals. We provide the reward function, observation, termination
     conditions for each goal in the info dict returned by env.reset and env.step, with prefix "goals/{goal_name}/".
     """
-
     @classmethod
     def default_config(cls):
         config = MetaDriveEnv.default_config()
@@ -469,8 +468,8 @@ class MultiGoalIntersectionEnvBase(MetaDriveEnv):
 
         long, lat = navi.final_lane.local_coordinates(vehicle.position)
         flag = (navi.final_lane.length - 5 < long < navi.final_lane.length + 5) and (
-                navi.get_current_lane_width() / 2 >= lat >=
-                (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
+            navi.get_current_lane_width() / 2 >= lat >=
+            (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
         )
         return flag
 
