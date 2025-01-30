@@ -8,11 +8,11 @@ ReplayEgoCarPolicy as the agent policy.
 """
 import pathlib
 
+from metadrive.constants import get_color_palette
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioOnlineEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.scenario.utils import read_dataset_summary, read_scenario_data
-from metadrive.constants import COLOR_PALETTE
 
 if __name__ == "__main__":
     data_directory = "waymo"
@@ -40,6 +40,6 @@ if __name__ == "__main__":
 
                 if i == 999:
                     raise ValueError("Can not arrive dest")
-            assert env.agent.panda_color == COLOR_PALETTE[2]
+            assert env.agent.panda_color == get_color_palette()[2]
     finally:
         env.close()

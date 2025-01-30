@@ -14,7 +14,7 @@ from metadrive.component.pg_space import ParameterSpace, Parameter, DiscreteSpac
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSectionWithUTurn
 from metadrive.component.road_network import Road
-from metadrive.constants import DEFAULT_AGENT, COLOR_PALETTE
+from metadrive.constants import DEFAULT_AGENT, get_color_palette
 from metadrive.engine.logger import get_logger
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.base_manager import BaseManager
@@ -206,7 +206,7 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
         vehicle_config = config["vehicle_config"]
         self.navigations = {}
         navi = NodeNetworkNavigation
-        colors = [COLOR_PALETTE[c] for c in range(len(self.GOALS))]
+        colors = [get_color_palette()[c] for c in range(len(self.GOALS))]
         for c, (dest_name, road) in enumerate(self.GOALS.items()):
             self.navigations[dest_name] = navi(
                 # self.engine,
@@ -251,6 +251,7 @@ class MultiGoalIntersectionEnvBase(MetaDriveEnv):
     This environment is an intersection with multiple goals. We provide the reward function, observation, termination
     conditions for each goal in the info dict returned by env.reset and env.step, with prefix "goals/{goal_name}/".
     """
+
     @classmethod
     def default_config(cls):
         config = MetaDriveEnv.default_config()
@@ -468,8 +469,8 @@ class MultiGoalIntersectionEnvBase(MetaDriveEnv):
 
         long, lat = navi.final_lane.local_coordinates(vehicle.position)
         flag = (navi.final_lane.length - 5 < long < navi.final_lane.length + 5) and (
-            navi.get_current_lane_width() / 2 >= lat >=
-            (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
+                navi.get_current_lane_width() / 2 >= lat >=
+                (0.5 - navi.get_current_lane_num()) * navi.get_current_lane_width()
         )
         return flag
 
@@ -657,7 +658,6 @@ if __name__ == "__main__":
                 print('=======================')
 
             if done:
-
                 import numpy as np
 
                 # for t in range(i):

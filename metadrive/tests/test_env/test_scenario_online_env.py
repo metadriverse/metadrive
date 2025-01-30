@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 
-from metadrive.constants import COLOR_PALETTE
+from metadrive.constants import get_color_palette
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioOnlineEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -36,7 +36,7 @@ def test_scenario_online_env(data_directory, render=False):
 
                 if i == 999:
                     raise ValueError("Can not arrive dest")
-            assert env.agent.panda_color == COLOR_PALETTE[2]
+            assert env.agent.panda_color == get_color_palette()[2]
     finally:
         env.close()
 

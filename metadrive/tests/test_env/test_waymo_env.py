@@ -1,7 +1,7 @@
-import pytest
 import numpy as np
+import pytest
 
-from metadrive.constants import COLOR_PALETTE
+from metadrive.constants import get_color_palette
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
@@ -38,7 +38,7 @@ def test_waymo_env(policy, render=False, num_scenarios=3):
 
                 if i == 999:
                     raise ValueError("Can not arrive dest")
-            assert env.agent.panda_color == COLOR_PALETTE[2]
+            assert env.agent.panda_color == get_color_palette()[2]
     finally:
         env.close()
 
