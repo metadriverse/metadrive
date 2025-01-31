@@ -43,7 +43,6 @@ install_requires = [
     "matplotlib",
     "pygame",
     "yapf",
-    "seaborn",
     "tqdm",
     "progressbar",
     # "panda3d==1.10.8",

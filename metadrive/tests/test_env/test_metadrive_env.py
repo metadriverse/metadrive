@@ -1,12 +1,11 @@
 import copy
-import seaborn as sns
 import os
 
 import numpy as np
 import pytest
 
 from metadrive import MetaDriveEnv
-from metadrive.constants import TerminationState
+from metadrive.constants import TerminationState, get_color_palette
 
 # Key: scenario name, value: environmental config
 blackbox_test_configs = dict(
@@ -60,7 +59,7 @@ def test_pgdrive_env_blackbox(config):
     env = MetaDriveEnv(config=cfg)
     try:
         obs, _ = env.reset()
-        assert env.agent.panda_color == sns.color_palette("colorblind")[2]
+        assert env.agent.panda_color == get_color_palette()[2]
         assert env.observation_space.contains(obs)
         _act(env, env.action_space.sample())
         for x in [-1, 0, 1]:

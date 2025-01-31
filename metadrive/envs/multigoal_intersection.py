@@ -9,14 +9,13 @@ from collections import defaultdict
 
 import gymnasium as gym
 import numpy as np
-import seaborn as sns
 
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.component.pg_space import ParameterSpace, Parameter, DiscreteSpace, BoxSpace
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSectionWithUTurn
 from metadrive.component.road_network import Road
-from metadrive.constants import DEFAULT_AGENT
+from metadrive.constants import DEFAULT_AGENT, get_color_palette
 from metadrive.engine.logger import get_logger
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.base_manager import BaseManager
@@ -208,7 +207,7 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
         vehicle_config = config["vehicle_config"]
         self.navigations = {}
         navi = NodeNetworkNavigation
-        colors = sns.color_palette("colorblind")
+        colors = [get_color_palette()[c] for c in range(len(self.GOALS))]
         for c, (dest_name, road) in enumerate(self.GOALS.items()):
             self.navigations[dest_name] = navi(
                 # self.engine,
@@ -659,9 +658,6 @@ if __name__ == "__main__":
                 print('=======================')
 
             if done:
-
-                import numpy as np
-
                 # for t in range(i):
                 #     # avg = [v[t] for k, v in obs_recorder.items()]
                 #     v = np.stack([v[0] for k, v in obs_recorder.items()])
