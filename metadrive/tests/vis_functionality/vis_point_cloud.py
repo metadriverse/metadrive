@@ -1,7 +1,7 @@
-from metadrive.component.sensors.depth_camera import DepthCamera
-from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
-import matplotlib.pyplot as plt
+from metadrive.component.sensors.point_cloud_lidar import PointCloudLidar
 import numpy as np
+from panda3d.core import Point3
+from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
 
 if __name__ == "__main__":
     env = SafeMetaDriveEnv(
@@ -10,16 +10,18 @@ if __name__ == "__main__":
             "traffic_density": 0.,
             "accident_prob": 1.,
             "start_seed": 4,
-            "map": "SSSSS",
+            "map": "CSCSCCCCCC",
             "manual_control": True,
             # "use_render": True,
             "image_observation": True,
-            "norm_pixel": False,
+            "map_region_size": 2048,
+            # "norm_pixel": True,
             "use_render": True,
+            "use_mesh_terrain": True,
             "debug": True,
-            "interface_panel": ["depth_camera"],
-            "sensors": dict(depth_camera=(DepthCamera, 800, 600)),
-            "vehicle_config": dict(image_source="depth_camera"),
+            "interface_panel": ["point_cloud"],
+            "sensors": dict(point_cloud=(PointCloudLidar, 200, 64, True)),  # 64 channel lidar
+            "vehicle_config": dict(image_source="point_cloud"),
             # "map_config": {
             #     BaseMap.GENERATE_TYPE: MapGenerateMethod.BIG_BLOCK_NUM,
             #     BaseMap.GENERATE_CONFIG: 12,
@@ -29,24 +31,24 @@ if __name__ == "__main__":
         }
     )
     env.reset()
-
-    import cv2
+    drawer = env.engine.make_line_drawer()
+    cam = env.engine.get_sensor("point_cloud").cam
+    env.engine.accept("9", env.engine.terrain.reload_terrain_shader)
 
     for i in range(1, 100000):
         o, r, tm, tc, info = env.step([0, 1])
         assert env.observation_space.contains(o)
 
-        depth_image_display = o["image"][..., 0, -1]
-        if env.config["norm_pixel"]:
-            depth_image_display = (o["image"][..., 0, -1] * 255).astype(np.uint8)
+        # to world coordinate
+        points = o["image"][..., :, -1] + np.asarray(env.engine.render.get_relative_point(cam, Point3(0, 0, 0)))
 
-        # Apply a colormap to the depth image for better visualization
-        depth_image_colormap = cv2.applyColorMap(depth_image_display, cv2.COLORMAP_VIRIDIS)
-
-        # Display the depth image with a colormap
-        cv2.imshow("Depth Image", depth_image_colormap)
-        cv2.waitKey(1)
-
+        drawer.reset()
+        drawer.draw_lines(points)
+        # drawer.draw_points(points, colors=[(0, 0, 1, 1)] * len(points))
+        #
+        # np.zeros([60, 3])
+        #
+        # env.vehicle.convert_to_world_coordinates()
         if env.config["use_render"]:
             # for i in range(ImageObservation.STACK_SIZE):
             #     ObservationType.show_gray_scale_array(o["image"][:, :, i])

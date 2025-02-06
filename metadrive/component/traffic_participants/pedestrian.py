@@ -7,7 +7,7 @@ from panda3d.core import LVector3
 from panda3d.core import LineSegs, NodePath
 
 from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
-from metadrive.constants import MetaDriveType, Semantics
+from metadrive.constants import MetaDriveType, Semantics, get_color_palette
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 from metadrive.utils.math import norm
@@ -171,7 +171,6 @@ class PedestrianBoundingBox(BaseTrafficParticipant):
 
             # Add some color to help debug
             from panda3d.core import Material
-            import seaborn as sns
 
             show_contour = self.config["show_contour"] if "show_contour" in self.config else False
             if show_contour:
@@ -223,7 +222,7 @@ class PedestrianBoundingBox(BaseTrafficParticipant):
                 line_np.setMaterial(line_material, True)
                 line_np.reparentTo(self.origin)
 
-            color = sns.color_palette("colorblind")
+            color = get_color_palette()
             color.remove(color[2])  # Remove the green and leave it for special vehicle
             idx = 0
             rand_c = color[idx]

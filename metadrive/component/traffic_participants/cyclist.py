@@ -3,7 +3,7 @@ from panda3d.core import LineSegs, NodePath
 
 from metadrive.component.traffic_participants.base_traffic_participant import BaseTrafficParticipant
 from metadrive.constants import CollisionGroup
-from metadrive.constants import MetaDriveType, Semantics
+from metadrive.constants import MetaDriveType, Semantics, get_color_palette
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.physics_node import BaseRigidBodyNode
 
@@ -92,7 +92,6 @@ class CyclistBoundingBox(BaseTrafficParticipant):
 
             # Add some color to help debug
             from panda3d.core import Material, LVecBase4
-            import seaborn as sns
 
             show_contour = self.config["show_contour"] if "show_contour" in self.config else False
             if show_contour:
@@ -144,7 +143,7 @@ class CyclistBoundingBox(BaseTrafficParticipant):
                 line_np.setMaterial(line_material, True)
                 line_np.reparentTo(self.origin)
 
-            color = sns.color_palette("colorblind")
+            color = get_color_palette()
             color.remove(color[2])  # Remove the green and leave it for special vehicle
             idx = 0
             rand_c = color[idx]
@@ -179,8 +178,7 @@ class CyclistBoundingBox(BaseTrafficParticipant):
 
             # Add some color to help debug
             from panda3d.core import Material, LVecBase4
-            import seaborn as sns
-            color = sns.color_palette("colorblind")
+            color = list(COLOR_PALETTE)
             color.remove(color[2])  # Remove the green and leave it for special vehicle
             idx = 0
             rand_c = color[idx]

@@ -53,7 +53,7 @@ class BaseCamera(ImageBuffer, BaseSensor):
             )
         self.cuda_graphics_resource = None
         if self.enable_cuda:
-            assert _cuda_enable, "Can not enable cuda rendering pipeline"
+            assert _cuda_enable, "Can not enable cuda rendering pipeline, if you are on Windows, try 'pip install pypiwin32'"
 
             # returned tensor property
             self.cuda_dtype = np.uint8
@@ -203,7 +203,12 @@ class BaseCamera(ImageBuffer, BaseSensor):
             self.cam.reparentTo(original_object)
             self.cam.setHpr(original_hpr)
             self.cam.setPos(original_position)
+        return self._format(ret, to_float)
 
+    def _format(self, ret, to_float):
+        """
+        Format the image to the desired type, float32 or uint8
+        """
         if not to_float:
             return ret.astype(np.uint8, copy=False, order="C")
         else:

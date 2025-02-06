@@ -9,14 +9,13 @@ from collections import defaultdict
 
 import gymnasium as gym
 import numpy as np
-import seaborn as sns
 
 from metadrive.component.navigation_module.node_network_navigation import NodeNetworkNavigation
 from metadrive.component.pg_space import ParameterSpace, Parameter, DiscreteSpace, BoxSpace
 from metadrive.component.pgblock.first_block import FirstPGBlock
 from metadrive.component.pgblock.intersection import InterSectionWithUTurn
 from metadrive.component.road_network import Road
-from metadrive.constants import DEFAULT_AGENT
+from metadrive.constants import DEFAULT_AGENT, get_color_palette
 from metadrive.engine.logger import get_logger
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.manager.base_manager import BaseManager
@@ -208,7 +207,7 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
         vehicle_config = config["vehicle_config"]
         self.navigations = {}
         navi = NodeNetworkNavigation
-        colors = sns.color_palette("colorblind")
+        colors = [get_color_palette()[c] for c in range(len(self.GOALS))]
         for c, (dest_name, road) in enumerate(self.GOALS.items()):
             self.navigations[dest_name] = navi(
                 # self.engine,
@@ -248,7 +247,7 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
         return self.navigations[goal_name]
 
 
-class MultiGoalIntersectionEnv(MetaDriveEnv):
+class MultiGoalIntersectionEnvBase(MetaDriveEnv):
     """
     This environment is an intersection with multiple goals. We provide the reward function, observation, termination
     conditions for each goal in the info dict returned by env.reset and env.step, with prefix "goals/{goal_name}/".
@@ -282,6 +281,10 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
                 # "on_continuous_line_done": True,
                 # "out_of_road_done": True,
                 "vehicle_config": {
+                    "show_navi_mark": False,
+                    "show_line_to_navi_mark": False,
+                    "show_line_to_dest": False,
+                    "show_dest_mark": False,
 
                     # Remove navigation arrows in the window as we are in multi-goal environment.
                     "show_navigation_arrow": False,
@@ -330,7 +333,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
     def _get_step_return(self, actions, engine_info):
         """Add goal-dependent observation to the info dict."""
-        o, r, tm, tc, i = super(MultiGoalIntersectionEnv, self)._get_step_return(actions, engine_info)
+        o, r, tm, tc, i = super(MultiGoalIntersectionEnvBase, self)._get_step_return(actions, engine_info)
 
         if self.config["use_multigoal_intersection"]:
             for goal_name in self.engine.goal_manager.goals.keys():
@@ -346,7 +349,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
 
     def _get_reset_return(self, reset_info):
         """Add goal-dependent observation to the info dict."""
-        o, i = super(MultiGoalIntersectionEnv, self)._get_reset_return(reset_info)
+        o, i = super(MultiGoalIntersectionEnvBase, self)._get_reset_return(reset_info)
 
         if self.config["use_multigoal_intersection"]:
             for goal_name in self.engine.goal_manager.goals.keys():
@@ -475,7 +478,7 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         """
         Compared to MetaDriveEnv's done_function, we add more stats here to record which goal is arrived.
         """
-        done, done_info = super(MultiGoalIntersectionEnv, self).done_function(vehicle_id)
+        done, done_info = super(MultiGoalIntersectionEnvBase, self).done_function(vehicle_id)
         vehicle = self.agents[vehicle_id]
 
         if self.config["use_multigoal_intersection"]:
@@ -490,20 +493,80 @@ class MultiGoalIntersectionEnv(MetaDriveEnv):
         return done, done_info
 
 
+class MultiGoalIntersectionEnv(MultiGoalIntersectionEnvBase):
+    current_goal = None
+
+    @classmethod
+    def default_config(cls):
+        config = MultiGoalIntersectionEnvBase.default_config()
+        config.update(
+            {"goal_probabilities": {
+                "u_turn": 0.25,
+                "right_turn": 0.25,
+                "go_straight": 0.25,
+                "left_turn": 0.25,
+            }}
+        )
+        return config
+
+    def step(self, actions):
+        o, r, tm, tc, i = super().step(actions)
+
+        o = i['obs/goals/{}'.format(self.current_goal)]
+        r = i['reward/goals/{}'.format(self.current_goal)]
+        i['route_completion'] = i['route_completion/goals/{}'.format(self.current_goal)]
+        i['arrive_dest'] = i['arrive_dest/goals/{}'.format(self.current_goal)]
+        i['reward/goals/default'] = i['reward/goals/{}'.format(self.current_goal)]
+        i['route_completion/goals/default'] = i['route_completion/goals/{}'.format(self.current_goal)]
+        i['arrive_dest/goals/default'] = i['arrive_dest/goals/{}'.format(self.current_goal)]
+        i["current_goal"] = self.current_goal
+        return o, r, tm, tc, i
+
+    def render(self, *args, **kwargs):
+        if "text" in kwargs:
+            kwargs["text"]["goal"] = self.current_goal
+        else:
+            kwargs["text"] = {"goal": self.current_goal}
+        return super().render(*args, **kwargs)
+
+    def reset(self, *args, **kwargs):
+        o, i = super().reset(*args, **kwargs)
+
+        # Sample a goal from the goal set
+        if self.config["use_multigoal_intersection"]:
+            p = self.config["goal_probabilities"]
+            self.current_goal = np.random.choice(list(p.keys()), p=list(p.values()))
+
+        else:
+            self.current_goal = "default"
+
+        o = i['obs/goals/{}'.format(self.current_goal)]
+        i['route_completion'] = i['route_completion/goals/{}'.format(self.current_goal)]
+        i['arrive_dest'] = i['arrive_dest/goals/{}'.format(self.current_goal)]
+        i['reward/goals/default'] = i['reward/goals/{}'.format(self.current_goal)]
+        i['route_completion/goals/default'] = i['route_completion/goals/{}'.format(self.current_goal)]
+        i['arrive_dest/goals/default'] = i['arrive_dest/goals/{}'.format(self.current_goal)]
+        i["current_goal"] = self.current_goal
+
+        return o, i
+
+
 if __name__ == "__main__":
     config = dict(
         use_render=True,
         manual_control=True,
         vehicle_config=dict(
-            show_navi_mark=True,
-            show_line_to_navi_mark=True,
+            show_navi_mark=False,
+            show_line_to_navi_mark=False,
             show_lidar=False,
             show_side_detector=True,
             show_lane_line_detector=True,
+            show_line_to_dest=False,
+            show_dest_mark=False,
         ),
 
         # ********************************************
-        use_multigoal_intersection=False
+        use_multigoal_intersection=True,
         # ********************************************
 
         # **{
@@ -524,11 +587,12 @@ if __name__ == "__main__":
         #         break
         # assert np.all(o == info["obs/goals/{}".format(goal)])
 
-        goal = "default"
+        # goal = "default"
+        goal = "left_turn"
 
         print('=======================')
         print("Full observation shape:\n\t", o.shape)
-        print("Goal-agnostic observation shape:\n\t", {k: v.shape for k, v in info.items() if k.startswith("obs/ego")})
+        print("Goal-agnostic observation shape:\n\t", NAVI_DIM + GOAL_DEPENDENT_STATE_DIM)
         print("Observation shape for each goals: ")
         for k in sorted(info.keys()):
             if k.startswith("obs/goals/"):
@@ -541,13 +605,13 @@ if __name__ == "__main__":
         for i in range(1, 1000000000):
             o, r, tm, tc, info = env.step([0, 1])
 
-            assert np.all(o == info["obs/goals/{}".format(goal)])
-            assert np.all(r == info["reward/goals/{}".format(goal)])
+            # assert np.all(o == info["obs/goals/{}".format(goal)])
+            # assert np.all(r == info["reward/goals/{}".format(goal)])
 
             done = tm or tc
             s += 1
-            # env.render()
-            env.render(mode="topdown")
+            env.render()
+            # env.render(mode="topdown")
 
             for k in info.keys():
                 if k.startswith("obs/goals"):
@@ -594,9 +658,6 @@ if __name__ == "__main__":
                 print('=======================')
 
             if done:
-
-                import numpy as np
-
                 # for t in range(i):
                 #     # avg = [v[t] for k, v in obs_recorder.items()]
                 #     v = np.stack([v[0] for k, v in obs_recorder.items()])

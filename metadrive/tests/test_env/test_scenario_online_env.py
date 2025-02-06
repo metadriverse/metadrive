@@ -1,16 +1,12 @@
-import pytest
-import seaborn as sns
-import numpy as np
-
-from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.scenario_env import ScenarioOnlineEnv
-from metadrive.policy.idm_policy import TrajectoryIDMPolicy
-from metadrive.policy.replay_policy import ReplayEgoCarPolicy
-from metadrive.scenario.utils import read_dataset_summary, read_scenario_data
-import pickle
 import pathlib
 
+import pytest
+
+from metadrive.constants import get_color_palette
+from metadrive.engine.asset_loader import AssetLoader
+from metadrive.envs.scenario_env import ScenarioOnlineEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.scenario.utils import read_dataset_summary, read_scenario_data
 
 
 @pytest.mark.parametrize("data_directory", ["waymo", "nuscenes"])
@@ -40,7 +36,7 @@ def test_scenario_online_env(data_directory, render=False):
 
                 if i == 999:
                     raise ValueError("Can not arrive dest")
-            assert env.agent.panda_color == sns.color_palette("colorblind")[2]
+            assert env.agent.panda_color == get_color_palette()[2]
     finally:
         env.close()
 

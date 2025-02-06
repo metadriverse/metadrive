@@ -43,7 +43,6 @@ install_requires = [
     "matplotlib",
     "pygame",
     "yapf",
-    "seaborn",
     "tqdm",
     "progressbar",
     # "panda3d==1.10.8",
@@ -66,7 +65,7 @@ test_requirement = [
 ]
 
 cuda_requirement = [
-    "cuda-python==12.0.0",
+    "cuda-python==12.1.0",
     "PyOpenGL==3.1.6",
     "PyOpenGL-accelerate==3.1.6",
     "pyrr==0.10.3",
