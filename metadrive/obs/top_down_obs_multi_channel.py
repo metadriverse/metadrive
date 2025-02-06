@@ -19,7 +19,7 @@ from metadrive.component.navigation_module.node_network_navigation import NodeNe
 from metadrive.component.navigation_module.edge_network_navigation import EdgeNetworkNavigation
 from metadrive.component.navigation_module.trajectory_navigation import TrajectoryNavigation
 
-pygame, gfxdraw = import_pygame()
+pygame = import_pygame()
 COLOR_WHITE = pygame.Color("white")
 DEFAULT_TRAJECTORY_LANE_WIDTH = 3
 

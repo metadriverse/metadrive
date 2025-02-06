@@ -61,4 +61,4 @@ def test_script(script, timeout=60):
 
 
 if __name__ == '__main__':
-    test_script(scripts[0])
+    test_script(scripts[1])

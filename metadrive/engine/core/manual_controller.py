@@ -14,7 +14,13 @@ if (not is_win()) and (not is_mac()):
 
 from metadrive.utils import import_pygame
 
-pygame, gfxdraw = import_pygame()
+pygame = None
+
+
+def get_pygame():
+    global pygame
+    if not pygame:
+        pygame = import_pygame()
 
 
 class Controller:
@@ -39,6 +45,7 @@ class KeyboardController(Controller):
     def __init__(self, pygame_control):
         self.pygame_control = pygame_control
         if self.pygame_control:
+            get_pygame()
             pygame.init()
         else:
             self.inputs = InputState()
@@ -141,6 +148,7 @@ class SteeringWheelController(Controller):
                 "Fail to load evdev, which is required for steering wheel control. "
                 "Install evdev via pip install evdev"
             )
+        get_pygame()
         pygame.display.init()
         pygame.joystick.init()
         assert not is_win(), "Steering Wheel is supported in linux and mac only"
@@ -223,6 +231,7 @@ class XboxController(Controller):
                 "Fail to load evdev, which is required for steering wheel control. "
                 "Install evdev via pip install evdev"
             )
+        get_pygame()
         pygame.display.init()
         pygame.joystick.init()
         assert not is_win(), "Joystick is supported in linux and mac only"

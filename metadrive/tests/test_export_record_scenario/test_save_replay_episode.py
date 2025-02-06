@@ -2,7 +2,7 @@ import pickle
 from metadrive.utils.math import wrap_to_pi
 import numpy as np
 
-from metadrive import MultiAgentRoundaboutEnv
+from metadrive.envs.marl_envs import MultiAgentRoundaboutEnv
 from metadrive.component.map.base_map import BaseMap
 from metadrive.component.map.pg_map import MapGenerateMethod
 from metadrive.envs.safe_metadrive_env import SafeMetaDriveEnv
