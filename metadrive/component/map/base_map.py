@@ -187,7 +187,8 @@ class BaseMap(BaseRunnable, ABC):
         pixels_per_meter=8,
         color_setting=MapTerrainSemanticColor,
         line_sample_interval=2,
-        polyline_thickness=1,
+        yellow_line_thickness=1,
+        white_line_thickness=1,
         layer=("lane_line", "lane")
     ):
         """
@@ -212,7 +213,7 @@ class BaseMap(BaseRunnable, ABC):
         points_to_skip = math.floor(PGDrivableAreaProperty.STRIPE_LENGTH * 2 / line_sample_interval)
         for obj in all_lanes.values():
             if MetaDriveType.is_lane(obj["type"]) and "lane" in layer:
-                polygons.append((obj["polygon"], MapTerrainSemanticColor.get_color(obj["type"])))
+                polygons.append((obj["polygon"], color_setting.get_color(obj["type"])))
             elif "lane_line" in layer and (MetaDriveType.is_road_line(obj["type"])
                                            or MetaDriveType.is_road_boundary_line(obj["type"])):
                 if MetaDriveType.is_broken_line(obj["type"]):
@@ -220,15 +221,15 @@ class BaseMap(BaseRunnable, ABC):
                         if index + points_to_skip < len(obj["polyline"]):
                             polylines.append(
                                 (
-                                    [obj["polyline"][index], obj["polyline"][index + points_to_skip]],
-                                    MapTerrainSemanticColor.get_color(obj["type"])
+                                    [obj["polyline"][index],
+                                     obj["polyline"][index + points_to_skip]], color_setting.get_color(obj["type"])
                                 )
                             )
                 else:
-                    polylines.append((obj["polyline"], MapTerrainSemanticColor.get_color(obj["type"])))
+                    polylines.append((obj["polyline"], color_setting.get_color(obj["type"])))
 
         size = int(size * pixels_per_meter)
-        mask = np.zeros([size, size, 1], dtype=np.float32)
+        mask = np.zeros([size, size, 1], dtype=np.uint8)
         mask[..., 0] = color_setting.get_color(MetaDriveType.GROUND)
         # create an example bounding box polygon
         # for idx in range(len(polygons)):
@@ -247,8 +248,8 @@ class BaseMap(BaseRunnable, ABC):
                     int((p[1] - center_p[1]) * pixels_per_meter) + size / 2
                 ] for p in line
             ]
-            thickness = polyline_thickness * 2 if color == MapTerrainSemanticColor.YELLOW else polyline_thickness
-            thickness = min(thickness, 2)  # clip
+            thickness = yellow_line_thickness if color == MapTerrainSemanticColor.YELLOW else white_line_thickness
+            # thickness = min(thickness, 2)  # clip
             cv2.polylines(mask, np.array([points]).astype(np.int32), False, color, thickness)
 
         if "crosswalk" in layer:
@@ -269,8 +270,7 @@ class BaseMap(BaseRunnable, ABC):
                 )
                 # 0-2pi
                 angle = np.arctan2(*dir) / np.pi * 180 + 180
-                # normalize to 0.4-0.714
-                angle = angle / 1000 + MapTerrainSemanticColor.get_color(MetaDriveType.CROSSWALK)
+                angle = int(angle / 2) + color_setting.get_color(MetaDriveType.CROSSWALK)
                 cv2.fillPoly(mask, np.array([points]).astype(np.int32), color=angle)
 
         #     self._semantic_map = mask

@@ -83,8 +83,6 @@ class EngineCore(ShowBase.ShowBase):
     DEBUG = False
     global_config = None  # global config can exist before engine initialization
     loadPrcFileData("", "window-title {}".format(EDITION))
-    loadPrcFileData("", "framebuffer-multisample 1")
-    loadPrcFileData("", "multisamples 8")
     loadPrcFileData("", "bullet-filter-algorithm groups-mask")
     loadPrcFileData("", "audio-library-name null")
     loadPrcFileData("", "model-cache-compressed-textures 1")
@@ -94,6 +92,15 @@ class EngineCore(ShowBase.ShowBase):
     # loadPrcFileData("", "state-cache 0")
     loadPrcFileData("", "garbage-collect-states 0")
     loadPrcFileData("", "print-pipe-types 0")
+
+    if is_mac():
+        # latest macOS supported openGL version
+        loadPrcFileData("", "gl-version 4 1")
+        loadPrcFileData("", "framebuffer-multisample 1")
+        loadPrcFileData("", "multisamples 4")
+    else:
+        loadPrcFileData("", "framebuffer-multisample 1")
+        loadPrcFileData("", "multisamples 8")
 
     # loadPrcFileData("", "allow-incomplete-render #t")
     # loadPrcFileData("", "# even-animation #t")
@@ -159,9 +166,6 @@ class EngineCore(ShowBase.ShowBase):
                 if self.global_config["show_interface"]:
                     # Disable useless camera capturing in none mode
                     self.global_config["show_interface"] = False
-
-        if is_mac() and (self.mode == RENDER_MODE_OFFSCREEN):  # Mac don't support offscreen rendering
-            self.mode = RENDER_MODE_ONSCREEN
 
         loadPrcFileData("", "win-size {} {}".format(*self.global_config["window_size"]))
 
@@ -252,12 +256,12 @@ class EngineCore(ShowBase.ShowBase):
                 if self.mode == RENDER_MODE_ONSCREEN and (not self.global_config["debug"]):
                     if self.global_config["show_logo"]:
                         self._window_logo = attach_logo(self)
-                    self._loading_logo = attach_cover_image(
-                        window_width=self.get_size()[0], window_height=self.get_size()[1]
-                    )
-                    for i in range(5):
-                        self.graphicsEngine.renderFrame()
-                    self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
+                        self._loading_logo = attach_cover_image(
+                            window_width=self.get_size()[0], window_height=self.get_size()[1]
+                        )
+                        for i in range(5):
+                            self.graphicsEngine.renderFrame()
+                        self.taskMgr.add(self.remove_logo, "remove _loading_logo in first frame")
 
         self.closed = False
 
@@ -273,7 +277,9 @@ class EngineCore(ShowBase.ShowBase):
         self.common_filter = None
 
         # physics world
-        self.physics_world = PhysicsWorld(self.global_config["debug_static_world"])
+        self.physics_world = PhysicsWorld(
+            self.global_config["debug_static_world"], disable_collision=self.global_config["disable_collision"]
+        )
 
         # collision callback
         self.physics_world.dynamic_world.setContactAddedCallback(PythonCallbackObject(collision_callback))
@@ -294,12 +300,19 @@ class EngineCore(ShowBase.ShowBase):
                 if self.global_config["daytime"] is not None:
                     self.render_pipeline.daytime_mgr.time = self.global_config["daytime"]
             else:
-                self.pbrpipe = init(
-                    msaa_samples=16,
-                    use_hardware_skinning=True,
-                    # use_normal_maps=True,
-                    use_330=False
-                )
+                if is_mac():
+                    self.pbrpipe = init(
+                        msaa_samples=4,
+                        # use_hardware_skinning=True,
+                        use_330=True
+                    )
+                else:
+                    self.pbrpipe = init(
+                        msaa_samples=16,
+                        use_hardware_skinning=True,
+                        # use_normal_maps=True,
+                        use_330=False
+                    )
 
                 self.sky_box = SkyBox(not self.global_config["show_skybox"])
                 self.sky_box.attach_to_world(self.render, self.physics_world)
@@ -308,6 +321,7 @@ class EngineCore(ShowBase.ShowBase):
                 self.world_light.attach_to_world(self.render, self.physics_world)
                 self.render.setLight(self.world_light.direction_np)
                 self.render.setLight(self.world_light.ambient_np)
+                self.render.setAntialias(AntialiasAttrib.MAuto)
 
                 # setup pssm shadow
                 # init shadow if required
@@ -579,6 +593,8 @@ class EngineCore(ShowBase.ShowBase):
             if sensor_id == "main_camera":
                 # It is added when initializing main_camera
                 continue
+            if sensor_id in self.sensors:
+                raise ValueError("Sensor id {} is duplicated!".format(sensor_id))
             cls = sensor_cfg[0]
             args = sensor_cfg[1:]
             assert issubclass(cls, BaseSensor), "{} is not a subclass of BaseSensor".format(cls.__name__)

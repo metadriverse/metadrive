@@ -124,7 +124,7 @@ class MainCamera(BaseSensor):
         if "main_camera" in engine.global_config["sensors"]:
             self.engine.sensors["main_camera"] = self
         if self.enable_cuda:
-            assert _cuda_enable, "Can not enable cuda rendering pipeline"
+            assert _cuda_enable, "Can not enable cuda rendering pipeline, if you are on Windows, try 'pip install pypiwin32'"
 
             # returned tensor property
             self.cuda_dtype = np.uint8
@@ -623,13 +623,15 @@ class MainCamera(BaseSensor):
         self._cuda_buffer = check_cudart_err(cudart.cudaGraphicsUnmapResources(1, self.cuda_graphics_resource, stream))
         return self
 
-    def get_image(self):
-        # The Tracked obj arg is only for compatibility
-        img = PNMImage()
-        self.engine.win.getScreenshot(img)
-        return img
+    # def get_image(self):
+    #     # The Tracked obj arg is only for compatibility
+    #     img = PNMImage()
+    #     self.engine.win.getScreenshot(img)
+    #     return img
 
     def save_image(self, tracked_obj, file_name="main_camera.png", **kwargs):
         # The Tracked obj arg is only for compatibility
-        img = self.get_image()
+        # img = self.get_image()
+        img = PNMImage()
+        self.engine.win.getScreenshot(img)
         img.write(file_name)

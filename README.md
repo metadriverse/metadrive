@@ -34,9 +34,9 @@
 
 MetaDrive is a driving simulator with the following key features:
 
-- **Compositional**: It supports generating infinite scenes with various road maps and traffic settings for the research of generalizable RL. 
-- **Lightweight**: It is easy to install and run. It can run up to +1000 FPS on a standard PC.
-- **Realistic**: Accurate physics simulation and multiple sensory input including Lidar, RGB images, top-down semantic map and first-person view images. 
+- **Compositional**: It supports synthesising infinite scenes with various road maps and traffic settings or loading real-world driving logs for the research of generalizable RL. 
+- **Lightweight**: It is easy to install and run on Linux/Windows/MacOS with sensor simulation support. It can run up to +1000 FPS on a standard PC.
+- **Realistic**: Accurate physics simulation and multiple sensory input including point cloud, RGB/Depth/Semantic images, top-down semantic map and first-person view images. 
 
 
 ## 🛠 Quick Start
@@ -47,13 +47,6 @@ git clone https://github.com/metadriverse/metadrive.git
 cd metadrive
 pip install -e .
 ```
-
-or
-
-```bash
-pip install metadrive-simulator
-```
-*Note that the program is tested on both Linux and Windows. Some control and display issues in MacOS wait to be solved*
 
 You can verify the installation of MetaDrive via running the testing script:
 
@@ -107,27 +100,7 @@ Traffic vehicles can not response to surrounding vchicles if directly replaying 
 Add argument ```--reactive_traffic``` to use an IDM policy control them and make them reactive.
 Press key ```r``` for loading a new scenario, and ```b``` or ```q``` for switching perspective. 
 
-[comment]: <> (### LQY: avoid introducing these trivial things )
 
-[comment]: <> (Run the example of procedural generation of a new map as:)
-
-[comment]: <> (```bash)
-
-[comment]: <> (python -m metadrive.examples.procedural_generation)
-
-[comment]: <> (```)
-
-[comment]: <> (*Note that the scripts above can not be run in a headless machine.*)
-
-[comment]: <> (*Please refer to the installation guideline in documentation for more information about how to launch runing in a headless machine.*)
-
-[comment]: <> (Run the following command to draw the generated maps from procedural generation:)
-
-[comment]: <> (```bash)
-
-[comment]: <> (python -m metadrive.examples.draw_maps)
-
-[comment]: <> (```)
 
 ### Basic Usage
 To build the RL environment in python script, you can simply code in the Farama Gymnasium format as:
@@ -172,66 +145,6 @@ If you use MetaDrive in your own work, please cite:
 }
 ```
 
-## 🎉 Relevant Projects
-
-**Learning to Simulate Self-driven Particles System with Coordinated Policy Optimization**
-\
-Zhenghao Peng, Quanyi Li, Chunxiao Liu, Bolei Zhou 
-\
-*NeurIPS 2021*
-\
-[<a href="https://arxiv.org/pdf/2110.13827.pdf" target="_blank">Paper</a>]
-[<a href="https://github.com/decisionforce/CoPO" target="_blank">Code</a>]
-[<a href="https://decisionforce.github.io/CoPO" target="_blank">Webpage</a>]
-[<a href="https://decisionforce.github.io/CoPO/copo_poster.pdf" target="_blank">Poster</a>]
-[<a href="https://youtu.be/sOw43l8lwxE" target="_blank">Talk</a>]
-[<a href="https://github.com/metadriverse/metadrive-benchmark/tree/main/MARL" target="_blank">Results&Models</a>]
-
-
-**Safe Driving via Expert Guided Policy Optimization**
-\
-Zhenghao Peng*, Quanyi Li*, Chunxiao Liu, Bolei Zhou
-\
-*Conference on Robot Learning (CoRL) 2021*
-\
-[<a href="https://arxiv.org/pdf/2110.06831.pdf" target="_blank">Paper</a>]
-[<a href="https://github.com/decisionforce/EGPO" target="_blank">Code</a>]
-[<a href="https://decisionforce.github.io/EGPO/" target="_blank">Webpage</a>]
-[<a href="https://decisionforce.github.io/EGPO/images/egpo_poster.png" target="_blank">Poster</a>]
-
-**Efficient Learning of Safe Driving Policy via Human-AI Copilot Optimization**
-\
-Quanyi Li*, Zhenghao Peng*, Bolei Zhou
-\
-*ICLR 2022*
-\
-[<a href="https://arxiv.org/pdf/2202.10341.pdf" target="_blank">Paper</a>]
-[<a href="https://github.com/decisionforce/HACO" target="_blank">Code</a>]
-[<a href="https://decisionforce.github.io/HACO/" target="_blank">Webpage</a>]
-[<a href="https://github.com/decisionforce/HACO/blob/main/docs/iclr_poster.pdf" target="_blank">Poster</a>]
-[<a href="https://youtu.be/PiJv4wtp8T8" target="_blank">Talk</a>]
-
-**Human-AI Shared Control via Policy Dissection**
-\
-Quanyi Li, Zhenghao Peng, Haibin Wu, Lan Feng, Bolei Zhou
-\
-*NeurIPS 2022*
-\
-[<a href="https://arxiv.org/pdf/2206.00152.pdf" target="_blank">Paper</a>]
-[<a href="https://github.com/metadriverse/policydissect" target="_blank">Code</a>]
-[<a href="https://metadriverse.github.io/policydissect/" target="_blank">Webpage</a>]
-
-
-And more:
-
-
-* Yang, Yujie, Yuxuan Jiang, Yichen Liu, Jianyu Chen, and Shengbo Eben Li. "Model-Free Safe Reinforcement Learning through Neural Barrier Certificate." IEEE Robotics and Automation Letters (2023).
-
-* Feng, Lan, Quanyi Li, Zhenghao Peng, Shuhan Tan, and Bolei Zhou. "TrafficGen: Learning to Generate Diverse and Realistic Traffic Scenarios." (**ICRA 2023**)
-
-* Zhenghai Xue, Zhenghao Peng, Quanyi Li, Zhihan Liu, Bolei Zhou. "Guarded Policy Optimization with Imperfect Online Demonstrations." (**ICLR 2023**)
-
-
 
 ## Acknowledgement
 
@@ -243,3 +156,4 @@ The simulator can not be built without the help from Panda3D community and the f
 - procedural_panda3d_model_primitives: https://github.com/Epihaius/procedural_panda3d_model_primitives
 - DiamondSquare for terrain generation: https://github.com/buckinha/DiamondSquare
 - KITSUNETSUKI-Asset-Tools: https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools
+

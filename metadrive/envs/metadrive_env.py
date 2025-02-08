@@ -72,6 +72,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     out_of_road_penalty=5.0,
     crash_vehicle_penalty=5.0,
     crash_object_penalty=5.0,
+    crash_sidewalk_penalty=0.0,
     driving_reward=1.0,
     speed_reward=0.1,
     use_lateral_reward=False,
@@ -83,7 +84,9 @@ METADRIVE_DEFAULT_CONFIG = dict(
 
     # ===== Termination Scheme =====
     out_of_route_done=False,
+    out_of_road_done=True,
     on_continuous_line_done=True,
+    on_broken_line_done=False,
     crash_vehicle_done=True,
     crash_object_done=True,
     crash_human_done=True,
@@ -159,7 +162,7 @@ class MetaDriveEnv(BaseEnv):
                 "Episode ended! Scenario Index: {} Reason: arrive_dest.".format(self.current_seed),
                 extra={"log_once": True}
             )
-        if done_info[TerminationState.OUT_OF_ROAD]:
+        if done_info[TerminationState.OUT_OF_ROAD] and self.config["out_of_road_done"]:
             done = True
             self.logger.info(
                 "Episode ended! Scenario Index: {} Reason: out_of_road.".format(self.current_seed),
@@ -235,6 +238,8 @@ class MetaDriveEnv(BaseEnv):
             ret = ret or vehicle.out_of_route
         elif self.config["on_continuous_line_done"]:
             ret = ret or vehicle.on_yellow_continuous_line or vehicle.on_white_continuous_line or vehicle.crash_sidewalk
+        if self.config["on_broken_line_done"]:
+            ret = ret or vehicle.on_broken_line
         return ret
 
     def reward_function(self, vehicle_id: str):
@@ -277,7 +282,8 @@ class MetaDriveEnv(BaseEnv):
             reward = -self.config["crash_vehicle_penalty"]
         elif vehicle.crash_object:
             reward = -self.config["crash_object_penalty"]
-
+        elif vehicle.crash_sidewalk:
+            reward = -self.config["crash_sidewalk_penalty"]
         step_info["route_completion"] = vehicle.navigation.route_completion
 
         return reward, step_info

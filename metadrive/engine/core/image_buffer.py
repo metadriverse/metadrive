@@ -69,7 +69,8 @@ class ImageBuffer:
         if parent_node:
             self.cam.reparentTo(parent_node)
         self.lens = self.cam.node().getLens()
-        self.lens.setFov(60)
+        self.lens.setFov(self.engine.global_config["camera_fov"])
+        self.lens.setAspectRatio(self.BUFFER_W / self.BUFFER_H)
 
     def _create_buffer(self, width, height, frame_buffer_property):
         """

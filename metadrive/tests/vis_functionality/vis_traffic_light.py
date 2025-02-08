@@ -12,11 +12,12 @@ def vis_traffic_light(render=True, manual_control=False, debug=False):
             "manual_control": manual_control,
             "use_render": render,
             "debug": debug,
-            "debug_static_world": debug,
+            "debug_static_world": False,
             "map": "X",
             "window_size": (1200, 800),
             "show_coordinates": True,
             "vehicle_config": {
+                "show_lidar": True,
                 "enable_reverse": True,
                 "show_dest_mark": True
             },
@@ -60,4 +61,4 @@ def vis_traffic_light(render=True, manual_control=False, debug=False):
 
 
 if __name__ == "__main__":
-    vis_traffic_light(True, manual_control=True)
+    vis_traffic_light(True, manual_control=True, debug=True)

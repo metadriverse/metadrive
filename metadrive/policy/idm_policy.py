@@ -1,10 +1,11 @@
 import numpy as np
-
+from metadrive.component.traffic_light.base_traffic_light import BaseTrafficLight
 from metadrive.component.lane.point_lane import PointLane
 from metadrive.component.vehicle.PID_controller import PIDController
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy
 from metadrive.utils.math import not_zero, wrap_to_pi, norm
+import logging
 
 
 class FrontBackObjects:
@@ -336,6 +337,17 @@ class IDMPolicy(BasePolicy):
         next_lanes = self.control_object.navigation.next_ref_lanes
         lane_num_diff = len(current_lanes) - len(next_lanes) if next_lanes is not None else 0
 
+        def lane_follow():
+            # fall back to lane follow
+            self.target_speed = self.NORMAL_SPEED
+            self.overtake_timer += 1
+            return surrounding_objects.front_object(), surrounding_objects.front_min_distance(
+            ), self.routing_target_lane
+
+        if isinstance(surrounding_objects.front_object(), BaseTrafficLight):
+            # traffic light, go lane follow
+            return lane_follow()
+
         # We have to perform lane changing because the number of lanes in next road is less than current road
         if lane_num_diff > 0:
             # lane num decreasing happened in left road or right road
@@ -397,9 +409,7 @@ class IDMPolicy(BasePolicy):
                            current_lanes[expect_lane_idx]
 
         # fall back to lane follow
-        self.target_speed = self.NORMAL_SPEED
-        self.overtake_timer += 1
-        return surrounding_objects.front_object(), surrounding_objects.front_min_distance(), self.routing_target_lane
+        return lane_follow()
 
 
 class ManualControllableIDMPolicy(IDMPolicy):
@@ -459,7 +469,7 @@ class TrajectoryIDMPolicy(IDMPolicy):
         lane_heading = target_lane.heading_theta_at(long + 1)
         v_heading = ego_vehicle.heading_theta
         steering = self.heading_pid.get_result(-wrap_to_pi(lane_heading - v_heading))
-        # steering += self.lateral_pid.get_result(-lat)
+        steering += self.lateral_pid.get_result(-lat)
         return float(steering)
 
     def act(self, do_speed_control, *args, **kwargs):

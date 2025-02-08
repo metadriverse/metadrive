@@ -1,5 +1,6 @@
 import gymnasium as gym
 from metadrive.component.sensors.base_camera import BaseCamera
+from metadrive.component.sensors.point_cloud_lidar import PointCloudLidar
 import numpy as np
 
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
@@ -53,7 +54,7 @@ class ImageObservation(BaseObservation):
     def __init__(self, config, image_source: str, clip_rgb: bool):
         self.enable_cuda = config["image_on_cuda"]
         if self.enable_cuda:
-            assert _cuda_enable, "CuPy is not enabled. Fail to set up image_on_cuda."
+            assert _cuda_enable, "CuPy is not enabled. Fail to set up image_on_cuda. Hint: pip install cupy-cuda11x or pip install cupy-cuda12x"
         self.STACK_SIZE = config["stack_size"]
         self.image_source = image_source
         super(ImageObservation, self).__init__(config)
@@ -69,6 +70,8 @@ class ImageObservation(BaseObservation):
         channel = sensor_cls.num_channels if sensor_cls != "MainCamera" else 3
         shape = (self.config["sensors"][self.image_source][2],
                  self.config["sensors"][self.image_source][1]) + (channel, self.STACK_SIZE)
+        if sensor_cls is PointCloudLidar:
+            return gym.spaces.Box(-np.inf, np.inf, shape=shape, dtype=np.float32)
         if self.norm_pixel:
             return gym.spaces.Box(-0.0, 1.0, shape=shape, dtype=np.float32)
         else:

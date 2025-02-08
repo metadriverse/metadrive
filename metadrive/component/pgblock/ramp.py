@@ -3,10 +3,11 @@ import numpy as np
 
 from metadrive.component.lane.straight_lane import StraightLane
 from metadrive.component.pgblock.create_pg_block_utils import ExtendStraightLane, CreateRoadFrom, CreateAdverseRoad, \
-    create_bend_straight
+    create_bend_straight, create_extension
 from metadrive.component.pgblock.pg_block import PGBlock
+from metadrive.component.lane.extension_lane import ExtensionDirection
 from metadrive.component.road_network import Road
-from metadrive.constants import Decoration, PGLineType
+from metadrive.constants import PGLineType
 from metadrive.utils.pg.utils import check_lane_on_road
 from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParameterSpace
 
@@ -14,13 +15,13 @@ from metadrive.component.pg_space import ParameterSpace, Parameter, BlockParamet
 class Ramp(PGBlock):
     """
                     InRamp                                             OutRamp
-    
+
      start ----------- end ------------------           start ----------- end ------------------
-     start ----------- end ------------------           start ----------- end ------------------              
+     start ----------- end ------------------           start ----------- end ------------------
     (start ----------- end)[----------------]           start ----------- end [----------------]
-                       end -----------------}          (start ---------- {end) 
-                      //                                                      \\                                                         
-    { ---------------//                                                        \\---------------}    
+                       end -----------------}          (start ---------- {end)
+                      //                                                      \\
+    { ---------------//                                                        \\---------------}
     """
     PARAMETER_SPACE = ParameterSpace(BlockParameterSpace.RAMP_PARAMETER)
     SOCKET_NUM = 1
@@ -39,8 +40,15 @@ class InRampOnStraight(Ramp):
     EXTRA_PART = 10
     SOCKET_LEN = 20
 
+    def _get_merge_part(self, att_lane: StraightLane, length: float):
+        start = att_lane.end
+        end = att_lane.position(att_lane.length + length, -self.lane_width)
+        merge_part = create_extension(start, end, ExtensionDirection.SHRINK, width=self.lane_width)
+        return merge_part
+
     def _try_plug_into_previous_block(self) -> bool:
-        acc_lane_len = self.get_config()[Parameter.length]
+        length = self.get_config()[Parameter.length]
+        extension_length = self.get_config()[Parameter.extension_length]
         no_cross = True
 
         # extend road and acc raod part, part 0
@@ -77,7 +85,7 @@ class InRampOnStraight(Ramp):
 
         # main acc part
         acc_side_lane = ExtendStraightLane(
-            extend_lane, acc_lane_len + self.lane_width, [extend_lane.line_types[0], PGLineType.SIDE]
+            extend_lane, length + extension_length, [extend_lane.line_types[0], PGLineType.SIDE]
         )
         acc_road = Road(extend_road.end_node, self.add_road_node())
         no_cross = CreateRoadFrom(
@@ -170,7 +178,7 @@ class InRampOnStraight(Ramp):
         # p1, road 2, 3
         bend_2, acc_lane = create_bend_straight(
             connect_part,
-            acc_lane_len,
+            length,
             self.RADIUS,
             np.deg2rad(self.ANGLE),
             True,
@@ -178,10 +186,11 @@ class InRampOnStraight(Ramp):
             self.LANE_TYPE,
             speed_limit=self.SPEED_LIMIT
         )
-        acc_lane.line_types = [PGLineType.BROKEN, PGLineType.CONTINUOUS]
+        acc_lane.line_types = [PGLineType.NONE, PGLineType.CONTINUOUS]
         bend_2_road = Road(connect_road.end_node, self.road_node(0, 0))  # end at part1 road 0, extend road
         self.block_network.add_lane(bend_2_road.start_node, bend_2_road.end_node, bend_2)
-        self.block_network.add_lane(acc_road.start_node, acc_road.end_node, acc_lane)
+        next_node = self.add_road_node()
+        self.block_network.add_lane(acc_road.start_node, next_node, acc_lane)
         no_cross = (
             not check_lane_on_road(
                 self._global_network, bend_2, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
@@ -194,11 +203,8 @@ class InRampOnStraight(Ramp):
         ) and no_cross
 
         # p1, road 4, small circular to decorate
-        merge_lane, _ = create_bend_straight(
-            acc_lane, 10, self.lane_width / 2, np.pi / 2, False, self.lane_width,
-            (PGLineType.BROKEN, PGLineType.CONTINUOUS)
-        )
-        self.block_network.add_lane(Decoration.start, Decoration.end, merge_lane)
+        merge_lane = self._get_merge_part(acc_lane, extension_length)
+        self.block_network.add_lane(next_node, acc_road.end_node, merge_lane)
 
         return no_cross
 
@@ -223,35 +229,24 @@ class OutRampOnStraight(Ramp):
     ID = "R"
     EXTRA_LEN = 15
 
-    def _get_deacc_lane(self, att_lane: StraightLane):
-        start = att_lane.position(self.lane_width, self.lane_width)
-        end = att_lane.position(att_lane.length, self.lane_width)
-        return StraightLane(start, end, self.lane_width, (PGLineType.BROKEN, PGLineType.CONTINUOUS))
-
-    def _get_merge_part(self, side_lane: StraightLane):
-        tool_lane = StraightLane(side_lane.end, side_lane.start, side_lane.width)
-        merge_part, _ = create_bend_straight(
-            tool_lane,
-            10,
-            self.lane_width / 2,
-            np.pi / 2,
-            True,
-            width=self.lane_width,
-            line_types=(PGLineType.CONTINUOUS, PGLineType.BROKEN)
-        )
+    def _get_merge_part(self, att_lane: StraightLane, length: float):
+        start = att_lane.position(0, 0)
+        end = att_lane.position(length, self.lane_width)
+        merge_part = create_extension(start, end, ExtensionDirection.EXTEND, width=self.lane_width)
         return merge_part
 
     def _try_plug_into_previous_block(self) -> bool:
         no_cross = True
         sin_angle = math.sin(np.deg2rad(self.ANGLE))
         cos_angle = math.cos(np.deg2rad(self.ANGLE))
+        dec_lane_len = self.get_config()[Parameter.length]
+        extension_len = self.get_config()[Parameter.extension_length]
         longitude_len = sin_angle * self.RADIUS * 2 + cos_angle * self.CONNECT_PART_LEN + self.RAMP_LEN + self.EXTRA_LEN
 
         self.set_part_idx(0)
         # part 0 road 0
-        dec_lane_len = self.get_config()[Parameter.length]
         dec_lane = ExtendStraightLane(
-            self.positive_basic_lane, dec_lane_len + self.lane_width,
+            self.positive_basic_lane, dec_lane_len + extension_len,
             [self.positive_basic_lane.line_types[0], PGLineType.SIDE]
         )
         dec_road = Road(self.pre_block_socket.positive_road.end_node, self.add_road_node())
@@ -302,19 +297,23 @@ class OutRampOnStraight(Ramp):
 
         # part 1 road 0
         self.set_part_idx(1)
-        dec_side_right_lane = self._get_deacc_lane(dec_right_lane)
-        self.block_network.add_lane(dec_road.start_node, dec_road.end_node, dec_side_right_lane)
+        merge_part_lane = self._get_merge_part(dec_right_lane, extension_len)
+        next_node = self.add_road_node()
+        self.block_network.add_lane(dec_road.start_node, next_node, merge_part_lane)
+
+        deacc_lane_end = dec_right_lane.position(dec_right_lane.length, self.lane_width)
+        deacc_lane = StraightLane(
+            merge_part_lane.end, deacc_lane_end, self.lane_width, (PGLineType.NONE, PGLineType.CONTINUOUS)
+        )
+        self.block_network.add_lane(next_node, dec_road.end_node, deacc_lane)
         no_cross = (
             not check_lane_on_road(
-                self._global_network,
-                dec_side_right_lane,
-                0.95,
-                ignore_intersection_checking=self.ignore_intersection_checking
+                self._global_network, deacc_lane, 0.95, ignore_intersection_checking=self.ignore_intersection_checking
             )
         ) and no_cross
 
         bend_1, connect_part = create_bend_straight(
-            dec_side_right_lane,
+            deacc_lane,
             self.CONNECT_PART_LEN,
             self.RADIUS,
             np.deg2rad(self.ANGLE),
@@ -369,6 +368,4 @@ class OutRampOnStraight(Ramp):
             )
         ) and no_cross
 
-        decoration_part = self._get_merge_part(dec_side_right_lane)
-        self.block_network.add_lane(Decoration.start, Decoration.end, decoration_part)
         return no_cross

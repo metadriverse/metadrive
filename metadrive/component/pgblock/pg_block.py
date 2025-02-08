@@ -250,12 +250,16 @@ class PGBlock(BaseBlock):
         for _from, to_dict in graph.items():
             for _to, lanes in to_dict.items():
                 for _id, lane in enumerate(lanes):
-
                     self._construct_lane(lane, (_from, _to, _id))
+
+                    # choose_side is a two-elemental list, the first element is for left side,
+                    # the second element is for right side. If False, then the left/right side line (broken line or
+                    # continuous line) will not be constructed.
+
                     choose_side = [True, True] if _id == len(lanes) - 1 else [True, False]
-                    if Road(_from, _to).is_negative_road() and _id == 0:
-                        # draw center line with positive road
-                        choose_side = [False, False]
+                    # if Road(_from, _to).is_negative_road() and _id == 0:
+                    #     # draw center line with positive road
+                    #     choose_side = [False, False]
                     self._construct_lane_line_in_block(lane, choose_side)
         self._construct_sidewalk()
         self._construct_crosswalk()
@@ -273,24 +277,14 @@ class PGBlock(BaseBlock):
                 )
                 self._node_path_list.extend(node_path_list)
 
-    def _construct_continuous_line(self, lane, lateral, line_color, line_type):
+    def _construct_continuous_line(self, points, line_color, line_type):
         """
         We process straight line to several pieces by default, which can be optimized through overriding this function
         Lateral: left[-1/2 * width] or right[1/2 * width]
         """
-        segment_num = int(lane.length / PGDrivableAreaProperty.LANE_SEGMENT_LENGTH)
-        if segment_num == 0:
-            start = lane.position(0, lateral)
-            end = lane.position(lane.length, lateral)
-            node_path_list = self._construct_lane_line_segment(start, end, line_color, line_type)
-            self._node_path_list.extend(node_path_list)
-        for segment in range(segment_num):
-            start = lane.position(PGDrivableAreaProperty.LANE_SEGMENT_LENGTH * segment, lateral)
-            if segment == segment_num - 1:
-                end = lane.position(lane.length, lateral)
-            else:
-                end = lane.position((segment + 1) * PGDrivableAreaProperty.LANE_SEGMENT_LENGTH, lateral)
-            node_path_list = self._construct_lane_line_segment(start, end, line_color, line_type)
+        for p_1_index, p_1 in enumerate(points[:-1]):
+            p_2 = points[p_1_index + 1]
+            node_path_list = self._construct_lane_line_segment(p_1, p_2, line_color, line_type)
             self._node_path_list.extend(node_path_list)
 
     def _generate_sidewalk_from_line(self, lane, sidewalk_height=None, lateral_direction=1):
@@ -340,16 +334,17 @@ class PGBlock(BaseBlock):
         for idx, line_type, line_color, need, in zip([-1, 1], lane.line_types, lane.line_colors, construct_left_right):
             if not need:
                 continue
-            lateral = idx * lane.width_at(0) / 2
+            seg_len = PGDrivableAreaProperty.LANE_SEGMENT_LENGTH
+            lateral = idx * lane.width / 2
             if line_type == PGLineType.CONTINUOUS:
-                self._construct_continuous_line(lane, lateral, line_color, line_type)
+                self._construct_continuous_line(lane.get_polyline(seg_len, lateral=lateral), line_color, line_type)
             elif line_type == PGLineType.BROKEN:
                 self._construct_broken_line(lane, lateral, line_color, line_type)
             elif line_type == PGLineType.SIDE:
-                self._construct_continuous_line(lane, lateral, line_color, line_type)
+                self._construct_continuous_line(lane.get_polyline(seg_len, lateral=lateral), line_color, line_type)
                 self._generate_sidewalk_from_line(lane)
             elif line_type == PGLineType.GUARDRAIL:
-                self._construct_continuous_line(lane, lateral, line_color, line_type)
+                self._construct_continuous_line(lane.get_polyline(seg_len, lateral=lateral), line_color, line_type)
                 self._generate_sidewalk_from_line(
                     lane, sidewalk_height=PGDrivableAreaProperty.GUARDRAIL_HEIGHT, lateral_direction=idx
                 )

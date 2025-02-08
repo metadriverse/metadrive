@@ -1,15 +1,15 @@
 import copy
-from metadrive.engine.logger import get_logger
-from metadrive.utils.math import norm
+
 import numpy as np
 
 from metadrive.component.static_object.traffic_object import TrafficCone, TrafficBarrier
-from metadrive.component.traffic_participants.cyclist import Cyclist
-from metadrive.component.traffic_participants.pedestrian import Pedestrian
+from metadrive.component.traffic_participants.cyclist import Cyclist, CyclistBoundingBox
+from metadrive.component.traffic_participants.pedestrian import Pedestrian, PedestrianBoundingBox
 from metadrive.component.vehicle.base_vehicle import BaseVehicle
-from metadrive.component.vehicle.vehicle_type import SVehicle, LVehicle, MVehicle, XLVehicle, \
-    TrafficDefaultVehicle
+from metadrive.component.vehicle.vehicle_type import LVehicle, MVehicle, XLVehicle, \
+    VaryingDynamicsBoundingBoxVehicle, SVehicle, DefaultVehicle
 from metadrive.constants import DEFAULT_AGENT
+from metadrive.engine.logger import get_logger
 from metadrive.manager.base_manager import BaseManager
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
@@ -17,6 +17,7 @@ from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 from metadrive.scenario.parse_object_state import parse_object_state, get_idm_route, get_max_valid_indicis
 from metadrive.scenario.scenario_description import ScenarioDescription as SD
 from metadrive.type import MetaDriveType
+from metadrive.utils.math import norm
 from metadrive.utils.math import wrap_to_pi
 
 logger = get_logger()
@@ -56,7 +57,10 @@ class ScenarioTrafficManager(BaseManager):
         self._obj_to_clean_this_frame = []
 
         # some flags
-        self.even_sample_v = self.engine.global_config["even_sample_vehicle_class"]
+        self.even_sample_v = self.engine.global_config.get("even_sample_vehicle_class", None)
+        if self.even_sample_v is not None:
+            raise DeprecationWarning("even_sample_vehicle_class is deprecated!")
+
         self.need_default_vehicle = self.engine.global_config["default_vehicle_in_traffic"]
         self.is_ego_vehicle_replay = self.engine.global_config["agent_policy"] == ReplayEgoCarPolicy
         self._filter_overlapping_car = self.engine.global_config["filter_overlapping_car"]
@@ -78,7 +82,7 @@ class ScenarioTrafficManager(BaseManager):
     def before_reset(self):
         super(ScenarioTrafficManager, self).before_reset()
         self._obj_to_clean_this_frame = []
-        reset_vehicle_type_count(self.np_random)
+        # reset_vehicle_type_count(self.np_random)
 
     def after_reset(self):
         self._scenario_id_to_obj_id = {}
@@ -169,7 +173,10 @@ class ScenarioTrafficManager(BaseManager):
         return list(self.engine.get_objects(filter=lambda o: isinstance(o, BaseVehicle)).values())
 
     def spawn_vehicle(self, v_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
+        use_bounding_box = (
+            self.engine.global_config["vehicle_config"]["vehicle_model"] == "varying_dynamics_bounding_box"
+        )
 
         # for each vehicle, we would like to know if it is static
         if v_id not in self._static_car_id and v_id not in self._moving_car_id:
@@ -184,21 +191,32 @@ class ScenarioTrafficManager(BaseManager):
 
         # if collision don't generate, unless ego car is in replay mode
         ego_pos = self.ego_vehicle.position
-        heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"], ego_pos)
+        heading_dist, side_dist = self.ego_vehicle.convert_to_local_coordinates(state["position"][:2], ego_pos)
         if not self.is_ego_vehicle_replay and self._filter_overlapping_car and \
                 abs(heading_dist) < self.GENERATION_FORWARD_CONSTRAINT and \
                 abs(side_dist) < self.GENERATION_SIDE_CONSTRAINT:
             return
 
         # create vehicle
-        if state["vehicle_class"]:
+        if state["vehicle_class"] and not use_bounding_box:
             vehicle_class = state["vehicle_class"]
         else:
             vehicle_class = get_vehicle_type(
-                float(state["length"]), None if self.even_sample_v else self.np_random, self.need_default_vehicle
+                float(state["length"]), self.need_default_vehicle, use_bounding_box=use_bounding_box
             )
+        # print("vehicle_class: ", vehicle_class)
         obj_name = v_id if self.engine.global_config["force_reuse_object_name"] else None
         v_cfg = copy.copy(self._traffic_v_config)
+
+        v_cfg["width"] = state["width"]
+        v_cfg["length"] = state["length"]
+        v_cfg["height"] = state["height"]
+        if use_bounding_box:
+            v_cfg["scale"] = (
+                v_cfg["width"] / vehicle_class.DEFAULT_WIDTH, v_cfg["length"] / vehicle_class.DEFAULT_LENGTH,
+                v_cfg["height"] / vehicle_class.DEFAULT_HEIGHT
+            )
+
         if self.engine.global_config["top_down_show_real_size"]:
             v_cfg["top_down_length"] = track["state"]["length"][self.episode_step]
             v_cfg["top_down_width"] = track["state"]["width"][self.episode_step]
@@ -207,8 +225,16 @@ class ScenarioTrafficManager(BaseManager):
                     "Scenario ID: {}. The top_down size of vehicle {} is weird: "
                     "{}".format(self.engine.current_seed, v_id, [v_cfg["length"], v_cfg["width"]])
                 )
+
+        position = list(state["position"])
+
+        # Add z to make it stick to the ground:
+        assert len(position) == 2
+        if use_bounding_box:
+            position.append(state['height'] / 2)
+
         v = self.spawn_object(
-            vehicle_class, position=state["position"], heading=state["heading"], vehicle_config=v_cfg, name=obj_name
+            vehicle_class, position=position, heading=state["heading"], vehicle_config=v_cfg, name=obj_name
         )
         self._scenario_id_to_obj_id[v_id] = v.name
         self._obj_id_to_scenario_id[v.name] = v_id
@@ -236,15 +262,27 @@ class ScenarioTrafficManager(BaseManager):
             self.idm_policy_count += 1
 
     def spawn_pedestrian(self, scenario_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
         if not state["valid"]:
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
+        if self.global_config["use_bounding_box"]:
+            cls = PedestrianBoundingBox
+            force_spawn = True
+        else:
+            cls = Pedestrian
+            force_spawn = False
+
+        position = list(state["position"])
         obj = self.spawn_object(
-            Pedestrian,
+            cls,
             name=obj_name,
-            position=state["position"],
+            position=position,
             heading_theta=state["heading"],
+            width=state["width"],
+            length=state["length"],
+            height=state["height"],
+            force_spawn=force_spawn
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id
@@ -252,15 +290,27 @@ class ScenarioTrafficManager(BaseManager):
         policy.act()
 
     def spawn_cyclist(self, scenario_id, track):
-        state = parse_object_state(track, self.episode_step)
+        state = parse_object_state(track, self.episode_step, include_z_position=False)
         if not state["valid"]:
             return
         obj_name = scenario_id if self.engine.global_config["force_reuse_object_name"] else None
+        if self.global_config["use_bounding_box"]:
+            cls = CyclistBoundingBox
+            force_spawn = True
+        else:
+            cls = Cyclist
+            force_spawn = False
+
+        position = list(state["position"])
         obj = self.spawn_object(
-            Cyclist,
+            cls,
             name=obj_name,
-            position=state["position"],
+            position=position,
             heading_theta=state["heading"],
+            width=state["width"],
+            length=state["length"],
+            height=state["height"],
+            force_spawn=force_spawn
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id
@@ -303,7 +353,7 @@ class ScenarioTrafficManager(BaseManager):
 
     def is_static_object(self, obj_id):
         return isinstance(self.spawned_objects[obj_id], TrafficBarrier) \
-               or isinstance(self.spawned_objects[obj_id], TrafficCone)
+            or isinstance(self.spawned_objects[obj_id], TrafficCone)
 
     @property
     def obj_id_to_scenario_id(self):
@@ -333,38 +383,27 @@ class ScenarioTrafficManager(BaseManager):
         return v_config
 
 
-type_count = [0 for i in range(3)]
+# type_count = [0 for i in range(3)]
 
 
-def get_vehicle_type(length, np_random=None, need_default_vehicle=False):
-    if np_random is not None:
-        if length <= 4:
-            return SVehicle
-        elif length <= 5.5:
-            return [LVehicle, SVehicle, MVehicle][np_random.randint(3)]
-        else:
-            return [LVehicle, XLVehicle][np_random.randint(2)]
+def get_vehicle_type(length, need_default_vehicle=False, use_bounding_box=False):
+    if use_bounding_box:
+        return VaryingDynamicsBoundingBoxVehicle
+    if need_default_vehicle:
+        return DefaultVehicle
+    if length <= 4:
+        return SVehicle
+    elif length <= 5.2:
+        return MVehicle
+    elif length <= 6.2:
+        return LVehicle
     else:
-        global type_count
-        # evenly sample
-        if length <= 4:
-            return SVehicle
-        elif length <= 5.5:
-            type_count[1] += 1
-            vs = [LVehicle, MVehicle, SVehicle]
-            # vs = [SVehicle, LVehicle, MVehicle]
-            if need_default_vehicle:
-                vs.append(TrafficDefaultVehicle)
-            return vs[type_count[1] % len(vs)]
-        else:
-            type_count[2] += 1
-            vs = [LVehicle, XLVehicle]
-            return vs[type_count[2] % len(vs)]
+        return XLVehicle
 
 
-def reset_vehicle_type_count(np_random=None):
-    global type_count
-    if np_random is None:
-        type_count = [0 for i in range(3)]
-    else:
-        type_count = [np_random.randint(100) for i in range(3)]
+# def reset_vehicle_type_count(np_random=None):
+#     global type_count
+#     if np_random is None:
+#         type_count = [0 for i in range(3)]
+#     else:
+#         type_count = [np_random.randint(100) for i in range(3)]

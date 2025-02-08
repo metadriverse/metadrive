@@ -24,7 +24,6 @@ if __name__ == "__main__":
             "num_scenarios": 10,
             "debug": True,
             "debug_static_world": True,
-            "map_region_size": 256,
             "norm_pixel": True,
             "show_interface": True,
             "show_sidewalk": True,

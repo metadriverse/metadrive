@@ -170,7 +170,7 @@ class CollisionGroup(Mask):
             (cls.BrokenLaneLine, cls.TrafficParticipants, True),
             (cls.BrokenLaneLine, cls.Crosswalk, False),
 
-            # vehicle collision
+            # vehicle contact
             (cls.Vehicle, cls.Vehicle, True),
             (cls.Vehicle, cls.LaneSurface, True),
             (cls.Vehicle, cls.ContinuousLaneLine, True),
@@ -232,11 +232,13 @@ class CollisionGroup(Mask):
         ]
 
     @classmethod
-    def set_collision_rule(cls, world: BulletWorld):
+    def set_collision_rule(cls, world: BulletWorld, disable_collision: bool = False):
         for rule in cls.collision_rules():
             group_1 = int(math.log(rule[0].getWord(), 2))
             group_2 = int(math.log(rule[1].getWord(), 2))
             relation = rule[-1]
+            if disable_collision:
+                relation = False
             world.setGroupCollisionFlag(group_1, group_2, relation)
 
     @classmethod
@@ -391,14 +393,20 @@ class Semantics:
     LANE_LINE = label_color("LANE_LINE", (255, 255, 255))
     CROSSWALK = label_color("CROSSWALK", (55, 176, 189))
 
+    # These color might be prettier?
+    # LANE_LINE = label_color("LANE_LINE", (128, 64, 128))
+    # CROSSWALK = label_color("CROSSWALK", (128, 64, 128))
+
+    BUS = label_color("BUS", (0, 60, 100))  # PZH: I just randomly choose a color.
+
 
 class MapTerrainSemanticColor:
     """
     Do not modify this as it is for terrain generation. If you want your own palette, just add a new one or modify
     class lMapSemanticColor
     """
-    YELLOW = 0.1
-    WHITE = 0.3
+    YELLOW = 30
+    WHITE = 10
 
     @staticmethod
     def get_color(type):
@@ -418,10 +426,10 @@ class MapTerrainSemanticColor:
             return MapTerrainSemanticColor.YELLOW
         elif MetaDriveType.is_lane(type):
             # return (0, 1, 0, 0)
-            return 0.2
+            return 20
         elif type == MetaDriveType.GROUND:
             # return (0, 0, 1, 0)
-            return 0.0
+            return 00
         elif MetaDriveType.is_white_line(type) or MetaDriveType.is_road_boundary_line(type):
             # return (0, 0, 0, 1)
             return MapTerrainSemanticColor.WHITE
@@ -429,7 +437,7 @@ class MapTerrainSemanticColor:
             # The range of crosswalk value is 0.4 <= value < 0.76,
             # so people can save the angle (degree) of the crosswalk in attribute map
             # the value * 10 = angle of crosswalk. It is a trick for saving memory.
-            return 0.4  # this value can be overwritten latter
+            return 40  # this value can be overwritten latter
         else:
             raise ValueError("Unsupported type: {}".format(type))
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -479,8 +487,7 @@ class TerrainProperty:
     """
     Define some constants/properties for the map and terrain
     """
-    map_region_size = 512
-    terrain_size = 2048
+    map_region_size = 2048
 
     @classmethod
     def get_semantic_map_pixel_per_meter(cls):
@@ -489,8 +496,8 @@ class TerrainProperty:
         Returns: a constant
 
         """
-        assert cls.terrain_size <= 2048, "Terrain size should be fixed to 2048"
-        return 22 if cls.map_region_size <= 1024 else 11
+        # assert cls.terrain_size <= 2048, "Terrain size should be fixed to 2048"
+        return 22 if cls.map_region_size != 4096 else 11
 
     @classmethod
     def point_in_map(cls, point):
@@ -545,4 +552,18 @@ class CameraTagStateKey:
 
 
 DEFAULT_SENSOR_OFFSET = (0., 0.8, 1.5)
-DEFAULT_SENSOR_HPR = (0., 0.0, 0.0)
+DEFAULT_SENSOR_HPR = (0., -5, 0.0)
+
+COLOR_PALETTE = (
+    (0.00392156862745098, 0.45098039215686275,
+     0.6980392156862745), (0.8705882352941177, 0.5607843137254902, 0.0196078431372549),
+    (0.00784313725490196, 0.6196078431372549, 0.45098039215686275), (0.8352941176470589, 0.3686274509803922, 0.0),
+    (0.8, 0.47058823529411764, 0.7372549019607844), (0.792156862745098, 0.5686274509803921, 0.3803921568627451),
+    (0.984313725490196, 0.6862745098039216,
+     0.8941176470588236), (0.5803921568627451, 0.5803921568627451, 0.5803921568627451),
+    (0.9254901960784314, 0.8823529411764706, 0.2), (0.33725490196078434, 0.7058823529411765, 0.9137254901960784)
+)
+
+
+def get_color_palette():
+    return list(COLOR_PALETTE)

@@ -272,6 +272,7 @@ class NodeRoadNetwork(BaseRoadNetwork):
         Returns:
             The shortest checkpoints from start to goal.
         """
+        assert isinstance(goal, str)
         start_road_node = start[0]
         assert start != goal
         return next(self.bfs_paths(start_road_node, goal), [])
@@ -299,10 +300,16 @@ class NodeRoadNetwork(BaseRoadNetwork):
         ret = {}
         for _from, _to_dict in self.graph.items():
             for _to, lanes in _to_dict.items():
-                for k, lane in enumerate(lanes):
-                    left_n = ["{}".format(l.index) for l in lanes[:k]]
-                    right_n = ["{}".format(l.index) for l in lanes[k + 1:]]
-                    ret["{}".format(lane.index)] = {
+                for k, lane, in enumerate(lanes):
+                    if _from == Decoration.start and _to == Decoration.end:
+                        left_n = []
+                        right_n = []
+                        id = "{}_decoration_{}".format(lane.index, k)
+                    else:
+                        left_n = ["{}".format(l.index) for l in lanes[:k]]
+                        right_n = ["{}".format(l.index) for l in lanes[k + 1:]]
+                        id = "{}".format(lane.index)
+                    ret[id] = {
                         SD.POLYLINE: lane.get_polyline(interval),
                         SD.POLYGON: lane.polygon,
                         # Convert to EdgeNetwork

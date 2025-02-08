@@ -64,6 +64,14 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
         self.control_object.set_heading_theta(info["heading"])
         self.control_object.set_angular_velocity(info["angular_velocity"])
 
+        # If set_static, then the agent will not "fall from the sky".
+        # However, the physics engine will not update the position of the agent.
+        # So in the visualization, the image will be very chunky as the agent will not suddenly move to the next
+        # position for each step.
+
+        if self.engine.global_config.get("set_static", False):
+            self.control_object.set_static(True)
+
         return None  # Return None action so the base vehicle will not overwrite the steering & throttle
 
 

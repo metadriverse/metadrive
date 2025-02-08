@@ -5,7 +5,7 @@ import time
 
 import numpy as np
 
-from metadrive import MultiAgentRoundaboutEnv
+from metadrive.envs.marl_envs import MultiAgentRoundaboutEnv
 from metadrive.utils import setup_logger
 
 if __name__ == '__main__':

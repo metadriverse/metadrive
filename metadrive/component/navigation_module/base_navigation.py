@@ -68,6 +68,7 @@ class BaseNavigation:
         self.navi_arrow_dir = [0, 0]
         self._dest_node_path = None
         self._goal_node_path = None
+        self._goal_node_path2 = None
 
         self._node_path_list = []
 
@@ -78,15 +79,20 @@ class BaseNavigation:
             # nodepath
             self._line_to_dest = self.origin.attachNewNode("line")
             self._goal_node_path = self.origin.attachNewNode("target")
+            self._goal_node_path2 = self.origin.attachNewNode("target2")
             self._dest_node_path = self.origin.attachNewNode("dest")
 
             self._node_path_list.append(self._line_to_dest)
             self._node_path_list.append(self._goal_node_path)
+            self._node_path_list.append(self._goal_node_path2)
             self._node_path_list.append(self._dest_node_path)
 
             if show_navi_mark:
                 navi_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
                 navi_point_model.reparentTo(self._goal_node_path)
+
+                navi_point_model2 = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
+                navi_point_model2.reparentTo(self._goal_node_path2)
             if show_dest_mark:
                 dest_point_model = AssetLoader.loader.loadModel(AssetLoader.file_path("models", "box.bam"))
                 dest_point_model.reparentTo(self._dest_node_path)
@@ -108,17 +114,19 @@ class BaseNavigation:
                 line_seg.setColor(self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 1.0)
                 line_seg.setThickness(4)
                 self._dynamic_line_np_2 = NodePath(line_seg.create(True))
-
                 self._node_path_list.append(self._dynamic_line_np_2)
-
                 self._dynamic_line_np_2.reparentTo(self.origin)
                 self._line_to_navi = line_seg
 
             self._goal_node_path.setTransparency(TransparencyAttrib.M_alpha)
+            self._goal_node_path2.setTransparency(TransparencyAttrib.M_alpha)
             self._dest_node_path.setTransparency(TransparencyAttrib.M_alpha)
 
             self._goal_node_path.setColor(
                 self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 0.7
+            )
+            self._goal_node_path2.setColor(
+                self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 0.5
             )
             self._dest_node_path.setColor(
                 self.navi_mark_color[0], self.navi_mark_color[1], self.navi_mark_color[2], 0.7
@@ -180,6 +188,7 @@ class BaseNavigation:
                 pass
             self._dest_node_path.removeNode()
             self._goal_node_path.removeNode()
+            self._goal_node_path2.removeNode()
 
         for np in self._node_path_list:
             np.detachNode()
@@ -234,12 +243,16 @@ class BaseNavigation:
         self._dynamic_line_np.hide(CamMask.Shadow | CamMask.RgbCam)
         self._dynamic_line_np.reparentTo(self.origin)
 
-    def _draw_line_to_navi(self, start_position, end_position):
+    def _draw_line_to_navi(self, start_position, end_position, next_checkpoint=None):
         if not self._show_line_to_navi_mark:
             return
         line_seg = self._line_to_navi
         line_seg.moveTo(panda_vector(start_position, self.LINE_TO_DEST_HEIGHT))
         line_seg.drawTo(panda_vector(end_position, self.LINE_TO_DEST_HEIGHT))
+
+        if next_checkpoint is not None:
+            line_seg.drawTo(panda_vector(next_checkpoint, self.LINE_TO_DEST_HEIGHT))
+
         self._dynamic_line_np_2.removeNode()
         self._dynamic_line_np_2 = NodePath(line_seg.create(False))
 
