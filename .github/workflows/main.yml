@@ -8,16 +8,20 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   code_style:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Check code style
         run: |
           pip install "yapf==0.30.0"
@@ -37,16 +41,19 @@ jobs:
   docstring_coverage:
     if: github.event_name != 'push' || github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Install software
         run: |
           sudo apt update && sudo apt install -y bc
-          pip install "docstr-coverage==2.3.0"
+          pip install "docstr-coverage"
       - name: Get post-PR docstring coverage
         run: |
           after=$(docstr-coverage --percentage-only --fail-under 0 metadrive/)
@@ -72,12 +79,15 @@ jobs:
 
   test_functionality:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Blackbox tests
         run: |
           pip install cython
@@ -86,18 +96,21 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_functionality
 
   test_environment:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Blackbox tests
         run: |
           pip install cython
@@ -107,18 +120,21 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_env
 
   test_policy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Blackbox tests
         run: |
           pip install cython
@@ -127,18 +143,21 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
 
   test_component:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Blackbox tests
         run: |
           pip install cython
@@ -147,18 +166,21 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_component
 
   test_export_record_scenario:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Blackbox tests
         run: |
           pip install cython
@@ -167,18 +189,21 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_export_record_scenario
 
   test_sensor_pipeline:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Prepare OpenGL
         run: |
           sudo apt-get -y install xvfb
@@ -191,18 +216,21 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_sensors/
 
   test_examples:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Prepare OpenGL
         run: |
           sudo apt-get -y install xvfb
@@ -217,18 +245,21 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_examples
 
   test_policy_windows:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Blackbox tests
         run: |
           pip install cython
@@ -237,18 +268,21 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pytest --cov=./ --cov-config=.coveragerc --cov-report=xml -sv tests/test_policy
 
   test_ipynb:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Prepare OpenGL
         run: |
           sudo apt-get -y install xvfb
@@ -261,7 +295,7 @@ jobs:
           python -m metadrive.pull_asset
           pip install pytest
           pip install pytest-cov
-          pip install ray
+          
           cd metadrive/
           pip install nbmake pytest-xdist
           mkdir ./tests/test_ipynb
@@ -270,12 +304,15 @@ jobs:
 
   test_doc_code:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Set up Python 3.9 / 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: ${{ matrix.python-version }}
       - name: Prepare OpenGL
         run: |
           sudo apt-get -y install xvfb
