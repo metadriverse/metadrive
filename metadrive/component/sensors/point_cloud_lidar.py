@@ -1,8 +1,6 @@
 import numpy as np
-from panda3d.core import Point3
-from scipy.spatial.transform import Rotation as R
-
 from metadrive.component.sensors.depth_camera import DepthCamera
+from panda3d.core import Point3
 
 
 class PointCloudLidar(DepthCamera):
@@ -39,7 +37,10 @@ class PointCloudLidar(DepthCamera):
         hpr = self.cam.getHpr(self.engine.render)
         hpr[0] += 90  # pand3d's y is the camera facing direction, so we need to rotate it 90 degree
         hpr[1] *= -1  # left right handed convert
+
+        from scipy.spatial.transform import Rotation as R
         rot = R.from_euler('ZYX', hpr, degrees=True)
+
         rotation_matrix = rot.as_matrix()
         translation = Point3(0, 0, 0)
         if not self.ego_centric:

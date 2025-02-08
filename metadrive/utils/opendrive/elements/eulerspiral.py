@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from scipy import special
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -50,6 +49,7 @@ class EulerSpiral:
         Returns:
 
         """
+        from scipy import special
 
         # Start
         C0 = x0 + 1j * y0
