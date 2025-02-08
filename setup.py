@@ -41,22 +41,17 @@ install_requires = [
     "gymnasium>=0.28",
     "numpy>=1.21.6",
     "matplotlib",
-    "pandas",
     "pygame",
-    "tqdm",
     "yapf",
-    "seaborn",
     "tqdm",
     "progressbar",
     # "panda3d==1.10.8",
     "panda3d==1.10.13",
     "panda3d-gltf==0.13",  # 0.14 will bring some problems
     "pillow",
-    "pytest",
     "opencv-python",
     "lxml",
     "psutil",
-    "geopandas",
     "shapely",
     "filelock",
     "Pygments",
@@ -64,11 +59,13 @@ install_requires = [
 ]
 
 test_requirement = [
+    "pandas",
+    "pytest",
     "scipy"
 ]
 
 cuda_requirement = [
-    "cuda-python==12.0.0",
+    "cuda-python==12.1.0",
     "PyOpenGL==3.1.6",
     "PyOpenGL-accelerate==3.1.6",
     "pyrr==0.10.3",
@@ -124,7 +121,10 @@ How to publish to pypi and Draft github Release?  Noted by Zhenghao and Quanyi i
 6. Upload to production channel
     twine upload dist/*
 
-7. Draft a release on github with new version number and upload assets.zip and the generated .whl files to the release.
+7. Draft a release on github with new version number.
+Create new tag. 
+Set target to main.
+Upload assets.zip and the generated .whl files to the release.
 
 8. Publish the release
 

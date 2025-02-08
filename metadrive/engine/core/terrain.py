@@ -1,17 +1,12 @@
 # import numpyf
 import math
-
 import os
 import pathlib
-import sys
-
+import time
 #
 #
 from abc import ABC
 
-import numpy
-
-from metadrive.constants import TerrainProperty, CameraTagStateKey
 import cv2
 import numpy as np
 from panda3d.bullet import BulletRigidBodyNode, BulletPlaneShape
@@ -20,8 +15,9 @@ from panda3d.core import SamplerState, PNMImage, CardMaker, LQuaternionf, NodePa
 from panda3d.core import Vec3, ShaderTerrainMesh, Texture, TextureStage, Shader, Filename
 
 from metadrive.base_class.base_object import BaseObject
-from metadrive.constants import CamMask, Semantics
+from metadrive.constants import CamMask, Semantics, MapTerrainSemanticColor
 from metadrive.constants import MetaDriveType, CollisionGroup
+from metadrive.constants import TerrainProperty, CameraTagStateKey
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.logger import get_logger
 from metadrive.third_party.diamond_square import diamond_square
@@ -53,8 +49,8 @@ class Terrain(BaseObject, ABC):
         self.mesh_collision_terrain = None  # a 3d mesh, Not available yet!
 
         # visualization mesh feature
-        self._terrain_size = TerrainProperty.terrain_size  # [m]
-        self._height_scale = engine.global_config["height_scale"]  # [m]
+        self._terrain_size = TerrainProperty.map_region_size  # [m]
+        self._height_scale = engine.global_config["height_scale"] * self._terrain_size / 2048  # [m]
         self._drivable_area_extension = engine.global_config["drivable_area_extension"]  # [m] road marin
         # it should include the whole map. Otherwise, road will have no texture!
         self._heightmap_size = self._semantic_map_size = TerrainProperty.map_region_size  # [m]
@@ -83,7 +79,8 @@ class Terrain(BaseObject, ABC):
             # prepare semantic texture
             semantic_size = self._semantic_map_size * self._semantic_map_pixel_per_meter
             self.semantic_tex = Texture()
-            self.semantic_tex.setup2dTexture(semantic_size, semantic_size, Texture.TFloat, Texture.F_red)
+            self.semantic_tex.setup2dTexture(semantic_size, semantic_size, Texture.TUnsignedByte, Texture.F_red)
+
             # prepare height field texture
             self.heightfield_tex = Texture()
             self.heightfield_tex.setup2dTexture(*self.heightfield_img.shape[:2], Texture.TShort, Texture.FLuminance)
@@ -258,18 +255,23 @@ class Terrain(BaseObject, ABC):
             # self._mesh_terrain.set_shader_input("side_tex", self.side_tex)
             # self._mesh_terrain.set_shader_input("side_normal", self.side_normal)
 
-            # road
+            # rock
             self._mesh_terrain.set_shader_input("rock_tex", self.rock_tex)
             self._mesh_terrain.set_shader_input("rock_normal", self.rock_normal)
             self._mesh_terrain.set_shader_input("rock_rough", self.rock_rough)
             self._mesh_terrain.set_shader_input("rock_tex_ratio", self.rock_tex_ratio)
 
+            # rock 2
+            self._mesh_terrain.set_shader_input("rock_tex_2", self.rock_tex_2)
+            self._mesh_terrain.set_shader_input("rock_normal_2", self.rock_normal_2)
+            self._mesh_terrain.set_shader_input("rock_rough_2", self.rock_rough_2)
+            self._mesh_terrain.set_shader_input("rock_tex_ratio_2", self.rock_tex_ratio_2)
+
+            # road
             self._mesh_terrain.set_shader_input("road_tex", self.road_texture)
-            self._mesh_terrain.set_shader_input("yellow_tex", self.yellow_lane_line)
-            self._mesh_terrain.set_shader_input("white_tex", self.white_lane_line)
+            self._mesh_terrain.set_shader_input("road_tex_ratio", self.road_tex_ratio)
             self._mesh_terrain.set_shader_input("road_normal", self.road_texture_normal)
             self._mesh_terrain.set_shader_input("road_rough", self.road_texture_rough)
-            self._mesh_terrain.set_shader_input("elevation_texture_ratio", self._elevation_texture_ratio)
 
             # crosswalk
             self._mesh_terrain.set_shader_input("crosswalk_tex", self.crosswalk_tex)
@@ -410,29 +412,18 @@ class Terrain(BaseObject, ABC):
         self.ts_normal.setMode(TextureStage.M_normal)
 
         # grass
-        # if engine.use_render_pipeline:
-        #     # grass
-        #     self.grass_tex = self.loader.loadTexture(
-        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
-        #     )
-        #     self.grass_normal = self.loader.loadTexture(
-        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
-        #     )
-        #     self.grass_rough = self.loader.loadTexture(
-        #         AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
-        #     )
-        #     self.grass_tex_ratio = 128.0
-        # else:
         self.grass_tex = self.loader.loadTexture(
             AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_COL_1K.jpg")
         )
         self.grass_normal = self.loader.loadTexture(
             AssetLoader.file_path("textures", "grass1", "GroundGrassGreen002_NRM_1K.jpg")
         )
-        self.grass_rough = self.loader.loadTexture(
-            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
-        )
-        self.grass_tex_ratio = 64
+
+        white = PNMImage(256, 256, 4)
+        white.fill(1., 1., 1.)
+        self.grass_rough = Texture("grass rough")
+        self.grass_rough.load(white)
+        self.grass_tex_ratio = 64 * self._terrain_size / 512
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -442,7 +433,7 @@ class Terrain(BaseObject, ABC):
             tex.set_wrap_v(v_wrap)
             tex.setMinfilter(filter_type)
             tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
+            tex.setAnisotropicDegree(1)
 
         # rock
         self.rock_tex = self.loader.loadTexture(
@@ -454,7 +445,7 @@ class Terrain(BaseObject, ABC):
         self.rock_rough = self.loader.loadTexture(
             AssetLoader.file_path("textures", "rock", "brown_mud_leaves_01_rough_1k.png")
         )
-        self.rock_tex_ratio = 128
+        self.rock_tex_ratio = 512 * self._terrain_size / 2048
 
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
@@ -464,7 +455,28 @@ class Terrain(BaseObject, ABC):
             tex.set_wrap_v(v_wrap)
             tex.setMinfilter(filter_type)
             tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
+            tex.setAnisotropicDegree(1)
+
+        # rock 2
+        self.rock_tex_2 = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_diff_1k.png")
+        )
+        self.rock_normal_2 = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_nor_gl_1k.png")
+        )
+        self.rock_rough_2 = self.loader.loadTexture(
+            AssetLoader.file_path("textures", "grass2", "grass_path_2_rough_1k.png")
+        )
+        self.rock_tex_ratio_2 = 256 * self._terrain_size / 2048
+
+        v_wrap = Texture.WMRepeat
+        u_warp = Texture.WMMirror
+
+        for tex in [self.rock_tex_2, self.rock_normal_2, self.rock_rough_2]:
+            tex.set_wrap_u(u_warp)
+            tex.set_wrap_v(v_wrap)
+            tex.setMinfilter(filter_type)
+            tex.setMagfilter(filter_type)
 
         # # sidewalk
         # self.side_tex = self.loader.loadTexture(AssetLoader.file_path("textures", "sidewalk", "color.png"))
@@ -478,39 +490,38 @@ class Terrain(BaseObject, ABC):
         #     tex.set_wrap_v(v_wrap)
         #     tex.setMinfilter(filter_type)
         #     tex.setMagfilter(filter_type)
-        #     tex.setAnisotropicDegree(anisotropic_degree)
+        #     tex.setAnisotropicDegree(1)
 
         # Road surface
-        # self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "new_color.png"))
         self.road_texture = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "diff_2k.png"))
         self.road_texture_normal = self.loader.loadTexture(
             AssetLoader.file_path("textures", "asphalt", "normal_2k.png")
         )
         self.road_texture_rough = self.loader.loadTexture(AssetLoader.file_path("textures", "asphalt", "rough_2k.png"))
+        self.road_tex_ratio = 128 * self._terrain_size / 2048
         v_wrap = Texture.WMRepeat
         u_warp = Texture.WMMirror
         filter_type = Texture.FTLinearMipmapLinear
-        anisotropic_degree = 16
         for tex in [self.road_texture_rough, self.road_texture, self.road_texture_normal]:
             tex.set_wrap_u(u_warp)
             tex.set_wrap_v(v_wrap)
             tex.setMinfilter(filter_type)
             tex.setMagfilter(filter_type)
-            tex.setAnisotropicDegree(anisotropic_degree)
+            tex.setAnisotropicDegree(1)
         # self.road_texture_displacement = self.loader.loadTexture(AssetLoader.file_path("textures", "sci", "normal.jpg"))
         # self.road_texture.setMinfilter(minfilter)
-        # self.road_texture.setAnisotropicDegree(anisotropic_degree)
+        # self.road_texture.setAnisotropicDegree(1)
 
         # lane line
-        white_lane_line = PNMImage(1024, 1024, 4)
-        white_lane_line.fill(1., 1., 1.)
-        self.white_lane_line = Texture("white lane line")
-        self.white_lane_line.load(white_lane_line)
-
-        yellow_lane_line = PNMImage(1024, 1024, 4)
-        yellow_lane_line.fill(*(255 / 255, 200 / 255, 0 / 255))
-        self.yellow_lane_line = Texture("white lane line")
-        self.yellow_lane_line.load(yellow_lane_line)
+        # white_lane_line = PNMImage(256, 256, 4)
+        # white_lane_line.fill(1., 1., 1.)
+        # self.white_lane_line = Texture("white lane line")
+        # self.white_lane_line.load(white_lane_line)
+        #
+        # yellow_lane_line = PNMImage(256, 256, 4)
+        # yellow_lane_line.fill(*(255 / 255, 200 / 255, 0 / 255))
+        # self.yellow_lane_line = Texture("white lane line")
+        # self.yellow_lane_line.load(yellow_lane_line)
 
         # crosswalk
         tex = np.frombuffer(self.road_texture.getRamImage().getData(), dtype=np.uint8)
@@ -601,14 +612,16 @@ class Terrain(BaseObject, ABC):
                 center_point,
                 size=self._semantic_map_size,
                 pixels_per_meter=self._semantic_map_pixel_per_meter,
-                polyline_thickness=int(self._semantic_map_pixel_per_meter / 11),
+                white_line_thickness=2,
+                yellow_line_thickness=3,
                 # 1 when map_region_size == 2048, 2 for others
                 layer=layer
             )
         else:
             logger.warning("Can not find map. Generate a square terrain")
             size = self._semantic_map_size * self._semantic_map_pixel_per_meter
-            semantics = np.ones((size, size, 1), dtype=np.float32) * 0.2
+            lane_color = MapTerrainSemanticColor.get_color(MetaDriveType.LANE_SURFACE_STREET)
+            semantics = np.ones((size, size, 1), dtype=np.uint8) * lane_color  # use lane color
         return semantics
 
     @staticmethod

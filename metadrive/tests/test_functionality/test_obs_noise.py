@@ -11,6 +11,7 @@ info_keys = [
 
 
 def _act(env, action):
+    action = np.asarray(action, dtype=env.action_space.dtype)
     assert env.action_space.contains(action)
     obs, reward, terminated, truncated, info = env.step(action)
     assert env.observation_space.contains(obs)

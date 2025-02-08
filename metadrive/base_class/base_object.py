@@ -1,22 +1,20 @@
 import copy
-from abc import ABC
-from metadrive.engine.logger import get_logger
-from metadrive.type import MetaDriveType
-
-import logging
 import math
+from abc import ABC
 from typing import Dict
 
 import numpy as np
-import seaborn as sns
 from panda3d.bullet import BulletWorld, BulletBodyNode, BulletVehicle
 from panda3d.core import LVector3, NodePath, PandaNode
-from metadrive.constants import Semantics, CameraTagStateKey
+
 from metadrive.base_class.base_runnable import BaseRunnable
 from metadrive.constants import ObjectState
+from metadrive.constants import Semantics, CameraTagStateKey, get_color_palette
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.engine.core.physics_world import PhysicsWorld
+from metadrive.engine.logger import get_logger
 from metadrive.engine.physics_node import BaseRigidBodyNode, BaseGhostBodyNode
+from metadrive.type import MetaDriveType
 from metadrive.utils import Vector
 from metadrive.utils import get_np_random
 from metadrive.utils import random_string
@@ -151,8 +149,8 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
                 self.loader.__init__()
 
         # add color setting for visualization
-        color = sns.color_palette("colorblind")
-        color.remove(color[2])  # Remove the green and leave it for special vehicle
+        color = get_color_palette()
+        color.pop(2)  # Remove the green and leave it for special vehicle
         idx = get_np_random().randint(len(color))
         rand_c = color[idx]
         self._panda_color = rand_c
@@ -340,8 +338,11 @@ class BaseObject(BaseRunnable, MetaDriveType, ABC):
         """
         Velocity, unit: m/s
         """
-        velocity = self.body.get_linear_velocity()
-        return np.asarray([velocity[0], velocity[1]])
+        if isinstance(self.body, BaseGhostBodyNode):
+            return np.array([0, 0])
+        else:
+            velocity = self.body.get_linear_velocity()
+            return np.asarray([velocity[0], velocity[1]])
 
     @property
     def velocity_km_h(self):

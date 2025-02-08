@@ -92,15 +92,14 @@ fragment:
         uniform sampler2D attribute_tex;
         uniform float grass_tex_ratio;
         uniform float rock_tex_ratio;
+        uniform float road_tex_ratio;
         
         
         // just learned that uniform means the variable won't change in each stage, while in/out is able to do that : )
-        uniform float elevation_texture_ratio; 
         uniform float height_scale; 
 
     material: |
-        float road_tex_ratio = 128;
-        float grass_tex_ratio = grass_tex_ratio * 4;
+        float elevation_texture_ratio = 1;
         const float r_min = (1-1/elevation_texture_ratio)/2;
         const float r_max = (1-1/elevation_texture_ratio)/2+1/elevation_texture_ratio;
         
@@ -124,20 +123,20 @@ fragment:
         mat3 tbn = mat3(tangent, binormal, normal);
         
         if ((attri.r > 0.01) && terrain_uv.x>=r_min && terrain_uv.y >= r_min && terrain_uv.x<=r_max && terrain_uv.y<=r_max){
-            float value = attri.r; // Assuming it's a red channel texture
+            float value = attri.r * 255; // Assuming it's a red channel texture
             vec3 diffuse;
-            if (value < 0.11) {
+            if (value < 14) {
                 // Semantics for value 1
                 diffuse=texture(yellow_tex, terrain_uv * road_tex_ratio).rgb;
-            } else if (value < 0.21) {
+            } else if (value < 23) {
                 // Semantics for value 2
                 diffuse = texture(road_tex, terrain_uv * road_tex_ratio).rgb;
-            }  else if (value < 0.31) {
+            }  else if (value < 31) {
                 // Semantics for value 4
                 diffuse = texture(white_tex, terrain_uv * road_tex_ratio).rgb;
-            } else if (value > 0.3999 ||  value < 0.760001) {
+            } else if (value > 39||  value < 221) {
                 // crosswalk
-                float theta=(value-0.39999) * 1000/180 * 3.1415926535;
+                float theta=(value-40) * 2/180.0*3.1415926535;
                 vec2 new_terrain_uv = vec2(cos(theta)*terrain_uv.x - sin(theta)*terrain_uv.y, sin(theta)*terrain_uv.x+cos(theta)*terrain_uv.y);
                 diffuse = texture(crosswalk_tex, new_terrain_uv * road_tex_ratio).rgb;
             } else {

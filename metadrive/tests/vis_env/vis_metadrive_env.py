@@ -1,13 +1,12 @@
 from metadrive.envs.metadrive_env import MetaDriveEnv
+import cv2
 from metadrive.utils import setup_logger
 
 if __name__ == "__main__":
     setup_logger(True)
     env = MetaDriveEnv(
         {
-            "num_scenarios": 1,
-            "traffic_density": 0,
-            "start_seed": 74,
+            "traffic_density": 0.1,
             # "_disable_detector_mask":True,
             # "debug_physics_world": True,
             "debug": True,
@@ -23,7 +22,7 @@ if __name__ == "__main__":
             # "debug_static_world": True,
             "manual_control": True,
             "use_render": True,
-            "use_mesh_terrain": False,
+            # "use_mesh_terrain": True,
             "full_size_mesh": True,
             "accident_prob": 0,
             "decision_repeat": 5,
@@ -31,10 +30,11 @@ if __name__ == "__main__":
             "interface_panel": [],
             "need_inverse_traffic": False,
             "norm_pixel": True,
-            "map": 1,
+            "map": "CRCrC",
+            "num_scenarios": 1,
+            "start_seed": 1010,
             # "agent_policy": ExpertPolicy,
             "random_traffic": False,
-            "map_region_size": 1024,
             # "height_scale": 100,
             # "random_lane_width": True,
             "driving_reward": 1.0,
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     start = time.time()
 
-    o, _ = env.reset(seed=74)
+    o, _ = env.reset()
     env.engine.accept("~", env.engine.terrain.reload_terrain_shader)
     # if env.config["render_pipeline"]:
     # env.engine.accept("5", env.engine.render_pipeline.reload_shaders)
@@ -131,7 +131,6 @@ if __name__ == "__main__":
     for s in range(1, 100000):
         # env.agent.set_velocity([1, 0], in_local_frame=True)
         o, r, tm, tc, info = env.step([0, 0])
-        env.render(text={"pos": env.agent.position})
         # env.render(
         #     text={
         #         "pos": env.engine.terrain.mesh_collision_terrain.getPos(),
@@ -151,14 +150,14 @@ if __name__ == "__main__":
         #     env.close()
         #     env.reset()
         # info["fuel"] = env.agent.energy_consumption
-        # env.render(
-        #     text={
-        #         # "heading_diff": env.agent.heading_diff(env.agent.lane),
-        #         # "lane_width": env.agent.lane.width,
-        #         # "lane_index": env.agent.lane_index,
-        #         # "lateral": env.agent.lane.local_coordinates(env.agent.position),
-        #         "current_seed": env.current_seed
-        #     }
+        ret = env.render(mode="topdown", semantic_map=True, draw_center_line=True)
+        # text={
+        #     # "heading_diff": env.agent.heading_diff(env.agent.lane),
+        #     # "lane_width": env.agent.lane.width,
+        #     # "lane_index": env.agent.lane_index,
+        #     # "lateral": env.agent.lane.local_coordinates(env.agent.position),
+        #     "current_seed": env.current_seed
+        # }
         # )
         # if tm or tc:
         #     env.reset()
