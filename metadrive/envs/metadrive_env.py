@@ -158,37 +158,37 @@ class MetaDriveEnv(BaseEnv):
         # determine env return
         if done_info[TerminationState.SUCCESS]:
             done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: arrive_dest.".format(self.current_seed),
                 extra={"log_once": True}
             )
         if done_info[TerminationState.OUT_OF_ROAD] and self.config["out_of_road_done"]:
             done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: out_of_road.".format(self.current_seed),
                 extra={"log_once": True}
             )
         if done_info[TerminationState.CRASH_VEHICLE] and self.config["crash_vehicle_done"]:
             done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: crash vehicle ".format(self.current_seed),
                 extra={"log_once": True}
             )
         if done_info[TerminationState.CRASH_OBJECT] and self.config["crash_object_done"]:
             done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: crash object ".format(self.current_seed),
                 extra={"log_once": True}
             )
         if done_info[TerminationState.CRASH_BUILDING]:
             done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: crash building ".format(self.current_seed),
                 extra={"log_once": True}
             )
         if done_info[TerminationState.CRASH_HUMAN] and self.config["crash_human_done"]:
             done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: crash human".format(self.current_seed),
                 extra={"log_once": True}
             )
@@ -196,7 +196,7 @@ class MetaDriveEnv(BaseEnv):
             # single agent horizon has the same meaning as max_step_per_agent
             if self.config["truncate_as_terminate"]:
                 done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: max step ".format(self.current_seed),
                 extra={"log_once": True}
             )
