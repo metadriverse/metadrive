@@ -120,7 +120,6 @@ class ScenarioEnv(BaseEnv):
             assert self.config["sequential_seed"], \
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
         self.start_index = self.config["start_scenario_index"]
-        self.num_scenarios = self.config["num_scenarios"]
 
     def _post_process_config(self, config):
         config = super(ScenarioEnv, self)._post_process_config(config)
