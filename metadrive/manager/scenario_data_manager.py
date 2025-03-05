@@ -24,23 +24,22 @@ class ScenarioDataManager(BaseManager):
 
         # for multi-worker
         self.worker_index = self.engine.global_config["worker_index"]
-        self.available_scenario_indices = [
-            i for i in range(
-                self.start_scenario_index + self.worker_index, self.start_scenario_index +
-                self.num_scenarios, self.engine.global_config["num_workers"]
-            )
-        ]
         self._scenarios = {}
 
         # Read summary file first:
         self.summary_dict, self.summary_lookup, self.mapping = read_dataset_summary(self.directory)
         self.summary_lookup[:self.start_scenario_index] = [None] * self.start_scenario_index
-        end_idx = self.start_scenario_index + self.num_scenarios
-        self.summary_lookup[end_idx:] = [None] * (len(self.summary_lookup) - end_idx)
 
         # sort scenario for curriculum training
         self.scenario_difficulty = None
         self.sort_scenarios()
+
+        if self.num_scenarios == -1:
+            self.num_scenarios = len(self.summary_lookup) - self.start_scenario_index
+            engine.global_config["num_scenarios"] = self.num_scenarios
+
+        end_idx = self.start_scenario_index + self.num_scenarios
+        self.summary_lookup[end_idx:] = [None] * (len(self.summary_lookup) - end_idx)
 
         # existence check
         assert self.start_scenario_index < len(self.summary_lookup), "Insufficient scenarios!"
@@ -54,6 +53,15 @@ class ScenarioDataManager(BaseManager):
 
         # stat
         self.coverage = [0 for _ in range(self.num_scenarios)]
+
+    @property
+    def available_scenario_indices(self):
+        return list(
+            range(
+                self.start_scenario_index + self.worker_index, self.start_scenario_index + self.num_scenarios,
+                self.engine.global_config["num_workers"]
+            )
+        )
 
     @property
     def current_scenario_summary(self):

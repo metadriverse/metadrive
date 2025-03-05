@@ -22,7 +22,10 @@ SCENARIO_ENV_CONFIG = dict(
     # ===== Scenario Config =====
     data_directory=AssetLoader.file_path("nuscenes", unix_style=False),
     start_scenario_index=0,
+
+    # Set num_scenarios=-1 to load all scenarios in the data directory.
     num_scenarios=3,
+
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
     worker_index=0,  # Allowing multi-worker sampling with Rllib
     num_workers=1,  # Allowing multi-worker sampling with Rllib
@@ -120,7 +123,6 @@ class ScenarioEnv(BaseEnv):
             assert self.config["sequential_seed"], \
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
         self.start_index = self.config["start_scenario_index"]
-        self.num_scenarios = self.config["num_scenarios"]
 
     def _post_process_config(self, config):
         config = super(ScenarioEnv, self)._post_process_config(config)
