@@ -124,7 +124,13 @@ class Terrain(BaseObject, ABC):
             heightfield_base = np.copy(self.heightfield_img)
 
             if drivable_region is None:
+                drivable_area_height_mean = self.heightfield_img[start:end, start:end, ...].mean()
+                heightfield_base = np.where(
+                    heightfield_base > (drivable_area_height_mean - self._terrain_offset),
+                    heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0
+                ).astype(np.uint16)
                 heightfield_to_modify = heightfield_base[start:end, start:end, ...]
+                heightfield_base[start:end, start:end, ...] = self._terrain_offset
                 logger.warning(
                     "No map is found in map region, "
                     "size: [{}, {}], "
