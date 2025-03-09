@@ -50,8 +50,8 @@ Please feel free to contact us if you have any suggestions or ideas!
    multigoal_intersection.ipynb
 
 .. toctree::
-   :hidden:
-   :maxdepth: 2
+   :includehidden:
+   :maxdepth: 1
    :caption: Concepts and Customization
 
    new_env.ipynb

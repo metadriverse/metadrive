@@ -1,9 +1,4 @@
-import os.path
-from distutils.dir_util import copy_tree
-
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.scenario_env import ScenarioEnv
-from metadrive.scenario.scenario_description import ScenarioDescription
 from metadrive.scenario.utils import read_dataset_summary, read_scenario_data
 
 
