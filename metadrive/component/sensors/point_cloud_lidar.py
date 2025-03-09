@@ -3,6 +3,7 @@ from panda3d.core import Point3
 
 from metadrive.component.sensors.depth_camera import DepthCamera
 
+
 def euler_to_rotation_matrix(hpr):
     """
     Convert ZYX Euler angles to a rotation matrix.
@@ -14,18 +15,20 @@ def euler_to_rotation_matrix(hpr):
         numpy.ndarray: 3x3 rotation matrix.
     """
     hpr = np.radians(hpr)
-    
+
     cz, sz = np.cos(hpr[0]), np.sin(hpr[0])  # Yaw (Z)
     cy, sy = np.cos(hpr[1]), np.sin(hpr[1])  # Pitch (Y)
     cx, sx = np.cos(hpr[2]), np.sin(hpr[2])  # Roll (X)
 
-    rotation_matrix = np.array([
-        [cz * cy, cz * sy * sx - sz * cx, cz * sy * cx + sz * sx],
-        [sz * cy, sz * sy * sx + cz * cx, sz * sy * cx - cz * sx],
-        [-sy,     cy * sx,                cy * cx]
-    ])
+    rotation_matrix = np.array(
+        [
+            [cz * cy, cz * sy * sx - sz * cx, cz * sy * cx + sz * sx],
+            [sz * cy, sz * sy * sx + cz * cx, sz * sy * cx - cz * sx], [-sy, cy * sx, cy * cx]
+        ]
+    )
 
     return rotation_matrix
+
 
 class PointCloudLidar(DepthCamera):
     """
