@@ -115,8 +115,8 @@ class Terrain(BaseObject, ABC):
         if self.render or self.use_mesh_terrain:
             # modify default height image
             drivable_region = self.get_drivable_region(center_point)
-            assert (drivable_region is None) or (
-                isinstance(drivable_region, np.ndarray) and drivable_region.dtype == bool)
+            assert (drivable_region is
+                    None) or (isinstance(drivable_region, np.ndarray) and drivable_region.dtype == bool)
 
             # embed to the original height image
             start = self._heightfield_start

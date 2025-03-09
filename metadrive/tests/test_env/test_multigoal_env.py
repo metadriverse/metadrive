@@ -10,14 +10,18 @@ from metadrive.scenario.utils import read_dataset_summary, read_scenario_data
 from metadrive.envs.multigoal_intersection import MultiGoalIntersectionEnv
 import numpy as np
 
+
 # @pytest.mark.parametrize("data_directory", ["waymo", "nuscenes"])
 def test_multigoal_env(render=False):
     # path = pathlib.Path(AssetLoader.file_path(AssetLoader.asset_path, data_directory, unix_style=False))
     # summary, scenario_ids, mapping = read_dataset_summary(path)
-    env = MultiGoalIntersectionEnv(config=dict(use_render=render,
-                                               use_multigoal_intersection=True,
-                                               # agent_policy=ReplayEgoCarPolicy,
-                                               ))
+    env = MultiGoalIntersectionEnv(
+        config=dict(
+            use_render=render,
+            use_multigoal_intersection=True,
+            # agent_policy=ReplayEgoCarPolicy,
+        )
+    )
     try:
         env.reset()
         for ep in range(10):
