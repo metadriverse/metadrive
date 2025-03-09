@@ -2,7 +2,6 @@ import math
 from typing import Tuple
 
 import numpy as np
-from scipy.interpolate import interp1d
 
 number_pos_inf = float("inf")
 number_neg_inf = float("-inf")
@@ -276,6 +275,8 @@ def resample_polyline(points, target_distance):
     resampled_distances = np.arange(0, distances[-1], target_distance)
 
     # Interpolate the points along the resampled distances
-    resampled_points = interp1d(distances, points, axis=0)(resampled_distances)
+    resampled_points = np.empty((len(resampled_distances), points.shape[1]))
+    for i in range(points.shape[1]):
+        resampled_points[:, i] = np.interp(resampled_distances, distances, points[:, i])
 
     return resampled_points

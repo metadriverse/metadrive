@@ -7,10 +7,10 @@ from metadrive.component.sensors.depth_camera import DepthCamera
 def euler_to_rotation_matrix(hpr):
     """
     Convert ZYX Euler angles to a rotation matrix.
-    
+
     Parameters:
         hpr (array-like): [yaw (Z), pitch (Y), roll (X)] in degrees.
-    
+
     Returns:
         numpy.ndarray: 3x3 rotation matrix.
     """
