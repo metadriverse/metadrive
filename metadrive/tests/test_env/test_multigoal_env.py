@@ -29,6 +29,9 @@ def test_multigoal_env(render=False):
                     f"Current seed: {env.engine.global_seed}, "
                     f"Current position: {env.vehicle.origin.get_pos()}, "
                     f"Terrain position: {env.engine.terrain.height}, "
+                    f"Terrain pos: {env.engine.terrain.origin.get_pos()}, "
+                    f"plane_collision_terrain position: {env.engine.terrain.plane_collision_terrain.get_pos()}, "
+
                 )
 
                 if tm or tc:
