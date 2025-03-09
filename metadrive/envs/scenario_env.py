@@ -25,7 +25,6 @@ SCENARIO_ENV_CONFIG = dict(
 
     # Set num_scenarios=-1 to load all scenarios in the data directory.
     num_scenarios=3,
-
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
     worker_index=0,  # Allowing multi-worker sampling with Rllib
     num_workers=1,  # Allowing multi-worker sampling with Rllib
