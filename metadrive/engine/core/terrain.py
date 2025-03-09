@@ -59,7 +59,9 @@ class Terrain(BaseObject, ABC):
         self._terrain_offset = 2055  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
         # pre calculate some variables
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
-        self.origin.setZ(-(self._terrain_offset + 1) / 65536 * self._height_scale * 2)
+
+        terrain_z = -(self._terrain_offset + 1) / 65536 * self._height_scale * 2
+        self.origin.setZ(terrain_z)
 
         self._mesh_terrain = None
         self._mesh_terrain_height = None

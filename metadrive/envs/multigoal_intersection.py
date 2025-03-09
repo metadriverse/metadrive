@@ -95,7 +95,7 @@ class CustomizedObservation(BaseObservation):
         assert goal_dependent_info.shape[0] == GOAL_DEPENDENT_STATE_DIM
         obs.append(goal_dependent_info)
 
-        obs = np.concatenate(obs)
+        obs = np.concatenate(obs).astype(np.float32)
 
         self.latest_observation["state"] = ego
         self.latest_observation["raw_navi"] = navi
@@ -136,7 +136,7 @@ class CustomizedObservation(BaseObservation):
                 distance=vehicle.config["side_detector"]["distance"],
                 physics_world=vehicle.engine.physics_world.static_world,
                 show=vehicle.config["show_side_detector"],
-            ).cloud_points
+            ).cloud_points, dtype=np.float32
         )
 
     def lane_line_detector_observe(self, vehicle):
@@ -147,7 +147,7 @@ class CustomizedObservation(BaseObservation):
                 num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
                 distance=vehicle.config["lane_line_detector"]["distance"],
                 show=vehicle.config["show_lane_line_detector"],
-            ).cloud_points
+            ).cloud_points, dtype=np.float32
         )
 
     def vehicle_detector_observe(self, vehicle):
@@ -158,7 +158,7 @@ class CustomizedObservation(BaseObservation):
             distance=vehicle.config["lidar"]["distance"],
             show=vehicle.config["show_lidar"],
         )
-        return np.asarray(cloud_points)
+        return np.asarray(cloud_points, dtype=np.float32)
 
     def destroy(self):
         """
