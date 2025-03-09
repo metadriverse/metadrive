@@ -9,14 +9,14 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 from metadrive.scenario.utils import read_dataset_summary, read_scenario_data
 from metadrive.envs.multigoal_intersection import MultiGoalIntersectionEnv
 
+
 # @pytest.mark.parametrize("data_directory", ["waymo", "nuscenes"])
 def test_multigoal_env(render=False):
     # path = pathlib.Path(AssetLoader.file_path(AssetLoader.asset_path, data_directory, unix_style=False))
     # summary, scenario_ids, mapping = read_dataset_summary(path)
-    env = MultiGoalIntersectionEnv(config=dict(
-        use_render=render,
-        # agent_policy=ReplayEgoCarPolicy,
-    ))
+    env = MultiGoalIntersectionEnv(config=dict(use_render=render,
+                                               # agent_policy=ReplayEgoCarPolicy,
+                                               ))
     try:
         env.reset(seed=147)
         for ep in range(10):
@@ -25,9 +25,11 @@ def test_multigoal_env(render=False):
                 o, r, tm, tc, info = env.step([1.0, 0.])
                 assert env.observation_space.contains(o)
 
-                print(f"Current seed: {env.engine.global_seed}, "
-                      f"Current position: {env.vehicle.origin.get_pos()}, "
-                      f"Terrain position: {env.engine.terrain.height}, ")
+                print(
+                    f"Current seed: {env.engine.global_seed}, "
+                    f"Current position: {env.vehicle.origin.get_pos()}, "
+                    f"Terrain position: {env.engine.terrain.height}, "
+                )
 
                 if tm or tc:
                     # assert info["arrive_dest"], "Can not arrive dest"

@@ -136,7 +136,8 @@ class CustomizedObservation(BaseObservation):
                 distance=vehicle.config["side_detector"]["distance"],
                 physics_world=vehicle.engine.physics_world.static_world,
                 show=vehicle.config["show_side_detector"],
-            ).cloud_points, dtype=np.float32
+            ).cloud_points,
+            dtype=np.float32
         )
 
     def lane_line_detector_observe(self, vehicle):
@@ -147,7 +148,8 @@ class CustomizedObservation(BaseObservation):
                 num_lasers=vehicle.config["lane_line_detector"]["num_lasers"],
                 distance=vehicle.config["lane_line_detector"]["distance"],
                 show=vehicle.config["show_lane_line_detector"],
-            ).cloud_points, dtype=np.float32
+            ).cloud_points,
+            dtype=np.float32
         )
 
     def vehicle_detector_observe(self, vehicle):
