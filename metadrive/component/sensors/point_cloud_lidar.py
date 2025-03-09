@@ -1,6 +1,33 @@
 import numpy as np
-from metadrive.component.sensors.depth_camera import DepthCamera
 from panda3d.core import Point3
+
+from metadrive.component.sensors.depth_camera import DepthCamera
+
+
+def euler_to_rotation_matrix(hpr):
+    """
+    Convert ZYX Euler angles to a rotation matrix.
+
+    Parameters:
+        hpr (array-like): [yaw (Z), pitch (Y), roll (X)] in degrees.
+
+    Returns:
+        numpy.ndarray: 3x3 rotation matrix.
+    """
+    hpr = np.radians(hpr)
+
+    cz, sz = np.cos(hpr[0]), np.sin(hpr[0])  # Yaw (Z)
+    cy, sy = np.cos(hpr[1]), np.sin(hpr[1])  # Pitch (Y)
+    cx, sx = np.cos(hpr[2]), np.sin(hpr[2])  # Roll (X)
+
+    rotation_matrix = np.array(
+        [
+            [cz * cy, cz * sy * sx - sz * cx, cz * sy * cx + sz * sx],
+            [sz * cy, sz * sy * sx + cz * cx, sz * sy * cx - cz * sx], [-sy, cy * sx, cy * cx]
+        ]
+    )
+
+    return rotation_matrix
 
 
 class PointCloudLidar(DepthCamera):
@@ -38,10 +65,7 @@ class PointCloudLidar(DepthCamera):
         hpr[0] += 90  # pand3d's y is the camera facing direction, so we need to rotate it 90 degree
         hpr[1] *= -1  # left right handed convert
 
-        from scipy.spatial.transform import Rotation as R
-        rot = R.from_euler('ZYX', hpr, degrees=True)
-
-        rotation_matrix = rot.as_matrix()
+        rotation_matrix = euler_to_rotation_matrix(hpr)
         translation = Point3(0, 0, 0)
         if not self.ego_centric:
             translation = np.asarray(self.engine.render.get_relative_point(self.cam, Point3(0, 0, 0)))

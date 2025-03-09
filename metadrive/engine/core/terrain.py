@@ -56,10 +56,12 @@ class Terrain(BaseObject, ABC):
         self._heightmap_size = self._semantic_map_size = TerrainProperty.map_region_size  # [m]
         self._heightfield_start = int((self._terrain_size - self._heightmap_size) / 2)
         self._semantic_map_pixel_per_meter = TerrainProperty.get_semantic_map_pixel_per_meter()  # [m]  pixels per meter
-        self._terrain_offset = 2055  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
+        self._terrain_offset = 2048 - 1  # 1023/65536 * self._height_scale [m] warning: make it power 2 -1!
         # pre calculate some variables
         self._elevation_texture_ratio = self._terrain_size / self._semantic_map_size  # for shader
-        self.origin.setZ(-(self._terrain_offset + 1) / 65536 * self._height_scale * 2)
+
+        terrain_z = -(self._terrain_offset + 1) / 65536 * self._height_scale * 2
+        self.origin.setZ(terrain_z)
 
         self._mesh_terrain = None
         self._mesh_terrain_height = None
@@ -113,14 +115,22 @@ class Terrain(BaseObject, ABC):
         if self.render or self.use_mesh_terrain:
             # modify default height image
             drivable_region = self.get_drivable_region(center_point)
+            assert (drivable_region is
+                    None) or (isinstance(drivable_region, np.ndarray) and drivable_region.dtype == bool)
 
             # embed to the original height image
             start = self._heightfield_start
             end = self._heightfield_start + self._heightmap_size
             heightfield_base = np.copy(self.heightfield_img)
 
-            if abs(np.mean(drivable_region) - 0.0) < 1e-3:
+            if drivable_region is None:
+                drivable_area_height_mean = self.heightfield_img[start:end, start:end, ...].mean()
+                heightfield_base = np.where(
+                    heightfield_base > (drivable_area_height_mean - self._terrain_offset),
+                    heightfield_base - (drivable_area_height_mean - self._terrain_offset), 0
+                ).astype(np.uint16)
                 heightfield_to_modify = heightfield_base[start:end, start:end, ...]
+                heightfield_base[start:end, start:end, ...] = self._terrain_offset
                 logger.warning(
                     "No map is found in map region, "
                     "size: [{}, {}], "
@@ -587,15 +597,15 @@ class Terrain(BaseObject, ABC):
     def get_drivable_region(self, center_point):
         """
         Get drivable area, consisting of all roads in map
-        Returns: drivable area
-
+        Returns: drivable area in boolean numpy array, or None if no map is found.
         """
         if self.engine.current_map:
             drivable_region = self.engine.current_map.get_height_map(
                 center_point, self._heightmap_size, 1, self._drivable_area_extension
             )
+            drivable_region = (drivable_region > 0).astype(bool)
         else:
-            drivable_region = np.ones((self._heightmap_size, self._heightmap_size, 1))
+            drivable_region = None
         return drivable_region
 
     def get_terrain_semantics(self, center_point):
@@ -650,12 +660,70 @@ class Terrain(BaseObject, ABC):
         """
         super(Terrain, self).destroy()
         if self.render:
+            self.road_texture.clearImage()
+            self.road_texture_normal.clearImage()
+            self.road_texture_rough.clearImage()
+            self.crosswalk_tex.clearImage()
+            self.rock_tex.clearImage()
+            self.rock_normal.clearImage()
+            self.rock_rough.clearImage()
+            self.rock_tex_2.clearImage()
+            self.rock_normal_2.clearImage()
+            self.rock_rough_2.clearImage()
+            self.grass_tex.clearImage()
+            self.grass_normal.clearImage()
+            self.grass_rough.clearImage()
             self.heightfield_tex.clearImage()
             self.semantic_tex.clearImage()
             self.heightfield_tex.clearRamImage()
             self.semantic_tex.clearRamImage()
             self.heightfield_tex.clear()
             self.semantic_tex.clear()
+            self.road_texture.clear()
+            self.road_texture_normal.clear()
+            self.road_texture_rough.clear()
+            self.crosswalk_tex.clear()
+            self.rock_tex.clear()
+            self.rock_normal.clear()
+            self.rock_rough.clear()
+            self.rock_tex_2.clear()
+            self.rock_normal_2.clear()
+            self.rock_rough_2.clear()
+            self.grass_tex.clear()
+            self.grass_normal.clear()
+            self.grass_rough.clear()
+            if self._mesh_terrain is not None:
+                self._mesh_terrain.clearShader()
+                self._mesh_terrain.clearShaderInput("attribute_tex")
+                self._mesh_terrain.clearShaderInput("camera")
+                self._mesh_terrain.clearShaderInput("height_scale")
+                self._mesh_terrain.clearShaderInput("grass_tex")
+                self._mesh_terrain.clearShaderInput("grass_normal")
+                self._mesh_terrain.clearShaderInput("grass_rough")
+                self._mesh_terrain.clearShaderInput("grass_tex_ratio")
+                self._mesh_terrain.clearShaderInput("rock_tex")
+                self._mesh_terrain.clearShaderInput("rock_normal")
+                self._mesh_terrain.clearShaderInput("rock_rough")
+                self._mesh_terrain.clearShaderInput("rock_tex_ratio")
+                self._mesh_terrain.clearShaderInput("rock_tex_2")
+                self._mesh_terrain.clearShaderInput("rock_normal_2")
+                self._mesh_terrain.clearShaderInput("rock_rough_2")
+                self._mesh_terrain.clearShaderInput("rock_tex_ratio_2")
+                self._mesh_terrain.clearShaderInput("road_tex")
+                self._mesh_terrain.clearShaderInput("road_tex_ratio")
+                self._mesh_terrain.clearShaderInput("road_normal")
+                self._mesh_terrain.clearShaderInput("road_rough")
+                self._mesh_terrain.clearShaderInput("crosswalk_tex")
+                self._mesh_terrain.clearShaderInput("side_tex")
+                self._mesh_terrain.clearShaderInput("side_normal")
+                self._mesh_terrain.clearShaderInput("side_tex_ratio")
+                self._mesh_terrain.clearShaderInput("attribute_tex")
+                self._mesh_terrain.clearShaderInput("crosswalk_tex")
+                self._mesh_terrain.clearShaderInput("crosswalk_tex_ratio")
+                self._mesh_terrain.removeNode()
+            self._mesh_terrain_node = None
+            self._mesh_terrain = None
+            self._terrain_shader_set = False
 
         # self.terrain_texture.clear()
         # self.grass_tex.clear()

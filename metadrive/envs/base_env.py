@@ -320,7 +320,6 @@ class BaseEnv(gym.Env):
 
         # scenarios
         self.start_index = 0
-        self.num_scenarios = self.config["num_scenarios"]
 
     def _post_process_config(self, config):
         """Add more special process to merged config"""
@@ -689,6 +688,10 @@ class BaseEnv(gym.Env):
     @property
     def current_seed(self):
         return self.engine.global_random_seed
+
+    @property
+    def num_scenarios(self):
+        return self.config["num_scenarios"]
 
     @property
     def observations(self):

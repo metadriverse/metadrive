@@ -22,6 +22,8 @@ SCENARIO_ENV_CONFIG = dict(
     # ===== Scenario Config =====
     data_directory=AssetLoader.file_path("nuscenes", unix_style=False),
     start_scenario_index=0,
+
+    # Set num_scenarios=-1 to load all scenarios in the data directory.
     num_scenarios=3,
     sequential_seed=False,  # Whether to set seed (the index of map) sequentially across episodes
     worker_index=0,  # Allowing multi-worker sampling with Rllib
@@ -120,7 +122,6 @@ class ScenarioEnv(BaseEnv):
             assert self.config["sequential_seed"], \
                 "If using > 1 workers, you have to allow sequential_seed for consistency!"
         self.start_index = self.config["start_scenario_index"]
-        self.num_scenarios = self.config["num_scenarios"]
 
     def _post_process_config(self, config):
         config = super(ScenarioEnv, self)._post_process_config(config)
@@ -177,32 +178,32 @@ class ScenarioEnv(BaseEnv):
 
         if done_info[TerminationState.SUCCESS]:
             done = True
-            self.logger.info(msg("arrive_dest"), extra={"log_once": True})
+            self.logger.debug(msg("arrive_dest"), extra={"log_once": True})
         elif done_info[TerminationState.OUT_OF_ROAD]:
             done = True
-            self.logger.info(msg("out_of_road"), extra={"log_once": True})
+            self.logger.debug(msg("out_of_road"), extra={"log_once": True})
         elif done_info[TerminationState.CRASH_HUMAN] and self.config["crash_human_done"]:
             done = True
-            self.logger.info(msg("crash human"), extra={"log_once": True})
+            self.logger.debug(msg("crash human"), extra={"log_once": True})
         elif done_info[TerminationState.CRASH_VEHICLE] and self.config["crash_vehicle_done"]:
             done = True
-            self.logger.info(msg("crash vehicle"), extra={"log_once": True})
+            self.logger.debug(msg("crash vehicle"), extra={"log_once": True})
         elif done_info[TerminationState.CRASH_OBJECT] and self.config["crash_object_done"]:
             done = True
-            self.logger.info(msg("crash object"), extra={"log_once": True})
+            self.logger.debug(msg("crash object"), extra={"log_once": True})
         elif done_info[TerminationState.CRASH_BUILDING] and self.config["crash_object_done"]:
             done = True
-            self.logger.info(msg("crash building"), extra={"log_once": True})
+            self.logger.debug(msg("crash building"), extra={"log_once": True})
         elif done_info[TerminationState.MAX_STEP]:
             if self.config["truncate_as_terminate"]:
                 done = True
-            self.logger.info(msg("max step"), extra={"log_once": True})
+            self.logger.debug(msg("max step"), extra={"log_once": True})
         elif self.config["allowed_more_steps"] and self.episode_lengths[vehicle_id] >= \
             self.engine.data_manager.current_scenario_length + self.config["allowed_more_steps"]:
             if self.config["truncate_as_terminate"]:
                 done = True
             done_info[TerminationState.MAX_STEP] = True
-            self.logger.info(msg("more step than original episode"), extra={"log_once": True})
+            self.logger.debug(msg("more step than original episode"), extra={"log_once": True})
 
         # log data to curriculum manager
         self.engine.curriculum_manager.log_episode(

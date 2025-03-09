@@ -366,14 +366,14 @@ class MultiAgentRacingEnv(MultiAgentMetaDrive):
         done_info[TerminationState.IDLE] = self._is_idle(vehicle_id)
         if self.config["idle_done"] and self._is_idle(vehicle_id):
             done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: IDLE.".format(self.current_seed), extra={"log_once": True}
             )
 
         done_info[TerminationState.CRASH_SIDEWALK] = self.agents[vehicle_id].crash_sidewalk
         if self.config["crash_sidewalk_done"] and self.agents[vehicle_id].crash_sidewalk:
             done = True
-            self.logger.info(
+            self.logger.debug(
                 "Episode ended! Scenario Index: {} Reason: CRASH_SIDEWALK.".format(self.current_seed),
                 extra={"log_once": True}
             )
