@@ -462,7 +462,7 @@ class MultiGoalIntersectionEnvBase(MetaDriveEnv):
                 return ret
 
             if goal_name == "default":
-                navi = self.vehicle.navigation
+                navi = self.agent.navigation
             else:
                 navi = self.engine.goal_manager.get_navigation(goal_name)
 
