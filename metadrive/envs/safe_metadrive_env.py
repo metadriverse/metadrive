@@ -15,6 +15,7 @@ class SafeMetaDriveEnv(MetaDriveEnv):
                 "crash_vehicle_done": False,
                 "crash_object_done": False,
                 "cost_to_reward": False,
+                "horizon": 1000,
             },
             allow_add_new_key=True
         )
