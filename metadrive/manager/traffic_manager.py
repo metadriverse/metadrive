@@ -18,15 +18,17 @@ BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 
 
 class TrafficMode:
+    # Traffic vehicles will be spawned once
+    Basic = "basic"
+    
     # Traffic vehicles will be respawned, once they arrive at the destinations
     Respawn = "respawn"
 
-    # Traffic vehicles will be triggered only once
+    # Traffic vehicles will be triggered only once, and will be triggered when agent comes close
     Trigger = "trigger"
 
     # Hybrid, some vehicles are triggered once on map and disappear when arriving at destination, others exist all time
     Hybrid = "hybrid"
-
 
 class PGTrafficManager(BaseManager):
     VEHICLE_GAP = 10  # m
@@ -63,13 +65,15 @@ class PGTrafficManager(BaseManager):
         if abs(traffic_density) < 1e-2:
             return
         self.respawn_lanes = self._get_available_respawn_lanes(map)
-        if self.mode == TrafficMode.Respawn:
-            # add respawn vehicle
-            self._create_respawn_vehicles(map, traffic_density)
-        elif self.mode == TrafficMode.Trigger or self.mode == TrafficMode.Hybrid:
-            self._create_vehicles_once(map, traffic_density)
+
+        logging.debug(f"Resetting Traffic Manager with mode {self.mode} and density {traffic_density}")
+
+        if self.mode in {TrafficMode.Basic, TrafficMode.Respawn}:
+            self._create_basic_vehicles(map, traffic_density)
+        elif self.mode in {TrafficMode.Trigger, TrafficMode.Hybrid}:
+            self._create_trigger_vehicles(map, traffic_density)
         else:
-            raise ValueError("No such mode named {}".format(self.mode))
+            raise ValueError(f"No such mode named {self.mode}")
 
     def before_step(self):
         """
@@ -78,7 +82,7 @@ class PGTrafficManager(BaseManager):
         """
         # trigger vehicles
         engine = self.engine
-        if self.mode != TrafficMode.Respawn:
+        if self.mode in {TrafficMode.Trigger, TrafficMode.Hybrid}:
             for v in engine.agent_manager.active_agents.values():
                 if len(self.block_triggered_vehicles) > 0:
                     ego_lane_idx = v.lane_index[:-1]
@@ -86,6 +90,7 @@ class PGTrafficManager(BaseManager):
                     if ego_road == self.block_triggered_vehicles[-1].trigger_road:
                         block_vehicles = self.block_triggered_vehicles.pop()
                         self._traffic_vehicles += list(self.get_objects(block_vehicles.vehicles).values())
+
         for v in self._traffic_vehicles:
             p = self.engine.get_policy(v.name)
             v.before_step(p.act())
@@ -99,17 +104,15 @@ class PGTrafficManager(BaseManager):
         for v in self._traffic_vehicles:
             v.after_step()
             if not v.on_lane:
-                if self.mode == TrafficMode.Trigger:
-                    v_to_remove.append(v)
-                elif self.mode == TrafficMode.Respawn or self.mode == TrafficMode.Hybrid:
-                    v_to_remove.append(v)
-                else:
-                    raise ValueError("Traffic mode error: {}".format(self.mode))
+                v_to_remove.append(v)
+                
         for v in v_to_remove:
             vehicle_type = type(v)
             self.clear_objects([v.id])
             self._traffic_vehicles.remove(v)
-            if self.mode == TrafficMode.Respawn or self.mode == TrafficMode.Hybrid:
+
+            # Spawn new vehicles to replace the removed one
+            if self.mode in {TrafficMode.Respawn, TrafficMode.Hybrid}:
                 lane = self.respawn_lanes[self.np_random.randint(0, len(self.respawn_lanes))]
                 lane_idx = lane.index
                 long = self.np_random.rand() * lane.length / 2
@@ -136,7 +139,7 @@ class PGTrafficManager(BaseManager):
         Get the vehicles on road
         :return:
         """
-        if self.mode == TrafficMode.Respawn:
+        if self.mode in {TrafficMode.Basic, TrafficMode.Respawn}:
             return len(self._traffic_vehicles)
         return sum(len(block_vehicle_set.vehicles) for block_vehicle_set in self.block_triggered_vehicles)
 
@@ -151,7 +154,7 @@ class PGTrafficManager(BaseManager):
             traffic_states[vehicle.index] = vehicle.get_state()
 
         # collect other vehicles
-        if self.mode != TrafficMode.Respawn:
+        if self.mode in {TrafficMode.Trigger, TrafficMode.Hybrid}:
             for v_b in self.block_triggered_vehicles:
                 for vehicle in v_b.vehicles:
                     traffic_states[vehicle.index] = vehicle.get_state()
@@ -188,7 +191,7 @@ class PGTrafficManager(BaseManager):
             vehicles[vehicle.index] = init_state
 
         # collect other vehicles
-        if self.mode != TrafficMode.Respawn:
+        if self.mode in {TrafficMode.Trigger, TrafficMode.Hybrid}:
             for v_b in self.block_triggered_vehicles:
                 for vehicle in v_b.vehicles:
                     init_state = vehicle.get_state()
@@ -208,7 +211,7 @@ class PGTrafficManager(BaseManager):
             potential_vehicle_configs.append(random_vehicle_config)
         return potential_vehicle_configs
 
-    def _create_respawn_vehicles(self, map: BaseMap, traffic_density: float):
+    def _create_basic_vehicles(self, map: BaseMap, traffic_density: float):
         total_num = len(self.respawn_lanes)
         for lane in self.respawn_lanes:
             _traffic_vehicles = []
@@ -227,7 +230,7 @@ class PGTrafficManager(BaseManager):
                 self.add_policy(random_v.id, IDMPolicy, random_v, self.generate_seed())
                 self._traffic_vehicles.append(random_v)
 
-    def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
+    def _create_trigger_vehicles(self, map: BaseMap, traffic_density: float) -> None:
         """
         Trigger mode, vehicles will be triggered only once, and disappear when arriving destination
         :param map: Map
@@ -365,10 +368,10 @@ TrafficManager = PGTrafficManager
 
 
 class MixedPGTrafficManager(PGTrafficManager):
-    def _create_respawn_vehicles(self, *args, **kwargs):
+    def _create_basic_vehicles(self, *args, **kwargs):
         raise NotImplementedError()
 
-    def _create_vehicles_once(self, map: BaseMap, traffic_density: float) -> None:
+    def _create_trigger_vehicles(self, map: BaseMap, traffic_density: float) -> None:
         vehicle_num = 0
         for block in map.blocks[1:]:
 
