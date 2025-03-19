@@ -33,19 +33,17 @@ packages = find_namespace_packages(
     exclude=("docs", "docs.*", "documentation", "documentation.*", "build.*"))
 print("We will install the following packages: ", packages)
 
+assert sys.version_info.major == 3 and sys.version_info.minor >= 6, \
+    "python version >= 3.6 is required"
+    
 install_requires = [
     "requests",
-    "gymnasium>=0.28",
-    "numpy>=1.21.6",
     "matplotlib",
     "pygame",
     "yapf",
     "tqdm",
     "progressbar",
-    "panda3d",
-    "panda3d-gltf",
     "pillow",
-    "opencv-python",
     "lxml",
     "psutil",
     "shapely",
@@ -89,6 +87,9 @@ setup(
         "cuda": cuda_requirement,
         "gym": gym_requirement,
         "ros": ros_requirement,
+        ":python_version == '3.6'": ["panda3d==1.10.11", "panda3d-gltf==0.10", "gymnasium>=0.26", "numpy", "opencv-python==4.5.5.64"],
+        ":python_version == '3.7'": ["panda3d>=1.10.11", "panda3d-gltf>=0.10", "gymnasium>=0.26", "numpy", "opencv-python"],
+        ":python_version >= '3.8'": ["panda3d>=1.10.14", "panda3d-gltf>=0.13", "gymnasium>=0.28", "numpy>=1.21.6", "opencv-python"],
     },
     include_package_data=True,
     license="Apache 2.0",
