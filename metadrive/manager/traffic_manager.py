@@ -20,7 +20,7 @@ BlockVehicles = namedtuple("block_vehicles", "trigger_road vehicles")
 class TrafficMode:
     # Traffic vehicles will be spawned once
     Basic = "basic"
-    
+
     # Traffic vehicles will be respawned, once they arrive at the destinations
     Respawn = "respawn"
 
@@ -29,6 +29,7 @@ class TrafficMode:
 
     # Hybrid, some vehicles are triggered once on map and disappear when arriving at destination, others exist all time
     Hybrid = "hybrid"
+
 
 class PGTrafficManager(BaseManager):
     VEHICLE_GAP = 10  # m
@@ -105,7 +106,7 @@ class PGTrafficManager(BaseManager):
             v.after_step()
             if not v.on_lane:
                 v_to_remove.append(v)
-                
+
         for v in v_to_remove:
             vehicle_type = type(v)
             self.clear_objects([v.id])
