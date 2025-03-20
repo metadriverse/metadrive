@@ -55,6 +55,7 @@ METADRIVE_DEFAULT_CONFIG = dict(
     # ===== Others =====
     use_AI_protector=False,
     save_level=0.5,
+    horizon=1000,
 
     # ===== Agent =====
     random_spawn_lane_index=True,
