@@ -1,5 +1,6 @@
 """
 Test example in metadrive/documentation/source/simgen_render.ipynb
+Used in: https://github.com/metadriverse/SimGen/blob/main/metadrive_simgen.py
 """
 import os
 import time
@@ -168,6 +169,10 @@ def test_simgen():
         for t in tqdm.trange(horizon):
             o, r, d, _, _ = env.step([1, 0.88])
             if t % skip_steps == 0:
+
+                assert o["depth"].max() == 255
+                assert o["depth"].min() == 0
+
                 depth_img = Image.fromarray(o["depth"].repeat(3, axis=-1), mode="RGB")
                 seg_img = Image.fromarray(o["seg"], mode="RGB")
                 rgb_img = Image.fromarray(o["rgb"], mode="RGB")
