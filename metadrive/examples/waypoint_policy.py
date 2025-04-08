@@ -12,11 +12,13 @@ from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy, WayPointPolicy
 
-
 from metadrive.envs.scenario_env import ScenarioEnv
+
+
 class WaypointEnv(ScenarioEnv):
     def __init__(self, config=None):
         super(WaypointEnv, self).__init__(config)
+
     def step(self, actions):
         """
         For this environment the actions will be waypoints
@@ -25,8 +27,6 @@ class WaypointEnv(ScenarioEnv):
         heading = actions["heading"]
         self.agent.set_position(position)
         self.agent.set_heading(heading)
-
-
 
 
 RENDER_MESSAGE = {

@@ -180,7 +180,6 @@ class VehicleAgentManager(BaseAgentManager):
         else:
             actions = None
 
-
         for agent_id in self.active_agents.keys():
             policy = self.get_policy(self._agent_to_object[agent_id])
             is_replay = isinstance(policy, ReplayTrafficParticipantPolicy)
@@ -192,7 +191,7 @@ class VehicleAgentManager(BaseAgentManager):
                 if is_waypoint:
                     #assert actions is not None, "No waypoints is set for agent {}".format(agent_id)
                     if stage == "after_step":
-                        policy.act(agent_id = agent_id, actions = actions)
+                        policy.act(agent_id=agent_id, actions=actions)
                         step_infos[agent_id] = policy.get_action_info()
                     else:
                         step_infos[agent_id] = self.get_agent(agent_id).before_step([0, 0])
