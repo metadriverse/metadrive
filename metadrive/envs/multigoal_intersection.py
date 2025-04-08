@@ -236,7 +236,7 @@ class MultiGoalIntersectionNavigationManager(BaseManager):
             navi.reset(self.agent, dest=self.goals[name])
             navi.update_localization(self.agent)
 
-    def after_step(self):
+    def after_step(self, *args, **kwargs):
         """Update all navigation modules."""
         # print("[DEBUG]: after_step in MultiGoalIntersectionNavigationManager")
         for name, navi in self.navigations.items():

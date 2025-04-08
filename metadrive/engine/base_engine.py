@@ -459,6 +459,7 @@ class BaseEngine(EngineCore, Randomizable):
         if self.on_screen_message is not None:
             self.on_screen_message.render()
 
+
     def after_step(self, *args, **kwargs) -> Dict:
         """
         Update states after finishing movement
@@ -469,6 +470,7 @@ class BaseEngine(EngineCore, Randomizable):
         if self.record_episode:
             assert list(self.managers.keys())[-1] == "record_manager", "Record Manager should have lowest priority"
         for manager in self.managers.values():
+            # GUARD AGAINST OTHER MANAGERS WHO DONT TAKE ANYTHING FOR after_step
             new_step_info = manager.after_step(*args, **kwargs)
             step_infos = concat_step_infos([step_infos, new_step_info])
         self.interface.after_step()
