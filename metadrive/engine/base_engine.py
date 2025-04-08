@@ -461,7 +461,6 @@ class BaseEngine(EngineCore, Randomizable):
         if self.on_screen_message is not None:
             self.on_screen_message.render()
 
-
     def after_step(self, *args, **kwargs) -> Dict:
         """
         Update states after finishing movement
