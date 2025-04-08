@@ -18,6 +18,8 @@ from metadrive.utils.utils import is_map_related_class
 from metadrive.version import VERSION, asset_version
 
 logger = get_logger()
+import inspect
+
 
 
 def generate_distinct_rgb_values():
@@ -466,12 +468,25 @@ class BaseEngine(EngineCore, Randomizable):
         :return: if this episode is done
         """
 
+        def method_accepts_args_kwargs(instance, method_name):
+            """Return a tuple (has_args, has_kwargs) for instance.method_name."""
+            method = getattr(instance, method_name)  # this is a bound method
+            sig = inspect.signature(method)  # get signature of the bound method
+            params = sig.parameters.values()
+            has_args = any(p.kind == p.VAR_POSITIONAL for p in params)
+            has_kwargs = any(p.kind == p.VAR_KEYWORD for p in params)
+            return (has_args, has_kwargs)
+
+
         step_infos = {}
         if self.record_episode:
             assert list(self.managers.keys())[-1] == "record_manager", "Record Manager should have lowest priority"
         for manager in self.managers.values():
             # GUARD AGAINST OTHER MANAGERS WHO DONT TAKE ANYTHING FOR after_step
-            new_step_info = manager.after_step(*args, **kwargs)
+            if method_accepts_args_kwargs(manager, "after_step"):
+                new_step_info = manager.after_step(*args, **kwargs)
+            else:
+                new_step_info = manager.after_step()
             step_infos = concat_step_infos([step_infos, new_step_info])
         self.interface.after_step()
 
