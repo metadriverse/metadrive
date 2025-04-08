@@ -88,7 +88,10 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
             ))
         return ret
 
+
 import copy
+
+
 class WayPointPolicy(ReplayEgoCarPolicy):
     """
     This policy will have the trajectory data being overwritten on the fly.
@@ -123,14 +126,14 @@ class WayPointPolicy(ReplayEgoCarPolicy):
         if kwargs["actions"] is not None:
             if kwargs["actions"]["default_agent"] is not None:
                 for i, action in enumerate(kwargs["actions"]["default_agent"]):
-                    if index + i  >= len(self.online_traj_info):
+                    if index + i >= len(self.online_traj_info):
                         continue
                     else:
-                        self.online_traj_info[index+i]["angular_velocity"] = action["angular_velocity"]
-                        self.online_traj_info[index+i]["heading"] = action["heading_theta"]
-                        self.online_traj_info[index+i]["heading_theta"] = action["heading_theta"]
-                        self.online_traj_info[index+i]["position"] = action["position"]
-                        self.online_traj_info[index+i]["velocity"] = action["velocity"]
+                        self.online_traj_info[index + i]["angular_velocity"] = action["angular_velocity"]
+                        self.online_traj_info[index + i]["heading"] = action["heading_theta"]
+                        self.online_traj_info[index + i]["heading_theta"] = action["heading_theta"]
+                        self.online_traj_info[index + i]["position"] = action["position"]
+                        self.online_traj_info[index + i]["velocity"] = action["velocity"]
         info = self.online_traj_info[index]
 
         # Before step
@@ -148,7 +151,6 @@ class WayPointPolicy(ReplayEgoCarPolicy):
             if hasattr(self.control_object, "set_steering"):
                 self.control_object.set_steering(float(info["steering"].item()))
 
-
         self.control_object.set_position(info["position"])
         self.control_object.set_velocity(info["velocity"], in_local_frame=self._velocity_local_frame)
         self.control_object.set_heading_theta(info["heading"])
@@ -163,6 +165,3 @@ class WayPointPolicy(ReplayEgoCarPolicy):
             self.control_object.set_static(True)
 
         return None  # Return None action so the base vehicle will not overwrite the steering & throttle
-
-
-
