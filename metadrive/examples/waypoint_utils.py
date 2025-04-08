@@ -1,18 +1,20 @@
 import numpy as np
+
+
 def interpolate(waypoints, original_frequency, target_frequency):
     """
     Interpolates the given waypoints(in world coordinate) to match the target frequency.
     """
     final_waypoints = []
     start = np.array([0, 0])
-    num_points = target_frequency // original_frequency + 1 #(10/2 =5) How many points to prepent to waypoints[i]
+    num_points = target_frequency // original_frequency + 1  #(10/2 =5) How many points to prepent to waypoints[i]
     for i in range(len(waypoints)):
         # uniformally sample points between the two waypoints
         sampled_points = np.linspace(start, waypoints[i], num_points)
-        final_waypoints.extend(sampled_points[1:]) # skip the first point to avoid duplication 
+        final_waypoints.extend(sampled_points[1:])  # skip the first point to avoid duplication
         start = waypoints[i]
     return np.array(final_waypoints)
-         
+
 
 def interpolate_headings(waypoints):
     """
@@ -21,11 +23,12 @@ def interpolate_headings(waypoints):
     """
     # Calculate the headings based on the waypoints
     headings = np.arctan2(np.diff(waypoints[:, 1]), np.diff(waypoints[:, 0]))
-    
+
     # Append the last heading to match the length of waypoints
     headings = np.append(headings, headings[-1])
-    
+
     return headings
+
 
 def interpolate_angular_velocities(headings, time_interval):
     """
@@ -34,11 +37,12 @@ def interpolate_angular_velocities(headings, time_interval):
     """
     # Calculate the angular velocities
     angular_velocities = np.diff(headings) / time_interval
-    
+
     # Append the last angular velocity to match the length of headings
     angular_velocities = np.append(angular_velocities, angular_velocities[-1])
-    
+
     return angular_velocities
+
 
 def interpolate_velocities(waypoints, dt):
     """
@@ -50,7 +54,10 @@ def interpolate_velocities(waypoints, dt):
     velocitaies = np.append(velocitaies, velocitaies[-1].reshape(1, -1), axis=0)
     return velocitaies
 
+
 from scipy.interpolate import CubicSpline
+
+
 def generate_smooth_spline(waypoints, num_points=100):
     """
     Generate smooth splines through the given waypoints.
@@ -73,5 +80,3 @@ def generate_smooth_spline(waypoints, num_points=100):
     y_spline = cs_y(t)
 
     return x_spline, y_spline
-
-

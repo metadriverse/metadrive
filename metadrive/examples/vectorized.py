@@ -12,18 +12,18 @@ from metadrive.obs.image_obs import ImageObservation
 from metadrive.obs.state_obs import StateObservation
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
 
+
 class MyStateObservation(BaseObservation):
     def __init__(self, config):
         super(MyStateObservation, self).__init__(config)
-        
 
     @property
     def observation_space(self):
         # Define the observation space for the state observation
-        dict={
-            "world_position": gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
-            "world_heading": gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
-            "world_speed": gym.spaces.Box(low=-np.inf, high=np.inf, shape=(1,), dtype=np.float32)
+        dict = {
+            "world_position": gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2, ), dtype=np.float32),
+            "world_heading": gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2, ), dtype=np.float32),
+            "world_speed": gym.spaces.Box(low=-np.inf, high=np.inf, shape=(1, ), dtype=np.float32)
         }
         return gym.spaces.Dict(dict)
 
@@ -39,6 +39,7 @@ class MyStateObservation(BaseObservation):
             world_speed=world_speed.astype(np.float32)
         )
 
+
 class SOMObseravation(BaseObservation):
     def __init__(self, config):
         super(SOMObseravation, self).__init__(config)
@@ -46,30 +47,33 @@ class SOMObseravation(BaseObservation):
         self.depth = ImageObservation(config, "depth", config["norm_pixel"])
         self.semantic = ImageObservation(config, "semantic", config["norm_pixel"])
         self.instance = ImageObservation(config, "instance", config["norm_pixel"])
-        self.state = MyStateObservation(config)    #StateObservation(config)
+        self.state = MyStateObservation(config)  #StateObservation(config)
 
     @property
     def observation_space(self):
-        os={o: getattr(self, o).observation_space for o in ["rgb", "state", "depth", "semantic", "instance"]}
+        os = {o: getattr(self, o).observation_space for o in ["rgb", "state", "depth", "semantic", "instance"]}
         return gym.spaces.Dict(os)
 
     def observe(self, vehicle):
-        os={o: getattr(self, o).observe(
-            new_parent_node=vehicle.origin) for o in ["rgb", "depth", "semantic", "instance"]}
+        os = {
+            o: getattr(self, o).observe(new_parent_node=vehicle.origin)
+            for o in ["rgb", "depth", "semantic", "instance"]
+        }
         os["state"] = self.state.observe(vehicle)
         return os
+
 
 def visualize(obs, env_id):
     # visualize image observation
     o_1 = obs["depth"][env_id][..., -1]
-    o_1 = np.concatenate([o_1, o_1, o_1], axis=-1) # align channel
+    o_1 = np.concatenate([o_1, o_1, o_1], axis=-1)  # align channel
     o_2 = obs["rgb"][env_id][..., -1]
     o_3 = obs["semantic"][env_id][..., -1]
     o_4 = obs["instance"][env_id][..., -1]
     #print(o_1.shape, o_2.shape, o_3.shape, o_4.shape)
     #exit()
     o = cv2.hconcat([o_1, o_2, o_3, o_4])
-    o = (o*255).astype(np.uint8)
+    o = (o * 255).astype(np.uint8)
     cv2.imshow(f"obs_{env_id}", o)
     cv2.waitKey(1)
 
@@ -77,7 +81,7 @@ def visualize(obs, env_id):
 import cv2
 
 if __name__ == "__main__":
- 
+
     asset_path = AssetLoader.asset_path
     cfg = {
         "agent_policy": ReplayEgoCarPolicy,
@@ -105,10 +109,6 @@ if __name__ == "__main__":
             obs, rewards, dones, infos = env.step(actions)
             #for i in range(env.num_envs):
             #    visualize(obs, i)
-            
+
             print(obs["state"])
             env.render(mode="top_down")
-
-   
-
-   

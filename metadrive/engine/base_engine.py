@@ -21,7 +21,6 @@ logger = get_logger()
 import inspect
 
 
-
 def generate_distinct_rgb_values():
     # Try to avoid (0,0,0) and (255,255,255) to avoid confusion with the background and other objects.
     r = np.linspace(16, 256 - 16, 16).astype(int)
@@ -466,7 +465,6 @@ class BaseEngine(EngineCore, Randomizable):
         Update states after finishing movement
         :return: if this episode is done
         """
-
         def method_accepts_args_kwargs(instance, method_name):
             """Return a tuple (has_args, has_kwargs) for instance.method_name."""
             method = getattr(instance, method_name)  # this is a bound method
@@ -475,7 +473,6 @@ class BaseEngine(EngineCore, Randomizable):
             has_args = any(p.kind == p.VAR_POSITIONAL for p in params)
             has_kwargs = any(p.kind == p.VAR_KEYWORD for p in params)
             return (has_args, has_kwargs)
-
 
         step_infos = {}
         if self.record_episode:
