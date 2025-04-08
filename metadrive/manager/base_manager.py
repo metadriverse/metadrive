@@ -305,7 +305,11 @@ class BaseAgentManager(BaseManager):
         return step_infos
 
     def after_step(self, *args, **kwargs):
-        step_infos = self.try_actuate_agent({}, stage="after_step")
+        if "actions" in kwargs.keys():
+            actions = kwargs["actions"]
+            step_infos = self.try_actuate_agent(dict(actions=actions), stage="after_step")
+        else:
+            step_infos = self.try_actuate_agent({}, stage="after_step")
         step_infos.update(self.for_each_active_agents(lambda v: v.after_step()))
         return step_infos
 
