@@ -53,7 +53,8 @@ if __name__ == "__main__":
         "map_region_size": 1024,  # use a large number if your map is toooooo big
         "sequential_seed": True,
         "reactive_traffic": True if args.reactive_traffic else False,
-        "use_render": True if not args.top_down else False,
+        # "use_render": True if not args.top_down else False,
+        "use_render": False,
         "data_directory": AssetLoader.file_path(asset_path, "waymo" if use_waymo else "nuscenes", unix_style=False),
         "num_scenarios": 3 if use_waymo else 10
     }
@@ -75,15 +76,15 @@ if __name__ == "__main__":
         for i in range(1, 100000):
             # action = None will not modify the WaypointPolicy.online_traj_info
             # action in the following format will overwrite the trajectory.
-            """action = [
+            action = [
                 dict(
                     angular_velocity = 0.,
                     heading_theta = 0.,
                     position = [0., 0.],
                     velocity = [0., 0.]
                 ) for _ in range(100)
-            ]"""
-            action = None
+            ]
+            # action = None
             o, r, tm, tc, info = env.step(actions=action)
             env.render(
                 mode="top_down" if args.top_down else None,

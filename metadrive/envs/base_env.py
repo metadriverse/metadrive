@@ -461,9 +461,7 @@ class BaseEnv(gym.Env):
 
     def _step_simulator(self, actions):
         # prepare for stepping the simulation
-        scene_manager_before_step_infos = self.engine.before_step(
-            actions
-        )  #actions have 0 impact because we don't have a policy per se. It will be much different if we had.
+        scene_manager_before_step_infos = self.engine.before_step(actions)
         # step all entities and the simulator
         self.engine.step(self.config["decision_repeat"])
         # update states, if restore from episode data, position and heading will be force set in update_state() function
