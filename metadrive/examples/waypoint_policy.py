@@ -77,12 +77,7 @@ if __name__ == "__main__":
             # action = None will not modify the WaypointPolicy.online_traj_info
             # action in the following format will overwrite the trajectory.
             action = [
-                dict(
-                    angular_velocity = 0.,
-                    heading_theta = 0.,
-                    position = [0., 0.],
-                    velocity = [0., 0.]
-                ) for _ in range(100)
+                dict(angular_velocity=0., heading_theta=0., position=[0., 0.], velocity=[0., 0.]) for _ in range(100)
             ]
             # action = None
             o, r, tm, tc, info = env.step(actions=action)
