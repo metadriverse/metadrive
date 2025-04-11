@@ -13,8 +13,6 @@ from metadrive.policy.replay_policy import ReplayEgoCarPolicy, WayPointPolicy
 import numpy as np
 from metadrive.envs.scenario_env import ScenarioEnv
 
-
-
 RENDER_MESSAGE = {
     "Quit": "ESC",
     "Switch perspective": "Q or B",
@@ -57,18 +55,14 @@ if __name__ == "__main__":
     try:
         env = ScenarioEnv(cfg)
         o, _ = env.reset()
-        control_duration = 10 # 1 steps, equivalent to 2 seconds in wall time
+        control_duration = 10  # 1 steps, equivalent to 2 seconds in wall time
         for i in range(1, 100000):
             # action = None will not modify the WaypointPolicy.online_traj_info
             # action in the following format will overwrite the trajectory.
             # Note that all these spatial information use ego coordinate, at 10HZ frequency.
             # velocity (10, 1) m/s, go front and go left
             # You can write as much waypoints as you wnat, as long as it's a np.array of shape (N,2)
-            action = dict(
-                position=np.array([
-                    [i,0.01*i] for i in range(1, 11)
-                ]),
-            )
+            action = dict(position=np.array([[i, 0.01 * i] for i in range(1, 11)]), )
             o, r, tm, tc, info = env.step(actions=action)
             env.render(
                 mode="top_down" if args.top_down else None,
