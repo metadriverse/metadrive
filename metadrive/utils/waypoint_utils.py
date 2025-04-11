@@ -49,4 +49,3 @@ def interpolate_velocities(waypoints, dt):
     # Append the last velocity to match the length of waypoints
     velocitaies = np.append(velocitaies, velocitaies[-1].reshape(1, -1), axis=0)
     return velocitaies
-
