@@ -11,8 +11,16 @@ from metadrive.constants import HELP_MESSAGE
 from metadrive.engine.asset_loader import AssetLoader
 from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy, WayPointPolicy
-
+import numpy as np
 from metadrive.envs.scenario_env import ScenarioEnv
+
+
+
+def ego2world9(env, waypoints):
+    """
+    env will be the scenario information,
+    """
+
 
 
 class WaypointEnv(ScenarioEnv):
@@ -49,14 +57,14 @@ if __name__ == "__main__":
     print(HELP_MESSAGE)
 
     cfg = {
-        "agent_policy": ReplayEgoCarPolicy,
+        "agent_policy": WayPointPolicy,
         "map_region_size": 1024,  # use a large number if your map is toooooo big
         "sequential_seed": True,
         "reactive_traffic": True if args.reactive_traffic else False,
         # "use_render": True if not args.top_down else False,
-        "use_render": False,
+        "use_render": True,
         "data_directory": AssetLoader.file_path(asset_path, "waymo" if use_waymo else "nuscenes", unix_style=False),
-        "num_scenarios": 3 if use_waymo else 10
+        "num_scenarios": 3 if use_waymo else 10,
     }
     if args.add_sensor:
         additional_cfg = {
@@ -73,13 +81,19 @@ if __name__ == "__main__":
         env = ScenarioEnv(cfg)
         o, _ = env.reset()
 
+
+        control_duration = 10 # 1 steps, equivalent to 2 seconds in wall time
+
         for i in range(1, 100000):
             # action = None will not modify the WaypointPolicy.online_traj_info
             # action in the following format will overwrite the trajectory.
-            action = [
-                dict(angular_velocity=0., heading_theta=0., position=[0., 0.], velocity=[0., 0.]) for _ in range(100)
-            ]
-            # action = None
+            # Note that all these spatial information use ego coordinate
+            # velocity (10, 1) m/s, go front and go left
+            action = dict(
+                position=np.array([
+                    [i,0.01*i] for i in range(1, 11)
+                ]),
+            )
             o, r, tm, tc, info = env.step(actions=action)
             env.render(
                 mode="top_down" if args.top_down else None,

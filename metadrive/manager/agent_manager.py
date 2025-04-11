@@ -167,6 +167,11 @@ class VehicleAgentManager(BaseAgentManager):
     def set_allow_respawn(self, flag: bool):
         self._allow_respawn = flag
 
+    def after_step(self, *args, **kwargs):
+        step_infos = self.try_actuate_agent(kwargs, stage="after_step")
+        step_infos.update(self.for_each_active_agents(lambda v: v.after_step()))
+        return step_infos
+
     def try_actuate_agent(self, step_infos, stage="before_step"):
         """
         Some policies should make decision before physics world actuation, in particular, those need decision-making
@@ -184,9 +189,7 @@ class VehicleAgentManager(BaseAgentManager):
             policy = self.get_policy(self._agent_to_object[agent_id])
             is_replay = isinstance(policy, ReplayTrafficParticipantPolicy)
             assert policy is not None, "No policy is set for agent {}".format(agent_id)
-
             is_waypoint = isinstance(policy, WayPointPolicy)
-
             if is_replay:
                 if is_waypoint:
                     #assert actions is not None, "No waypoints is set for agent {}".format(agent_id)

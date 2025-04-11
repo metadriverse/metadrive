@@ -1,6 +1,4 @@
 import numpy as np
-
-
 def interpolate(waypoints, original_frequency, target_frequency):
     """
     Interpolates the given waypoints(in world coordinate) to match the target frequency.
@@ -23,10 +21,8 @@ def interpolate_headings(waypoints):
     """
     # Calculate the headings based on the waypoints
     headings = np.arctan2(np.diff(waypoints[:, 1]), np.diff(waypoints[:, 0]))
-
     # Append the last heading to match the length of waypoints
     headings = np.append(headings, headings[-1])
-
     return headings
 
 
@@ -37,10 +33,8 @@ def interpolate_angular_velocities(headings, time_interval):
     """
     # Calculate the angular velocities
     angular_velocities = np.diff(headings) / time_interval
-
     # Append the last angular velocity to match the length of headings
     angular_velocities = np.append(angular_velocities, angular_velocities[-1])
-
     return angular_velocities
 
 

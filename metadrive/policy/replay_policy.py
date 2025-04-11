@@ -90,6 +90,8 @@ class ReplayEgoCarPolicy(ReplayTrafficParticipantPolicy):
 
 
 import copy
+import numpy as np
+from metadrive.utils.waypoint_utils import interpolate_velocities, interpolate_angular_velocities, interpolate_headings
 
 
 class WayPointPolicy(ReplayEgoCarPolicy):
@@ -123,17 +125,31 @@ class WayPointPolicy(ReplayEgoCarPolicy):
         """
         # start overwriting the traj_info
         # actions will be a list of dicts also
-        if kwargs["actions"] is not None:
-            if kwargs["actions"]["default_agent"] is not None:
-                for i, action in enumerate(kwargs["actions"]["default_agent"]):
-                    if index + i >= len(self.online_traj_info):
-                        continue
-                    else:
-                        self.online_traj_info[index + i]["angular_velocity"] = action["angular_velocity"]
-                        self.online_traj_info[index + i]["heading"] = action["heading_theta"]
-                        self.online_traj_info[index + i]["heading_theta"] = action["heading_theta"]
-                        self.online_traj_info[index + i]["position"] = action["position"]
-                        self.online_traj_info[index + i]["velocity"] = action["velocity"]
+        if kwargs["actions"] is not None and kwargs["actions"]["default_agent"] is not None:
+            # User input is in ego's coordinate, convert it to world coordinate
+            ego_positions = kwargs["actions"]["default_agent"]["position"].tolist()
+            world_positions = np.array([self.control_object.convert_to_world_coordinates(point, self.control_object.position) for point in ego_positions])
+            # world headings, velocities, and angular_velocities from world waypoints
+            headings = np.array(interpolate_headings(world_positions))
+            angular_velocities = np.array(interpolate_angular_velocities(headings, 0.1))
+            velocities = np.array(interpolate_velocities(world_positions, 0.1))
+            duration = len(kwargs["actions"]["default_agent"]["position"])
+            for i in range(duration):
+                # Overwrite the online buffer. It will not be longer than the original trajectory.
+                if index + i >= len(self.online_traj_info):
+                    continue
+                self.online_traj_info[index + i]["angular_velocity"]   = angular_velocities[i]
+                self.online_traj_info[index + i]["heading"]            = headings[i]
+                self.online_traj_info[index + i]["heading_theta"]      = headings[i]
+                self.online_traj_info[index + i]["position"]           = world_positions[i]
+                self.online_traj_info[index + i]["velocity"]           = velocities[i]
+            # For the rewrite the tailing information
+            for i in range(index + duration, len(self.online_traj_info)):
+                self.online_traj_info[i]["angular_velocity"]   = angular_velocities[-1]
+                self.online_traj_info[i]["heading"]            = headings[-1]
+                self.online_traj_info[i]["heading_theta"]      = headings[-1]
+                self.online_traj_info[i]["position"]           = world_positions[-1]
+                self.online_traj_info[i]["velocity"]           = velocities[-1]
         info = self.online_traj_info[index]
 
         # Before step
