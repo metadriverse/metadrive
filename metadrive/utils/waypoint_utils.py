@@ -48,29 +48,3 @@ def interpolate_velocities(waypoints, dt):
     velocitaies = np.append(velocitaies, velocitaies[-1].reshape(1, -1), axis=0)
     return velocitaies
 
-
-from scipy.interpolate import CubicSpline
-
-
-def generate_smooth_spline(waypoints, num_points=100):
-    """
-    Generate smooth splines through the given waypoints.
-
-    :param waypoints: List of (x, y) tuples representing waypoints.
-    :param num_points: Number of points to sample along the spline.
-    :return: x and y coordinates of the sampled points.
-    """
-    waypoints = np.array(waypoints)
-    x = waypoints[:, 0]
-    y = waypoints[:, 1]
-
-    # Fit cubic splines
-    cs_x = CubicSpline(np.arange(len(x)), x, bc_type='natural')
-    cs_y = CubicSpline(np.arange(len(y)), y, bc_type='natural')
-
-    # Generate new points
-    t = np.linspace(0, len(waypoints) - 1, num_points)
-    x_spline = cs_x(t)
-    y_spline = cs_y(t)
-
-    return x_spline, y_spline
