@@ -10,7 +10,6 @@ from metadrive.policy.replay_policy import WayPointPolicy
 import numpy as np
 from metadrive.envs.scenario_env import ScenarioEnv
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--reactive_traffic", action="store_true")
@@ -28,7 +27,7 @@ if __name__ == "__main__":
         "map_region_size": 1024,  # use a large number if your map is toooooo big
         "sequential_seed": True,
         "reactive_traffic": True if args.reactive_traffic else False,
-        "use_render": False, #True if not args.top_down else False,
+        "use_render": False,  #True if not args.top_down else False,
         "data_directory": AssetLoader.file_path(asset_path, "waymo" if use_waymo else "nuscenes", unix_style=False),
         "num_scenarios": 3 if use_waymo else 10,
     }
@@ -53,10 +52,8 @@ if __name__ == "__main__":
     ego_track = scenario["tracks"][ego_id]
     ego_traj = ego_track["state"]["position"][..., :2]
     ego_traj_world = ego_traj.tolist()
-    ego_traj_ego = np.array([env.agent.convert_to_local_coordinates(
-        point, env.agent.position
-    ) for point in ego_traj])
-    ADEs, FDEs, flag  = [], [], True
+    ego_traj_ego = np.array([env.agent.convert_to_local_coordinates(point, env.agent.position) for point in ego_traj])
+    ADEs, FDEs, flag = [], [], True
     for i in range(1, 100000):
         if flag:
             action = dict(position=ego_traj_ego)
@@ -79,15 +76,15 @@ if __name__ == "__main__":
                 break
             else:
                 seen_seeds.add(env.engine.data_manager.current_scenario["id"])
-            trajectory, flag  = [], True
+            trajectory, flag = [], True
             scenario = env.engine.data_manager.current_scenario
             ego_id = scenario["metadata"]["sdc_id"]
             ego_track = scenario["tracks"][ego_id]
             ego_traj = ego_track["state"]["position"][..., :2]
             ego_traj_world = ego_traj.tolist()
-            ego_traj_ego = np.array([env.agent.convert_to_local_coordinates(
-                point, env.agent.position
-            ) for point in ego_traj])
+            ego_traj_ego = np.array(
+                [env.agent.convert_to_local_coordinates(point, env.agent.position) for point in ego_traj]
+            )
     mean_ade = np.mean(ADEs)
     mean_fde = np.mean(FDEs)
     assert mean_ade < 1 and mean_fde < 2

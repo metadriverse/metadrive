@@ -1,4 +1,6 @@
 import numpy as np
+
+
 def interpolate(waypoints, original_frequency, target_frequency):
     """
     Interpolates the given waypoints(in world coordinate) to match the target frequency.
