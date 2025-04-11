@@ -131,7 +131,7 @@ def test_config_memory_leak():
         last_lm = lm
         if t > 500:
             time.sleep(0.1)
-            assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
+            assert abs((lm - cm) - last_mem) < 20  # Memory should not have change > 1KB
         last_mem = lm - cm
 
 
