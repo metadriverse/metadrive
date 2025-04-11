@@ -9,32 +9,10 @@ from metadrive.component.sensors.rgb_camera import RGBCamera
 from metadrive.component.sensors.semantic_camera import SemanticCamera
 from metadrive.constants import HELP_MESSAGE
 from metadrive.engine.asset_loader import AssetLoader
-from metadrive.envs.scenario_env import ScenarioEnv
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy, WayPointPolicy
 import numpy as np
 from metadrive.envs.scenario_env import ScenarioEnv
 
-
-
-def ego2world9(env, waypoints):
-    """
-    env will be the scenario information,
-    """
-
-
-
-class WaypointEnv(ScenarioEnv):
-    def __init__(self, config=None):
-        super(WaypointEnv, self).__init__(config)
-
-    def step(self, actions):
-        """
-        For this environment the actions will be waypoints
-        """
-        position = actions["position"]
-        heading = actions["heading"]
-        self.agent.set_position(position)
-        self.agent.set_heading(heading)
 
 
 RENDER_MESSAGE = {
@@ -61,8 +39,7 @@ if __name__ == "__main__":
         "map_region_size": 1024,  # use a large number if your map is toooooo big
         "sequential_seed": True,
         "reactive_traffic": True if args.reactive_traffic else False,
-        # "use_render": True if not args.top_down else False,
-        "use_render": True,
+        "use_render": True if not args.top_down else False,
         "data_directory": AssetLoader.file_path(asset_path, "waymo" if use_waymo else "nuscenes", unix_style=False),
         "num_scenarios": 3 if use_waymo else 10,
     }
@@ -80,15 +57,13 @@ if __name__ == "__main__":
     try:
         env = ScenarioEnv(cfg)
         o, _ = env.reset()
-
-
         control_duration = 10 # 1 steps, equivalent to 2 seconds in wall time
-
         for i in range(1, 100000):
             # action = None will not modify the WaypointPolicy.online_traj_info
             # action in the following format will overwrite the trajectory.
             # Note that all these spatial information use ego coordinate, at 10HZ frequency.
             # velocity (10, 1) m/s, go front and go left
+            # You can write as much waypoints as you wnat, as long as it's a np.array of shape (N,2)
             action = dict(
                 position=np.array([
                     [i,0.01*i] for i in range(1, 11)
