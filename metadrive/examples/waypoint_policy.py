@@ -87,7 +87,7 @@ if __name__ == "__main__":
         for i in range(1, 100000):
             # action = None will not modify the WaypointPolicy.online_traj_info
             # action in the following format will overwrite the trajectory.
-            # Note that all these spatial information use ego coordinate
+            # Note that all these spatial information use ego coordinate, at 10HZ frequency.
             # velocity (10, 1) m/s, go front and go left
             action = dict(
                 position=np.array([
