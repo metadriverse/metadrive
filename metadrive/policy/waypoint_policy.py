@@ -57,8 +57,11 @@ class WaypointPolicy(BasePolicy):
 
             world_positions = self._convert_to_world_coordinates(waypoint_positions)
             headings = np.array(waypoint_utils.interpolate_headings(world_positions))
+
+            # FIXME: Should read dt from config.
             angular_velocities = np.array(waypoint_utils.interpolate_angular_velocities(headings, 0.1))
             velocities = np.array(waypoint_utils.interpolate_velocities(world_positions, 0.1))
+
             duration = len(waypoint_positions)
             assert duration == self.horizon, "The length of the waypoint positions should be equal to the horizon: {} vs {}".format(
                 duration, self.horizon

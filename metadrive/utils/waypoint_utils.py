@@ -18,6 +18,8 @@ def interpolate(waypoints, original_frequency, target_frequency):
 
 def interpolate_headings(waypoints):
     """
+    FIXME: Should rename from interpolate to interpret?
+
     Interpolates the headings of the waypoints.
     return the yaw angle(in world coordinate), with positive value turning left and negative value turning right
     """
