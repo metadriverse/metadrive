@@ -4,7 +4,7 @@ from metadrive.manager.base_manager import BaseAgentManager
 from metadrive.policy.AI_protect_policy import AIProtectPolicy
 from metadrive.policy.idm_policy import TrajectoryIDMPolicy
 from metadrive.policy.manual_control_policy import ManualControlPolicy, TakeoverPolicy, TakeoverPolicyWithoutBrake
-from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy, WayPointPolicy
+from metadrive.policy.replay_policy import ReplayTrafficParticipantPolicy
 
 logger = get_logger()
 
@@ -167,11 +167,6 @@ class VehicleAgentManager(BaseAgentManager):
     def set_allow_respawn(self, flag: bool):
         self._allow_respawn = flag
 
-    def after_step(self, *args, **kwargs):
-        step_infos = self.try_actuate_agent(kwargs, stage="after_step")
-        step_infos.update(self.for_each_active_agents(lambda v: v.after_step()))
-        return step_infos
-
     def try_actuate_agent(self, step_infos, stage="before_step"):
         """
         Some policies should make decision before physics world actuation, in particular, those need decision-making
@@ -179,39 +174,21 @@ class VehicleAgentManager(BaseAgentManager):
         exempt the requirement for rolling out the dynamic system to get it.
         """
         assert stage == "before_step" or stage == "after_step"
-
-        if "actions" in step_infos.keys():
-            actions = step_infos["actions"]
-        else:
-            actions = None
-
         for agent_id in self.active_agents.keys():
             policy = self.get_policy(self._agent_to_object[agent_id])
             is_replay = isinstance(policy, ReplayTrafficParticipantPolicy)
             assert policy is not None, "No policy is set for agent {}".format(agent_id)
-            is_waypoint = isinstance(policy, WayPointPolicy)
             if is_replay:
-                if is_waypoint:
-                    #assert actions is not None, "No waypoints is set for agent {}".format(agent_id)
-                    if stage == "after_step":
-                        policy.act(agent_id=agent_id, actions=actions)
-                        step_infos[agent_id] = policy.get_action_info()
-                    else:
-                        step_infos[agent_id] = self.get_agent(agent_id).before_step([0, 0])
+                if stage == "after_step":
+                    policy.act(agent_id)
+                    step_infos[agent_id] = policy.get_action_info()
                 else:
-                    if stage == "after_step":
-                        policy.act(agent_id)
-                        step_infos[agent_id] = policy.get_action_info()
-                    else:
-                        step_infos[agent_id] = self.get_agent(agent_id).before_step([0, 0])
+                    step_infos[agent_id] = self.get_agent(agent_id).before_step([0, 0])
             else:
                 if stage == "before_step":
                     action = policy.act(agent_id)
                     step_infos[agent_id] = policy.get_action_info()
                     step_infos[agent_id].update(self.get_agent(agent_id).before_step(action))
-
-        if "actions" in step_infos.keys():
-            step_infos.pop("actions")
 
         return step_infos
 

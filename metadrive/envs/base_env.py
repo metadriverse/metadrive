@@ -465,8 +465,7 @@ class BaseEnv(gym.Env):
         # step all entities and the simulator
         self.engine.step(self.config["decision_repeat"])
         # update states, if restore from episode data, position and heading will be force set in update_state() function
-        # TODO take care of corner cases
-        scene_manager_after_step_infos = self.engine.after_step(actions=actions)
+        scene_manager_after_step_infos = self.engine.after_step()
 
         # Note that we use shallow update for info dict in this function! This will accelerate system.
         return merge_dicts(
