@@ -10,5 +10,7 @@ They are:
 
 * ReplayEgoCarPolicy(BasePolicy): Make the ego car replay the logged trajectory.
 
+* WaypointPolicy(BasePolicy): A policy that follows the waypoint.
+
 Change the `env_config["agent_policy"]` to `IDMPolicy|WaymoIDMPolicy|ReplayEgoCarPolicy` to let the ego car follow different policies.
 

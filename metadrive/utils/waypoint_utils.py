@@ -7,7 +7,7 @@ def interpolate(waypoints, original_frequency, target_frequency):
     """
     final_waypoints = []
     start = np.array([0, 0])
-    num_points = target_frequency // original_frequency + 1  #(10/2 =5) How many points to prepent to waypoints[i]
+    num_points = target_frequency // original_frequency + 1  # (10/2 =5) How many points to prepent to waypoints[i]
     for i in range(len(waypoints)):
         # uniformally sample points between the two waypoints
         sampled_points = np.linspace(start, waypoints[i], num_points)
@@ -49,3 +49,20 @@ def interpolate_velocities(waypoints, dt):
     # Append the last velocity to match the length of waypoints
     velocitaies = np.append(velocitaies, velocitaies[-1].reshape(1, -1), axis=0)
     return velocitaies
+
+
+def rotate(x, y, angle, z=None, assert_shape=True):
+    """
+    Rotate the coordinates (x, y) by the given angle in radians.
+    """
+    if assert_shape:
+        assert angle.shape == x.shape == y.shape, (angle.shape, x.shape, y.shape)
+        if z is not None:
+            assert x.shape == z.shape
+    other_x_trans = np.cos(angle) * x - np.sin(angle) * y
+    other_y_trans = np.cos(angle) * y + np.sin(angle) * x
+    if z is None:
+        output_coords = np.stack((other_x_trans, other_y_trans), axis=-1)
+    else:
+        output_coords = np.stack((other_x_trans, other_y_trans, z), axis=-1)
+    return output_coords
