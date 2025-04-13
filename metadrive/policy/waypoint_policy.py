@@ -60,7 +60,9 @@ class WaypointPolicy(BasePolicy):
             angular_velocities = np.array(waypoint_utils.interpolate_angular_velocities(headings, 0.1))
             velocities = np.array(waypoint_utils.interpolate_velocities(world_positions, 0.1))
             duration = len(waypoint_positions)
-            assert duration == self.horizon, (duration, self.horizon)
+            assert duration == self.horizon, "The length of the waypoint positions should be equal to the horizon: {} vs {}".format(
+                duration, self.horizon
+            )
 
             self.cache = dict(
                 position=world_positions,
