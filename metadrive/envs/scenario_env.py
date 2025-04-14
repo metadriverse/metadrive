@@ -15,6 +15,7 @@ from metadrive.manager.scenario_light_manager import ScenarioLightManager
 from metadrive.manager.scenario_map_manager import ScenarioMapManager
 from metadrive.manager.scenario_traffic_manager import ScenarioTrafficManager
 from metadrive.policy.replay_policy import ReplayEgoCarPolicy
+from metadrive.policy.waypoint_policy import WaypointPolicy
 from metadrive.utils import get_np_random
 from metadrive.utils.math import wrap_to_pi
 
@@ -63,8 +64,8 @@ SCENARIO_ENV_CONFIG = dict(
     ),
     # If set_static=True, then the agent will not "fall from the sky". This will be helpful if you want to
     # capture per-frame data for the agent (for example for collecting static sensor data).
-    # However, the physics engine will not update the position of the agent. So in the visualization, the image will be
-    # very chunky as the agent will not suddenly move to the next position for each step.
+    # However, the physics simulation of the agent will be disable too. So in the visualization, the image will be
+    # very chunky as the agent will suddenly move to the next position for each step.
     # Set to False for better visualization.
     set_static=False,
 
@@ -100,6 +101,16 @@ SCENARIO_ENV_CONFIG = dict(
     allowed_more_steps=None,  # horizon, None=infinite
     top_down_show_real_size=False,
     use_bounding_box=False,  # Set True to use a cube in visualization to represent every dynamic objects.
+)
+
+SCENARIO_WAYPOINT_ENV_CONFIG = dict(
+    # How many waypoints will be used at each environmental step. Checkout ScenarioWaypointEnv for details.
+    waypoint_horizon=5,
+    agent_policy=WaypointPolicy,
+
+    # Must set this to True, otherwise the agent will drift away from the waypoint when doing
+    # "self.engine.step(self.config["decision_repeat"])" in "_step_simulator".
+    set_static=True,
 )
 
 
@@ -416,6 +427,40 @@ class ScenarioOnlineEnv(ScenarioEnv):
     def set_scenario(self, scenario_data):
         """Please call this function before env.reset()"""
         self.engine.data_manager.set_scenario(scenario_data)
+
+
+class ScenarioWaypointEnv(ScenarioEnv):
+    """
+    This environment use WaypointPolicy. Even though the environment still runs in 10 HZ, we allow the external
+    waypoint generator generates up to 5 waypoints at each step (controlled by config "waypoint_horizon").
+    Say at step t, we receive 5 waypoints. Then we will set the agent states for t+1, t+2, t+3, t+4, t+5 if at
+    t+1 ~ t+4 no additional waypoints are received. Here is the full timeline:
+
+    step t=0: env.reset(), initial positions/obs are sent out. This corresponds to the t=0 or t=10 in WOMD dataset
+    (TODO: we should allow control on the meaning of the t=0)
+    step t=1: env.step(), agent receives 5 waypoints, we will record the waypoint sequences. Set agent state for t=1,
+        and send out the obs for t=1.
+    step t=2: env.step(), it's possible to get action=None, which means the agent will use the cached waypoint t=2,
+        and set the agent state for t=2. The obs for t=2 will be sent out. If new waypoints are received, we will \
+        instead set agent state to the first new waypoint.
+    step t=3: ... continues the loop and receives action=None or new waypoints.
+    step t=4: ...
+    step t=5: ...
+    step t=6: if we only receive action at t=1, and t=2~t=5 are all None, then this step will force to receive
+        new waypoints. We will set the agent state to the first new waypoint.
+
+    Most of the functions are implemented in WaypointPolicy.
+    """
+    @classmethod
+    def default_config(cls):
+        config = super(ScenarioWaypointEnv, cls).default_config()
+        config.update(SCENARIO_WAYPOINT_ENV_CONFIG)
+        return config
+
+    def _post_process_config(self, config):
+        ret = super(ScenarioWaypointEnv, self)._post_process_config(config)
+        assert config["set_static"], "Waypoint policy requires set_static=True"
+        return ret
 
 
 if __name__ == "__main__":

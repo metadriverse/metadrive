@@ -66,9 +66,8 @@ class ReplayTrafficParticipantPolicy(BasePolicy):
 
         # If set_static, then the agent will not "fall from the sky".
         # However, the physics engine will not update the position of the agent.
-        # So in the visualization, the image will be very chunky as the agent will not suddenly move to the next
+        # So in the visualization, the image will be very chunky as the agent will suddenly move to the next
         # position for each step.
-
         if self.engine.global_config.get("set_static", False):
             self.control_object.set_static(True)
 
