@@ -107,6 +107,10 @@ SCENARIO_WAYPOINT_ENV_CONFIG = dict(
     # How many waypoints will be used at each environmental step. Checkout ScenarioWaypointEnv for details.
     waypoint_horizon=5,
     agent_policy=WaypointPolicy,
+
+    # Must set this to True, otherwise the agent will drift away from the waypoint when doing
+    # "self.engine.step(self.config["decision_repeat"])" in "_step_simulator".
+    set_static=True,
 )
 
 
@@ -452,6 +456,11 @@ class ScenarioWaypointEnv(ScenarioEnv):
         config = super(ScenarioWaypointEnv, cls).default_config()
         config.update(SCENARIO_WAYPOINT_ENV_CONFIG)
         return config
+
+    def _post_process_config(self, config):
+        ret = super(ScenarioWaypointEnv, self)._post_process_config(config)
+        assert config["set_static"], "Waypoint policy requires set_static=True"
+        return ret
 
 
 if __name__ == "__main__":

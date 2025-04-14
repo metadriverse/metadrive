@@ -100,7 +100,7 @@ def test_waypoint_policy(render=False):
 
     mean_ade = np.mean(ADEs)
     mean_fde = np.mean(FDEs)
-    assert mean_ade < 1 and mean_fde < 2
+    assert mean_ade < 1e-4 and mean_fde < 1e-4
 
     env.close()
 
