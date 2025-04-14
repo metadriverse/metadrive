@@ -56,11 +56,13 @@ class WaypointPolicy(BasePolicy):
             assert waypoint_positions.shape[1] == 2
 
             world_positions = self._convert_to_world_coordinates(waypoint_positions)
-            headings = np.array(waypoint_utils.interpolate_headings(world_positions))
+            headings = np.array(waypoint_utils.reconstruct_heading(world_positions))
 
-            # FIXME: Should read dt from config.
-            angular_velocities = np.array(waypoint_utils.interpolate_angular_velocities(headings, 0.1))
-            velocities = np.array(waypoint_utils.interpolate_velocities(world_positions, 0.1))
+            # dt should be 0.1s in default settings
+            dt = self.engine.global_config["physics_world_step_size"] * self.engine.global_config["decision_repeat"]
+
+            angular_velocities = np.array(waypoint_utils.reconstruct_angular_velocity(headings, dt))
+            velocities = np.array(waypoint_utils.reconstruct_velocity(world_positions, dt))
 
             duration = len(waypoint_positions)
             assert duration == self.horizon, "The length of the waypoint positions should be equal to the horizon: {} vs {}".format(
