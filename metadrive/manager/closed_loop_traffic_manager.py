@@ -19,9 +19,7 @@ class ClosedLoopTrafficManager(ScenarioTrafficManager):
         if self.episode_step < self.current_scenario_length:
             replay_done = False
             for scenario_id, track in self.current_traffic_data.items():
-                if scenario_id == self.sdc_scenario_id:
-                    continue
-                if scenario_id not in self._scenario_id_to_obj_id:
+                if scenario_id != self.sdc_scenario_id and scenario_id not in self._scenario_id_to_obj_id:
                     if track["type"] == MetaDriveType.VEHICLE:
                         self.spawn_vehicle(scenario_id, track)
                     elif track["type"] == MetaDriveType.CYCLIST:
@@ -33,18 +31,20 @@ class ClosedLoopTrafficManager(ScenarioTrafficManager):
                         self.spawn_static_object(cls, scenario_id, track)
                     else:
                         logger.info("Do not support {}".format(track["type"]))
-                elif self.has_policy(self._scenario_id_to_obj_id[scenario_id], ReplayTrafficParticipantPolicy):
+
+                elif self.has_policy(self._scenario_id_to_obj_id[scenario_id], ClosedLoopPolicy):
                     # static object will not be cleaned!
                     policy = self.get_policy(self._scenario_id_to_obj_id[scenario_id])
                     if policy.is_current_step_valid:
                         policy.act()
                     else:
                         self._obj_to_clean_this_frame.append(scenario_id)
+
         else:
             replay_done = True
             # clean replay vehicle
             for scenario_id, obj_id in self._scenario_id_to_obj_id.items():
-                if self.has_policy(obj_id, ReplayTrafficParticipantPolicy) and not self.is_static_object(obj_id):
+                if self.has_policy(obj_id, ClosedLoopPolicy) and not self.is_static_object(obj_id):
                     self._obj_to_clean_this_frame.append(scenario_id)
 
         for scenario_id in list(self._obj_to_clean_this_frame):
