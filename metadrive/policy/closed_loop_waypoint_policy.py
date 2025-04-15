@@ -9,11 +9,12 @@ class ClosedLoopPolicy(BasePolicy):
     """
     This policy will have the trajectory data being overwritten on the fly.
     """
-    def __init__(self, obj, seed):
-        super(ClosedLoopPolicy, self).__init__(control_object=obj, random_seed=seed)
+    def __init__(self, control_object, track, random_seed=None):
+        super(ClosedLoopPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.horizon = self.engine.global_config.get("waypoint_horizon", 10)
         self.cache = None
         self.cache_last_update = 0
+
 
     @classmethod
     def get_input_space(cls):
@@ -45,17 +46,34 @@ class ClosedLoopPolicy(BasePolicy):
         self.cache_last_update = 0
         super(ClosedLoopPolicy, self).reset()
 
-    def act(self, agent_id, waypoint_motion=None):
-        assert waypoint_motion is not None
+    def get_actions(self, scenario_id):
+        import pdb; pdb.set_trace()
+        tracks = self.engine.current_scenario["tracks"]
+        assert scenario_id in tracks
+        track = tracks[scenario_id]
+        assert track is not None
+        agent_motion = track["state"]
 
-        agent_motion = waypoint_motion[agent_id]
+        return agent_motion
+
+
+    # def act(self, agent_id, scenario_id):
+    def act(self, *args, **kwargs):
+        obj_id_to_scenario_id = self.engine.traffic_manager.get_obj_id_to_scenario_id()
+        agent_id = self.control_object.id
+        scenario_id = obj_id_to_scenario_id[agent_id]
+
+        import pdb; pdb.set_trace()
+
+        agent_motion = self.get_actions(scenario_id)
+        assert agent_motion is not None
 
         waypoint_positions = agent_motion["position"]
         waypoint_heading = agent_motion["heading"]
         waypoint_velocity = agent_motion["velocity"]
         waypoint_angular_velocity = agent_motion["angular_velocity"]
 
-        assert waypoint_positions is not None and waypoint_heading is not None and waypoint_velocity is not None and waypoint_angular_velocity is not Non
+        assert waypoint_positions is not None and waypoint_heading is not None and waypoint_velocity is not None and waypoint_angular_velocity is not None
         assert waypoint_positions.ndim == 2
         assert waypoint_positions.shape[1] == 2
 
@@ -82,6 +100,9 @@ class ClosedLoopPolicy(BasePolicy):
 
         cache_index = self.engine.episode_step - self.cache_last_update
         assert cache_index < self.horizon, "Cache index out of range: {} vs {}".format(cache_index, self.horizon)
+
+        # import pdb; pdb.set_trace()
+        # cur_traffic_agent = self.engine.get_objects()[agent_id]
 
         self.control_object.set_position(self.cache["position"][cache_index])
         self.control_object.set_velocity(self.cache["velocity"][cache_index])

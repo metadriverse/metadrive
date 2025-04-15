@@ -12,13 +12,23 @@ class ClosedLoopTrafficManager(ScenarioTrafficManager):
     Closed loop traffic manager for closed-loop simulation
     """
 
-    def __init__(self, engine):
-        super(ClosedLoopTrafficManager, self).__init__(engine)
+    def __init__(self, policy_cls=ClosedLoopPolicy):
+        super(ClosedLoopTrafficManager, self).__init__(policy_cls)
+
+    def get_scenario_id_to_obj_id(self):
+        return self._scenario_id_to_obj_id
+    
+
+    def get_obj_id_to_scenario_id(self):
+        return self._obj_id_to_scenario_id
+
 
     def after_step(self, *args, **kwargs):
         if self.episode_step < self.current_scenario_length:
             replay_done = False
             for scenario_id, track in self.current_traffic_data.items():
+                agent_id = self._scenario_id_to_obj_id[scenario_id]
+
                 if scenario_id != self.sdc_scenario_id and scenario_id not in self._scenario_id_to_obj_id:
                     if track["type"] == MetaDriveType.VEHICLE:
                         self.spawn_vehicle(scenario_id, track)
@@ -32,13 +42,19 @@ class ClosedLoopTrafficManager(ScenarioTrafficManager):
                     else:
                         logger.info("Do not support {}".format(track["type"]))
 
-                elif self.has_policy(self._scenario_id_to_obj_id[scenario_id], ClosedLoopPolicy):
+                elif self.has_policy(agent_id, ClosedLoopPolicy):
                     # static object will not be cleaned!
-                    policy = self.get_policy(self._scenario_id_to_obj_id[scenario_id])
+                    policy = self.get_policy(agent_id)
                     if policy.is_current_step_valid:
-                        policy.act()
+                        policy.act(agent_id, scenario_id)
                     else:
                         self._obj_to_clean_this_frame.append(scenario_id)
+
+                else:
+                    import pdb; pdb.set_trace()
+                    raise ValueError(
+                        "The scenario id {} is not in the current traffic data!".format(scenario_id)
+                    )
 
         else:
             replay_done = True
