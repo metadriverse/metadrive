@@ -4,7 +4,6 @@ import numpy as np
 from metadrive.policy.base_policy import BasePolicy
 from metadrive.utils import waypoint_utils
 
-
 class ClosedLoopPolicy(BasePolicy):
     """
     This policy will have the trajectory data being overwritten on the fly.
@@ -12,9 +11,11 @@ class ClosedLoopPolicy(BasePolicy):
     def __init__(self, control_object, track, random_seed=None):
         super(ClosedLoopPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.horizon = self.engine.global_config.get("waypoint_horizon", 10)
-        self.cache = None
-        self.cache_last_update = 0
+        self.agent_mask = None
 
+    @property
+    def is_current_step_valid(self):
+        return self.agent_mask[self.engine.episode_step]
 
     @classmethod
     def get_input_space(cls):
@@ -42,16 +43,13 @@ class ClosedLoopPolicy(BasePolicy):
         """
         Reset the policy
         """
-        self.cache = None
-        self.cache_last_update = 0
         super(ClosedLoopPolicy, self).reset()
 
     def get_actions(self, scenario_id):
-        import pdb; pdb.set_trace()
-        tracks = self.engine.current_scenario["tracks"]
-        assert scenario_id in tracks
+        tracks = self.engine.data_manager.current_scenario["tracks"]
+        assert scenario_id in tracks, "Scenario ID {} not found in tracks".format(scenario_id)
         track = tracks[scenario_id]
-        assert track is not None
+        assert track is not None, "Track {} is None".format(scenario_id)
         agent_motion = track["state"]
 
         return agent_motion
@@ -60,54 +58,54 @@ class ClosedLoopPolicy(BasePolicy):
     # def act(self, agent_id, scenario_id):
     def act(self, *args, **kwargs):
         obj_id_to_scenario_id = self.engine.traffic_manager.get_obj_id_to_scenario_id()
+
         agent_id = self.control_object.id
         scenario_id = obj_id_to_scenario_id[agent_id]
-
-        import pdb; pdb.set_trace()
 
         agent_motion = self.get_actions(scenario_id)
         assert agent_motion is not None
 
-        waypoint_positions = agent_motion["position"]
-        waypoint_heading = agent_motion["heading"]
-        waypoint_velocity = agent_motion["velocity"]
-        waypoint_angular_velocity = agent_motion["angular_velocity"]
+        start_idx = (self.engine.episode_step // self.horizon)* self.horizon
+        end_idx = start_idx + self.horizon
+        update_idx = self.engine.episode_step % self.horizon
 
-        assert waypoint_positions is not None and waypoint_heading is not None and waypoint_velocity is not None and waypoint_angular_velocity is not None
+        waypoint_positions = agent_motion["position"][start_idx: end_idx, :2]
+        waypoint_headings = agent_motion["heading"][start_idx : end_idx]
+        waypoint_velocities = agent_motion["velocity"][start_idx : end_idx]
+        waypoint_masks = agent_motion["valid"][start_idx : end_idx]
+
+
+        self.agent_mask = agent_motion["valid"]
+
+        assert waypoint_positions is not None and waypoint_headings is not None and waypoint_velocities is not None
         assert waypoint_positions.ndim == 2
         assert waypoint_positions.shape[1] == 2
 
-        world_positions = self._convert_to_world_coordinates(waypoint_positions)
-        headings = np.array(waypoint_utils.reconstruct_heading(world_positions))
-
-        # dt should be 0.1s in default settings
         dt = self.engine.global_config["physics_world_step_size"] * self.engine.global_config["decision_repeat"]
-        angular_velocities = np.array(waypoint_utils.reconstruct_angular_velocity(headings, dt))
+        assert dt == 0.1 # dt should be 0.1s in default settings
+
+        world_positions = waypoint_positions # since we are using SD's GT data now
         velocities = np.array(waypoint_utils.reconstruct_velocity(world_positions, dt))
+        angular_velocities = np.array(waypoint_utils.reconstruct_angular_velocity(waypoint_headings, dt))
 
         duration = len(waypoint_positions)
         assert duration == self.horizon, "The length of the waypoint positions should be equal to the horizon: {} vs {}".format(
             duration, self.horizon
         )
 
-        self.cache = dict(
+        agent_waypoint= dict(
             position=world_positions,
             velocity=velocities,
-            heading=headings,
+            heading=waypoint_headings,
             angular_velocity=angular_velocities,
+            valid=waypoint_masks,
         )
-        self.cache_last_update = self.engine.episode_step
 
-        cache_index = self.engine.episode_step - self.cache_last_update
-        assert cache_index < self.horizon, "Cache index out of range: {} vs {}".format(cache_index, self.horizon)
-
-        # import pdb; pdb.set_trace()
-        # cur_traffic_agent = self.engine.get_objects()[agent_id]
-
-        self.control_object.set_position(self.cache["position"][cache_index])
-        self.control_object.set_velocity(self.cache["velocity"][cache_index])
-        self.control_object.set_heading_theta(self.cache["heading"][cache_index])
-        self.control_object.set_angular_velocity(self.cache["angular_velocity"][cache_index])
+        if agent_waypoint["valid"][update_idx]:
+            self.control_object.set_position(agent_waypoint["position"][update_idx])
+            self.control_object.set_velocity(agent_waypoint["velocity"][update_idx])
+            self.control_object.set_heading_theta(agent_waypoint["heading"][update_idx])
+            self.control_object.set_angular_velocity(agent_waypoint["angular_velocity"][update_idx])
 
         # A legacy code to set the static mode of the agent
         # If set_static, then the agent will not "fall from the sky".

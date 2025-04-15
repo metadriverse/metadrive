@@ -39,7 +39,7 @@ class ScenarioTrafficManager(BaseManager):
     # filter noise static object: barrier and cone
     MIN_VALID_FRAME_LEN = 20  # frames
 
-    def __init__(self):
+    def __init__(self, policy_cls=ReplayTrafficParticipantPolicy):
         super(ScenarioTrafficManager, self).__init__()
         self._scenario_id_to_obj_id = None
         self._obj_id_to_scenario_id = None
@@ -67,6 +67,7 @@ class ScenarioTrafficManager(BaseManager):
 
         # config
         self._traffic_v_config = self.get_traffic_v_config()
+        self.policy_type = policy_cls
 
     def before_step(self, *args, **kwargs):
         self._obj_to_clean_this_frame = []
@@ -249,7 +250,7 @@ class ScenarioTrafficManager(BaseManager):
         ) < self.IDM_CREATE_SIDE_CONSTRAINT and heading_ok
         need_reactive_traffic = self.engine.global_config["reactive_traffic"]
         if not need_reactive_traffic or v_id in self._static_car_id or not idm_ok or not length_ok:
-            policy = self.add_policy(v.name, ReplayTrafficParticipantPolicy, v, track)
+            policy = self.add_policy(v.name, self.policy_type, v, track)
             policy.act()
         else:
             idm_route = get_idm_route(track["state"]["position"][start_index:end_index][..., :2])
@@ -286,7 +287,7 @@ class ScenarioTrafficManager(BaseManager):
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id
-        policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
+        policy = self.add_policy(obj.name, self.policy_type, obj, track)
         policy.act()
 
     def spawn_cyclist(self, scenario_id, track):
@@ -314,7 +315,7 @@ class ScenarioTrafficManager(BaseManager):
         )
         self._scenario_id_to_obj_id[scenario_id] = obj.name
         self._obj_id_to_scenario_id[obj.name] = scenario_id
-        policy = self.add_policy(obj.name, ReplayTrafficParticipantPolicy, obj, track)
+        policy = self.add_policy(obj.name, self.policy_type, obj, track)
         policy.act()
 
     def spawn_static_object(self, cls, scenario_id, track):
