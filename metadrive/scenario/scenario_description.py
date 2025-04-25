@@ -479,9 +479,9 @@ class ScenarioDescription(dict):
 
         # If object summary does not exist, fill them here
         object_summaries = {}
-        for track_id, track in scenario[scenario.TRACKS].items():
-            object_summaries[track_id] = scenario.get_object_summary(object_dict=track, object_id=track_id)
-        scenario[scenario.METADATA][scenario.SUMMARY.OBJECT_SUMMARY] = object_summaries
+        for track_id, track in scenario[ScenarioDescription.TRACKS].items():
+            object_summaries[track_id] = ScenarioDescription.get_object_summary(object_dict=track, object_id=track_id)
+        scenario[ScenarioDescription.METADATA][ScenarioDescription.SUMMARY.OBJECT_SUMMARY] = object_summaries
 
         # moving object
         number_summary_dict.update(ScenarioDescription._calculate_num_moving_objects(scenario))
