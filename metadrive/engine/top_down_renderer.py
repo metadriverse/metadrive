@@ -192,6 +192,7 @@ class TopDownRenderer:
         draw_contour=True,
         window=True,
         screen_record=False,
+        center_on_map=False,
     ):
         """
         Launch a top-down renderer for current episode. Usually, it is launched by env.render(mode="topdown") and will
@@ -235,6 +236,9 @@ class TopDownRenderer:
 
             screen_record: Whether to record the episode. The recorded result can be accessed by
             env.top_down_renderer.screen_frames or env.top_down_renderer.generate_gif(file_name, fps)
+
+            center_on_map: Whether to center the camera on the map. If set to True, the camera will not move with the
+            ego car, and the camera position will be fixed at the center of the map.
         """
         # doc-end
         # LQY: do not delete the above line !!!!!
@@ -251,6 +255,7 @@ class TopDownRenderer:
             target_agent_heading_up = target_vehicle_heading_up
 
         self.position = camera_position
+        self.center_on_map = center_on_map
         self.target_agent_heading_up = target_agent_heading_up
         self.show_agent_name = show_agent_name
         self.draw_target_vehicle_trajectory = draw_target_vehicle_trajectory
@@ -525,8 +530,12 @@ class TopDownRenderer:
         field = self._screen_canvas.get_size()
         if not self.target_agent_heading_up:
             if self.position is not None or v is not None:
-                cam_pos = (self.position or v.position)
-                position = self._frame_canvas.pos2pix(*cam_pos)
+                if self.center_on_map:
+                    frame_canvas_size = self._frame_canvas.get_size()
+                    position = (frame_canvas_size[0] / 2, frame_canvas_size[1] / 2)
+                else:
+                    cam_pos = (self.position or v.position)
+                    position = self._frame_canvas.pos2pix(*cam_pos)
             else:
                 position = (field[0] / 2, field[1] / 2)
             off = (position[0] - field[0] / 2, position[1] - field[1] / 2)
