@@ -417,11 +417,9 @@ class ScenarioOnlineEnv(ScenarioEnv):
     """
     def default_config(cls):
         config = super(ScenarioOnlineEnv, cls).default_config()
-        config.update(
-            {
-                "store_map": False,
-            }
-        )
+        config.update({
+            "store_map": False,
+        })
         return config
 
     def __init__(self, config=None):
