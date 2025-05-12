@@ -415,9 +415,19 @@ class ScenarioOnlineEnv(ScenarioEnv):
     """
     This environment allow the user to pass in scenario data directly.
     """
+    def default_config(cls):
+        config = super(ScenarioOnlineEnv, cls).default_config()
+        config.update({
+            "store_map": False,
+        })
+        return config
+
     def __init__(self, config=None):
         super(ScenarioOnlineEnv, self).__init__(config)
         self.lazy_init()
+
+        assert self.config["store_map"] is False, \
+            "ScenarioOnlineEnv should not store map. Please set store_map=False in config"
 
     def setup_engine(self):
         """Overwrite the data_manager by ScenarioOnlineDataManager"""
