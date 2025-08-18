@@ -1,0 +1,79 @@
+{
+  "reproduction_target": "MetaDrive PPO Expert",
+  "experiment_name": "ppo_expert_reproduction_20250818_112449",
+  "timestamp": "2025-08-18T11:24:49.758037",
+  "random_seed": 43,
+  "device": "cuda",
+  "network": {
+    "observation_dim": 275,
+    "action_dim": 2,
+    "hidden_dim": 256,
+    "activation": "tanh"
+  },
+  "env_config": {
+    "num_scenarios": 1000,
+    "traffic_density": 0.1,
+    "random_traffic": false,
+    "horizon": 1000,
+    "map": 3,
+    "reward_config": {
+      "success_reward": 20.0,
+      "driving_reward": 2.0,
+      "speed_reward": 0.3,
+      "use_lateral_reward": true,
+      "out_of_road_penalty": 8.0,
+      "crash_vehicle_penalty": 8.0,
+      "crash_object_penalty": 8.0,
+      "crash_sidewalk_penalty": 2.0
+    },
+    "termination_config": {
+      "out_of_road_done": true,
+      "crash_vehicle_done": true,
+      "crash_object_done": true,
+      "on_continuous_line_done": false,
+      "on_broken_line_done": false
+    },
+    "vehicle_config": {
+      "lidar": {
+        "num_lasers": 240,
+        "distance": 50,
+        "num_others": 4,
+        "gaussian_noise": 0.0,
+        "dropout_prob": 0.0
+      },
+      "side_detector": {
+        "num_lasers": 0,
+        "distance": 50,
+        "gaussian_noise": 0.0,
+        "dropout_prob": 0.0
+      },
+      "lane_line_detector": {
+        "num_lasers": 0,
+        "distance": 20,
+        "gaussian_noise": 0.0,
+        "dropout_prob": 0.0
+      },
+      "random_agent_model": false
+    }
+  },
+  "hyperparameters": {
+    "learning_rate": 8e-05,
+    "n_steps": 6144,
+    "n_envs": 1,
+    "batch_size": 768,
+    "n_epochs": 10,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.1,
+    "entropy_coef": 0.01,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "target_kl": 0.05
+  },
+  "training": {
+    "total_timesteps": 2000000,
+    "checkpoint_freq": 50,
+    "eval_freq": 2,
+    "log_freq": 1
+  }
+}

@@ -128,6 +128,12 @@ class PPOExpertReproduction:
         self.episode_count = 0
         self.train_stats = []
         
+        # 熵系数衰减设置
+        self.entropy_coef_start = args.entropy_coef_start
+        self.entropy_coef_end = args.entropy_coef_end
+        self.entropy_decay_end_ratio = args.entropy_decay_end_ratio
+        self.current_entropy_coef = self.entropy_coef_start  # 当前熵系数
+        
         # 添加episode统计缓冲区
         self.episode_rewards = deque(maxlen=100)
         self.episode_lengths = deque(maxlen=100)
@@ -185,6 +191,28 @@ class PPOExpertReproduction:
                 "random_traffic": False,
                 "horizon": 1000,
                 "map": 3,
+                
+                # 优化的奖励配置
+                "reward_config": {
+                    "success_reward": self.args.success_reward,
+                    "driving_reward": self.args.driving_reward,
+                    "speed_reward": self.args.speed_reward,
+                    "use_lateral_reward": self.args.use_lateral_reward,
+                    "out_of_road_penalty": self.args.out_of_road_penalty,
+                    "crash_vehicle_penalty": self.args.crash_penalty,
+                    "crash_object_penalty": self.args.crash_penalty,
+                    "crash_sidewalk_penalty": 2.0
+                },
+                
+                # 终止条件配置
+                "termination_config": {
+                    "out_of_road_done": True,
+                    "crash_vehicle_done": True,
+                    "crash_object_done": True,
+                    "on_continuous_line_done": False,
+                    "on_broken_line_done": False
+                },
+                
                 "vehicle_config": {
                     "lidar": {
                         "num_lasers": 240,
@@ -249,6 +277,33 @@ class PPOExpertReproduction:
             "horizon": 1000,
             "map": 3,
             "start_seed": self.args.seed,
+            
+            # === 优化的奖励配置 ===
+            # 成功奖励 - 增加以鼓励完成任务
+            "success_reward": self.args.success_reward,  # 默认10.0 -> 20.0
+            
+            # 前进奖励 - 鼓励沿道路前进
+            "driving_reward": self.args.driving_reward,   # 默认1.0 -> 2.0
+            
+            # 速度奖励 - 鼓励合理速度
+            "speed_reward": self.args.speed_reward,     # 默认0.1 -> 0.3
+            
+            # 车道保持奖励 - 关键！帮助学会沿车道行驶
+            "use_lateral_reward": self.args.use_lateral_reward,  # 默认False -> True
+            
+            # 惩罚设置 - 平衡学习难度
+            "out_of_road_penalty": self.args.out_of_road_penalty,      # 默认5.0 -> 8.0 (增加冲出道路惩罚)
+            "crash_vehicle_penalty": self.args.crash_penalty,    # 默认5.0 -> 8.0
+            "crash_object_penalty": self.args.crash_penalty,     # 默认5.0 -> 8.0
+            "crash_sidewalk_penalty": 2.0,   # 默认0.0 -> 2.0 (增加撞人行道惩罚)
+            
+            # 终止条件 - 让智能体有更多机会学习
+            "out_of_road_done": True,         # 确保冲出道路会终止
+            "crash_vehicle_done": True,       # 确保撞车会终止
+            "crash_object_done": True,        # 确保撞物体会终止
+            "on_continuous_line_done": False, # 允许压线，降低学习难度
+            "on_broken_line_done": False,     # 允许压虚线
+            
             "vehicle_config": {
                 "lidar": dict(
                     num_lasers=240, 
@@ -286,12 +341,30 @@ class PPOExpertReproduction:
         env = self._create_single_environment()
         return [env]  # 返回单环境列表以保持兼容性
     
+    def _update_entropy_coef(self):
+        """更新熵系数 - 线性衰减逻辑"""
+        # 计算训练进度
+        progress = self.global_step / self.args.total_timesteps
+        
+        if progress <= self.entropy_decay_end_ratio:
+            # 在衰减区间内进行线性插值
+            decay_progress = progress / self.entropy_decay_end_ratio
+            self.current_entropy_coef = (
+                self.entropy_coef_start - 
+                (self.entropy_coef_start - self.entropy_coef_end) * decay_progress
+            )
+        else:
+            # 超过衰减区间，保持最终值
+            self.current_entropy_coef = self.entropy_coef_end
+        
+        return self.current_entropy_coef
+    
     def _init_csv_log(self):
         """初始化CSV日志"""
         headers = [
             "step", "episode", "ep_reward_mean", "ep_len_mean",
             "policy_loss", "value_loss", "entropy", "approx_kl",
-            "learning_rate", "collision_rate", "offroad_rate", 
+            "learning_rate", "entropy_coef", "collision_rate", "offroad_rate", 
             "success_rate", "fps", "clipfrac", "explained_variance",
             "grad_norm", "avg_speed", "lane_deviation", "lane_change_count",
             "min_ttc", "path_completion"
@@ -515,7 +588,7 @@ class PPOExpertReproduction:
                 entropy_loss = -entropy.mean()
                 
                 # 总损失
-                total_loss = policy_loss + self.args.vf_coef * value_loss + self.args.entropy_coef * entropy_loss
+                total_loss = policy_loss + self.args.vf_coef * value_loss + self.current_entropy_coef * entropy_loss
                 
                 # 反向传播
                 self.optimizer.zero_grad()
@@ -612,10 +685,10 @@ class PPOExpertReproduction:
                 
                 if terminated or truncated:
                     # 统计终止原因
-                    if info.get("crash", False):
+                    if info.get("crash", False) or info.get("crash_vehicle", False) or info.get("crash_object", False):
                         eval_collisions += 1
                     elif info.get("out_of_road", False):
-                        eval_offroads += 1
+                        eval_offroads += 1 
                     elif info.get("arrive_dest", False):
                         eval_successes += 1
                     
@@ -688,6 +761,9 @@ class PPOExpertReproduction:
         current_lr = self.optimizer.param_groups[0]['lr']
         self.writer.add_scalar("train/learning_rate", current_lr, self.global_step)
         
+        # 添加熵系数记录
+        self.writer.add_scalar("train/entropy_coef", self.current_entropy_coef, self.global_step)
+        
         # Episode环境统计
         if len(self.episode_rewards) > 0:
             self.writer.add_scalar("env/ep_rew_mean", np.mean(self.episode_rewards), self.global_step)
@@ -717,6 +793,7 @@ class PPOExpertReproduction:
             train_stats.get("entropy", 0),
             train_stats.get("approx_kl", 0),
             current_lr,
+            self.current_entropy_coef,  # 添加熵系数
             eval_stats.get("eval_collision_rate", 0) if eval_stats else 0,
             eval_stats.get("eval_offroad_rate", 0) if eval_stats else 0,
             eval_stats.get("eval_success_rate", 0) if eval_stats else 0,
@@ -749,6 +826,7 @@ class PPOExpertReproduction:
             print(f"   车道偏移: {eval_stats.get('eval_lane_deviation', 0):.3f}")
             print(f"   路径完成: {eval_stats.get('eval_path_completion', 0):.3f}")
             print(f"   成功率: {eval_stats.get('eval_success_rate', 0):.3f}")
+            print(f"   当前熵系数: {self.current_entropy_coef:.4f}")
             if train_stats.get('clipfrac', 0) > 0:
                 print(f"   Clip Fraction: {train_stats.get('clipfrac', 0):.3f}")
                 print(f"   Explained Var: {train_stats.get('explained_variance', 0):.3f}")
@@ -764,6 +842,9 @@ class PPOExpertReproduction:
         while self.global_step < self.args.total_timesteps:
             iteration += 1
             
+            # 更新熵系数
+            current_entropy = self._update_entropy_coef()
+            
             # 收集rollouts
             rollout_start = time.time()
             rollouts = self.collect_rollouts()
@@ -777,6 +858,7 @@ class PPOExpertReproduction:
             # 计算FPS
             fps = (self.args.n_steps * self.args.n_envs) / (rollout_time + update_time)
             train_stats["fps"] = fps
+            train_stats["entropy_coef"] = self.current_entropy_coef  # 记录当前熵系数
             
             # 定期评估
             eval_stats = None
@@ -1006,6 +1088,28 @@ def add_arguments():
                        help="PPO裁剪范围 (默认: 0.2)")
     parser.add_argument("--entropy_coef", type=float, default=0.01,
                        help="熵系数 (默认: 0.01)")
+    
+    # ===== 熵系数衰减参数 (新增) =====
+    parser.add_argument("--entropy_coef_start", type=float, default=0.015,
+                       help="初始熵系数 (默认: 0.015)")
+    parser.add_argument("--entropy_coef_end", type=float, default=0.005,
+                       help="最终熵系数 (默认: 0.005)")
+    parser.add_argument("--entropy_decay_end_ratio", type=float, default=0.8,
+                       help="熵系数衰减完成的训练进度比例 (默认: 0.8)")
+    
+    # ===== 奖励配置参数 (新增) =====
+    parser.add_argument("--success_reward", type=float, default=20.0,
+                       help="成功奖励 (默认: 20.0)")
+    parser.add_argument("--driving_reward", type=float, default=2.0,
+                       help="前进奖励 (默认: 2.0)")
+    parser.add_argument("--speed_reward", type=float, default=0.3,
+                       help="速度奖励 (默认: 0.3)")
+    parser.add_argument("--use_lateral_reward", action="store_true", default=True,
+                       help="启用车道保持奖励 (默认: True)")
+    parser.add_argument("--out_of_road_penalty", type=float, default=8.0,
+                       help="冲出道路惩罚 (默认: 8.0)")
+    parser.add_argument("--crash_penalty", type=float, default=8.0,
+                       help="碰撞惩罚 (默认: 8.0)")
     
     # ===== 其他超参数 (预留扩展) =====
     parser.add_argument("--vf_coef", type=float, default=0.5,
