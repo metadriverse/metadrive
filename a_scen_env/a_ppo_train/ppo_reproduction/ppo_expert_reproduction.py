@@ -128,6 +128,11 @@ class PPOExpertReproduction:
         self.episode_count = 0
         self.train_stats = []
         
+        # 恢复训练逻辑
+        if args.resume_from:
+            self.load_checkpoint(args.resume_from)
+            print(f"✅ 从检查点恢复训练完成")
+        
         # 熵系数衰减设置
         self.entropy_coef_start = args.entropy_coef_start
         self.entropy_coef_end = args.entropy_coef_end
@@ -155,15 +160,24 @@ class PPOExpertReproduction:
     
     def _create_experiment_dir(self) -> str:
         """创建实验目录"""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        exp_name = f"ppo_expert_reproduction_{timestamp}"
-        exp_dir = os.path.join(self.args.save_dir, f"runs/{exp_name}")
+        # 恢复训练时，使用检查点所在的实验目录
+        if hasattr(self.args, 'resume_from') and self.args.resume_from:
+            checkpoint_path = Path(self.args.resume_from)
+            # 检查点通常在 experiment_dir/checkpoints/ 目录下
+            if checkpoint_path.parent.name == "checkpoints":
+                exp_dir = str(checkpoint_path.parent.parent)
+                print(f"🔄 恢复训练模式 - 使用原实验目录: {exp_dir}")
+                return exp_dir
         
-        # 创建子目录
+        # 正常模式：创建新的实验目录
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        exp_name = f"ppo_expert_reproduction_{timestamp}"
+        exp_dir = os.path.join(self.args.save_dir, "runs", exp_name)
+        
         os.makedirs(exp_dir, exist_ok=True)
-        os.makedirs(os.path.join(exp_dir, "tensorboard"), exist_ok=True)
         os.makedirs(os.path.join(exp_dir, "checkpoints"), exist_ok=True)
         
+        print(f"📁 实验目录已创建: {exp_dir}")
         return exp_dir
     
     def _build_config(self) -> Dict[str, Any]:
@@ -360,7 +374,13 @@ class PPOExpertReproduction:
         return self.current_entropy_coef
     
     def _init_csv_log(self):
-        """初始化CSV日志"""
+        """初始化CSV日志文件"""
+        # 恢复训练模式：检查CSV文件是否存在
+        if hasattr(self.args, 'resume_from') and self.args.resume_from and os.path.exists(self.csv_path):
+            print(f"📄 恢复CSV日志记录: {self.csv_path}")
+            return
+        
+        # 正常模式：创建新的CSV文件
         headers = [
             "step", "episode", "ep_reward_mean", "ep_len_mean",
             "policy_loss", "value_loss", "entropy", "approx_kl",
@@ -370,9 +390,11 @@ class PPOExpertReproduction:
             "min_ttc", "path_completion"
         ]
         
-        with open(self.csv_path, 'w', newline='') as f:
+        with open(self.csv_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow(headers)
+        
+        print(f"📄 CSV日志文件已创建: {self.csv_path}")
     
     def collect_rollouts(self) -> Tuple[torch.Tensor, ...]:
         """收集rollout数据（单环境模拟批处理）"""
@@ -745,6 +767,76 @@ class PPOExpertReproduction:
         latest_path = os.path.join(self.exp_dir, "checkpoints", "latest_model.pt")
         torch.save(checkpoint, latest_path)
     
+    def load_checkpoint(self, checkpoint_path: str):
+        """从检查点恢复训练状态"""
+        if not os.path.exists(checkpoint_path):
+            raise FileNotFoundError(f"检查点文件不存在: {checkpoint_path}")
+        
+        print(f"📥 正在加载检查点: {checkpoint_path}")
+        
+        # 加载检查点数据
+        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        
+        # 验证检查点格式
+        required_keys = ["iteration", "global_step", "network_state_dict", "optimizer_state_dict"]
+        missing_keys = [key for key in required_keys if key not in checkpoint]
+        if missing_keys:
+            raise ValueError(f"检查点格式不完整，缺少键: {missing_keys}")
+        
+        # 验证配置兼容性
+        self._validate_checkpoint_compatibility(checkpoint)
+        
+        # 恢复网络状态
+        self.network.load_state_dict(checkpoint["network_state_dict"])
+        print(f"✅ 网络权重已恢复")
+        
+        # 恢复优化器状态
+        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        print(f"✅ 优化器状态已恢复")
+        
+        # 恢复训练进度
+        self.global_step = checkpoint["global_step"]
+        
+        # 计算起始迭代号（避免重复）
+        self.start_iteration = checkpoint["iteration"]
+        
+        print(f"📊 训练状态恢复:")
+        print(f"   全局步数: {self.global_step:,}")
+        print(f"   迭代次数: {self.start_iteration}")
+        
+        # 重新创建TensorBoard writer以支持恢复模式
+        self.writer.close()
+        self.writer = SummaryWriter(log_dir=os.path.join(self.exp_dir, "tensorboard"))
+    
+    def _validate_checkpoint_compatibility(self, checkpoint: Dict):
+        """验证检查点与当前配置的兼容性"""
+        if "config" not in checkpoint:
+            print("⚠️  检查点中无配置信息，跳过兼容性检查")
+            return
+        
+        checkpoint_config = checkpoint["config"]
+        current_config = self.config
+        
+        # 关键参数兼容性检查
+        critical_params = [
+            "obs_dim", "action_dim", "num_scenarios", "map",
+            "vehicle_config", "success_reward", "driving_reward"
+        ]
+        
+        incompatible_params = []
+        for param in critical_params:
+            if param in checkpoint_config and param in current_config:
+                if checkpoint_config[param] != current_config[param]:
+                    incompatible_params.append(f"{param}: {checkpoint_config[param]} -> {current_config[param]}")
+        
+        if incompatible_params:
+            print("⚠️  检测到配置差异:")
+            for param in incompatible_params:
+                print(f"   {param}")
+            print("继续训练可能导致不可预期的结果")
+        else:
+            print("✅ 配置兼容性检查通过")
+    
     def log_metrics(self, iteration: int, train_stats: Dict, eval_stats: Dict = None):
         """记录指标"""
         # TensorBoard日志 - 训练指标
@@ -835,9 +927,15 @@ class PPOExpertReproduction:
         """主训练循环"""
         print(f"🚀 开始PPO训练 - 目标步数: {self.args.total_timesteps:,}")
         
-        iteration = 0
+        # 设置起始迭代号
+        start_iteration = getattr(self, 'start_iteration', 0)
+        iteration = start_iteration
         start_time = time.time()
         best_reward = float('-inf')
+        
+        # 如果是恢复训练，尝试获取历史最佳奖励
+        if hasattr(self, 'start_iteration') and self.start_iteration > 0:
+            print(f"🔄 从迭代 {self.start_iteration} 恢复训练")
         
         while self.global_step < self.args.total_timesteps:
             iteration += 1
@@ -1139,6 +1237,10 @@ def add_arguments():
                        default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction",
                        help="保存目录")
     
+    # ===== 恢复训练设置 =====
+    parser.add_argument("--resume_from", type=str, default=None,
+                       help="从指定检查点恢复训练 (默认: None, 从头开始)")
+    
     return parser
 
 
@@ -1154,6 +1256,14 @@ def main():
     
     print("🎯 MetaDrive PPO Expert 复现训练")
     print("=" * 50)
+    
+    # 恢复训练信息
+    if args.resume_from:
+        print(f"🔄 恢复训练模式:")
+        print(f"   检查点路径: {args.resume_from}")
+        print(f"   检查点存在: {'✅' if os.path.exists(args.resume_from) else '❌'}")
+        print("=" * 50)
+    
     print(f"📊 关键超参数:")
     print(f"   学习率: {args.lr}")
     print(f"   rollout步数: {args.n_steps}")
