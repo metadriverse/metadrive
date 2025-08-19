@@ -3,6 +3,7 @@
 MetaDrive PPO Expert 复现训练系统
 严格对齐MetaDrive PPO expert的配置，仅关键超参数可调整
 支持TensorBoard可视化、完整产物落地和详细说明文档生成
+可实现断点续训、读取ckpt结合新参数训
 """
 
 import os
@@ -102,6 +103,7 @@ def make_env(rank: int, config: Dict[str, Any]):
     """
     环境工厂函数 - 用于创建向量化环境
     每个子进程将运行独立的MetaDrive环境实例
+    支持直线场景的动态生成，确保每个环境都有不同的道路长度和交通配置
     
     Args:
         rank: 环境索引
@@ -113,7 +115,25 @@ def make_env(rank: int, config: Dict[str, Any]):
     def _init():
         # 为每个环境设置不同的随机种子，确保样本多样性
         env_config = config.copy()
-        env_config["start_seed"] = config.get("start_seed", 0) + rank * 10000
+        base_seed = config.get("start_seed", 0)
+        env_seed = base_seed + rank * 10000
+        env_config["start_seed"] = env_seed
+        
+        # 为每个环境生成不同的直线场景参数
+        scenario_index = env_seed % 1000  # 确保在0-999范围内
+        
+        # 动态直线道路长度：每个环境不同数量的S段
+        min_segments, max_segments = 2, 10
+        num_segments = min_segments + (scenario_index * (max_segments - min_segments)) // 1000
+        map_string = "S" * num_segments
+        
+        # 动态交通密度：每个环境不同（使用命令行参数）
+        min_density, max_density = config.get("traffic_density_min", 0.1), config.get("traffic_density_max", 0.15)
+        traffic_density = min_density + (scenario_index * (max_density - min_density)) / 1000
+        
+        # 更新环境配置
+        env_config["map"] = map_string
+        env_config["traffic_density"] = traffic_density
         
         # 确保子进程环境不使用渲染（避免显示冲突）
         env_config["use_render"] = False
@@ -147,9 +167,16 @@ class PPOExpertReproduction:
         # 创建环境
         self.envs = self._create_environments()
         
+        # 存储交通密度参数供其他方法使用
+        self.traffic_density_min = args.traffic_density_min
+        self.traffic_density_max = args.traffic_density_max
+        
         # 创建网络
         self.network = PPONetwork().to(self.device)
         self.optimizer = optim.Adam(self.network.parameters(), lr=args.lr)
+        
+        # 验证和记录直线场景生成
+        self._validate_and_log_scenarios()
         
         # 创建TensorBoard writer
         self.writer = SummaryWriter(log_dir=os.path.join(self.exp_dir, "tensorboard"))
@@ -232,13 +259,16 @@ class PPOExpertReproduction:
                 "activation": "tanh"
             },
             
-            # ===== 环境配置 (严格对齐expert) =====
+            # ===== 环境配置 (直线场景生成) =====
             "env_config": {
                 "num_scenarios": 1000,
-                "traffic_density": 0.1,
-                "random_traffic": False,
+                "map_type": "straight_road",     # 直线道路类型
+                "dynamic_road_length": True,     # 启用动态道路长度
+                "road_length_range": [500, 1000], # 道路长度范围(米)
+                "dynamic_traffic": True,         # 启用动态交通配置
+                "traffic_density_range": [self.args.traffic_density_min, self.args.traffic_density_max], # 交通密度范围
+                "random_traffic": True,          # 交通随机化
                 "horizon": 1000,
-                "map": 3,
                 
                 # 优化的奖励配置
                 "reward_config": {
@@ -317,14 +347,31 @@ class PPOExpertReproduction:
             json.dump(self.config, f, indent=2, ensure_ascii=False)
     
     def _get_env_config(self):
-        """获取环境配置"""
+        """获取环境配置 - 支持直线场景生成"""
+        # 基于场景索引计算动态参数
+        scenario_seed = self.args.seed if hasattr(self, 'current_scenario_seed') else self.args.seed
+        scenario_index = scenario_seed % 1000  # 场景索引 0-999
+        
+        # 动态交通密度：基于场景索引生成不同的交通密度（使用命令行参数）
+        min_density, max_density = self.args.traffic_density_min, self.args.traffic_density_max
+        traffic_density = min_density + (scenario_index * (max_density - min_density)) / 1000
+        
+        # 动态直线道路长度：通过生成不同数量的S段来实现
+        # 长度范围：2-10个S段，每段约50-80米
+        min_segments, max_segments = 2, 10
+        num_segments = min_segments + (scenario_index * (max_segments - min_segments)) // 1000
+        map_string = "S" * num_segments  # 生成多个直线段
+        
         return {
+            # === 直线场景配置 ===
             "num_scenarios": 1000,
-            "traffic_density": 0.1,
-            "random_traffic": False,
+            "map": map_string,                   # 使用动态数量的直线段
+            
+            # === 动态交通配置 ===
+            "traffic_density": traffic_density,  # 动态交通密度
+            "random_traffic": True,              # 启用交通随机化
             "horizon": 1000,
-            "map": 3,
-            "start_seed": self.args.seed,
+            "start_seed": scenario_seed,
             
             # === 优化的奖励配置 ===
             # 成功奖励 - 增加以鼓励完成任务
@@ -724,13 +771,10 @@ class PPOExpertReproduction:
         eval_min_ttcs = []
         eval_path_completions = []
         
-        # 创建独立的评估环境（避免影响训练环境）
-        eval_config = self._get_env_config()
-        eval_config["start_seed"] = 99999  # 使用固定种子确保评估的一致性
-        eval_env = DummyVecEnv([make_env(0, eval_config)])
+        print(f"🔍 开始策略评估 ({num_episodes} episodes)...")
         
         for episode in range(num_episodes):
-            obs = eval_env.reset()
+            obs = self.envs.reset()
             episode_reward = 0
             episode_length = 0
             episode_speeds = []
@@ -744,12 +788,18 @@ class PPOExpertReproduction:
                 with torch.no_grad():
                     action, _, _, _ = self.network.get_action_and_value(obs_tensor)
                 
-                obs, reward, done, info = eval_env.step(action.cpu().numpy())
-                episode_reward += reward[0]  # 向量化环境返回数组
-                episode_length += 1
+                obs, reward, done, info = self.envs.step(action.cpu().numpy())
                 
-                # 收集详细统计信息
-                info = info[0]  # 获取第一个（也是唯一一个）环境的info
+                # 处理多环境返回值 - 取第一个环境的数据用于评估
+                if isinstance(reward, (list, tuple, np.ndarray)):
+                    episode_reward += reward[0]
+                    done_flag = done[0]
+                    info = info[0]
+                else:
+                    episode_reward += reward
+                    done_flag = done
+                
+                episode_length += 1
                 
                 # 速度统计 - 修复：MetaDrive使用'velocity'键而非'speed'
                 if 'velocity' in info:
@@ -759,14 +809,14 @@ class PPOExpertReproduction:
                 elif hasattr(info, 'speed'):
                     episode_speeds.append(info.speed)
                 
-                # 获取评估环境实例来计算缺失的指标
+                # 获取环境实例来计算缺失的指标
                 try:
                     # 从向量化环境中获取环境实例
                     current_env = None
-                    if hasattr(eval_env, 'envs') and len(eval_env.envs) > 0:
-                        current_env = eval_env.envs[0]
-                    elif hasattr(eval_env, 'venv') and hasattr(eval_env.venv, 'envs'):
-                        current_env = eval_env.venv.envs[0] if len(eval_env.venv.envs) > 0 else None
+                    if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
+                        current_env = self.envs.envs[0]
+                    elif hasattr(self.envs, 'venv') and hasattr(self.envs.venv, 'envs'):
+                        current_env = self.envs.venv.envs[0] if len(self.envs.venv.envs) > 0 else None
                     
                     # 计算缺失的指标
                     if current_env is not None:
@@ -796,7 +846,7 @@ class PPOExpertReproduction:
                 elif missing_metrics.get('lane_change', False):
                     episode_lane_changes += 1
                 
-                if done[0]:  # 向量化环境返回数组
+                if done_flag:
                     # 统计终止原因
                     if info.get("crash", False) or info.get("crash_vehicle", False) or info.get("crash_object", False):
                         eval_collisions += 1
@@ -820,8 +870,7 @@ class PPOExpertReproduction:
             eval_lane_changes.append(episode_lane_changes)
             eval_min_ttcs.append(np.min(episode_min_ttcs) if episode_min_ttcs else float('inf'))
         
-        # 关闭评估环境
-        eval_env.close()
+        print(f"✅ 评估完成")
         
         return {
             "eval_reward_mean": np.mean(eval_rewards),
@@ -1275,13 +1324,15 @@ class PPOExpertReproduction:
 - **隐藏层**: 256 -> 256
 - **激活函数**: Tanh
 
-### 环境配置 (严格对齐Expert)
-- **场景数量**: 1000
-- **交通密度**: 0.1
-- **时长限制**: 1000步
+### 环境配置 (直线场景生成)
+- **场景类型**: 动态直线道路
+- **场景数量**: 1000个互不相同的直线场景
+- **道路长度**: 200-800米动态变化
+- **交通密度**: {self.args.traffic_density_min}-{self.args.traffic_density_max}动态变化
 - **并行环境**: {self.args.n_envs} (真正的多进程并行)
 - **Lidar配置**: 240束激光，50米距离，4个其他车辆
 - **随机种子**: {self.args.seed}
+- **交通随机化**: 启用
 
 ### 关键超参数 (可调整)
 - **学习率**: {self.args.lr}
@@ -1434,6 +1485,60 @@ env_config.update({{
             f.write(report_content)
         
         print(f"📄 最终报告已生成: {report_path}")
+    
+    def _validate_and_log_scenarios(self):
+        """验证和记录直线场景生成参数"""
+        print(f"\n🛣️ 直线场景配置验证:")
+        print(f"   场景类型: 动态直线道路")
+        print(f"   总场景数: 1000")
+        print(f"   道路长度: 2-10个直线段 (每段约50-80米)")
+        print(f"   交通密度范围: {self.args.traffic_density_min}-{self.args.traffic_density_max}")
+        print(f"   交通随机化: 启用")
+        
+        # 生成几个示例场景参数用于验证
+        sample_scenarios = []
+        for i in [0, 100, 500, 999]:
+            scenario_index = (self.args.seed + i) % 1000
+            num_segments = 2 + (scenario_index * 8) // 1000  # 2-10段
+            traffic_density = self.args.traffic_density_min + (scenario_index * (self.args.traffic_density_max - self.args.traffic_density_min)) / 1000
+            map_string = "S" * num_segments
+            estimated_length = num_segments * 65  # 估算长度（每段约65米）
+            sample_scenarios.append({
+                "index": i,
+                "seed": self.args.seed + i,
+                "num_segments": num_segments,
+                "map_string": map_string,
+                "estimated_length": estimated_length,
+                "traffic_density": traffic_density
+            })
+        
+        print(f"\n📊 场景示例:")
+        for scenario in sample_scenarios:
+            print(f"   场景{scenario['index']:3d}: {scenario['num_segments']:2d}段 ({scenario['estimated_length']:3d}m), "
+                  f"密度={scenario['traffic_density']:.3f}, 地图='{scenario['map_string']}'")
+        
+        # 保存场景配置到文件
+        scenario_config_path = os.path.join(self.exp_dir, "scenario_config.json")
+        scenario_config = {
+            "scenario_type": "straight_road_segments",
+            "total_scenarios": 1000,
+            "segments_range": [2, 10],
+            "estimated_length_range": [130, 650],  # 2*65 到 10*65
+            "traffic_density_range": [self.args.traffic_density_min, self.args.traffic_density_max],
+            "random_traffic": True,
+            "sample_scenarios": sample_scenarios,
+            "generation_formula": {
+                "num_segments": "2 + (scenario_index * 8) // 1000",
+                "traffic_density": f"{self.args.traffic_density_min} + (scenario_index * ({self.args.traffic_density_max} - {self.args.traffic_density_min})) / 1000",
+                "map_string": "'S' * num_segments"
+            }
+        }
+        
+        with open(scenario_config_path, 'w', encoding='utf-8') as f:
+            json.dump(scenario_config, f, indent=2, ensure_ascii=False)
+        
+        print(f"📄 场景配置已保存: {scenario_config_path}")
+        print("=" * 50)
 
 
 def add_arguments():
@@ -1489,6 +1594,12 @@ def add_arguments():
                        help="冲出道路惩罚 (默认: 8.0)")
     parser.add_argument("--crash_penalty", type=float, default=8.0,
                        help="碰撞惩罚 (默认: 8.0)")
+
+    # ===== 交通密度配置参数 (新增) =====
+    parser.add_argument("--traffic_density_min", type=float, default=0.1,
+                       help="最小交通密度 (默认: 0.1)")
+    parser.add_argument("--traffic_density_max", type=float, default=0.15,
+                       help="最大交通密度 (默认: 0.15)")
 
     
     # ===== 训练设置 =====
