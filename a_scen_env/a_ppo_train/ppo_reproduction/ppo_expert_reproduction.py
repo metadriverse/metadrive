@@ -85,6 +85,8 @@ class PPONetwork(nn.Module):
         
         # 分离均值和标准差
         action_mean, action_log_std = torch.chunk(action_logits, 2, dim=-1)
+        # 🔧 修复3: 约束log_std防止漂移
+        action_log_std = torch.clamp(action_log_std, -5.0, 2.0)
         action_std = torch.exp(action_log_std)
         
         # 创建分布
@@ -97,6 +99,12 @@ class PPONetwork(nn.Module):
         entropy = dist.entropy().sum(dim=-1)
         
         return action, log_prob, entropy, value.squeeze(-1)
+    
+    def act_deterministic(self, obs_tensor):
+        """🔧 修复2: 为评估提供确定性动作（使用均值）"""
+        action_logits, _ = self.forward(obs_tensor)
+        action_mean, _ = torch.chunk(action_logits, 2, dim=-1)
+        return action_mean
 
 
 def make_env(rank: int, config: Dict[str, Any]):
@@ -753,6 +761,8 @@ class PPOExpertReproduction:
             
             # 执行动作 - 向量化环境会自动处理多个环境
             actions_np = actions.cpu().numpy()
+            # 🔧 修复6: 动作clip到[-1,1]范围
+            actions_np = np.clip(actions_np, -1.0, 1.0)
             next_obs, rewards, dones, infos = self.envs.step(actions_np)
             
             # 收集episode统计信息 - 处理多环境信息
@@ -847,6 +857,11 @@ class PPOExpertReproduction:
             
             obs = next_obs  # 更新观测
         
+        # 🔧 修复1: 计算last_values作为bootstrap值
+        last_obs_tensor = torch.as_tensor(obs, dtype=torch.float32, device=self.device)  # 这里obs是下一时刻的obs
+        with torch.no_grad():
+            _, _, _, last_values = self.network.get_action_and_value(last_obs_tensor)
+        
         # 更新全局步数
         self.global_step += self.args.n_steps * self.args.n_envs
         
@@ -858,28 +873,28 @@ class PPOExpertReproduction:
         dones_batch = torch.FloatTensor(dones_batch).to(self.device)
         values_batch = torch.FloatTensor(values_batch).to(self.device)
         
-        # 计算advantages和returns
-        advantages, returns = self.compute_gae(rewards_batch, values_batch, dones_batch)
+        # 🔧 修复1: 使用last_values计算正确的GAE  
+        advantages, returns = self.compute_gae(rewards_batch, values_batch, dones_batch, last_values)
         
         return (obs_batch, actions_batch, log_probs_batch, 
                 advantages, returns)
     
-    def compute_gae(self, rewards, values, dones):
-        """计算GAE优势函数"""
-        advantages = torch.zeros_like(rewards).to(self.device)
-        gae = 0
+    def compute_gae(self, rewards, values, dones, last_values):
+        """🔧 修复1: 计算GAE优势函数 - 使用正确的bootstrap值"""
+        # rewards: [n_steps, n_envs]
+        # values:  [n_steps, n_envs] 
+        # last_values: [n_envs] 对应s_T的V估计（bootstrap）
+        n_steps, n_envs = rewards.shape
+        advantages = torch.zeros_like(rewards, device=self.device)
+        last_values = torch.as_tensor(last_values, dtype=torch.float32, device=self.device)
+        last_adv = torch.zeros(n_envs, device=self.device)
         
-        for t in reversed(range(self.args.n_steps)):
-            if t == self.args.n_steps - 1:
-                next_non_terminal = 1.0 - dones[t]
-                next_value = values[t]  # 最后一步使用当前值
-            else:
-                next_non_terminal = 1.0 - dones[t]
-                next_value = values[t + 1]
-            
+        for t in reversed(range(n_steps)):
+            next_non_terminal = 1.0 - dones[t]
+            next_value = last_values if t == n_steps - 1 else values[t + 1]
             delta = rewards[t] + self.args.gamma * next_value * next_non_terminal - values[t]
-            gae = delta + self.args.gamma * self.args.gae_lambda * next_non_terminal * gae
-            advantages[t] = gae
+            last_adv = delta + self.args.gamma * self.args.gae_lambda * next_non_terminal * last_adv
+            advantages[t] = last_adv
         
         returns = advantages + values
         return advantages, returns
@@ -1018,9 +1033,13 @@ class PPOExpertReproduction:
                 obs_tensor = torch.FloatTensor(obs).to(self.device)
                 
                 with torch.no_grad():
-                    action, _, _, _ = self.network.get_action_and_value(obs_tensor)
+                    # 🔧 修复2: 评估使用确定性动作（均值）
+                    action = self.network.act_deterministic(obs_tensor)
                 
-                obs, reward, done, info = self.envs.step(action.cpu().numpy())
+                # 🔧 修复6: 评估时也要clip动作
+                action_np = action.cpu().numpy()
+                action_np = np.clip(action_np, -1.0, 1.0)
+                obs, reward, done, info = self.envs.step(action_np)
                 
                 # 处理多环境返回值 - 取第一个环境的数据用于评估
                 if isinstance(reward, (list, tuple, np.ndarray)):
@@ -1893,27 +1912,27 @@ def add_arguments():
     parser.add_argument("--target_kl", type=float, default=None,
                        help="目标KL散度 (早停, 默认: None)")
     
-    # ===== 熵系数衰减参数 (新增) =====
-    parser.add_argument("--entropy_coef_start", type=float, default=0.015,
-                       help="初始熵系数 (默认: 0.015)")
-    parser.add_argument("--entropy_coef_end", type=float, default=0.005,
-                       help="最终熵系数 (默认: 0.005)")
-    parser.add_argument("--entropy_decay_end_ratio", type=float, default=0.8,
-                       help="熵系数衰减完成的训练进度比例 (默认: 0.8)")
+    # ===== 熵系数衰减参数 (🔧 修复5: 调整熵系数) =====
+    parser.add_argument("--entropy_coef_start", type=float, default=0.01,
+                       help="初始熵系数 (默认: 0.01, 降低自0.015)")
+    parser.add_argument("--entropy_coef_end", type=float, default=0.001,
+                       help="最终熵系数 (默认: 0.001, 降低自0.005)")
+    parser.add_argument("--entropy_decay_end_ratio", type=float, default=0.5,
+                       help="熵系数衰减完成的训练进度比例 (默认: 0.5, 降低自0.8)")
     
-    # ===== 奖励配置参数 (新增) =====
-    parser.add_argument("--success_reward", type=float, default=20.0,
-                       help="成功奖励 (默认: 20.0)")
-    parser.add_argument("--driving_reward", type=float, default=2.0,
-                       help="前进奖励 (默认: 2.0)")
-    parser.add_argument("--speed_reward", type=float, default=0.3,
-                       help="速度奖励 (默认: 0.3)")
+    # ===== 奖励配置参数 (🔧 修复4: 回调到合理量级) =====
+    parser.add_argument("--success_reward", type=float, default=10.0,
+                       help="成功奖励 (默认: 10.0, 回调自20.0)")
+    parser.add_argument("--driving_reward", type=float, default=1.0,
+                       help="前进奖励 (默认: 1.0, 回调自2.0)")
+    parser.add_argument("--speed_reward", type=float, default=0.1,
+                       help="速度奖励 (默认: 0.1, 回调自0.3)")
     parser.add_argument("--use_lateral_reward", action="store_true", default=True,
                        help="启用车道保持奖励 (默认: True)")
-    parser.add_argument("--out_of_road_penalty", type=float, default=8.0,
-                       help="冲出道路惩罚 (默认: 8.0)")
-    parser.add_argument("--crash_penalty", type=float, default=8.0,
-                       help="碰撞惩罚 (默认: 8.0)")
+    parser.add_argument("--out_of_road_penalty", type=float, default=5.0,
+                       help="冲出道路惩罚 (默认: 5.0, 回调自8.0)")
+    parser.add_argument("--crash_penalty", type=float, default=5.0,
+                       help="碰撞惩罚 (默认: 5.0, 回调自8.0)")
 
     # ===== 交通密度配置参数 (新增) =====
     parser.add_argument("--traffic_density_min", type=float, default=0.1,
