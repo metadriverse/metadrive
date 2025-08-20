@@ -59,11 +59,32 @@ class PPONetwork(nn.Module):
         self._init_weights()
     
     def _init_weights(self):
-        """权重初始化"""
-        for module in self.modules():
-            if isinstance(module, nn.Linear):
-                nn.init.orthogonal_(module.weight, gain=1.0)
-                nn.init.constant_(module.bias, 0.0)
+        # 隐层：正交 + gain=1.0（tanh稳定）
+        for layer in [self.actor_fc1, self.actor_fc2, self.critic_fc1, self.critic_fc2]:
+            nn.init.orthogonal_(layer.weight, gain=1.0)
+            nn.init.constant_(layer.bias, 0.0)
+
+        # critic 输出正常尺度
+        nn.init.orthogonal_(self.critic_out.weight, gain=1.0)
+        nn.init.constant_(self.critic_out.bias, 0.0)
+
+        # actor 输出降温：小得多的增益，避免一开始把动作打到饱和
+        nn.init.orthogonal_(self.actor_out.weight, gain=0.01)
+        nn.init.constant_(self.actor_out.bias, 0.0)
+
+        # 给“均值”的 throttle 维度一个小正偏置；给 log_std 维度一个较小的初值
+        # actor_out 的前 action_dim 是 mean，后 action_dim 是 log_std
+        with torch.no_grad():
+            action_dim = self.actor_out.out_features // 2
+            # log_std 初值更稳一些（比如 -0.5）
+            self.actor_out.bias[action_dim:].fill_(-0.5)
+            # throttle/brake 是动作的第2维（索引1）：给 mean 一个+0.3 的轻微偏置，鼓励先动起来
+            self.actor_out.bias[1] = 0.3
+        # """权重初始化"""
+        # for module in self.modules():
+        #     if isinstance(module, nn.Linear):
+        #         nn.init.orthogonal_(module.weight, gain=1.0)
+        #         nn.init.constant_(module.bias, 0.0)
     
     def forward(self, obs):
         """前向传播"""
@@ -79,32 +100,69 @@ class PPONetwork(nn.Module):
         
         return action_logits, value
     
-    def get_action_and_value(self, obs, action=None):
-        """获取动作和价值"""
-        action_logits, value = self.forward(obs)
+    # def get_action_and_value(self, obs, action=None):
+    #     """获取动作和价值"""
+    #     action_logits, value = self.forward(obs)
         
-        # 分离均值和标准差
+    #     # 分离均值和标准差
+    #     action_mean, action_log_std = torch.chunk(action_logits, 2, dim=-1)
+    #     # 🔧 修复3: 约束log_std防止漂移
+    #     action_log_std = torch.clamp(action_log_std, -5.0, 2.0)
+    #     action_std = torch.exp(action_log_std)
+        
+    #     # 创建分布
+    #     dist = torch.distributions.Normal(action_mean, action_std)
+        
+    #     if action is None:
+    #         action = dist.sample()
+        
+    #     log_prob = dist.log_prob(action).sum(dim=-1)
+    #     entropy = dist.entropy().sum(dim=-1)
+        
+    #     return action, log_prob, entropy, value.squeeze(-1)
+    
+    def get_action_and_value(self, obs, action=None, eps: float = 1e-6):
+        """使用 tanh-squashed Gaussian，确保环境执行的动作与计算log_prob完全一致"""
+        action_logits, value = self.forward(obs)
         action_mean, action_log_std = torch.chunk(action_logits, 2, dim=-1)
-        # 🔧 修复3: 约束log_std防止漂移
         action_log_std = torch.clamp(action_log_std, -5.0, 2.0)
         action_std = torch.exp(action_log_std)
-        
-        # 创建分布
-        dist = torch.distributions.Normal(action_mean, action_std)
-        
+
+        base_dist = torch.distributions.Normal(action_mean, action_std)
+
         if action is None:
-            action = dist.sample()
-        
-        log_prob = dist.log_prob(action).sum(dim=-1)
-        entropy = dist.entropy().sum(dim=-1)
-        
-        return action, log_prob, entropy, value.squeeze(-1)
+            # 训练时用 reparameterization 更稳定
+            u = base_dist.rsample()
+        else:
+            # 来自回放/旧动作：它已经是 tanh 后的 a，需要反挤压回 u=atanh(a)
+            a = action.clamp(-1 + eps, 1 - eps)
+            u = 0.5 * (torch.log1p(a) - torch.log1p(-a))  # atanh(a)
+
+        a = torch.tanh(u)
+
+        # log_prob 需要加上 tanh 的雅可比修正项
+        log_prob = base_dist.log_prob(u) - torch.log(1 - a.pow(2) + eps)
+        log_prob = log_prob.sum(dim=-1)
+
+        # 熵用 base_dist 的熵作近似（足够做熵正则/监控）
+        entropy = base_dist.entropy().sum(dim=-1)
+
+        return a, log_prob, entropy, value.squeeze(-1)
     
     def act_deterministic(self, obs_tensor):
         """🔧 修复2: 为评估提供确定性动作（使用均值）"""
         action_logits, _ = self.forward(obs_tensor)
         action_mean, _ = torch.chunk(action_logits, 2, dim=-1)
-        return action_mean
+        return torch.tanh(action_mean)
+    
+    def get_action_stats(self, obs_tensor):
+        """获取动作统计信息（均值）"""
+        action_logits, _ = self.forward(obs_tensor)
+        action_mean, _ = torch.chunk(action_logits, 2, dim=-1)
+        # 应用tanh变换
+        action_tanh = torch.tanh(action_mean)
+        # 返回steer和throttle的均值
+        return action_tanh[:, 0], action_tanh[:, 1]  # steer, throttle
 
 
 def make_env(rank: int, config: Dict[str, Any]):
@@ -255,6 +313,10 @@ class PPOExpertReproduction:
         self.episode_min_ttcs = deque(maxlen=100)
         self.episode_path_completions = deque(maxlen=100)
         self.episode_timeouts = deque(maxlen=100)
+        
+        # 🔧 新增：动作统计缓冲区
+        self.episode_steer_means = deque(maxlen=100)
+        self.episode_throttle_means = deque(maxlen=100)
         
         # 创建CSV日志
         self.csv_path = os.path.join(self.exp_dir, "training_logs.csv")
@@ -721,7 +783,8 @@ class PPOExpertReproduction:
             "learning_rate", "entropy_coef", "collision_rate", "offroad_rate", 
             "success_rate", "fps", "clipfrac", "explained_variance",
             "grad_norm", "avg_speed", "lane_deviation", "lane_change_count",
-            "min_ttc", "path_completion"
+            "min_ttc", "path_completion",
+            "steer_mean", "steer_std", "throttle_mean", "throttle_std"  # 🔧 新增动作统计列
         ]
         
         with open(self.csv_path, 'w', newline='', encoding='utf-8') as f:
@@ -751,6 +814,10 @@ class PPOExpertReproduction:
         lane_changes = np.zeros(self.args.n_envs)
         min_ttcs = [[] for _ in range(self.args.n_envs)]
         
+        # 🔧 新增：动作统计变量
+        episode_steer_means = [[] for _ in range(self.args.n_envs)]
+        episode_throttle_means = [[] for _ in range(self.args.n_envs)]
+        
         # 收集n_steps步数据
         for step in range(self.args.n_steps):
             # 将观测转换为tensor
@@ -758,11 +825,13 @@ class PPOExpertReproduction:
             
             with torch.no_grad():
                 actions, log_probs, _, values = self.network.get_action_and_value(obs_tensor)
+                # 🔧 新增：获取动作统计信息
+                steer_means, throttle_means = self.network.get_action_stats(obs_tensor)
             
             # 执行动作 - 向量化环境会自动处理多个环境
             actions_np = actions.cpu().numpy()
             # 🔧 修复6: 动作clip到[-1,1]范围
-            actions_np = np.clip(actions_np, -1.0, 1.0)
+            # actions_np = np.clip(actions_np, -1.0, 1.0)
             next_obs, rewards, dones, infos = self.envs.step(actions_np)
             
             # 收集episode统计信息 - 处理多环境信息
@@ -815,6 +884,10 @@ class PPOExpertReproduction:
                     lane_changes[env_idx] += 1
                 elif missing_metrics.get('lane_change', False):
                     lane_changes[env_idx] += 1
+                
+                # 🔧 新增：收集动作统计信息
+                episode_steer_means[env_idx].append(steer_means[env_idx].item())
+                episode_throttle_means[env_idx].append(throttle_means[env_idx].item())
             
             # 处理episode结束 - 检查每个环境
             for env_idx in range(self.args.n_envs):
@@ -826,6 +899,10 @@ class PPOExpertReproduction:
                     self.episode_lane_deviations.append(np.mean(lane_deviations[env_idx]) if lane_deviations[env_idx] else 0)
                     self.episode_lane_changes.append(lane_changes[env_idx])
                     self.episode_min_ttcs.append(np.min(min_ttcs[env_idx]) if min_ttcs[env_idx] else float('inf'))
+                    
+                    # 🔧 新增：记录动作统计
+                    self.episode_steer_means.append(np.mean(episode_steer_means[env_idx]) if episode_steer_means[env_idx] else 0)
+                    self.episode_throttle_means.append(np.mean(episode_throttle_means[env_idx]) if episode_throttle_means[env_idx] else 0)
                     
                     # 路径完成度计算
                     info = infos[env_idx]
@@ -846,6 +923,9 @@ class PPOExpertReproduction:
                     lane_deviations[env_idx] = []
                     lane_changes[env_idx] = 0
                     min_ttcs[env_idx] = []
+                    # 🔧 新增：重置动作统计
+                    episode_steer_means[env_idx] = []
+                    episode_throttle_means[env_idx] = []
             
             # 存储数据 - 直接使用向量化环境的真实数据
             obs_batch.append(obs.copy())
@@ -1050,7 +1130,7 @@ class PPOExpertReproduction:
                 
                 # 🔧 修复6: 评估时也要clip动作
                 action_np = action.cpu().numpy()
-                action_np = np.clip(action_np, -1.0, 1.0)
+                # action_np = np.clip(action_np, -1.0, 1.0)
                 obs, reward, done, info = self.envs.step(action_np)
                 
                 # 处理多环境返回值 - 取第一个环境的数据用于评估
@@ -1497,6 +1577,19 @@ class PPOExpertReproduction:
         if len(self.episode_timeouts) > 0:
             self.writer.add_scalar("env/time_outs", np.mean(self.episode_timeouts), self.global_step)
         
+        # 🔧 新增：动作统计记录
+        if len(self.episode_steer_means) > 0:
+            self.writer.add_scalar("actions/steer_mean", np.mean(self.episode_steer_means), self.global_step)
+            self.writer.add_scalar("actions/steer_std", np.std(self.episode_steer_means), self.global_step)
+            self.writer.add_scalar("actions/steer_min", np.min(self.episode_steer_means), self.global_step)
+            self.writer.add_scalar("actions/steer_max", np.max(self.episode_steer_means), self.global_step)
+        
+        if len(self.episode_throttle_means) > 0:
+            self.writer.add_scalar("actions/throttle_mean", np.mean(self.episode_throttle_means), self.global_step)
+            self.writer.add_scalar("actions/throttle_std", np.std(self.episode_throttle_means), self.global_step)
+            self.writer.add_scalar("actions/throttle_min", np.min(self.episode_throttle_means), self.global_step)
+            self.writer.add_scalar("actions/throttle_max", np.max(self.episode_throttle_means), self.global_step)
+        
         # 评估指标
         if eval_stats:
             for key, value in eval_stats.items():
@@ -1524,7 +1617,12 @@ class PPOExpertReproduction:
             eval_stats.get('eval_lane_deviation', 0) if eval_stats else 0,
             eval_stats.get('eval_lane_change_count', 0) if eval_stats else 0,
             eval_stats.get('eval_min_ttc', 0) if eval_stats else 0,
-            eval_stats.get('eval_path_completion', 0) if eval_stats else 0
+            eval_stats.get('eval_path_completion', 0) if eval_stats else 0,
+            # 🔧 新增：动作统计数据
+            np.mean(self.episode_steer_means) if len(self.episode_steer_means) > 0 else 0,
+            np.std(self.episode_steer_means) if len(self.episode_steer_means) > 0 else 0,
+            np.mean(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
+            np.std(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0
         ]
         
         with open(self.csv_path, 'a', newline='') as f:
@@ -1546,6 +1644,13 @@ class PPOExpertReproduction:
             print(f"   路径完成: {eval_stats.get('eval_path_completion', 0):.3f}")
             print(f"   成功率: {eval_stats.get('eval_success_rate', 0):.3f}")
             print(f"   当前熵系数: {self.current_entropy_coef:.4f}")
+            
+            # 🔧 新增：动作统计输出
+            if len(self.episode_steer_means) > 0:
+                print(f"   转向均值: {np.mean(self.episode_steer_means):.3f} ± {np.std(self.episode_steer_means):.3f}")
+            if len(self.episode_throttle_means) > 0:
+                print(f"   油门均值: {np.mean(self.episode_throttle_means):.3f} ± {np.std(self.episode_throttle_means):.3f}")
+            
             if train_stats.get('clipfrac', 0) > 0:
                 print(f"   Clip Fraction: {train_stats.get('clipfrac', 0):.3f}")
                 print(f"   Explained Var: {train_stats.get('explained_variance', 0):.3f}")

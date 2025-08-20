@@ -484,7 +484,7 @@ def main():
     parser = argparse.ArgumentParser(description="PPO检查点仿真控制器")
     
     parser.add_argument("--checkpoint", type=str,
-                       default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction/runs/ppo_expert_reproduction_20250819_004438/checkpoints/checkpoint_930.pt",
+                       default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction/runs/ppo_expert_reproduction_20250820_100618/checkpoints/checkpoint_130.pt",
                        help="检查点文件路径")
     
     parser.add_argument("--config", type=str, default=None,
