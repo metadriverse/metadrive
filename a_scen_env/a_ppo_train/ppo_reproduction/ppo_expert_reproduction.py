@@ -32,7 +32,7 @@ metadrive_root = current_dir.parent.parent.parent
 sys.path.insert(0, str(metadrive_root))
 
 from metadrive.envs.metadrive_env import MetaDriveEnv
-from metadrive.obs.state_obs import LidarStateObservation
+# from metadrive.obs.state_obs import LidarStateObservation
 from torch.utils.tensorboard import SummaryWriter
 
 
@@ -123,24 +123,53 @@ def make_env(rank: int, config: Dict[str, Any]):
         scenario_index = env_seed % 1000  # 确保在0-999范围内
         
         # 动态直线道路长度：每个环境不同数量的S段
-        min_segments, max_segments = 2, 10
+        min_segments, max_segments = 10, 12
         num_segments = min_segments + (scenario_index * (max_segments - min_segments)) // 1000
         map_string = "S" * num_segments
         
-        # 动态交通密度：每个环境不同（使用命令行参数）
+        # 动态交通密度：每个环境不同（使用基础配置中的值）
+        # 注意：交通密度会在训练过程中通过课程学习动态调整
         min_density, max_density = config.get("traffic_density_min", 0.1), config.get("traffic_density_max", 0.15)
-        traffic_density = min_density + (scenario_index * (max_density - min_density)) / 1000
+        base_traffic_density = config.get("traffic_density", min_density)  # 使用配置中的基础值
+        
+        # 为了保持环境多样性，每个环境在基础密度上增加小的扰动
+        density_perturbation = (scenario_index % 100) / 1000.0 * 0.02  # 最大2%的扰动
+        traffic_density = base_traffic_density + density_perturbation
         
         # 更新环境配置
         env_config["map"] = map_string
         env_config["traffic_density"] = traffic_density
         
         # 确保子进程环境不使用渲染（避免显示冲突）
+        # 强制覆盖渲染相关参数，确保多进程环境安全
         env_config["use_render"] = False
         env_config["debug"] = False
+        env_config["image_observation"] = False
+        
+        # 只保留MetaDrive真正必需的渲染参数
+        # 其他参数让MetaDrive使用默认值
+        
+        # 移除自定义参数（MetaDrive不识别的参数）
+        custom_params = ["traffic_density_min", "traffic_density_max"]
+        for param in custom_params:
+            if param in env_config:
+                del env_config[param]
+        
+        # 调试：打印关键配置参数
+        print(f"🔧 环境{rank}配置验证: use_render={env_config.get('use_render')}, image_observation={env_config.get('image_observation')}")
         
         # 创建MetaDrive环境
         env = MetaDriveEnv(env_config)
+        
+        # 为环境添加动态更新交通密度的能力
+        def update_traffic_density(new_density):
+            """动态更新交通密度"""
+            if hasattr(env, 'config'):
+                env.config['traffic_density'] = new_density + density_perturbation
+                # 如果环境支持运行时配置更新，在这里实现
+                
+        env.update_traffic_density = update_traffic_density
+        
         return env
     
     return _init
@@ -164,27 +193,39 @@ class PPOExpertReproduction:
         self.config = self._build_config()
         self._save_config()
         
-        # 创建环境
-        self.envs = self._create_environments()
+        # 初始化训练统计 - 必须在创建环境之前初始化
+        self.global_step = 0
+        self.episode_count = 0
+        self.train_stats = []
         
         # 存储交通密度参数供其他方法使用
         self.traffic_density_min = args.traffic_density_min
         self.traffic_density_max = args.traffic_density_max
         
+        # 课程学习状态 - 必须在创建环境之前初始化
+        self.use_curriculum = self.args.use_curriculum
+        self.curriculum_mode = self.args.curriculum_mode
+        self.curriculum_alpha = self.args.curriculum_alpha
+        self.curriculum_stage = 0  # gate模式使用；progress模式按进度算，不用这个
+        
+        # 创建环境
+        self.envs = self._create_environments()
+        
         # 创建网络
         self.network = PPONetwork().to(self.device)
         self.optimizer = optim.Adam(self.network.parameters(), lr=args.lr)
         
+        # 学习率调度参数缓存
+        self.lr_init = self.args.lr              # 初始学习率
+        self.lr_min = self.args.lr_min           # 衰减的下限
+        self.warmup_ratio = self.args.warmup_ratio
+        self.lr_schedule = self.args.lr_schedule
+
         # 验证和记录直线场景生成
         self._validate_and_log_scenarios()
         
         # 创建TensorBoard writer
         self.writer = SummaryWriter(log_dir=os.path.join(self.exp_dir, "tensorboard"))
-        
-        # 初始化训练统计
-        self.global_step = 0
-        self.episode_count = 0
-        self.train_stats = []
         
         # 恢复训练逻辑
         if args.resume_from:
@@ -241,6 +282,52 @@ class PPOExpertReproduction:
         print(f"📁 实验目录已创建: {exp_dir}")
         return exp_dir
     
+    def _compute_scheduled_lr(self):
+        # 进度 p ∈ [0,1]
+        p = min(1.0, float(self.global_step) / float(self.args.total_timesteps + 1e-8))
+        # warmup
+        if self.warmup_ratio > 0.0:
+            wu = self.warmup_ratio
+            if p < wu:
+                # 从 0 → lr_init 线性升温
+                return self.lr_init * (p / wu)
+            # 去掉 warmup 后的重新归一化进度
+            p = (p - wu) / max(1e-8, (1.0 - wu))
+            p = max(0.0, min(1.0, p))
+
+        if self.lr_schedule == "constant":
+            return self.lr_init
+
+        if self.lr_schedule == "linear":
+            # 线性从 lr_init → lr_min，80% 进度到达 lr_min
+            end_ratio = 0.8
+            q = min(1.0, p / end_ratio)
+            return self.lr_init + (self.lr_min - self.lr_init) * q
+
+        if self.lr_schedule == "cosine":
+            # 余弦退火从 lr_init → lr_min
+            import math
+            cos_term = 0.5 * (1 + math.cos(math.pi * p))
+            return self.lr_min + (self.lr_init - self.lr_min) * cos_term
+
+        if self.lr_schedule == "stage":
+            # === 兜底：没开课程时直接返回初始学习率 ===
+            if not self.use_curriculum:
+                return self.lr_init
+            # === 正常分段调度 ===
+            if self.curriculum_stage == 0:
+                return self.lr_init
+            elif self.curriculum_stage == 1:
+                return max(self.lr_min, self.lr_init * 0.7)
+            elif self.curriculum_stage == 2:
+                return max(self.lr_min, self.lr_init * 0.5)
+            else:  # stage 3
+                return max(self.lr_min, self.lr_init * 0.3)
+
+        # 兜底
+        return self.lr_init
+
+
     def _build_config(self) -> Dict[str, Any]:
         """构建完整配置"""
         return {
@@ -346,21 +433,125 @@ class PPOExpertReproduction:
         with open(config_path, 'w', encoding='utf-8') as f:
             json.dump(self.config, f, indent=2, ensure_ascii=False)
     
-    def _get_env_config(self):
-        """获取环境配置 - 支持直线场景生成"""
-        # 基于场景索引计算动态参数
+    def _curriculum_schedule(self):
+        """计算课程学习下的 map_string 和 traffic_density"""
+        # 计算训练进度 p ∈ [0,1]
+        p = min(1.0, float(self.global_step) / float(self.args.total_timesteps + 1e-8))
+
+        if self.use_curriculum:
+            if self.curriculum_mode == "progress":
+                # 四阶段分段
+                if p < 0.1:
+                    stage = 0
+                elif p < 0.2:
+                    stage = 1
+                elif p < 0.5:
+                    stage = 2
+                else:
+                    stage = 3
+
+                # 分段内归一化进度（用于插值）
+                seg_edges = [0.0, 0.1, 0.2, 0.5, 1.0]
+                seg_p = (p - seg_edges[stage]) / max(1e-8, (seg_edges[stage + 1] - seg_edges[stage]))
+                seg_p = max(0.0, min(1.0, seg_p)) ** self.curriculum_alpha
+            else:
+                # gate 模式：直接用固定 stage
+                stage = getattr(self, "curriculum_stage", 0)
+                seg_p = 1.0
+        else:
+            # 未启用课程：直接用最高难度
+            stage = 3
+            seg_p = 1.0
+
+        # 每阶段地图模板
+        stage_maps = {
+            0: "SSS",
+            1: "SSSSS",
+            2: "SCSCS",
+            3: None   # None → 原始动态直线逻辑
+        }
+
+        # 每阶段目标交通密度区间
+        stage_density = {
+            0: (0.03, 0.06),
+            1: (0.06, 0.09),
+            2: (0.09, 0.12),
+            3: (0.12, self.args.traffic_density_max)
+        }
+
+        # 计算交通密度
+        d0, d1 = stage_density[stage]
+        traffic_density_cur = d0 + (d1 - d0) * seg_p
+
+        # 计算地图字符串
+        if stage_maps[stage] is not None:
+            map_string = stage_maps[stage]
+        else:
+            # 动态直线逻辑
+            scenario_seed = self.args.seed if hasattr(self, 'current_scenario_seed') else self.args.seed
+            scenario_index = scenario_seed % 1000
+            min_segments, max_segments = 2, 10
+            num_segments = min_segments + (scenario_index * (max_segments - min_segments)) // 1000
+            map_string = "S" * num_segments
+
+        return map_string, traffic_density_cur
+    def _compute_dynamic_straight_map(self):
+        """保持你原来的动态直线地图逻辑，仅返回 map_string"""
         scenario_seed = self.args.seed if hasattr(self, 'current_scenario_seed') else self.args.seed
-        scenario_index = scenario_seed % 1000  # 场景索引 0-999
-        
-        # 动态交通密度：基于场景索引生成不同的交通密度（使用命令行参数）
-        min_density, max_density = self.args.traffic_density_min, self.args.traffic_density_max
-        traffic_density = min_density + (scenario_index * (max_density - min_density)) / 1000
-        
-        # 动态直线道路长度：通过生成不同数量的S段来实现
-        # 长度范围：2-10个S段，每段约50-80米
+        scenario_index = scenario_seed % 1000
         min_segments, max_segments = 2, 10
         num_segments = min_segments + (scenario_index * (max_segments - min_segments)) // 1000
-        map_string = "S" * num_segments  # 生成多个直线段
+        return "S" * num_segments
+
+    def _curriculum_density(self):
+        """
+        只根据课程学习计算交通密度 traffic_density，地图不受影响（始终直线）。
+        返回: float traffic_density
+        """
+        # 基本进度 p ∈ [0,1]
+        p = min(1.0, float(self.global_step) / float(self.args.total_timesteps + 1e-8))
+
+        # 默认目标阶段 = 3（最难），未开课程学习直接用目标分布
+        stage = 3
+        seg_p = 1.0
+
+        if self.use_curriculum:
+            if self.curriculum_mode == "progress":
+                # 四段式：[0.0, 0.1, 0.2, 0.5, 1.0]
+                if p < 0.1:
+                    stage = 0
+                elif p < 0.2:
+                    stage = 1
+                elif p < 0.5:
+                    stage = 2
+                else:
+                    stage = 3
+                seg_edges = [0.0, 0.1, 0.2, 0.5, 1.0]
+                seg_p = (p - seg_edges[stage]) / max(1e-8, (seg_edges[stage+1] - seg_edges[stage]))
+                seg_p = max(0.0, min(1.0, seg_p)) ** self.curriculum_alpha
+            else:
+                # gate：由 self.curriculum_stage 控制
+                stage = getattr(self, "curriculum_stage", 0)
+                seg_p = 1.0
+
+        # 仅密度分布按阶段变化；最后阶段回到你的原始范围
+        stage_density = {
+            0: (0.03, 0.06),
+            1: (0.06, 0.09),
+            2: (0.09, 0.12),
+            3: (0.12, self.args.traffic_density_max)
+        }
+
+        d0, d1 = stage_density[stage]
+        return d0 + (d1 - d0) * seg_p
+
+    def _get_base_env_config(self):
+        """获取基础环境配置 - 不包含动态参数"""
+        # 地图：保持直线（动态段数），不受课程学习影响
+        map_string = self._compute_dynamic_straight_map()
+
+        # 使用初始交通密度，后续会动态更新
+        initial_traffic_density = self._curriculum_density()
         
         return {
             # === 直线场景配置 ===
@@ -368,10 +559,15 @@ class PPOExpertReproduction:
             "map": map_string,                   # 使用动态数量的直线段
             
             # === 动态交通配置 ===
-            "traffic_density": traffic_density,  # 动态交通密度
+            "traffic_density": initial_traffic_density,  # 初始交通密度
             "random_traffic": True,              # 启用交通随机化
             "horizon": 1000,
-            "start_seed": scenario_seed,
+            "start_seed": self.args.seed,
+            
+            # === 渲染和观测配置（MetaDrive必需） ===
+            "use_render": False,                 # 关闭渲染（训练时不需要）
+            "debug": False,                      # 关闭调试模式
+            "image_observation": False,          # 关闭图像观测（使用激光雷达）
             
             # === 优化的奖励配置 ===
             # 成功奖励 - 增加以鼓励完成任务
@@ -422,13 +618,49 @@ class PPOExpertReproduction:
             }
         }
     
-    def _create_single_environment(self):
-        """创建单个环境实例"""
-        return MetaDriveEnv(self._get_env_config())
+    def _update_env_curriculum(self):
+        """动态更新环境的课程学习参数"""
+        if not self.use_curriculum:
+            return
+            
+        # 计算当前交通密度
+        current_traffic_density = self._curriculum_density()
+        
+        # 更新所有环境的交通密度
+        # SB3 的 VecEnv 都支持 env_method；SubprocVecEnv 也支持
+        if hasattr(self.envs, "env_method"):
+            self.envs.env_method("update_traffic_density", current_traffic_density)
+        elif hasattr(self.envs, "envs"):
+            # DummyVecEnv 情况：拿到真实 env 实例逐个更新
+            for env in self.envs.envs:
+                if hasattr(env, "update_traffic_density"):
+                    env.update_traffic_density(current_traffic_density)
+                elif hasattr(env, "config"):
+                    env.config["traffic_density"] = current_traffic_density
+
+        # # 对于向量化环境，需要特殊处理
+        # if hasattr(self.envs, 'set_attr'):
+        #     # Stable Baselines3 的向量化环境
+        #     self.envs.set_attr('config', {'traffic_density': current_traffic_density})
+        # elif hasattr(self.envs, 'envs'):
+        #     # 手动更新每个环境
+        #     for env in self.envs.envs:
+        #         if hasattr(env, 'config'):
+        #             env.config['traffic_density'] = current_traffic_density
+        #         # 如果环境有内部配置更新方法，也调用它
+        #         if hasattr(env, 'update_traffic_density'):
+        #             env.update_traffic_density(current_traffic_density)
+
+    
+    def _get_env_config(self):
+        """获取环境配置 - 保持兼容性，实际使用 _get_base_env_config"""
+        return self._get_base_env_config()
     
     def _create_environments(self):
         """创建向量化环境 - 支持真正的多进程并行"""
-        env_config = self._get_env_config()
+        # 注意：这里不直接调用 _get_env_config()，因为课程学习需要动态更新
+        # 我们传递基础配置，交通密度在运行时动态计算
+        base_env_config = self._get_base_env_config()
         
         if self.args.n_envs > 1:
             print(f"🚀 创建 {self.args.n_envs} 个并行环境 (SubprocVecEnv)")
@@ -436,7 +668,7 @@ class PPOExpertReproduction:
             
             # 使用SubprocVecEnv创建多进程并行环境
             envs = SubprocVecEnv([
-                make_env(rank, env_config) 
+                make_env(rank, base_env_config) 
                 for rank in range(self.args.n_envs)
             ])
             
@@ -446,7 +678,7 @@ class PPOExpertReproduction:
             print("📍 创建单个环境 (DummyVecEnv)")
             
             # 单环境也使用向量化接口保持一致性
-            envs = DummyVecEnv([make_env(0, env_config)])
+            envs = DummyVecEnv([make_env(0, base_env_config)])
             return envs
     
     def _update_entropy_coef(self):
@@ -1167,6 +1399,21 @@ class PPOExpertReproduction:
         # 添加熵系数记录
         self.writer.add_scalar("train/entropy_coef", self.current_entropy_coef, self.global_step)
         
+        # 记录课程阶段（便于可视化）
+        stage_for_log = 3
+        if self.use_curriculum:
+            stage_for_log = self.curriculum_stage if self.curriculum_mode == "gate" else (
+                0 if self.global_step < 0.1 * self.args.total_timesteps else
+                1 if self.global_step < 0.2 * self.args.total_timesteps else
+                2 if self.global_step < 0.5 * self.args.total_timesteps else 3
+            )
+        self.writer.add_scalar("env/curriculum_stage", stage_for_log, self.global_step)
+        
+        # 记录当前交通密度（课程学习）
+        if self.use_curriculum:
+            current_traffic_density = self._curriculum_density()
+            self.writer.add_scalar("env/curriculum_traffic_density", current_traffic_density, self.global_step)
+
         # Episode环境统计
         if len(self.episode_rewards) > 0:
             self.writer.add_scalar("env/ep_rew_mean", np.mean(self.episode_rewards), self.global_step)
@@ -1254,11 +1501,19 @@ class PPOExpertReproduction:
             # 更新熵系数
             current_entropy = self._update_entropy_coef()
             
+            # 更新课程学习环境参数
+            self._update_env_curriculum()
+            
             # 收集rollouts
             rollout_start = time.time()
             rollouts = self.collect_rollouts()
             rollout_time = time.time() - rollout_start
             
+            # 更新学习率（每个迭代生效）
+            new_lr = self._compute_scheduled_lr()
+            for pg in self.optimizer.param_groups:
+                pg["lr"] = new_lr
+
             # 更新策略
             update_start = time.time()
             train_stats = self.update_policy(*rollouts)
@@ -1274,6 +1529,59 @@ class PPOExpertReproduction:
             if iteration % self.args.eval_freq == 0:
                 eval_stats = self.evaluate()
                 
+                # ===== gate 模式晋升判定 =====
+                if self.use_curriculum and self.curriculum_mode == "gate":
+                    succ = eval_stats.get("eval_success_rate", 0.0)
+                    coll = eval_stats.get("eval_collision_rate", 1.0)
+                    if self.curriculum_stage < 3 and succ >= self.args.gate_succ_threshold and coll <= self.args.gate_coll_threshold:
+                        self.curriculum_stage += 1
+                        print(f"🎓 课程晋升 -> Stage {self.curriculum_stage}")
+
+                # ===== 指标阈值达标检查 =====
+                reward_mean = eval_stats.get("eval_reward_mean", 0.0)
+                success_rate = eval_stats.get("eval_success_rate", 0.0)
+                collision_rate = eval_stats.get("eval_collision_rate", 1.0)
+                offroad_rate = eval_stats.get("eval_offroad_rate", 1.0)
+                
+                # 检查是否同时满足所有阈值条件
+                if (reward_mean >= 200 and 
+                    success_rate >= 0.70 and 
+                    collision_rate <= 0.15 and 
+                    offroad_rate <= 0.15):
+                    
+                    print(f"🎯 指标达标检测到！")
+                    print(f"   平均奖励: {reward_mean:.3f} ≥ 200.0 ✅")
+                    print(f"   成功率: {success_rate:.3f} ≥ 0.70 ✅")
+                    print(f"   碰撞率: {collision_rate:.3f} ≤ 0.15 ✅")
+                    print(f"   冲出道路率: {offroad_rate:.3f} ≤ 0.15 ✅")
+                    
+                    # 保存达标检查点（特殊命名）
+                    milestone_checkpoint_path = os.path.join(
+                        self.exp_dir, "checkpoints", 
+                        f"milestone_checkpoint_iter{iteration}_reward{reward_mean:.1f}_succ{success_rate:.2f}.pt"
+                    )
+                    
+                    milestone_checkpoint = {
+                        "iteration": iteration,
+                        "global_step": self.global_step,
+                        "network_state_dict": self.network.state_dict(),
+                        "optimizer_state_dict": self.optimizer.state_dict(),
+                        "config": self.config,
+                        "args": vars(self.args),
+                        "milestone_metrics": {
+                            "eval_reward_mean": reward_mean,
+                            "eval_success_rate": success_rate,
+                            "eval_collision_rate": collision_rate,
+                            "eval_offroad_rate": offroad_rate,
+                            "milestone_achieved": True,
+                            "milestone_timestamp": datetime.now().isoformat()
+                        }
+                    }
+                    
+                    torch.save(milestone_checkpoint, milestone_checkpoint_path)
+                    print(f"🏆 里程碑检查点已保存: {os.path.basename(milestone_checkpoint_path)}")
+                    print(f"📁 完整路径: {milestone_checkpoint_path}")
+
                 # 检查是否为最佳模型
                 is_best = eval_stats["eval_reward_mean"] > best_reward
                 if is_best:
@@ -1540,6 +1848,10 @@ env_config.update({{
         print(f"📄 场景配置已保存: {scenario_config_path}")
         print("=" * 50)
 
+    def _create_single_environment(self):
+        """创建单个环境实例"""
+        return MetaDriveEnv(self._get_base_env_config())
+
 
 def add_arguments():
     """添加命令行参数"""
@@ -1548,6 +1860,14 @@ def add_arguments():
     # ===== 关键超参数 (可调整) =====
     parser.add_argument("--lr", type=float, default=3e-4,
                        help="学习率 (默认: 3e-4)")
+    parser.add_argument("--lr_schedule", type=str, default="linear",
+                        choices=["constant", "linear", "cosine", "stage"],
+                        help="学习率日程 (默认: linear)")
+    parser.add_argument("--lr_min", type=float, default=3e-5,
+                        help="最小学习率（线性/余弦的下限）")
+    parser.add_argument("--warmup_ratio", type=float, default=0.05,
+                        help="Warmup占总步数比例 (默认: 0.05)")
+
     parser.add_argument("--n_steps", type=int, default=2048,
                        help="rollout步数 (默认: 2048)")
     parser.add_argument("--n_envs", type=int, default=4,
@@ -1605,12 +1925,26 @@ def add_arguments():
     # ===== 训练设置 =====
     parser.add_argument("--total_timesteps", type=int, default=1000000,
                        help="总训练步数 (默认: 1,000,000)")
-    parser.add_argument("--checkpoint_freq", type=int, default=50,
+    parser.add_argument("--checkpoint_freq", type=int, default=10,
                        help="检查点保存频率 (默认: 50)")
-    parser.add_argument("--eval_freq", type=int, default=10,
+    parser.add_argument("--eval_freq", type=int, default=50,
                        help="评估频率 (默认: 10)")
     parser.add_argument("--log_freq", type=int, default=1,
                        help="日志记录频率 (默认: 1)")
+    
+    # ===== 课程学习（Curriculum Learning）开关与参数 =====
+    parser.add_argument("--use_curriculum", action="store_true", default=False,
+                        help="启用课程学习（默认关闭）")
+    parser.add_argument("--curriculum_mode", type=str, default="progress",
+                        choices=["progress", "gate"],
+                        help="课程推进方式：progress=按训练进度；gate=按评估指标门槛（默认：progress）")
+    parser.add_argument("--curriculum_alpha", type=float, default=1.5,
+                        help="progress模式下的分段内插值幂指数（默认1.5，越大越保守）")
+    parser.add_argument("--gate_succ_threshold", type=float, default=0.70,
+                        help="gate模式：晋级所需成功率阈值（默认0.70）")
+    parser.add_argument("--gate_coll_threshold", type=float, default=0.20,
+                        help="gate模式：晋级所需碰撞率上限（默认0.20）")
+
     
     # ===== 系统设置 =====
     parser.add_argument("--device", type=str, default="auto",
@@ -1637,7 +1971,7 @@ def main():
     
     # 自动选择设备
     if args.device == "auto":
-        args.device = "cuda" if torch.cuda.is_available() else "cpu"
+        args.device = "cuda"# if torch.cuda.is_available() else "cpu"
     
     print("🎯 MetaDrive PPO Expert 复现训练")
     print("=" * 50)
