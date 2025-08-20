@@ -277,6 +277,9 @@ class PPOExpertReproduction:
         # 创建环境
         self.envs = self._create_environments()
         
+        # 🔧 新增：动态设置变道冷却时间步数
+        self._setup_lane_change_cooldown()
+        
         # 创建网络
         self.network = PPONetwork().to(self.device)
         self.optimizer = optim.Adam(self.network.parameters(), lr=args.lr)
@@ -318,6 +321,11 @@ class PPOExpertReproduction:
         self.episode_steer_means = deque(maxlen=100)
         self.episode_throttle_means = deque(maxlen=100)
         
+        # 🔧 新增：变道统计缓冲区
+        self.episode_lane_change_penalties = deque(maxlen=100)
+        self.episode_lane_change_speed_ratios = deque(maxlen=100)
+        self.episode_cooldown_violations = deque(maxlen=100)
+        
         # 创建CSV日志
         self.csv_path = os.path.join(self.exp_dir, "training_logs.csv")
         self._init_csv_log()
@@ -325,10 +333,55 @@ class PPOExpertReproduction:
         # 初始化车道跟踪（用于车道变更检测）
         self._last_lane_index = {}
         
+        # 🔧 新增：变道冷却时间跟踪
+        self._last_lane_change_step = {}
+        # 动态计算冷却时间步数，基于环境实际频率
+        self._lane_change_cooldown_steps = None  # 将在环境创建后动态设置
+        
         print(f"🚀 PPO Expert复现训练初始化完成")
         print(f"📁 实验目录: {self.exp_dir}")
         print(f"🔧 设备: {self.device}")
         print(f"🌱 随机种子: {args.seed}")
+    
+    def _setup_lane_change_cooldown(self):
+        """🔧 新增：动态设置变道冷却时间步数"""
+        try:
+            # 获取第一个环境的配置来了解实际频率
+            if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
+                env = self.envs.envs[0]
+            elif hasattr(self.envs, 'venv') and hasattr(self.envs.venv, 'envs'):
+                env = self.envs.venv.envs[0] if len(self.envs.venv.envs) > 0 else None
+            else:
+                env = None
+            
+            if env and hasattr(env, 'config'):
+                # 获取物理步长和决策重复次数
+                physics_step_size = env.config.get('physics_world_step_size', 0.02)
+                decision_repeat = env.config.get('decision_repeat', 5)
+                
+                # 计算实际有效频率
+                effective_time_step = physics_step_size * decision_repeat
+                effective_frequency = 1.0 / effective_time_step
+                
+                # 计算冷却时间步数
+                self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * effective_frequency)
+                
+                print(f"🔧 变道冷却时间设置:")
+                print(f"   物理步长: {physics_step_size:.3f}s")
+                print(f"   决策重复: {decision_repeat}")
+                print(f"   有效频率: {effective_frequency:.1f}Hz")
+                print(f"   冷却时间: {self.args.lc_cooldown_s}s → {self._lane_change_cooldown_steps}步")
+            else:
+                # 如果无法获取环境配置，使用默认值
+                self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * 10)
+                print(f"⚠️  无法获取环境配置，使用默认10Hz假设")
+                print(f"   冷却时间: {self.args.lc_cooldown_s}s → {self._lane_change_cooldown_steps}步")
+                
+        except Exception as e:
+            # 异常处理，使用默认值
+            self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * 10)
+            print(f"⚠️  设置冷却时间失败: {e}，使用默认10Hz假设")
+            print(f"   冷却时间: {self.args.lc_cooldown_s}s → {self._lane_change_cooldown_steps}步")
     
     def _create_experiment_dir(self) -> str:
         """创建实验目录"""
@@ -436,7 +489,13 @@ class PPOExpertReproduction:
                     "out_of_road_penalty": self.args.out_of_road_penalty,
                     "crash_vehicle_penalty": self.args.crash_penalty,
                     "crash_object_penalty": self.args.crash_penalty,
-                    "crash_sidewalk_penalty": 2.0
+                    "crash_sidewalk_penalty": 2.0,
+                    # 🔧 新增：变道惩罚配置
+                    "w_lc": self.args.w_lc,
+                    "k_speed": self.args.k_speed,
+                    "v_limit": self.args.v_limit,
+                    "lc_cooldown_s": self.args.lc_cooldown_s,
+                    "w_lc_cool": self.args.w_lc_cool
                 },
                 
                 # 终止条件配置
@@ -662,7 +721,7 @@ class PPOExpertReproduction:
             "out_of_road_done": True,         # 确保冲出道路会终止
             "crash_vehicle_done": True,       # 确保撞车会终止
             "crash_object_done": True,        # 确保撞物体会终止
-            "on_continuous_line_done": False, # 允许压线，降低学习难度
+            "on_continuous_line_done": True, # 不允许压线，降低学习难度
             "on_broken_line_done": False,     # 允许压虚线
             
             "vehicle_config": {
@@ -784,7 +843,8 @@ class PPOExpertReproduction:
             "success_rate", "fps", "clipfrac", "explained_variance",
             "grad_norm", "avg_speed", "lane_deviation", "lane_change_count",
             "min_ttc", "path_completion",
-            "steer_mean", "steer_std", "throttle_mean", "throttle_std"  # 🔧 新增动作统计列
+            "steer_mean", "steer_std", "throttle_mean", "throttle_std",  # 🔧 新增动作统计列
+            "lane_change_penalty_mean", "lane_change_speed_ratio", "cooldown_violations"  # 🔧 新增变道统计列
         ]
         
         with open(self.csv_path, 'w', newline='', encoding='utf-8') as f:
@@ -817,6 +877,11 @@ class PPOExpertReproduction:
         # 🔧 新增：动作统计变量
         episode_steer_means = [[] for _ in range(self.args.n_envs)]
         episode_throttle_means = [[] for _ in range(self.args.n_envs)]
+        
+        # 🔧 新增：变道惩罚统计变量
+        episode_lane_change_penalties = [[] for _ in range(self.args.n_envs)]
+        episode_lane_change_speed_ratios = [[] for _ in range(self.args.n_envs)]
+        episode_cooldown_violations = [[] for _ in range(self.args.n_envs)]
         
         # 收集n_steps步数据
         for step in range(self.args.n_steps):
@@ -880,10 +945,59 @@ class PPOExpertReproduction:
                     min_ttcs[env_idx].append(missing_metrics['ttc'])
                 
                 # 车道变换检测 - 优先使用info，其次使用计算值
+                lane_change_detected = False
                 if 'lane_change' in info and info['lane_change']:
                     lane_changes[env_idx] += 1
+                    lane_change_detected = True
                 elif missing_metrics.get('lane_change', False):
                     lane_changes[env_idx] += 1
+                    lane_change_detected = True
+                
+                # 🔧 新增：变道惩罚计算
+                if lane_change_detected:
+                    # 获取当前速度
+                    current_speed = 0.0
+                    if 'velocity' in info:
+                        current_speed = abs(info['velocity'])
+                    elif 'speed' in info:
+                        current_speed = abs(info['speed'])
+                    elif hasattr(info, 'speed'):
+                        current_speed = abs(info.speed)
+                    
+                    # 计算速度比例
+                    speed_ratio = current_speed / self.args.v_limit
+                    speed_ratio = min(speed_ratio, 2.0)  # 限制最大比例
+                    
+                    # 基础变道惩罚
+                    base_penalty = self.args.w_lc
+                    
+                    # 高速放大惩罚
+                    speed_penalty = base_penalty * (1 + self.args.k_speed * speed_ratio)
+                    
+                    # 检查冷却时间
+                    agent_id = env_idx  # 简化：直接使用环境索引
+                    current_step = self.global_step + step
+                    
+                    if agent_id in self._last_lane_change_step:
+                        steps_since_last_change = current_step - self._last_lane_change_step[agent_id]
+                        if steps_since_last_change < self._lane_change_cooldown_steps:
+                            # 冷却期内，附加惩罚
+                            speed_penalty += self.args.w_lc_cool
+                            episode_cooldown_violations[env_idx].append(1)
+                        else:
+                            episode_cooldown_violations[env_idx].append(0)
+                    else:
+                        episode_cooldown_violations[env_idx].append(0)
+                    
+                    # 更新最后变道时间
+                    self._last_lane_change_step[agent_id] = current_step
+                    
+                    # 记录变道惩罚统计
+                    episode_lane_change_penalties[env_idx].append(speed_penalty)
+                    episode_lane_change_speed_ratios[env_idx].append(speed_ratio)
+                    
+                    # 将惩罚应用到奖励中
+                    rewards[env_idx] -= speed_penalty
                 
                 # 🔧 新增：收集动作统计信息
                 episode_steer_means[env_idx].append(steer_means[env_idx].item())
@@ -903,6 +1017,11 @@ class PPOExpertReproduction:
                     # 🔧 新增：记录动作统计
                     self.episode_steer_means.append(np.mean(episode_steer_means[env_idx]) if episode_steer_means[env_idx] else 0)
                     self.episode_throttle_means.append(np.mean(episode_throttle_means[env_idx]) if episode_throttle_means[env_idx] else 0)
+                    
+                    # 🔧 新增：记录变道惩罚统计
+                    self.episode_lane_change_penalties.append(np.mean(episode_lane_change_penalties[env_idx]) if episode_lane_change_penalties[env_idx] else 0)
+                    self.episode_lane_change_speed_ratios.append(np.mean(episode_lane_change_speed_ratios[env_idx]) if episode_lane_change_speed_ratios[env_idx] else 0)
+                    self.episode_cooldown_violations.append(np.sum(episode_cooldown_violations[env_idx]) if episode_cooldown_violations[env_idx] else 0)
                     
                     # 路径完成度计算
                     info = infos[env_idx]
@@ -926,6 +1045,10 @@ class PPOExpertReproduction:
                     # 🔧 新增：重置动作统计
                     episode_steer_means[env_idx] = []
                     episode_throttle_means[env_idx] = []
+                    # 🔧 新增：重置变道统计
+                    episode_lane_change_penalties[env_idx] = []
+                    episode_lane_change_speed_ratios[env_idx] = []
+                    episode_cooldown_violations[env_idx] = []
             
             # 存储数据 - 直接使用向量化环境的真实数据
             obs_batch.append(obs.copy())
@@ -1590,6 +1713,13 @@ class PPOExpertReproduction:
             self.writer.add_scalar("actions/throttle_min", np.min(self.episode_throttle_means), self.global_step)
             self.writer.add_scalar("actions/throttle_max", np.max(self.episode_throttle_means), self.global_step)
         
+        # 🔧 新增：变道惩罚统计记录
+        if len(self.episode_lane_change_penalties) > 0:
+            self.writer.add_scalar("lane_change/penalty_mean", np.mean(self.episode_lane_change_penalties), self.global_step)
+            self.writer.add_scalar("lane_change/penalty_total", np.sum(self.episode_lane_change_penalties), self.global_step)
+            self.writer.add_scalar("lane_change/speed_ratio_mean", np.mean(self.episode_lane_change_speed_ratios), self.global_step)
+            self.writer.add_scalar("lane_change/cooldown_violations", np.sum(self.episode_cooldown_violations), self.global_step)
+        
         # 评估指标
         if eval_stats:
             for key, value in eval_stats.items():
@@ -1622,7 +1752,11 @@ class PPOExpertReproduction:
             np.mean(self.episode_steer_means) if len(self.episode_steer_means) > 0 else 0,
             np.std(self.episode_steer_means) if len(self.episode_steer_means) > 0 else 0,
             np.mean(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
-            np.std(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0
+            np.std(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
+            # 🔧 新增：变道统计数据
+            np.mean(self.episode_lane_change_penalties) if len(self.episode_lane_change_penalties) > 0 else 0,
+            np.mean(self.episode_lane_change_speed_ratios) if len(self.episode_lane_change_speed_ratios) > 0 else 0,
+            np.sum(self.episode_cooldown_violations) if len(self.episode_cooldown_violations) > 0 else 0
         ]
         
         with open(self.csv_path, 'a', newline='') as f:
@@ -1650,6 +1784,12 @@ class PPOExpertReproduction:
                 print(f"   转向均值: {np.mean(self.episode_steer_means):.3f} ± {np.std(self.episode_steer_means):.3f}")
             if len(self.episode_throttle_means) > 0:
                 print(f"   油门均值: {np.mean(self.episode_throttle_means):.3f} ± {np.std(self.episode_throttle_means):.3f}")
+            
+            # 🔧 新增：变道惩罚统计输出
+            if len(self.episode_lane_change_penalties) > 0:
+                print(f"   变道惩罚: {np.mean(self.episode_lane_change_penalties):.3f} ± {np.std(self.episode_lane_change_penalties):.3f}")
+                print(f"   变道速度比: {np.mean(self.episode_lane_change_speed_ratios):.3f}")
+                print(f"   冷却违规: {np.sum(self.episode_cooldown_violations)}")
             
             if train_stats.get('clipfrac', 0) > 0:
                 print(f"   Clip Fraction: {train_stats.get('clipfrac', 0):.3f}")
@@ -2076,7 +2216,7 @@ def add_arguments():
                        help="熵系数衰减完成的训练进度比例 (默认: 0.5, 降低自0.8)")
     
     # ===== 奖励配置参数 (🔧 修复4: 回调到合理量级) =====
-    parser.add_argument("--success_reward", type=float, default=10.0,
+    parser.add_argument("--success_reward", type=float, default=20.0,
                        help="成功奖励 (默认: 10.0, 回调自20.0)")
     parser.add_argument("--driving_reward", type=float, default=1.0,
                        help="前进奖励 (默认: 1.0, 回调自2.0)")
@@ -2084,10 +2224,22 @@ def add_arguments():
                        help="速度奖励 (默认: 0.1, 回调自0.3)")
     parser.add_argument("--use_lateral_reward", action="store_true", default=True,
                        help="启用车道保持奖励 (默认: True)")
-    parser.add_argument("--out_of_road_penalty", type=float, default=5.0,
+    parser.add_argument("--out_of_road_penalty", type=float, default=8.0,
                        help="冲出道路惩罚 (默认: 5.0, 回调自8.0)")
-    parser.add_argument("--crash_penalty", type=float, default=5.0,
+    parser.add_argument("--crash_penalty", type=float, default=8.0,
                        help="碰撞惩罚 (默认: 5.0, 回调自8.0)")
+    
+    # ===== 新增：变道惩罚配置参数 =====
+    parser.add_argument("--w_lc", type=float, default=0.6,
+                       help="基础变道成本 (默认: 0.6)")
+    parser.add_argument("--k_speed", type=float, default=1.0,
+                       help="高速放大系数 (默认: 1.0)")
+    parser.add_argument("--v_limit", type=float, default=15.0,
+                       help="用于速度归一的限速 (默认: 15.0)")
+    parser.add_argument("--lc_cooldown_s", type=float, default=4.0,
+                       help="变道冷却时间，秒 (默认: 4.0)")
+    parser.add_argument("--w_lc_cool", type=float, default=1,
+                       help="冷却期内附加惩罚 (默认: 1)")
 
     # ===== 交通密度配置参数 (新增) =====
     parser.add_argument("--traffic_density_min", type=float, default=0.1,
