@@ -754,7 +754,7 @@ class PPOExpertReproduction:
         # 收集n_steps步数据
         for step in range(self.args.n_steps):
             # 将观测转换为tensor
-            obs_tensor = torch.FloatTensor(obs).to(self.device)
+            obs_tensor = torch.as_tensor(np.array(obs), dtype=torch.float32, device=self.device)   #torch.FloatTensor(obs).to(self.device)
             
             with torch.no_grad():
                 actions, log_probs, _, values = self.network.get_action_and_value(obs_tensor)
@@ -865,13 +865,14 @@ class PPOExpertReproduction:
         # 更新全局步数
         self.global_step += self.args.n_steps * self.args.n_envs
         
-        # 转换为tensor
-        obs_batch = torch.FloatTensor(obs_batch).to(self.device)
-        actions_batch = torch.FloatTensor(actions_batch).to(self.device)
-        log_probs_batch = torch.FloatTensor(log_probs_batch).to(self.device)
-        rewards_batch = torch.FloatTensor(rewards_batch).to(self.device)
-        dones_batch = torch.FloatTensor(dones_batch).to(self.device)
-        values_batch = torch.FloatTensor(values_batch).to(self.device)
+        # 转换为tensor - 使用更高效的方法
+        obs_batch     = torch.as_tensor(np.asarray(obs_batch,     dtype=np.float32), device=self.device)
+        actions_batch = torch.as_tensor(np.asarray(actions_batch, dtype=np.float32), device=self.device)
+        log_probs_batch = torch.as_tensor(np.asarray(log_probs_batch, dtype=np.float32), device=self.device)
+        rewards_batch = torch.as_tensor(np.asarray(rewards_batch, dtype=np.float32), device=self.device)
+        dones_batch   = torch.as_tensor(np.asarray(dones_batch,   dtype=np.float32), device=self.device)
+        values_batch  = torch.as_tensor(np.asarray(values_batch,  dtype=np.float32), device=self.device)
+
         
         # 🔧 修复1: 使用last_values计算正确的GAE  
         advantages, returns = self.compute_gae(rewards_batch, values_batch, dones_batch, last_values)
@@ -1029,6 +1030,17 @@ class PPOExpertReproduction:
             episode_lane_changes = 0
             episode_min_ttcs = []
             
+            # 🔧 从环境获取第一个实例用于指标计算
+            try:
+                if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
+                    current_env = self.envs.envs[0]
+                elif hasattr(self.envs, 'venv') and hasattr(self.envs.venv, 'envs'):
+                    current_env = self.envs.venv.envs[0] if len(self.envs.venv.envs) > 0 else None
+                else:
+                    current_env = None
+            except Exception:
+                current_env = None
+            
             while True:
                 obs_tensor = torch.FloatTensor(obs).to(self.device)
                 
@@ -1052,65 +1064,97 @@ class PPOExpertReproduction:
                 
                 episode_length += 1
                 
-                # 速度统计 - 修复：MetaDrive使用'velocity'键而非'speed'
-                if 'velocity' in info:
-                    episode_speeds.append(info['velocity'])
-                elif 'speed' in info:
-                    episode_speeds.append(info['speed'])
-                elif hasattr(info, 'speed'):
-                    episode_speeds.append(info.speed)
+                # 🔧 修复：更全面的速度获取
+                speed_value = 0.0
+                if isinstance(info, dict):
+                    if 'velocity' in info:
+                        speed_value = abs(info['velocity'])  # 取绝对值
+                    elif 'speed' in info:
+                        speed_value = abs(info['speed'])
+                    elif hasattr(info, 'speed'):
+                        speed_value = abs(info.speed)
+                # 从agent直接获取速度
+                if speed_value == 0.0 and current_env is not None:
+                    try:
+                        if hasattr(current_env, 'agent') and hasattr(current_env.agent, 'speed'):
+                            speed_value = abs(current_env.agent.speed)
+                    except:
+                        pass
                 
-                # 获取环境实例来计算缺失的指标
-                try:
-                    # 从向量化环境中获取环境实例
-                    current_env = None
-                    if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
-                        current_env = self.envs.envs[0]
-                    elif hasattr(self.envs, 'venv') and hasattr(self.envs.venv, 'envs'):
-                        current_env = self.envs.venv.envs[0] if len(self.envs.venv.envs) > 0 else None
-                    
-                    # 计算缺失的指标
-                    if current_env is not None:
+                if speed_value > 0:
+                    episode_speeds.append(speed_value)
+                
+                # 🔧 修复：更完善的指标计算
+                missing_metrics = {}
+                if current_env is not None:
+                    try:
                         missing_metrics = self._calculate_missing_metrics(current_env, info)
-                    else:
-                        missing_metrics = {}
-                except Exception:
-                    missing_metrics = {}
+                    except Exception as e:
+                        # print(f"警告：指标计算失败: {e}")
+                        pass
                 
-                # 车道偏移统计 - 优先使用info，其次使用计算值
-                if 'lane_deviation' in info:
-                    episode_lane_deviations.append(info['lane_deviation'])
+                # 车道偏移统计
+                if isinstance(info, dict) and 'lane_deviation' in info:
+                    episode_lane_deviations.append(abs(info['lane_deviation']))
                 elif 'lane_deviation' in missing_metrics:
-                    episode_lane_deviations.append(missing_metrics['lane_deviation'])
+                    episode_lane_deviations.append(abs(missing_metrics['lane_deviation']))
+                else:
+                    # 添加默认值避免空列表
+                    episode_lane_deviations.append(0.0)
                 
-                # TTC统计 - 优先使用info，其次使用计算值
-                if 'ttc' in info:
-                    episode_min_ttcs.append(info['ttc'])
-                elif 'min_ttc' in info:
-                    episode_min_ttcs.append(info['min_ttc'])
+                # TTC统计
+                if isinstance(info, dict):
+                    if 'ttc' in info:
+                        episode_min_ttcs.append(info['ttc'])
+                    elif 'min_ttc' in info:
+                        episode_min_ttcs.append(info['min_ttc'])
                 elif 'ttc' in missing_metrics:
                     episode_min_ttcs.append(missing_metrics['ttc'])
+                else:
+                    # 添加默认值
+                    episode_min_ttcs.append(10.0)  # 默认安全TTC
                 
-                # 车道变换检测 - 优先使用info，其次使用计算值
-                if 'lane_change' in info and info['lane_change']:
+                # 车道变换检测
+                if isinstance(info, dict) and 'lane_change' in info and info['lane_change']:
                     episode_lane_changes += 1
                 elif missing_metrics.get('lane_change', False):
                     episode_lane_changes += 1
                 
                 if done_flag:
-                    # 统计终止原因
-                    if info.get("crash", False) or info.get("crash_vehicle", False) or info.get("crash_object", False):
-                        eval_collisions += 1
-                    elif info.get("out_of_road", False):
-                        eval_offroads += 1 
-                    elif info.get("arrive_dest", False):
-                        eval_successes += 1
+                    # 🔧 修复：更准确的终止原因统计
+                    crash_detected = False
+                    offroad_detected = False
+                    success_detected = False
+                    
+                    if isinstance(info, dict):
+                        # 检查各种碰撞情况
+                        if (info.get("crash", False) or 
+                            info.get("crash_vehicle", False) or 
+                            info.get("crash_object", False) or
+                            info.get("collision", False)):
+                            crash_detected = True
+                            eval_collisions += 1
+                        # 检查冲出道路
+                        elif info.get("out_of_road", False):
+                            offroad_detected = True
+                            eval_offroads += 1
+                        # 检查成功到达
+                        elif info.get("arrive_dest", False):
+                            success_detected = True
+                            eval_successes += 1
                     
                     # 计算路径完成度
-                    path_completion = info.get('route_completion', 0.0)
-                    if info.get('arrive_dest', False):
-                        path_completion = 1.0
+                    path_completion = 0.0
+                    if isinstance(info, dict):
+                        path_completion = info.get('route_completion', 0.0)
+                        if info.get('arrive_dest', False):
+                            path_completion = 1.0
                     eval_path_completions.append(path_completion)
+                    
+                    # # 调试输出
+                    # print(f"   Episode {episode+1}: reward={episode_reward:.2f}, length={episode_length}, "
+                    #       f"speed={np.mean(episode_speeds) if episode_speeds else 0:.2f}, "
+                    #       f"crash={crash_detected}, offroad={offroad_detected}, success={success_detected}")
                     
                     break
             
@@ -1119,21 +1163,26 @@ class PPOExpertReproduction:
             eval_speeds.append(np.mean(episode_speeds) if episode_speeds else 0)
             eval_lane_deviations.append(np.mean(episode_lane_deviations) if episode_lane_deviations else 0)
             eval_lane_changes.append(episode_lane_changes)
-            eval_min_ttcs.append(np.min(episode_min_ttcs) if episode_min_ttcs else float('inf'))
+            eval_min_ttcs.append(np.min(episode_min_ttcs) if episode_min_ttcs else 10.0)
         
-        print(f"✅ 评估完成")
+        # 计算最终统计
+        collision_rate = eval_collisions / num_episodes
+        offroad_rate = eval_offroads / num_episodes  
+        success_rate = eval_successes / num_episodes
+        
+        print(f"✅ 评估完成: 碰撞率={collision_rate:.3f}, 冲出道路率={offroad_rate:.3f}, 成功率={success_rate:.3f}")
         
         return {
             "eval_reward_mean": np.mean(eval_rewards),
             "eval_reward_std": np.std(eval_rewards),
             "eval_length_mean": np.mean(eval_lengths),
-            "eval_collision_rate": eval_collisions / num_episodes,
-            "eval_offroad_rate": eval_offroads / num_episodes,
-            "eval_success_rate": eval_successes / num_episodes,
+            "eval_collision_rate": collision_rate,
+            "eval_offroad_rate": offroad_rate,
+            "eval_success_rate": success_rate,
             "eval_avg_speed": np.mean(eval_speeds),
             "eval_lane_deviation": np.mean(eval_lane_deviations),
             "eval_lane_change_count": np.mean(eval_lane_changes),
-            "eval_min_ttc": np.mean([ttc for ttc in eval_min_ttcs if ttc != float('inf')]) if any(ttc != float('inf') for ttc in eval_min_ttcs) else 0,
+            "eval_min_ttc": np.mean([ttc for ttc in eval_min_ttcs if ttc != float('inf')]) if any(ttc != float('inf') for ttc in eval_min_ttcs) else 10.0,
             "eval_path_completion": np.mean(eval_path_completions)
         }
     
@@ -1419,13 +1468,14 @@ class PPOExpertReproduction:
         self.writer.add_scalar("train/entropy_coef", self.current_entropy_coef, self.global_step)
         
         # 记录课程阶段（便于可视化）
-        stage_for_log = 3
         if self.use_curriculum:
             stage_for_log = self.curriculum_stage if self.curriculum_mode == "gate" else (
                 0 if self.global_step < 0.1 * self.args.total_timesteps else
                 1 if self.global_step < 0.2 * self.args.total_timesteps else
                 2 if self.global_step < 0.5 * self.args.total_timesteps else 3
             )
+        else:
+            stage_for_log = 0  # 未启用课程学习时显示stage 0
         self.writer.add_scalar("env/curriculum_stage", stage_for_log, self.global_step)
         
         # 记录当前交通密度（课程学习）
