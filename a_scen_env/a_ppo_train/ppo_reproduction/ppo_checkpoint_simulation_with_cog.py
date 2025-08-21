@@ -146,34 +146,7 @@ class PPOCheckpointSimulator:
         if self.use_cognitive_modules:
             print("🧠 初始化认知模块...")
             
-            # 初始化认知偏差模块
-            if args and getattr(args, 'use_cognitive_bias', False):
-                bias_config = {
-                    'inverse_tta_coef': getattr(args, 'bias_inverse_tta_coef', 1.5),
-                    'tta_threshold': getattr(args, 'bias_tta_threshold', 0.1),
-                    'adaptive_bias': True,
-                    'adaptation_rate': getattr(args, 'bias_adaptive_learning_rate', 0.01),
-                    'min_adaptive_factor': getattr(args, 'bias_adaptive_factor_min', 0.5),
-                    'max_adaptive_factor': getattr(args, 'bias_adaptive_factor_max', 2.0),
-                    'visual_detection_distance': getattr(args, 'bias_visual_distance', 50.0),
-                    'visual_detection_angle': getattr(args, 'bias_visual_angle', 30.0),
-                    'visual_aversion_strength': getattr(args, 'bias_visual_aversion_factor', 1.2),
-                    'verbose': True
-                }
-                self.cognitive_bias_module = CognitiveBiasModule(bias_config=bias_config)
-                print(f"   ✅ 认知偏差模块已启用")
-            
-            # 初始化认知延迟模块
-            if args and getattr(args, 'use_cognitive_delay', False):
-                self.cognitive_delay_module = CognitiveDelayModule(
-                    delay_steps=int(getattr(args, 'delay_steps', 2)),  # 确保是整数类型
-                    enable_smoothing=False,
-                    smoothing_factor=0.3,
-                    enable_visualization=True
-                )
-                print(f"   ✅ 认知延迟模块已启用 (延迟{getattr(args, 'delay_steps', 2)}步)")
-            
-            # 初始化认知感知模块
+            # 先初始化认知感知模块（因为认知偏差模块需要引用它）
             if args and getattr(args, 'use_cognitive_perception', False):
                 perception_config = {
                     'sigma0': getattr(args, 'perception_noise_std', 0.01) * 10,  # 转换为米制噪声
@@ -193,6 +166,33 @@ class PPOCheckpointSimulator:
                     self.cognitive_perception_module.enable_radar_visualization(True)
                 
                 print(f"   ✅ 认知感知模块已启用")
+            
+            # 初始化认知偏差模块（传入认知感知模块引用）
+            if args and getattr(args, 'use_cognitive_bias', False):
+                bias_config = {
+                    'inverse_tta_coef': getattr(args, 'bias_inverse_tta_coef', 1.5),
+                    'tta_threshold': getattr(args, 'bias_tta_threshold', 0.1),
+                    'visual_detection_distance': getattr(args, 'bias_visual_distance', 50.0),
+                    'verbose': True
+                }
+                # 🔧 新增：传入认知感知模块引用
+                self.cognitive_bias_module = CognitiveBiasModule(
+                    bias_config=bias_config,
+                    cognitive_perception_module=self.cognitive_perception_module
+                )
+                print(f"   ✅ 认知偏差模块已启用")
+                if self.cognitive_perception_module:
+                    print(f"      🔗 已连接到认知感知模块")
+            
+            # 初始化认知延迟模块
+            if args and getattr(args, 'use_cognitive_delay', False):
+                self.cognitive_delay_module = CognitiveDelayModule(
+                    delay_steps=int(getattr(args, 'delay_steps', 2)),  # 确保是整数类型
+                    enable_smoothing=False,
+                    smoothing_factor=0.3,
+                    enable_visualization=True
+                )
+                print(f"   ✅ 认知延迟模块已启用 (延迟{getattr(args, 'delay_steps', 2)}步)")
         
         # 加载检查点
         self._load_checkpoint()
@@ -366,11 +366,14 @@ class PPOCheckpointSimulator:
                 env_config["random_traffic"] = False  # 确保第一个场景交通状态固定
                 print(f"🔒 固定第一个场景种子: {scenario_seed} (背景车状态将保持一致)")
         
-        # 设置观察配置
+        # 设置观察配置 - ⚠️ 重要：避免与认知感知模块的双重噪声
         env_config["vehicle_config"]["lidar"] = {
             "num_lasers": 240,
             "distance": 50,
             "num_others": 4,
+            # 🚫 关键：必须设置为0以避免与认知感知模块的噪声叠加
+            "gaussian_noise": 0.0,
+            "dropout_prob": 0.0
         }
         
         # 创建环境
@@ -500,6 +503,19 @@ class PPOCheckpointSimulator:
                 # 🔧 关键：将噪声雷达附加到环境，替换原始雷达传感器
                 self.cognitive_perception_module.attach_to_env(env)
                 print("🔗 认知感知模块已附加到环境 - 噪声将在传感器层自动注入")
+                
+                # 🔍 验证环境配置，确保避免双重噪声
+                lidar_config = env.config.get("vehicle_config", {}).get("lidar", {})
+                gaussian_noise = lidar_config.get("gaussian_noise", 0.0)
+                dropout_prob = lidar_config.get("dropout_prob", 0.0)
+                
+                if gaussian_noise > 0.0 or dropout_prob > 0.0:
+                    print(f"⚠️ 警告：检测到环境lidar配置中存在额外噪声！")
+                    print(f"   gaussian_noise: {gaussian_noise}")
+                    print(f"   dropout_prob: {dropout_prob}")
+                    print(f"   这可能导致双重噪声问题，建议设置为0.0")
+                else:
+                    print(f"✅ 环境lidar噪声配置正确 (gaussian_noise=0.0, dropout_prob=0.0)")
             
             # 🔗 认知偏差模块附加到环境
             if self.cognitive_bias_module:
@@ -980,7 +996,6 @@ class PPOCheckpointSimulator:
                         print(f"   💭 认知偏差:")
                         print(f"      平均偏差强度: {bias_stats.get('average_bias', 0.0):.3f}")
                         print(f"      偏差应用次数: {bias_stats.get('active_steps', 0)}")
-                        print(f"      自适应因子: {bias_stats.get('adaptive_factor', 1.0):.3f}")
                     else:
                         print(f"   💭 认知偏差: 基本模式运行")
                 except Exception as e:
@@ -1440,24 +1455,14 @@ def main():
                        help="认知偏差模块启用视觉厌恶 (默认启用)")
     parser.add_argument("--bias_visual_distance", type=float, default=50.0,
                        help="认知偏差模块视觉距离 (默认: 50.0)")
-    parser.add_argument("--bias_visual_angle", type=float, default=30.0,
-                       help="认知偏差模块视觉角度 (默认: 30.0)")
-    parser.add_argument("--bias_visual_aversion_factor", type=float, default=1.2,
-                       help="认知偏差模块视觉厌恶因子 (默认: 1.2)")
     parser.add_argument("--bias_inverse_tta_coef", type=float, default=1.5,
-                       help="认知偏差模块逆TTA系数 (默认: 1.5)")
+                       help="认知偏差模块looming penalty系数 c (默认: 1.5)")
     parser.add_argument("--bias_tta_threshold", type=float, default=0.1,
                        help="认知偏差模块TTA阈值 (默认: 0.1)")
-    parser.add_argument("--bias_adaptive_factor_min", type=float, default=0.5,
-                       help="认知偏差模块自适应因子最小值 (默认: 0.5)")
-    parser.add_argument("--bias_adaptive_factor_max", type=float, default=2.0,
-                       help="认知偏差模块自适应因子最大值 (默认: 2.0)")
-    parser.add_argument("--bias_adaptive_learning_rate", type=float, default=0.01,
-                       help="认知偏差模块自适应学习率 (默认: 0.01)")
     parser.add_argument("--use_cognitive_delay", action="store_true",
                        help="启用认知延迟模块 (默认禁用)")
     parser.add_argument("--delay_steps", type=int, default=2,
-                       help="认知延迟模块延迟步数 (默认: 2)")
+                       help="认知延迟模块延迟步数 (默认: 2)")  # 一个step是0.1s
     parser.add_argument("--use_cognitive_perception", action="store_true",
                        help="启用认知感知模块 (默认禁用)")
     parser.add_argument("--perception_noise_std", type=float, default=0.01,

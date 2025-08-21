@@ -286,6 +286,17 @@ class PerceptNoiseLidar(Lidar):
             'length': len(self.front_beam_history['original_distances'])
         }
 
+    def get_latest_processed_distances(self):
+        """
+        获取最新的处理后雷达距离数组（供认知偏差模块使用）
+        
+        Returns:
+            np.ndarray or None: 最新的处理后雷达距离数组（米），如果不可用则返回None
+        """
+        if self.last_noisy_distances is not None:
+            return self.last_noisy_distances.copy()
+        return None
+
     # === 新增：每束 1D-CV 卡尔曼滤波实现（状态 [r, r_dot]，量测 z=r） ===
     def _kf_filter(self, z_distances: np.ndarray, sigma_array: np.ndarray, return_var: bool = False):
         """
@@ -755,6 +766,17 @@ class CognitivePerceptionModule:
             dict: 包含正前方雷达的原始距离、加噪距离和噪声强度
         """
         return self.noise_lidar.get_front_beam_data()
+    
+    def get_processed_radar_distances(self):
+        """
+        获取认知感知模块处理后的完整雷达距离数组（供认知偏差模块使用）
+        
+        Returns:
+            np.ndarray or None: 处理后的雷达距离数组（米），如果不可用则返回None
+        """
+        if self.noise_lidar and hasattr(self.noise_lidar, 'get_latest_processed_distances'):
+            return self.noise_lidar.get_latest_processed_distances()
+        return None
     
     def enable_radar_visualization(self, enable: bool = True):
         """

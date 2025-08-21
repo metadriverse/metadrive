@@ -32,39 +32,31 @@ class CognitiveBiasModule:
     3. 支持自适应偏差调整
     """
     
-    def __init__(self, bias_config: Optional[Dict[str, Any]] = None):
+    def __init__(self, bias_config: Optional[Dict[str, Any]] = None, 
+                 cognitive_perception_module: Optional[Any] = None):
         """
         初始化认知偏差模块
         
         Args:
             bias_config: 偏差配置参数
+            cognitive_perception_module: 认知感知模块实例，用于获取处理后的雷达数据
         """
         # 获取配置
         config = bias_config or self._get_default_config()
         
-        # 核心参数
-        self.inverse_tta_coef = config.get('inverse_tta_coef', 1.0)  # 偏差强度系数
+        # 核心参数 - 新的looming penalty模式
+        self.inverse_tta_coef = config.get('inverse_tta_coef', 1.0)  # looming penalty系数 c
         self.tta_threshold = config.get('tta_threshold', 1.0)  # TTA阈值
-        self.adaptive_bias = config.get('adaptive_bias', True)  # 自适应偏差
         
-        # 视觉厌恶参数
-        self.visual_detection_distance = config.get('visual_detection_distance', 50.0)  # 视觉检测距离
-        self.visual_detection_angle = np.radians(config.get('visual_detection_angle', 30.0))  # 转换为弧度
-        self.visual_aversion_strength = config.get('visual_aversion_strength', 0.5)  # 视觉厌恶强度
+        # 检测参数（保留用于雷达数据获取）
+        self.visual_detection_distance = config.get('visual_detection_distance', 50.0)  # 雷达检测距离
         
-        # 自适应参数
-        self.adaptive_factor = 1.0
-        self.adaptation_rate = config.get('adaptation_rate', 0.01)
-        self.min_adaptive_factor = config.get('min_adaptive_factor', 0.5)
-        self.max_adaptive_factor = config.get('max_adaptive_factor', 2.0)
-        
-        # 历史记录（用于分析和自适应）
+        # 历史记录（用于分析）
         self.bias_history = deque(maxlen=config.get('history_length', 100))
         self.reward_history = deque(maxlen=config.get('history_length', 100))
         self.tta_history = deque(maxlen=config.get('history_length', 100))
         
-        # 视觉厌恶检测历史记录
-        # 修复：增加历史记录长度以确保保留完整的数据，包括reset瞬间的27.8 m/s记录
+        # 检测历史记录
         extended_history_length = config.get('extended_history_length', 1000)  # 扩展到1000步
         self.detection_history = deque(maxlen=extended_history_length)  # 检测到的物体信息
         self.distance_history = deque(maxlen=extended_history_length)   # 最近威胁距离历史
@@ -78,29 +70,26 @@ class CognitiveBiasModule:
         # 附加的环境实例
         self.attached_env = None
         
+        # === 新增：认知感知模块引用 ===
+        self.cognitive_perception_module = cognitive_perception_module
+        
         # 日志级别
         self.verbose = config.get('verbose', False)
         
-        logger.info(f"CognitiveBiasModule初始化: inverse_tta_coef={self.inverse_tta_coef}, "
-                   f"tta_threshold={self.tta_threshold}, adaptive_bias={self.adaptive_bias}")
+        logger.info(f"CognitiveBiasModule初始化 (Looming Penalty模式): c={self.inverse_tta_coef}, "
+                   f"tta_threshold={self.tta_threshold}")
     
     def _get_default_config(self) -> Dict[str, Any]:
         """获取默认配置"""
         return {
-            'inverse_tta_coef': 1.0,      # 偏差强度系数
-            'tta_threshold': 1.0,          # TTA阈值（降低以便更容易触发视觉厌恶）
-            'adaptive_bias': True,         # 启用自适应偏差
-            'adaptation_rate': 0.01,       # 自适应速率
-            'min_adaptive_factor': 0.5,    # 最小自适应因子
-            'max_adaptive_factor': 2.0,    # 最大自适应因子
+            'inverse_tta_coef': 1.0,      # looming penalty系数 c
+            'tta_threshold': 1.0,          # TTA阈值
             'history_length': 100,         # 常规历史记录长度
             'extended_history_length': 1000,  # 扩展历史记录长度（用于可视化分析）
             'verbose': False,              # 详细日志输出
             
-            # 视觉厌恶参数
-            'visual_detection_distance': 50.0,  # 视觉检测距离（米）
-            'visual_detection_angle': 30.0,     # 视觉检测角度（度）
-            'visual_aversion_strength': 0.5     # 视觉厌恶增强强度
+            # 检测参数（保留用于雷达数据获取）
+            'visual_detection_distance': 50.0,  # 雷达检测距离（米）
         }
     
     def attach_to_env(self, env):
@@ -127,6 +116,16 @@ class CognitiveBiasModule:
         except Exception as e:
             logger.error(f"❌ 附加认知偏差模块失败: {e}")
             return False
+    
+    def set_cognitive_perception_module(self, cognitive_perception_module):
+        """
+        设置认知感知模块引用
+        
+        Args:
+            cognitive_perception_module: 认知感知模块实例
+        """
+        self.cognitive_perception_module = cognitive_perception_module
+        logger.info("✅ 认知感知模块引用已设置到认知偏差模块")
     
     def _check_tta_support(self, env) -> bool:
         """
@@ -197,10 +196,68 @@ class CognitiveBiasModule:
         
         return None
     
+    def _calculate_relative_speed_from_radar(self, current_min_distance: float, data_source: str) -> Optional[float]:
+        """
+        基于雷达距离变化率计算相对速度
+        
+        Args:
+            current_min_distance: 当前检测到的最小距离
+            data_source: 数据来源标识
+            
+        Returns:
+            相对速度（m/s），正值表示接近，如果无法计算则返回None
+        """
+        try:
+            # 方法1：从认知感知模块获取距离历史（如果可用）
+            if self.cognitive_perception_module is not None and data_source == "认知感知模块":
+                # 获取正前方雷达束的历史数据
+                history_data = self.cognitive_perception_module.get_processed_radar_distances()
+                if hasattr(self.cognitive_perception_module, 'noise_lidar') and self.cognitive_perception_module.noise_lidar:
+                    front_beam_history = self.cognitive_perception_module.noise_lidar.get_front_beam_history()
+                    
+                    if front_beam_history['length'] >= 2:
+                        distances = front_beam_history['noisy_distances']  # 使用加噪后的距离
+                        timestamps = front_beam_history['timestamps']
+   
+                        if len(distances) >= 2 and len(timestamps) >= 2:
+                            # 计算最近两个时间点的距离变化率
+                            dt = timestamps[-1] - timestamps[-2]
+                            dr = distances[-2] - distances[-1]  # 距离减少为正（接近）
+                            
+                            if dt > 1e-6:  # 避免除零
+                                relative_speed = dr / dt
+                                logger.info(f"📡 从认知感知模块计算相对速度: dr={dr:.3f}m, dt={dt:.3f}s, v_rel={relative_speed:.3f}m/s")
+                                return max(0.0, relative_speed)  # 确保非负
+            
+            # 方法2：基于认知偏差模块自身的距离历史
+            if len(self.distance_history) >= 2:
+                # 使用最近两次的距离测量
+                recent_distance = self.distance_history[-1]
+                prev_distance = self.distance_history[-2]
+                
+                # 估算时间间隔（假设固定的环境步长）
+                # MetaDrive环境的典型频率是10Hz，即0.1s间隔
+                estimated_dt = 0.1  # 秒
+                
+                # 计算距离变化
+                dr = prev_distance - recent_distance  # 距离减少为正（接近）
+                relative_speed = dr / estimated_dt
+                
+                logger.info(f"📊 从历史距离计算相对速度: dr={dr:.3f}m, dt={estimated_dt:.3f}s, v_rel={relative_speed:.3f}m/s")
+                return max(0.0, relative_speed)  # 确保非负
+            
+            # 方法3：如果历史数据不足，无法计算
+            logger.info(f"⚠️ 历史数据不足，无法计算相对速度")
+            return None
+            
+        except Exception as e:
+            logger.warning(f"⚠️ 相对速度计算异常: {e}")
+            return None
+    
     def _compute_inverse_tta_manually(self, env) -> Optional[float]:
         """
-        手动计算inverse_tta（基于雷达射线数据）
-        从正前方±30度范围内的所有雷达射线中找到最小距离，使用TTA = min_distance / agent_speed计算
+        手动计算inverse_tta（基于认知感知模块处理后的雷达射线数据）
+        从正前方±15度范围内（总30度）的所有雷达射线中找到最小距离，使用TTA = min_distance / agent_speed计算
         
         Args:
             env: 环境实例
@@ -213,32 +270,130 @@ class CognitiveBiasModule:
             agent_speed = agent.speed
             
             # 检测参数
-            detection_angle_degrees = 30  # ±30度范围
+            detection_angle_degrees = 30  # ±15度范围，总30度
             max_detection_distance = self.visual_detection_distance  # 最大检测距离
             
             min_distance = float('inf')
             radar_data_found = False
             beam_count = 0
             valid_beams = 0
+            data_source = "未知"
             
             # 强制输出调试信息，无论verbose设置如何
-            logger.info(f"🚀 开始雷达TTA计算: 检测角度=±{detection_angle_degrees}°, 最大距离={max_detection_distance}m, 当前速度={agent_speed:.2f}m/s")
+            logger.info(f"🚀 开始雷达TTA计算: 检测角度=±{detection_angle_degrees//2}°(总{detection_angle_degrees}°), 最大距离={max_detection_distance}m, 当前速度={agent_speed:.2f}m/s")
             
-            # 方法1：从观测空间获取雷达数据
-            # 尝试从环境的观测数据中获取
-            try:
-                obs = env.get_single_observation()
-                logger.info(f"🔍 观测数据类型: {type(obs)}, 键: {list(obs.keys()) if isinstance(obs, dict) else 'N/A'}")
-                
-                if isinstance(obs, dict) and 'lidar' in obs:
-                    lidar_obs = obs['lidar']
-                    logger.info(f"🔍 雷达数据类型: {type(lidar_obs)}, 形状: {lidar_obs.shape if hasattr(lidar_obs, 'shape') else 'N/A'}")
-                    if isinstance(lidar_obs, np.ndarray) and len(lidar_obs) > 0:
+            # 方法1：优先从认知感知模块获取处理后的雷达数据
+            if self.cognitive_perception_module is not None:
+                try:
+                    processed_distances = self.cognitive_perception_module.get_processed_radar_distances()
+                    if processed_distances is not None and len(processed_distances) > 0:
                         radar_data_found = True
-                        beam_count = len(lidar_obs)
+                        beam_count = len(processed_distances)
+                        data_source = "认知感知模块"
                         
                         # 使用相同的角度计算逻辑
-                        total_beams = len(lidar_obs)
+                        total_beams = len(processed_distances)
+                        angle_per_beam = 360.0 / total_beams
+                        front_beam_index = 0  # 正前方雷达束索引
+                        beam_range = int(detection_angle_degrees / angle_per_beam)  # ±15度对应的射线数量
+                        
+                        start_index = (front_beam_index - beam_range) % total_beams
+                        end_index = (front_beam_index + beam_range + 1) % total_beams
+                        
+                        logger.info(f"📡 认知感知模块雷达配置: 总射线={total_beams}, 每度射线数={total_beams/360:.1f}, "
+                                   f"前方射线范围=[{start_index}:{end_index}], 射线数量={beam_range*2+1}")
+                        
+                        # 提取前方±15度范围内的雷达数据
+                        if start_index < end_index:
+                            front_radar_data = processed_distances[start_index:end_index]
+                        else:
+                            front_radar_data = np.concatenate([
+                                processed_distances[start_index:],
+                                processed_distances[:end_index]
+                            ])
+                        
+                        # 筛选有效距离（排除无效值）
+                        valid_distances = front_radar_data[
+                            (front_radar_data > 0) & 
+                            (front_radar_data < max_detection_distance) &
+                            (front_radar_data != float('inf')) &
+                            (~np.isnan(front_radar_data))
+                        ]
+                        
+                        valid_beams = len(valid_distances)
+                        
+                        if len(valid_distances) > 0:
+                            min_distance = float(np.min(valid_distances))
+                            
+                            logger.info(f"✅ 认知感知模块雷达数据成功: 总射线={total_beams}, 有效距离数={valid_beams}, "
+                                       f"最小距离={min_distance:.2f}m")
+                        else:
+                            logger.info(f"⚠️ 认知感知模块雷达数据无有效距离: 总射线={total_beams}, 检查距离数={len(front_radar_data)}")
+                    else:
+                        logger.warning(f"⚠️ 认知感知模块未提供有效雷达数据")
+                        
+                except Exception as e:
+                    logger.warning(f"⚠️ 从认知感知模块获取雷达数据失败: {e}")
+            
+            # 方法2：回退到从观测空间获取雷达数据（如果认知感知模块不可用）
+            if not radar_data_found:
+                try:
+                    obs = env.get_single_observation()
+                    logger.info(f"🔍 回退方案-观测数据类型: {type(obs)}, 键: {list(obs.keys()) if isinstance(obs, dict) else 'N/A'}")
+                    
+                    # 处理字典格式的观测数据
+                    if isinstance(obs, dict) and 'lidar' in obs:
+                        lidar_obs = obs['lidar']
+                        logger.info(f"🔍 回退方案-雷达数据类型: {type(lidar_obs)}, 形状: {lidar_obs.shape if hasattr(lidar_obs, 'shape') else 'N/A'}")
+                        if isinstance(lidar_obs, np.ndarray) and len(lidar_obs) > 0:
+                            radar_data_found = True
+                            beam_count = len(lidar_obs)
+                            data_source = "环境观测-字典"
+                            front_radar_data = lidar_obs  # 直接使用观测数据
+                            
+                    # 处理LidarStateObservation对象
+                    elif hasattr(obs, 'cloud_points'):
+                        logger.info(f"🔍 LidarStateObservation属性检查: cloud_points={obs.cloud_points}, type={type(obs.cloud_points) if obs.cloud_points is not None else 'None'}")
+                        # 尝试触发雷达观测
+                        if hasattr(obs, 'lidar_observe') and hasattr(env, 'agent'):
+                            try:
+                                lidar_data = obs.lidar_observe(env.agent)
+                                logger.info(f"🔍 尝试lidar_observe: 数据类型={type(lidar_data)}, 长度={len(lidar_data) if lidar_data else 0}")
+                                if lidar_data and len(lidar_data) > 0:
+                                    lidar_obs = np.array(lidar_data)
+                                    logger.info(f"🔍 从lidar_observe获取数据: 形状={lidar_obs.shape}")
+                                    radar_data_found = True
+                                    beam_count = len(lidar_obs)
+                                    data_source = "环境观测-LidarObserve"
+                                    front_radar_data = lidar_obs
+                            except Exception as e:
+                                logger.warning(f"⚠️ lidar_observe调用失败: {e}")
+                        
+                        # 检查cloud_points
+                        if not radar_data_found and obs.cloud_points is not None:
+                            cloud_points = obs.cloud_points
+                            if isinstance(cloud_points, (list, np.ndarray)) and len(cloud_points) > 0:
+                                lidar_obs = np.array(cloud_points)
+                                logger.info(f"🔍 回退方案-LidarStateObservation雷达数据: 形状={lidar_obs.shape}, 类型={type(lidar_obs)}")
+                                radar_data_found = True
+                                beam_count = len(lidar_obs)
+                                data_source = "环境观测-LidarState"
+                                front_radar_data = lidar_obs
+                            else:
+                                logger.warning(f"⚠️ LidarStateObservation的cloud_points为空或无效: {cloud_points}")
+                        
+                        # 如果都没获取到，打印更多调试信息
+                        if not radar_data_found:
+                            logger.info(f"🔍 LidarStateObservation调试信息:")
+                            logger.info(f"    hasattr cloud_points: {hasattr(obs, 'cloud_points')}")
+                            logger.info(f"    hasattr lidar_observe: {hasattr(obs, 'lidar_observe')}")
+                            logger.info(f"    hasattr state_obs: {hasattr(obs, 'state_obs')}")
+                            logger.info(f"    dir(obs): {[attr for attr in dir(obs) if not attr.startswith('_')]}")
+                    
+                    # 如果获取到雷达数据，进行处理
+                    if radar_data_found:
+                        # 使用相同的角度计算逻辑
+                        total_beams = len(front_radar_data)
                         angle_per_beam = 360.0 / total_beams
                         front_beam_index = 0
                         beam_range = int(detection_angle_degrees / angle_per_beam)
@@ -246,16 +401,23 @@ class CognitiveBiasModule:
                         start_index = (front_beam_index - beam_range) % total_beams
                         end_index = (front_beam_index + beam_range + 1) % total_beams
                         
-                        logger.info(f"📡 雷达配置: 总射线={total_beams}, 每度射线数={total_beams/360:.1f}, "
+                        logger.info(f"📡 环境观测雷达配置: 总射线={total_beams}, 每度射线数={total_beams/360:.1f}, "
                                    f"前方射线范围=[{start_index}:{end_index}]")
                         
+                        # 提取前方范围的雷达数据
                         if start_index < end_index:
-                            front_radar_data = lidar_obs[start_index:end_index]
+                            front_radar_data = front_radar_data[start_index:end_index]
                         else:
                             front_radar_data = np.concatenate([
-                                lidar_obs[start_index:],
-                                lidar_obs[:end_index]
+                                front_radar_data[start_index:],
+                                front_radar_data[:end_index]
                             ])
+                        
+                        # 注意：观测数据可能是归一化的(0-1)，需要转换为距离
+                        # 假设最大检测距离为50米（与配置保持一致）
+                        if np.max(front_radar_data) <= 1.0:  # 可能是归一化数据
+                            front_radar_data = front_radar_data * 50.0  # 转换为米
+                            logger.info(f"🔄 检测到归一化数据，已转换为距离（米）")
                         
                         valid_distances = front_radar_data[
                             (front_radar_data > 0) & 
@@ -269,37 +431,43 @@ class CognitiveBiasModule:
                         if len(valid_distances) > 0:
                             min_distance = float(np.min(valid_distances))
                             
-                            logger.info(f"✅ 雷达方法1成功: 总射线={total_beams}, 有效距离数={valid_beams}, "
-                                       f"最小距离={min_distance:.2f}m")
-                
-            except Exception as e:
-                logger.warning(f"⚠️ 雷达方法1失败: {e}")
-            
-
+                            logger.info(f"✅ 环境观测雷达数据成功: 总射线={total_beams}, 有效距离数={valid_beams}, "
+                                       f"最小距离={min_distance:.2f}m, 数据源={data_source}")
+                    else:
+                        logger.warning(f"⚠️ 无法从观测数据中提取雷达信息")
+                    
+                except Exception as e:
+                    logger.warning(f"⚠️ 回退方案-从环境观测获取雷达数据失败: {e}")
             
             # 计算TTA和inverse_TTA
-            if radar_data_found and min_distance < float('inf') and agent_speed > 0.1:
-                # 计算TTA = distance / speed
-                tta = min_distance / agent_speed
-                # 计算inverse_TTA = speed / distance
-                basic_inverse_tta = agent_speed / min_distance
+            if radar_data_found and min_distance < float('inf'):
+                # 尝试基于雷达距离变化率计算相对速度
+                relative_speed = self._calculate_relative_speed_from_radar(min_distance, data_source)
                 
-                # 应用视觉厌恶增强因子
-                distance_factor = max_detection_distance / min_distance
-                visual_aversion_factor = 1.0 + (distance_factor - 1.0) * self.visual_aversion_strength
+
+                speed_source = "雷达距离变化率"
+                logger.info(f"✅ 使用相对速度: {relative_speed:.2f}m/s (来源: {speed_source})")
                 
-                inverse_tta = basic_inverse_tta * visual_aversion_factor
+                # 计算TTA = distance / relative_speed  
+                tta = min_distance / relative_speed
+                # 计算inverse_TTA = relative_speed / distance
+                basic_inverse_tta = relative_speed / min_distance
+                
+                # 新的looming penalty计算: L = c * tanh(inverse_TTA)
+                inverse_tta = basic_inverse_tta  # 保持基础inverse_tta用于记录
                 
                 # 记录检测信息
                 detection_info = {
                     'method': 'radar_beam',
+                    'data_source': data_source,  # 新增：记录数据来源
                     'total_beams': beam_count,
                     'valid_beams': valid_beams,
                     'min_distance': min_distance,
                     'agent_speed': agent_speed,
+                    'relative_speed': relative_speed,  # 新增：相对速度
+                    'speed_source': speed_source,     # 新增：速度来源
                     'tta': tta,
                     'basic_inverse_tta': basic_inverse_tta,
-                    'visual_aversion_factor': visual_aversion_factor,
                     'final_inverse_tta': inverse_tta,
                     'detection_angle': detection_angle_degrees
                 }
@@ -307,22 +475,22 @@ class CognitiveBiasModule:
                 self.distance_history.append(min_distance)
                 self.threat_count_history.append(1 if min_distance < float('inf') else 0)
                 
-                logger.info(f"🎯 雷达TTA: 最小距离={min_distance:.2f}m, 速度={agent_speed:.2f}m/s, "
-                           f"TTA={tta:.2f}s, 基础inverse_tta={basic_inverse_tta:.3f}, "
-                           f"视觉厌恶因子={visual_aversion_factor:.2f}, 最终inverse_tta={inverse_tta:.3f}")
+                logger.info(f"🎯 雷达TTA计算成功 [数据源: {data_source}]: 最小距离={min_distance:.2f}m, "
+                           f"相对速度={relative_speed:.2f}m/s ({speed_source}), "
+                           f"TTA={tta:.2f}s, inverse_tta={inverse_tta:.3f}")
                 
                 return inverse_tta
             
             # 如果没有有效的雷达数据，记录空检测信息
             detection_info = {
                 'method': 'radar_beam',
+                'data_source': data_source,  # 新增：记录数据来源
                 'total_beams': beam_count,
                 'valid_beams': valid_beams,
                 'min_distance': float('inf'),
                 'agent_speed': agent_speed,
                 'tta': float('inf'),
                 'basic_inverse_tta': 0.0,
-                'visual_aversion_factor': 1.0,
                 'final_inverse_tta': 0.1 if agent_speed > 0 else 0.0,
                 'detection_angle': detection_angle_degrees
             }
@@ -331,7 +499,7 @@ class CognitiveBiasModule:
             self.threat_count_history.append(0)
             
             # 强制输出调试信息
-            logger.info(f"❌ 雷达TTA: 无有效检测数据, 速度={agent_speed:.2f}m/s, "
+            logger.info(f"❌ 雷达TTA计算失败 [数据源: {data_source}]: 无有效检测数据, 速度={agent_speed:.2f}m/s, "
                        f"雷达数据获取={'成功' if radar_data_found else '失败'}, "
                        f"总射线数={beam_count}, 有效射线数={valid_beams}")
             
@@ -361,7 +529,6 @@ class CognitiveBiasModule:
             'original_reward': original_reward,
             'bias_applied': 0.0,
             'inverse_tta': None,
-            'adaptive_factor': self.adaptive_factor,
             'bias_active': False
         }
         
@@ -383,26 +550,21 @@ class CognitiveBiasModule:
         # 记录TTA历史
         self.tta_history.append(inverse_tta)
         
-        # 判断是否应用偏差
+        # 应用新的looming penalty: L = c * tanh(inverse_TTA)
         if inverse_tta > self.tta_threshold:
-            # 计算偏差量
-            bias_factor = self.inverse_tta_coef * inverse_tta
-            
-            # 应用自适应因子
-            if self.adaptive_bias:
-                bias_factor *= self.adaptive_factor
+            # 计算looming penalty
+            looming_penalty = self.inverse_tta_coef * np.tanh(inverse_tta)
             
             # 应用偏差（惩罚高风险行为）
-            bias_amount = bias_factor
-            adjusted_reward = original_reward - bias_amount
+            adjusted_reward = original_reward - looming_penalty
             
             # 记录偏差
-            self.bias_history.append(bias_amount)
-            bias_info['bias_applied'] = bias_amount
+            self.bias_history.append(looming_penalty)
+            bias_info['bias_applied'] = looming_penalty
             bias_info['bias_active'] = True
             
             # 更新统计
-            self._total_bias += bias_amount
+            self._total_bias += looming_penalty
             self._active_steps += 1
             
         else:
@@ -412,10 +574,6 @@ class CognitiveBiasModule:
         
         # 记录奖励历史
         self.reward_history.append(original_reward)
-        
-        # 更新自适应因子
-        if self.adaptive_bias:
-            self._update_adaptive_factor()
         
         # 更新步数
         self._step_count += 1
@@ -432,42 +590,7 @@ class CognitiveBiasModule:
         bias_info['adjusted_reward'] = adjusted_reward
         return adjusted_reward, bias_info
     
-    def _update_adaptive_factor(self):
-        """更新自适应偏差因子"""
-        if len(self.reward_history) >= 10:
-            # 基于最近的奖励变化调整偏差强度
-            recent_rewards = list(self.reward_history)[-10:]
-            reward_variance = np.var(recent_rewards)
-            
-            # 基于TTA历史调整
-            if self.tta_history:
-                recent_tta = list(self.tta_history)[-10:]
-                avg_tta = np.mean(recent_tta)
-                
-                # 如果平均TTA很高，增加偏差；如果很低，减少偏差
-                if avg_tta > self.tta_threshold * 1.5:
-                    self.adaptive_factor = min(
-                        self.max_adaptive_factor,
-                        self.adaptive_factor + self.adaptation_rate
-                    )
-                elif avg_tta < self.tta_threshold * 0.5:
-                    self.adaptive_factor = max(
-                        self.min_adaptive_factor,
-                        self.adaptive_factor - self.adaptation_rate
-                    )
-            
-            # 基于奖励方差调整
-            if reward_variance > 1.0:
-                self.adaptive_factor = min(
-                    self.max_adaptive_factor,
-                    self.adaptive_factor + self.adaptation_rate * 0.5
-                )
-            else:
-                self.adaptive_factor = max(
-                    self.min_adaptive_factor,
-                    self.adaptive_factor - self.adaptation_rate * 0.5
-                )
-    
+
     def reset(self):
         """重置认知偏差模块状态"""
         # 清空历史记录
@@ -482,9 +605,6 @@ class CognitiveBiasModule:
         self._step_count = 0
         self._total_bias = 0.0
         self._active_steps = 0
-        
-        # 重置自适应因子
-        self.adaptive_factor = 1.0
         
         logger.info("CognitiveBiasModule已重置")
     
@@ -505,8 +625,7 @@ class CognitiveBiasModule:
             'active_steps': self._active_steps,
             'activation_rate': self._active_steps / max(1, self._step_count),
             'total_bias': self._total_bias,
-            'average_bias': self._total_bias / max(1, self._step_count),
-            'adaptive_factor': self.adaptive_factor
+            'average_bias': self._total_bias / max(1, self._step_count)
         }
         
         if self.bias_history:
@@ -632,37 +751,7 @@ class CognitiveBiasModule:
         plt.savefig(save_path, dpi=150, bbox_inches='tight')
         plt.close()
     
-    def _plot_adaptive_factor(self, save_dir: str):
-        """绘制自适应因子变化"""
-        if not self.adaptive_bias or self._step_count == 0:
-            return
-        
-        # 这里简化处理，只显示当前的自适应因子
-        # 实际使用中可以记录自适应因子的历史
-        fig, ax = plt.subplots(figsize=(8, 6))
-        
-        # 创建一个简单的条形图显示当前状态
-        categories = ['Min', 'Current', 'Max']
-        values = [self.min_adaptive_factor, self.adaptive_factor, self.max_adaptive_factor]
-        colors = ['blue', 'green', 'red']
-        
-        bars = ax.bar(categories, values, color=colors, alpha=0.7)
-        ax.set_ylabel('Adaptive Factor')
-        ax.set_title('Adaptive Bias Factor Status')
-        ax.set_ylim(0, self.max_adaptive_factor * 1.2)
-        
-        # 添加数值标签
-        for bar, val in zip(bars, values):
-            height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height,
-                   f'{val:.2f}', ha='center', va='bottom')
-        
-        ax.grid(True, alpha=0.3, axis='y')
-        
-        save_path = os.path.join(save_dir, 'adaptive_factor.png')
-        plt.savefig(save_path, dpi=150, bbox_inches='tight')
-        plt.close()
-    
+
     def _plot_reward_comparison(self, save_dir: str):
         """绘制奖励对比（原始vs调整后）"""
         if not self.reward_history or not self.bias_history:
