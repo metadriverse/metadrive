@@ -106,7 +106,7 @@ class PPONetwork(nn.Module):
         
     #     # 分离均值和标准差
     #     action_mean, action_log_std = torch.chunk(action_logits, 2, dim=-1)
-    #     # 🔧 修复3: 约束log_std防止漂移
+    #     #  修复3: 约束log_std防止漂移
     #     action_log_std = torch.clamp(action_log_std, -5.0, 2.0)
     #     action_std = torch.exp(action_log_std)
         
@@ -150,7 +150,7 @@ class PPONetwork(nn.Module):
         return a, log_prob, entropy, value.squeeze(-1)
     
     def act_deterministic(self, obs_tensor):
-        """🔧 修复2: 为评估提供确定性动作（使用均值）"""
+        """ 修复2: 为评估提供确定性动作（使用均值）"""
         action_logits, _ = self.forward(obs_tensor)
         action_mean, _ = torch.chunk(action_logits, 2, dim=-1)
         return torch.tanh(action_mean)
@@ -222,7 +222,7 @@ def make_env(rank: int, config: Dict[str, Any]):
                 del env_config[param]
         
         # 调试：打印关键配置参数
-        print(f"🔧 环境{rank}配置验证: use_render={env_config.get('use_render')}, image_observation={env_config.get('image_observation')}")
+        print(f" 环境{rank}配置验证: use_render={env_config.get('use_render')}, image_observation={env_config.get('image_observation')}")
         
         # 创建MetaDrive环境
         env = MetaDriveEnv(env_config)
@@ -277,7 +277,7 @@ class PPOExpertReproduction:
         # 创建环境
         self.envs = self._create_environments()
         
-        # 🔧 新增：动态设置变道冷却时间步数
+        #  新增：动态设置变道冷却时间步数
         self._setup_lane_change_cooldown()
         
         # 创建网络
@@ -317,11 +317,11 @@ class PPOExpertReproduction:
         self.episode_path_completions = deque(maxlen=100)
         self.episode_timeouts = deque(maxlen=100)
         
-        # 🔧 新增：动作统计缓冲区
+        #  新增：动作统计缓冲区
         self.episode_steer_means = deque(maxlen=100)
         self.episode_throttle_means = deque(maxlen=100)
         
-        # 🔧 新增：变道统计缓冲区
+        #  新增：变道统计缓冲区
         self.episode_lane_change_penalties = deque(maxlen=100)
         self.episode_lane_change_speed_ratios = deque(maxlen=100)
         self.episode_cooldown_violations = deque(maxlen=100)
@@ -333,18 +333,18 @@ class PPOExpertReproduction:
         # 初始化车道跟踪（用于车道变更检测）
         self._last_lane_index = {}
         
-        # 🔧 新增：变道冷却时间跟踪
+        #  新增：变道冷却时间跟踪
         self._last_lane_change_step = {}
         # 动态计算冷却时间步数，基于环境实际频率
         self._lane_change_cooldown_steps = None  # 将在环境创建后动态设置
         
-        print(f"🚀 PPO Expert复现训练初始化完成")
-        print(f"📁 实验目录: {self.exp_dir}")
-        print(f"🔧 设备: {self.device}")
-        print(f"🌱 随机种子: {args.seed}")
+        print(f" PPO Expert复现训练初始化完成")
+        print(f" 实验目录: {self.exp_dir}")
+        print(f" 设备: {self.device}")
+        print(f" 随机种子: {args.seed}")
     
     def _setup_lane_change_cooldown(self):
-        """🔧 新增：动态设置变道冷却时间步数"""
+        """ 新增：动态设置变道冷却时间步数"""
         try:
             # 获取第一个环境的配置来了解实际频率
             if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
@@ -366,7 +366,7 @@ class PPOExpertReproduction:
                 # 计算冷却时间步数
                 self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * effective_frequency)
                 
-                print(f"🔧 变道冷却时间设置:")
+                print(f" 变道冷却时间设置:")
                 print(f"   物理步长: {physics_step_size:.3f}s")
                 print(f"   决策重复: {decision_repeat}")
                 print(f"   有效频率: {effective_frequency:.1f}Hz")
@@ -391,7 +391,7 @@ class PPOExpertReproduction:
             # 检查点通常在 experiment_dir/checkpoints/ 目录下
             if checkpoint_path.parent.name == "checkpoints":
                 exp_dir = str(checkpoint_path.parent.parent)
-                print(f"🔄 恢复训练模式 - 使用原实验目录: {exp_dir}")
+                print(f" 恢复训练模式 - 使用原实验目录: {exp_dir}")
                 return exp_dir
         
         # 正常模式：创建新的实验目录
@@ -402,7 +402,7 @@ class PPOExpertReproduction:
         os.makedirs(exp_dir, exist_ok=True)
         os.makedirs(os.path.join(exp_dir, "checkpoints"), exist_ok=True)
         
-        print(f"📁 实验目录已创建: {exp_dir}")
+        print(f" 实验目录已创建: {exp_dir}")
         return exp_dir
     
     def _compute_scheduled_lr(self):
@@ -490,7 +490,7 @@ class PPOExpertReproduction:
                     "crash_vehicle_penalty": self.args.crash_penalty,
                     "crash_object_penalty": self.args.crash_penalty,
                     "crash_sidewalk_penalty": 2.0,
-                    # 🔧 新增：变道惩罚配置
+                    #  新增：变道惩罚配置
                     "w_lc": self.args.w_lc,
                     "k_speed": self.args.k_speed,
                     "v_limit": self.args.v_limit,
@@ -792,7 +792,7 @@ class PPOExpertReproduction:
         base_env_config = self._get_base_env_config()
         
         if self.args.n_envs > 1:
-            print(f"🚀 创建 {self.args.n_envs} 个并行环境 (SubprocVecEnv)")
+            print(f" 创建 {self.args.n_envs} 个并行环境 (SubprocVecEnv)")
             print(f"   每个环境运行在独立子进程中，避免MetaDrive Engine单例限制")
             
             # 使用SubprocVecEnv创建多进程并行环境
@@ -804,7 +804,7 @@ class PPOExpertReproduction:
             print(f"✅ 成功创建 {self.args.n_envs} 个并行环境")
             return envs
         else:
-            print("📍 创建单个环境 (DummyVecEnv)")
+            print(" 创建单个环境 (DummyVecEnv)")
             
             # 单环境也使用向量化接口保持一致性
             envs = DummyVecEnv([make_env(0, base_env_config)])
@@ -832,7 +832,7 @@ class PPOExpertReproduction:
         """初始化CSV日志文件"""
         # 恢复训练模式：检查CSV文件是否存在
         if hasattr(self.args, 'resume_from') and self.args.resume_from and os.path.exists(self.csv_path):
-            print(f"📄 恢复CSV日志记录: {self.csv_path}")
+            print(f" 恢复CSV日志记录: {self.csv_path}")
             return
         
         # 正常模式：创建新的CSV文件
@@ -843,18 +843,23 @@ class PPOExpertReproduction:
             "success_rate", "fps", "clipfrac", "explained_variance",
             "grad_norm", "avg_speed", "lane_deviation", "lane_change_count",
             "min_ttc", "path_completion",
-            "steer_mean", "steer_std", "throttle_mean", "throttle_std",  # 🔧 新增动作统计列
-            "lane_change_penalty_mean", "lane_change_speed_ratio", "cooldown_violations"  # 🔧 新增变道统计列
+            "steer_mean", "steer_std", "throttle_mean", "throttle_std",  #  新增动作统计列
+            "lane_change_penalty_mean", "lane_change_speed_ratio", "cooldown_violations"  #  新增变道统计列
         ]
         
         with open(self.csv_path, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow(headers)
         
-        print(f"📄 CSV日志文件已创建: {self.csv_path}")
+        print(f" CSV日志文件已创建: {self.csv_path}")
     
     def collect_rollouts(self) -> Tuple[torch.Tensor, ...]:
         """收集rollout数据 - 使用向量化环境的真实并行采样"""
+        #  新增：确保变道冷却时间已初始化
+        if self._lane_change_cooldown_steps is None:
+            print("⚠️  变道冷却时间未初始化，使用默认值")
+            self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * 10)
+        
         # 存储rollout数据
         obs_batch = []
         actions_batch = []
@@ -874,11 +879,11 @@ class PPOExpertReproduction:
         lane_changes = np.zeros(self.args.n_envs)
         min_ttcs = [[] for _ in range(self.args.n_envs)]
         
-        # 🔧 新增：动作统计变量
+        #  新增：动作统计变量
         episode_steer_means = [[] for _ in range(self.args.n_envs)]
         episode_throttle_means = [[] for _ in range(self.args.n_envs)]
         
-        # 🔧 新增：变道惩罚统计变量
+        #  新增：变道惩罚统计变量
         episode_lane_change_penalties = [[] for _ in range(self.args.n_envs)]
         episode_lane_change_speed_ratios = [[] for _ in range(self.args.n_envs)]
         episode_cooldown_violations = [[] for _ in range(self.args.n_envs)]
@@ -890,12 +895,12 @@ class PPOExpertReproduction:
             
             with torch.no_grad():
                 actions, log_probs, _, values = self.network.get_action_and_value(obs_tensor)
-                # 🔧 新增：获取动作统计信息
+                #  新增：获取动作统计信息
                 steer_means, throttle_means = self.network.get_action_stats(obs_tensor)
             
             # 执行动作 - 向量化环境会自动处理多个环境
             actions_np = actions.cpu().numpy()
-            # 🔧 修复6: 动作clip到[-1,1]范围
+            #  修复6: 动作clip到[-1,1]范围
             # actions_np = np.clip(actions_np, -1.0, 1.0)
             next_obs, rewards, dones, infos = self.envs.step(actions_np)
             
@@ -953,7 +958,7 @@ class PPOExpertReproduction:
                     lane_changes[env_idx] += 1
                     lane_change_detected = True
                 
-                # 🔧 新增：变道惩罚计算
+                #  新增：变道惩罚计算
                 if lane_change_detected:
                     # 获取当前速度
                     current_speed = 0.0
@@ -999,7 +1004,7 @@ class PPOExpertReproduction:
                     # 将惩罚应用到奖励中
                     rewards[env_idx] -= speed_penalty
                 
-                # 🔧 新增：收集动作统计信息
+                #  新增：收集动作统计信息
                 episode_steer_means[env_idx].append(steer_means[env_idx].item())
                 episode_throttle_means[env_idx].append(throttle_means[env_idx].item())
             
@@ -1014,11 +1019,11 @@ class PPOExpertReproduction:
                     self.episode_lane_changes.append(lane_changes[env_idx])
                     self.episode_min_ttcs.append(np.min(min_ttcs[env_idx]) if min_ttcs[env_idx] else float('inf'))
                     
-                    # 🔧 新增：记录动作统计
+                    #  新增：记录动作统计
                     self.episode_steer_means.append(np.mean(episode_steer_means[env_idx]) if episode_steer_means[env_idx] else 0)
                     self.episode_throttle_means.append(np.mean(episode_throttle_means[env_idx]) if episode_throttle_means[env_idx] else 0)
                     
-                    # 🔧 新增：记录变道惩罚统计
+                    #  新增：记录变道惩罚统计
                     self.episode_lane_change_penalties.append(np.mean(episode_lane_change_penalties[env_idx]) if episode_lane_change_penalties[env_idx] else 0)
                     self.episode_lane_change_speed_ratios.append(np.mean(episode_lane_change_speed_ratios[env_idx]) if episode_lane_change_speed_ratios[env_idx] else 0)
                     self.episode_cooldown_violations.append(np.sum(episode_cooldown_violations[env_idx]) if episode_cooldown_violations[env_idx] else 0)
@@ -1042,10 +1047,10 @@ class PPOExpertReproduction:
                     lane_deviations[env_idx] = []
                     lane_changes[env_idx] = 0
                     min_ttcs[env_idx] = []
-                    # 🔧 新增：重置动作统计
+                    #  新增：重置动作统计
                     episode_steer_means[env_idx] = []
                     episode_throttle_means[env_idx] = []
-                    # 🔧 新增：重置变道统计
+                    #  新增：重置变道统计
                     episode_lane_change_penalties[env_idx] = []
                     episode_lane_change_speed_ratios[env_idx] = []
                     episode_cooldown_violations[env_idx] = []
@@ -1060,7 +1065,7 @@ class PPOExpertReproduction:
             
             obs = next_obs  # 更新观测
         
-        # 🔧 修复1: 计算last_values作为bootstrap值
+        #  修复1: 计算last_values作为bootstrap值
         last_obs_tensor = torch.as_tensor(obs, dtype=torch.float32, device=self.device)  # 这里obs是下一时刻的obs
         with torch.no_grad():
             _, _, _, last_values = self.network.get_action_and_value(last_obs_tensor)
@@ -1077,14 +1082,14 @@ class PPOExpertReproduction:
         values_batch  = torch.as_tensor(np.asarray(values_batch,  dtype=np.float32), device=self.device)
 
         
-        # 🔧 修复1: 使用last_values计算正确的GAE  
+        #  修复1: 使用last_values计算正确的GAE  
         advantages, returns = self.compute_gae(rewards_batch, values_batch, dones_batch, last_values)
         
         return (obs_batch, actions_batch, log_probs_batch, 
                 advantages, returns)
     
     def compute_gae(self, rewards, values, dones, last_values):
-        """🔧 修复1: 计算GAE优势函数 - 使用正确的bootstrap值"""
+        """ 修复1: 计算GAE优势函数 - 使用正确的bootstrap值"""
         # rewards: [n_steps, n_envs]
         # values:  [n_steps, n_envs] 
         # last_values: [n_envs] 对应s_T的V估计（bootstrap）
@@ -1222,7 +1227,7 @@ class PPOExpertReproduction:
         eval_min_ttcs = []
         eval_path_completions = []
         
-        print(f"🔍 开始策略评估 ({num_episodes} episodes)...")
+        print(f" 开始策略评估 ({num_episodes} episodes)...")
         
         for episode in range(num_episodes):
             obs = self.envs.reset()
@@ -1233,7 +1238,7 @@ class PPOExpertReproduction:
             episode_lane_changes = 0
             episode_min_ttcs = []
             
-            # 🔧 从环境获取第一个实例用于指标计算
+            #  从环境获取第一个实例用于指标计算
             try:
                 if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
                     current_env = self.envs.envs[0]
@@ -1248,10 +1253,10 @@ class PPOExpertReproduction:
                 obs_tensor = torch.FloatTensor(obs).to(self.device)
                 
                 with torch.no_grad():
-                    # 🔧 修复2: 评估使用确定性动作（均值）
+                    #  修复2: 评估使用确定性动作（均值）
                     action = self.network.act_deterministic(obs_tensor)
                 
-                # 🔧 修复6: 评估时也要clip动作
+                #  修复6: 评估时也要clip动作
                 action_np = action.cpu().numpy()
                 # action_np = np.clip(action_np, -1.0, 1.0)
                 obs, reward, done, info = self.envs.step(action_np)
@@ -1267,7 +1272,7 @@ class PPOExpertReproduction:
                 
                 episode_length += 1
                 
-                # 🔧 修复：更全面的速度获取
+                #  修复：更全面的速度获取
                 speed_value = 0.0
                 if isinstance(info, dict):
                     if 'velocity' in info:
@@ -1287,7 +1292,7 @@ class PPOExpertReproduction:
                 if speed_value > 0:
                     episode_speeds.append(speed_value)
                 
-                # 🔧 修复：更完善的指标计算
+                #  修复：更完善的指标计算
                 missing_metrics = {}
                 if current_env is not None:
                     try:
@@ -1324,7 +1329,7 @@ class PPOExpertReproduction:
                     episode_lane_changes += 1
                 
                 if done_flag:
-                    # 🔧 修复：更准确的终止原因统计
+                    #  修复：更准确的终止原因统计
                     crash_detected = False
                     offroad_detected = False
                     success_detected = False
@@ -1418,7 +1423,7 @@ class PPOExpertReproduction:
         if not os.path.exists(checkpoint_path):
             raise FileNotFoundError(f"检查点文件不存在: {checkpoint_path}")
         
-        print(f"📥 正在加载检查点: {checkpoint_path}")
+        print(f" 正在加载检查点: {checkpoint_path}")
         
         # 加载检查点数据
         checkpoint = torch.load(checkpoint_path, map_location=self.device)
@@ -1444,7 +1449,7 @@ class PPOExpertReproduction:
         if hasattr(self.args, 'lr'):
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = self.args.lr
-            print(f"🔄 学习率已更新为新设置: {self.args.lr}")
+            print(f" 学习率已更新为新设置: {self.args.lr}")
         
         # 恢复训练进度
         self.global_step = checkpoint["global_step"]
@@ -1452,7 +1457,7 @@ class PPOExpertReproduction:
         # 计算起始迭代号（避免重复）
         self.start_iteration = checkpoint["iteration"]
         
-        print(f"📊 训练状态恢复:")
+        print(f" 训练状态恢复:")
         print(f"   全局步数: {self.global_step:,}")
         print(f"   迭代次数: {self.start_iteration}")
         
@@ -1597,7 +1602,7 @@ class PPOExpertReproduction:
     
     def _show_hyperparameter_override_info(self, checkpoint: Dict):
         """显示超参数覆盖信息"""
-        print("\n🔄 超参数覆盖情况:")
+        print("\n 超参数覆盖情况:")
         
         # 检查是否有保存的args
         checkpoint_args = checkpoint.get("args", {})
@@ -1635,19 +1640,19 @@ class PPOExpertReproduction:
                 overridden_params.append(f"   {param_desc}: (新增) {current_val}")
         
         if overridden_params:
-            print("🎯 已覆盖的超参数:")
+            print(" 已覆盖的超参数:")
             for param in overridden_params:
                 print(param)
         
         if unchanged_params and len(unchanged_params) <= 5:  # 只显示少量未改变的参数
-            print("📌 保持不变的超参数:")
+            print(" 保持不变的超参数:")
             for param in unchanged_params[:5]:
                 print(param)
             if len(unchanged_params) > 5:
                 print(f"   ... 以及其他{len(unchanged_params)-5}个参数")
         
         if not overridden_params:
-            print("📋 所有超参数保持与检查点一致")
+            print(" 所有超参数保持与检查点一致")
         
         print()
     
@@ -1700,7 +1705,7 @@ class PPOExpertReproduction:
         if len(self.episode_timeouts) > 0:
             self.writer.add_scalar("env/time_outs", np.mean(self.episode_timeouts), self.global_step)
         
-        # 🔧 新增：动作统计记录
+        #  新增：动作统计记录
         if len(self.episode_steer_means) > 0:
             self.writer.add_scalar("actions/steer_mean", np.mean(self.episode_steer_means), self.global_step)
             self.writer.add_scalar("actions/steer_std", np.std(self.episode_steer_means), self.global_step)
@@ -1713,7 +1718,7 @@ class PPOExpertReproduction:
             self.writer.add_scalar("actions/throttle_min", np.min(self.episode_throttle_means), self.global_step)
             self.writer.add_scalar("actions/throttle_max", np.max(self.episode_throttle_means), self.global_step)
         
-        # 🔧 新增：变道惩罚统计记录
+        #  新增：变道惩罚统计记录
         if len(self.episode_lane_change_penalties) > 0:
             self.writer.add_scalar("lane_change/penalty_mean", np.mean(self.episode_lane_change_penalties), self.global_step)
             self.writer.add_scalar("lane_change/penalty_total", np.sum(self.episode_lane_change_penalties), self.global_step)
@@ -1748,12 +1753,12 @@ class PPOExpertReproduction:
             eval_stats.get('eval_lane_change_count', 0) if eval_stats else 0,
             eval_stats.get('eval_min_ttc', 0) if eval_stats else 0,
             eval_stats.get('eval_path_completion', 0) if eval_stats else 0,
-            # 🔧 新增：动作统计数据
+            #  新增：动作统计数据
             np.mean(self.episode_steer_means) if len(self.episode_steer_means) > 0 else 0,
             np.std(self.episode_steer_means) if len(self.episode_steer_means) > 0 else 0,
             np.mean(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
             np.std(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
-            # 🔧 新增：变道统计数据
+            #  新增：变道统计数据
             np.mean(self.episode_lane_change_penalties) if len(self.episode_lane_change_penalties) > 0 else 0,
             np.mean(self.episode_lane_change_speed_ratios) if len(self.episode_lane_change_speed_ratios) > 0 else 0,
             np.sum(self.episode_cooldown_violations) if len(self.episode_cooldown_violations) > 0 else 0
@@ -1772,20 +1777,20 @@ class PPOExpertReproduction:
         
         # 每隔一定步数输出详细统计
         if iteration % (self.args.eval_freq * 2) == 0 and eval_stats:
-            print(f"📊 详细统计 (Step {self.global_step}):")
+            print(f" 详细统计 (Step {self.global_step}):")
             print(f"   平均速度: {eval_stats.get('eval_avg_speed', 0):.2f}")
             print(f"   车道偏移: {eval_stats.get('eval_lane_deviation', 0):.3f}")
             print(f"   路径完成: {eval_stats.get('eval_path_completion', 0):.3f}")
             print(f"   成功率: {eval_stats.get('eval_success_rate', 0):.3f}")
             print(f"   当前熵系数: {self.current_entropy_coef:.4f}")
             
-            # 🔧 新增：动作统计输出
+            #  新增：动作统计输出
             if len(self.episode_steer_means) > 0:
                 print(f"   转向均值: {np.mean(self.episode_steer_means):.3f} ± {np.std(self.episode_steer_means):.3f}")
             if len(self.episode_throttle_means) > 0:
                 print(f"   油门均值: {np.mean(self.episode_throttle_means):.3f} ± {np.std(self.episode_throttle_means):.3f}")
             
-            # 🔧 新增：变道惩罚统计输出
+            #  新增：变道惩罚统计输出
             if len(self.episode_lane_change_penalties) > 0:
                 print(f"   变道惩罚: {np.mean(self.episode_lane_change_penalties):.3f} ± {np.std(self.episode_lane_change_penalties):.3f}")
                 print(f"   变道速度比: {np.mean(self.episode_lane_change_speed_ratios):.3f}")
@@ -1797,7 +1802,7 @@ class PPOExpertReproduction:
     
     def train(self):
         """主训练循环"""
-        print(f"🚀 开始PPO训练 - 目标步数: {self.args.total_timesteps:,}")
+        print(f" 开始PPO训练 - 目标步数: {self.args.total_timesteps:,}")
         
         # 设置起始迭代号
         start_iteration = getattr(self, 'start_iteration', 0)
@@ -1807,7 +1812,7 @@ class PPOExpertReproduction:
         
         # 如果是恢复训练，尝试获取历史最佳奖励
         if hasattr(self, 'start_iteration') and self.start_iteration > 0:
-            print(f"🔄 从迭代 {self.start_iteration} 恢复训练")
+            print(f" 从迭代 {self.start_iteration} 恢复训练")
         
         while self.global_step < self.args.total_timesteps:
             iteration += 1
@@ -1849,7 +1854,7 @@ class PPOExpertReproduction:
                     coll = eval_stats.get("eval_collision_rate", 1.0)
                     if self.curriculum_stage < 3 and succ >= self.args.gate_succ_threshold and coll <= self.args.gate_coll_threshold:
                         self.curriculum_stage += 1
-                        print(f"🎓 课程晋升 -> Stage {self.curriculum_stage}")
+                        print(f" 课程晋升 -> Stage {self.curriculum_stage}")
 
                 # ===== 指标阈值达标检查 =====
                 reward_mean = eval_stats.get("eval_reward_mean", 0.0)
@@ -1858,12 +1863,29 @@ class PPOExpertReproduction:
                 offroad_rate = eval_stats.get("eval_offroad_rate", 1.0)
                 
                 # 检查是否同时满足所有阈值条件
-                if (reward_mean >= 200 and 
+                # 增加课程学习条件：必须进入stage 2才开始检查指标达标
+                if self.curriculum_mode == "gate":
+                    current_stage = self.curriculum_stage
+                else:
+                    # progress模式：根据训练进度计算stage
+                    p = min(1.0, float(self.global_step) / float(self.args.total_timesteps + 1e-8))
+                    if p < 0.1:
+                        current_stage = 0
+                    elif p < 0.2:
+                        current_stage = 1
+                    elif p < 0.5:
+                        current_stage = 2
+                    else:
+                        current_stage = 3
+                
+                if (current_stage >= 2 and  # 课程学习必须进入stage 2
+                    reward_mean >= 200 and 
                     success_rate >= 0.70 and 
                     collision_rate <= 0.15 and 
                     offroad_rate <= 0.15):
                     
-                    print(f"🎯 指标达标检测到！")
+                    print(f"�� 指标达标检测到！")
+                    print(f"   当前课程阶段: Stage {current_stage} ✅")
                     print(f"   平均奖励: {reward_mean:.3f} ≥ 200.0 ✅")
                     print(f"   成功率: {success_rate:.3f} ≥ 0.70 ✅")
                     print(f"   碰撞率: {collision_rate:.3f} ≤ 0.15 ✅")
@@ -1872,7 +1894,7 @@ class PPOExpertReproduction:
                     # 保存达标检查点（特殊命名）
                     milestone_checkpoint_path = os.path.join(
                         self.exp_dir, "checkpoints", 
-                        f"milestone_checkpoint_iter{iteration}_reward{reward_mean:.1f}_succ{success_rate:.2f}.pt"
+                        f"milestone_checkpoint_iter{iteration}_stage{current_stage}_reward{reward_mean:.1f}_succ{success_rate:.2f}.pt"
                     )
                     
                     milestone_checkpoint = {
@@ -1887,14 +1909,15 @@ class PPOExpertReproduction:
                             "eval_success_rate": success_rate,
                             "eval_collision_rate": collision_rate,
                             "eval_offroad_rate": offroad_rate,
+                            "curriculum_stage": current_stage,  # 记录达到里程碑时的课程阶段
                             "milestone_achieved": True,
                             "milestone_timestamp": datetime.now().isoformat()
                         }
                     }
                     
                     torch.save(milestone_checkpoint, milestone_checkpoint_path)
-                    print(f"🏆 里程碑检查点已保存: {os.path.basename(milestone_checkpoint_path)}")
-                    print(f"📁 完整路径: {milestone_checkpoint_path}")
+                    print(f" 里程碑检查点已保存: {os.path.basename(milestone_checkpoint_path)}")
+                    print(f" 完整路径: {milestone_checkpoint_path}")
 
                 # 检查是否为最佳模型
                 is_best = eval_stats["eval_reward_mean"] > best_reward
@@ -1923,7 +1946,7 @@ class PPOExpertReproduction:
         self.writer.close()
         # 关闭向量化环境
         self.envs.close()
-        print(f"🔄 训练环境已安全关闭")
+        print(f" 训练环境已安全关闭")
     
     def generate_final_report(self, final_eval: Dict):
         """生成最终报告"""
@@ -1934,11 +1957,11 @@ class PPOExpertReproduction:
         
         report_content = f"""# MetaDrive PPO Expert 复现训练报告
 
-## 📋 背景与目标
+##  背景与目标
 
 本实验旨在复现MetaDrive PPO Expert的训练过程，严格对齐网络结构、观测空间、动作空间和环境配置，仅对关键超参数进行可控调整。
 
-## 🔧 实验配置
+##  实验配置
 
 ### 网络结构 (严格对齐Expert)
 - **观测维度**: 275 (Lidar: 240 + State: 35)
@@ -1967,7 +1990,7 @@ class PPOExpertReproduction:
 - **裁剪范围**: {self.args.clip_range}
 - **熵系数**: {self.args.entropy_coef}
 
-## 📊 训练结果
+##  训练结果
 
 ### 最终性能
 - **平均奖励**: {final_eval['eval_reward_mean']:.3f} ± {final_eval['eval_reward_std']:.3f}
@@ -1982,7 +2005,7 @@ class PPOExpertReproduction:
 - **最终值函数损失**: {df['value_loss'].iloc[-1]:.6f}
 - **最终熵值**: {df['entropy'].iloc[-1]:.6f}
 
-## 🎯 使用方法
+##  使用方法
 
 ### 基础训练
 ```bash
@@ -2020,7 +2043,7 @@ python ppo_expert_reproduction.py \\
 - `--entropy_coef`: 熵系数 (默认: 0.01)
 - `--total_timesteps`: 总训练步数 (默认: 1,000,000)
 
-## 📈 可视化说明
+##  可视化说明
 
 ### TensorBoard监控
 ```bash
@@ -2036,7 +2059,7 @@ tensorboard --logdir {self.exp_dir}/tensorboard
 - `eval/eval_collision_rate`: 碰撞率
 - `eval/eval_success_rate`: 成功率
 
-## 🏆 评估协议
+##  评估协议
 
 ### 验证设置
 - **验证环境**: 与训练环境相同配置
@@ -2049,7 +2072,7 @@ tensorboard --logdir {self.exp_dir}/tensorboard
 2. **约束条件**: 碰撞率不劣化
 3. **辅助指标**: 成功率、episode长度
 
-## 🔄 复现性保证
+##  复现性保证
 
 ### 依赖版本
 - Python: {sys.version.split()[0]}
@@ -2065,7 +2088,7 @@ tensorboard --logdir {self.exp_dir}/tensorboard
 - **计算设备**: {self.device}
 - **训练时长**: 预计2-4小时 (取决于硬件)
 
-## 📁 产物说明
+##  产物说明
 
 ```
 {os.path.basename(self.exp_dir)}/
@@ -2079,7 +2102,7 @@ tensorboard --logdir {self.exp_dir}/tensorboard
 └── report.md                 # 本报告文件
 ```
 
-## 🚀 扩展说明
+##  扩展说明
 
 ### 添加新超参数
 1. 在`add_arguments()`函数中添加参数定义
@@ -2106,11 +2129,11 @@ env_config.update({{
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report_content)
         
-        print(f"📄 最终报告已生成: {report_path}")
+        print(f" 最终报告已生成: {report_path}")
     
     def _validate_and_log_scenarios(self):
         """验证和记录直线场景生成参数"""
-        print(f"\n🛣️ 直线场景配置验证:")
+        print(f"\n️ 直线场景配置验证:")
         print(f"   场景类型: 动态直线道路")
         print(f"   总场景数: 1000")
         print(f"   道路长度: 2-10个直线段 (每段约50-80米)")
@@ -2134,7 +2157,7 @@ env_config.update({{
                 "traffic_density": traffic_density
             })
         
-        print(f"\n📊 场景示例:")
+        print(f"\n 场景示例:")
         for scenario in sample_scenarios:
             print(f"   场景{scenario['index']:3d}: {scenario['num_segments']:2d}段 ({scenario['estimated_length']:3d}m), "
                   f"密度={scenario['traffic_density']:.3f}, 地图='{scenario['map_string']}'")
@@ -2159,7 +2182,7 @@ env_config.update({{
         with open(scenario_config_path, 'w', encoding='utf-8') as f:
             json.dump(scenario_config, f, indent=2, ensure_ascii=False)
         
-        print(f"📄 场景配置已保存: {scenario_config_path}")
+        print(f" 场景配置已保存: {scenario_config_path}")
         print("=" * 50)
 
     def _create_single_environment(self):
@@ -2207,7 +2230,7 @@ def add_arguments():
     parser.add_argument("--target_kl", type=float, default=None,
                        help="目标KL散度 (早停, 默认: None)")
     
-    # ===== 熵系数衰减参数 (🔧 修复5: 调整熵系数) =====
+    # ===== 熵系数衰减参数 ( 修复5: 调整熵系数) =====
     parser.add_argument("--entropy_coef_start", type=float, default=0.01,
                        help="初始熵系数 (默认: 0.01, 降低自0.015)")
     parser.add_argument("--entropy_coef_end", type=float, default=0.001,
@@ -2215,7 +2238,7 @@ def add_arguments():
     parser.add_argument("--entropy_decay_end_ratio", type=float, default=0.5,
                        help="熵系数衰减完成的训练进度比例 (默认: 0.5, 降低自0.8)")
     
-    # ===== 奖励配置参数 (🔧 修复4: 回调到合理量级) =====
+    # ===== 奖励配置参数 ( 修复4: 回调到合理量级) =====
     parser.add_argument("--success_reward", type=float, default=20.0,
                        help="成功奖励 (默认: 10.0, 回调自20.0)")
     parser.add_argument("--driving_reward", type=float, default=1.0,
@@ -2236,8 +2259,8 @@ def add_arguments():
                        help="高速放大系数 (默认: 1.0)")
     parser.add_argument("--v_limit", type=float, default=15.0,
                        help="用于速度归一的限速 (默认: 15.0)")
-    parser.add_argument("--lc_cooldown_s", type=float, default=4.0,
-                       help="变道冷却时间，秒 (默认: 4.0)")
+    parser.add_argument("--lc_cooldown_s", type=float, default=3.0,
+                       help="变道冷却时间，秒 (默认: 3.0)")
     parser.add_argument("--w_lc_cool", type=float, default=1,
                        help="冷却期内附加惩罚 (默认: 1)")
 
@@ -2279,7 +2302,7 @@ def add_arguments():
     parser.add_argument("--seed", type=int, default=42,
                        help="随机种子 (默认: 42)")
     parser.add_argument("--save_dir", type=str, 
-                       default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction",
+                       default="/share/home/u22537/data/JXY/metadrive/a_scen_env/a_ppo_train/ppo_reproduction",
                        help="保存目录")
     
     # ===== 恢复训练设置 =====
@@ -2299,24 +2322,24 @@ def main():
     if args.device == "auto":
         args.device = "cuda"# if torch.cuda.is_available() else "cpu"
     
-    print("🎯 MetaDrive PPO Expert 复现训练")
+    print(" MetaDrive PPO Expert 复现训练")
     print("=" * 50)
     
     # 恢复训练信息
     if args.resume_from:
-        print(f"🔄 恢复训练模式:")
+        print(f" 恢复训练模式:")
         print(f"   检查点路径: {args.resume_from}")
         print(f"   检查点存在: {'✅' if os.path.exists(args.resume_from) else '❌'}")
         print("=" * 50)
     
-    print(f"📊 关键超参数:")
+    print(f" 关键超参数:")
     print(f"   学习率: {args.lr}")
     print(f"   rollout步数: {args.n_steps}")
     print(f"   环境数量: {args.n_envs}")
     print(f"   批次大小: {args.batch_size}")
     print(f"   训练轮次: {args.n_epochs}")
     print(f"   裁剪范围: {args.clip_range}")
-    print(f"🔧 训练设置:")
+    print(f" 训练设置:")
     print(f"   总步数: {args.total_timesteps:,}")
     print(f"   随机种子: {args.seed}")
     print(f"   计算设备: {args.device}")
