@@ -4,6 +4,7 @@ MetaDrive PPO Expert 复现训练系统
 严格对齐MetaDrive PPO expert的配置，仅关键超参数可调整
 支持TensorBoard可视化、完整产物落地和详细说明文档生成
 可实现断点续训、读取ckpt结合新参数训
+集成认知模块：认知偏差、认知延迟、认知感知
 """
 
 import os
@@ -31,9 +32,15 @@ current_dir = Path(__file__).parent.absolute()
 metadrive_root = current_dir.parent.parent.parent
 sys.path.insert(0, str(metadrive_root))
 
+
 from metadrive.envs.metadrive_env import MetaDriveEnv
 # from metadrive.obs.state_obs import LidarStateObservation
 from torch.utils.tensorboard import SummaryWriter
+
+# 导入认知模块
+from cognitive_module.cognitive_bias_module import CognitiveBiasModule
+from cognitive_module.cognitive_delay_module import CognitiveDelayModule
+from cognitive_module.cognitive_perception_module import CognitivePerceptionModule
 
 
 class PPONetwork(nn.Module):
@@ -72,7 +79,7 @@ class PPONetwork(nn.Module):
         nn.init.orthogonal_(self.actor_out.weight, gain=0.01)
         nn.init.constant_(self.actor_out.bias, 0.0)
 
-        # 给“均值”的 throttle 维度一个小正偏置；给 log_std 维度一个较小的初值
+        # 给"均值"的 throttle 维度一个小正偏置；给 log_std 维度一个较小的初值
         # actor_out 的前 action_dim 是 mean，后 action_dim 是 log_std
         with torch.no_grad():
             action_dim = self.actor_out.out_features // 2
@@ -274,10 +281,65 @@ class PPOExpertReproduction:
         self.curriculum_alpha = self.args.curriculum_alpha
         self.curriculum_stage = 0  # gate模式使用；progress模式按进度算，不用这个
         
+        # === 初始化认知模块 ===
+        self.use_cognitive_modules = args.use_cognitive_modules
+        
+        if self.use_cognitive_modules:
+            # 初始化认知偏差模块（风险厌恶）
+            if args.use_cognitive_bias:
+                bias_config = {
+                    'inverse_tta_coef': args.bias_inverse_tta_coef,
+                    'tta_threshold': args.bias_tta_threshold,
+                    'adaptive_bias': args.bias_adaptive,
+                    'adaptation_rate': args.bias_adaptation_rate,
+                    'visual_detection_distance': args.bias_visual_distance,
+                    'visual_detection_angle': args.bias_visual_angle,
+                    'visual_aversion_strength': args.bias_visual_strength,
+                    'verbose': args.cognitive_verbose
+                }
+                self.cognitive_bias_module = CognitiveBiasModule(bias_config)
+                print(f"✅ 认知偏差模块已初始化")
+            else:
+                self.cognitive_bias_module = None
+            
+            # 初始化认知延迟模块（动作延迟）
+            if args.use_cognitive_delay:
+                self.cognitive_delay_module = CognitiveDelayModule(
+                    delay_steps=args.delay_steps,
+                    enable_smoothing=args.delay_smoothing,
+                    smoothing_factor=args.delay_smoothing_factor,
+                    enable_visualization=args.cognitive_visualization
+                )
+                print(f"✅ 认知延迟模块已初始化")
+            else:
+                self.cognitive_delay_module = None
+            
+            # 初始化认知感知模块（观测噪声）
+            if args.use_cognitive_perception:
+                perception_config = {
+                    'sigma0': args.perception_sigma0,
+                    'k': args.perception_k,
+                    'p_miss0': args.perception_p_miss0,
+                    'p_false': args.perception_p_false,
+                    'use_kf': args.perception_use_kf,
+                    'kf_dt': args.perception_kf_dt,
+                    'kf_q_scale': args.perception_kf_q_scale
+                }
+                self.cognitive_perception_module = CognitivePerceptionModule(perception_config)
+                print(f"✅ 认知感知模块已初始化")
+            else:
+                self.cognitive_perception_module = None
+                
+            print(f" 认知模块集成完成")
+        else:
+            self.cognitive_bias_module = None
+            self.cognitive_delay_module = None
+            self.cognitive_perception_module = None
+        
         # 创建环境
         self.envs = self._create_environments()
         
-        #  新增：动态设置变道冷却时间步数
+        #  新增：动态设置变道冷却时间步数
         self._setup_lane_change_cooldown()
         
         # 创建网络
@@ -855,7 +917,7 @@ class PPOExpertReproduction:
     
     def collect_rollouts(self) -> Tuple[torch.Tensor, ...]:
         """收集rollout数据 - 使用向量化环境的真实并行采样"""
-        #  新增：确保变道冷却时间已初始化
+        #  新增：确保变道冷却时间已初始化
         if self._lane_change_cooldown_steps is None:
             print("⚠️  变道冷却时间未初始化，使用默认值")
             self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * 10)
@@ -871,6 +933,15 @@ class PPOExpertReproduction:
         # 使用向量化环境进行真实并行采样
         obs = self.envs.reset()  # 返回shape: (n_envs, obs_dim)
         
+        # === 认知模块：重置状态 ===
+        if self.use_cognitive_modules:
+            if self.cognitive_delay_module:
+                self.cognitive_delay_module.reset()
+            if self.cognitive_perception_module:
+                self.cognitive_perception_module.reset()
+            if self.cognitive_bias_module:
+                self.cognitive_bias_module.reset()
+        
         # Episode统计变量 - 支持多环境
         episode_rewards = np.zeros(self.args.n_envs)
         episode_lengths = np.zeros(self.args.n_envs)
@@ -879,30 +950,81 @@ class PPOExpertReproduction:
         lane_changes = np.zeros(self.args.n_envs)
         min_ttcs = [[] for _ in range(self.args.n_envs)]
         
-        #  新增：动作统计变量
+        #  新增：动作统计变量
         episode_steer_means = [[] for _ in range(self.args.n_envs)]
         episode_throttle_means = [[] for _ in range(self.args.n_envs)]
         
-        #  新增：变道惩罚统计变量
+        #  新增：变道统计变量
         episode_lane_change_penalties = [[] for _ in range(self.args.n_envs)]
         episode_lane_change_speed_ratios = [[] for _ in range(self.args.n_envs)]
         episode_cooldown_violations = [[] for _ in range(self.args.n_envs)]
         
         # 收集n_steps步数据
         for step in range(self.args.n_steps):
+            # === 认知感知模块：处理观测噪声 ===
+            if self.use_cognitive_modules and self.cognitive_perception_module:
+                # 对每个环境的观测应用感知噪声
+                obs_processed = []
+                for env_idx in range(self.args.n_envs):
+                    single_obs = obs[env_idx]
+                    # 应用感知噪声
+                    noisy_obs = self.cognitive_perception_module.process_observation(
+                        single_obs, 
+                        is_ppo_mode=True
+                    )
+                    obs_processed.append(noisy_obs)
+                obs = np.array(obs_processed)
+            
             # 将观测转换为tensor
-            obs_tensor = torch.as_tensor(np.array(obs), dtype=torch.float32, device=self.device)   #torch.FloatTensor(obs).to(self.device)
+            obs_tensor = torch.as_tensor(np.array(obs), dtype=torch.float32, device=self.device)
             
             with torch.no_grad():
                 actions, log_probs, _, values = self.network.get_action_and_value(obs_tensor)
-                #  新增：获取动作统计信息
+                #  新增：获取动作统计信息
                 steer_means, throttle_means = self.network.get_action_stats(obs_tensor)
             
             # 执行动作 - 向量化环境会自动处理多个环境
             actions_np = actions.cpu().numpy()
-            #  修复6: 动作clip到[-1,1]范围
-            # actions_np = np.clip(actions_np, -1.0, 1.0)
+            
+            # === 认知延迟模块：处理动作延迟 ===
+            if self.use_cognitive_modules and self.cognitive_delay_module:
+                # 对每个环境的动作应用延迟
+                actions_delayed = []
+                for env_idx in range(self.args.n_envs):
+                    single_action = actions_np[env_idx]
+                    # 应用动作延迟
+                    delayed_action = self.cognitive_delay_module.process_action(
+                        single_action,
+                        is_ppo_mode=True
+                    )
+                    actions_delayed.append(delayed_action)
+                actions_np = np.array(actions_delayed)
+            
             next_obs, rewards, dones, infos = self.envs.step(actions_np)
+            
+            # === 认知偏差模块：处理奖励偏差 ===
+            if self.use_cognitive_modules and self.cognitive_bias_module:
+                # 对每个环境的奖励应用认知偏差
+                for env_idx in range(self.args.n_envs):
+                    # 获取当前环境实例
+                    current_env = None
+                    try:
+                        if hasattr(self.envs, 'envs') and len(self.envs.envs) > env_idx:
+                            current_env = self.envs.envs[env_idx]
+                        elif hasattr(self.envs, 'venv') and hasattr(self.envs.venv, 'envs'):
+                            current_env = self.envs.venv.envs[env_idx] if len(self.envs.venv.envs) > env_idx else None
+                    except:
+                        pass
+                    
+                    if current_env:
+                        # 处理奖励偏差
+                        adjusted_reward, bias_info = self.cognitive_bias_module.process_reward(
+                            original_reward=rewards[env_idx],
+                            env=current_env,
+                            info=infos[env_idx],
+                            is_ppo_mode=True
+                        )
+                        rewards[env_idx] = adjusted_reward
             
             # 收集episode统计信息 - 处理多环境信息
             episode_rewards += rewards
@@ -1404,6 +1526,28 @@ class PPOExpertReproduction:
             "config": self.config,
             "args": vars(self.args)
         }
+        
+        # 保存认知模块状态
+        if self.use_cognitive_modules:
+            cognitive_states = {}
+            
+            if self.cognitive_bias_module:
+                cognitive_states['bias_module'] = {
+                    'adaptive_factor': self.cognitive_bias_module.adaptive_factor,
+                    'step_count': self.cognitive_bias_module._step_count,
+                    'total_bias': self.cognitive_bias_module._total_bias,
+                    'active_steps': self.cognitive_bias_module._active_steps
+                }
+            
+            if self.cognitive_delay_module:
+                cognitive_states['delay_module'] = self.cognitive_delay_module.get_status()
+            
+            if self.cognitive_perception_module:
+                cognitive_states['perception_module'] = {
+                    'initialized': getattr(self.cognitive_perception_module, 'initialized', False)
+                }
+            
+            checkpoint['cognitive_states'] = cognitive_states
         
         # 保存常规检查点
         checkpoint_path = os.path.join(self.exp_dir, "checkpoints", f"checkpoint_{iteration}.pt")
@@ -1957,11 +2101,34 @@ class PPOExpertReproduction:
         
         report_content = f"""# MetaDrive PPO Expert 复现训练报告
 
-##  背景与目标
+##  背景与目标
 
 本实验旨在复现MetaDrive PPO Expert的训练过程，严格对齐网络结构、观测空间、动作空间和环境配置，仅对关键超参数进行可控调整。
 
-##  实验配置
+{f'''##  认知模块集成
+
+本次训练集成了以下认知模块：
+
+### 认知偏差模块（风险厌恶）
+- **状态**: {'启用' if self.args.use_cognitive_bias else '禁用'}
+- **偏差强度系数**: {self.args.bias_inverse_tta_coef if self.args.use_cognitive_bias else 'N/A'}
+- **TTA阈值**: {self.args.bias_tta_threshold if self.args.use_cognitive_bias else 'N/A'}
+- **视觉检测距离**: {self.args.bias_visual_distance if self.args.use_cognitive_bias else 'N/A'}米
+- **视觉检测角度**: {self.args.bias_visual_angle if self.args.use_cognitive_bias else 'N/A'}度
+
+### 认知延迟模块（动作延迟）
+- **状态**: {'启用' if self.args.use_cognitive_delay else '禁用'}
+- **延迟步数**: {self.args.delay_steps if self.args.use_cognitive_delay else 'N/A'}
+- **动作平滑**: {'启用' if self.args.delay_smoothing else 'N/A'}
+- **平滑系数**: {self.args.delay_smoothing_factor if self.args.use_cognitive_delay else 'N/A'}
+
+### 认知感知模块（观测噪声）
+- **状态**: {'启用' if self.args.use_cognitive_perception else '禁用'}
+- **基础噪声**: {self.args.perception_sigma0 if self.args.use_cognitive_perception else 'N/A'}米
+- **卡尔曼滤波**: {'启用' if self.args.perception_use_kf else 'N/A'}
+''' if self.args.use_cognitive_modules else '## 认知模块未启用'}
+
+##  实验配置
 
 ### 网络结构 (严格对齐Expert)
 - **观测维度**: 275 (Lidar: 240 + State: 35)
@@ -2294,6 +2461,59 @@ def add_arguments():
     parser.add_argument("--gate_coll_threshold", type=float, default=0.20,
                         help="gate模式：晋级所需碰撞率上限（默认0.20）")
 
+    # ===== 认知模块参数 =====
+    parser.add_argument("--use_cognitive_modules", action="store_true", default=False,
+                        help="启用认知模块（默认关闭）")
+    parser.add_argument("--cognitive_verbose", action="store_true", default=False,
+                        help="认知模块详细日志输出（默认关闭）")
+    parser.add_argument("--cognitive_visualization", action="store_true", default=False,
+                        help="认知模块可视化输出（默认关闭）")
+    
+    # 认知偏差模块参数（风险厌恶）
+    parser.add_argument("--use_cognitive_bias", action="store_true", default=True,
+                        help="启用认知偏差模块（默认开启）")
+    parser.add_argument("--bias_inverse_tta_coef", type=float, default=1.0,
+                        help="偏差强度系数（默认1.0）")
+    parser.add_argument("--bias_tta_threshold", type=float, default=1.0,
+                        help="TTA阈值（默认1.0）")
+    parser.add_argument("--bias_adaptive", action="store_true", default=True,
+                        help="启用自适应偏差（默认开启）")
+    parser.add_argument("--bias_adaptation_rate", type=float, default=0.01,
+                        help="自适应速率（默认0.01）")
+    parser.add_argument("--bias_visual_distance", type=float, default=50.0,
+                        help="视觉检测距离（米）（默认50.0）")
+    parser.add_argument("--bias_visual_angle", type=float, default=30.0,
+                        help="视觉检测角度（度）（默认30.0）")
+    parser.add_argument("--bias_visual_strength", type=float, default=0.5,
+                        help="视觉厌恶强度（默认0.5）")
+    
+    # 认知延迟模块参数（动作延迟）
+    parser.add_argument("--use_cognitive_delay", action="store_true", default=True,
+                        help="启用认知延迟模块（默认开启）")
+    parser.add_argument("--delay_steps", type=int, default=2,
+                        help="延迟步数（默认2）")
+    parser.add_argument("--delay_smoothing", action="store_true", default=True,
+                        help="启用动作平滑（默认开启）")
+    parser.add_argument("--delay_smoothing_factor", type=float, default=0.3,
+                        help="平滑系数（默认0.3）")
+    
+    # 认知感知模块参数（观测噪声）
+    parser.add_argument("--use_cognitive_perception", action="store_true", default=True,
+                        help="启用认知感知模块（默认开启）")
+    parser.add_argument("--perception_sigma0", type=float, default=0.1,
+                        help="基础噪声标准差（米）（默认0.1）")
+    parser.add_argument("--perception_k", type=float, default=0.02,
+                        help="距离相关系数（默认0.02）")
+    parser.add_argument("--perception_p_miss0", type=float, default=0.01,
+                        help="基础漏检概率（默认0.01）")
+    parser.add_argument("--perception_p_false", type=float, default=0.0,
+                        help="误检概率（默认0.0）")
+    parser.add_argument("--perception_use_kf", action="store_true", default=True,
+                        help="启用卡尔曼滤波（默认开启）")
+    parser.add_argument("--perception_kf_dt", type=float, default=0.1,
+                        help="卡尔曼滤波步长（默认0.1）")
+    parser.add_argument("--perception_kf_q_scale", type=float, default=100.0,
+                        help="卡尔曼滤波过程噪声缩放（默认100.0）")
     
     # ===== 系统设置 =====
     parser.add_argument("--device", type=str, default="auto",
