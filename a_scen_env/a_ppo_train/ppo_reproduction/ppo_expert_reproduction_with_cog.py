@@ -41,23 +41,24 @@ from torch.utils.tensorboard import SummaryWriter
 from cognitive_module.cognitive_bias_module import CognitiveBiasModule
 from cognitive_module.cognitive_delay_module import CognitiveDelayModule
 from cognitive_module.cognitive_perception_module import CognitivePerceptionModule
+from cognitive_module.cognitive_parameter_sampler import CognitiveParameterSampler
 
 
 class PPONetwork(nn.Module):
-    """PPO网络结构 - 严格对齐MetaDrive expert"""
+    """PPO网络结构 - 严格对齐MetaDrive expert + 认知参数集成"""
     
-    def __init__(self, obs_dim: int = 275, action_dim: int = 2, hidden_dim: int = 256):
+    def __init__(self, obs_dim: int = 279, action_dim: int = 2, hidden_dim: int = 256):
         super(PPONetwork, self).__init__()
         
-        # Actor网络 (与expert完全对齐)
-        self.actor_fc1 = nn.Linear(obs_dim, hidden_dim)
-        self.actor_fc2 = nn.Linear(hidden_dim, hidden_dim)
-        self.actor_out = nn.Linear(hidden_dim, action_dim * 2)  # mean + log_std
+        # Actor网络 (观测维度从275扩展到279，包含认知参数)
+        self.actor_fc1 = nn.Linear(obs_dim, hidden_dim)      # 279 → 256
+        self.actor_fc2 = nn.Linear(hidden_dim, hidden_dim)    # 256 → 256
+        self.actor_out = nn.Linear(hidden_dim, action_dim * 2) # 256 → 4
         
-        # Critic网络 (与expert完全对齐)
-        self.critic_fc1 = nn.Linear(obs_dim, hidden_dim)
-        self.critic_fc2 = nn.Linear(hidden_dim, hidden_dim)
-        self.critic_out = nn.Linear(hidden_dim, 1)
+        # Critic网络 (观测维度从275扩展到279，包含认知参数)
+        self.critic_fc1 = nn.Linear(obs_dim, hidden_dim)      # 279 → 256
+        self.critic_fc2 = nn.Linear(hidden_dim, hidden_dim)   # 256 → 256
+        self.critic_out = nn.Linear(hidden_dim, 1)            # 256 → 1
         
         # 激活函数
         self.tanh = nn.Tanh()
@@ -283,9 +284,36 @@ class PPOExpertReproduction:
         
         # === 初始化认知模块 ===
         self.use_cognitive_modules = args.use_cognitive_modules
+        self.cognitive_bias_module = None
+        self.cognitive_delay_module = None
+        self.cognitive_perception_module = None
         
         if self.use_cognitive_modules:
-            # 初始化认知偏差模块（风险厌恶）
+            print("🧠 初始化认知模块...")
+            
+            # 先初始化认知感知模块（因为认知偏差模块需要引用它）
+            if args.use_cognitive_perception:
+                perception_config = {
+                    'sigma0': args.perception_sigma0 * 10,  # 转换为米制噪声
+                    'k': args.perception_k,
+                    'p_miss0': args.perception_p_miss0,
+                    'far_distance': 50.0,
+                    'p_false': args.perception_p_false,
+                    'use_ar1': True,  # 启用AR(1)过程
+                    'rho': 0.8,       # AR(1)相关系数
+                    'use_kf': args.perception_use_kf,
+                    'kf_dt': args.perception_kf_dt,
+                    'kf_q_scale': args.perception_kf_q_scale
+                }
+                self.cognitive_perception_module = CognitivePerceptionModule(perception_config)
+                
+                # 启用雷达束可视化（如果指定）
+                if getattr(args, 'enable_radar_beam_viz', False):
+                    self.cognitive_perception_module.enable_radar_visualization(True)
+                
+                print(f"   ✅ 认知感知模块已启用")
+            
+            # 初始化认知偏差模块（传入认知感知模块引用）
             if args.use_cognitive_bias:
                 bias_config = {
                     'inverse_tta_coef': args.bias_inverse_tta_coef,
@@ -297,47 +325,78 @@ class PPOExpertReproduction:
                     'visual_aversion_strength': args.bias_visual_strength,
                     'verbose': args.cognitive_verbose
                 }
-                self.cognitive_bias_module = CognitiveBiasModule(bias_config)
-                print(f"✅ 认知偏差模块已初始化")
-            else:
-                self.cognitive_bias_module = None
+                # 🔧 关键改进：传入认知感知模块引用
+                self.cognitive_bias_module = CognitiveBiasModule(
+                    bias_config=bias_config,
+                    cognitive_perception_module=self.cognitive_perception_module
+                )
+                print(f"   ✅ 认知偏差模块已启用")
+                if self.cognitive_perception_module:
+                    print(f"      🔗 已连接到认知感知模块")
             
-            # 初始化认知延迟模块（动作延迟）
+            # 初始化认知延迟模块
             if args.use_cognitive_delay:
                 self.cognitive_delay_module = CognitiveDelayModule(
-                    delay_steps=args.delay_steps,
+                    delay_steps=int(args.delay_steps),  # 确保是整数类型
                     enable_smoothing=args.delay_smoothing,
                     smoothing_factor=args.delay_smoothing_factor,
                     enable_visualization=args.cognitive_visualization
                 )
-                print(f"✅ 认知延迟模块已初始化")
-            else:
-                self.cognitive_delay_module = None
+                print(f"   ✅ 认知延迟模块已启用 (延迟{args.delay_steps}步)")
             
-            # 初始化认知感知模块（观测噪声）
-            if args.use_cognitive_perception:
-                perception_config = {
-                    'sigma0': args.perception_sigma0,
-                    'k': args.perception_k,
-                    'p_miss0': args.perception_p_miss0,
-                    'p_false': args.perception_p_false,
-                    'use_kf': args.perception_use_kf,
-                    'kf_dt': args.perception_kf_dt,
-                    'kf_q_scale': args.perception_kf_q_scale
-                }
-                self.cognitive_perception_module = CognitivePerceptionModule(perception_config)
-                print(f"✅ 认知感知模块已初始化")
+            # === 新增：初始化认知参数采样器 ===
+            if args.use_cognitive_parameter_sampling:
+                self.cognitive_parameter_sampler = CognitiveParameterSampler(
+                    update_steps=args.cognitive_param_update_steps,
+                    bias_inverse_tta_coef_range=args.bias_inverse_tta_coef_range,
+                    perception_sigma0_range=args.perception_sigma0_range,
+                    perception_k_range=args.perception_k_range,
+                    delay_steps_range=args.delay_steps_range,
+                    enable_visualization=args.cognitive_visualization,
+                    save_history=True
+                )
+
             else:
-                self.cognitive_perception_module = None
-                
-            print(f" 认知模块集成完成")
+                self.cognitive_parameter_sampler = None
+
+        
+        # === 认知可视化数据收集 ===
+        self.enable_cognitive_visualization = args.cognitive_visualization
+        if self.enable_cognitive_visualization and self.use_cognitive_modules:
+            self.cognitive_viz_data = {
+                'timestamps': [],
+                'bias_strength': [],
+                'bias_applied': [],
+                'delay_steps': [],
+                'delay_applied': [],
+                'perception_noise': [],
+                'perception_applied': [],
+                'original_rewards': [],
+                'modified_rewards': [],
+                'original_actions': [],
+                'delayed_actions': [],
+                'original_observations': [],
+                'noisy_observations': [],
+                'step_count': []
+            }
+            print(f"🎨 认知可视化: 已启用")
         else:
-            self.cognitive_bias_module = None
-            self.cognitive_delay_module = None
-            self.cognitive_perception_module = None
+            self.cognitive_viz_data = None
         
         # 创建环境
         self.envs = self._create_environments()
+        
+        # === 认知模块：附加到环境 ===
+        if self.use_cognitive_modules:
+            # 对于向量化环境，附加到第一个环境实例（用于可视化等）
+            try:
+                if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
+                    self._attach_cognitive_modules_to_env(self.envs.envs[0])
+                elif hasattr(self.envs, 'venv') and hasattr(self.envs.venv, 'envs'):
+                    if len(self.envs.venv.envs) > 0:
+                        self._attach_cognitive_modules_to_env(self.envs.venv.envs[0])
+            except Exception as e:
+                print(f"⚠️ 认知模块附加失败: {e}")
         
         #  新增：动态设置变道冷却时间步数
         self._setup_lane_change_cooldown()
@@ -400,10 +459,27 @@ class PPOExpertReproduction:
         # 动态计算冷却时间步数，基于环境实际频率
         self._lane_change_cooldown_steps = None  # 将在环境创建后动态设置
         
-        print(f" PPO Expert复现训练初始化完成")
-        print(f" 实验目录: {self.exp_dir}")
-        print(f" 设备: {self.device}")
-        print(f" 随机种子: {args.seed}")
+        print(f" PPO Expert复现训练初始化完成")
+        print(f" 实验目录: {self.exp_dir}")
+        print(f" 设备: {self.device}")
+        print(f" 随机种子: {args.seed}")
+        
+        # === 认知参数集成调试信息 ===
+        if self.use_cognitive_modules:
+            print(f"🧠 认知模块已启用，观测维度已扩展:")
+            print(f"   原始观测维度: 275 (Lidar: 240 + State: 35)")
+            print(f"   认知参数维度: 4 (bias_coef, sigma0, k, delay)")
+            print(f"   扩展后观测维度: 279")
+            print(f"   网络结构: 279 → 256 → 256 → 4/1")
+            
+            if self.cognitive_parameter_sampler:
+                print(f"   认知参数采样器: 已启用")
+                print(f"   参数更新频率: {self.cognitive_parameter_sampler.update_steps} 步")
+                print(f"   当前认知参数: {self.cognitive_parameter_sampler.get_current_parameters()}")
+            else:
+                print(f"   认知参数采样器: 未启用 (使用固定参数)")
+        else:
+            print(f"📊 认知模块未启用，使用标准观测维度: 275")
     
     def _setup_lane_change_cooldown(self):
         """ 新增：动态设置变道冷却时间步数"""
@@ -523,12 +599,14 @@ class PPOExpertReproduction:
             "random_seed": self.args.seed,
             "device": str(self.device),
             
-            # ===== 网络结构 (严格对齐expert) =====
+            # ===== 网络结构 (严格对齐expert + 认知参数集成) =====
             "network": {
-                "observation_dim": 275,  # 与expert对齐
+                "observation_dim": 279,  # 275(原始) + 4(认知参数)
                 "action_dim": 2,
                 "hidden_dim": 256,
-                "activation": "tanh"
+                "activation": "tanh",
+                "cognitive_params_integration": True,
+                "cognitive_params_dim": 4
             },
             
             # ===== 环境配置 (直线场景生成) =====
@@ -905,8 +983,10 @@ class PPOExpertReproduction:
             "success_rate", "fps", "clipfrac", "explained_variance",
             "grad_norm", "avg_speed", "lane_deviation", "lane_change_count",
             "min_ttc", "path_completion",
-            "steer_mean", "steer_std", "throttle_mean", "throttle_std",  #  新增动作统计列
-            "lane_change_penalty_mean", "lane_change_speed_ratio", "cooldown_violations"  #  新增变道统计列
+            "steer_mean", "steer_std", "throttle_mean", "throttle_std",  # 新增动作统计列
+            "lane_change_penalty_mean", "lane_change_speed_ratio", "cooldown_violations",  # 新增变道统计列
+            # === 新增：认知参数列 ===
+            "bias_inverse_tta_coef", "perception_sigma0", "perception_k", "delay_steps"
         ]
         
         with open(self.csv_path, 'w', newline='', encoding='utf-8') as f:
@@ -961,6 +1041,14 @@ class PPOExpertReproduction:
         
         # 收集n_steps步数据
         for step in range(self.args.n_steps):
+            # === 认知参数更新：基于真实仿真步数 ===
+            if self.use_cognitive_modules and self.cognitive_parameter_sampler:
+                current_sim_step = self.global_step + step
+                if self.cognitive_parameter_sampler.should_update_parameters(current_sim_step):
+                    new_params = self.cognitive_parameter_sampler.update_parameters(current_sim_step)
+                    self._apply_cognitive_parameters(new_params)
+
+            
             # === 认知感知模块：处理观测噪声 ===
             if self.use_cognitive_modules and self.cognitive_perception_module:
                 # 对每个环境的观测应用感知噪声
@@ -975,8 +1063,16 @@ class PPOExpertReproduction:
                     obs_processed.append(noisy_obs)
                 obs = np.array(obs_processed)
             
-            # 将观测转换为tensor
-            obs_tensor = torch.as_tensor(np.array(obs), dtype=torch.float32, device=self.device)
+            # === 认知参数集成：将认知参数拼接到观测中 ===
+            current_cognitive_params = {}
+            if self.use_cognitive_modules and self.cognitive_parameter_sampler:
+                current_cognitive_params = self.cognitive_parameter_sampler.get_current_parameters()
+            
+            # 将认知参数拼接到观测中
+            obs_with_cognitive = self._concatenate_cognitive_params(obs, current_cognitive_params)
+            
+            # 将观测转换为tensor (现在包含认知参数)
+            obs_tensor = torch.as_tensor(obs_with_cognitive, dtype=torch.float32, device=self.device)
             
             with torch.no_grad():
                 actions, log_probs, _, values = self.network.get_action_and_value(obs_tensor)
@@ -1017,14 +1113,37 @@ class PPOExpertReproduction:
                         pass
                     
                     if current_env:
-                        # 处理奖励偏差
-                        adjusted_reward, bias_info = self.cognitive_bias_module.process_reward(
-                            original_reward=rewards[env_idx],
-                            env=current_env,
-                            info=infos[env_idx],
-                            is_ppo_mode=True
-                        )
-                        rewards[env_idx] = adjusted_reward
+                        try:
+                            # 根据文档使用正确的参数调用 process_reward
+                            if hasattr(self.cognitive_bias_module, 'process_reward'):
+                                reward_result = self.cognitive_bias_module.process_reward(
+                                    original_reward=rewards[env_idx],
+                                    env=current_env,
+                                    info=infos[env_idx],
+                                    is_ppo_mode=True
+                                )
+                                
+                                # 处理返回值 - 根据文档是 (adjusted_reward, bias_info)
+                                orig_reward_debug = rewards[env_idx]
+                                if isinstance(reward_result, (tuple, list)) and len(reward_result) >= 2:
+                                    adjusted_reward, bias_info = reward_result[0], reward_result[1]
+                                    rewards[env_idx] = float(adjusted_reward)
+                                    
+                                    # 记录偏差信息用于可视化
+                                    if isinstance(bias_info, dict):
+                                        bias_amount = bias_info.get('bias_applied', 0.0)
+                                        inverse_tta = bias_info.get('inverse_tta', 0.0)
+                                        bias_active = bias_info.get('bias_active', False)
+                                        
+                                        # 只在第一个环境和偶尔输出调试信息，避免刷屏
+                                        if bias_active and abs(bias_amount) > 1e-6 and env_idx == 0 and step % 100 == 0:
+                                            print(f"🧠 认知偏差: {orig_reward_debug:.3f} → {rewards[env_idx]:.3f} (偏差: {bias_amount:+.3f}, TTA⁻¹: {inverse_tta:.3f})")
+                                else:
+                                    # 兼容性处理 - 单一返回值
+                                    rewards[env_idx] = float(reward_result) if reward_result is not None else rewards[env_idx]
+                        except Exception as e:
+                            if env_idx == 0 and step == 0:  # 只在第一次报错
+                                print(f"⚠️ 认知偏差模块处理失败: {e}")
             
             # 收集episode统计信息 - 处理多环境信息
             episode_rewards += rewards
@@ -1178,7 +1297,15 @@ class PPOExpertReproduction:
                     episode_cooldown_violations[env_idx] = []
             
             # 存储数据 - 直接使用向量化环境的真实数据
-            obs_batch.append(obs.copy())
+            # === 修复：存储包含认知参数的观测 ===
+            if self.use_cognitive_modules:
+                # 存储包含认知参数的观测
+                obs_to_store = obs_with_cognitive.copy()
+            else:
+                # 存储原始观测
+                obs_to_store = obs.copy()
+            
+            obs_batch.append(obs_to_store)
             actions_batch.append(actions_np)
             log_probs_batch.append(log_probs.cpu().numpy())
             rewards_batch.append(rewards)
@@ -1187,8 +1314,23 @@ class PPOExpertReproduction:
             
             obs = next_obs  # 更新观测
         
-        #  修复1: 计算last_values作为bootstrap值
-        last_obs_tensor = torch.as_tensor(obs, dtype=torch.float32, device=self.device)  # 这里obs是下一时刻的obs
+        # 修复1: 计算last_values作为bootstrap值
+        # 确保last_obs也包含认知参数
+        current_cognitive_params = {}
+        if self.use_cognitive_modules and self.cognitive_parameter_sampler:
+            current_cognitive_params = self.cognitive_parameter_sampler.get_current_parameters()
+        elif self.use_cognitive_modules:
+            # 使用默认认知参数
+            current_cognitive_params = {
+                'bias_inverse_tta_coef': 1.0,
+                'perception_sigma0': 0.1,
+                'perception_k': 0.02,
+                'delay_steps': 2
+            }
+        
+        last_obs_with_cognitive = self._concatenate_cognitive_params(obs, current_cognitive_params)
+        last_obs_tensor = torch.as_tensor(last_obs_with_cognitive, dtype=torch.float32, device=self.device)
+        
         with torch.no_grad():
             _, _, _, last_values = self.network.get_action_and_value(last_obs_tensor)
         
@@ -1232,6 +1374,13 @@ class PPOExpertReproduction:
     
     def update_policy(self, obs, actions, old_log_probs, advantages, returns):
         """更新策略"""
+        # === 调试信息：显示观测维度 ===
+        print(f"🔍 update_policy调试信息:")
+        print(f"   输入obs形状: {obs.shape}")
+        print(f"   认知模块状态: {self.use_cognitive_modules}")
+        if self.use_cognitive_modules and self.cognitive_parameter_sampler:
+            print(f"   当前认知参数: {self.cognitive_parameter_sampler.get_current_parameters()}")
+        
         # 标准化advantages
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
         
@@ -1242,6 +1391,39 @@ class PPOExpertReproduction:
         old_log_probs = old_log_probs.view(batch_size)
         advantages = advantages.view(batch_size)
         returns = returns.view(batch_size)
+        
+        # === 修复：确保观测包含认知参数 ===
+        if self.use_cognitive_modules and obs.shape[1] == 275:
+            # 如果观测是275维，需要添加认知参数
+            print(f"   检测到275维观测，正在添加认知参数...")
+            current_cognitive_params = {}
+            if self.cognitive_parameter_sampler:
+                current_cognitive_params = self.cognitive_parameter_sampler.get_current_parameters()
+            else:
+                # 使用默认认知参数
+                current_cognitive_params = {
+                    'bias_inverse_tta_coef': 1.0,
+                    'perception_sigma0': 0.1,
+                    'perception_k': 0.02,
+                    'delay_steps': 2
+                }
+            
+            # 为每个样本添加认知参数
+            cognitive_vector = np.array([
+                [current_cognitive_params['bias_inverse_tta_coef'],
+                 current_cognitive_params['perception_sigma0'],
+                 current_cognitive_params['perception_k'],
+                 current_cognitive_params['delay_steps']] for _ in range(batch_size)
+            ], dtype=np.float32)
+            
+            # 拼接认知参数
+            obs = np.concatenate([obs.cpu().numpy(), cognitive_vector], axis=1)
+            obs = torch.as_tensor(obs, dtype=torch.float32, device=self.device)
+            print(f"   观测维度已扩展: 275 → {obs.shape[1]}")
+        elif self.use_cognitive_modules and obs.shape[1] != 279:
+            print(f"   ⚠️ 警告：观测维度异常: {obs.shape[1]}，期望279")
+        else:
+            print(f"   观测维度正常: {obs.shape[1]}")
         
         # 多轮更新
         policy_losses = []
@@ -1372,7 +1554,15 @@ class PPOExpertReproduction:
                 current_env = None
             
             while True:
-                obs_tensor = torch.FloatTensor(obs).to(self.device)
+                # === 认知参数集成：将认知参数拼接到观测中 ===
+                current_cognitive_params = {}
+                if self.use_cognitive_modules and self.cognitive_parameter_sampler:
+                    current_cognitive_params = self.cognitive_parameter_sampler.get_current_parameters()
+                
+                # 将认知参数拼接到观测中
+                obs_with_cognitive = self._concatenate_cognitive_params(obs, current_cognitive_params)
+                
+                obs_tensor = torch.FloatTensor(obs_with_cognitive).to(self.device)
                 
                 with torch.no_grad():
                     #  修复2: 评估使用确定性动作（均值）
@@ -1533,10 +1723,11 @@ class PPOExpertReproduction:
             
             if self.cognitive_bias_module:
                 cognitive_states['bias_module'] = {
-                    'adaptive_factor': self.cognitive_bias_module.adaptive_factor,
-                    'step_count': self.cognitive_bias_module._step_count,
-                    'total_bias': self.cognitive_bias_module._total_bias,
-                    'active_steps': self.cognitive_bias_module._active_steps
+                    'inverse_tta_coef': getattr(self.cognitive_bias_module, 'inverse_tta_coef', 1.0),
+                    'tta_threshold': getattr(self.cognitive_bias_module, 'tta_threshold', 1.0),
+                    'step_count': getattr(self.cognitive_bias_module, '_step_count', 0),
+                    'total_bias': getattr(self.cognitive_bias_module, '_total_bias', 0.0),
+                    'active_steps': getattr(self.cognitive_bias_module, '_active_steps', 0)
                 }
             
             if self.cognitive_delay_module:
@@ -1544,7 +1735,19 @@ class PPOExpertReproduction:
             
             if self.cognitive_perception_module:
                 cognitive_states['perception_module'] = {
-                    'initialized': getattr(self.cognitive_perception_module, 'initialized', False)
+                    'initialized': getattr(self.cognitive_perception_module, 'initialized', False),
+                    'sigma0': getattr(self.cognitive_perception_module, 'sigma0', 0.0),
+                    'k': getattr(self.cognitive_perception_module, 'k', 0.0)
+                }
+            
+            # === 新增：保存认知参数采样器状态 ===
+            if self.cognitive_parameter_sampler:
+                cognitive_states['parameter_sampler'] = {
+                    'current_parameters': self.cognitive_parameter_sampler.get_current_parameters(),
+                    'total_updates': getattr(self.cognitive_parameter_sampler, '_total_updates', 0),
+                    'last_update_step': getattr(self.cognitive_parameter_sampler, '_last_update_step', 0),
+                    'update_steps': self.cognitive_parameter_sampler.update_steps,
+                    'param_history_count': len(self.cognitive_parameter_sampler.param_history)
                 }
             
             checkpoint['cognitive_states'] = cognitive_states
@@ -1601,7 +1804,30 @@ class PPOExpertReproduction:
         # 计算起始迭代号（避免重复）
         self.start_iteration = checkpoint["iteration"]
         
-        print(f" 训练状态恢复:")
+        # === 新增：恢复认知参数采样器状态 ===
+        if (self.use_cognitive_modules and 
+            self.cognitive_parameter_sampler and 
+            "cognitive_states" in checkpoint and 
+            "parameter_sampler" in checkpoint["cognitive_states"]):
+            
+            try:
+                sampler_state = checkpoint["cognitive_states"]["parameter_sampler"]
+                
+                # 恢复参数更新统计
+                if hasattr(self.cognitive_parameter_sampler, '_total_updates'):
+                    self.cognitive_parameter_sampler._total_updates = sampler_state.get('total_updates', 0)
+                if hasattr(self.cognitive_parameter_sampler, '_last_update_step'):
+                    self.cognitive_parameter_sampler._last_update_step = sampler_state.get('last_update_step', 0)
+                
+                # 恢复当前参数
+                current_params = sampler_state.get('current_parameters', {})
+                if current_params:
+                    self._apply_cognitive_parameters(current_params)
+                
+            except Exception as e:
+                print(f"⚠️ 恢复认知参数采样器状态失败: {e}")
+        
+        print(f"📊 训练状态恢复:")
         print(f"   全局步数: {self.global_step:,}")
         print(f"   迭代次数: {self.start_iteration}")
         
@@ -1874,6 +2100,27 @@ class PPOExpertReproduction:
             for key, value in eval_stats.items():
                 self.writer.add_scalar(f"eval/{key.replace('eval_', '')}", value, self.global_step)
         
+
+        # === 新增：记录认知参数采样器指标 ===
+        if self.cognitive_parameter_sampler:
+            
+            # 记录当前参数值
+            current_params = self.cognitive_parameter_sampler.get_current_parameters()
+            self.writer.add_scalar("cognitive_params/bias_inverse_tta_coef", 
+                                current_params['bias_inverse_tta_coef'], 
+                                self.global_step)
+            self.writer.add_scalar("cognitive_params/perception_sigma0", 
+                                current_params['perception_sigma0'], 
+                                self.global_step)
+            self.writer.add_scalar("cognitive_params/perception_k", 
+                                current_params['perception_k'], 
+                                self.global_step)
+            self.writer.add_scalar("cognitive_params/delay_steps", 
+                                current_params['delay_steps'], 
+                                self.global_step)
+                
+                
+             
         # CSV日志
         log_data = [
             self.global_step, iteration,
@@ -1905,7 +2152,12 @@ class PPOExpertReproduction:
             #  新增：变道统计数据
             np.mean(self.episode_lane_change_penalties) if len(self.episode_lane_change_penalties) > 0 else 0,
             np.mean(self.episode_lane_change_speed_ratios) if len(self.episode_lane_change_speed_ratios) > 0 else 0,
-            np.sum(self.episode_cooldown_violations) if len(self.episode_cooldown_violations) > 0 else 0
+            np.sum(self.episode_cooldown_violations) if len(self.episode_cooldown_violations) > 0 else 0,
+            # === 新增：认知参数数据
+            self.cognitive_parameter_sampler.get_current_parameters()['bias_inverse_tta_coef'] if self.cognitive_parameter_sampler else 0.0,
+            self.cognitive_parameter_sampler.get_current_parameters()['perception_sigma0'] if self.cognitive_parameter_sampler else 0.0,
+            self.cognitive_parameter_sampler.get_current_parameters()['perception_k'] if self.cognitive_parameter_sampler else 0.0,
+            self.cognitive_parameter_sampler.get_current_parameters()['delay_steps'] if self.cognitive_parameter_sampler else 1
         ]
         
         with open(self.csv_path, 'a', newline='') as f:
@@ -2088,6 +2340,74 @@ class PPOExpertReproduction:
         
         # 关闭资源
         self.writer.close()
+        
+        # === 认知模块：分离环境 ===
+        if self.use_cognitive_modules:
+            # 生成认知模块可视化（如果启用）
+            if self.enable_cognitive_visualization and self.cognitive_perception_module:
+                try:
+                    viz_dir = os.path.join(self.exp_dir, "cognitive_visualization")
+                    os.makedirs(viz_dir, exist_ok=True)
+                    # 注意：需要在环境关闭前生成可视化
+                    if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
+                        self.cognitive_perception_module.generate_visualization(save_dir=viz_dir, env=self.envs.envs[0])
+                        print("📊 认知感知模块可视化已生成")
+                except Exception as e:
+                    print(f"⚠️ 认知感知模块可视化生成失败: {e}")
+            
+            # 生成偏差模块可视化
+            if self.cognitive_bias_module:
+                try:
+                    viz_dir = os.path.join(self.exp_dir, "cognitive_visualization")
+                    os.makedirs(viz_dir, exist_ok=True)
+                    if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
+                        self.cognitive_bias_module.generate_visualization(env=self.envs.envs[0], save_dir=viz_dir)
+                        print("📊 认知偏差模块可视化已生成")
+                except Exception as e:
+                    print(f"⚠️ 认知偏差模块可视化生成失败: {e}")
+            
+            # === 新增：生成认知参数采样器可视化 ===
+            if self.cognitive_parameter_sampler:
+                try:
+                    viz_dir = os.path.join(self.exp_dir, "cognitive_visualization")
+                    os.makedirs(viz_dir, exist_ok=True)
+                    
+                    # 添加调试信息
+                    sampler_stats = self.cognitive_parameter_sampler.get_statistics()
+                 
+                    
+                    # 如果没有足够的历史数据，强制记录当前参数
+                    if len(self.cognitive_parameter_sampler.param_history) < 2:
+                        print("⚠️ 历史数据不足，强制记录当前参数...")
+                        current_params = self.cognitive_parameter_sampler.get_current_parameters()
+                        self.cognitive_parameter_sampler._record_parameter_update(
+                            self.global_step, "forced_record"
+                        )
+                        print(f"✅ 已强制记录当前参数: {current_params}")
+                    
+                    # 生成参数采样可视化图表
+                    viz_file = self.cognitive_parameter_sampler.generate_parameter_visualization(
+                        output_dir=os.path.join(viz_dir, "parameter_sampling"),
+                        session_name=f"ppo_training_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                    )
+                    if viz_file:
+                        print("📊 认知参数采样器可视化已生成")
+                    else:
+                        print("⚠️ 认知参数采样器可视化生成失败")
+                    
+                    # 保存参数采样历史到文件
+                    history_file = os.path.join(viz_dir, "parameter_sampling_history.json")
+                    self.cognitive_parameter_sampler.save_history_to_file(history_file)
+                    print("📄 认知参数采样历史已保存")
+                    
+                except Exception as e:
+                    print(f"⚠️ 认知参数采样器可视化生成失败: {e}")
+                    import traceback
+                    traceback.print_exc()
+            
+            # 分离认知模块
+            self._detach_cognitive_modules_from_env()
+        
         # 关闭向量化环境
         self.envs.close()
         print(f" 训练环境已安全关闭")
@@ -2130,8 +2450,8 @@ class PPOExpertReproduction:
 
 ##  实验配置
 
-### 网络结构 (严格对齐Expert)
-- **观测维度**: 275 (Lidar: 240 + State: 35)
+### 网络结构 (严格对齐Expert + 认知参数集成)
+- **观测维度**: 279 (Lidar: 240 + State: 35 + 4维认知参数)
 - **动作维度**: 2 (连续控制: 转向 + 油门/刹车)
 - **隐藏层**: 256 -> 256
 - **激活函数**: Tanh
@@ -2355,7 +2675,123 @@ env_config.update({{
     def _create_single_environment(self):
         """创建单个环境实例"""
         return MetaDriveEnv(self._get_base_env_config())
-
+    
+    def _attach_cognitive_modules_to_env(self, env):
+        """将认知模块附加到环境"""
+        if not self.use_cognitive_modules:
+            return
+            
+        # 附加感知模块（必须先于偏差模块）
+        if self.cognitive_perception_module:
+            self.cognitive_perception_module.reset()
+            self.cognitive_perception_module.attach_to_env(env)
+            print("🔗 认知感知模块已附加到环境 - 噪声将在传感器层自动注入")
+            
+            # 验证环境配置，确保避免双重噪声
+            lidar_config = env.config.get("vehicle_config", {}).get("lidar", {})
+            gaussian_noise = lidar_config.get("gaussian_noise", 0.0)
+            dropout_prob = lidar_config.get("dropout_prob", 0.0)
+            
+            if gaussian_noise > 0.0 or dropout_prob > 0.0:
+                print(f"⚠️ 警告：检测到环境lidar配置中存在额外噪声！")
+                print(f"   gaussian_noise: {gaussian_noise}")
+                print(f"   dropout_prob: {dropout_prob}")
+                print(f"   这可能导致双重噪声问题，建议设置为0.0")
+            else:
+                print(f"✅ 环境lidar噪声配置正确 (gaussian_noise=0.0, dropout_prob=0.0)")
+            
+        # 附加偏差模块
+        if self.cognitive_bias_module:
+            success = self.cognitive_bias_module.attach_to_env(env)
+            if success:
+                print("🔗 认知偏差模块已附加到环境 - 将基于TTA动态调整奖励")
+            else:
+                print("⚠️ 认知偏差模块附加失败")
+    
+    def _detach_cognitive_modules_from_env(self):
+        """从环境分离认知模块"""
+        if not self.use_cognitive_modules:
+            return
+            
+        if self.cognitive_perception_module:
+            self.cognitive_perception_module.detach_from_env()
+            print("🔗 认知感知模块已从环境分离")
+            
+        if self.cognitive_bias_module:
+            try:
+                self.cognitive_bias_module.detach_from_env()
+                print("🔗 认知偏差模块已从环境分离")
+            except Exception as e:
+                print(f"⚠️ 认知偏差模块分离失败: {e}")
+    
+    def _apply_cognitive_parameters(self, new_params: Dict[str, Any]):
+        """
+        将新采样的认知参数应用到相应的认知模块
+        
+        Args:
+            new_params (Dict[str, Any]): 新的参数字典
+        """
+ 
+        # 更新认知偏差模块参数
+        if self.cognitive_bias_module and 'bias_inverse_tta_coef' in new_params:
+            old_coef = getattr(self.cognitive_bias_module, 'inverse_tta_coef', 'N/A')
+            self.cognitive_bias_module.inverse_tta_coef = new_params['bias_inverse_tta_coef']
+            
+        # 更新认知感知模块参数
+        if self.cognitive_perception_module:
+            if 'perception_sigma0' in new_params:
+                old_sigma0 = getattr(self.cognitive_perception_module, 'sigma0', 'N/A')
+                # 注意：感知模块的sigma0需要转换为米制单位
+                new_sigma0 = new_params['perception_sigma0'] * 10  # 转换为米制
+                self.cognitive_perception_module.sigma0 = new_sigma0
+                
+            if 'perception_k' in new_params:
+                old_k = getattr(self.cognitive_perception_module, 'k', 'N/A')
+                self.cognitive_perception_module.k = new_params['perception_k']
+                
+        # 更新认知延迟模块参数
+        if self.cognitive_delay_module and 'delay_steps' in new_params:
+            old_delay = getattr(self.cognitive_delay_module, 'delay_steps', 'N/A')
+            self.cognitive_delay_module.update_config(delay_steps=new_params['delay_steps'])
+              
+         
+     
+    def _concatenate_cognitive_params(self, obs, cognitive_params):
+        """
+        将认知参数拼接到观测向量中
+        
+        Args:
+            obs: 原始观测 [n_envs, 275] 或 [batch_size, 275]
+            cognitive_params: 认知参数字典
+        
+        Returns:
+            扩展后的观测 [n_envs, 279] 或 [batch_size, 279]
+        """
+        if not cognitive_params or not self.use_cognitive_modules:
+            # 如果没有认知参数或未启用认知模块，返回原始观测
+            return obs
+        
+        # 确保obs是numpy数组
+        if torch.is_tensor(obs):
+            obs_np = obs.cpu().numpy()
+        else:
+            obs_np = obs
+        
+        # 提取认知参数值
+        bias_coef = cognitive_params.get('bias_inverse_tta_coef', 1.0)
+        sigma0 = cognitive_params.get('perception_sigma0', 0.1)
+        k = cognitive_params.get('perception_k', 0.02)
+        delay = cognitive_params.get('delay_steps', 2)
+        
+        # 构建认知参数向量
+        cognitive_vector = np.array([
+            [bias_coef, sigma0, k, delay] for _ in range(obs_np.shape[0])
+        ], dtype=np.float32)
+        
+        # 拼接原始观测和认知参数
+        obs_with_cognitive = np.concatenate([obs_np, cognitive_vector], axis=1)
+        
+        return obs_with_cognitive
 
 def add_arguments():
     """添加命令行参数"""
@@ -2469,6 +2905,20 @@ def add_arguments():
     parser.add_argument("--cognitive_visualization", action="store_true", default=False,
                         help="认知模块可视化输出（默认关闭）")
     
+    # === 新增：认知参数采样器参数 ===
+    parser.add_argument("--use_cognitive_parameter_sampling", action="store_true", default=False,
+                        help="启用认知参数采样器（默认关闭）")
+    parser.add_argument("--cognitive_param_update_steps", type=int, default=5,
+                        help="认知参数更新频率（环境步数，默认5步）")
+    parser.add_argument("--bias_inverse_tta_coef_range", type=float, nargs=2, default=[0.5, 2.0],
+                        help="视觉厌恶系数采样范围 [min, max]（默认[0.5, 2.0]）")
+    parser.add_argument("--perception_sigma0_range", type=float, nargs=2, default=[0.02, 0.20],
+                        help="感知噪声标准差采样范围 [min, max]（默认[0.02, 0.20]米）")
+    parser.add_argument("--perception_k_range", type=float, nargs=2, default=[0.002, 0.01],
+                        help="距离相关系数采样范围 [min, max]（默认[0.002, 0.01]）")
+    parser.add_argument("--delay_steps_range", type=int, nargs=2, default=[1, 3],
+                        help="动作延迟步数采样范围 [min, max]（默认[1, 3]）")
+    
     # 认知偏差模块参数（风险厌恶）
     parser.add_argument("--use_cognitive_bias", action="store_true", default=True,
                         help="启用认知偏差模块（默认开启）")
@@ -2504,16 +2954,20 @@ def add_arguments():
                         help="基础噪声标准差（米）（默认0.1）")
     parser.add_argument("--perception_k", type=float, default=0.02,
                         help="距离相关系数（默认0.02）")
-    parser.add_argument("--perception_p_miss0", type=float, default=0.01,
-                        help="基础漏检概率（默认0.01）")
+    parser.add_argument("--perception_p_miss0", type=float, default=0.0,
+                        help="基础漏检概率（默认0.0，已关闭）")
     parser.add_argument("--perception_p_false", type=float, default=0.0,
-                        help="误检概率（默认0.0）")
+                        help="误检概率（默认0.0，已关闭）")
     parser.add_argument("--perception_use_kf", action="store_true", default=True,
                         help="启用卡尔曼滤波（默认开启）")
     parser.add_argument("--perception_kf_dt", type=float, default=0.1,
                         help="卡尔曼滤波步长（默认0.1）")
     parser.add_argument("--perception_kf_q_scale", type=float, default=100.0,
                         help="卡尔曼滤波过程噪声缩放（默认100.0）")
+    
+    # ===== 认知可视化参数 =====
+    parser.add_argument("--enable_radar_beam_viz", action="store_true", default=False,
+                        help="启用雷达束可视化（默认关闭）")
     
     # ===== 系统设置 =====
     parser.add_argument("--device", type=str, default="auto",

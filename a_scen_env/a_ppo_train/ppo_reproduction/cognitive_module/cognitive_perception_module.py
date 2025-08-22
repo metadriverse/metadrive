@@ -375,7 +375,13 @@ class PerceptNoiseLidar(Lidar):
         
         # 1. 高斯测距噪声：sigma(d) = sigma0 + k * d
         if self.sigma0 > 0 or self.k > 0:
-            sigma_array = self.sigma0 + self.k * distances
+            # === 新增：当距离为最大检测距离时，不注入噪声 ===
+            # 创建噪声掩码：距离为max_range的束不注入噪声
+            noise_mask = distances < max_range
+            
+            # 只对有效距离的束计算噪声
+            valid_distances = distances[noise_mask]
+            sigma_array = self.sigma0 + self.k * valid_distances
             gaussian_noise = np.random.normal(0, sigma_array)
             
             # === 新增：基于3σ的噪声裁剪，避免极端异常值 ===
@@ -399,14 +405,21 @@ class PerceptNoiseLidar(Lidar):
             # AR(1)时间相关性
             if self.use_ar1 and self.rho > 0:
                 # n_t = ρ * n_{t-1} + sqrt(1-ρ^2) * ξ_t
-                self.ar1_states = (self.rho * self.ar1_states + 
-                                  np.sqrt(1 - self.rho**2) * gaussian_noise)
-                gaussian_noise = self.ar1_states
+                # 只对有效距离的束更新AR(1)状态
+                self.ar1_states[noise_mask] = (self.rho * self.ar1_states[noise_mask] + 
+                                              np.sqrt(1 - self.rho**2) * gaussian_noise)
+                gaussian_noise = self.ar1_states[noise_mask]
                 
                 # AR(1)后再次应用3σ裁剪（因为AR(1)可能会累积极端值）
                 gaussian_noise = np.clip(gaussian_noise, -noise_limit, noise_limit)
             
-            noisy_distances += gaussian_noise
+            # 将噪声应用到对应的有效距离束
+            noisy_distances[noise_mask] += gaussian_noise
+            
+            # 记录噪声统计（只统计有效距离的束）
+            if np.any(noise_mask):
+                logger.debug(f"🔧 噪声注入: {np.sum(noise_mask)}/{len(distances)}束有效距离, "
+                           f"最大噪声: {np.max(np.abs(gaussian_noise)):.3f}米")
         
         # 2. 漏检：以p_miss(d)概率将该束置为max_range
         if self.p_miss0 > 0:
@@ -679,10 +692,10 @@ class CognitivePerceptionModule:
         """获取默认噪声配置"""
         return {
             'sigma0': 0.1,          # 基础高斯噪声（米）
-            'k': 0.02,              # 距离相关系数
-            'p_miss0': 0.01,        # 基础漏检概率
+            'k': 0.01,              # 距离相关系数
+            'p_miss0': 0,        # 基础漏检概率
             'far_distance': 50.0,   # 远距离参考值
-            'p_false': 0.0001,      # 误检概率（保守值）
+            'p_false': 0,      # 误检概率（保守值）
             'near_min': 1.0,        # 误检最近距离
             'near_max': 5.0,        # 误检最远距离
             'angle_jitter_steps': 1, # 角度抖动束数

@@ -187,7 +187,7 @@ class CognitiveDelayModule:
             for item in self.buffer:
                 new_buffer.append(item)
             self.buffer = new_buffer
-            print(f"延迟步数已更新: {old_delay} -> {self.delay_steps}")
+
             
         if 'enable_smoothing' in kwargs:
             self.enable_smoothing = kwargs['enable_smoothing']
