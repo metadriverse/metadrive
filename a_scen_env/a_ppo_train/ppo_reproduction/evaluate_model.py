@@ -84,7 +84,7 @@ class ModelEvaluator:
         
         # 加载模型
         self.network = PPONetwork().to(self.device)
-        checkpoint = torch.load(model_path, map_location=self.device)
+        checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
         self.network.load_state_dict(checkpoint['network_state_dict'])
         self.network.eval()
         

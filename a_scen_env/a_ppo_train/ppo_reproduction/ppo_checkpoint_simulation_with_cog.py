@@ -282,7 +282,7 @@ class PPOCheckpointSimulator:
             raise FileNotFoundError(f"检查点文件不存在: {self.checkpoint_path}")
         
         # 加载检查点数据
-        self.checkpoint = torch.load(self.checkpoint_path, map_location=self.device)
+        self.checkpoint = torch.load(self.checkpoint_path, map_location=self.device, weights_only=False)
         
         # 创建并加载网络
         self.network = PPONetwork().to(self.device)

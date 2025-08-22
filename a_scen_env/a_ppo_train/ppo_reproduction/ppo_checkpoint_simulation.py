@@ -173,7 +173,7 @@ class PPOCheckpointSimulator:
             raise FileNotFoundError(f"检查点文件不存在: {self.checkpoint_path}")
         
         # 加载检查点数据
-        self.checkpoint = torch.load(self.checkpoint_path, map_location=self.device)
+        self.checkpoint = torch.load(self.checkpoint_path, map_location=self.device, weights_only=False)
         
         # 创建并加载网络
         self.network = PPONetwork().to(self.device)
@@ -639,7 +639,7 @@ def main():
     parser = argparse.ArgumentParser(description="PPO检查点仿真控制器")
     
     parser.add_argument("--checkpoint", type=str,
-                       default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction/runs/ppo_expert_reproduction_20250820_154108/checkpoints/checkpoint_790.pt",
+                       default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction/runs/milestone_checkpoint_iter1500_stage2_reward819.2_succ0.90.pt",
                        help="检查点文件路径")
     
     parser.add_argument("--config", type=str, default=None,

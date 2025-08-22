@@ -287,6 +287,7 @@ class PPOExpertReproduction:
         self.cognitive_bias_module = None
         self.cognitive_delay_module = None
         self.cognitive_perception_module = None
+        self.cognitive_parameter_sampler = None
         
         if self.use_cognitive_modules:
             print("🧠 初始化认知模块...")
@@ -401,8 +402,9 @@ class PPOExpertReproduction:
         #  新增：动态设置变道冷却时间步数
         self._setup_lane_change_cooldown()
         
-        # 创建网络
-        self.network = PPONetwork().to(self.device)
+        # 创建网络 - 根据是否启用认知模块动态设置观测维度
+        obs_dim = 279 if self.use_cognitive_modules else 275
+        self.network = PPONetwork(obs_dim=obs_dim).to(self.device)
         self.optimizer = optim.Adam(self.network.parameters(), lr=args.lr)
         
         # 学习率调度参数缓存
@@ -459,10 +461,21 @@ class PPOExpertReproduction:
         # 动态计算冷却时间步数，基于环境实际频率
         self._lane_change_cooldown_steps = None  # 将在环境创建后动态设置
         
+        # 调试开关
+        self.debug_lane_change = getattr(args, 'debug_lane_change', False)  # 从命令行参数读取
+        
         print(f" PPO Expert复现训练初始化完成")
         print(f" 实验目录: {self.exp_dir}")
         print(f" 设备: {self.device}")
         print(f" 随机种子: {args.seed}")
+        
+        # 显示车道变更检测状态
+        if self.debug_lane_change:
+            print(f"🔍 车道变更检测调试模式: 已启用")
+            print(f"   将显示详细的车道变更检测信息")
+        else:
+            print(f"🔍 车道变更检测调试模式: 已禁用")
+            print(f"   如需启用，请使用 --debug_lane_change 参数")
         
         # === 认知参数集成调试信息 ===
         if self.use_cognitive_modules:
@@ -1170,7 +1183,7 @@ class PPOExpertReproduction:
                     
                     # 计算缺失的指标
                     if current_env is not None:
-                        missing_metrics = self._calculate_missing_metrics(current_env, info)
+                        missing_metrics = self._calculate_missing_metrics(current_env, info, env_idx=0)
                     else:
                         missing_metrics = {}
                 except Exception:
@@ -1195,9 +1208,21 @@ class PPOExpertReproduction:
                 if 'lane_change' in info and info['lane_change']:
                     lane_changes[env_idx] += 1
                     lane_change_detected = True
+                    if self.debug_lane_change:
+                        print(f"🚗 [环境{env_idx}] 通过info检测到车道变更")
                 elif missing_metrics.get('lane_change', False):
                     lane_changes[env_idx] += 1
                     lane_change_detected = True
+                    if self.debug_lane_change:
+                        print(f"🚗 [环境{env_idx}] 通过missing_metrics检测到车道变更")
+                else:
+                    # 使用增强的车道变更检测
+                    if current_env is not None and hasattr(current_env, 'agent'):
+                        lane_change_detected = self._detect_lane_change_enhanced(current_env.agent, env_idx, info)
+                        if lane_change_detected:
+                            lane_changes[env_idx] += 1
+                            if self.debug_lane_change:
+                                print(f"🚗 [环境{env_idx}] 通过增强检测检测到车道变更")
                 
                 #  新增：变道惩罚计算
                 if lane_change_detected:
@@ -1608,7 +1633,7 @@ class PPOExpertReproduction:
                 missing_metrics = {}
                 if current_env is not None:
                     try:
-                        missing_metrics = self._calculate_missing_metrics(current_env, info)
+                        missing_metrics = self._calculate_missing_metrics(current_env, info, env_idx=0)  # 评估时使用env_idx=0
                     except Exception as e:
                         # print(f"警告：指标计算失败: {e}")
                         pass
@@ -1637,8 +1662,19 @@ class PPOExpertReproduction:
                 # 车道变换检测
                 if isinstance(info, dict) and 'lane_change' in info and info['lane_change']:
                     episode_lane_changes += 1
+                    if self.debug_lane_change:
+                        print(f"🚗 [评估] 通过info检测到车道变更")
                 elif missing_metrics.get('lane_change', False):
                     episode_lane_changes += 1
+                    if self.debug_lane_change:
+                        print(f"🚗 [评估] 通过missing_metrics检测到车道变更")
+                else:
+                    # 使用增强的车道变更检测
+                    if current_env is not None and hasattr(current_env, 'agent'):
+                        if self._detect_lane_change_enhanced(current_env.agent, 0, info):  # 评估时使用env_idx=0
+                            episode_lane_changes += 1
+                            if self.debug_lane_change:
+                                print(f"🚗 [评估] 通过增强检测检测到车道变更")
                 
                 if done_flag:
                     #  修复：更准确的终止原因统计
@@ -1773,7 +1809,7 @@ class PPOExpertReproduction:
         print(f" 正在加载检查点: {checkpoint_path}")
         
         # 加载检查点数据
-        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
         
         # 验证检查点格式
         required_keys = ["iteration", "global_step", "network_state_dict", "optimizer_state_dict"]
@@ -1867,13 +1903,14 @@ class PPOExpertReproduction:
         else:
             print("✅ 配置兼容性检查通过")
     
-    def _calculate_missing_metrics(self, env, info):
+    def _calculate_missing_metrics(self, env, info, env_idx=None):
         """
         计算MetaDrive info中缺失的指标
         
         Args:
             env: MetaDrive环境实例（用于访问agent）
             info: 环境返回的info字典
+            env_idx: 环境索引，用于车道变更检测
             
         Returns:
             dict: 包含计算出的指标的字典
@@ -1914,27 +1951,114 @@ class PPOExpertReproduction:
             
             # 2. 车道变更检测 (Lane Change)
             try:
-                # 检查当前车道索引是否与之前不同
-                if hasattr(agent, 'lane_index'):
+                # 改进的车道变更检测方法
+                lane_change_detected = False
+                
+                # 方法1: 检查MetaDrive环境info中的车道变更标志
+                if isinstance(info, dict) and 'lane_change' in info:
+                    lane_change_detected = bool(info['lane_change'])
+                    if lane_change_detected:
+                        if self.debug_lane_change:
+                            print(f"🔍 [环境{env_idx}] 通过info检测到车道变更")
+                        return True
+                
+                # 方法2: 基于车道索引变化检测
+                if not lane_change_detected and hasattr(agent, 'lane_index'):
                     current_lane_index = agent.lane_index
+                    env_agent_id = f"env_{env_idx}_lane_index"
                     
-                    # 为每个环境单独跟踪车道索引
-                    agent_id = getattr(agent, 'id', id(agent))  # 使用agent的id或内存地址作为键
-                    
-                    # 检查是否存储了上一个车道索引
-                    if agent_id in self._last_lane_index:
-                        if self._last_lane_index[agent_id] != current_lane_index:
-                            metrics['lane_change'] = True
+                    if env_agent_id in self._last_lane_index:
+                        if self._last_lane_index[env_agent_id] != current_lane_index:
+                            if self.debug_lane_change:
+                                print(f"🔍 [环境{env_idx}] 车道索引变化: {self._last_lane_index[env_agent_id]} → {current_lane_index}")
+                            self._last_lane_index[env_agent_id] = current_lane_index
+                            return True
                         else:
-                            metrics['lane_change'] = False
+                            self._last_lane_index[env_agent_id] = current_lane_index
+                            return False
                     else:
-                        metrics['lane_change'] = False
-                    
-                    # 存储当前车道索引供下次比较
-                    self._last_lane_index[agent_id] = current_lane_index
-                else:
-                    metrics['lane_change'] = False
-            except Exception:
+                        # 首次记录
+                        self._last_lane_index[env_agent_id] = current_lane_index
+                        if self.debug_lane_change:
+                            print(f"🔍 [环境{env_idx}] 首次记录车道索引: {current_lane_index}")
+                        return False
+                
+                # 方法3: 基于转向角度和速度启发式检测
+                if not lane_change_detected:
+                    try:
+                        steering = getattr(agent, 'steering', 0.0)
+                        speed = getattr(agent, 'speed', 0.0)
+                        
+                        # 如果转向角度大且速度适中，可能是车道变更
+                        if abs(steering) > 0.3 and 5.0 < speed < 20.0:
+                            # 检查是否持续了一段时间
+                            if env_idx is not None:
+                                steering_key = f"env_{env_idx}_steering"
+                            else:
+                                steering_key = f"agent_{getattr(agent, 'id', id(agent))}_steering"
+                                
+                            if steering_key not in self._last_lane_index:
+                                self._last_lane_index[steering_key] = 0
+                            
+                            self._last_lane_index[steering_key] += 1
+                            
+                            # 如果连续3步都有大转向，可能是车道变更
+                            if self._last_lane_index[steering_key] >= 3:
+                                if self.debug_lane_change:
+                                    print(f"🔍 [环境{env_idx}] 通过转向模式检测到车道变更: 转向={steering:.3f}, 速度={speed:.3f}, 持续步数={self._last_lane_index[steering_key]}")
+                                self._last_lane_index[steering_key] = 0  # 重置计数器
+                                return True
+                        else:
+                            # 重置转向计数器
+                            steering_key = f"env_{env_idx}_steering_pattern"
+                            if steering_key in self._last_lane_index:
+                                self._last_lane_index[steering_key] = 0
+                                
+                    except Exception as e:
+                        if self.debug_lane_change:
+                            print(f"⚠️ [环境{env_idx}] 转向模式检测失败: {e}")
+                
+                # 方法4: 直线道路场景的替代检测（模拟车道变更行为）
+                if not lane_change_detected:
+                    try:
+                        steering = getattr(agent, 'steering', 0.0)
+                        speed = getattr(agent, 'speed', 0.0)
+                        
+                        # 在直线道路场景中，检测"车道变更意图"而不是实际变更
+                        # 这基于转向模式、速度和位置变化
+                        if abs(steering) > 0.15 and 5.0 < speed < 25.0:  # 降低转向阈值
+                            # 检查是否持续了一段时间
+                            steering_key = f"env_{env_idx}_steering_intent"
+                            
+                            if steering_key not in self._last_lane_index:
+                                self._last_lane_index[steering_key] = 0
+                            
+                            self._last_lane_index[steering_key] += 1
+                            
+                            # 连续3步有转向意图判定为"车道变更意图"
+                            if self._last_lane_index[steering_key] >= 3:
+                                if self.debug_lane_change:
+                                    print(f"🔍 [环境{env_idx}] 检测到车道变更意图: 转向={steering:.3f}, 速度={speed:.3f}, 持续步数={self._last_lane_index[steering_key]}")
+                                self._last_lane_index[steering_key] = 0  # 重置计数器
+                                return True
+                        else:
+                            # 重置转向意图计数器
+                            steering_key = f"env_{env_idx}_steering_intent"
+                            if steering_key in self._last_lane_index:
+                                self._last_lane_index[steering_key] = 0
+                                
+                    except Exception as e:
+                        if self.debug_lane_change:
+                            print(f"⚠️ [环境{env_idx}] 车道变更意图检测失败: {e}")
+                
+                metrics['lane_change'] = lane_change_detected
+                
+                # 调试信息
+                if lane_change_detected:
+                    print(f"🚗 车道变更检测成功! 环境{env_idx if env_idx is not None else 'N/A'}, 车道索引: {getattr(agent, 'lane_index', 'N/A')}")
+                
+            except Exception as e:
+                print(f"⚠️ 车道变更检测异常: {e}")
                 metrics['lane_change'] = False
             
             # 3. TTC计算 (Time to Collision) - 简化版本
@@ -2793,6 +2917,168 @@ env_config.update({{
         
         return obs_with_cognitive
 
+    def _detect_lane_change_enhanced(self, agent, env_idx, info):
+        """
+        增强的车道变更检测方法 - 适配MetaDrive直线道路场景
+        
+        Args:
+            agent: MetaDrive agent对象
+            env_idx: 环境索引
+            info: 环境info字典
+            
+        Returns:
+            bool: 是否检测到车道变更
+        """
+        try:
+            # 方法1: 直接检查info中的车道变更标志
+            if isinstance(info, dict) and 'lane_change' in info:
+                if info['lane_change']:
+                    if self.debug_lane_change:
+                        print(f"🔍 [环境{env_idx}] 通过info检测到车道变更")
+                    return True
+            
+            # 方法2: 使用MetaDrive的相邻车道信息检测
+            if hasattr(agent, 'lane') and agent.lane:
+                current_lane = agent.lane
+                current_lane_index = getattr(current_lane, 'index', None)
+                
+                # 获取相邻车道信息
+                left_lanes = getattr(current_lane, 'left_lanes', [])
+                right_lanes = getattr(current_lane, 'right_lanes', [])
+                
+                # 检查是否有相邻车道
+                has_left_neighbor = len(left_lanes) > 0
+                has_right_neighbor = len(right_lanes) > 0
+                
+                if self.debug_lane_change and (has_left_neighbor or has_right_neighbor):
+                    print(f"🔍 [环境{env_idx}] 当前车道 {current_lane_index}: 左相邻={len(left_lanes)}, 右相邻={len(right_lanes)}")
+                
+                # 记录当前车道索引用于变化检测
+                env_agent_id = f"env_{env_idx}_lane_index"
+                
+                if env_agent_id in self._last_lane_index:
+                    if self._last_lane_index[env_agent_id] != current_lane_index:
+                        if self.debug_lane_change:
+                            print(f"🔍 [环境{env_idx}] 车道索引变化: {self._last_lane_index[env_agent_id]} → {current_lane_index}")
+                        self._last_lane_index[env_agent_id] = current_lane_index
+                        return True
+                    else:
+                        self._last_lane_index[env_agent_id] = current_lane_index
+                        return False
+                else:
+                    # 首次记录
+                    self._last_lane_index[env_agent_id] = current_lane_index
+                    if self.debug_lane_change:
+                        print(f"🔍 [环境{env_idx}] 首次记录车道索引: {current_lane_index}")
+                    return False
+            
+            # 方法3: 基于转向模式检测（当有相邻车道时）
+            try:
+                steering = getattr(agent, 'steering', 0.0)
+                speed = getattr(agent, 'speed', 0.0)
+                
+                # 检查是否有相邻车道
+                has_neighbors = False
+                if hasattr(agent, 'lane') and agent.lane:
+                    left_lanes = getattr(agent.lane, 'left_lanes', [])
+                    right_lanes = getattr(agent.lane, 'right_lanes', [])
+                    has_neighbors = len(left_lanes) > 0 or len(right_lanes) > 0
+                
+                # 大转向 + 适中速度 + 有相邻车道 = 可能的车道变更
+                if has_neighbors and abs(steering) > 0.2 and 3.0 < speed < 25.0:
+                    steering_key = f"env_{env_idx}_steering_pattern"
+                    
+                    if steering_key not in self._last_lane_index:
+                        self._last_lane_index[steering_key] = 0
+                    
+                    self._last_lane_index[steering_key] += 1
+                    
+                    # 连续2步大转向判定为车道变更（降低阈值）
+                    if self._last_lane_index[steering_key] >= 2:
+                        if self.debug_lane_change:
+                            print(f"🔍 [环境{env_idx}] 通过转向模式检测到车道变更: 转向={steering:.3f}, 速度={speed:.3f}, 持续步数={self._last_lane_index[steering_key]}")
+                        self._last_lane_index[steering_key] = 0  # 重置计数器
+                        return True
+                else:
+                    # 重置转向计数器
+                    steering_key = f"env_{env_idx}_steering_pattern"
+                    if steering_key in self._last_lane_index:
+                        self._last_lane_index[steering_key] = 0
+                        
+            except Exception as e:
+                if self.debug_lane_change:
+                    print(f"⚠️ [环境{env_idx}] 转向模式检测失败: {e}")
+            
+            # 方法4: 基于位置变化检测（当有相邻车道时）
+            try:
+                if hasattr(agent, 'position') and hasattr(agent, 'lane') and agent.lane:
+                    # 检查是否有相邻车道
+                    left_lanes = getattr(agent.lane, 'left_lanes', [])
+                    right_lanes = getattr(agent.lane, 'right_lanes', [])
+                    has_neighbors = len(left_lanes) > 0 or len(right_lanes) > 0
+                    
+                    if has_neighbors:
+                        current_pos = agent.position
+                        pos_key = f"env_{env_idx}_position"
+                        
+                        if pos_key in self._last_lane_index:
+                            last_pos = self._last_lane_index[pos_key]
+                            # 计算横向位移
+                            lateral_movement = abs(current_pos[1] - last_pos[1])  # Y轴变化
+                            
+                            # 如果横向位移超过阈值，可能是车道变更
+                            if lateral_movement > 1.5 and speed > 5.0:  # 降低阈值
+                                if self.debug_lane_change:
+                                    print(f"🔍 [环境{env_idx}] 通过位置变化检测到车道变更: 横向位移={lateral_movement:.3f}m")
+                                self._last_lane_index[pos_key] = current_pos
+                                return True
+                        
+                        # 记录当前位置
+                        self._last_lane_index[pos_key] = current_pos
+                    
+            except Exception as e:
+                if self.debug_lane_change:
+                    print(f"⚠️ [环境{env_idx}] 位置变化检测失败: {e}")
+            
+            # 方法5: 直线道路场景的替代检测（模拟车道变更行为）
+            try:
+                steering = getattr(agent, 'steering', 0.0)
+                speed = getattr(agent, 'speed', 0.0)
+                
+                # 在直线道路场景中，检测"车道变更意图"而不是实际变更
+                # 这基于转向模式、速度和位置变化
+                if abs(steering) > 0.15 and 2.0 < speed < 25.0:  # 降低转向阈值
+                    # 检查是否持续了一段时间
+                    steering_key = f"env_{env_idx}_steering_intent"
+                    
+                    if steering_key not in self._last_lane_index:
+                        self._last_lane_index[steering_key] = 0
+                    
+                    self._last_lane_index[steering_key] += 1
+                    
+                    # 连续3步有转向意图判定为"车道变更意图"
+                    if self._last_lane_index[steering_key] >= 3:
+                        if self.debug_lane_change:
+                            print(f"🔍 [环境{env_idx}] 检测到车道变更意图: 转向={steering:.3f}, 速度={speed:.3f}, 持续步数={self._last_lane_index[steering_key]}")
+                        self._last_lane_index[steering_key] = 0  # 重置计数器
+                        return True
+                else:
+                    # 重置转向意图计数器
+                    steering_key = f"env_{env_idx}_steering_intent"
+                    if steering_key in self._last_lane_index:
+                        self._last_lane_index[steering_key] = 0
+                        
+            except Exception as e:
+                if self.debug_lane_change:
+                    print(f"⚠️ [环境{env_idx}] 车道变更意图检测失败: {e}")
+            
+            return False
+            
+        except Exception as e:
+            if self.debug_lane_change:
+                print(f"⚠️ [环境{env_idx}] 车道变更检测异常: {e}")
+            return False
+
 def add_arguments():
     """添加命令行参数"""
     parser = argparse.ArgumentParser(description="MetaDrive PPO Expert 复现训练")
@@ -2866,6 +3152,10 @@ def add_arguments():
                        help="变道冷却时间，秒 (默认: 3.0)")
     parser.add_argument("--w_lc_cool", type=float, default=1,
                        help="冷却期内附加惩罚 (默认: 1)")
+    
+    # ===== 调试开关 =====
+    parser.add_argument("--debug_lane_change", action="store_true", default=False,
+                       help="启用车道变更检测的调试输出")
 
     # ===== 交通密度配置参数 (新增) =====
     parser.add_argument("--traffic_density_min", type=float, default=0.1,

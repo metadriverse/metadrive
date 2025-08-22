@@ -1426,7 +1426,7 @@ class PPOExpertReproduction:
         print(f" 正在加载检查点: {checkpoint_path}")
         
         # 加载检查点数据
-        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
         
         # 验证检查点格式
         required_keys = ["iteration", "global_step", "network_state_dict", "optimizer_state_dict"]
