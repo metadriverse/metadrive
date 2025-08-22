@@ -88,12 +88,7 @@ class PPONetwork(nn.Module):
             self.actor_out.bias[action_dim:].fill_(-0.5)
             # throttle/brake 是动作的第2维（索引1）：给 mean 一个+0.3 的轻微偏置，鼓励先动起来
             self.actor_out.bias[1] = 0.3
-        # """权重初始化"""
-        # for module in self.modules():
-        #     if isinstance(module, nn.Linear):
-        #         nn.init.orthogonal_(module.weight, gain=1.0)
-        #         nn.init.constant_(module.bias, 0.0)
-    
+
     def forward(self, obs):
         """前向传播"""
         # Actor前向
@@ -108,26 +103,6 @@ class PPONetwork(nn.Module):
         
         return action_logits, value
     
-    # def get_action_and_value(self, obs, action=None):
-    #     """获取动作和价值"""
-    #     action_logits, value = self.forward(obs)
-        
-    #     # 分离均值和标准差
-    #     action_mean, action_log_std = torch.chunk(action_logits, 2, dim=-1)
-    #     #  修复3: 约束log_std防止漂移
-    #     action_log_std = torch.clamp(action_log_std, -5.0, 2.0)
-    #     action_std = torch.exp(action_log_std)
-        
-    #     # 创建分布
-    #     dist = torch.distributions.Normal(action_mean, action_std)
-        
-    #     if action is None:
-    #         action = dist.sample()
-        
-    #     log_prob = dist.log_prob(action).sum(dim=-1)
-    #     entropy = dist.entropy().sum(dim=-1)
-        
-    #     return action, log_prob, entropy, value.squeeze(-1)
     
     def get_action_and_value(self, obs, action=None, eps: float = 1e-6):
         """使用 tanh-squashed Gaussian，确保环境执行的动作与计算log_prob完全一致"""
@@ -399,8 +374,6 @@ class PPOExpertReproduction:
             except Exception as e:
                 print(f"⚠️ 认知模块附加失败: {e}")
         
-        #  新增：动态设置变道冷却时间步数
-        self._setup_lane_change_cooldown()
         
         # 创建网络 - 根据是否启用认知模块动态设置观测维度
         obs_dim = 279 if self.use_cognitive_modules else 275
@@ -444,38 +417,16 @@ class PPOExpertReproduction:
         self.episode_steer_means = deque(maxlen=100)
         self.episode_throttle_means = deque(maxlen=100)
         
-        #  新增：变道统计缓冲区
-        self.episode_lane_change_penalties = deque(maxlen=100)
-        self.episode_lane_change_speed_ratios = deque(maxlen=100)
-        self.episode_cooldown_violations = deque(maxlen=100)
-        
+
         # 创建CSV日志
         self.csv_path = os.path.join(self.exp_dir, "training_logs.csv")
         self._init_csv_log()
         
-        # 初始化车道跟踪（用于车道变更检测）
-        self._last_lane_index = {}
-        
-        #  新增：变道冷却时间跟踪
-        self._last_lane_change_step = {}
-        # 动态计算冷却时间步数，基于环境实际频率
-        self._lane_change_cooldown_steps = None  # 将在环境创建后动态设置
-        
-        # 调试开关
-        self.debug_lane_change = getattr(args, 'debug_lane_change', False)  # 从命令行参数读取
         
         print(f" PPO Expert复现训练初始化完成")
         print(f" 实验目录: {self.exp_dir}")
         print(f" 设备: {self.device}")
         print(f" 随机种子: {args.seed}")
-        
-        # 显示车道变更检测状态
-        if self.debug_lane_change:
-            print(f"🔍 车道变更检测调试模式: 已启用")
-            print(f"   将显示详细的车道变更检测信息")
-        else:
-            print(f"🔍 车道变更检测调试模式: 已禁用")
-            print(f"   如需启用，请使用 --debug_lane_change 参数")
         
         # === 认知参数集成调试信息 ===
         if self.use_cognitive_modules:
@@ -494,45 +445,7 @@ class PPOExpertReproduction:
         else:
             print(f"📊 认知模块未启用，使用标准观测维度: 275")
     
-    def _setup_lane_change_cooldown(self):
-        """ 新增：动态设置变道冷却时间步数"""
-        try:
-            # 获取第一个环境的配置来了解实际频率
-            if hasattr(self.envs, 'envs') and len(self.envs.envs) > 0:
-                env = self.envs.envs[0]
-            elif hasattr(self.envs, 'venv') and hasattr(self.envs.venv, 'envs'):
-                env = self.envs.venv.envs[0] if len(self.envs.venv.envs) > 0 else None
-            else:
-                env = None
-            
-            if env and hasattr(env, 'config'):
-                # 获取物理步长和决策重复次数
-                physics_step_size = env.config.get('physics_world_step_size', 0.02)
-                decision_repeat = env.config.get('decision_repeat', 5)
-                
-                # 计算实际有效频率
-                effective_time_step = physics_step_size * decision_repeat
-                effective_frequency = 1.0 / effective_time_step
-                
-                # 计算冷却时间步数
-                self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * effective_frequency)
-                
-                print(f" 变道冷却时间设置:")
-                print(f"   物理步长: {physics_step_size:.3f}s")
-                print(f"   决策重复: {decision_repeat}")
-                print(f"   有效频率: {effective_frequency:.1f}Hz")
-                print(f"   冷却时间: {self.args.lc_cooldown_s}s → {self._lane_change_cooldown_steps}步")
-            else:
-                # 如果无法获取环境配置，使用默认值
-                self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * 10)
-                print(f"⚠️  无法获取环境配置，使用默认10Hz假设")
-                print(f"   冷却时间: {self.args.lc_cooldown_s}s → {self._lane_change_cooldown_steps}步")
-                
-        except Exception as e:
-            # 异常处理，使用默认值
-            self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * 10)
-            print(f"⚠️  设置冷却时间失败: {e}，使用默认10Hz假设")
-            print(f"   冷却时间: {self.args.lc_cooldown_s}s → {self._lane_change_cooldown_steps}步")
+  
     
     def _create_experiment_dir(self) -> str:
         """创建实验目录"""
@@ -643,12 +556,6 @@ class PPOExpertReproduction:
                     "crash_vehicle_penalty": self.args.crash_penalty,
                     "crash_object_penalty": self.args.crash_penalty,
                     "crash_sidewalk_penalty": 2.0,
-                    #  新增：变道惩罚配置
-                    "w_lc": self.args.w_lc,
-                    "k_speed": self.args.k_speed,
-                    "v_limit": self.args.v_limit,
-                    "lc_cooldown_s": self.args.lc_cooldown_s,
-                    "w_lc_cool": self.args.w_lc_cool
                 },
                 
                 # 终止条件配置
@@ -1010,11 +917,7 @@ class PPOExpertReproduction:
     
     def collect_rollouts(self) -> Tuple[torch.Tensor, ...]:
         """收集rollout数据 - 使用向量化环境的真实并行采样"""
-        #  新增：确保变道冷却时间已初始化
-        if self._lane_change_cooldown_steps is None:
-            print("⚠️  变道冷却时间未初始化，使用默认值")
-            self._lane_change_cooldown_steps = int(self.args.lc_cooldown_s * 10)
-        
+    
         # 存储rollout数据
         obs_batch = []
         actions_batch = []
@@ -1046,11 +949,6 @@ class PPOExpertReproduction:
         #  新增：动作统计变量
         episode_steer_means = [[] for _ in range(self.args.n_envs)]
         episode_throttle_means = [[] for _ in range(self.args.n_envs)]
-        
-        #  新增：变道统计变量
-        episode_lane_change_penalties = [[] for _ in range(self.args.n_envs)]
-        episode_lane_change_speed_ratios = [[] for _ in range(self.args.n_envs)]
-        episode_cooldown_violations = [[] for _ in range(self.args.n_envs)]
         
         # 收集n_steps步数据
         for step in range(self.args.n_steps):
@@ -1223,53 +1121,8 @@ class PPOExpertReproduction:
                             lane_changes[env_idx] += 1
                             if self.debug_lane_change:
                                 print(f"🚗 [环境{env_idx}] 通过增强检测检测到车道变更")
-                
-                #  新增：变道惩罚计算
-                if lane_change_detected:
-                    # 获取当前速度
-                    current_speed = 0.0
-                    if 'velocity' in info:
-                        current_speed = abs(info['velocity'])
-                    elif 'speed' in info:
-                        current_speed = abs(info['speed'])
-                    elif hasattr(info, 'speed'):
-                        current_speed = abs(info.speed)
-                    
-                    # 计算速度比例
-                    speed_ratio = current_speed / self.args.v_limit
-                    speed_ratio = min(speed_ratio, 2.0)  # 限制最大比例
-                    
-                    # 基础变道惩罚
-                    base_penalty = self.args.w_lc
-                    
-                    # 高速放大惩罚
-                    speed_penalty = base_penalty * (1 + self.args.k_speed * speed_ratio)
-                    
-                    # 检查冷却时间
-                    agent_id = env_idx  # 简化：直接使用环境索引
-                    current_step = self.global_step + step
-                    
-                    if agent_id in self._last_lane_change_step:
-                        steps_since_last_change = current_step - self._last_lane_change_step[agent_id]
-                        if steps_since_last_change < self._lane_change_cooldown_steps:
-                            # 冷却期内，附加惩罚
-                            speed_penalty += self.args.w_lc_cool
-                            episode_cooldown_violations[env_idx].append(1)
-                        else:
-                            episode_cooldown_violations[env_idx].append(0)
-                    else:
-                        episode_cooldown_violations[env_idx].append(0)
-                    
-                    # 更新最后变道时间
-                    self._last_lane_change_step[agent_id] = current_step
-                    
-                    # 记录变道惩罚统计
-                    episode_lane_change_penalties[env_idx].append(speed_penalty)
-                    episode_lane_change_speed_ratios[env_idx].append(speed_ratio)
-                    
-                    # 将惩罚应用到奖励中
-                    rewards[env_idx] -= speed_penalty
-                
+
+
                 #  新增：收集动作统计信息
                 episode_steer_means[env_idx].append(steer_means[env_idx].item())
                 episode_throttle_means[env_idx].append(throttle_means[env_idx].item())
@@ -1288,12 +1141,7 @@ class PPOExpertReproduction:
                     #  新增：记录动作统计
                     self.episode_steer_means.append(np.mean(episode_steer_means[env_idx]) if episode_steer_means[env_idx] else 0)
                     self.episode_throttle_means.append(np.mean(episode_throttle_means[env_idx]) if episode_throttle_means[env_idx] else 0)
-                    
-                    #  新增：记录变道惩罚统计
-                    self.episode_lane_change_penalties.append(np.mean(episode_lane_change_penalties[env_idx]) if episode_lane_change_penalties[env_idx] else 0)
-                    self.episode_lane_change_speed_ratios.append(np.mean(episode_lane_change_speed_ratios[env_idx]) if episode_lane_change_speed_ratios[env_idx] else 0)
-                    self.episode_cooldown_violations.append(np.sum(episode_cooldown_violations[env_idx]) if episode_cooldown_violations[env_idx] else 0)
-                    
+
                     # 路径完成度计算
                     info = infos[env_idx]
                     path_completion = info.get('route_completion', 0.0)
@@ -1316,10 +1164,6 @@ class PPOExpertReproduction:
                     #  新增：重置动作统计
                     episode_steer_means[env_idx] = []
                     episode_throttle_means[env_idx] = []
-                    #  新增：重置变道统计
-                    episode_lane_change_penalties[env_idx] = []
-                    episode_lane_change_speed_ratios[env_idx] = []
-                    episode_cooldown_violations[env_idx] = []
             
             # 存储数据 - 直接使用向量化环境的真实数据
             # === 修复：存储包含认知参数的观测 ===
@@ -2211,14 +2055,7 @@ class PPOExpertReproduction:
             self.writer.add_scalar("actions/throttle_std", np.std(self.episode_throttle_means), self.global_step)
             self.writer.add_scalar("actions/throttle_min", np.min(self.episode_throttle_means), self.global_step)
             self.writer.add_scalar("actions/throttle_max", np.max(self.episode_throttle_means), self.global_step)
-        
-        #  新增：变道惩罚统计记录
-        if len(self.episode_lane_change_penalties) > 0:
-            self.writer.add_scalar("lane_change/penalty_mean", np.mean(self.episode_lane_change_penalties), self.global_step)
-            self.writer.add_scalar("lane_change/penalty_total", np.sum(self.episode_lane_change_penalties), self.global_step)
-            self.writer.add_scalar("lane_change/speed_ratio_mean", np.mean(self.episode_lane_change_speed_ratios), self.global_step)
-            self.writer.add_scalar("lane_change/cooldown_violations", np.sum(self.episode_cooldown_violations), self.global_step)
-        
+
         # 评估指标
         if eval_stats:
             for key, value in eval_stats.items():
@@ -2273,10 +2110,7 @@ class PPOExpertReproduction:
             np.std(self.episode_steer_means) if len(self.episode_steer_means) > 0 else 0,
             np.mean(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
             np.std(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
-            #  新增：变道统计数据
-            np.mean(self.episode_lane_change_penalties) if len(self.episode_lane_change_penalties) > 0 else 0,
-            np.mean(self.episode_lane_change_speed_ratios) if len(self.episode_lane_change_speed_ratios) > 0 else 0,
-            np.sum(self.episode_cooldown_violations) if len(self.episode_cooldown_violations) > 0 else 0,
+
             # === 新增：认知参数数据
             self.cognitive_parameter_sampler.get_current_parameters()['bias_inverse_tta_coef'] if self.cognitive_parameter_sampler else 0.0,
             self.cognitive_parameter_sampler.get_current_parameters()['perception_sigma0'] if self.cognitive_parameter_sampler else 0.0,
@@ -2309,13 +2143,7 @@ class PPOExpertReproduction:
                 print(f"   转向均值: {np.mean(self.episode_steer_means):.3f} ± {np.std(self.episode_steer_means):.3f}")
             if len(self.episode_throttle_means) > 0:
                 print(f"   油门均值: {np.mean(self.episode_throttle_means):.3f} ± {np.std(self.episode_throttle_means):.3f}")
-            
-            #  新增：变道惩罚统计输出
-            if len(self.episode_lane_change_penalties) > 0:
-                print(f"   变道惩罚: {np.mean(self.episode_lane_change_penalties):.3f} ± {np.std(self.episode_lane_change_penalties):.3f}")
-                print(f"   变道速度比: {np.mean(self.episode_lane_change_speed_ratios):.3f}")
-                print(f"   冷却违规: {np.sum(self.episode_cooldown_violations)}")
-            
+
             if train_stats.get('clipfrac', 0) > 0:
                 print(f"   Clip Fraction: {train_stats.get('clipfrac', 0):.3f}")
                 print(f"   Explained Var: {train_stats.get('explained_variance', 0):.3f}")
@@ -2917,167 +2745,7 @@ env_config.update({{
         
         return obs_with_cognitive
 
-    def _detect_lane_change_enhanced(self, agent, env_idx, info):
-        """
-        增强的车道变更检测方法 - 适配MetaDrive直线道路场景
-        
-        Args:
-            agent: MetaDrive agent对象
-            env_idx: 环境索引
-            info: 环境info字典
-            
-        Returns:
-            bool: 是否检测到车道变更
-        """
-        try:
-            # 方法1: 直接检查info中的车道变更标志
-            if isinstance(info, dict) and 'lane_change' in info:
-                if info['lane_change']:
-                    if self.debug_lane_change:
-                        print(f"🔍 [环境{env_idx}] 通过info检测到车道变更")
-                    return True
-            
-            # 方法2: 使用MetaDrive的相邻车道信息检测
-            if hasattr(agent, 'lane') and agent.lane:
-                current_lane = agent.lane
-                current_lane_index = getattr(current_lane, 'index', None)
-                
-                # 获取相邻车道信息
-                left_lanes = getattr(current_lane, 'left_lanes', [])
-                right_lanes = getattr(current_lane, 'right_lanes', [])
-                
-                # 检查是否有相邻车道
-                has_left_neighbor = len(left_lanes) > 0
-                has_right_neighbor = len(right_lanes) > 0
-                
-                if self.debug_lane_change and (has_left_neighbor or has_right_neighbor):
-                    print(f"🔍 [环境{env_idx}] 当前车道 {current_lane_index}: 左相邻={len(left_lanes)}, 右相邻={len(right_lanes)}")
-                
-                # 记录当前车道索引用于变化检测
-                env_agent_id = f"env_{env_idx}_lane_index"
-                
-                if env_agent_id in self._last_lane_index:
-                    if self._last_lane_index[env_agent_id] != current_lane_index:
-                        if self.debug_lane_change:
-                            print(f"🔍 [环境{env_idx}] 车道索引变化: {self._last_lane_index[env_agent_id]} → {current_lane_index}")
-                        self._last_lane_index[env_agent_id] = current_lane_index
-                        return True
-                    else:
-                        self._last_lane_index[env_agent_id] = current_lane_index
-                        return False
-                else:
-                    # 首次记录
-                    self._last_lane_index[env_agent_id] = current_lane_index
-                    if self.debug_lane_change:
-                        print(f"🔍 [环境{env_idx}] 首次记录车道索引: {current_lane_index}")
-                    return False
-            
-            # 方法3: 基于转向模式检测（当有相邻车道时）
-            try:
-                steering = getattr(agent, 'steering', 0.0)
-                speed = getattr(agent, 'speed', 0.0)
-                
-                # 检查是否有相邻车道
-                has_neighbors = False
-                if hasattr(agent, 'lane') and agent.lane:
-                    left_lanes = getattr(agent.lane, 'left_lanes', [])
-                    right_lanes = getattr(agent.lane, 'right_lanes', [])
-                    has_neighbors = len(left_lanes) > 0 or len(right_lanes) > 0
-                
-                # 大转向 + 适中速度 + 有相邻车道 = 可能的车道变更
-                if has_neighbors and abs(steering) > 0.2 and 3.0 < speed < 25.0:
-                    steering_key = f"env_{env_idx}_steering_pattern"
-                    
-                    if steering_key not in self._last_lane_index:
-                        self._last_lane_index[steering_key] = 0
-                    
-                    self._last_lane_index[steering_key] += 1
-                    
-                    # 连续2步大转向判定为车道变更（降低阈值）
-                    if self._last_lane_index[steering_key] >= 2:
-                        if self.debug_lane_change:
-                            print(f"🔍 [环境{env_idx}] 通过转向模式检测到车道变更: 转向={steering:.3f}, 速度={speed:.3f}, 持续步数={self._last_lane_index[steering_key]}")
-                        self._last_lane_index[steering_key] = 0  # 重置计数器
-                        return True
-                else:
-                    # 重置转向计数器
-                    steering_key = f"env_{env_idx}_steering_pattern"
-                    if steering_key in self._last_lane_index:
-                        self._last_lane_index[steering_key] = 0
-                        
-            except Exception as e:
-                if self.debug_lane_change:
-                    print(f"⚠️ [环境{env_idx}] 转向模式检测失败: {e}")
-            
-            # 方法4: 基于位置变化检测（当有相邻车道时）
-            try:
-                if hasattr(agent, 'position') and hasattr(agent, 'lane') and agent.lane:
-                    # 检查是否有相邻车道
-                    left_lanes = getattr(agent.lane, 'left_lanes', [])
-                    right_lanes = getattr(agent.lane, 'right_lanes', [])
-                    has_neighbors = len(left_lanes) > 0 or len(right_lanes) > 0
-                    
-                    if has_neighbors:
-                        current_pos = agent.position
-                        pos_key = f"env_{env_idx}_position"
-                        
-                        if pos_key in self._last_lane_index:
-                            last_pos = self._last_lane_index[pos_key]
-                            # 计算横向位移
-                            lateral_movement = abs(current_pos[1] - last_pos[1])  # Y轴变化
-                            
-                            # 如果横向位移超过阈值，可能是车道变更
-                            if lateral_movement > 1.5 and speed > 5.0:  # 降低阈值
-                                if self.debug_lane_change:
-                                    print(f"🔍 [环境{env_idx}] 通过位置变化检测到车道变更: 横向位移={lateral_movement:.3f}m")
-                                self._last_lane_index[pos_key] = current_pos
-                                return True
-                        
-                        # 记录当前位置
-                        self._last_lane_index[pos_key] = current_pos
-                    
-            except Exception as e:
-                if self.debug_lane_change:
-                    print(f"⚠️ [环境{env_idx}] 位置变化检测失败: {e}")
-            
-            # 方法5: 直线道路场景的替代检测（模拟车道变更行为）
-            try:
-                steering = getattr(agent, 'steering', 0.0)
-                speed = getattr(agent, 'speed', 0.0)
-                
-                # 在直线道路场景中，检测"车道变更意图"而不是实际变更
-                # 这基于转向模式、速度和位置变化
-                if abs(steering) > 0.15 and 2.0 < speed < 25.0:  # 降低转向阈值
-                    # 检查是否持续了一段时间
-                    steering_key = f"env_{env_idx}_steering_intent"
-                    
-                    if steering_key not in self._last_lane_index:
-                        self._last_lane_index[steering_key] = 0
-                    
-                    self._last_lane_index[steering_key] += 1
-                    
-                    # 连续3步有转向意图判定为"车道变更意图"
-                    if self._last_lane_index[steering_key] >= 3:
-                        if self.debug_lane_change:
-                            print(f"🔍 [环境{env_idx}] 检测到车道变更意图: 转向={steering:.3f}, 速度={speed:.3f}, 持续步数={self._last_lane_index[steering_key]}")
-                        self._last_lane_index[steering_key] = 0  # 重置计数器
-                        return True
-                else:
-                    # 重置转向意图计数器
-                    steering_key = f"env_{env_idx}_steering_intent"
-                    if steering_key in self._last_lane_index:
-                        self._last_lane_index[steering_key] = 0
-                        
-            except Exception as e:
-                if self.debug_lane_change:
-                    print(f"⚠️ [环境{env_idx}] 车道变更意图检测失败: {e}")
-            
-            return False
-            
-        except Exception as e:
-            if self.debug_lane_change:
-                print(f"⚠️ [环境{env_idx}] 车道变更检测异常: {e}")
-            return False
+
 
 def add_arguments():
     """添加命令行参数"""
@@ -3141,29 +2809,12 @@ def add_arguments():
     parser.add_argument("--crash_penalty", type=float, default=8.0,
                        help="碰撞惩罚 (默认: 5.0, 回调自8.0)")
     
-    # ===== 新增：变道惩罚配置参数 =====
-    parser.add_argument("--w_lc", type=float, default=0.6,
-                       help="基础变道成本 (默认: 0.6)")
-    parser.add_argument("--k_speed", type=float, default=1.0,
-                       help="高速放大系数 (默认: 1.0)")
-    parser.add_argument("--v_limit", type=float, default=15.0,
-                       help="用于速度归一的限速 (默认: 15.0)")
-    parser.add_argument("--lc_cooldown_s", type=float, default=3.0,
-                       help="变道冷却时间，秒 (默认: 3.0)")
-    parser.add_argument("--w_lc_cool", type=float, default=1,
-                       help="冷却期内附加惩罚 (默认: 1)")
-    
-    # ===== 调试开关 =====
-    parser.add_argument("--debug_lane_change", action="store_true", default=False,
-                       help="启用车道变更检测的调试输出")
-
     # ===== 交通密度配置参数 (新增) =====
     parser.add_argument("--traffic_density_min", type=float, default=0.1,
                        help="最小交通密度 (默认: 0.1)")
     parser.add_argument("--traffic_density_max", type=float, default=0.15,
                        help="最大交通密度 (默认: 0.15)")
 
-    
     # ===== 训练设置 =====
     parser.add_argument("--total_timesteps", type=int, default=1000000,
                        help="总训练步数 (默认: 1,000,000)")
