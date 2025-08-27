@@ -42,6 +42,8 @@ from cognitive_module.cognitive_bias_module import CognitiveBiasModule
 from cognitive_module.cognitive_delay_module import CognitiveDelayModule
 from cognitive_module.cognitive_perception_module import CognitivePerceptionModule
 from cognitive_module.cognitive_parameter_sampler import CognitiveParameterSampler
+# === 新增：导入离散认知参数采样器 ===
+from cognitive_module.discrete_cognitive_parameter_sampler import DiscreteCognitiveParameterSampler
 
 
 class SpeedControlMetaDriveEnv(MetaDriveEnv):
@@ -185,10 +187,15 @@ class SpeedControlMetaDriveEnv(MetaDriveEnv):
 
 
 class PPONetwork(nn.Module):
-    """PPO网络结构 - 严格对齐MetaDrive expert + 认知参数集成"""
+    """PPO网络结构 - 严格对齐MetaDrive expert + 认知参数集成 + 渐进式训练支持"""
     
-    def __init__(self, obs_dim: int = 279, action_dim: int = 2, hidden_dim: int = 256):
+    def __init__(self, obs_dim: int = 279, action_dim: int = 2, hidden_dim: int = 256, 
+                 checkpoint_obs_dim: int = None):
         super(PPONetwork, self).__init__()
+        
+        self.obs_dim = obs_dim
+        self.checkpoint_obs_dim = checkpoint_obs_dim
+        self.is_progressive_training = checkpoint_obs_dim == 275 and obs_dim == 279
         
         # Actor网络 (观测维度从275扩展到279，包含认知参数)
         self.actor_fc1 = nn.Linear(obs_dim, hidden_dim)      # 279 → 256
@@ -203,8 +210,16 @@ class PPONetwork(nn.Module):
         # 激活函数
         self.tanh = nn.Tanh()
         
+        # 渐进式训练相关属性
+        self.training_stage = 1  # 1: 冻结阶段, 2: 解冻阶段
+        self.freeze_threshold_steps = 3000000  # 3M步切换点
+        
         # 初始化权重
         self._init_weights()
+        
+        # 如果是从275维检查点恢复，设置冻结状态
+        if self.is_progressive_training:
+            self._setup_progressive_training()
     
     def _init_weights(self):
         # 隐层：正交 + gain=1.0（tanh稳定）
@@ -286,6 +301,154 @@ class PPONetwork(nn.Module):
         action_tanh = torch.tanh(action_mean)
         # 返回steer和throttle的均值
         return action_tanh[:, 0], action_tanh[:, 1]  # steer, throttle
+    
+    def _setup_progressive_training(self):
+        """设置渐进式训练 - 冻结前275维权重"""
+        if not self.is_progressive_training:
+            return
+            
+        print("🧠 设置渐进式训练模式：")
+        print(f"   检查点维度: {self.checkpoint_obs_dim}")
+        print(f"   目标维度: {self.obs_dim}")
+        print(f"   冻结前275维权重，仅训练新增4维和下游层")
+        
+        # 冻结前275维权重（actor_fc1和critic_fc1的前275维）
+        with torch.no_grad():
+            # 冻结actor_fc1的前275维权重
+            self.actor_fc1.weight[:, :275].requires_grad_(False)
+            print(f"   ✅ 已冻结actor_fc1前275维权重")
+            
+            # 冻结critic_fc1的前275维权重
+            self.critic_fc1.weight[:, :275].requires_grad_(False)
+            print(f"   ✅ 已冻结critic_fc1前275维权重")
+        
+        # 设置训练阶段
+        self.training_stage = 1
+        print(f"   🎯 当前训练阶段: {self.training_stage} (冻结阶段)")
+    
+    def update_training_stage(self, global_step: int):
+        """根据训练步数更新训练阶段"""
+        if not self.is_progressive_training:
+            return
+            
+        if self.training_stage == 1 and global_step >= self.freeze_threshold_steps:
+            self.training_stage = 2
+            self._unfreeze_weights()
+            print(f"🎯 训练阶段切换: {self.training_stage} (解冻阶段)")
+            print(f"   已解冻前275维权重，允许学习认知参数协同作用")
+    
+    def _unfreeze_weights(self):
+        """解冻前275维权重"""
+        if not self.is_progressive_training:
+            return
+            
+        # 解冻前275维权重
+        with torch.no_grad():
+            # 解冻actor_fc1的前275维权重
+            self.actor_fc1.weight[:, :275].requires_grad_(True)
+            
+            # 解冻critic_fc1的前275维权重
+            self.critic_fc1.weight[:, :275].requires_grad_(True)
+        
+        print(f"   ✅ 已解冻前275维权重")
+    
+    def _load_and_extend_weights(self, checkpoint_state_dict):
+        """从275维检查点加载权重并扩展到279维"""
+        print("🔧 正在扩展275维权重到279维...")
+        
+        # 创建新的状态字典
+        new_state_dict = {}
+        
+        for key, value in checkpoint_state_dict.items():
+            if key in ['actor_fc1.weight', 'critic_fc1.weight']:
+                # 对于输入层，需要扩展权重
+                if key == 'actor_fc1.weight':
+                    # 原始: [256, 275], 目标: [256, 279]
+                    new_weight = torch.zeros(256, 279, device=value.device)
+                    new_weight[:, :275] = value  # 复制前275维权重
+                    # 初始化新增4维权重（使用较小的随机值）
+                    torch.nn.init.orthogonal_(new_weight[:, 275:], gain=0.01)
+                    new_state_dict[key] = new_weight
+                    print(f"   ✅ 已扩展actor_fc1权重: 275 → 279")
+                    
+                elif key == 'critic_fc1.weight':
+                    # 原始: [256, 275], 目标: [256, 279]
+                    new_weight = torch.zeros(256, 279, device=value.device)
+                    new_weight[:, :275] = value  # 复制前275维权重
+                    # 初始化新增4维权重
+                    torch.nn.init.orthogonal_(new_weight[:, 275:], gain=0.01)
+                    new_state_dict[key] = new_weight
+                    print(f"   ✅ 已扩展critic_fc1权重: 275 → 279")
+            else:
+                # 其他层直接复制
+                new_state_dict[key] = value
+        
+        # 返回扩展后的状态字典
+        print("✅ 权重扩展完成")
+        return new_state_dict
+    
+    def _load_and_truncate_weights(self, checkpoint_state_dict):
+        """从279维检查点截取前275维权重"""
+        print("🔧 正在截取279维权重到275维...")
+        
+        # 创建新的状态字典
+        new_state_dict = {}
+        
+        for key, value in checkpoint_state_dict.items():
+            if key in ['actor_fc1.weight', 'critic_fc1.weight']:
+                # 对于输入层，需要截取权重
+                if key == 'actor_fc1.weight':
+                    # 原始: [256, 279], 目标: [256, 275]
+                    new_weight = value[:, :275]
+                    new_state_dict[key] = new_weight
+                    print(f"   ✅ 已截取actor_fc1权重: 279 → 275")
+                    
+                elif key == 'critic_fc1.weight':
+                    # 原始: [256, 279], 目标: [256, 275]
+                    new_weight = value[:, :275]
+                    new_state_dict[key] = new_weight
+                    print(f"   ✅ 已截取critic_fc1权重: 279 → 275")
+            else:
+                # 其他层直接复制
+                new_state_dict[key] = value
+        
+        # 返回截取后的状态字典
+        print("✅ 权重截取完成")
+        return new_state_dict
+    
+    def get_frozen_weight_stats(self):
+        """获取冻结权重的统计信息"""
+        if not self.is_progressive_training:
+            return {}
+            
+        stats = {}
+        
+        # 获取前275维权重的统计信息
+        with torch.no_grad():
+            # Actor网络前275维权重统计
+            actor_frozen_weights = self.actor_fc1.weight[:, :275]
+            stats['actor_frozen_mean'] = actor_frozen_weights.mean().item()
+            stats['actor_frozen_std'] = actor_frozen_weights.std().item()
+            stats['actor_frozen_norm'] = torch.norm(actor_frozen_weights).item()
+            
+            # Critic网络前275维权重统计
+            critic_frozen_weights = self.critic_fc1.weight[:, :275]
+            stats['critic_frozen_mean'] = critic_frozen_weights.mean().item()
+            stats['critic_frozen_std'] = critic_frozen_weights.std().item()
+            stats['critic_frozen_norm'] = torch.norm(critic_frozen_weights).item()
+            
+            # 新增4维权重统计
+            actor_new_weights = self.actor_fc1.weight[:, 275:]
+            stats['actor_new_mean'] = actor_new_weights.mean().item()
+            stats['actor_new_std'] = actor_new_weights.std().item()
+            stats['actor_new_norm'] = torch.norm(actor_new_weights).item()
+            
+            critic_new_weights = self.critic_fc1.weight[:, 275:]
+            stats['critic_new_mean'] = critic_new_weights.mean().item()
+            stats['critic_new_std'] = critic_new_weights.std().item()
+            stats['critic_new_norm'] = torch.norm(critic_new_weights).item()
+        
+        return stats
 
 
 def make_env(rank: int, config: Dict[str, Any], args):
@@ -467,8 +630,7 @@ class PPOExpertReproduction:
                     'adaptation_rate': args.bias_adaptation_rate,
                     'visual_detection_distance': args.bias_visual_distance,
                     'visual_detection_angle': args.bias_visual_angle,
-                    'visual_aversion_strength': args.bias_visual_strength,
-                    'verbose': args.cognitive_verbose
+                    'visual_aversion_strength': args.bias_visual_strength
                 }
                 #  关键改进：传入认知感知模块引用
                 self.cognitive_bias_module = CognitiveBiasModule(
@@ -491,15 +653,36 @@ class PPOExpertReproduction:
             
             # === 新增：初始化认知参数采样器 ===
             if args.use_cognitive_parameter_sampling:
-                self.cognitive_parameter_sampler = CognitiveParameterSampler(
-                    update_steps=args.cognitive_param_update_steps,
-                    bias_inverse_tta_coef_range=args.bias_inverse_tta_coef_range,
-                    perception_sigma0_range=args.perception_sigma0_range,
-                    perception_k_range=args.perception_k_range,
-                    delay_steps_range=args.delay_steps_range,
-                    enable_visualization=args.cognitive_visualization,
-                    save_history=True
-                )
+                # 根据参数选择采样器类型
+                if args.cognitive_sampler_type == "discrete":
+                    print("   使用离散认知参数采样器")
+                    self.cognitive_parameter_sampler = DiscreteCognitiveParameterSampler(
+                        update_steps=args.cognitive_param_update_steps,
+                        bias_inverse_tta_coef_range=args.bias_inverse_tta_coef_range,
+                        perception_sigma0_range=args.perception_sigma0_range,
+                        perception_k_range=args.perception_k_range,
+                        delay_steps_range=args.delay_steps_range,
+                        # === 新增：离散采样密度参数 ===
+                        bias_inverse_tta_coef_density=args.bias_inverse_tta_coef_density,
+                        perception_sigma0_density=args.perception_sigma0_density,
+                        perception_k_density=args.perception_k_density,
+                        delay_steps_density=args.delay_steps_density,
+                        enable_visualization=args.cognitive_visualization,
+                        save_history=True
+                    )
+                elif args.cognitive_sampler_type == "continuous":
+                    print("   使用连续认知参数采样器")
+                    self.cognitive_parameter_sampler = CognitiveParameterSampler(
+                        update_steps=args.cognitive_param_update_steps,
+                        bias_inverse_tta_coef_range=args.bias_inverse_tta_coef_range,
+                        perception_sigma0_range=args.perception_sigma0_range,
+                        perception_k_range=args.perception_k_range,
+                        delay_steps_range=args.delay_steps_range,
+                        enable_visualization=args.cognitive_visualization,
+                        save_history=True
+                    )
+                else:
+                    raise ValueError(f"不支持的认知采样器类型: {args.cognitive_sampler_type}")
 
             else:
                 self.cognitive_parameter_sampler = None
@@ -544,10 +727,21 @@ class PPOExpertReproduction:
                 print(f"⚠️ 认知模块附加失败: {e}")
         
         
+        # 渐进式训练相关属性
+        self.checkpoint_obs_dim = None  # 将在load_checkpoint中设置
+        self.is_progressive_training = False  # 是否启用渐进式训练
+        
         # 创建网络 - 根据是否启用认知模块动态设置观测维度
-        obs_dim = 279 if self.use_cognitive_modules else 275
-        self.network = PPONetwork(obs_dim=obs_dim).to(self.device)
-        self.optimizer = optim.Adam(self.network.parameters(), lr=args.lr)
+        # 注意：如果是从检查点恢复，网络维度将在load_checkpoint中确定
+        if args.resume_from:
+            # 延迟创建网络，在load_checkpoint中根据检查点维度创建
+            self.network = None
+            self.optimizer = None
+        else:
+            # 正常模式：创建网络
+            obs_dim = 279 if self.use_cognitive_modules else 275
+            self.network = PPONetwork(obs_dim=obs_dim).to(self.device)
+            self.optimizer = optim.Adam(self.network.parameters(), lr=args.lr)
         
         # 学习率调度参数缓存
         self.lr_init = self.args.lr              # 初始学习率
@@ -601,6 +795,17 @@ class PPOExpertReproduction:
         print(f" 设备: {self.device}")
         print(f" 随机种子: {args.seed}")
         
+        # === 渐进式训练信息 ===
+        if self.is_progressive_training:
+            self.network.training_stage = 1
+            print(f"🧠 渐进式训练模式已启用:")
+            print(f"   检查点维度: {self.checkpoint_obs_dim}")
+            print(f"   目标维度: {self.network.obs_dim}")
+            print(f"   冻结阈值: {self.network.freeze_threshold_steps:,} 步")
+            print(f"   当前阶段: {self.network.training_stage} (1=冻结, 2=解冻)")
+        elif self.checkpoint_obs_dim:
+            print(f"📥 从{self.checkpoint_obs_dim}维检查点恢复训练")
+        
         # === 认知参数集成调试信息 ===
         if self.use_cognitive_modules:
             print(f"易 认知模块已启用，观测维度已扩展:")
@@ -610,8 +815,14 @@ class PPOExpertReproduction:
             print(f"   网络结构: 279 → 256 → 256 → 4/1")
             
             if self.cognitive_parameter_sampler:
-                print(f"   认知参数采样器: 已启用")
+                sampler_type_name = "离散" if args.cognitive_sampler_type == "discrete" else "连续"
+                print(f"   认知参数采样器: 已启用 ({sampler_type_name})")
                 print(f"   参数更新频率: {self.cognitive_parameter_sampler.update_steps} 步")
+                if args.cognitive_sampler_type == "discrete":
+                    print(f"   离散采样密度: 偏差系数={args.bias_inverse_tta_coef_density}, "
+                          f"感知sigma0={args.perception_sigma0_density}, "
+                          f"感知k={args.perception_k_density}, "
+                          f"延迟步数={args.delay_steps_density}")
                 print(f"   当前认知参数: {self.cognitive_parameter_sampler.get_current_parameters()}")
             else:
                 print(f"   认知参数采样器: 未启用 (使用固定参数)")
@@ -697,6 +908,14 @@ class PPOExpertReproduction:
             "timestamp": datetime.now().isoformat(),
             "random_seed": self.args.seed,
             "device": str(self.device),
+            
+            # ===== 系统设置 =====
+            "system": {
+                "device": str(self.device),
+                "seed": self.args.seed,
+                "save_dir": self.args.save_dir,
+                "resume_from": self.args.resume_from
+            },
             
             # ===== 网络结构 (严格对齐expert + 认知参数集成) =====
             "network": {
@@ -793,7 +1012,22 @@ class PPOExpertReproduction:
                 "entropy_coef": self.args.entropy_coef,
                 "vf_coef": self.args.vf_coef,
                 "max_grad_norm": self.args.max_grad_norm,
-                "target_kl": self.args.target_kl
+                "target_kl": self.args.target_kl,
+                "action_penalty_coef": self.args.action_penalty_coef
+            },
+            
+            # ===== 学习率调度配置 =====
+            "learning_rate_schedule": {
+                "schedule_type": self.args.lr_schedule,
+                "lr_min": self.args.lr_min,
+                "warmup_ratio": self.args.warmup_ratio
+            },
+            
+            # ===== 熵系数衰减配置 =====
+            "entropy_decay": {
+                "entropy_coef_start": self.args.entropy_coef_start,
+                "entropy_coef_end": self.args.entropy_coef_end,
+                "entropy_decay_end_ratio": self.args.entropy_decay_end_ratio
             },
             
             # ===== 训练设定 =====
@@ -802,6 +1036,70 @@ class PPOExpertReproduction:
                 "checkpoint_freq": self.args.checkpoint_freq,
                 "eval_freq": self.args.eval_freq,
                 "log_freq": self.args.log_freq
+            },
+            
+            # ===== 课程学习配置 =====
+            "curriculum_learning": {
+                "enabled": self.args.use_curriculum,
+                "mode": self.args.curriculum_mode,
+                "alpha": self.args.curriculum_alpha,
+                "gate_succ_threshold": self.args.gate_succ_threshold,
+                "gate_coll_threshold": self.args.gate_coll_threshold
+            },
+            
+            # ===== 认知模块配置 =====
+            "cognitive_modules": {
+                "enabled": self.args.use_cognitive_modules,
+                "visualization": self.args.cognitive_visualization,
+                
+                # 认知偏差模块（风险厌恶）
+                "cognitive_bias": {
+                    "enabled": self.args.use_cognitive_bias,
+                    "inverse_tta_coef": self.args.bias_inverse_tta_coef,
+                    "tta_threshold": self.args.bias_tta_threshold,
+                    "adaptive_bias": self.args.bias_adaptive,
+                    "adaptation_rate": self.args.bias_adaptation_rate,
+                    "visual_detection_distance": self.args.bias_visual_distance,
+                    "visual_detection_angle": self.args.bias_visual_angle,
+                    "visual_aversion_strength": self.args.bias_visual_strength
+                },
+                
+                # 认知延迟模块（动作延迟）
+                "cognitive_delay": {
+                    "enabled": self.args.use_cognitive_delay,
+                    "delay_steps": self.args.delay_steps,
+                    "enable_smoothing": self.args.delay_smoothing,
+                    "smoothing_factor": self.args.delay_smoothing_factor
+                },
+                
+                # 认知感知模块（观测噪声）
+                "cognitive_perception": {
+                    "enabled": self.args.use_cognitive_perception,
+                    "sigma0": self.args.perception_sigma0,
+                    "k": self.args.perception_k,
+                    "p_miss0": self.args.perception_p_miss0,
+                    "p_false": self.args.perception_p_false,
+                    "use_kf": self.args.perception_use_kf,
+                    "kf_dt": self.args.perception_kf_dt,
+                    "kf_q_scale": self.args.perception_kf_q_scale,
+                    "enable_radar_beam_viz": getattr(self.args, 'enable_radar_beam_viz', False)
+                },
+                
+                # 认知参数采样器
+                "cognitive_parameter_sampler": {
+                    "enabled": self.args.use_cognitive_parameter_sampling,
+                    "sampler_type": self.args.cognitive_sampler_type,  # 采样器类型
+                    "update_steps": self.args.cognitive_param_update_steps,
+                    "bias_inverse_tta_coef_range": self.args.bias_inverse_tta_coef_range,
+                    "perception_sigma0_range": self.args.perception_sigma0_range,
+                    "perception_k_range": self.args.perception_k_range,
+                    "delay_steps_range": self.args.delay_steps_range,
+                    # === 新增：离散采样密度参数 ===
+                    "bias_inverse_tta_coef_density": self.args.bias_inverse_tta_coef_density,
+                    "perception_sigma0_density": self.args.perception_sigma0_density,
+                    "perception_k_density": self.args.perception_k_density,
+                    "delay_steps_density": self.args.delay_steps_density
+                }
             }
         }
     
@@ -1111,7 +1409,6 @@ class PPOExpertReproduction:
             "grad_norm", "avg_speed", "lane_deviation", "lane_change_count",
             "min_ttc", "path_completion",
             "steer_mean", "steer_std", "throttle_mean", "throttle_std",  # 新增动作统计列
-            "lane_change_penalty_mean", "lane_change_speed_ratio", "cooldown_violations",  # 新增变道统计列
             "action_penalty",  # === 新增：动作正则化惩罚列 ===
             # === 新增：认知参数列 ===
             "bias_inverse_tta_coef", "perception_sigma0", "perception_k", "delay_steps"
@@ -1184,17 +1481,17 @@ class PPOExpertReproduction:
             
             # === 认知参数集成：将认知参数拼接到观测中 ===
             current_cognitive_params = {}
-            if self.use_cognitive_modules and self.cognitive_parameter_sampler:
-                try:
+            if self.use_cognitive_modules:
+                if self.cognitive_parameter_sampler:
                     current_cognitive_params = self.cognitive_parameter_sampler.get_current_parameters()
-                except Exception as e:
-                    print(f"⚠️ 获取认知参数失败: {e}")
-                    # 使用默认认知参数
+   
+                else:
+                    # 如果没有参数采样器，使用命令行参数的默认值
                     current_cognitive_params = {
-                        'bias_inverse_tta_coef': 1.0,
-                        'perception_sigma0': 0.1,
-                        'perception_k': 0.02,
-                        'delay_steps': 2
+                        'bias_inverse_tta_coef': self.args.bias_inverse_tta_coef,
+                        'perception_sigma0': self.args.perception_sigma0,
+                        'perception_k': self.args.perception_k,
+                        'delay_steps': self.args.delay_steps
                     }
             
             # 将认知参数拼接到观测中
@@ -1855,6 +2152,15 @@ class PPOExpertReproduction:
             "args": vars(self.args)
         }
         
+        # === 保存渐进式训练状态 ===
+        if self.is_progressive_training:
+            checkpoint['progressive_training'] = {
+                'is_progressive_training': True,
+                'training_stage': self.network.training_stage,
+                'checkpoint_obs_dim': self.checkpoint_obs_dim,
+                'freeze_threshold_steps': self.network.freeze_threshold_steps
+            }
+        
         # 保存认知模块状态
         if self.use_cognitive_modules:
             cognitive_states = {}
@@ -1908,74 +2214,106 @@ class PPOExpertReproduction:
         if not os.path.exists(checkpoint_path):
             raise FileNotFoundError(f"检查点文件不存在: {checkpoint_path}")
         
-        print(f" 正在加载检查点: {checkpoint_path}")
-        
-        # 加载检查点数据
+        print(f"📥 正在加载检查点: {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
-        
-        # 验证检查点格式
+
         required_keys = ["iteration", "global_step", "network_state_dict", "optimizer_state_dict"]
         missing_keys = [key for key in required_keys if key not in checkpoint]
         if missing_keys:
             raise ValueError(f"检查点格式不完整，缺少键: {missing_keys}")
         
-        # 验证配置兼容性
-        self._validate_checkpoint_compatibility(checkpoint)
+        ckpt_state = checkpoint["network_state_dict"]
+        if "actor_fc1.weight" in ckpt_state:
+            checkpoint_obs_dim = ckpt_state["actor_fc1.weight"].shape[1]
+        elif "critic_fc1.weight" in ckpt_state:
+            checkpoint_obs_dim = ckpt_state["critic_fc1.weight"].shape[1]
+        else:
+            checkpoint_obs_dim = None
+
+        if self.network is None:
+            target_obs_dim = 279 if self.use_cognitive_modules else 275
+            print(f"🔧 根据目标配置创建网络: {target_obs_dim}维")
+            self.network = PPONetwork(obs_dim=target_obs_dim).to(self.device)
+            self.optimizer = optim.Adam(self.network.parameters(), lr=self.args.lr)
         
-        # 恢复网络状态
-        self.network.load_state_dict(checkpoint["network_state_dict"])
-        print(f"✅ 网络权重已恢复")
-        
-        # 恢复优化器状态
-        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-        print(f"✅ 优化器状态已恢复")
-        
-        # 重新设置学习率以确保新的超参数生效
+        current_obs_dim = self.network.actor_fc1.in_features
+        self.checkpoint_obs_dim = checkpoint_obs_dim
+
+        # ---- 权重加载 ----
+        if checkpoint_obs_dim and checkpoint_obs_dim != current_obs_dim:
+            if checkpoint_obs_dim == 275 and current_obs_dim == 279:
+                print("🧠 检测到 275→279 迁移，调用 _load_and_extend_weights")
+                extended_state_dict = self.network._load_and_extend_weights(ckpt_state)
+                self.network.load_state_dict(extended_state_dict)
+                self.is_progressive_training = True
+            elif checkpoint_obs_dim == 279 and current_obs_dim == 275:
+                print("🧠 检测到 279→275 迁移，调用 _load_and_truncate_weights")
+                truncated_state_dict = self.network._load_and_truncate_weights(ckpt_state)
+                self.network.load_state_dict(truncated_state_dict)
+            else:
+                print("⚠️ 无法自动处理维度不匹配，将尝试直接加载")
+                self.network.load_state_dict(ckpt_state, strict=False)
+        else:
+            print(f"✅ 维度匹配，直接加载权重")
+            self.network.load_state_dict(ckpt_state)
+
+        print("✅ 网络权重已恢复")
+
+        # ---- 恢复优化器状态（部分保留） ----
+        # try:
+        self.safe_load_optimizer_state(self.optimizer, checkpoint["optimizer_state_dict"], self.network)
+        # except Exception as e:
+        #     print(f"⚠️ 优化器状态部分恢复失败: {e}")
+        #     print(f"   将重新初始化优化器参数状态")
+        #     self.optimizer = torch.optim.Adam(self.network.parameters(), lr=self.args.lr)
+
+        # 强制覆盖学习率
         if hasattr(self.args, 'lr'):
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = self.args.lr
-            print(f" 学习率已更新为新设置: {self.args.lr}")
-        
-        # 恢复训练进度
+            print(f"🔄 学习率已更新为新设置: {self.args.lr}")
+
+        # ---- 恢复训练进度 ----
         self.global_step = checkpoint["global_step"]
-        
-        # 计算起始迭代号（避免重复）
         self.start_iteration = checkpoint["iteration"]
-        
-        # === 新增：恢复认知参数采样器状态 ===
-        if (self.use_cognitive_modules and 
-            self.cognitive_parameter_sampler and 
-            "cognitive_states" in checkpoint and 
-            "parameter_sampler" in checkpoint["cognitive_states"]):
-            
-            try:
-                sampler_state = checkpoint["cognitive_states"]["parameter_sampler"]
-                
-                # 恢复参数更新统计
-                if hasattr(self.cognitive_parameter_sampler, '_total_updates'):
-                    self.cognitive_parameter_sampler._total_updates = sampler_state.get('total_updates', 0)
-                if hasattr(self.cognitive_parameter_sampler, '_last_update_step'):
-                    self.cognitive_parameter_sampler._last_update_step = sampler_state.get('last_update_step', 0)
-                
-                # 恢复当前参数
-                current_params = sampler_state.get('current_parameters', {})
-                if current_params:
-                    self._apply_cognitive_parameters(current_params)
-                
-            except Exception as e:
-                print(f"⚠️ 恢复认知参数采样器状态失败: {e}")
-        
-        print(f" 训练状态恢复:")
+
+        # === 渐进式训练只依赖 global_step ===
+        if self.is_progressive_training:
+            self.network.training_stage = 1
+            if self.global_step >= self.network.freeze_threshold_steps:
+                self.network.update_training_stage(self.global_step)
+
+        print(f"📊 训练状态恢复:")
         print(f"   全局步数: {self.global_step:,}")
         print(f"   迭代次数: {self.start_iteration}")
-        
-        # 显示超参数覆盖信息
-        self._show_hyperparameter_override_info(checkpoint)
-        
-        # 重新创建TensorBoard writer以支持恢复模式
+
+        # === TensorBoard 重建 ===
         self.writer.close()
         self.writer = SummaryWriter(log_dir=os.path.join(self.exp_dir, "tensorboard"))
-    
+
+        
+    def safe_load_optimizer_state(self, optimizer, state_dict, model):
+        """只保留 shape 匹配的动量状态"""
+        new_state = optimizer.state_dict()
+
+        # 映射: 参数 id -> 参数对象
+        param_map = {id(p): p for group in optimizer.param_groups for p in group['params']}
+
+        for pid, old_state in state_dict["state"].items():
+            if pid not in param_map:
+                continue
+            param = param_map[pid]
+            if param.shape != old_state.get("exp_avg", torch.zeros_like(param)).shape:
+                print(f"⚠️ 丢弃优化器状态: {param.shape} vs {old_state.get('exp_avg').shape}")
+                continue
+
+            # shape 匹配 -> 保留该参数的状态
+            new_state["state"][pid] = old_state
+
+        optimizer.load_state_dict(new_state)
+        print("✅ 优化器状态已部分恢复（仅保留 shape 匹配的参数）")
+
+
     def _validate_checkpoint_compatibility(self, checkpoint: Dict):
         """验证检查点与当前配置的兼容性"""
         if "config" not in checkpoint:
@@ -2271,6 +2609,19 @@ class PPOExpertReproduction:
         # 添加熵系数记录
         self.writer.add_scalar("train/entropy_coef", self.current_entropy_coef, self.global_step)
         
+        # === 渐进式训练监控 ===
+        if self.is_progressive_training:
+            # 记录训练阶段
+            self.writer.add_scalar("progressive_training/stage", self.network.training_stage, self.global_step)
+            
+            # 记录冻结权重统计
+            frozen_stats = self.network.get_frozen_weight_stats()
+            if frozen_stats:
+                self.writer.add_scalar("progressive_training/actor_frozen_norm", frozen_stats['actor_frozen_norm'], self.global_step)
+                self.writer.add_scalar("progressive_training/critic_frozen_norm", frozen_stats['critic_frozen_norm'], self.global_step)
+                self.writer.add_scalar("progressive_training/actor_new_norm", frozen_stats['actor_new_norm'], self.global_step)
+                self.writer.add_scalar("progressive_training/critic_new_norm", frozen_stats['critic_new_norm'], self.global_step)
+        
         # 记录课程阶段（便于可视化）
         if self.use_curriculum:
             stage_for_log = self.curriculum_stage if self.curriculum_mode == "gate" else (
@@ -2376,8 +2727,29 @@ class PPOExpertReproduction:
             try:
                 cognitive_params = self.cognitive_parameter_sampler.get_current_parameters()
             except Exception as e:
-                print(f"⚠️ 获取认知参数失败: {e}")
+                print(f"⚠️ 从采样器获取认知参数失败: {e}")
                 # 使用默认值继续
+        # 如果没有采样器，从实际使用的模块获取参数
+        elif self.use_cognitive_modules:
+
+            # 从认知偏差模块获取实际使用的偏差系数
+            if self.cognitive_bias_module:
+                cognitive_params['bias_inverse_tta_coef'] = getattr(self.cognitive_bias_module, 'inverse_tta_coef', self.args.bias_inverse_tta_coef)
+            
+            # 从认知感知模块获取实际使用的感知参数
+            if self.cognitive_perception_module:
+                # 注意：感知模块的sigma0需要转换为米制单位
+                sigma0_meters = getattr(self.cognitive_perception_module, 'sigma0', self.args.perception_sigma0 * 10)
+                cognitive_params['perception_sigma0'] = sigma0_meters / 10.0  # 转换回原始单位
+                cognitive_params['perception_k'] = getattr(self.cognitive_perception_module, 'k', self.args.perception_k)
+            
+            # 从认知延迟模块获取实际使用的延迟参数
+            if self.cognitive_delay_module:
+                cognitive_params['delay_steps'] = getattr(self.cognitive_delay_module, 'delay_steps', self.args.delay_steps)
+            
+            print(f"✅ 已获取真实使用的认知参数: {cognitive_params}")
+
+
         
         log_data = [
             self.global_step, iteration,
@@ -2409,7 +2781,7 @@ class PPOExpertReproduction:
             # 新增：动作正则化惩罚数据
             train_stats.get('action_penalty', 0),
 
-            # === 修复：使用安全的认知参数数据 ===
+            # === 修复：使用真实使用的认知参数数据 ===
             cognitive_params['bias_inverse_tta_coef'],
             cognitive_params['perception_sigma0'],
             cognitive_params['perception_k'],
@@ -2436,6 +2808,21 @@ class PPOExpertReproduction:
             print(f"   成功率: {eval_stats.get('eval_success_rate', 0):.3f}")
             print(f"   当前熵系数: {self.current_entropy_coef:.4f}")
             
+            # === 渐进式训练状态输出 ===
+            if self.is_progressive_training:
+                print(f"🧠 渐进式训练状态:")
+                print(f"   训练阶段: {self.network.training_stage} (1=冻结, 2=解冻)")
+                print(f"   冻结阈值: {self.network.freeze_threshold_steps:,} 步")
+                print(f"   距离解冻: {max(0, self.network.freeze_threshold_steps - self.global_step):,} 步")
+                
+                # 显示冻结权重统计
+                frozen_stats = self.network.get_frozen_weight_stats()
+                if frozen_stats:
+                    print(f"   冻结权重统计:")
+                    print(f"     Actor前275维: 均值={frozen_stats['actor_frozen_mean']:.4f}, 范数={frozen_stats['actor_frozen_norm']:.4f}")
+                    print(f"     Critic前275维: 均值={frozen_stats['critic_frozen_mean']:.4f}, 范数={frozen_stats['critic_frozen_norm']:.4f}")
+                    print(f"     新增4维: Actor={frozen_stats['actor_new_norm']:.4f}, Critic={frozen_stats['critic_new_norm']:.4f}")
+            
             # 新增：动作统计输出
             if len(self.episode_steer_means) > 0:
                 print(f"   转向均值: {np.mean(self.episode_steer_means):.3f} ± {np.std(self.episode_steer_means):.3f}")
@@ -2449,7 +2836,7 @@ class PPOExpertReproduction:
             # === 新增：动作正则化惩罚输出 ===
             if train_stats.get('action_penalty', 0) > 0:
                 print(f"   动作正则化惩罚: {train_stats.get('action_penalty', 0):.6f}")
-            
+
             # 新增：速度控制奖励统计输出
             if self.args.use_speed_control_reward:
                 speed_control_data = self._collect_speed_control_metrics()
@@ -2496,6 +2883,10 @@ class PPOExpertReproduction:
             
             # 更新课程学习环境参数
             self._update_env_curriculum()
+            
+            # === 渐进式训练：更新训练阶段 ===
+            if self.is_progressive_training:
+                self.network.update_training_stage(self.global_step)
             
             # 收集rollouts
             rollout_start = time.time()
@@ -3064,8 +3455,8 @@ env_config.update({{
         Returns:
             扩展后的观测 [n_envs, 279] 或 [batch_size, 279]
         """
-        if not cognitive_params or not self.use_cognitive_modules:
-            # 如果没有认知参数或未启用认知模块，返回原始观测
+        if not self.use_cognitive_modules:
+            # 如果未启用认知模块，返回原始观测
             return obs
         
         # 确保obs是numpy数组
@@ -3304,17 +3695,18 @@ def add_arguments():
     # ===== 认知模块参数 =====
     parser.add_argument("--use_cognitive_modules", action="store_true", default=False,
                         help="启用认知模块（默认关闭）")
-    parser.add_argument("--cognitive_verbose", action="store_true", default=False,
-                        help="认知模块详细日志输出（默认关闭）")
     parser.add_argument("--cognitive_visualization", action="store_true", default=False,
                         help="认知模块可视化输出（默认关闭）")
     
     # === 新增：认知参数采样器参数 ===
     parser.add_argument("--use_cognitive_parameter_sampling", action="store_true", default=False,
                         help="启用认知参数采样器（默认关闭）")
+    parser.add_argument("--cognitive_sampler_type", type=str, default="discrete",
+                        choices=["discrete", "continuous"],
+                        help="认知参数采样器类型: discrete=离散采样, continuous=连续采样（默认: discrete）")
     parser.add_argument("--cognitive_param_update_steps", type=int, default=5,
                         help="认知参数更新频率（环境步数，默认5步）")
-    parser.add_argument("--bias_inverse_tta_coef_range", type=float, nargs=2, default=[0.5, 2.0],
+    parser.add_argument("--bias_inverse_tta_coef_range", type=float, nargs=2, default=[0, 0.5],
                         help="视觉厌恶系数采样范围 [min, max]（默认[0.5, 2.0]）")
     parser.add_argument("--perception_sigma0_range", type=float, nargs=2, default=[0.02, 0.20],
                         help="感知噪声标准差采样范围 [min, max]（默认[0.02, 0.20]米）")
@@ -3322,6 +3714,16 @@ def add_arguments():
                         help="距离相关系数采样范围 [min, max]（默认[0.002, 0.01]）")
     parser.add_argument("--delay_steps_range", type=int, nargs=2, default=[1, 3],
                         help="动作延迟步数采样范围 [min, max]（默认[1, 3]）")
+    
+    # === 新增：离散采样器密度参数 ===
+    parser.add_argument("--perception_k_density", type=int, default=5,
+                        help="感知距离相关系数k的离散采样点数量（默认5）")
+    parser.add_argument("--perception_sigma0_density", type=int, default=5,
+                        help="感知噪声标准差sigma0的离散采样点数量（默认5）")
+    parser.add_argument("--bias_inverse_tta_coef_density", type=int, default=5,
+                        help="认知偏差系数的离散采样点数量（默认5）")
+    parser.add_argument("--delay_steps_density", type=int, default=3,
+                        help="动作延迟步数的离散采样点数量（默认3）")
     
     # 认知偏差模块参数（风险厌恶）
     parser.add_argument("--use_cognitive_bias", action="store_true", default=True,
@@ -3342,8 +3744,8 @@ def add_arguments():
                         help="视觉厌恶强度（默认0.5）")
     
     # 认知延迟模块参数（动作延迟）
-    parser.add_argument("--use_cognitive_delay", action="store_true", default=True,
-                        help="启用认知延迟模块（默认开启）")
+    parser.add_argument("--use_cognitive_delay", action="store_true", default=False,
+                        help="启用认知延迟模块（默认关闭）")
     parser.add_argument("--delay_steps", type=int, default=2,
                         help="延迟步数（默认2）")
     parser.add_argument("--delay_smoothing", action="store_true", default=False,
@@ -3352,8 +3754,8 @@ def add_arguments():
                         help="平滑系数（默认0.3）")
     
     # 认知感知模块参数（观测噪声）
-    parser.add_argument("--use_cognitive_perception", action="store_true", default=True,
-                        help="启用认知感知模块（默认开启）")
+    parser.add_argument("--use_cognitive_perception", action="store_true", default=False,
+                        help="启用认知感知模块（默认关闭）")
     parser.add_argument("--perception_sigma0", type=float, default=0.1,
                         help="基础噪声标准差（米）（默认0.1）")
     parser.add_argument("--perception_k", type=float, default=0.02,
@@ -3447,6 +3849,25 @@ def main():
     print(f"   批次大小: {args.batch_size}")
     print(f"   训练轮次: {args.n_epochs}")
     print(f"   裁剪范围: {args.clip_range}")
+    
+    # === 新增：认知模块配置显示 ===
+    if args.use_cognitive_modules:
+        print(f" 认知模块配置:")
+        print(f"   认知偏差模块: {'启用' if args.use_cognitive_bias else '禁用'}")
+        print(f"   认知延迟模块: {'启用' if args.use_cognitive_delay else '禁用'}")
+        print(f"   认知感知模块: {'启用' if args.use_cognitive_perception else '禁用'}")
+        if args.use_cognitive_parameter_sampling:
+            sampler_type_name = "离散" if args.cognitive_sampler_type == "discrete" else "连续"
+            print(f"   参数采样器: 启用 ({sampler_type_name})")
+            if args.cognitive_sampler_type == "discrete":
+                print(f"     采样密度设置: 偏差系数={args.bias_inverse_tta_coef_density}, "
+                      f"感知sigma0={args.perception_sigma0_density}, "
+                      f"感知k={args.perception_k_density}, "
+                      f"延迟步数={args.delay_steps_density}")
+        else:
+            print(f"   参数采样器: 禁用")
+    else:
+        print(f" 认知模块: 未启用")
     print(f" 训练设置:")
     print(f"   总步数: {args.total_timesteps:,}")
     print(f"   随机种子: {args.seed}")

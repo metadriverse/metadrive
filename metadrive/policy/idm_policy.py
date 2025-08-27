@@ -225,7 +225,6 @@ class IDMPolicy(BasePolicy):
     def __init__(self, control_object, random_seed):
         super(IDMPolicy, self).__init__(control_object=control_object, random_seed=random_seed)
         self.target_speed = self.np_random.uniform(1, self.NORMAL_SPEED)  # self.NORMAL_SPEED 
-        print(self.target_speed)
         self.routing_target_lane = None
         self.available_routing_index_range = None
         self.overtake_timer = self.np_random.randint(0, self.LANE_CHANGE_FREQ)
