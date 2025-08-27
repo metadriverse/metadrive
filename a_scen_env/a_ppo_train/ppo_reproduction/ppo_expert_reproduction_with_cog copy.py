@@ -45,32 +45,19 @@ from cognitive_module.cognitive_parameter_sampler import CognitiveParameterSampl
 
 
 class SpeedControlMetaDriveEnv(MetaDriveEnv):
-    def __init__(self, config, args=None):
-        # 提取速度控制参数 - 优先使用config中的值，如果没有则使用命令行参数的默认值
-        if args is not None:
-            self.k = config.get("speed_control_k", args.speed_control_k)
-            self.kappa = config.get("speed_control_kappa", args.speed_control_kappa)
-            self.mu = config.get("speed_control_mu", args.speed_control_mu)
-            self.nu = config.get("speed_control_nu", args.speed_control_nu)
-            self.v_tol = config.get("speed_control_v_tolerance", args.speed_control_v_tolerance)
-            self.v_ref = config.get("speed_control_v_ref", args.speed_control_v_ref)
-            
-            # 提取子模块启用状态参数
-            self.enable_tracking = config.get("speed_control_enable_tracking", args.speed_control_enable_tracking)
-            self.enable_soft_wall = config.get("speed_control_enable_soft_wall", args.speed_control_enable_soft_wall)
-            self.enable_behavior_guidance = config.get("speed_control_enable_behavior_guidance", args.speed_control_enable_behavior_guidance)
-        else:
-            # 向后兼容：如果没有传入args，使用硬编码的默认值
-            self.k = config.get("speed_control_k", 1.0)
-            self.kappa = config.get("speed_control_kappa", 0.5)
-            self.mu = config.get("speed_control_mu", 0.3)
-            self.nu = config.get("speed_control_nu", 0.2)
-            self.v_tol = config.get("speed_control_v_tolerance", 1.0)
-            self.v_ref = config.get("speed_control_v_ref", 10.0)
-            
-            self.enable_tracking = config.get("speed_control_enable_tracking", True)
-            self.enable_soft_wall = config.get("speed_control_enable_soft_wall", True)
-            self.enable_behavior_guidance = config.get("speed_control_enable_behavior_guidance", True)
+    def __init__(self, config):
+        # 提取速度控制参数
+        self.k = config.get("speed_control_k", 1.0)
+        self.kappa = config.get("speed_control_kappa", 0.5)
+        self.mu = config.get("speed_control_mu", 0.3)
+        self.nu = config.get("speed_control_nu", 0.2)
+        self.v_tol = config.get("speed_control_v_tolerance", 1.0)
+        self.v_ref = config.get("speed_control_v_ref", 15.0)
+        
+        # 提取子模块启用状态参数
+        self.enable_tracking = config.get("speed_control_enable_tracking", True)
+        self.enable_soft_wall = config.get("speed_control_enable_soft_wall", True)
+        self.enable_behavior_guidance = config.get("speed_control_enable_behavior_guidance", True)
         
         # 创建MetaDrive兼容的配置（移除所有自定义参数）
         metadrive_config = config.copy()
@@ -168,8 +155,6 @@ class SpeedControlMetaDriveEnv(MetaDriveEnv):
     def reward_function(self, vehicle_id: str) -> float:
         base_reward = super().reward_function(vehicle_id)
 
-        # 注意：这里仍然使用config.get，因为这是环境内部的配置检查
-        # 如果需要使用命令行参数，需要在创建环境时传入
         if self.config.get("use_speed_control_reward", False):
             vehicle = self.agents[vehicle_id]
             current_action = getattr(vehicle, 'current_action', [0.0, 0.0])
@@ -225,9 +210,9 @@ class PPONetwork(nn.Module):
         with torch.no_grad():
             action_dim = self.actor_out.out_features // 2
             # log_std 初值更稳一些（比如 -0.5）
-            self.actor_out.bias[action_dim:].fill_(-1.0)
+            self.actor_out.bias[action_dim:].fill_(-0.5)
             # throttle/brake 是动作的第2维（索引1）：给 mean 一个+0.3 的轻微偏置，鼓励先动起来
-            self.actor_out.bias[1] = 0.1
+            self.actor_out.bias[1] = 0.3
 
     def forward(self, obs):
         """前向传播"""
@@ -288,7 +273,7 @@ class PPONetwork(nn.Module):
         return action_tanh[:, 0], action_tanh[:, 1]  # steer, throttle
 
 
-def make_env(rank: int, config: Dict[str, Any], args):
+def make_env(rank: int, config: Dict[str, Any]):
     """
     环境工厂函数 - 用于创建向量化环境
     每个子进程将运行独立的MetaDrive环境实例
@@ -297,7 +282,6 @@ def make_env(rank: int, config: Dict[str, Any], args):
     Args:
         rank: 环境索引
         config: 环境配置字典
-        args: 命令行参数对象，包含所有add_arguments的默认值
     
     Returns:
         环境创建函数
@@ -317,9 +301,9 @@ def make_env(rank: int, config: Dict[str, Any], args):
         num_segments = min_segments + (scenario_index * (max_segments - min_segments)) // 1000
         map_string = "S" * num_segments
         
-        # 动态交通密度：每个环境不同（使用命令行参数的默认值）
+        # 动态交通密度：每个环境不同（使用基础配置中的值）
         # 注意：交通密度会在训练过程中通过课程学习动态调整
-        min_density, max_density = config.get("traffic_density_min", args.traffic_density_min), config.get("traffic_density_max", args.traffic_density_max)
+        min_density, max_density = config.get("traffic_density_min", 0.1), config.get("traffic_density_max", 0.15)
         base_traffic_density = config.get("traffic_density", min_density)  # 使用配置中的基础值
         
         # 为了保持环境多样性，每个环境在基础密度上增加小的扰动
@@ -354,18 +338,18 @@ def make_env(rank: int, config: Dict[str, Any], args):
             # 从命令行参数获取速度控制参数
             speed_control_config = env_config.copy()
             speed_control_config.update({
-                "speed_control_k": config.get("speed_control_k", args.speed_control_k),  # 使用命令行参数默认值
-                "speed_control_kappa": config.get("speed_control_kappa", args.speed_control_kappa),  # 使用命令行参数默认值
-                "speed_control_mu": config.get("speed_control_mu", args.speed_control_mu),  # 使用命令行参数默认值
-                "speed_control_nu": config.get("speed_control_nu", args.speed_control_nu),  # 使用命令行参数默认值
-                "speed_control_v_tolerance": config.get("speed_control_v_tolerance", args.speed_control_v_tolerance),  # 使用命令行参数默认值
-                "speed_control_v_ref": config.get("speed_control_v_ref", args.speed_control_v_ref),  # 使用命令行参数默认值
+                "speed_control_k": config.get("speed_control_k", 1.0),
+                "speed_control_kappa": config.get("speed_control_kappa", 0.5),
+                "speed_control_mu": config.get("speed_control_mu", 0.3),
+                "speed_control_nu": config.get("speed_control_nu", 0.2),
+                "speed_control_v_tolerance": config.get("speed_control_v_tolerance", 1.0),
+                "speed_control_v_ref": config.get("speed_control_v_ref", 15.0),
                 # === 新增：子模块启用控制参数 ===
-                "speed_control_enable_tracking": config.get("speed_control_enable_tracking", args.speed_control_enable_tracking),  # 使用命令行参数默认值
-                "speed_control_enable_soft_wall": config.get("speed_control_enable_soft_wall", args.speed_control_enable_soft_wall),  # 使用命令行参数默认值
-                "speed_control_enable_behavior_guidance": config.get("speed_control_enable_behavior_guidance", args.speed_control_enable_behavior_guidance),  # 使用命令行参数默认值
+                "speed_control_enable_tracking": config.get("speed_control_enable_tracking", True),
+                "speed_control_enable_soft_wall": config.get("speed_control_enable_soft_wall", True),
+                "speed_control_enable_behavior_guidance": config.get("speed_control_enable_behavior_guidance", True),
             })
-            env = SpeedControlMetaDriveEnv(speed_control_config, args)
+            env = SpeedControlMetaDriveEnv(speed_control_config)
             
             # 输出子模块启用状态信息
             tracking_status = "✅" if speed_control_config["speed_control_enable_tracking"] else "❌"
@@ -717,7 +701,7 @@ class PPOExpertReproduction:
                 "dynamic_traffic": True,         # 启用动态交通配置
                 "traffic_density_range": [self.args.traffic_density_min, self.args.traffic_density_max], # 交通密度范围
                 "random_traffic": True,          # 交通随机化
-                "horizon": 10000,
+                "horizon": 1000,
                 
                 # 优化的奖励配置
                 "reward_config": {
@@ -728,7 +712,7 @@ class PPOExpertReproduction:
                     "out_of_road_penalty": self.args.out_of_road_penalty,
                     "crash_vehicle_penalty": self.args.crash_penalty,
                     "crash_object_penalty": self.args.crash_penalty,
-                    "crash_sidewalk_penalty": self.args.crash_sidewalk_penalty,
+                    "crash_sidewalk_penalty": 2.0,
                     
                     # === 速度控制奖励配置 (新增) ===
                     "use_speed_control_reward": self.args.use_speed_control_reward,  # 是否启用速度控制奖励
@@ -939,7 +923,7 @@ class PPOExpertReproduction:
             # === 动态交通配置 ===
             "traffic_density": initial_traffic_density,  # 初始交通密度
             "random_traffic": True,              # 启用交通随机化
-            "horizon": 10000,
+            "horizon": 1000,
             "start_seed": self.args.seed,
             
             # === 渲染和观测配置（MetaDrive必需） ===
@@ -1064,7 +1048,7 @@ class PPOExpertReproduction:
             
             # 使用SubprocVecEnv创建多进程并行环境
             envs = SubprocVecEnv([
-                make_env(rank, base_env_config, self.args) 
+                make_env(rank, base_env_config) 
                 for rank in range(self.args.n_envs)
             ])
             
@@ -1074,7 +1058,7 @@ class PPOExpertReproduction:
             print(" 创建单个环境 (DummyVecEnv)")
             
             # 单环境也使用向量化接口保持一致性
-            envs = DummyVecEnv([make_env(0, base_env_config, self.args)])
+            envs = DummyVecEnv([make_env(0, base_env_config)])
             return envs
     
     def _update_entropy_coef(self):
@@ -1112,7 +1096,6 @@ class PPOExpertReproduction:
             "min_ttc", "path_completion",
             "steer_mean", "steer_std", "throttle_mean", "throttle_std",  # 新增动作统计列
             "lane_change_penalty_mean", "lane_change_speed_ratio", "cooldown_violations",  # 新增变道统计列
-            "action_penalty",  # === 新增：动作正则化惩罚列 ===
             # === 新增：认知参数列 ===
             "bias_inverse_tta_coef", "perception_sigma0", "perception_k", "delay_steps"
         ]
@@ -1591,12 +1574,8 @@ class PPOExpertReproduction:
                 # Entropy损失
                 entropy_loss = -entropy.mean()
                 
-                # === 新增：动作正则化惩罚 ===
-                # 惩罚过大的动作值，防止油门/转向饱和
-                action_penalty = self.args.action_penalty_coef * torch.mean(torch.abs(batch_actions))
-                
                 # 总损失
-                total_loss = policy_loss + self.args.vf_coef * value_loss + self.current_entropy_coef * entropy_loss + action_penalty
+                total_loss = policy_loss + self.args.vf_coef * value_loss + self.current_entropy_coef * entropy_loss
                 
                 # 反向传播
                 self.optimizer.zero_grad()
@@ -1631,8 +1610,7 @@ class PPOExpertReproduction:
             "approx_kl": np.mean(approx_kls),
             "clipfrac": np.mean(clipfracs),
             "explained_variance": explained_var.item(),
-            "grad_norm": np.mean(grad_norms),
-            "action_penalty": self.args.action_penalty_coef * torch.mean(torch.abs(actions)).item()  # 记录动作惩罚
+            "grad_norm": np.mean(grad_norms)
         }
     
     def evaluate(self, num_episodes: int = 10) -> Dict[str, float]:
@@ -2333,10 +2311,6 @@ class PPOExpertReproduction:
             self.writer.add_scalar("actions/throttle_min", np.min(self.episode_throttle_means), self.global_step)
             self.writer.add_scalar("actions/throttle_max", np.max(self.episode_throttle_means), self.global_step)
 
-        # === 新增：动作正则化惩罚记录 ===
-        if train_stats.get("action_penalty", 0) > 0:
-            self.writer.add_scalar("train/action_penalty", train_stats["action_penalty"], self.global_step)
-
         # 评估指标
         if eval_stats:
             for key, value in eval_stats.items():
@@ -2406,8 +2380,6 @@ class PPOExpertReproduction:
             np.std(self.episode_steer_means) if len(self.episode_steer_means) > 0 else 0,
             np.mean(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
             np.std(self.episode_throttle_means) if len(self.episode_throttle_means) > 0 else 0,
-            # 新增：动作正则化惩罚数据
-            train_stats.get('action_penalty', 0),
 
             # === 修复：使用安全的认知参数数据 ===
             cognitive_params['bias_inverse_tta_coef'],
@@ -2445,10 +2417,6 @@ class PPOExpertReproduction:
             if train_stats.get('clipfrac', 0) > 0:
                 print(f"   Clip Fraction: {train_stats.get('clipfrac', 0):.3f}")
                 print(f"   Explained Var: {train_stats.get('explained_variance', 0):.3f}")
-            
-            # === 新增：动作正则化惩罚输出 ===
-            if train_stats.get('action_penalty', 0) > 0:
-                print(f"   动作正则化惩罚: {train_stats.get('action_penalty', 0):.6f}")
             
             # 新增：速度控制奖励统计输出
             if self.args.use_speed_control_reward:
@@ -3248,7 +3216,7 @@ def add_arguments():
     parser.add_argument("--target_kl", type=float, default=None,
                        help="目标KL散度 (早停, 默认: None)")
     
-    # ===== 熵系数衰减参数 ( 修复5: 调整熵系数) =====
+    # ===== 熵系数衰减参数 ( 修复5: 调整熵系数) =====
     parser.add_argument("--entropy_coef_start", type=float, default=0.01,
                        help="初始熵系数 (默认: 0.01, 降低自0.015)")
     parser.add_argument("--entropy_coef_end", type=float, default=0.001,
@@ -3259,8 +3227,8 @@ def add_arguments():
     # ===== 奖励配置参数 ( 修复4: 回调到合理量级) =====
     parser.add_argument("--success_reward", type=float, default=20.0,
                        help="成功奖励 (默认: 10.0, 回调自20.0)")
-    parser.add_argument("--driving_reward", type=float, default=1,
-                       help="前进奖励 (默认: 1.0)")
+    parser.add_argument("--driving_reward", type=float, default=2.0,
+                       help="前进奖励 (默认: 1.0, 回调自2.0)")
     parser.add_argument("--speed_reward", type=float, default=0,
                        help="速度奖励 (默认: 0, 回调自0.3)")
     parser.add_argument("--use_lateral_reward", action="store_true", default=True,
@@ -3269,8 +3237,6 @@ def add_arguments():
                        help="冲出道路惩罚 (默认: 5.0, 回调自8.0)")
     parser.add_argument("--crash_penalty", type=float, default=8.0,
                        help="碰撞惩罚 (默认: 5.0, 回调自8.0)")
-    parser.add_argument("--crash_sidewalk_penalty", type=float, default=2.0,
-                       help="碰撞人行道惩罚 (默认: 8.0, 回调自8.0)")
     
     # ===== 交通密度配置参数 (新增) =====
     parser.add_argument("--traffic_density_min", type=float, default=0.1,
@@ -3392,12 +3358,12 @@ def add_arguments():
                        help="启用速度控制奖励（默认关闭）")
     
     # === 子模块启用控制参数 ===
-    parser.add_argument("--speed_control_enable_tracking", action="store_true", default=False,
-                       help="启用速度跟踪子模块（默认关闭）")
-    parser.add_argument("--speed_control_enable_soft_wall", action="store_true", default=False,
-                       help="启用速度软墙子模块（默认关闭）")
+    parser.add_argument("--speed_control_enable_tracking", action="store_true", default=True,
+                       help="启用速度跟踪子模块（默认开启）")
+    parser.add_argument("--speed_control_enable_soft_wall", action="store_true", default=True,
+                       help="启用速度软墙子模块（默认开启）")
     parser.add_argument("--speed_control_enable_behavior_guidance", action="store_true", default=True,
-                       help="启用行为导向子模块（默认关闭）")
+                       help="启用行为导向子模块（默认开启）")
     
     # === 子模块参数 ===
     parser.add_argument("--speed_control_k", type=float, default=1.0,
@@ -3412,10 +3378,6 @@ def add_arguments():
                        help="速度跟踪容差 (默认: 1.0 m/s)")
     parser.add_argument("--speed_control_v_ref", type=float, default=10.0,
                        help="目标参考速度 (默认: 25.0 m/s)")
-    
-    # ===== 动作正则化参数 (新增) =====
-    parser.add_argument("--action_penalty_coef", type=float, default=0.001,
-                       help="动作正则化惩罚系数 (默认: 0.001)")
     
     return parser
 
@@ -3460,4 +3422,3 @@ def main():
 
 if __name__ == "__main__":
     main() 
-

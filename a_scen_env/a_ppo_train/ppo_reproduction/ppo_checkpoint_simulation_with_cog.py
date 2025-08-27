@@ -44,29 +44,47 @@ cognitive_module_path = current_dir.parent.parent / "cognitive_module"
 sys.path.insert(0, str(cognitive_module_path))
 
 # 导入认知模块
-# 导入认知模块
 from cognitive_module.cognitive_bias_module import CognitiveBiasModule
 from cognitive_module.cognitive_delay_module import CognitiveDelayModule
 from cognitive_module.cognitive_perception_module import CognitivePerceptionModule
 
-
+# 导入环境类
 from metadrive.envs.metadrive_env import MetaDriveEnv
 from metadrive.obs.state_obs import LidarStateObservation
 
+# 导入速度控制环境（如果存在）
+try:
+    from ppo_expert_reproduction_with_cog import SpeedControlMetaDriveEnv
+    SPEED_CONTROL_AVAILABLE = True
+    print("✅ SpeedControlMetaDriveEnv导入成功")
+except ImportError:
+    SPEED_CONTROL_AVAILABLE = False
+    print("⚠️ SpeedControlMetaDriveEnv导入失败，将使用标准MetaDriveEnv")
+
 
 class PPONetwork(nn.Module):
-    """PPO网络结构 - 与训练脚本完全一致"""
+    """PPO网络结构 - 支持动态观测维度"""
     
-    def __init__(self, obs_dim: int = 275, action_dim: int = 2, hidden_dim: int = 256):
+    def __init__(self, obs_dim: int = 275, action_dim: int = 2, hidden_dim: int = 256, use_cognitive_modules: bool = False):
         super(PPONetwork, self).__init__()
         
+        # 根据认知模块启用状态确定观测维度
+        if use_cognitive_modules:
+            # 认知模块启用时，使用扩展观测维度
+            self.obs_dim = obs_dim
+            print(f"🧠 认知模块启用，使用观测维度: {self.obs_dim}")
+        else:
+            # 认知模块不启用时，使用标准275维度
+            self.obs_dim = 275
+            print(f"🔧 认知模块禁用，使用标准观测维度: {self.obs_dim}")
+        
         # Actor网络
-        self.actor_fc1 = nn.Linear(obs_dim, hidden_dim)
+        self.actor_fc1 = nn.Linear(self.obs_dim, hidden_dim)
         self.actor_fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.actor_out = nn.Linear(hidden_dim, action_dim * 2)  # mean + log_std
         
         # Critic网络
-        self.critic_fc1 = nn.Linear(obs_dim, hidden_dim)
+        self.critic_fc1 = nn.Linear(self.obs_dim, hidden_dim)
         self.critic_fc2 = nn.Linear(hidden_dim, hidden_dim)
         self.critic_out = nn.Linear(hidden_dim, 1)
         
@@ -85,6 +103,10 @@ class PPONetwork(nn.Module):
     
     def forward(self, obs):
         """前向传播"""
+        # 检查观测维度匹配
+        if obs.shape[-1] != self.obs_dim:
+            raise ValueError(f"观测维度不匹配: 期望{self.obs_dim}, 实际{obs.shape[-1]}")
+        
         # Actor前向
         x_actor = self.tanh(self.actor_fc1(obs))
         x_actor = self.tanh(self.actor_fc2(x_actor))
@@ -240,6 +262,23 @@ class PPOCheckpointSimulator:
             print(f"🎨 认知可视化: 已启用")
         else:
             self.cognitive_viz_data = None
+        
+        # === 速度控制奖励数据收集 ===
+        self.enable_speed_control_visualization = args and getattr(args, 'use_speed_control_reward', False)
+        if self.enable_speed_control_visualization:
+            self.speed_control_viz_data = {
+                'step_count': [],
+                'speed_control_total': [],
+                'speed_control_tracking': [],
+                'speed_control_soft_wall': [],
+                'speed_control_behavior_guidance': [],
+                'vehicle_speeds': [],
+                'speed_references': [],
+                'speed_deviations': []
+            }
+            print(f"🚀 速度控制可视化: 已启用")
+        else:
+            self.speed_control_viz_data = None
     
     def _setup_lane_change_cooldown(self, env):
         """🔧 新增：动态设置变道冷却时间步数"""
@@ -284,12 +323,74 @@ class PPOCheckpointSimulator:
         # 加载检查点数据
         self.checkpoint = torch.load(self.checkpoint_path, map_location=self.device, weights_only=False)
         
-        # 创建并加载网络
-        self.network = PPONetwork().to(self.device)
-        self.network.load_state_dict(self.checkpoint['network_state_dict'])
-        self.network.eval()
+        # 检测检查点中的观测维度
+        checkpoint_obs_dim = None
+        if 'network_state_dict' in self.checkpoint:
+            # 从第一个线性层的权重推断观测维度
+            first_layer_key = None
+            for key in self.checkpoint['network_state_dict'].keys():
+                if 'actor_fc1.weight' in key:
+                    first_layer_key = key
+                    break
+            
+            if first_layer_key:
+                checkpoint_obs_dim = self.checkpoint['network_state_dict'][first_layer_key].shape[1]
+                print(f"🔍 检查点检测到观测维度: {checkpoint_obs_dim}")
         
-        print(f"📥 检查点加载成功: {os.path.basename(self.checkpoint_path)}")
+        # 根据认知模块启用状态确定使用的观测维度
+        if self.use_cognitive_modules:
+            # 认知模块启用时，使用检查点的原始维度
+            obs_dim = checkpoint_obs_dim if checkpoint_obs_dim else 275
+            print(f"🧠 认知模块启用，使用观测维度: {obs_dim}")
+        else:
+            # 认知模块不启用时，强制使用275维度
+            obs_dim = 275
+            print(f"🔧 认知模块禁用，强制使用标准观测维度: {obs_dim}")
+        
+        # 创建并加载网络
+        self.network = PPONetwork(obs_dim=obs_dim, use_cognitive_modules=self.use_cognitive_modules).to(self.device)
+        
+        # 如果观测维度不匹配，需要调整网络权重
+        if checkpoint_obs_dim and checkpoint_obs_dim != obs_dim:
+            print(f"⚠️ 观测维度不匹配，检查点: {checkpoint_obs_dim}, 目标: {obs_dim}")
+            if obs_dim == 275 and checkpoint_obs_dim > 275:
+                # 从扩展维度截取到275维度
+                print("🔧 从扩展维度截取到275维度")
+                self._adjust_network_weights(checkpoint_obs_dim, obs_dim)
+            else:
+                print("⚠️ 无法自动调整权重，将尝试直接加载")
+        
+        # 尝试加载权重
+        try:
+            self.network.load_state_dict(self.checkpoint['network_state_dict'])
+            print("✅ 权重加载成功")
+        except Exception as e:
+            print(f"⚠️ 权重加载失败: {e}")
+            print("🔧 将使用随机初始化的权重")
+        
+        self.network.eval()
+        print(f"📥 检查点加载完成: {os.path.basename(self.checkpoint_path)}")
+    
+    def _adjust_network_weights(self, from_dim: int, to_dim: int):
+        """调整网络权重以适应不同的观测维度"""
+        if from_dim <= to_dim:
+            return
+        
+        print(f"🔧 调整网络权重: {from_dim} → {to_dim}")
+        
+        # 获取检查点权重
+        checkpoint_weights = self.checkpoint['network_state_dict']
+        
+        # 调整第一层权重（截取前to_dim个输入）
+        for layer_name in ['actor_fc1.weight', 'critic_fc1.weight']:
+            if layer_name in checkpoint_weights:
+                old_weight = checkpoint_weights[layer_name]
+                new_weight = old_weight[:, :to_dim]  # 截取前to_dim个输入维度
+                checkpoint_weights[layer_name] = new_weight
+                print(f"   {layer_name}: {old_weight.shape} → {new_weight.shape}")
+        
+        # 更新检查点
+        self.checkpoint['network_state_dict'] = checkpoint_weights
     
     def _get_default_config(self):
         """获取默认环境配置 - 与训练时保持一致"""
@@ -308,16 +409,18 @@ class PPOCheckpointSimulator:
 
             
             # 奖励配置 - 与训练时完全一致
-            "success_reward": 10.0,
+            "success_reward": 20.0,
             "driving_reward": 1.0,
-            "speed_reward": 0.1,
+            "speed_reward": 0,
             "use_lateral_reward": True,
             
+            # 速度控制奖励配置（不在环境配置中，由SpeedControlMetaDriveEnv内部处理）
+            
             # 惩罚配置 - 与训练时一致
-            "out_of_road_penalty": 5.0,
-            "crash_vehicle_penalty": 5.0,
-            "crash_object_penalty": 5.0,
-            "crash_sidewalk_penalty": 2.0,
+            "out_of_road_penalty": 8.0,
+            "crash_vehicle_penalty": 8.0,
+            "crash_object_penalty": 8.0,
+            "crash_sidewalk_penalty": 8.0,
             
             # 终止条件 - 与训练时一致
             "out_of_road_done": True,
@@ -326,7 +429,7 @@ class PPOCheckpointSimulator:
             "on_continuous_line_done": False,
             "on_broken_line_done": False,
             
-            # 车辆配置 - 与训练时完全一致
+            # 车辆配置 - 与训练时完全一致 (主车配置)
             "vehicle_config": {
                 "lidar": {
                     "num_lasers": 240,
@@ -347,6 +450,16 @@ class PPOCheckpointSimulator:
                     "gaussian_noise": 0.0,
                     "dropout_prob": 0.0
                 }
+            },
+            
+            # 🚗 背景车专用配置
+            "traffic_vehicle_config": {
+                "show_navi_mark": False,
+                "show_dest_mark": False,
+                "enable_reverse": False,
+                "show_lidar": False,
+                "show_lane_line_detector": False,
+                "show_side_detector": False,
             },
             
             # 渲染配置
@@ -376,8 +489,82 @@ class PPOCheckpointSimulator:
             "dropout_prob": 0.0
         }
         
-        # 创建环境
-        env = MetaDriveEnv(env_config)
+        # 根据配置选择环境类型
+        use_speed_control = env_config.get("use_speed_control_reward", False)
+        
+        # 🔧 修复：检查命令行参数中的use_speed_control_reward
+        if hasattr(self, 'args') and self.args and getattr(self.args, 'use_speed_control_reward', False):
+            use_speed_control = True
+            print(f"🔧 从命令行参数启用速度控制奖励")
+        
+        if use_speed_control and SPEED_CONTROL_AVAILABLE:
+            # 使用速度控制环境
+            print("🚀 创建SpeedControlMetaDriveEnv环境")
+            
+            # 创建包含速度控制参数的配置（SpeedControlMetaDriveEnv会自动清理）
+            speed_control_config = env_config.copy()
+            
+            # 🔧 修复：确保use_speed_control_reward被设置
+            speed_control_config["use_speed_control_reward"] = True
+            
+            # 添加速度控制参数到配置中
+            if hasattr(self, 'args') and self.args:
+                speed_control_config.update({
+                    "speed_control_k": getattr(self.args, 'speed_control_k', 1.0),
+                    "speed_control_kappa": getattr(self.args, 'speed_control_kappa', 0.5),
+                    "speed_control_mu": getattr(self.args, 'speed_control_mu', 0.3),
+                    "speed_control_nu": getattr(self.args, 'speed_control_nu', 0.2),
+                    "speed_control_v_tolerance": getattr(self.args, 'speed_control_v_tolerance', 1.0),
+                    "speed_control_v_ref": getattr(self.args, 'speed_control_v_ref', 15.0)
+                })
+            
+            # 🔧 修复：关闭原始速度奖励，避免重复
+            speed_control_config["speed_reward"] = 0.0
+            
+            print(f"   🔧 配置更新:")
+            print(f"      use_speed_control_reward: {speed_control_config['use_speed_control_reward']}")
+            print(f"      speed_reward: {speed_control_config['speed_reward']}")
+            print(f"      speed_control_k: {speed_control_config.get('speed_control_k', 'N/A')}")
+            print(f"      speed_control_v_ref: {speed_control_config.get('speed_control_v_ref', 'N/A')}")
+            
+            # 创建SpeedControlMetaDriveEnv实例（它会自动清理速度控制参数）
+            env = SpeedControlMetaDriveEnv(speed_control_config)
+            
+            # 🔧 修复：设置速度控制子模块启用状态（在环境创建后设置）
+            if hasattr(self, 'args') and self.args:
+                tracking_enabled = getattr(self.args, 'speed_control_enable_tracking', False)
+                soft_wall_enabled = getattr(self.args, 'speed_control_enable_soft_wall', False)
+                behavior_enabled = getattr(self.args, 'speed_control_enable_behavior_guidance', False)
+                
+                # 🔧 修复：直接设置环境属性
+                env.enable_tracking = tracking_enabled
+                env.enable_soft_wall = soft_wall_enabled
+                env.enable_behavior_guidance = behavior_enabled
+                
+                print(f"   🔧 子模块开关设置:")
+                print(f"      enable_tracking: {tracking_enabled}")
+                print(f"      enable_soft_wall: {soft_wall_enabled}")
+                print(f"      enable_behavior_guidance: {behavior_enabled}")
+                
+                # 🔧 修复：验证设置是否成功
+                print(f"   🔍 验证子模块开关设置:")
+                print(f"      env.enable_tracking: {getattr(env, 'enable_tracking', 'N/A')}")
+                print(f"      env.enable_soft_wall: {getattr(env, 'enable_soft_wall', 'N/A')}")
+                print(f"      env.enable_behavior_guidance: {getattr(env, 'enable_behavior_guidance', 'N/A')}")
+            else:
+                print("   ✅ 使用默认子模块配置")
+                print(f"      enable_tracking: {getattr(env, 'enable_tracking', True)}")
+                print(f"      enable_soft_wall: {getattr(env, 'enable_soft_wall', True)}")
+                print(f"      enable_behavior_guidance: {getattr(env, 'enable_behavior_guidance', True)}")
+        
+        else:
+            # 使用标准MetaDrive环境
+            if use_speed_control and not SPEED_CONTROL_AVAILABLE:
+                print("⚠️ 速度控制环境不可用，使用标准MetaDriveEnv")
+            else:
+                print("🔧 使用标准MetaDriveEnv环境")
+            
+            env = MetaDriveEnv(env_config)
         
         # 🔧 新增：动态设置变道冷却时间
         if not hasattr(self, '_lane_change_cooldown_steps') or self._lane_change_cooldown_steps is None:
@@ -649,6 +836,122 @@ class PPOCheckpointSimulator:
                         self.cognitive_viz_data['original_rewards'].append(float(original_reward))
                         self.cognitive_viz_data['modified_rewards'].append(float(reward))
                 
+                # 🚀 新增：收集速度控制奖励数据
+                if self.enable_speed_control_visualization and self.speed_control_viz_data is not None:
+                    # 记录步数
+                    self.speed_control_viz_data['step_count'].append(step_count)
+                    
+                    try:
+                        # 🔧 修复：检查环境类型和step_infos属性
+                        if hasattr(env, 'step_infos') and isinstance(env.step_infos, dict):
+                            # 🔧 修复：获取正确的agent ID
+                            agent_id = None
+                            if hasattr(env, 'agent') and hasattr(env.agent, 'id'):
+                                agent_id = env.agent.id
+                            elif hasattr(env, 'agents'):
+                                # 如果没有agent属性，尝试从agents中获取第一个
+                                agent_ids = list(env.agents.keys())
+                                if agent_ids:
+                                    agent_id = agent_ids[0]
+                            
+                            # 🔧 修复：如果找不到agent_id，尝试从step_infos中获取
+                            if agent_id is None and env.step_infos:
+                                # 使用step_infos中的第一个agent ID
+                                agent_id = list(env.step_infos.keys())[0]
+                                print(f"    🔍 从step_infos中获取agent_id: {agent_id}")
+                            
+                            if agent_id and agent_id in env.step_infos:
+                                step_info = env.step_infos[agent_id]
+                                
+                                # 调试：打印step_info的内容（前几步）
+                                if step < 5:
+                                    print(f"    🔍 速度控制调试 - agent_id: {agent_id}")
+                                    print(f"    🔍 速度控制调试 - step_info键: {list(step_info.keys())}")
+                                    if 'sc_r_total' in step_info:
+                                        print(f"    ✅ 找到速度控制奖励: {step_info['sc_r_total']:.4f}")
+                                    else:
+                                        print(f"    ❌ 未找到速度控制奖励键")
+                                
+                                # 收集速度控制奖励数据
+                                if 'sc_r_total' in step_info:
+                                    self.speed_control_viz_data['speed_control_total'].append(float(step_info['sc_r_total']))
+                                    self.speed_control_viz_data['speed_control_tracking'].append(float(step_info.get('sc_r_track', 0.0)))
+                                    self.speed_control_viz_data['speed_control_soft_wall'].append(float(step_info.get('sc_r_wall', 0.0)))
+                                    self.speed_control_viz_data['speed_control_behavior_guidance'].append(float(step_info.get('sc_r_act_over', 0.0)))
+                                    
+                                    # 记录速度相关信息
+                                    if 'sc_v' in step_info:
+                                        self.speed_control_viz_data['vehicle_speeds'].append(float(step_info['sc_v']))
+                                    if 'sc_v_ref' in step_info:
+                                        self.speed_control_viz_data['speed_references'].append(float(step_info['sc_v_ref']))
+                                    if 'sc_dv' in step_info:
+                                        self.speed_control_viz_data['speed_deviations'].append(float(step_info['sc_dv']))
+                                    
+                                    # 🔧 修复：打印成功收集的数据
+                                    if step < 5:
+                                        print(f"    ✅ 成功收集速度控制数据: sc_r_total={step_info['sc_r_total']:.4f}")
+                                else:
+                                    # 🔧 修复：如果没有速度控制奖励，尝试从环境直接计算
+                                    if hasattr(env, '_compute_speed_control_reward') and hasattr(env, 'agent'):
+                                        try:
+                                            # 直接调用速度控制奖励计算
+                                            sc_reward = env._compute_speed_control_reward(env.agent, action)
+                                            # 从step_infos中获取最新数据
+                                            if agent_id in env.step_infos:
+                                                step_info = env.step_infos[agent_id]
+                                                if 'sc_r_total' in step_info:
+                                                    self.speed_control_viz_data['speed_control_total'].append(float(step_info['sc_r_total']))
+                                                    self.speed_control_viz_data['speed_control_tracking'].append(float(step_info.get('sc_r_track', 0.0)))
+                                                    self.speed_control_viz_data['speed_control_soft_wall'].append(float(step_info.get('sc_r_wall', 0.0)))
+                                                    self.speed_control_viz_data['speed_control_behavior_guidance'].append(float(step_info.get('sc_r_act_over', 0.0)))
+                                                    
+                                                    if 'sc_v' in step_info:
+                                                        self.speed_control_viz_data['vehicle_speeds'].append(float(step_info['sc_v']))
+                                                    if 'sc_v_ref' in step_info:
+                                                        self.speed_control_viz_data['speed_references'].append(float(step_info['sc_v_ref']))
+                                                    if 'sc_dv' in step_info:
+                                                        self.speed_control_viz_data['speed_deviations'].append(float(step_info['sc_dv']))
+                                                else:
+                                                    # 填充默认值
+                                                    self._fill_default_speed_control_data()
+                                            else:
+                                                self._fill_default_speed_control_data()
+                                        except Exception as e:
+                                            print(f"    ⚠️ 直接计算速度控制奖励失败: {e}")
+                                            self._fill_default_speed_control_data()
+                                    else:
+                                        # 填充默认值
+                                        self._fill_default_speed_control_data()
+                            else:
+                                # 调试：打印环境信息
+                                if step < 5:
+                                    print(f"    🔍 速度控制调试 - 环境信息:")
+                                    print(f"       hasattr(env, 'step_infos'): {hasattr(env, 'step_infos')}")
+                                    print(f"       env.step_infos类型: {type(env.step_infos)}")
+                                    print(f"       env.step_infos内容: {env.step_infos}")
+                                    if hasattr(env, 'agent') and hasattr(env.agent, 'id'):
+                                        print(f"       agent.id: {env.agent.id}")
+                                    elif hasattr(env, 'agents'):
+                                        print(f"       agents键: {list(env.agents.keys())}")
+                                
+                                # 如果没有step_info，填充默认值
+                                self._fill_default_speed_control_data()
+                        else:
+                            # 调试：打印环境类型信息
+                            if step < 5:
+                                print(f"    🔍 速度控制调试 - 环境类型检查:")
+                                print(f"       环境类型: {type(env)}")
+                                print(f"       环境类名: {env.__class__.__name__}")
+                                print(f"       是否SpeedControlMetaDriveEnv: {hasattr(env, 'step_infos')}")
+                                print(f"       step_infos类型: {type(getattr(env, 'step_infos', None))}")
+                            
+                            # 如果环境不支持速度控制，填充默认值
+                            self._fill_default_speed_control_data()
+                    except Exception as e:
+                        print(f"⚠️ 速度控制奖励数据收集失败: {e}")
+                        # 异常时填充默认值
+                        self._fill_default_speed_control_data()
+                
                 # 更新统计
                 episode_stats["total_reward"] += reward
                 episode_stats["episode_length"] += 1
@@ -845,6 +1148,17 @@ class PPOCheckpointSimulator:
                 except Exception as e:
                     print(f"⚠️ 认知可视化生成失败: {e}")
             
+            # === 生成速度控制可视化 ===
+            if self.enable_speed_control_visualization and self.speed_control_viz_data:
+                try:
+                    viz_path = self.generate_speed_control_visualization(episode_stats)
+                    episode_stats["speed_control_visualization_path"] = viz_path
+                    
+                    # 清空数据为下一个episode准备
+                    self.clear_speed_control_visualization_data()
+                except Exception as e:
+                    print(f"⚠️ 速度控制可视化生成失败: {e}")
+            
             # === 认知模块：分离环境 ===
             if self.use_cognitive_modules and self.cognitive_perception_module:
                 try:
@@ -941,6 +1255,10 @@ class PPOCheckpointSimulator:
             # 🎨 新增：认知可视化输出
             if 'cognitive_visualization_path' in stats and stats['cognitive_visualization_path']:
                 print(f"   🎨 认知可视化: {stats['cognitive_visualization_path']}")
+            
+            # 🚀 新增：速度控制可视化输出
+            if 'speed_control_visualization_path' in stats and stats['speed_control_visualization_path']:
+                print(f"   🚀 速度控制可视化: {stats['speed_control_visualization_path']}")
         
         # 打印总体统计
         self._print_summary_stats(all_stats)
@@ -1126,7 +1444,7 @@ class PPOCheckpointSimulator:
         plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial']
         plt.rcParams['axes.unicode_minus'] = False
         
-        # 创建综合可视化图表
+        # 创建综合可视化图表 - 改为3x2布局（移除速度控制奖励可视化）
         fig, axes = plt.subplots(3, 2, figsize=(16, 12))
         fig.suptitle(f'Cognitive Modules Visualization Analysis - {timestamp}', fontsize=16, fontweight='bold')
         
@@ -1320,6 +1638,8 @@ class PPOCheckpointSimulator:
             ax6.text(0.5, 0.5, 'Insufficient Observation Data', ha='center', va='center', transform=ax6.transAxes)
             ax6.set_title('Front Radar Distance: Before vs After Noise', fontweight='bold')
         
+
+        
         plt.tight_layout()
         
         # 保存图表
@@ -1394,6 +1714,8 @@ class PPOCheckpointSimulator:
                 f.write(f"- **最大负面影响**: {np.min(reward_diff):.4f}\n")
                 f.write(f"- **最大正面影响**: {np.max(reward_diff):.4f}\n")
                 f.write(f"- **奖励标准差变化**: {np.std(mod_rewards) - np.std(orig_rewards):.4f}\n\n")
+            
+
         
         print(f"✅ 认知报告已保存: {report_path}")
     
@@ -1403,6 +1725,277 @@ class PPOCheckpointSimulator:
             for key in self.cognitive_viz_data:
                 self.cognitive_viz_data[key].clear()
             print("🗑️ 认知可视化数据已清空")
+    
+    def generate_speed_control_visualization(self, episode_data: Dict, save_dir: str = None) -> str:
+        """
+        生成速度控制奖励可视化图表
+        
+        Args:
+            episode_data: episode统计数据
+            save_dir: 保存目录
+            
+        Returns:
+            保存的图表文件路径
+        """
+        if not self.enable_speed_control_visualization or self.speed_control_viz_data is None:
+            print("⚠️ 速度控制可视化未启用")
+            return None
+        
+        if not self.speed_control_viz_data['step_count']:
+            print("⚠️ 没有速度控制可视化数据")
+            return None
+        
+        # 创建保存目录
+        if save_dir is None:
+            save_dir = "fig_cog/speed_control_visualization"
+        else:
+            save_dir = os.path.join("fig_cog", "speed_control_visualization")
+        
+        os.makedirs(save_dir, exist_ok=True)
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # 设置字体为英文，避免中文字体问题
+        plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial']
+        plt.rcParams['axes.unicode_minus'] = False
+        
+        # 创建速度控制可视化图表 - 2x2布局
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        fig.suptitle(f'Speed Control Reward Visualization Analysis - {timestamp}', fontsize=16, fontweight='bold')
+        
+        steps = self.speed_control_viz_data['step_count']
+        
+        # 数据收集情况检查
+        print(f"🔍 速度控制可视化数据: {len(steps)}步")
+        
+        # 1. 速度控制奖励子模块对比
+        ax1 = axes[0, 0]
+        if (self.speed_control_viz_data['speed_control_tracking'] and 
+            self.speed_control_viz_data['speed_control_soft_wall'] and 
+            self.speed_control_viz_data['speed_control_behavior_guidance']):
+            
+            tracking_rewards = self.speed_control_viz_data['speed_control_tracking']
+            soft_wall_rewards = self.speed_control_viz_data['speed_control_soft_wall']
+            behavior_rewards = self.speed_control_viz_data['speed_control_behavior_guidance']
+            
+            # 确保数据长度和步数长度匹配
+            min_len = min(len(steps), len(tracking_rewards), len(soft_wall_rewards), len(behavior_rewards))
+            if min_len > 0:
+                steps_subset = steps[:min_len]
+                tracking_subset = tracking_rewards[:min_len]
+                soft_wall_subset = soft_wall_rewards[:min_len]
+                behavior_subset = behavior_rewards[:min_len]
+                
+                ax1.plot(steps_subset, tracking_subset, 'g-', linewidth=2, label='Speed Tracking', marker='o', markersize=3)
+                ax1.plot(steps_subset, soft_wall_subset, 'r-', linewidth=2, label='Soft Wall', marker='s', markersize=3)
+                ax1.plot(steps_subset, behavior_subset, 'b-', linewidth=2, label='Behavior Guidance', marker='^', markersize=3)
+                
+                ax1.set_title('Speed Control Reward Sub-modules', fontweight='bold')
+                ax1.set_xlabel('Steps')
+                ax1.set_ylabel('Reward Value')
+                ax1.legend()
+                ax1.grid(True, alpha=0.3)
+            else:
+                ax1.text(0.5, 0.5, 'Insufficient Speed Control Data', ha='center', va='center', transform=ax1.transAxes)
+                ax1.set_title('Speed Control Reward Sub-modules', fontweight='bold')
+        else:
+            ax1.text(0.5, 0.5, 'Speed Control Module Disabled', ha='center', va='center', transform=ax1.transAxes)
+            ax1.set_title('Speed Control Reward Sub-modules', fontweight='bold')
+        
+        # 2. 速度控制总奖励和车辆速度
+        ax2 = axes[0, 1]
+        if (self.speed_control_viz_data['speed_control_total'] and 
+            self.speed_control_viz_data['vehicle_speeds'] and 
+            self.speed_control_viz_data['speed_references']):
+            
+            total_rewards = self.speed_control_viz_data['speed_control_total']
+            vehicle_speeds = self.speed_control_viz_data['vehicle_speeds']
+            speed_refs = self.speed_control_viz_data['speed_references']
+            
+            # 确保数据长度和步数长度匹配
+            min_len = min(len(steps), len(total_rewards), len(vehicle_speeds), len(speed_refs))
+            if min_len > 0:
+                steps_subset = steps[:min_len]
+                total_subset = total_rewards[:min_len]
+                speeds_subset = vehicle_speeds[:min_len]
+                refs_subset = speed_refs[:min_len]
+                
+                # 创建双y轴
+                ax2_twin = ax2.twinx()
+                
+                # 左y轴：速度控制总奖励
+                line1 = ax2.plot(steps_subset, total_subset, 'purple', linewidth=2, label='Total SC Reward', marker='o', markersize=3)
+                ax2.set_ylabel('Total Speed Control Reward', color='purple')
+                ax2.tick_params(axis='y', labelcolor='purple')
+                
+                # 右y轴：车辆速度和参考速度
+                line2 = ax2_twin.plot(steps_subset, speeds_subset, 'orange', linewidth=2, label='Vehicle Speed', marker='s', markersize=3)
+                line3 = ax2_twin.plot(steps_subset, refs_subset, 'cyan', linewidth=2, label='Reference Speed', marker='^', markersize=3, linestyle='--')
+                ax2_twin.set_ylabel('Speed (m/s)', color='orange')
+                ax2_twin.tick_params(axis='y', labelcolor='orange')
+                
+                # 合并图例
+                lines = line1 + line2 + line3
+                labels = [l.get_label() for l in lines]
+                ax2.legend(lines, labels, loc='upper left')
+                
+                ax2.set_title('Speed Control Total Reward & Vehicle Speed', fontweight='bold')
+                ax2.set_xlabel('Steps')
+                ax2.grid(True, alpha=0.3)
+            else:
+                ax2.text(0.5, 0.5, 'Insufficient Speed Control Data', ha='center', va='center', transform=ax2.transAxes)
+                ax2.set_title('Speed Control Total Reward & Vehicle Speed', fontweight='bold')
+        else:
+            ax2.text(0.5, 0.5, 'Speed Control Module Disabled', ha='center', va='center', transform=ax2.transAxes)
+            ax2.set_title('Speed Control Total Reward & Vehicle Speed', fontweight='bold')
+        
+        # 3. 速度偏差分析
+        ax3 = axes[1, 0]
+        if self.speed_control_viz_data['speed_deviations']:
+            deviations = self.speed_control_viz_data['speed_deviations']
+            
+            # 确保数据长度和步数长度匹配
+            min_len = min(len(steps), len(deviations))
+            if min_len > 0:
+                steps_subset = steps[:min_len]
+                deviations_subset = deviations[:min_len]
+                
+                ax3.plot(steps_subset, deviations_subset, 'red', linewidth=2, marker='o', markersize=3, label='Speed Deviation')
+                ax3.axhline(y=0, color='black', linestyle='--', alpha=0.5, label='Reference Line')
+                
+                ax3.set_title('Speed Deviation Analysis', fontweight='bold')
+                ax3.set_xlabel('Steps')
+                ax3.set_ylabel('Speed Deviation (m/s)')
+                ax3.legend()
+                ax3.grid(True, alpha=0.3)
+            else:
+                ax3.text(0.5, 0.5, 'Insufficient Deviation Data', ha='center', va='center', transform=ax3.transAxes)
+                ax3.set_title('Speed Deviation Analysis', fontweight='bold')
+        else:
+            ax3.text(0.5, 0.5, 'No Deviation Data Available', ha='center', va='center', transform=ax3.transAxes)
+            ax3.set_title('Speed Deviation Analysis', fontweight='bold')
+        
+        # 4. 速度控制奖励统计
+        ax4 = axes[1, 1]
+        if self.speed_control_viz_data['speed_control_total']:
+            total_rewards = self.speed_control_viz_data['speed_control_total']
+            tracking_rewards = self.speed_control_viz_data['speed_control_tracking']
+            soft_wall_rewards = self.speed_control_viz_data['speed_control_soft_wall']
+            behavior_rewards = self.speed_control_viz_data['speed_control_behavior_guidance']
+            
+            # 计算统计信息
+            total_mean = np.mean(total_rewards)
+            tracking_mean = np.mean(tracking_rewards)
+            soft_wall_mean = np.mean(soft_wall_rewards)
+            behavior_mean = np.mean(behavior_rewards)
+            
+            # 创建柱状图
+            categories = ['Total', 'Tracking', 'Soft Wall', 'Behavior']
+            values = [total_mean, tracking_mean, soft_wall_mean, behavior_mean]
+            colors = ['purple', 'green', 'red', 'blue']
+            
+            bars = ax4.bar(categories, values, color=colors, alpha=0.7)
+            ax4.set_title('Average Speed Control Rewards', fontweight='bold')
+            ax4.set_ylabel('Average Reward Value')
+            ax4.grid(True, alpha=0.3)
+            
+            # 在柱子上添加数值标签
+            for bar, value in zip(bars, values):
+                height = bar.get_height()
+                ax4.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+                        f'{value:.3f}', ha='center', va='bottom')
+        else:
+            ax4.text(0.5, 0.5, 'No Reward Data Available', ha='center', va='center', transform=ax4.transAxes)
+            ax4.set_title('Average Speed Control Rewards', fontweight='bold')
+        
+        plt.tight_layout()
+        
+        # 保存图表
+        viz_filename = f"speed_control_visualization_{timestamp}.png"
+        viz_path = os.path.join(save_dir, viz_filename)
+        plt.savefig(viz_path, dpi=300, bbox_inches='tight')
+        plt.close()
+        
+        # 生成统计报告
+        self._generate_speed_control_report(episode_data, save_dir, timestamp)
+        
+        print(f"✅ 速度控制可视化已保存: {viz_path}")
+        return viz_path
+    
+    def _generate_speed_control_report(self, episode_data: Dict, save_dir: str, timestamp: str):
+        """生成速度控制奖励统计报告"""
+        report_path = os.path.join(save_dir, f"speed_control_report_{timestamp}.md")
+        
+        with open(report_path, 'w', encoding='utf-8') as f:
+            f.write(f"# 速度控制奖励分析报告\n\n")
+            f.write(f"**生成时间**: {timestamp}\n\n")
+            
+            # Episode基本信息
+            f.write(f"## Episode基本信息\n\n")
+            f.write(f"- **总步数**: {episode_data.get('episode_length', 0)}\n")
+            f.write(f"- **总奖励**: {episode_data.get('total_reward', 0):.3f}\n")
+            f.write(f"- **成功到达**: {'是' if episode_data.get('success', False) else '否'}\n")
+            f.write(f"- **平均速度**: {episode_data.get('avg_speed', 0):.2f} m/s\n\n")
+            
+            # 速度控制奖励统计
+            if (self.speed_control_viz_data['speed_control_total'] and 
+                any(abs(x) > 1e-6 for x in self.speed_control_viz_data['speed_control_total'])):
+                
+                total_rewards = np.array(self.speed_control_viz_data['speed_control_total'])
+                tracking_rewards = np.array(self.speed_control_viz_data['speed_control_tracking'])
+                soft_wall_rewards = np.array(self.speed_control_viz_data['speed_control_soft_wall'])
+                behavior_rewards = np.array(self.speed_control_viz_data['speed_control_behavior_guidance'])
+                
+                f.write(f"## 速度控制奖励分析\n\n")
+                f.write(f"- **总速度控制奖励**:\n")
+                f.write(f"  - 平均: {np.mean(total_rewards):.4f}\n")
+                f.write(f"  - 标准差: {np.std(total_rewards):.4f}\n")
+                f.write(f"  - 最小值: {np.min(total_rewards):.4f}\n")
+                f.write(f"  - 最大值: {np.max(total_rewards):.4f}\n\n")
+                
+                f.write(f"- **速度跟踪子模块**:\n")
+                f.write(f"  - 平均奖励: {np.mean(tracking_rewards):.4f}\n")
+                f.write(f"  - 标准差: {np.std(tracking_rewards):.4f}\n\n")
+                
+                f.write(f"- **超速软墙子模块**:\n")
+                f.write(f"  - 平均奖励: {np.mean(soft_wall_rewards):.4f}\n")
+                f.write(f"  - 标准差: {np.std(soft_wall_rewards):.4f}\n\n")
+                
+                f.write(f"- **行为导向子模块**:\n")
+                f.write(f"  - 平均奖励: {np.mean(behavior_rewards):.4f}\n")
+                f.write(f"  - 标准差: {np.std(behavior_rewards):.4f}\n\n")
+                
+                # 速度统计
+                if self.speed_control_viz_data['vehicle_speeds']:
+                    speeds = np.array(self.speed_control_viz_data['vehicle_speeds'])
+                    refs = np.array(self.speed_control_viz_data['speed_references'])
+                    deviations = np.array(self.speed_control_viz_data['speed_deviations'])
+                    
+                    f.write(f"- **速度统计**:\n")
+                    f.write(f"  - 平均车辆速度: {np.mean(speeds):.2f} m/s\n")
+                    f.write(f"  - 平均参考速度: {np.mean(refs):.2f} m/s\n")
+                    f.write(f"  - 平均速度偏差: {np.mean(deviations):.2f} m/s\n")
+                    f.write(f"  - 速度偏差标准差: {np.std(deviations):.2f} m/s\n\n")
+        
+        print(f"✅ 速度控制报告已保存: {report_path}")
+    
+    def clear_speed_control_visualization_data(self):
+        """清空速度控制可视化数据"""
+        if self.speed_control_viz_data:
+            for key in self.speed_control_viz_data:
+                self.speed_control_viz_data[key].clear()
+            print("🗑️ 速度控制可视化数据已清空")
+    
+    def _fill_default_speed_control_data(self):
+        """填充默认的速度控制数据"""
+        if self.speed_control_viz_data:
+            self.speed_control_viz_data['speed_control_total'].append(0.0)
+            self.speed_control_viz_data['speed_control_tracking'].append(0.0)
+            self.speed_control_viz_data['speed_control_soft_wall'].append(0.0)
+            self.speed_control_viz_data['speed_control_behavior_guidance'].append(0.0)
+            self.speed_control_viz_data['vehicle_speeds'].append(0.0)
+            self.speed_control_viz_data['speed_references'].append(0.0)
+            self.speed_control_viz_data['speed_deviations'].append(0.0)
 
 
 def main():
@@ -1410,7 +2003,7 @@ def main():
     parser = argparse.ArgumentParser(description="PPO检查点仿真控制器")
     
     parser.add_argument("--checkpoint", type=str,
-                       default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction/runs/ppo_expert_reproduction_20250820_154108/checkpoints/checkpoint_790.pt",
+                       default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction/ckpt_0827/AB_1_13_latest_model.pt",
                        help="检查点文件路径")
     
     parser.add_argument("--config", type=str, default=None,
@@ -1476,6 +2069,28 @@ def main():
     parser.add_argument("--perception_enable_attention_bias", action="store_true",
                        help="认知感知模块启用注意力偏置 (默认启用)")
     
+    # ===== 新增：速度控制奖励配置参数 =====
+    parser.add_argument("--use_speed_control_reward", action="store_true",
+                       help="启用速度控制奖励 (默认禁用)")
+    parser.add_argument("--speed_control_k", type=float, default=1.0,
+                       help="速度跟踪系数 (默认: 1.0)")
+    parser.add_argument("--speed_control_kappa", type=float, default=0.5,
+                       help="超速软墙系数 (默认: 0.5)")
+    parser.add_argument("--speed_control_mu", type=float, default=0.3,
+                       help="超速刹车奖励系数 (默认: 0.3)")
+    parser.add_argument("--speed_control_nu", type=float, default=0.2,
+                       help="超速加速惩罚系数 (默认: 0.2)")
+    parser.add_argument("--speed_control_v_tolerance", type=float, default=1.0,
+                       help="速度跟踪容差 (默认: 1.0)")
+    parser.add_argument("--speed_control_v_ref", type=float, default=15.0,
+                       help="目标参考速度 (默认: 15.0)")
+    parser.add_argument("--speed_control_enable_tracking", action="store_true",
+                       help="启用速度跟踪子模块 (默认禁用)")
+    parser.add_argument("--speed_control_enable_soft_wall", action="store_true",
+                       help="启用超速软墙子模块 (默认禁用)")
+    parser.add_argument("--speed_control_enable_behavior_guidance", action="store_true",
+                       help="启用行为导向子模块 (默认禁用)")
+    
     # ===== 新增：认知可视化配置参数 =====
     parser.add_argument("--enable_cognitive_viz", action="store_true",
                        help="启用认知模块可视化 (默认禁用)")
@@ -1493,50 +2108,61 @@ def main():
         print(f"❌ 检查点文件不存在: {args.checkpoint}")
         sys.exit(1)
     
-    try:
-        # 创建仿真控制器
-        simulator = PPOCheckpointSimulator(
-            checkpoint_path=args.checkpoint,
-            config_path=args.config,
-            device=args.device,
-            args=args  # 🔧 新增：传递命令行参数
+
+    # 创建仿真控制器
+    simulator = PPOCheckpointSimulator(
+        checkpoint_path=args.checkpoint,
+        config_path=args.config,
+        device=args.device,
+        args=args  # 🔧 新增：传递命令行参数
+    )
+    
+    # 🚀 新增：更新速度控制配置
+    if args.use_speed_control_reward:
+        # 只更新MetaDrive兼容的配置键
+        simulator.config.update({
+            "use_speed_control_reward": True
+        })
+        print("🚀 速度控制奖励配置已更新")
+        print(f"   📊 速度跟踪系数: {args.speed_control_k}")
+        print(f"   🧱 超速软墙系数: {args.speed_control_kappa}")
+        print(f"   🎯 行为导向系数: μ={args.speed_control_mu}, ν={args.speed_control_nu}")
+        print(f"   ⚡ 目标速度: {args.speed_control_v_ref} m/s")
+        print(f"   📏 速度容差: {args.speed_control_v_tolerance} m/s")
+        print(f"   ✅ 子模块状态: 跟踪={args.speed_control_enable_tracking}, 软墙={args.speed_control_enable_soft_wall}, 行为={args.speed_control_enable_behavior_guidance}")
+        print("   📝 注意：速度控制参数将在环境创建时通过命令行参数设置")
+    
+    if args.evaluate:
+        # 运行模型评估
+        evaluation = simulator.evaluate_model(
+            num_episodes=args.eval_episodes,
+            render=not args.no_render
         )
         
-        if args.evaluate:
-            # 运行模型评估
-            evaluation = simulator.evaluate_model(
-                num_episodes=args.eval_episodes,
-                render=not args.no_render
-            )
-            
-            print(f"\n📊 评估结果总结:")
-            print(f"🏆 成功率: {evaluation['success_rate']:.1%}")
-            print(f"💰 平均奖励: {evaluation['avg_reward']:.2f} ± {evaluation['std_reward']:.2f}")
-            print(f"📏 平均Episode长度: {evaluation['avg_episode_length']:.1f}")
-            print(f"🎯 平均路径完成度: {evaluation['avg_path_completion']:.1%}")
-            
-            # 🔧 新增：变道统计评估输出
-            print(f"🚗 总变道次数: {evaluation['total_lane_changes']}")
-            print(f"💸 平均变道惩罚: {evaluation['avg_lane_change_penalty']:.3f}")
-            print(f"⚡ 平均变道速度比: {evaluation['avg_lane_change_speed_ratio']:.3f}")
-            print(f"⏰ 总冷却期违规: {evaluation['total_cooldown_violations']}")
-            
-        else:
-            # 运行常规仿真
-            simulator.run_simulation(
-                num_episodes=args.episodes,
-                render=not args.no_render,
-                max_steps=args.max_steps,
-                deterministic=not args.stochastic
-            )
+        print(f"\n📊 评估结果总结:")
+        print(f"🏆 成功率: {evaluation['success_rate']:.1%}")
+        print(f"💰 平均奖励: {evaluation['avg_reward']:.2f} ± {evaluation['std_reward']:.2f}")
+        print(f"📏 平均Episode长度: {evaluation['avg_episode_length']:.1f}")
+        print(f"🎯 平均路径完成度: {evaluation['avg_path_completion']:.1%}")
         
-        print(f"\n✅ 仿真完成！")
+        # 🔧 新增：变道统计评估输出
+        print(f"🚗 总变道次数: {evaluation['total_lane_changes']}")
+        print(f"💸 平均变道惩罚: {evaluation['avg_lane_change_penalty']:.3f}")
+        print(f"⚡ 平均变道速度比: {evaluation['avg_lane_change_speed_ratio']:.3f}")
+        print(f"⏰ 总冷却期违规: {evaluation['total_cooldown_violations']}")
         
-    except Exception as e:
-        print(f"❌ 仿真运行失败: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
+    else:
+        # 运行常规仿真
+        simulator.run_simulation(
+            num_episodes=args.episodes,
+            render=not args.no_render,
+            max_steps=args.max_steps,
+            deterministic=not args.stochastic
+        )
+    
+    print(f"\n✅ 仿真完成！")
+    
+
 
 
 if __name__ == "__main__":
