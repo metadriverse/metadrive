@@ -29,7 +29,7 @@ class CognitiveParameterSampler:
                  bias_inverse_tta_coef_range: Tuple[float, float] = (0.5, 2.0),
                  perception_sigma0_range: Tuple[float, float] = (0.02, 0.20),
                  perception_k_range: Tuple[float, float] = (0.002, 0.01),
-                 delay_steps_range: Tuple[int, int] = (1, 3),
+                 delay_steps_range: Tuple[int, int] = (0, 3),
                  enable_visualization: bool = True,
                  save_history: bool = True):
         """

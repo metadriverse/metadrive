@@ -580,8 +580,21 @@ class PPOExpertReproduction:
         self.train_stats = []
         
         # 存储交通密度参数供其他方法使用
-        self.traffic_density_min = args.traffic_density_min
-        self.traffic_density_max = args.traffic_density_max
+        self.traffic_density_min = args.traffic_density_min if args.traffic_density_min > 0 else 0.1
+        self.traffic_density_max = args.traffic_density_max if args.traffic_density_max > 0 else 0.15
+        
+        # === 检测并记录交通密度采样模式 ===
+        if (hasattr(args, 'resume_from') and args.resume_from and 
+            args.traffic_density_min > 0 and args.traffic_density_max > 0):
+            print(f"🎯 恢复训练模式 - 交通密度采样:")
+            print(f"   模式: 随机采样（覆盖课程学习）")
+            print(f"   密度范围: [{args.traffic_density_min:.3f}, {args.traffic_density_max:.3f}]")
+            self.traffic_density_mode = "random_sampling"
+        else:
+            print(f"🎯 交通密度采样:")
+            print(f"   模式: 课程学习（默认/未指定密度参数）") 
+            print(f"   默认范围: [{self.traffic_density_min:.3f}, {self.traffic_density_max:.3f}]")
+            self.traffic_density_mode = "curriculum_learning"
         
         # 课程学习状态 - 必须在创建环境之前初始化
         self.use_curriculum = self.args.use_curriculum
@@ -833,16 +846,38 @@ class PPOExpertReproduction:
     
     def _create_experiment_dir(self) -> str:
         """创建实验目录"""
-        # 恢复训练时，使用检查点所在的实验目录
+        # 恢复训练时的逻辑
         if hasattr(self.args, 'resume_from') and self.args.resume_from:
             checkpoint_path = Path(self.args.resume_from)
-            # 检查点通常在 experiment_dir/checkpoints/ 目录下
-            if checkpoint_path.parent.name == "checkpoints":
-                exp_dir = str(checkpoint_path.parent.parent)
-                print(f" 恢复训练模式 - 使用原实验目录: {exp_dir}")
+            
+            # 检查用户是否显式指定了save_dir
+            if self.args.save_dir is not None:
+                # 用户指定了新的save_dir，在新位置创建继续训练目录
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                exp_name = f"resumed_training_{timestamp}"
+                exp_dir = os.path.join(self.args.save_dir, "runs", exp_name)
+                os.makedirs(exp_dir, exist_ok=True)
+                os.makedirs(os.path.join(exp_dir, "checkpoints"), exist_ok=True)
+                print(f"📁 恢复训练模式 - 使用新指定目录: {exp_dir}")
+                print(f"   原检查点路径: {self.args.resume_from}")
                 return exp_dir
+            else:
+                # 用户未指定save_dir，使用原检查点目录
+                if checkpoint_path.parent.name == "checkpoints":
+                    exp_dir = str(checkpoint_path.parent.parent)
+                    print(f"📥 恢复训练模式 - 使用原实验目录: {exp_dir}")
+                    return exp_dir
+                else:
+                    # 兜底：检查点不在标准目录结构中
+                    exp_dir = str(checkpoint_path.parent)
+                    print(f"📥 恢复训练模式 - 使用检查点所在目录: {exp_dir}")
+                    return exp_dir
         
-        # 正常模式：创建新的实验目录
+        # 正常模式：创建新实验目录
+        if self.args.save_dir is None:
+            # 设置默认save_dir
+            self.args.save_dir = "/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction"
+        
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         exp_name = f"ppo_expert_reproduction_{timestamp}"
         exp_dir = os.path.join(self.args.save_dir, "runs", exp_name)
@@ -850,7 +885,7 @@ class PPOExpertReproduction:
         os.makedirs(exp_dir, exist_ok=True)
         os.makedirs(os.path.join(exp_dir, "checkpoints"), exist_ok=True)
         
-        print(f" 实验目录已创建: {exp_dir}")
+        print(f"📁 实验目录已创建: {exp_dir}")
         return exp_dir
     
     def _compute_scheduled_lr(self):
@@ -1181,7 +1216,46 @@ class PPOExpertReproduction:
 
     def _curriculum_density(self):
         """
-        只根据课程学习计算交通密度 traffic_density，地图不受影响（始终直线）。
+        根据训练模式计算交通密度：
+        1. 恢复训练且用户指定密度范围 → 随机采样
+        2. 其他情况 → 课程学习
+        返回: float traffic_density
+        """
+        # 检测恢复训练 + 用户指定密度范围的情况
+        if (hasattr(self.args, 'resume_from') and self.args.resume_from and 
+            self._is_traffic_density_user_specified()):
+            # 在用户指定范围内随机采样
+            return self._sample_traffic_density_randomly()
+        
+        # 否则使用原有的课程学习逻辑
+        return self._curriculum_density_original()
+    
+    def _is_traffic_density_user_specified(self) -> bool:
+        """检测用户是否显式指定了交通密度参数"""
+        return (self.args.traffic_density_min > 0 and 
+                self.args.traffic_density_max > 0 and
+                self.args.traffic_density_min < self.args.traffic_density_max)
+    
+    def _sample_traffic_density_randomly(self) -> float:
+        """在用户指定范围内随机采样交通密度"""
+        import random
+        traffic_density = random.uniform(self.args.traffic_density_min, self.args.traffic_density_max)
+        
+        # 定期输出采样值（避免过度输出）
+        if hasattr(self, '_density_sample_count'):
+            self._density_sample_count += 1
+        else:
+            self._density_sample_count = 1
+            
+        if self._density_sample_count % 1000 == 1:  # 每1000次输出一次
+            print(f"🎲 随机交通密度采样: {traffic_density:.4f} "
+                  f"(范围: [{self.args.traffic_density_min:.3f}, {self.args.traffic_density_max:.3f}])")
+        
+        return traffic_density
+    
+    def _curriculum_density_original(self):
+        """
+        原始课程学习计算交通密度逻辑
         返回: float traffic_density
         """
         # 基本进度 p ∈ [0,1]
@@ -1210,12 +1284,13 @@ class PPOExpertReproduction:
                 stage = getattr(self, "curriculum_stage", 0)
                 seg_p = 1.0
 
-        # 仅密度分布按阶段变化；最后阶段回到你的原始范围
+        # 仅密度分布按阶段变化；最后阶段使用默认范围
+        default_max = 0.15  # 原始默认最大值
         stage_density = {
             0: (0.03, 0.06),
             1: (0.06, 0.09),
             2: (0.09, 0.12),
-            3: (0.12, self.args.traffic_density_max)
+            3: (0.12, default_max)
         }
 
         d0, d1 = stage_density[stage]
@@ -2536,13 +2611,14 @@ class PPOExpertReproduction:
     
     def _show_hyperparameter_override_info(self, checkpoint: Dict):
         """显示超参数覆盖信息"""
-        print("\n 超参数覆盖情况:")
+        print("\n 超参数覆盖情况:")
         
         # 检查是否有保存的args
         checkpoint_args = checkpoint.get("args", {})
         
-        # 关键超参数对比
+        # 关键超参数对比 - 添加total_timesteps
         key_hyperparams = [
+            ("total_timesteps", "总训练步数"),
             ("lr", "学习率"),
             ("n_steps", "rollout步数"),
             ("batch_size", "批次大小"),
@@ -2567,26 +2643,36 @@ class PPOExpertReproduction:
             
             if checkpoint_val != "N/A" and current_val != "N/A":
                 if checkpoint_val != current_val:
-                    overridden_params.append(f"   {param_desc}: {checkpoint_val} → {current_val}")
+                    # 特殊处理total_timesteps显示格式
+                    if param_name == "total_timesteps":
+                        overridden_params.append(f"   {param_desc}: {checkpoint_val:,} → {current_val:,}")
+                    else:
+                        overridden_params.append(f"   {param_desc}: {checkpoint_val} → {current_val}")
                 else:
-                    unchanged_params.append(f"   {param_desc}: {current_val}")
+                    if param_name == "total_timesteps":
+                        unchanged_params.append(f"   {param_desc}: {current_val:,}")
+                    else:
+                        unchanged_params.append(f"   {param_desc}: {current_val}")
             elif current_val != "N/A":
-                overridden_params.append(f"   {param_desc}: (新增) {current_val}")
+                if param_name == "total_timesteps":
+                    overridden_params.append(f"   {param_desc}: (新增) {current_val:,}")
+                else:
+                    overridden_params.append(f"   {param_desc}: (新增) {current_val}")
         
         if overridden_params:
-            print(" 已覆盖的超参数:")
+            print(" 已覆盖的超参数:")
             for param in overridden_params:
                 print(param)
         
         if unchanged_params and len(unchanged_params) <= 5:  # 只显示少量未改变的参数
-            print(" 保持不变的超参数:")
+            print(" 保持不变的超参数:")
             for param in unchanged_params[:5]:
                 print(param)
             if len(unchanged_params) > 5:
                 print(f"   ... 以及其他{len(unchanged_params)-5}个参数")
         
         if not overridden_params:
-            print(" 所有超参数保持与检查点一致")
+            print(" 所有超参数保持与检查点一致")
         
         print()
     
@@ -3664,10 +3750,10 @@ def add_arguments():
                        help="碰撞人行道惩罚 (默认: 8.0, 回调自8.0)")
     
     # ===== 交通密度配置参数 (新增) =====
-    parser.add_argument("--traffic_density_min", type=float, default=0.1,
-                       help="最小交通密度 (默认: 0.1)")
-    parser.add_argument("--traffic_density_max", type=float, default=0.15,
-                       help="最大交通密度 (默认: 0.15)")
+    parser.add_argument("--traffic_density_min", type=float, default=-1.0,
+                       help="最小交通密度（恢复训练时指定则覆盖课程学习，默认: -1表示未指定）")
+    parser.add_argument("--traffic_density_max", type=float, default=-1.0,
+                       help="最大交通密度（恢复训练时指定则覆盖课程学习，默认: -1表示未指定）")
 
     # ===== 训练设置 =====
     parser.add_argument("--total_timesteps", type=int, default=1000000,
@@ -3712,8 +3798,8 @@ def add_arguments():
                         help="感知噪声标准差采样范围 [min, max]（默认[0.02, 0.20]米）")
     parser.add_argument("--perception_k_range", type=float, nargs=2, default=[0.002, 0.01],
                         help="距离相关系数采样范围 [min, max]（默认[0.002, 0.01]）")
-    parser.add_argument("--delay_steps_range", type=int, nargs=2, default=[1, 3],
-                        help="动作延迟步数采样范围 [min, max]（默认[1, 3]）")
+    parser.add_argument("--delay_steps_range", type=int, nargs=2, default=[0, 3],
+                        help="动作延迟步数采样范围 [min, max]（默认[0, 3]，0表示无延迟）")
     
     # === 新增：离散采样器密度参数 ===
     parser.add_argument("--perception_k_density", type=int, default=5,
@@ -3726,7 +3812,7 @@ def add_arguments():
                         help="动作延迟步数的离散采样点数量（默认3）")
     
     # 认知偏差模块参数（风险厌恶）
-    parser.add_argument("--use_cognitive_bias", action="store_true", default=True,
+    parser.add_argument("--use_cognitive_bias", action="store_true", default=False,
                         help="启用认知偏差模块（默认开启）")
     parser.add_argument("--bias_inverse_tta_coef", type=float, default=1.0,
                         help="偏差强度系数（默认1.0）")
@@ -3746,8 +3832,8 @@ def add_arguments():
     # 认知延迟模块参数（动作延迟）
     parser.add_argument("--use_cognitive_delay", action="store_true", default=False,
                         help="启用认知延迟模块（默认关闭）")
-    parser.add_argument("--delay_steps", type=int, default=2,
-                        help="延迟步数（默认2）")
+    parser.add_argument("--delay_steps", type=int, default=0,
+                        help="延迟步数（默认0，0表示无延迟）")
     parser.add_argument("--delay_smoothing", action="store_true", default=False,
                         help="启用动作平滑（默认开启）")
     parser.add_argument("--delay_smoothing_factor", type=float, default=0.3,
@@ -3781,9 +3867,8 @@ def add_arguments():
                        help="计算设备 (默认: auto)")
     parser.add_argument("--seed", type=int, default=42,
                        help="随机种子 (默认: 42)")
-    parser.add_argument("--save_dir", type=str, 
-                       default="/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction",
-                       help="保存目录")
+    parser.add_argument("--save_dir", type=str, default=None,
+                       help="保存目录（恢复训练时若未指定则使用原检查点目录）")
     
     # ===== 恢复训练设置 =====
     parser.add_argument("--resume_from", type=str, default=None,

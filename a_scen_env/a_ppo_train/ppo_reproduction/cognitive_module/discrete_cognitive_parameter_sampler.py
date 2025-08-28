@@ -23,7 +23,7 @@ class DiscreteCognitiveParameterSampler:
                  perception_sigma0_density: int = 4,
                  perception_k_range: Tuple[float, float] = (0.002, 0.01),
                  perception_k_density: int = 4,
-                 delay_steps_range: Tuple[int, int] = (1, 3),
+                 delay_steps_range: Tuple[int, int] = (0, 3),
                  delay_steps_density: int = 3,
                  shuffle: bool = True,
                  enable_visualization: bool = True,
@@ -54,7 +54,8 @@ class DiscreteCognitiveParameterSampler:
         self.bias_inverse_tta_coef_values = np.linspace(*bias_inverse_tta_coef_range, bias_inverse_tta_coef_density)
         self.perception_sigma0_values = np.linspace(*perception_sigma0_range, perception_sigma0_density)
         self.perception_k_values = np.linspace(*perception_k_range, perception_k_density)
-        self.delay_steps_values = np.linspace(*delay_steps_range, delay_steps_density, dtype=int)
+        # 对于整数类型的delay_steps，使用arange生成完整序列
+        self.delay_steps_values = np.arange(delay_steps_range[0], delay_steps_range[1] + 1, dtype=int)
         
         # 生成所有组合
         self.param_grid: List[Dict[str, Any]] = []

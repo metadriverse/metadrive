@@ -23,12 +23,12 @@ class CognitiveDelayModule:
     4. 可视化：记录和展示延迟效果
     """
     
-    def __init__(self, delay_steps=2, enable_smoothing=False, smoothing_factor=0.3, enable_visualization=True):
+    def __init__(self, delay_steps=0, enable_smoothing=False, smoothing_factor=0.3, enable_visualization=True):
         """
         初始化认知延迟模块
         
         Args:
-            delay_steps (int): 延迟步数，模拟从决策到执行的时间间隔
+            delay_steps (int): 延迟步数，模拟从决策到执行的时间间隔（0表示无延迟）
             enable_smoothing (bool): 是否启用动作平滑
             smoothing_factor (float): 平滑系数，范围[0,1]，值越大平滑效果越强
             enable_visualization (bool): 是否启用可视化记录
@@ -39,7 +39,8 @@ class CognitiveDelayModule:
         self.enable_visualization = enable_visualization
         
         # 延迟缓冲区，使用双端队列实现FIFO
-        self.buffer = deque(maxlen=delay_steps + 1)
+        # 当delay_steps为0时，maxlen设为1以避免队列为空
+        self.buffer = deque(maxlen=max(delay_steps + 1, 1))
         
         # 记录上一个动作用于平滑
         self.previous_action = np.array([0.0, 0.0])
@@ -108,7 +109,10 @@ class CognitiveDelayModule:
         self.buffer.append(smoothed_action.copy())
         
         # 获取延迟后的动作
-        if len(self.buffer) <= self.delay_steps:
+        if self.delay_steps == 0:
+            # 无延迟：直接返回当前动作
+            delayed_action = smoothed_action
+        elif len(self.buffer) <= self.delay_steps:
             # 初始几步返回零动作（冷启动阶段）
             delayed_action = np.array([0.0, 0.0])
         else:
@@ -182,8 +186,8 @@ class CognitiveDelayModule:
         if 'delay_steps' in kwargs:
             old_delay = self.delay_steps
             self.delay_steps = kwargs['delay_steps']
-            # 调整缓冲区大小
-            new_buffer = deque(maxlen=self.delay_steps + 1)
+            # 调整缓冲区大小，当delay_steps为0时确保maxlen至少为1
+            new_buffer = deque(maxlen=max(self.delay_steps + 1, 1))
             for item in self.buffer:
                 new_buffer.append(item)
             self.buffer = new_buffer

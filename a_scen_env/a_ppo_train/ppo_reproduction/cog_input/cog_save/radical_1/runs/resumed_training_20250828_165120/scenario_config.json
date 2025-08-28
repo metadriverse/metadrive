@@ -1,0 +1,72 @@
+{
+  "scenario_type": "straight_road_segments",
+  "total_scenarios": 1000,
+  "segments_range": [
+    2,
+    10
+  ],
+  "estimated_length_range": [
+    130,
+    650
+  ],
+  "traffic_density_range": [
+    0.06,
+    0.1
+  ],
+  "random_traffic": true,
+  "sample_scenarios": [
+    {
+      "index": 0,
+      "seed": 101,
+      "num_segments": 2,
+      "map_string": "SS",
+      "estimated_length": 130,
+      "traffic_density": 0.06404
+    },
+    {
+      "index": 100,
+      "seed": 201,
+      "num_segments": 3,
+      "map_string": "SSS",
+      "estimated_length": 195,
+      "traffic_density": 0.06804
+    },
+    {
+      "index": 500,
+      "seed": 601,
+      "num_segments": 6,
+      "map_string": "SSSSSS",
+      "estimated_length": 390,
+      "traffic_density": 0.08404
+    },
+    {
+      "index": 999,
+      "seed": 1100,
+      "num_segments": 2,
+      "map_string": "SS",
+      "estimated_length": 130,
+      "traffic_density": 0.064
+    }
+  ],
+  "generation_formula": {
+    "num_segments": "2 + (scenario_index * 8) // 1000",
+    "traffic_density": "0.06 + (scenario_index * (0.1 - 0.06)) / 1000",
+    "map_string": "'S' * num_segments"
+  },
+  "curriculum_learning": {
+    "enabled": true,
+    "stage_boundaries": [
+      0.0,
+      0.02,
+      0.05,
+      0.1,
+      1.0
+    ],
+    "stage_descriptions": {
+      "stage_0": "0.0-2% 训练进度: 简单场景",
+      "stage_1": "2%-5% 训练进度: 中等场景",
+      "stage_2": "5%-10% 训练进度: 复杂场景",
+      "stage_3": "10%-100% 训练进度: 完整场景"
+    }
+  }
+}

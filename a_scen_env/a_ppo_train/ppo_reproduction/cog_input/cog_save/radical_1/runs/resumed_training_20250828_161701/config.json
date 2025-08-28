@@ -1,0 +1,180 @@
+{
+  "reproduction_target": "MetaDrive PPO Expert",
+  "experiment_name": "resumed_training_20250828_161701",
+  "timestamp": "2025-08-28T16:17:01.451036",
+  "random_seed": 101,
+  "device": "cuda",
+  "system": {
+    "device": "cuda",
+    "seed": 101,
+    "save_dir": "/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction/cog_input/cog_save/radical_1",
+    "resume_from": "/home/jxy/桌面/1_Project/20250705_computational_cognitive_modeling/computational_cognitive_modeling/metadrive/a_scen_env/a_ppo_train/ppo_reproduction/cog_input/cog_ckpt/reward_speed_AB1_10_922_latest_model.pt"
+  },
+  "network": {
+    "observation_dim": 279,
+    "action_dim": 2,
+    "hidden_dim": 256,
+    "activation": "tanh",
+    "cognitive_params_integration": true,
+    "cognitive_params_dim": 4
+  },
+  "env_config": {
+    "num_scenarios": 1000,
+    "map_type": "straight_road",
+    "dynamic_road_length": true,
+    "road_length_range": [
+      500,
+      1000
+    ],
+    "dynamic_traffic": true,
+    "traffic_density_range": [
+      0.06,
+      0.1
+    ],
+    "random_traffic": true,
+    "horizon": 10000,
+    "reward_config": {
+      "success_reward": 100.0,
+      "driving_reward": 0.4,
+      "speed_reward": 0,
+      "use_lateral_reward": true,
+      "out_of_road_penalty": 8.0,
+      "crash_vehicle_penalty": 8.0,
+      "crash_object_penalty": 8.0,
+      "crash_sidewalk_penalty": 8.0,
+      "use_speed_control_reward": true,
+      "speed_control_enable_tracking": true,
+      "speed_control_enable_soft_wall": true,
+      "speed_control_enable_behavior_guidance": true,
+      "speed_control_k": 0.12,
+      "speed_control_kappa": 0.15,
+      "speed_control_mu": 0.3,
+      "speed_control_nu": 0.2,
+      "speed_control_v_tolerance": 1.0,
+      "speed_control_v_ref": 10.0
+    },
+    "termination_config": {
+      "out_of_road_done": true,
+      "crash_vehicle_done": true,
+      "crash_object_done": true,
+      "on_continuous_line_done": false,
+      "on_broken_line_done": false
+    },
+    "vehicle_config": {
+      "lidar": {
+        "num_lasers": 240,
+        "distance": 50,
+        "num_others": 4,
+        "gaussian_noise": 0.0,
+        "dropout_prob": 0.0
+      },
+      "side_detector": {
+        "num_lasers": 0,
+        "distance": 50,
+        "gaussian_noise": 0.0,
+        "dropout_prob": 0.0
+      },
+      "lane_line_detector": {
+        "num_lasers": 0,
+        "distance": 20,
+        "gaussian_noise": 0.0,
+        "dropout_prob": 0.0
+      },
+      "random_agent_model": false
+    }
+  },
+  "hyperparameters": {
+    "learning_rate": 0.0003,
+    "n_steps": 5376,
+    "n_envs": 3,
+    "batch_size": 512,
+    "n_epochs": 10,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "entropy_coef": 0.01,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "target_kl": 0.03,
+    "action_penalty_coef": 0.001
+  },
+  "learning_rate_schedule": {
+    "schedule_type": "linear",
+    "lr_min": 3e-05,
+    "warmup_ratio": 0.05
+  },
+  "entropy_decay": {
+    "entropy_coef_start": 0.015,
+    "entropy_coef_end": 0.005,
+    "entropy_decay_end_ratio": 0.8
+  },
+  "training": {
+    "total_timesteps": 50000000,
+    "checkpoint_freq": 10,
+    "eval_freq": 2,
+    "log_freq": 1
+  },
+  "curriculum_learning": {
+    "enabled": true,
+    "mode": "progress",
+    "alpha": 1.5,
+    "gate_succ_threshold": 0.7,
+    "gate_coll_threshold": 0.2
+  },
+  "cognitive_modules": {
+    "enabled": true,
+    "visualization": false,
+    "cognitive_bias": {
+      "enabled": true,
+      "inverse_tta_coef": 1.0,
+      "tta_threshold": 1.0,
+      "adaptive_bias": false,
+      "adaptation_rate": 0.01,
+      "visual_detection_distance": 50.0,
+      "visual_detection_angle": 30.0,
+      "visual_aversion_strength": 0.5
+    },
+    "cognitive_delay": {
+      "enabled": true,
+      "delay_steps": 2,
+      "enable_smoothing": false,
+      "smoothing_factor": 0.3
+    },
+    "cognitive_perception": {
+      "enabled": true,
+      "sigma0": 0.1,
+      "k": 0.02,
+      "p_miss0": 0.0,
+      "p_false": 0.0,
+      "use_kf": true,
+      "kf_dt": 0.1,
+      "kf_q_scale": 100.0,
+      "enable_radar_beam_viz": false
+    },
+    "cognitive_parameter_sampler": {
+      "enabled": true,
+      "sampler_type": "discrete",
+      "update_steps": 5,
+      "bias_inverse_tta_coef_range": [
+        0.0,
+        0.1
+      ],
+      "perception_sigma0_range": [
+        0.0,
+        0.1
+      ],
+      "perception_k_range": [
+        0.0,
+        0.1
+      ],
+      "delay_steps_range": [
+        0,
+        1
+      ],
+      "bias_inverse_tta_coef_density": 4,
+      "perception_sigma0_density": 4,
+      "perception_k_density": 4,
+      "delay_steps_density": 2
+    }
+  }
+}
