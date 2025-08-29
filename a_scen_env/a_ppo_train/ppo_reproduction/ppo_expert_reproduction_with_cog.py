@@ -353,8 +353,17 @@ class PPONetwork(nn.Module):
         print(f"   ✅ 已解冻前275维权重")
     
     def _load_and_extend_weights(self, checkpoint_state_dict):
-        """从275维检查点加载权重并扩展到279维"""
-        print("🔧 正在扩展275维权重到279维...")
+        """动态扩展检查点权重到当前网络维度"""
+        current_dim = self.actor_fc1.in_features
+        
+        # 检测检查点维度
+        checkpoint_dim = None
+        for key, value in checkpoint_state_dict.items():
+            if key in ['actor_fc1.weight', 'critic_fc1.weight']:
+                checkpoint_dim = value.shape[1]
+                break
+        
+        print(f"🔧 正在扩展权重: {checkpoint_dim}维 → {current_dim}维...")
         
         # 创建新的状态字典
         new_state_dict = {}
@@ -363,22 +372,22 @@ class PPONetwork(nn.Module):
             if key in ['actor_fc1.weight', 'critic_fc1.weight']:
                 # 对于输入层，需要扩展权重
                 if key == 'actor_fc1.weight':
-                    # 原始: [256, 275], 目标: [256, 279]
-                    new_weight = torch.zeros(256, 279, device=value.device)
-                    new_weight[:, :275] = value  # 复制前275维权重
-                    # 初始化新增4维权重（使用较小的随机值）
-                    torch.nn.init.orthogonal_(new_weight[:, 275:], gain=0.01)
+                    new_weight = torch.zeros(256, current_dim, device=value.device)
+                    new_weight[:, :checkpoint_dim] = value  # 复制原有权重
+                    # 初始化新增维度权重（使用较小的随机值）
+                    if current_dim > checkpoint_dim:
+                        torch.nn.init.orthogonal_(new_weight[:, checkpoint_dim:], gain=0.01)
                     new_state_dict[key] = new_weight
-                    print(f"   ✅ 已扩展actor_fc1权重: 275 → 279")
+                    print(f"   ✅ 已扩展actor_fc1权重: {checkpoint_dim} → {current_dim}")
                     
                 elif key == 'critic_fc1.weight':
-                    # 原始: [256, 275], 目标: [256, 279]
-                    new_weight = torch.zeros(256, 279, device=value.device)
-                    new_weight[:, :275] = value  # 复制前275维权重
-                    # 初始化新增4维权重
-                    torch.nn.init.orthogonal_(new_weight[:, 275:], gain=0.01)
+                    new_weight = torch.zeros(256, current_dim, device=value.device)
+                    new_weight[:, :checkpoint_dim] = value  # 复制原有权重
+                    # 初始化新增维度权重
+                    if current_dim > checkpoint_dim:
+                        torch.nn.init.orthogonal_(new_weight[:, checkpoint_dim:], gain=0.01)
                     new_state_dict[key] = new_weight
-                    print(f"   ✅ 已扩展critic_fc1权重: 275 → 279")
+                    print(f"   ✅ 已扩展critic_fc1权重: {checkpoint_dim} → {current_dim}")
             else:
                 # 其他层直接复制
                 new_state_dict[key] = value
@@ -388,8 +397,17 @@ class PPONetwork(nn.Module):
         return new_state_dict
     
     def _load_and_truncate_weights(self, checkpoint_state_dict):
-        """从279维检查点截取前275维权重"""
-        print("🔧 正在截取279维权重到275维...")
+        """动态截取检查点权重到当前网络维度"""
+        current_dim = self.actor_fc1.in_features
+        
+        # 检测检查点维度
+        checkpoint_dim = None
+        for key, value in checkpoint_state_dict.items():
+            if key in ['actor_fc1.weight', 'critic_fc1.weight']:
+                checkpoint_dim = value.shape[1]
+                break
+        
+        print(f"🔧 正在截取权重: {checkpoint_dim}维 → {current_dim}维...")
         
         # 创建新的状态字典
         new_state_dict = {}
@@ -398,16 +416,14 @@ class PPONetwork(nn.Module):
             if key in ['actor_fc1.weight', 'critic_fc1.weight']:
                 # 对于输入层，需要截取权重
                 if key == 'actor_fc1.weight':
-                    # 原始: [256, 279], 目标: [256, 275]
-                    new_weight = value[:, :275]
+                    new_weight = value[:, :current_dim]
                     new_state_dict[key] = new_weight
-                    print(f"   ✅ 已截取actor_fc1权重: 279 → 275")
+                    print(f"   ✅ 已截取actor_fc1权重: {checkpoint_dim} → {current_dim}")
                     
                 elif key == 'critic_fc1.weight':
-                    # 原始: [256, 279], 目标: [256, 275]
-                    new_weight = value[:, :275]
+                    new_weight = value[:, :current_dim]
                     new_state_dict[key] = new_weight
-                    print(f"   ✅ 已截取critic_fc1权重: 279 → 275")
+                    print(f"   ✅ 已截取critic_fc1权重: {checkpoint_dim} → {current_dim}")
             else:
                 # 其他层直接复制
                 new_state_dict[key] = value
@@ -447,6 +463,25 @@ class PPONetwork(nn.Module):
             stats['critic_new_mean'] = critic_new_weights.mean().item()
             stats['critic_new_std'] = critic_new_weights.std().item()
             stats['critic_new_norm'] = torch.norm(critic_new_weights).item()
+        
+        return stats
+
+    def get_cognitive_mask_stats(self):
+        """获取认知模块mask的统计信息"""
+        if not hasattr(self, 'is_progressive_training') or not self.is_progressive_training:
+            return {}
+            
+        stats = {}
+        
+        # 如果网络输入维度包含mask信息
+        if self.obs_dim == 283:  # 275 + 4(params) + 4(mask) = 283
+            stats['input_dim'] = self.obs_dim
+            stats['original_obs_dim'] = 275
+            stats['cognitive_params_dim'] = 4
+            stats['cognitive_mask_dim'] = 4
+            stats['mask_supported'] = True
+        else:
+            stats['mask_supported'] = False
         
         return stats
 
@@ -752,7 +787,8 @@ class PPOExpertReproduction:
             self.optimizer = None
         else:
             # 正常模式：创建网络
-            obs_dim = 279 if self.use_cognitive_modules else 275
+            # 维度计算：275(原始) + 4(认知参数) + 4(mask) = 283
+            obs_dim = 283 if self.use_cognitive_modules else 275
             self.network = PPONetwork(obs_dim=obs_dim).to(self.device)
             self.optimizer = optim.Adam(self.network.parameters(), lr=args.lr)
         
@@ -808,6 +844,9 @@ class PPOExpertReproduction:
         print(f" 设备: {self.device}")
         print(f" 随机种子: {args.seed}")
         
+        # 输出认知模块mask状态
+        self._print_cognitive_mask_status()
+        
         # === 渐进式训练信息 ===
         if self.is_progressive_training:
             self.network.training_stage = 1
@@ -824,8 +863,10 @@ class PPOExpertReproduction:
             print(f"易 认知模块已启用，观测维度已扩展:")
             print(f"   原始观测维度: 275 (Lidar: 240 + State: 35)")
             print(f"   认知参数维度: 4 (bias_coef, sigma0, k, delay)")
-            print(f"   扩展后观测维度: 279")
-            print(f"   网络结构: 279 → 256 → 256 → 4/1")
+            print(f"   认知mask维度: 4 (bias_mask, sigma0_mask, k_mask, delay_mask)")
+            print(f"   扩展后观测维度: 283")
+            print(f"   网络结构: 283 → 256 → 256 → 4/1")
+            print(f"   Mask控制机制: 启用模块对应mask=1.0，禁用模块对应mask=0.0")
             
             if self.cognitive_parameter_sampler:
                 sampler_type_name = "离散" if args.cognitive_sampler_type == "discrete" else "连续"
@@ -842,6 +883,18 @@ class PPOExpertReproduction:
         else:
             print(f" 认知模块未启用，使用标准观测维度: 275")
     
+    def _print_cognitive_mask_status(self):
+        """输出认知模块mask状态信息"""
+        if self.use_cognitive_modules:
+            print(f"🎭 认知模块Mask状态:")
+            print(f"   偏差模块: {'✅启用' if self.args.use_cognitive_bias else '❌禁用'} (mask={'1.0' if self.args.use_cognitive_bias else '0.0'})")
+            print(f"   感知模块: {'✅启用' if self.args.use_cognitive_perception else '❌禁用'} (mask={'1.0' if self.args.use_cognitive_perception else '0.0'})")
+            print(f"   延迟模块: {'✅启用' if self.args.use_cognitive_delay else '❌禁用'} (mask={'1.0' if self.args.use_cognitive_delay else '0.0'})")
+            total_active = sum([self.args.use_cognitive_bias, self.args.use_cognitive_perception, self.args.use_cognitive_delay])
+            print(f"   活跃模块数: {total_active}/3")
+            print(f"   输入维度: 275(原始) + 4(认知参数) + 4(mask) = 283")
+        else:
+            print(f"🎭 认知模块未启用，无mask控制")
   
     
     def _create_experiment_dir(self) -> str:
@@ -1866,10 +1919,10 @@ class PPOExpertReproduction:
         advantages = advantages.view(batch_size)
         returns = returns.view(batch_size)
         
-        # === 修复：确保观测包含认知参数 ===
+                # === 修复：确保观测包含认知参数和mask ===
         if self.use_cognitive_modules and obs.shape[1] == 275:
-            # 如果观测是275维，需要添加认知参数
-            print(f"   检测到275维观测，正在添加认知参数...")
+            # 如果观测是275维，需要添加认知参数和mask
+            print(f"   检测到275维观测，正在添加认知参数和mask...")
             current_cognitive_params = {}
             if self.cognitive_parameter_sampler:
                 try:
@@ -1892,7 +1945,13 @@ class PPOExpertReproduction:
                     'delay_steps': 2
                 }
             
-            # 为每个样本添加认知参数
+            # 生成认知参数mask
+            bias_mask = 1.0 if self.args.use_cognitive_bias else 0.0
+            perception_sigma0_mask = 1.0 if self.args.use_cognitive_perception else 0.0
+            perception_k_mask = 1.0 if self.args.use_cognitive_perception else 0.0
+            delay_mask = 1.0 if self.args.use_cognitive_delay else 0.0
+            
+            # 为每个样本添加认知参数和mask
             cognitive_vector = np.array([
                 [current_cognitive_params['bias_inverse_tta_coef'],
                  current_cognitive_params['perception_sigma0'],
@@ -1900,12 +1959,16 @@ class PPOExpertReproduction:
                  current_cognitive_params['delay_steps']] for _ in range(batch_size)
             ], dtype=np.float32)
             
-            # 拼接认知参数
-            obs = np.concatenate([obs.cpu().numpy(), cognitive_vector], axis=1)
+            cognitive_mask = np.array([
+                [bias_mask, perception_sigma0_mask, perception_k_mask, delay_mask] for _ in range(batch_size)
+            ], dtype=np.float32)
+            
+            # 拼接认知参数和mask
+            obs = np.concatenate([obs.cpu().numpy(), cognitive_vector, cognitive_mask], axis=1)
             obs = torch.as_tensor(obs, dtype=torch.float32, device=self.device)
-            print(f"   观测维度已扩展: 275 → {obs.shape[1]}")
-        elif self.use_cognitive_modules and obs.shape[1] != 279:
-            print(f"   ⚠️ 警告：观测维度异常: {obs.shape[1]}，期望279")
+            print(f"   观测维度已扩展: 275 → {obs.shape[1]} (包含认知参数和mask)")
+        elif self.use_cognitive_modules and obs.shape[1] != 283:
+            print(f"   ⚠️ 警告：观测维度异常: {obs.shape[1]}，期望283")
         else:
             print(f"   观测维度正常: {obs.shape[1]}")
         
@@ -2306,7 +2369,7 @@ class PPOExpertReproduction:
             checkpoint_obs_dim = None
 
         if self.network is None:
-            target_obs_dim = 279 if self.use_cognitive_modules else 275
+            target_obs_dim = 283 if self.use_cognitive_modules else 275
             print(f"🔧 根据目标配置创建网络: {target_obs_dim}维")
             self.network = PPONetwork(obs_dim=target_obs_dim).to(self.device)
             self.optimizer = optim.Adam(self.network.parameters(), lr=self.args.lr)
@@ -2316,13 +2379,18 @@ class PPOExpertReproduction:
 
         # ---- 权重加载 ----
         if checkpoint_obs_dim and checkpoint_obs_dim != current_obs_dim:
-            if checkpoint_obs_dim == 275 and current_obs_dim == 279:
-                print("🧠 检测到 275→279 迁移，调用 _load_and_extend_weights")
+            if checkpoint_obs_dim == 275 and current_obs_dim == 283:
+                print("🧠 检测到 275→283 迁移（新增认知参数+mask），调用 _load_and_extend_weights")
                 extended_state_dict = self.network._load_and_extend_weights(ckpt_state)
                 self.network.load_state_dict(extended_state_dict)
                 self.is_progressive_training = True
-            elif checkpoint_obs_dim == 279 and current_obs_dim == 275:
-                print("🧠 检测到 279→275 迁移，调用 _load_and_truncate_weights")
+            elif checkpoint_obs_dim == 279 and current_obs_dim == 283:
+                print("🧠 检测到 279→283 迁移（增加mask维度），调用 _load_and_extend_weights")
+                extended_state_dict = self.network._load_and_extend_weights(ckpt_state)
+                self.network.load_state_dict(extended_state_dict)
+                self.is_progressive_training = True
+            elif checkpoint_obs_dim == 283 and current_obs_dim == 275:
+                print("🧠 检测到 283→275 迁移，调用 _load_and_truncate_weights")
                 truncated_state_dict = self.network._load_and_truncate_weights(ckpt_state)
                 self.network.load_state_dict(truncated_state_dict)
             else:
@@ -2796,6 +2864,29 @@ class PPOExpertReproduction:
                                 self.global_step)
             self.writer.add_scalar("cognitive_params/delay_steps", 
                                 current_params['delay_steps'], 
+                                self.global_step)
+        
+        # === 新增：记录认知模块mask状态 ===
+        if self.use_cognitive_modules:
+            # 记录各模块的mask状态（1.0=启用, 0.0=禁用）
+            self.writer.add_scalar("cognitive_mask/bias_module", 
+                                1.0 if self.args.use_cognitive_bias else 0.0, 
+                                self.global_step)
+            self.writer.add_scalar("cognitive_mask/perception_module", 
+                                1.0 if self.args.use_cognitive_perception else 0.0, 
+                                self.global_step)
+            self.writer.add_scalar("cognitive_mask/delay_module", 
+                                1.0 if self.args.use_cognitive_delay else 0.0, 
+                                self.global_step)
+            
+            # 记录总的认知模块激活数量
+            active_modules = sum([
+                self.args.use_cognitive_bias,
+                self.args.use_cognitive_perception,
+                self.args.use_cognitive_delay
+            ])
+            self.writer.add_scalar("cognitive_mask/active_modules_count", 
+                                active_modules, 
                                 self.global_step)
                 
                 
@@ -3532,14 +3623,15 @@ env_config.update({{
      
     def _concatenate_cognitive_params(self, obs, cognitive_params):
         """
-        将认知参数拼接到观测向量中
+        将认知参数和对应的mask拼接到观测向量中
         
         Args:
             obs: 原始观测 [n_envs, 275] 或 [batch_size, 275]
             cognitive_params: 认知参数字典
         
         Returns:
-            扩展后的观测 [n_envs, 279] 或 [batch_size, 279]
+            扩展后的观测 [n_envs, 283] 或 [batch_size, 283]
+            维度分解：275(原始) + 4(认知参数) + 4(mask) = 283
         """
         if not self.use_cognitive_modules:
             # 如果未启用认知模块，返回原始观测
@@ -3557,13 +3649,24 @@ env_config.update({{
         k = cognitive_params.get('perception_k', 0.02)
         delay = cognitive_params.get('delay_steps', 2)
         
-        # 构建认知参数向量
+        # 生成认知参数mask（根据模块开关状态）
+        bias_mask = 1.0 if self.args.use_cognitive_bias else 0.0
+        perception_sigma0_mask = 1.0 if self.args.use_cognitive_perception else 0.0
+        perception_k_mask = 1.0 if self.args.use_cognitive_perception else 0.0
+        delay_mask = 1.0 if self.args.use_cognitive_delay else 0.0
+        
+        # 构建认知参数向量 [bias_coef, sigma0, k, delay]
         cognitive_vector = np.array([
             [bias_coef, sigma0, k, delay] for _ in range(obs_np.shape[0])
         ], dtype=np.float32)
         
-        # 拼接原始观测和认知参数
-        obs_with_cognitive = np.concatenate([obs_np, cognitive_vector], axis=1)
+        # 构建认知参数mask向量 [bias_mask, sigma0_mask, k_mask, delay_mask]
+        cognitive_mask = np.array([
+            [bias_mask, perception_sigma0_mask, perception_k_mask, delay_mask] for _ in range(obs_np.shape[0])
+        ], dtype=np.float32)
+        
+        # 拼接：原始观测 + 认知参数 + 认知mask
+        obs_with_cognitive = np.concatenate([obs_np, cognitive_vector, cognitive_mask], axis=1)
         
         return obs_with_cognitive
 
