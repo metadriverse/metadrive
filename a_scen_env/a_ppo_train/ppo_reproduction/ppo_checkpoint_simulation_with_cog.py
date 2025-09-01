@@ -392,12 +392,60 @@ class PPOCheckpointSimulator:
         # 更新检查点
         self.checkpoint['network_state_dict'] = checkpoint_weights
     
+    def _concatenate_cognitive_params(self, obs: np.ndarray) -> np.ndarray:
+        """
+        将认知参数和对应的mask拼接到观测向量中
+        
+        Args:
+            obs: 原始观测 [275维]
+            
+        Returns:
+            扩展后的观测 [283维] - 275(原始) + 4(认知参数) + 4(mask)
+        """
+        if not self.use_cognitive_modules:
+            # 如果未启用认知模块，直接返回原始观测
+            return obs
+        
+        # 确保obs是275维度
+        if obs.shape[-1] != 275:
+            raise ValueError(f"原始观测维度应为275，实际为{obs.shape[-1]}")
+        
+        # 获取认知参数值（使用默认值或从命令行参数获取）
+        bias_coef = getattr(self.args, 'bias_inverse_tta_coef', 1.5) if self.args else 1.5
+        sigma0 = getattr(self.args, 'perception_sigma0', 0.01) * 10 if self.args else 0.1  # 转换为米制
+        k = getattr(self.args, 'perception_k', 0.02) if self.args else 0.02
+        delay = getattr(self.args, 'delay_steps', 2) if self.args else 2
+        
+        # 生成认知参数mask（根据命令行开关状态）
+        bias_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_bias', False)) else 0.0
+        perception_sigma0_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_perception', False)) else 0.0
+        perception_k_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_perception', False)) else 0.0
+        delay_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_delay', False)) else 0.0
+        
+        # 构建认知参数向量 [bias_coef, sigma0, k, delay]
+        cognitive_params = np.array([bias_coef, sigma0, k, delay], dtype=np.float32)
+        
+        # 构建认知参数mask向量 [bias_mask, sigma0_mask, k_mask, delay_mask]
+        cognitive_mask = np.array([bias_mask, perception_sigma0_mask, perception_k_mask, delay_mask], dtype=np.float32)
+        
+        # 拼接：原始观测 + 认知参数 + 认知mask
+        obs_with_cognitive = np.concatenate([obs, cognitive_params, cognitive_mask], axis=-1)
+        
+        # 只在第一次调用时打印详细信息
+        if not hasattr(self, '_cognitive_params_logged'):
+            print(f"🧠 认知参数拼接: {obs.shape} → {obs_with_cognitive.shape}")
+            print(f"   参数: [bias={bias_coef:.2f}, σ0={sigma0:.3f}, k={k:.3f}, delay={delay}]")
+            print(f"   mask: [bias={bias_mask}, σ0={perception_sigma0_mask}, k={perception_k_mask}, delay={delay_mask}]")
+            self._cognitive_params_logged = True
+        
+        return obs_with_cognitive
+    
     def _get_default_config(self):
         """获取默认环境配置 - 与训练时保持一致"""
         return {
             # 基础环境配置 - 与训练时一致
             "num_scenarios": 1,
-            "traffic_density": 0.12,
+            "traffic_density": 0.08,
             "random_traffic": True,
             "random_agent_model": False,
             "horizon": 1000,
@@ -408,9 +456,9 @@ class PPOCheckpointSimulator:
 
 
             
-            # 奖励配置 - 与训练时完全一致
-            "success_reward": 20.0,
-            "driving_reward": 1.0,
+            # 奖励配置 - 与训练时完全一a致
+            "success_reward": 100.0,
+            "driving_reward": 0.4,
             "speed_reward": 0,
             "use_lateral_reward": True,
             
@@ -592,6 +640,11 @@ class PPOCheckpointSimulator:
         # 这里的 observation 已经包含了噪声效果，无需额外处理
         processed_obs = observation
         perception_applied = bool(self.use_cognitive_modules and self.cognitive_perception_module)
+
+        # === 🔧 修复：认知模块启用时需要拼接认知参数到观测 ===
+        if self.use_cognitive_modules and self.network.obs_dim > 275:
+            # 需要将观测从275维扩展到283维（或其他扩展维度）
+            processed_obs = self._concatenate_cognitive_params(processed_obs)
 
         # 转换为tensor
         obs_tensor = torch.FloatTensor(processed_obs).unsqueeze(0).to(self.device)
@@ -2042,6 +2095,7 @@ def main():
     # ===== 新增：认知模块配置参数 =====
     parser.add_argument("--use_cognitive_modules", action="store_true",
                        help="启用认知模块 (默认禁用)")
+    
     parser.add_argument("--use_cognitive_bias", action="store_true",
                        help="启用认知偏差模块 (默认禁用)")
     parser.add_argument("--bias_visual_aversion", action="store_true",
@@ -2052,10 +2106,12 @@ def main():
                        help="认知偏差模块looming penalty系数 c (默认: 1.5)")
     parser.add_argument("--bias_tta_threshold", type=float, default=0.1,
                        help="认知偏差模块TTA阈值 (默认: 0.1)")
+    
     parser.add_argument("--use_cognitive_delay", action="store_true",
                        help="启用认知延迟模块 (默认禁用)")
     parser.add_argument("--delay_steps", type=int, default=2,
                        help="认知延迟模块延迟步数 (默认: 2)")  # 一个step是0.1s
+    
     parser.add_argument("--use_cognitive_perception", action="store_true",
                        help="启用认知感知模块 (默认禁用)")
     parser.add_argument("--perception_noise_std", type=float, default=0.01,
