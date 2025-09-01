@@ -74,8 +74,8 @@ class PPOCheckpointSimulator:
             # 先初始化认知感知模块（因为认知偏差模块需要引用它）
             if args and getattr(args, 'use_cognitive_perception', False):
                 perception_config = {
-                    'sigma0': getattr(args, 'perception_sigma0', 0.1) * 10,  # 转换为米制噪声
-                    'k': getattr(args, 'perception_k', 0.02),
+                    'sigma0': getattr(args, 'perception_sigma0', 0.1),  # 基础噪声（米）
+                    'sigma_max': getattr(args, 'perception_sigma_max', 0.8),  # 最大噪声（米）
                     'p_miss0': getattr(args, 'perception_p_miss0', 0.0),
                     'far_distance': 50.0,
                     'p_false': getattr(args, 'perception_p_false', 0.0),
@@ -339,21 +339,21 @@ class PPOCheckpointSimulator:
         
         # 获取认知参数值（使用默认值或从命令行参数获取）
         bias_coef = getattr(self.args, 'bias_inverse_tta_coef', 1.5) if self.args else 1.5
-        sigma0 = getattr(self.args, 'perception_sigma0', 0.1) if self.args else 0.1  # 注意：这里不需要*10转换
-        k = getattr(self.args, 'perception_k', 0.02) if self.args else 0.02
+        sigma0 = getattr(self.args, 'perception_sigma0', 0.1) if self.args else 0.1
+        sigma_max = getattr(self.args, 'perception_sigma_max', 0.8) if self.args else 0.8
         delay = getattr(self.args, 'delay_steps', 2) if self.args else 2
         
         # 生成认知参数mask（根据命令行开关状态）
         bias_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_bias', False)) else 0.0
         perception_sigma0_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_perception', False)) else 0.0
-        perception_k_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_perception', False)) else 0.0
+        perception_sigma_max_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_perception', False)) else 0.0
         delay_mask = 1.0 if (self.args and getattr(self.args, 'use_cognitive_delay', False)) else 0.0
         
-        # 构建认知参数向量 [bias_coef, sigma0, k, delay]
-        cognitive_params = np.array([bias_coef, sigma0, k, delay], dtype=np.float32)
+        # 构建认知参数向量 [bias_coef, sigma0, sigma_max, delay]
+        cognitive_params = np.array([bias_coef, sigma0, sigma_max, delay], dtype=np.float32)
         
-        # 构建认知参数mask向量 [bias_mask, sigma0_mask, k_mask, delay_mask]
-        cognitive_mask = np.array([bias_mask, perception_sigma0_mask, perception_k_mask, delay_mask], dtype=np.float32)
+        # 构建认知参数mask向量 [bias_mask, sigma0_mask, sigma_max_mask, delay_mask]
+        cognitive_mask = np.array([bias_mask, perception_sigma0_mask, perception_sigma_max_mask, delay_mask], dtype=np.float32)
         
         # 拼接：原始观测 + 认知参数 + 认知mask
         obs_with_cognitive = np.concatenate([obs, cognitive_params, cognitive_mask], axis=-1)
@@ -361,8 +361,8 @@ class PPOCheckpointSimulator:
         # 只在第一次调用时打印详细信息
         if not hasattr(self, '_cognitive_params_logged'):
             print(f"🧠 认知参数拼接: {obs.shape} → {obs_with_cognitive.shape}")
-            print(f"   参数: [bias={bias_coef:.2f}, σ0={sigma0:.3f}, k={k:.3f}, delay={delay}]")
-            print(f"   mask: [bias={bias_mask}, σ0={perception_sigma0_mask}, k={perception_k_mask}, delay={delay_mask}]")
+            print(f"   参数: [bias={bias_coef:.2f}, σ0={sigma0:.3f}, σ_max={sigma_max:.3f}, delay={delay}]")
+            print(f"   mask: [bias={bias_mask}, σ0={perception_sigma0_mask}, σ_max={perception_sigma_max_mask}, delay={delay_mask}]")
             self._cognitive_params_logged = True
             self._cognitive_params_logged = True
         

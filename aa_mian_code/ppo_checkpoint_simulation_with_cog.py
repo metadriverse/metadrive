@@ -102,8 +102,8 @@ def main():
                        help="启用认知感知模块 (默认禁用)")
     parser.add_argument("--perception_sigma0", type=float, default=0.1,
                        help="基础噪声标准差（米）（默认0.1）")
-    parser.add_argument("--perception_k", type=float, default=0.02,
-                       help="距离相关系数（默认0.02）")
+    parser.add_argument("--perception_sigma_max", type=float, default=0.8,
+                       help="最大噪声标准差（米）（默认0.8）")
     parser.add_argument("--perception_p_miss0", type=float, default=0.0,
                        help="基础漏检概率（默认0.0，已关闭）")
     parser.add_argument("--perception_p_false", type=float, default=0.0,

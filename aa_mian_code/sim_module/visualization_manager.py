@@ -339,28 +339,160 @@ class VisualizationManager:
     
     def _generate_reward_plot(self, ax, steps):
         """生成奖励对比图表"""
-        # 实现奖励对比可视化（与原代码逻辑相同）
-        pass
+        if self.cognitive_viz_data['original_rewards'] and self.cognitive_viz_data['modified_rewards']:
+            original_rewards = self.cognitive_viz_data['original_rewards']
+            modified_rewards = self.cognitive_viz_data['modified_rewards']
+            
+            # 确保奖励数据长度和步数长度匹配
+            min_len = min(len(steps), len(original_rewards), len(modified_rewards))
+            if min_len > 0:
+                steps_subset = steps[:min_len]
+                original_rewards_subset = original_rewards[:min_len]
+                modified_rewards_subset = modified_rewards[:min_len]
+                
+                # 检查奖励差异程度
+                reward_diff = [abs(orig - mod) for orig, mod in zip(original_rewards_subset, modified_rewards_subset)]
+                max_diff = max(reward_diff) if reward_diff else 0
+                
+                ax.plot(steps_subset, original_rewards_subset, 'g-', linewidth=3, label='Original Reward', alpha=0.8, marker='o', markersize=4)
+                ax.plot(steps_subset, modified_rewards_subset, 'b-', linewidth=3, label='Modified Reward', marker='s', markersize=4)
+                
+                # 只有当存在明显差异时才显示填充区域
+                if max_diff > 1e-6:  # 只有当差异大于阈值时才显示
+                    ax.fill_between(steps_subset, original_rewards_subset, modified_rewards_subset, 
+                                   alpha=0.3, color='orange', label='Bias Effect')
+
+                ax.set_title('Reward Signal Comparison', fontweight='bold')
+                ax.set_xlabel('Steps')
+                ax.set_ylabel('Reward Value')
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+            else:
+                ax.text(0.5, 0.5, 'Insufficient Reward Data', ha='center', va='center', transform=ax.transAxes)
+                ax.set_title('Reward Signal Comparison', fontweight='bold')
+        else:
+            ax.text(0.5, 0.5, 'Insufficient Reward Data', ha='center', va='center', transform=ax.transAxes)
+            ax.set_title('Reward Signal Comparison', fontweight='bold')
     
     def _generate_delay_plot(self, ax, steps):
         """生成认知延迟图表"""
-        # 实现延迟可视化（与原代码逻辑相同）
-        pass
+        if self.cognitive_viz_data['delay_steps']:
+            delay_steps = self.cognitive_viz_data['delay_steps']
+            delay_applied = self.cognitive_viz_data['delay_applied']
+            
+            # 确保延迟数据长度和步数长度匹配
+            min_len = min(len(steps), len(delay_steps), len(delay_applied))
+            if min_len > 0:
+                steps_subset = steps[:min_len]
+                delay_steps_subset = delay_steps[:min_len]
+                delay_applied_subset = delay_applied[:min_len]
+                
+                ax.plot(steps_subset, delay_steps_subset, 'purple', linewidth=2, marker='o', markersize=3, label='Delay Steps')
+                ax.fill_between(steps_subset, 0, delay_steps_subset, where=[x for x in delay_applied_subset], 
+                               alpha=0.3, color='purple', label='Delay Applied')
+                ax.set_title('Cognitive Delay Steps', fontweight='bold')
+                ax.set_xlabel('Steps')
+                ax.set_ylabel('Delay Steps')
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+            else:
+                ax.text(0.5, 0.5, 'Insufficient Delay Data', ha='center', va='center', transform=ax.transAxes)
+                ax.set_title('Cognitive Delay Steps', fontweight='bold')
+        else:
+            ax.text(0.5, 0.5, 'Cognitive Delay Module Disabled', ha='center', va='center', transform=ax.transAxes)
+            ax.set_title('Cognitive Delay Steps', fontweight='bold')
     
     def _generate_action_plot(self, ax, steps):
         """生成动作对比图表"""
-        # 实现动作对比可视化（与原代码逻辑相同）
-        pass
+        if self.cognitive_viz_data['original_actions'] and self.cognitive_viz_data['delayed_actions']:
+            original_actions = np.array(self.cognitive_viz_data['original_actions'])
+            delayed_actions = np.array(self.cognitive_viz_data['delayed_actions'])
+            
+            # 确保动作数据长度和步数长度匹配
+            min_len = min(len(steps), len(original_actions), len(delayed_actions))
+            if min_len > 0:
+                steps_subset = steps[:min_len]
+                original_actions_subset = original_actions[:min_len]
+                delayed_actions_subset = delayed_actions[:min_len]
+                
+                ax.plot(steps_subset, original_actions_subset[:, 0], 'g-', linewidth=2, label='Original Steering', alpha=0.7)
+                ax.plot(steps_subset, delayed_actions_subset[:, 0], 'orange', linewidth=2, label='Delayed Steering')
+                ax.set_title('Steering Action Comparison', fontweight='bold')
+                ax.set_xlabel('Steps')
+                ax.set_ylabel('Steering Value')
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+            else:
+                ax.text(0.5, 0.5, 'Insufficient Action Data', ha='center', va='center', transform=ax.transAxes)
+                ax.set_title('Steering Action Comparison', fontweight='bold')
+        else:
+            ax.text(0.5, 0.5, 'Insufficient Action Data', ha='center', va='center', transform=ax.transAxes)
+            ax.set_title('Steering Action Comparison', fontweight='bold')
     
     def _generate_perception_plot(self, ax, steps):
         """生成感知噪声图表"""
-        # 实现感知噪声可视化（与原代码逻辑相同）
-        pass
+        if self.cognitive_viz_data['perception_noise']:
+            perception_noise = self.cognitive_viz_data['perception_noise']
+            perception_applied = self.cognitive_viz_data['perception_applied']
+            
+            # 确保感知噪声数据长度和步数长度匹配
+            min_len = min(len(steps), len(perception_noise), len(perception_applied))
+            if min_len > 0:
+                steps_subset = steps[:min_len]
+                perception_noise_subset = perception_noise[:min_len]
+                perception_applied_subset = perception_applied[:min_len]
+                
+                ax.plot(steps_subset, perception_noise_subset, 'cyan', linewidth=2, label='Front Beam Noise', marker='o', markersize=3)
+                ax.fill_between(steps_subset, 0, perception_noise_subset, where=[x for x in perception_applied_subset], 
+                               alpha=0.3, color='cyan', label='Noise Applied')
+                ax.set_title('Front Radar Beam Noise Level (Real-time)', fontweight='bold')
+                ax.set_xlabel('Steps')
+                ax.set_ylabel('Noise Magnitude (meters)')
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+            else:
+                ax.text(0.5, 0.5, 'Insufficient Perception Data', ha='center', va='center', transform=ax.transAxes)
+                ax.set_title('Front Radar Beam Noise Level (Real-time)', fontweight='bold')
+        else:
+            ax.text(0.5, 0.5, 'Cognitive Perception Module Disabled', ha='center', va='center', transform=ax.transAxes)
+            ax.set_title('Front Radar Beam Noise Level (Real-time)', fontweight='bold')
     
     def _generate_observation_plot(self, ax, steps):
         """生成观测对比图表"""
-        # 实现观测对比可视化（与原代码逻辑相同）
-        pass
+        if self.cognitive_viz_data['original_observations'] and self.cognitive_viz_data['noisy_observations']:
+            original_obs = self.cognitive_viz_data['original_observations']
+            noisy_obs = self.cognitive_viz_data['noisy_observations']
+            
+            # 确保观测数据长度和步数长度匹配
+            min_len = min(len(steps), len(original_obs), len(noisy_obs))
+            if min_len > 0:
+                steps_subset = steps[:min_len]
+                original_obs_subset = original_obs[:min_len]
+                noisy_obs_subset = noisy_obs[:min_len]
+                
+                # 检查观测差异程度  
+                obs_diff = [abs(orig - noise) for orig, noise in zip(original_obs_subset, noisy_obs_subset)]
+                max_diff = max(obs_diff) if obs_diff else 0
+                
+                ax.plot(steps_subset, original_obs_subset, 'g-', linewidth=3, label='Original Distance', alpha=0.8, marker='o', markersize=4)
+                ax.plot(steps_subset, noisy_obs_subset, 'red', linewidth=3, label='Noisy Distance', marker='s', markersize=4)
+                
+                # 只有当存在明显差异时才显示填充区域
+                if max_diff > 1e-6:  # 只有当差异大于阈值时才显示
+                    ax.fill_between(steps_subset, original_obs_subset, noisy_obs_subset, 
+                                   alpha=0.3, color='yellow', label='Noise Effect')
+
+                ax.set_title('Front Radar Distance: Before vs After Noise', fontweight='bold')
+                ax.set_xlabel('Steps')
+                ax.set_ylabel('Distance (meters)')
+                ax.legend()
+                ax.grid(True, alpha=0.3)
+            else:
+                ax.text(0.5, 0.5, 'Insufficient Observation Data', ha='center', va='center', transform=ax.transAxes)
+                ax.set_title('Front Radar Distance: Before vs After Noise', fontweight='bold')
+        else:
+            ax.text(0.5, 0.5, 'Insufficient Observation Data', ha='center', va='center', transform=ax.transAxes)
+            ax.set_title('Front Radar Distance: Before vs After Noise', fontweight='bold')
     
     def _generate_cognitive_report(self, episode_data: Dict, save_dir: str, timestamp: str):
         """生成认知模块统计报告"""
@@ -384,8 +516,51 @@ class VisualizationManager:
     
     def _write_cognitive_stats(self, f):
         """写入认知模块统计信息"""
-        # 详细实现与原代码相同
-        pass
+        # 认知偏差统计
+        if self.cognitive_viz_data['bias_strength']:
+            bias_data = self.cognitive_viz_data['bias_strength']
+            bias_applied_count = sum(self.cognitive_viz_data['bias_applied'])
+            
+            f.write(f"## 认知偏差模块\n\n")
+            f.write(f"- **偏差生效次数**: {bias_applied_count}\n")
+            f.write(f"- **平均偏差强度**: {np.mean(bias_data):.4f}\n")
+            f.write(f"- **最大偏差强度**: {np.max(bias_data):.4f}\n")
+            f.write(f"- **偏差生效率**: {bias_applied_count/len(bias_data)*100:.1f}%\n\n")
+        
+        # 认知延迟统计
+        if self.cognitive_viz_data['delay_steps']:
+            delay_data = self.cognitive_viz_data['delay_steps']
+            delay_applied_count = sum(self.cognitive_viz_data['delay_applied'])
+            
+            f.write(f"## 认知延迟模块\n\n")
+            f.write(f"- **延迟生效次数**: {delay_applied_count}\n")
+            f.write(f"- **平均延迟步数**: {np.mean(delay_data):.2f}\n")
+            f.write(f"- **最大延迟步数**: {np.max(delay_data)}\n")
+            f.write(f"- **延迟生效率**: {delay_applied_count/len(delay_data)*100:.1f}%\n\n")
+        
+        # 认知感知统计
+        if self.cognitive_viz_data['perception_noise']:
+            noise_data = self.cognitive_viz_data['perception_noise']
+            perception_applied_count = sum(self.cognitive_viz_data['perception_applied'])
+            
+            f.write(f"## 认知感知模块\n\n")
+            f.write(f"- **噪声生效次数**: {perception_applied_count}\n")
+            f.write(f"- **平均噪声水平**: {np.mean(noise_data):.4f}\n")
+            f.write(f"- **最大噪声水平**: {np.max(noise_data):.4f}\n")
+            f.write(f"- **噪声生效率**: {perception_applied_count/len(noise_data)*100:.1f}%\n\n")
+        
+        # 影响分析
+        if (self.cognitive_viz_data['original_rewards'] and 
+            self.cognitive_viz_data['modified_rewards']):
+            orig_rewards = np.array(self.cognitive_viz_data['original_rewards'])
+            mod_rewards = np.array(self.cognitive_viz_data['modified_rewards'])
+            reward_diff = mod_rewards - orig_rewards
+            
+            f.write(f"## 认知影响分析\n\n")
+            f.write(f"- **平均奖励变化**: {np.mean(reward_diff):.4f}\n")
+            f.write(f"- **最大负面影响**: {np.min(reward_diff):.4f}\n")
+            f.write(f"- **最大正面影响**: {np.max(reward_diff):.4f}\n")
+            f.write(f"- **总体奖励影响**: {np.sum(reward_diff):.4f}\n\n")
     
     def generate_speed_control_visualization(self, episode_data: Dict, save_dir: str = None) -> Optional[str]:
         """
