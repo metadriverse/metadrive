@@ -8,6 +8,7 @@ from metadrive.component.vehicle.vehicle_type import DefaultVehicle
 from metadrive.obs.gaussian_obs import GaussianObservation
 from metadrive.obs.navigation_obs import NavigationObservation
 from metadrive.obs.state_obs import StateObservation
+from metadrive.obs.surrounding_obs import SurroundingObservation
 from metadrive.obs.assembly_obs import AssemblyObservation
 from metadrive.obs.observation_base import DefaultObservation
 BASE_DEFAULT_CONFIG = dict(
@@ -35,6 +36,18 @@ BASE_DEFAULT_CONFIG = dict(
                 observer_class=GaussianObservation,
                 clip_rgb=False,
                 stack_size=3,
+                cameras={
+                'BACK': {
+                    'offset': [-2.65, 0, 1.8],
+                    'hpr': [180, 0, 0],
+                    'H': 900,
+                    'W': 1600,
+                    'fovx': 90.22309438895985,
+                    'fovy': 58.9063564284116,
+                    'cx': 428.8887163431848,
+                    'cy': 238.44244942037076
+                }
+                }
             ),
             navigation = dict(
                 observer_class=NavigationObservation,
@@ -42,6 +55,9 @@ BASE_DEFAULT_CONFIG = dict(
             ),
             states = dict(
                 observer_class=StateObservation,
+            ),
+            surrounding = dict(
+                observer_class=SurroundingObservation,
             )
         ),
         policy=EnvInputPolicy,
@@ -75,7 +91,7 @@ BASE_DEFAULT_CONFIG = dict(
         ),
         controller_config=dict(
             enable_reverse=True,
-            spawn_velocity=False,
+            spawn_velocity=True,
         )
     ),
 
