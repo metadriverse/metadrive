@@ -1,4 +1,5 @@
-import time
+import gc
+import tracemalloc
 from collections import deque
 from itertools import chain
 from sys import getsizeof, stderr
@@ -73,66 +74,54 @@ def process_memory(to_mb=False):
         return mem_info.rss
 
 
-def test_engine_memory_leak():
+# A step may keep this many bytes alive on average before it counts as a leak
+MAX_LEAK_PER_STEP = 64
+
+
+def python_memory_growth(step, num_steps, num_warmup_steps):
+    """
+    Run step() num_warmup_steps + num_steps times and return how many bytes allocated by Python during the last
+    num_steps calls are still alive afterwards.
+
+    The process RSS is not used here: it changes in whole pages depending on allocator state and other threads, so it
+    grows now and then in a long test session even when nothing leaks.
+    """
+    was_tracing = tracemalloc.is_tracing()
+    if not was_tracing:
+        tracemalloc.start()
     try:
+        for _ in range(num_warmup_steps):
+            step()
+        gc.collect()
+        before = tracemalloc.get_traced_memory()[0]
+        for _ in range(num_steps):
+            step()
+        gc.collect()
+        return tracemalloc.get_traced_memory()[0] - before
+    finally:
+        if not was_tracing:
+            tracemalloc.stop()
 
-        default_config = MetaDriveEnv.default_config()
-        default_config["map_config"]["config"] = 3
 
-        close_engine()
-
-        engine = initialize_engine(default_config)
-
-        ct = time.time()
-        last_lm = cm = process_memory()
-        last_mem = 0.0
-        for t in range(300):
-            lt = time.time()
-
-            engine.seed(0)
-
-            engine = get_engine()
-
-            nlt = time.time()
-            lm = process_memory()
-            # # print(
-            #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
-            #         t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
-            #     )
-            # )
-            last_lm = lm
-            if t > 100:
-                time.sleep(0.1)
-                assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
-            last_mem = lm - cm
+def test_engine_memory_leak():
+    default_config = MetaDriveEnv.default_config()
+    default_config["map_config"]["config"] = 3
+    close_engine()
+    initialize_engine(default_config)
+    try:
+        growth = python_memory_growth(lambda: get_engine().seed(0), num_steps=200, num_warmup_steps=100)
     finally:
         close_engine()
+    assert growth < 200 * MAX_LEAK_PER_STEP, "engine.seed() keeps {:.0f} bytes alive per call".format(growth / 200)
 
 
 def test_config_memory_leak():
-
-    ct = time.time()
-    last_lm = cm = process_memory()
-    last_mem = 0.0
-    for t in range(800):
-        lt = time.time()
-
+    def step():
         default_config = MetaDriveEnv.default_config()
         default_config.update({"map": 3, "type": "block_sequence", "config": 3})
-        del default_config
 
-        nlt = time.time()
-        lm = process_memory()
-        # print(
-        #     "After {} Iters, Time {:.3f} Total Time {:.3f}, Memory Usage {:,} Memory Change {:,}".format(
-        #         t + 1, nlt - lt, nlt - ct, lm - cm, lm - last_lm
-        #     )
-        # )
-        last_lm = lm
-        if t > 500:
-            time.sleep(0.1)
-            assert abs((lm - cm) - last_mem) < 10  # Memory should not have change > 1KB
-        last_mem = lm - cm
+    growth = python_memory_growth(step, num_steps=300, num_warmup_steps=500)
+    assert growth < 300 * MAX_LEAK_PER_STEP, "default_config() keeps {:.0f} bytes alive per call".format(growth / 300)
 
 
 if __name__ == "__main__":
