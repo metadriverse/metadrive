@@ -77,6 +77,30 @@ def test_idm_policy_is_moving(use_mesh_terrain, render=False, in_test=True):
         env.close()
 
 
+def test_idm_desired_gap_uses_si_units():
+    """The desired gap is in metres, so speeds must enter in m/s (not km/h)."""
+    from types import SimpleNamespace
+    policy = SimpleNamespace(DISTANCE_WANTED=10.0, TIME_WANTED=1.5, ACC_FACTOR=1.0, DEACC_FACTOR=-5)
+    heading = np.array([1.0, 0.0])
+    ego = SimpleNamespace(
+        speed=10.0,
+        speed_km_h=36.0,
+        velocity=np.array([10.0, 0.0]),
+        velocity_km_h=np.array([36.0, 0.0]),
+        heading=heading,
+    )
+    front = SimpleNamespace(
+        speed=10.0, speed_km_h=36.0, velocity=np.array([10.0, 0.0]), velocity_km_h=np.array([36.0, 0.0])
+    )
+    # same speed: d* = d0 + v * T = 10 m + 10 m/s * 1.5 s = 25 m
+    assert np.isclose(IDMPolicy.desired_gap(policy, ego, front), 25.0)
+    # approaching at 2 m/s adds v * dv / (2 * sqrt(a * b)) = 10 * 2 / (2 * sqrt(5)) m
+    front.velocity = np.array([8.0, 0.0])
+    front.speed = 8.0
+    expected = 25.0 + 10.0 * 2.0 / (2 * np.sqrt(5.0))
+    assert np.isclose(IDMPolicy.desired_gap(policy, ego, front), expected)
+
+
 if __name__ == '__main__':
     # test_idm_policy_briefly()
     test_idm_policy_is_moving(False, render=True, in_test=False)
