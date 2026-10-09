@@ -312,12 +312,16 @@ class IDMPolicy(BasePolicy):
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
+        """IDM desired gap d* = d0 + v*T + v*dv / (2*sqrt(a*b)), in metres.
+
+        Speeds must be in m/s: DISTANCE_WANTED is in metres and TIME_WANTED in seconds.
+        """
         d0 = self.DISTANCE_WANTED
         tau = self.TIME_WANTED
         ab = -self.ACC_FACTOR * self.DEACC_FACTOR
-        dv = np.dot(ego_vehicle.velocity_km_h - front_obj.velocity_km_h, ego_vehicle.heading) if projected \
-            else ego_vehicle.speed_km_h - front_obj.speed_km_h
-        d_star = d0 + ego_vehicle.speed_km_h * tau + ego_vehicle.speed_km_h * dv / (2 * np.sqrt(ab))
+        dv = np.dot(ego_vehicle.velocity - front_obj.velocity, ego_vehicle.heading) if projected \
+            else ego_vehicle.speed - front_obj.speed
+        d_star = d0 + ego_vehicle.speed * tau + ego_vehicle.speed * dv / (2 * np.sqrt(ab))
         return d_star
 
     def reset(self):
