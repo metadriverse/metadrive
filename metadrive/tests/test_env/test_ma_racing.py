@@ -77,6 +77,9 @@ def test_ma_racing_env_with_IDM(num_agents):
     config = dict(
         num_agents=num_agents,
         agent_policy=IDMPolicy,
+        # Spawn slots are 8 m apart, closer than the IDM jam distance, so each row waits for the row ahead to pull
+        # away. With 12 agents the last row starts after about 100 steps and would be terminated as idle.
+        idle_done=False,
         # use_render=True,
         # prefer_track_agent="agent11",
         debug=True

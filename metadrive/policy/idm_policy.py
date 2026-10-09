@@ -309,6 +309,10 @@ class IDMPolicy(BasePolicy):
             d = dist_to_front
             speed_diff = self.desired_gap(ego_vehicle, front_obj) / not_zero(d)
             acceleration -= self.ACC_FACTOR * (speed_diff**2)
+        if acceleration < 0 and ego_vehicle.enable_reverse and np.dot(ego_vehicle.velocity, ego_vehicle.heading) < 0.01:
+            # IDM only drives forward. With reverse enabled, a negative throttle at standstill would reverse the
+            # vehicle, so output zero throttle instead, which applies the brake and holds the vehicle.
+            acceleration = 0.
         return acceleration
 
     def desired_gap(self, ego_vehicle, front_obj, projected: bool = True) -> float:
