@@ -5,5 +5,5 @@
 ## Checklist
 
 * [ ] I have merged the latest main branch into current branch.
-* [ ] I have run `bash scripts/format.sh` before merging.
+* [ ] I have run `bash format.sh` before merging.
 * Please use "squash and merge" mode.
