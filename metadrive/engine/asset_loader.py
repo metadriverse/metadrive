@@ -112,8 +112,6 @@ def initialize_asset_loader(engine):
     Returns: None
 
     """
-    # load model file in utf-8
-    os.environ["PYTHONUTF8"] = "on"
     if AssetLoader.initialized():
         AssetLoader.logger.warning(
             "AssetLoader is initialize to root path: {}! But you are initializing again!".format(
