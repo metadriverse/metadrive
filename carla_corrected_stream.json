@@ -1,0 +1,7202 @@
+[
+  {
+    "frame_id": 0,
+    "timestamp": 0.0,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 0.423,
+          "y": -0.0,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.12,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 8.452,
+        "vy": -0.001,
+        "vz": 0.0,
+        "speed_mps": 8.466,
+        "speed_kmh": 30.48
+      },
+      "acceleration": {
+        "ax": 2.383,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.003
+      }
+    },
+    "control": {
+      "steer": 0.002,
+      "throttle": 0.822,
+      "brake": 0.007,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.006,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 15.423,
+      "y": -0.002,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 1,
+    "timestamp": 0.05,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 0.851,
+          "y": -0.0,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.27,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 8.571,
+        "vy": -0.002,
+        "vz": 0.0,
+        "speed_mps": 8.661,
+        "speed_kmh": 31.18
+      },
+      "acceleration": {
+        "ax": 2.377,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.003
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.822,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.006,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 15.851,
+      "y": -0.004,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 2,
+    "timestamp": 0.1,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 1.286,
+          "y": -0.0,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.03,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 8.69,
+        "vy": -0.003,
+        "vz": 0.0,
+        "speed_mps": 8.558,
+        "speed_kmh": 30.81
+      },
+      "acceleration": {
+        "ax": 2.371,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.822,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.005,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 16.286,
+      "y": -0.006,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 3,
+    "timestamp": 0.15,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 1.726,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.13,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 8.808,
+        "vy": -0.004,
+        "vz": 0.0,
+        "speed_mps": 8.622,
+        "speed_kmh": 31.04
+      },
+      "acceleration": {
+        "ax": 2.366,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.821,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.005,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 16.726,
+      "y": -0.008,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 4,
+    "timestamp": 0.2,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 2.172,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.12,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 8.926,
+        "vy": -0.005,
+        "vz": 0.0,
+        "speed_mps": 8.717,
+        "speed_kmh": 31.38
+      },
+      "acceleration": {
+        "ax": 2.36,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.821,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.004,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 17.172,
+      "y": -0.009,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 5,
+    "timestamp": 0.25,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 2.625,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.16,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.044,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 8.905,
+        "speed_kmh": 32.06
+      },
+      "acceleration": {
+        "ax": 2.354,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.0,
+      "throttle": 0.821,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.004,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 17.625,
+      "y": -0.01,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 6,
+    "timestamp": 0.3,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 3.083,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.19,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.161,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 8.973,
+        "speed_kmh": 32.3
+      },
+      "acceleration": {
+        "ax": 2.348,
+        "ay": -0.002,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.82,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.004,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 18.083,
+      "y": -0.011,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 7,
+    "timestamp": 0.35,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 3.547,
+          "y": -0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.09,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.278,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 9.068,
+        "speed_kmh": 32.65
+      },
+      "acceleration": {
+        "ax": 2.342,
+        "ay": -0.002,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.82,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.004,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 18.547,
+      "y": -0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 8,
+    "timestamp": 0.4,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 4.016,
+          "y": -0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.31,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.395,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 9.084,
+        "speed_kmh": 32.7
+      },
+      "acceleration": {
+        "ax": 2.336,
+        "ay": -0.002,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.818,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.004,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 19.016,
+      "y": -0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 9,
+    "timestamp": 0.45,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 4.492,
+          "y": -0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.17,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.512,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 9.334,
+        "speed_kmh": 33.6
+      },
+      "acceleration": {
+        "ax": 2.33,
+        "ay": -0.002,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.817,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.004,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 19.492,
+      "y": -0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 10,
+    "timestamp": 0.5,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 4.973,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.08,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.628,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 9.496,
+        "speed_kmh": 34.19
+      },
+      "acceleration": {
+        "ax": 2.324,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.815,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.005,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 19.973,
+      "y": -0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 11,
+    "timestamp": 0.55,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 5.461,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.05,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.744,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 9.568,
+        "speed_kmh": 34.44
+      },
+      "acceleration": {
+        "ax": 2.319,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.814,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.004,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 20.461,
+      "y": -0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 12,
+    "timestamp": 0.6,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 5.953,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.04,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.859,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 9.64,
+        "speed_kmh": 34.7
+      },
+      "acceleration": {
+        "ax": 2.313,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.811,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.005,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 20.953,
+      "y": -0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 13,
+    "timestamp": 0.65,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 6.452,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.03,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 9.975,
+        "vy": -0.005,
+        "vz": 0.0,
+        "speed_mps": 9.718,
+        "speed_kmh": 34.99
+      },
+      "acceleration": {
+        "ax": 2.307,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.809,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.005,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 21.452,
+      "y": -0.011,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 14,
+    "timestamp": 0.7,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 6.957,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": -0.1,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 10.09,
+        "vy": -0.005,
+        "vz": 0.0,
+        "speed_mps": 9.646,
+        "speed_kmh": 34.73
+      },
+      "acceleration": {
+        "ax": 2.301,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.806,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.005,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 21.957,
+      "y": -0.01,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 15,
+    "timestamp": 0.75,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 7.467,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.15,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 10.205,
+        "vy": -0.004,
+        "vz": 0.0,
+        "speed_mps": 9.662,
+        "speed_kmh": 34.78
+      },
+      "acceleration": {
+        "ax": 2.296,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.0,
+      "throttle": 0.803,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.005,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 22.467,
+      "y": -0.01,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 16,
+    "timestamp": 0.8,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 7.983,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.56,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 10.319,
+        "vy": -0.003,
+        "vz": 0.0,
+        "speed_mps": 9.843,
+        "speed_kmh": 35.43
+      },
+      "acceleration": {
+        "ax": 2.29,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.0,
+      "throttle": 0.8,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.005,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 22.983,
+      "y": -0.009,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 17,
+    "timestamp": 0.85,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 8.505,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.75,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 10.433,
+        "vy": -0.002,
+        "vz": 0.0,
+        "speed_mps": 10.084,
+        "speed_kmh": 36.3
+      },
+      "acceleration": {
+        "ax": 2.284,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.0,
+      "throttle": 0.796,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.006,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 23.505,
+      "y": -0.007,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 18,
+    "timestamp": 0.9,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 9.032,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.39,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 10.547,
+        "vy": -0.001,
+        "vz": 0.0,
+        "speed_mps": 10.155,
+        "speed_kmh": 36.56
+      },
+      "acceleration": {
+        "ax": 2.278,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.0,
+      "throttle": 0.791,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.006,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 24.032,
+      "y": -0.006,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 19,
+    "timestamp": 0.95,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 9.565,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.27,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 10.661,
+        "vy": -0.0,
+        "vz": 0.0,
+        "speed_mps": 10.433,
+        "speed_kmh": 37.56
+      },
+      "acceleration": {
+        "ax": 2.273,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.786,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.006,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 24.565,
+      "y": -0.005,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 20,
+    "timestamp": 1.0,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 10.104,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.43,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 10.774,
+        "vy": 0.001,
+        "vz": 0.0,
+        "speed_mps": 10.456,
+        "speed_kmh": 37.64
+      },
+      "acceleration": {
+        "ax": 2.267,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.781,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.007,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 25.104,
+      "y": -0.004,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 21,
+    "timestamp": 1.05,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 10.648,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.63,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 10.887,
+        "vy": 0.002,
+        "vz": 0.0,
+        "speed_mps": 10.442,
+        "speed_kmh": 37.59
+      },
+      "acceleration": {
+        "ax": 2.261,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.776,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.007,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 25.648,
+      "y": -0.002,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 22,
+    "timestamp": 1.1,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 11.198,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.43,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.0,
+        "vy": 0.003,
+        "vz": 0.0,
+        "speed_mps": 10.796,
+        "speed_kmh": 38.86
+      },
+      "acceleration": {
+        "ax": 2.252,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.769,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.007,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 26.198,
+      "y": -0.001,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 23,
+    "timestamp": 1.15,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 11.754,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.84,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.109,
+        "vy": 0.004,
+        "vz": 0.0,
+        "speed_mps": 10.877,
+        "speed_kmh": 39.16
+      },
+      "acceleration": {
+        "ax": 2.187,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.763,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.008,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 26.754,
+      "y": 0.001,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 24,
+    "timestamp": 1.2,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 12.314,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.6,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.215,
+        "vy": 0.005,
+        "vz": 0.0,
+        "speed_mps": 10.888,
+        "speed_kmh": 39.2
+      },
+      "acceleration": {
+        "ax": 2.124,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.756,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.009,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 27.314,
+      "y": 0.002,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 25,
+    "timestamp": 1.25,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 12.88,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.5,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.319,
+        "vy": 0.006,
+        "vz": 0.0,
+        "speed_mps": 11.104,
+        "speed_kmh": 39.98
+      },
+      "acceleration": {
+        "ax": 2.063,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.747,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.009,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 27.88,
+      "y": 0.004,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 26,
+    "timestamp": 1.3,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 13.451,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.56,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.419,
+        "vy": 0.006,
+        "vz": 0.0,
+        "speed_mps": 11.124,
+        "speed_kmh": 40.05
+      },
+      "acceleration": {
+        "ax": 2.004,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.739,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.01,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 28.451,
+      "y": 0.005,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 27,
+    "timestamp": 1.35,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 14.027,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.62,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.516,
+        "vy": 0.007,
+        "vz": 0.0,
+        "speed_mps": 11.296,
+        "speed_kmh": 40.66
+      },
+      "acceleration": {
+        "ax": 1.946,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.73,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.01,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 29.027,
+      "y": 0.007,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 28,
+    "timestamp": 1.4,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 14.608,
+          "y": -0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.7,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.611,
+        "vy": 0.008,
+        "vz": 0.0,
+        "speed_mps": 11.435,
+        "speed_kmh": 41.16
+      },
+      "acceleration": {
+        "ax": 1.89,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.721,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 29.608,
+      "y": 0.008,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 29,
+    "timestamp": 1.45,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 15.193,
+          "y": -0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.78,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.702,
+        "vy": 0.009,
+        "vz": 0.0,
+        "speed_mps": 11.47,
+        "speed_kmh": 41.29
+      },
+      "acceleration": {
+        "ax": 1.836,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.712,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 30.193,
+      "y": 0.01,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 30,
+    "timestamp": 1.5,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 15.782,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.51,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.792,
+        "vy": 0.01,
+        "vz": 0.0,
+        "speed_mps": 11.64,
+        "speed_kmh": 41.9
+      },
+      "acceleration": {
+        "ax": 1.783,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.702,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 30.782,
+      "y": 0.011,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 31,
+    "timestamp": 1.55,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 16.376,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.37,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.878,
+        "vy": 0.01,
+        "vz": 0.0,
+        "speed_mps": 11.725,
+        "speed_kmh": 42.21
+      },
+      "acceleration": {
+        "ax": 1.732,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.691,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.013,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 31.376,
+      "y": 0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 32,
+    "timestamp": 1.6,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 16.974,
+          "y": -0.0,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.58,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 11.962,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 11.814,
+        "speed_kmh": 42.53
+      },
+      "acceleration": {
+        "ax": 1.682,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.681,
+      "brake": 0.005,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.013,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 31.974,
+      "y": 0.013,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 33,
+    "timestamp": 1.65,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 17.576,
+          "y": 0.0,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.67,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.044,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 11.591,
+        "speed_kmh": 41.73
+      },
+      "acceleration": {
+        "ax": 1.634,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": 0.001,
+      "throttle": 0.671,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.014,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 32.576,
+      "y": 0.014,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 34,
+    "timestamp": 1.7,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 18.183,
+          "y": 0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.64,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.123,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 11.916,
+        "speed_kmh": 42.9
+      },
+      "acceleration": {
+        "ax": 1.587,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.66,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.014,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 33.183,
+      "y": 0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 35,
+    "timestamp": 1.75,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 18.793,
+          "y": 0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.77,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.2,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 11.746,
+        "speed_kmh": 42.29
+      },
+      "acceleration": {
+        "ax": 1.541,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.649,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.014,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 33.793,
+      "y": 0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 36,
+    "timestamp": 1.8,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 19.406,
+          "y": 0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.85,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.275,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 11.794,
+        "speed_kmh": 42.46
+      },
+      "acceleration": {
+        "ax": 1.497,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.638,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 34.406,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 37,
+    "timestamp": 1.85,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 20.024,
+          "y": 0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.58,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.348,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 11.912,
+        "speed_kmh": 42.88
+      },
+      "acceleration": {
+        "ax": 1.454,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": 0.0,
+      "throttle": 0.625,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 35.024,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 38,
+    "timestamp": 1.9,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 20.645,
+          "y": 0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.62,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.418,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 11.842,
+        "speed_kmh": 42.63
+      },
+      "acceleration": {
+        "ax": 1.412,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.0,
+      "throttle": 0.614,
+      "brake": 0.006,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 35.645,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 39,
+    "timestamp": 1.95,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 21.269,
+          "y": 0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.36,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.487,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 12.091,
+        "speed_kmh": 43.53
+      },
+      "acceleration": {
+        "ax": 1.371,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.0,
+      "throttle": 0.601,
+      "brake": 0.007,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 3
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 36.269,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 40,
+    "timestamp": 2.0,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 21.897,
+          "y": 0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.46,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.554,
+        "vy": 0.01,
+        "vz": 0.0,
+        "speed_mps": 12.048,
+        "speed_kmh": 43.37
+      },
+      "acceleration": {
+        "ax": 1.332,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.589,
+      "brake": 0.007,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 36.897,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 41,
+    "timestamp": 2.05,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 22.528,
+          "y": 0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.58,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.618,
+        "vy": 0.009,
+        "vz": 0.0,
+        "speed_mps": 12.215,
+        "speed_kmh": 43.98
+      },
+      "acceleration": {
+        "ax": 1.294,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.577,
+      "brake": 0.007,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 37.528,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 42,
+    "timestamp": 2.1,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 23.162,
+          "y": 0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.34,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.681,
+        "vy": 0.009,
+        "vz": 0.0,
+        "speed_mps": 12.453,
+        "speed_kmh": 44.83
+      },
+      "acceleration": {
+        "ax": 1.256,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.565,
+      "brake": 0.007,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 38.162,
+      "y": 0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 43,
+    "timestamp": 2.15,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 23.799,
+          "y": 0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.45,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.742,
+        "vy": 0.008,
+        "vz": 0.0,
+        "speed_mps": 12.615,
+        "speed_kmh": 45.41
+      },
+      "acceleration": {
+        "ax": 1.22,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.001,
+      "throttle": 0.553,
+      "brake": 0.007,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 38.799,
+      "y": 0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 44,
+    "timestamp": 2.2,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 24.439,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.58,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.801,
+        "vy": 0.007,
+        "vz": 0.0,
+        "speed_mps": 12.618,
+        "speed_kmh": 45.42
+      },
+      "acceleration": {
+        "ax": 1.185,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.541,
+      "brake": 0.007,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 39.439,
+      "y": 0.014,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 45,
+    "timestamp": 2.25,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 25.082,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.6,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.859,
+        "vy": 0.006,
+        "vz": 0.0,
+        "speed_mps": 12.589,
+        "speed_kmh": 45.32
+      },
+      "acceleration": {
+        "ax": 1.151,
+        "ay": 0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.529,
+      "brake": 0.008,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.015,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 40.082,
+      "y": 0.013,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 46,
+    "timestamp": 2.3,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 25.728,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.84,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.915,
+        "vy": 0.005,
+        "vz": 0.0,
+        "speed_mps": 12.66,
+        "speed_kmh": 45.58
+      },
+      "acceleration": {
+        "ax": 1.118,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.518,
+      "brake": 0.008,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.014,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 40.728,
+      "y": 0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 47,
+    "timestamp": 2.35,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 26.376,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.77,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 12.969,
+        "vy": 0.004,
+        "vz": 0.0,
+        "speed_mps": 12.685,
+        "speed_kmh": 45.66
+      },
+      "acceleration": {
+        "ax": 1.086,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.506,
+      "brake": 0.008,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.014,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 41.376,
+      "y": 0.011,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 48,
+    "timestamp": 2.4,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 27.027,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.75,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.022,
+        "vy": 0.003,
+        "vz": 0.0,
+        "speed_mps": 12.69,
+        "speed_kmh": 45.69
+      },
+      "acceleration": {
+        "ax": 1.055,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.494,
+      "brake": 0.008,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.014,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 42.027,
+      "y": 0.01,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 49,
+    "timestamp": 2.45,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 27.681,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.65,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.073,
+        "vy": 0.001,
+        "vz": 0.0,
+        "speed_mps": 12.661,
+        "speed_kmh": 45.58
+      },
+      "acceleration": {
+        "ax": 1.024,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.482,
+      "brake": 0.009,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.014,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 42.681,
+      "y": 0.008,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 50,
+    "timestamp": 2.5,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 28.337,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.83,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.123,
+        "vy": 0.0,
+        "vz": 0.0,
+        "speed_mps": 12.733,
+        "speed_kmh": 45.84
+      },
+      "acceleration": {
+        "ax": 0.995,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.471,
+      "brake": 0.009,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.014,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 43.337,
+      "y": 0.007,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 51,
+    "timestamp": 2.55,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 28.995,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.9,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.171,
+        "vy": -0.001,
+        "vz": 0.0,
+        "speed_mps": 12.826,
+        "speed_kmh": 46.17
+      },
+      "acceleration": {
+        "ax": 0.966,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.461,
+      "brake": 0.009,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.013,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 43.995,
+      "y": 0.005,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 52,
+    "timestamp": 2.6,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 29.656,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.81,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.218,
+        "vy": -0.002,
+        "vz": 0.0,
+        "speed_mps": 12.822,
+        "speed_kmh": 46.16
+      },
+      "acceleration": {
+        "ax": 0.939,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.449,
+      "brake": 0.01,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.013,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 44.656,
+      "y": 0.004,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 53,
+    "timestamp": 2.65,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 30.32,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.98,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.264,
+        "vy": -0.004,
+        "vz": 0.0,
+        "speed_mps": 13.088,
+        "speed_kmh": 47.12
+      },
+      "acceleration": {
+        "ax": 0.912,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.441,
+      "brake": 0.01,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.013,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 45.32,
+      "y": 0.002,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 54,
+    "timestamp": 2.7,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 30.985,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.79,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.308,
+        "vy": -0.005,
+        "vz": 0.0,
+        "speed_mps": 12.948,
+        "speed_kmh": 46.61
+      },
+      "acceleration": {
+        "ax": 0.885,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.429,
+      "brake": 0.01,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.013,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 45.985,
+      "y": 0.001,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 55,
+    "timestamp": 2.75,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 31.653,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.93,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.351,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 13.061,
+        "speed_kmh": 47.02
+      },
+      "acceleration": {
+        "ax": 0.86,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.42,
+      "brake": 0.01,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 46.653,
+      "y": -0.001,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 56,
+    "timestamp": 2.8,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 32.322,
+          "y": 0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 1.1,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.393,
+        "vy": -0.007,
+        "vz": 0.0,
+        "speed_mps": 13.395,
+        "speed_kmh": 48.22
+      },
+      "acceleration": {
+        "ax": 0.835,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.413,
+      "brake": 0.01,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 47.322,
+      "y": -0.002,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 57,
+    "timestamp": 2.85,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 32.994,
+          "y": 0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.96,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.433,
+        "vy": -0.008,
+        "vz": 0.0,
+        "speed_mps": 13.222,
+        "speed_kmh": 47.6
+      },
+      "acceleration": {
+        "ax": 0.811,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.401,
+      "brake": 0.011,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 47.994,
+      "y": -0.004,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 58,
+    "timestamp": 2.9,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 33.667,
+          "y": 0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.74,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.473,
+        "vy": -0.009,
+        "vz": 0.0,
+        "speed_mps": 13.203,
+        "speed_kmh": 47.53
+      },
+      "acceleration": {
+        "ax": 0.788,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.391,
+      "brake": 0.011,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 48.667,
+      "y": -0.005,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 59,
+    "timestamp": 2.95,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 34.343,
+          "y": 0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.92,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.511,
+        "vy": -0.01,
+        "vz": 0.0,
+        "speed_mps": 13.431,
+        "speed_kmh": 48.35
+      },
+      "acceleration": {
+        "ax": 0.765,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.384,
+      "brake": 0.011,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 49.343,
+      "y": -0.007,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 60,
+    "timestamp": 3.0,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 35.02,
+          "y": 0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 1.02,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.548,
+        "vy": -0.011,
+        "vz": 0.0,
+        "speed_mps": 13.474,
+        "speed_kmh": 48.51
+      },
+      "acceleration": {
+        "ax": 0.743,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.376,
+      "brake": 0.012,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 50.02,
+      "y": -0.008,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 61,
+    "timestamp": 3.05,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 35.7,
+          "y": 0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 1.29,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.584,
+        "vy": -0.011,
+        "vz": 0.0,
+        "speed_mps": 13.249,
+        "speed_kmh": 47.7
+      },
+      "acceleration": {
+        "ax": 0.722,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.365,
+      "brake": 0.012,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 50.7,
+      "y": -0.01,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 62,
+    "timestamp": 3.1,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 36.381,
+          "y": 0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 1.27,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.619,
+        "vy": -0.012,
+        "vz": 0.0,
+        "speed_mps": 13.399,
+        "speed_kmh": 48.24
+      },
+      "acceleration": {
+        "ax": 0.701,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.358,
+      "brake": 0.012,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.01,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 51.381,
+      "y": -0.011,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 63,
+    "timestamp": 3.15,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 37.063,
+          "y": 0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.89,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.653,
+        "vy": -0.012,
+        "vz": 0.0,
+        "speed_mps": 13.472,
+        "speed_kmh": 48.5
+      },
+      "acceleration": {
+        "ax": 0.681,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.35,
+      "brake": 0.013,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.01,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 52.063,
+      "y": -0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 64,
+    "timestamp": 3.2,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 37.748,
+          "y": 0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.8,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.686,
+        "vy": -0.013,
+        "vz": 0.0,
+        "speed_mps": 13.517,
+        "speed_kmh": 48.66
+      },
+      "acceleration": {
+        "ax": 0.661,
+        "ay": -0.001,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.343,
+      "brake": 0.013,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.01,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 52.748,
+      "y": -0.013,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 65,
+    "timestamp": 3.25,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 38.432,
+          "y": 0.0,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.83,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.696,
+        "vy": -0.013,
+        "vz": 0.0,
+        "speed_mps": 13.617,
+        "speed_kmh": 49.02
+      },
+      "acceleration": {
+        "ax": 0.191,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.321,
+      "brake": 0.015,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 53.432,
+      "y": -0.014,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 66,
+    "timestamp": 3.3,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 39.118,
+          "y": -0.0,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.8,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.705,
+        "vy": -0.013,
+        "vz": 0.0,
+        "speed_mps": 13.501,
+        "speed_kmh": 48.6
+      },
+      "acceleration": {
+        "ax": 0.19,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.312,
+      "brake": 0.016,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 54.118,
+      "y": -0.014,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 67,
+    "timestamp": 3.35,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 39.803,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.79,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.715,
+        "vy": -0.013,
+        "vz": 0.0,
+        "speed_mps": 13.473,
+        "speed_kmh": 48.5
+      },
+      "acceleration": {
+        "ax": 0.19,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.306,
+      "brake": 0.016,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 54.803,
+      "y": -0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 68,
+    "timestamp": 3.4,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 40.49,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.7,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.724,
+        "vy": -0.013,
+        "vz": 0.0,
+        "speed_mps": 13.397,
+        "speed_kmh": 48.23
+      },
+      "acceleration": {
+        "ax": 0.189,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.298,
+      "brake": 0.017,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 55.49,
+      "y": -0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 69,
+    "timestamp": 3.45,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 41.176,
+          "y": -0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.83,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.734,
+        "vy": -0.012,
+        "vz": 0.0,
+        "speed_mps": 13.594,
+        "speed_kmh": 48.94
+      },
+      "acceleration": {
+        "ax": 0.189,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.296,
+      "brake": 0.016,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 56.176,
+      "y": -0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 70,
+    "timestamp": 3.5,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 41.863,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.83,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.743,
+        "vy": -0.012,
+        "vz": 0.0,
+        "speed_mps": 13.494,
+        "speed_kmh": 48.58
+      },
+      "acceleration": {
+        "ax": 0.188,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.289,
+      "brake": 0.017,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 56.863,
+      "y": -0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 71,
+    "timestamp": 3.55,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 42.551,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.86,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.753,
+        "vy": -0.011,
+        "vz": 0.0,
+        "speed_mps": 13.236,
+        "speed_kmh": 47.65
+      },
+      "acceleration": {
+        "ax": 0.188,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.28,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 57.551,
+      "y": -0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 72,
+    "timestamp": 3.6,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 43.239,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.78,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.762,
+        "vy": -0.01,
+        "vz": 0.0,
+        "speed_mps": 13.271,
+        "speed_kmh": 47.78
+      },
+      "acceleration": {
+        "ax": 0.187,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.275,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 58.239,
+      "y": -0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 73,
+    "timestamp": 3.65,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 43.928,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.64,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.771,
+        "vy": -0.01,
+        "vz": 0.0,
+        "speed_mps": 13.366,
+        "speed_kmh": 48.12
+      },
+      "acceleration": {
+        "ax": 0.187,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.272,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 58.928,
+      "y": -0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 74,
+    "timestamp": 3.7,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 44.617,
+          "y": -0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.74,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.781,
+        "vy": -0.009,
+        "vz": 0.0,
+        "speed_mps": 13.293,
+        "speed_kmh": 47.85
+      },
+      "acceleration": {
+        "ax": 0.186,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.267,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 59.617,
+      "y": -0.014,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 75,
+    "timestamp": 3.75,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 45.306,
+          "y": -0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.47,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.79,
+        "vy": -0.008,
+        "vz": 0.0,
+        "speed_mps": 13.315,
+        "speed_kmh": 47.94
+      },
+      "acceleration": {
+        "ax": 0.186,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.263,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 60.306,
+      "y": -0.013,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 76,
+    "timestamp": 3.8,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 45.996,
+          "y": -0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.56,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.799,
+        "vy": -0.007,
+        "vz": 0.0,
+        "speed_mps": 13.19,
+        "speed_kmh": 47.48
+      },
+      "acceleration": {
+        "ax": 0.186,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.258,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 60.996,
+      "y": -0.013,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 77,
+    "timestamp": 3.85,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 46.687,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.51,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.808,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 12.931,
+        "speed_kmh": 46.55
+      },
+      "acceleration": {
+        "ax": 0.185,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.251,
+      "brake": 0.02,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 61.687,
+      "y": -0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 78,
+    "timestamp": 3.9,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 47.378,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.66,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.818,
+        "vy": -0.004,
+        "vz": 0.0,
+        "speed_mps": 13.198,
+        "speed_kmh": 47.51
+      },
+      "acceleration": {
+        "ax": 0.185,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.252,
+      "brake": 0.02,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 62.378,
+      "y": -0.011,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 79,
+    "timestamp": 3.95,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 48.069,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.56,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.827,
+        "vy": -0.003,
+        "vz": 0.0,
+        "speed_mps": 13.244,
+        "speed_kmh": 47.68
+      },
+      "acceleration": {
+        "ax": 0.184,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.25,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 63.069,
+      "y": -0.009,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 80,
+    "timestamp": 4.0,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 48.761,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.67,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.836,
+        "vy": -0.002,
+        "vz": 0.0,
+        "speed_mps": 13.226,
+        "speed_kmh": 47.61
+      },
+      "acceleration": {
+        "ax": 0.184,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.247,
+      "brake": 0.02,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 63.761,
+      "y": -0.008,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 81,
+    "timestamp": 4.05,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 49.453,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.61,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.845,
+        "vy": -0.0,
+        "vz": 0.0,
+        "speed_mps": 13.293,
+        "speed_kmh": 47.85
+      },
+      "acceleration": {
+        "ax": 0.183,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.245,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 64.453,
+      "y": -0.007,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 82,
+    "timestamp": 4.1,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 50.146,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.39,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.854,
+        "vy": 0.001,
+        "vz": 0.0,
+        "speed_mps": 13.401,
+        "speed_kmh": 48.24
+      },
+      "acceleration": {
+        "ax": 0.183,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.245,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 65.146,
+      "y": -0.005,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 83,
+    "timestamp": 4.15,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 50.839,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.37,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.863,
+        "vy": 0.002,
+        "vz": 0.0,
+        "speed_mps": 13.381,
+        "speed_kmh": 48.17
+      },
+      "acceleration": {
+        "ax": 0.182,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.242,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 65.839,
+      "y": -0.004,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 84,
+    "timestamp": 4.2,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 51.532,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.43,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.873,
+        "vy": 0.003,
+        "vz": 0.0,
+        "speed_mps": 13.478,
+        "speed_kmh": 48.52
+      },
+      "acceleration": {
+        "ax": 0.182,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.242,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 66.532,
+      "y": -0.002,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 85,
+    "timestamp": 4.25,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 52.227,
+          "y": -0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.23,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.882,
+        "vy": 0.005,
+        "vz": 0.0,
+        "speed_mps": 13.477,
+        "speed_kmh": 48.52
+      },
+      "acceleration": {
+        "ax": 0.181,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.24,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 67.227,
+      "y": -0.001,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 86,
+    "timestamp": 4.3,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 52.921,
+          "y": -0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.32,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.891,
+        "vy": 0.006,
+        "vz": 0.0,
+        "speed_mps": 13.313,
+        "speed_kmh": 47.93
+      },
+      "acceleration": {
+        "ax": 0.181,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.236,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 67.921,
+      "y": 0.001,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 87,
+    "timestamp": 4.35,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 53.616,
+          "y": -0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.57,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.9,
+        "vy": 0.007,
+        "vz": 0.0,
+        "speed_mps": 13.691,
+        "speed_kmh": 49.29
+      },
+      "acceleration": {
+        "ax": 0.18,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.24,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 68.616,
+      "y": 0.003,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 88,
+    "timestamp": 4.4,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 54.312,
+          "y": -0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.82,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.909,
+        "vy": 0.008,
+        "vz": 0.0,
+        "speed_mps": 13.533,
+        "speed_kmh": 48.72
+      },
+      "acceleration": {
+        "ax": 0.18,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.002
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.236,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 69.312,
+      "y": 0.004,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 89,
+    "timestamp": 4.45,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 55.007,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.94,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.918,
+        "vy": 0.009,
+        "vz": 0.0,
+        "speed_mps": 13.475,
+        "speed_kmh": 48.51
+      },
+      "acceleration": {
+        "ax": 0.18,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.235,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 70.007,
+      "y": 0.006,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 90,
+    "timestamp": 4.5,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 55.704,
+          "y": -0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 1.1,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.927,
+        "vy": 0.01,
+        "vz": 0.0,
+        "speed_mps": 13.308,
+        "speed_kmh": 47.91
+      },
+      "acceleration": {
+        "ax": 0.179,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.002,
+      "throttle": 0.231,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 70.704,
+      "y": 0.007,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 91,
+    "timestamp": 4.55,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 56.401,
+          "y": -0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.73,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.936,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 13.387,
+        "speed_kmh": 48.19
+      },
+      "acceleration": {
+        "ax": 0.179,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.231,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 71.401,
+      "y": 0.009,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 92,
+    "timestamp": 4.6,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 57.098,
+          "y": -0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 1.01,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.945,
+        "vy": 0.012,
+        "vz": 0.0,
+        "speed_mps": 13.345,
+        "speed_kmh": 48.04
+      },
+      "acceleration": {
+        "ax": 0.178,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.23,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.011,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 72.098,
+      "y": 0.01,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 93,
+    "timestamp": 4.65,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 57.795,
+          "y": -0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.8,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.953,
+        "vy": 0.012,
+        "vz": 0.0,
+        "speed_mps": 13.228,
+        "speed_kmh": 47.62
+      },
+      "acceleration": {
+        "ax": 0.178,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.228,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 72.795,
+      "y": 0.011,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 94,
+    "timestamp": 4.7,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 58.494,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.72,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.962,
+        "vy": 0.013,
+        "vz": 0.0,
+        "speed_mps": 13.154,
+        "speed_kmh": 47.36
+      },
+      "acceleration": {
+        "ax": 0.177,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.001
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.226,
+      "brake": 0.019,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 73.494,
+      "y": 0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 95,
+    "timestamp": 4.75,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 59.192,
+          "y": -0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.56,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.971,
+        "vy": 0.013,
+        "vz": 0.0,
+        "speed_mps": 13.432,
+        "speed_kmh": 48.36
+      },
+      "acceleration": {
+        "ax": 0.177,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.229,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 74.192,
+      "y": 0.013,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 96,
+    "timestamp": 4.8,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 59.891,
+          "y": 0.0,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.78,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.98,
+        "vy": 0.013,
+        "vz": 0.0,
+        "speed_mps": 13.418,
+        "speed_kmh": 48.3
+      },
+      "acceleration": {
+        "ax": 0.176,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.228,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 74.891,
+      "y": 0.014,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 97,
+    "timestamp": 4.85,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 60.591,
+          "y": 0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.85,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.989,
+        "vy": 0.013,
+        "vz": 0.0,
+        "speed_mps": 13.072,
+        "speed_kmh": 47.06
+      },
+      "acceleration": {
+        "ax": 0.176,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": 0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.224,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 75.591,
+      "y": 0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 98,
+    "timestamp": 4.9,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 61.29,
+          "y": 0.001,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.64,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 13.998,
+        "vy": 0.013,
+        "vz": 0.0,
+        "speed_mps": 13.365,
+        "speed_kmh": 48.11
+      },
+      "acceleration": {
+        "ax": 0.176,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.226,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 76.29,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 99,
+    "timestamp": 4.95,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 61.991,
+          "y": 0.002,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.79,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.006,
+        "vy": 0.013,
+        "vz": 0.0,
+        "speed_mps": 13.338,
+        "speed_kmh": 48.02
+      },
+      "acceleration": {
+        "ax": 0.175,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": -0.003,
+      "throttle": 0.226,
+      "brake": 0.018,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 76.991,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 100,
+    "timestamp": 5.0,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 62.691,
+          "y": 0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.81,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.015,
+        "vy": 0.013,
+        "vz": 0.0,
+        "speed_mps": 13.281,
+        "speed_kmh": 47.81
+      },
+      "acceleration": {
+        "ax": 0.175,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.0
+      }
+    },
+    "control": {
+      "steer": -0.004,
+      "throttle": 0.225,
+      "brake": 0.017,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 77.691,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 101,
+    "timestamp": 5.05,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 63.393,
+          "y": 0.003,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.71,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.024,
+        "vy": 0.012,
+        "vz": 0.0,
+        "speed_mps": 13.276,
+        "speed_kmh": 47.79
+      },
+      "acceleration": {
+        "ax": 0.174,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.004,
+      "throttle": 0.224,
+      "brake": 0.017,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 78.393,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 102,
+    "timestamp": 5.1,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 64.094,
+          "y": 0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.83,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.032,
+        "vy": 0.012,
+        "vz": 0.0,
+        "speed_mps": 13.344,
+        "speed_kmh": 48.04
+      },
+      "acceleration": {
+        "ax": 0.174,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.004,
+      "throttle": 0.225,
+      "brake": 0.017,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 79.094,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 103,
+    "timestamp": 5.15,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 64.796,
+          "y": 0.004,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.65,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.041,
+        "vy": 0.011,
+        "vz": 0.0,
+        "speed_mps": 13.407,
+        "speed_kmh": 48.27
+      },
+      "acceleration": {
+        "ax": 0.173,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.004,
+      "throttle": 0.225,
+      "brake": 0.017,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 79.796,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 104,
+    "timestamp": 5.2,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 65.499,
+          "y": 0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.62,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.05,
+        "vy": 0.01,
+        "vz": 0.0,
+        "speed_mps": 13.26,
+        "speed_kmh": 47.74
+      },
+      "acceleration": {
+        "ax": 0.173,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.004,
+      "throttle": 0.224,
+      "brake": 0.017,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 80.499,
+      "y": 0.016,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 105,
+    "timestamp": 5.25,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 66.202,
+          "y": 0.005,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.44,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.058,
+        "vy": 0.009,
+        "vz": 0.0,
+        "speed_mps": 13.314,
+        "speed_kmh": 47.93
+      },
+      "acceleration": {
+        "ax": 0.173,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.004,
+      "throttle": 0.224,
+      "brake": 0.017,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 81.202,
+      "y": 0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 106,
+    "timestamp": 5.3,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 66.905,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.49,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.067,
+        "vy": 0.008,
+        "vz": 0.0,
+        "speed_mps": 13.465,
+        "speed_kmh": 48.47
+      },
+      "acceleration": {
+        "ax": 0.172,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.001
+      }
+    },
+    "control": {
+      "steer": -0.005,
+      "throttle": 0.225,
+      "brake": 0.016,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 81.905,
+      "y": 0.015,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 107,
+    "timestamp": 5.35,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 67.609,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.67,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.076,
+        "vy": 0.007,
+        "vz": 0.0,
+        "speed_mps": 13.383,
+        "speed_kmh": 48.18
+      },
+      "acceleration": {
+        "ax": 0.172,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.005,
+      "throttle": 0.225,
+      "brake": 0.016,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 82.609,
+      "y": 0.014,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 108,
+    "timestamp": 5.4,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 68.313,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.67,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.084,
+        "vy": 0.006,
+        "vz": 0.0,
+        "speed_mps": 13.454,
+        "speed_kmh": 48.43
+      },
+      "acceleration": {
+        "ax": 0.171,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.005,
+      "throttle": 0.225,
+      "brake": 0.016,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 83.313,
+      "y": 0.013,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 109,
+    "timestamp": 5.45,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 69.018,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.74,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.093,
+        "vy": 0.005,
+        "vz": 0.0,
+        "speed_mps": 13.354,
+        "speed_kmh": 48.07
+      },
+      "acceleration": {
+        "ax": 0.171,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.005,
+      "throttle": 0.224,
+      "brake": 0.016,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 84.018,
+      "y": 0.012,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 110,
+    "timestamp": 5.5,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 69.723,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.43,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.101,
+        "vy": 0.004,
+        "vz": 0.0,
+        "speed_mps": 13.308,
+        "speed_kmh": 47.91
+      },
+      "acceleration": {
+        "ax": 0.17,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.005,
+      "throttle": 0.224,
+      "brake": 0.016,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 84.723,
+      "y": 0.011,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 111,
+    "timestamp": 5.55,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 70.428,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.54,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.11,
+        "vy": 0.002,
+        "vz": 0.0,
+        "speed_mps": 13.551,
+        "speed_kmh": 48.78
+      },
+      "acceleration": {
+        "ax": 0.17,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.006,
+      "throttle": 0.226,
+      "brake": 0.015,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 85.428,
+      "y": 0.009,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 112,
+    "timestamp": 5.6,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 71.134,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.64,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.118,
+        "vy": 0.001,
+        "vz": 0.0,
+        "speed_mps": 13.406,
+        "speed_kmh": 48.26
+      },
+      "acceleration": {
+        "ax": 0.17,
+        "ay": 0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.006,
+      "throttle": 0.225,
+      "brake": 0.015,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 86.134,
+      "y": 0.008,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 113,
+    "timestamp": 5.65,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 71.84,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.69,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.127,
+        "vy": -0.0,
+        "vz": 0.0,
+        "speed_mps": 13.51,
+        "speed_kmh": 48.64
+      },
+      "acceleration": {
+        "ax": 0.169,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.006,
+      "throttle": 0.226,
+      "brake": 0.015,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 86.84,
+      "y": 0.007,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 114,
+    "timestamp": 5.7,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 72.547,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.58,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.135,
+        "vy": -0.002,
+        "vz": 0.0,
+        "speed_mps": 13.533,
+        "speed_kmh": 48.72
+      },
+      "acceleration": {
+        "ax": 0.169,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.006,
+      "throttle": 0.226,
+      "brake": 0.015,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 87.547,
+      "y": 0.005,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 115,
+    "timestamp": 5.75,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 73.254,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.61,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.143,
+        "vy": -0.003,
+        "vz": 0.0,
+        "speed_mps": 13.546,
+        "speed_kmh": 48.77
+      },
+      "acceleration": {
+        "ax": 0.168,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.006,
+      "throttle": 0.226,
+      "brake": 0.015,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 88.254,
+      "y": 0.004,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 116,
+    "timestamp": 5.8,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 73.962,
+          "y": 0.007,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.67,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.152,
+        "vy": -0.004,
+        "vz": 0.0,
+        "speed_mps": 13.725,
+        "speed_kmh": 49.41
+      },
+      "acceleration": {
+        "ax": 0.168,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.007,
+      "throttle": 0.228,
+      "brake": 0.014,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 88.962,
+      "y": 0.002,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 117,
+    "timestamp": 5.85,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 74.67,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.72,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.16,
+        "vy": -0.006,
+        "vz": 0.0,
+        "speed_mps": 13.682,
+        "speed_kmh": 49.25
+      },
+      "acceleration": {
+        "ax": 0.167,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.007,
+      "throttle": 0.228,
+      "brake": 0.014,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 89.67,
+      "y": 0.0,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 118,
+    "timestamp": 5.9,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 75.378,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.43,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.169,
+        "vy": -0.007,
+        "vz": 0.0,
+        "speed_mps": 13.623,
+        "speed_kmh": 49.04
+      },
+      "acceleration": {
+        "ax": 0.167,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.007,
+      "throttle": 0.227,
+      "brake": 0.014,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 90.378,
+      "y": -0.001,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  },
+  {
+    "frame_id": 119,
+    "timestamp": 5.95,
+    "delta_seconds": 0.05,
+    "ego_state": {
+      "transform": {
+        "location": {
+          "x": 76.087,
+          "y": 0.006,
+          "z": 0.15
+        },
+        "rotation": {
+          "pitch": 0.0,
+          "yaw": 0.49,
+          "roll": 0.0
+        }
+      },
+      "velocity": {
+        "vx": 14.177,
+        "vy": -0.008,
+        "vz": 0.0,
+        "speed_mps": 13.838,
+        "speed_kmh": 49.82
+      },
+      "acceleration": {
+        "ax": 0.167,
+        "ay": -0.0,
+        "az": 0.0
+      },
+      "angular_velocity": {
+        "wx": 0.0,
+        "wy": 0.0,
+        "wz": -0.002
+      }
+    },
+    "control": {
+      "steer": -0.007,
+      "throttle": 0.229,
+      "brake": 0.014,
+      "hand_brake": false,
+      "reverse": false,
+      "gear": 4
+    },
+    "environment_context": {
+      "speed_limit_kmh": 50.0,
+      "lane_id": 1,
+      "road_id": 42,
+      "lane_offset_meters": -0.012,
+      "distance_to_lead_vehicle_m": -1.0,
+      "lead_vehicle_speed_kmh": 0.0,
+      "traffic_light_state": "Green",
+      "collision_warning": false
+    },
+    "target_waypoint": {
+      "x": 91.087,
+      "y": -0.003,
+      "z": 0.15,
+      "target_speed_kmh": 50.0
+    }
+  }
+]

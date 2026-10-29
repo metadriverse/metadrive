@@ -3,7 +3,7 @@ Dedicated All-in-One Autonomous Overtaking Scenario
 ===================================================
 Demonstrates smooth, high-speed overtaking in MetaDrive:
   1. Detects slow/stopped vehicle ahead in the current lane.
-  2. Executes an active, smooth lane change to the open adjacent lane.
+  2. Executes a smooth, native lane change to the open adjacent lane.
   3. Accelerates past the obstacle and cruises continuously to Destination B!
 
 Usage:
@@ -23,10 +23,10 @@ from metadrive.examples import expert
 
 
 class SmoothOvertakePlanner:
-    def __init__(self, cruise_speed_kmh=55.0):
+    def __init__(self, cruise_speed_kmh=60.0):
         self.cruise_speed = cruise_speed_kmh
         self.target_lane_idx = None
-        self.overtaking = False
+        self.cooldown = 0
 
     def get_action(self, env):
         vehicle = env.agent
@@ -43,6 +43,9 @@ class SmoothOvertakePlanner:
         if self.target_lane_idx is None:
             self.target_lane_idx = current_lane_idx
 
+        if self.cooldown > 0:
+            self.cooldown -= 1
+
         # ── 1. Obstacle Detection ─────────────────────────────────────────────
         lead_dist = 999.0
         surrounding_objects = vehicle.lidar.get_surrounding_objects(vehicle)
@@ -56,48 +59,30 @@ class SmoothOvertakePlanner:
             dy = dx_w * sin_h + dy_w * cos_h  # longitudinal (+ is forward)
 
             # Detect obstacles in the current forward path
-            if dy > 0 and abs(dx) < 2.0:
+            if dy > 0 and abs(dx) < 2.2:
                 if dy < lead_dist:
                     lead_dist = dy
 
-        # ── 2. Overtaking Tactical Decision ───────────────────────────────────
-        if lead_dist < 22.0 and not self.overtaking:
-            # Shift target lane to left adjacent lane if available, else right
-            if self.target_lane_idx < num_lanes - 1:
-                self.target_lane_idx += 1
-                self.overtaking = True
+        # ── 2. Native Overtaking Decision ──────────────────────────────────────
+        if lead_dist < 22.0 and self.cooldown == 0:
+            if current_lane_idx < num_lanes - 1:
+                self.target_lane_idx = current_lane_idx + 1
+                self.cooldown = 40
+                # Update navigation reference lane natively
+                if ref_lanes and self.target_lane_idx < len(ref_lanes):
+                    vehicle.navigation.current_ref_lanes = [ref_lanes[self.target_lane_idx]] + [l for i, l in enumerate(ref_lanes) if i != self.target_lane_idx]
                 print(f"\n [OVERTAKE TRIGGERED] Slow vehicle at {lead_dist:.1f}m -> Changing LEFT to lane {self.target_lane_idx}!")
-            elif self.target_lane_idx > 0:
-                self.target_lane_idx -= 1
-                self.overtaking = True
-                print(f"\n [OVERTAKE TRIGGERED] Slow vehicle at {lead_dist:.1f}m -> Changing RIGHT to lane {self.target_lane_idx}!")
 
-        # ── 3. Steering & Lane Centering ──────────────────────────────────────
-        target_lane = ref_lanes[min(self.target_lane_idx, num_lanes - 1)]
-        long_dist, lat_error = target_lane.local_coordinates(vehicle.position)
-        heading_error = vehicle.heading_diff(target_lane)
+        # ── 3. Native Expert Control ──────────────────────────────────────────
+        base_act = expert(vehicle)
+        steering = float(base_act[0])
+        throttle = float(base_act[1])
 
-        if abs(lat_error) < 0.35:
-            # Aligned in target lane: use MetaDrive expert steering for smooth tracking
-            base_act = expert(vehicle)
-            steering = float(base_act[0])
-            if lead_dist > 30.0:
-                self.overtaking = False  # Overtake completed!
-        else:
-            # Smooth steering to transition into open target lane center
-            steering = float(np.clip(-0.25 * lat_error - 0.65 * heading_error, -1.0, 1.0))
+        # Emergency Distance Keeping (Brake if vehicle cuts in < 5.0m)
+        if lead_dist < 5.0:
+            throttle = -1.0  # Apply hard brake
 
-        # ── 4. High-Speed Cruise & Speed Control ──────────────────────────────
-        target_sp = self.cruise_speed
-        if lead_dist < 6.0:
-            throttle = -1.0  # Emergency brake if vehicle cuts in
-        else:
-            speed_error = target_sp - current_speed
-            throttle = float(np.clip(speed_error * 0.18, -1.0, 1.0))
-            if self.overtaking:
-                throttle = max(throttle, 0.70)  # Maintain strong speed during pass
-
-        return [steering, throttle], lead_dist, self.overtaking
+        return [steering, throttle], lead_dist, (self.cooldown > 0)
 
 
 def run_demo(num_episodes=5):
@@ -151,8 +136,6 @@ def run_demo(num_episodes=5):
         print(f" SUMMARY: Overtake Demo completed {num_episodes} episodes. Arrival Rate: {success_count}/{num_episodes} ({(success_count/num_episodes)*100:.1f}%)")
         print("=" * 70)
 
-    except KeyboardInterrupt:
-        print("\n[!] Demo stopped by user.")
     finally:
         env.close()
 
