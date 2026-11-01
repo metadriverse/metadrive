@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: at the root dir >> bash scripts/format.sh
+# Usage: at the root dir >> bash format.sh
 
 # Check yapf version.
 ver=$(yapf --version)

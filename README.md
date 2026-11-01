@@ -55,7 +55,7 @@ You can verify the installation of MetaDrive via running the testing script:
 python -m metadrive.examples.profile_metadrive
 ```
 
-*Note that please do not run the above command in a folder that has a sub-folder called `./metadrive`.*
+*Note: On Windows or Linux, do not run the above command inside a directory that has a sub-folder called `./metadrive` to avoid module name shadowing. For headless Windows environments without a display monitor, set `config["use_render"] = False`.*
 
 ## 🚕 Examples
 We provide [examples](https://github.com/metadriverse/metadrive/tree/main/metadrive/examples) to demonstrate features and basic usages of MetaDrive after the local installation.
