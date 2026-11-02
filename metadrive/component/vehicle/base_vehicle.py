@@ -925,7 +925,8 @@ class BaseVehicle(BaseObject, BaseVehicleState):
     def _update_overtake_stat(self):
         lidar_available = self.config["lidar"]["num_lasers"] > 0 and self.config["lidar"]["distance"] > 0
         if self.config["overtake_stat"] and lidar_available:
-            surrounding_vs = self.lidar.get_surrounding_vehicles()
+            surrounding_objects = self.lidar.get_surrounding_objects(self, self.config["lidar"]["distance"])
+            surrounding_vs = self.lidar.get_surrounding_vehicles(surrounding_objects)
             routing = self.navigation
             ckpt_idx = routing._target_checkpoints_index
             for surrounding_v in surrounding_vs:
