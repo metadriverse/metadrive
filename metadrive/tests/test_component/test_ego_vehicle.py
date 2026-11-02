@@ -103,3 +103,54 @@ def _nan_speed(pg_env):
 if __name__ == '__main__':
     # pytest.main(["-sv", "test_ego_vehicle.py"])
     test_base_vehicle()
+
+
+def test_overtake_stat():
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+
+    from metadrive.component.lane.straight_lane import StraightLane
+    from metadrive.component.sensors.lidar import Lidar
+    from metadrive.component.vehicle.base_vehicle import BaseVehicle
+
+    other = Mock(spec=BaseVehicle, position=np.array([10, 0]), lane_index=("a", "b", 0))
+    off_route = Mock(spec=BaseVehicle, position=np.array([10, 0]), lane_index=("b", "c", 0))
+    objects = set()
+
+    def surrounding_objects(vehicle, radius):
+        assert vehicle is ego
+        assert radius == 75
+        return objects
+
+    ego = SimpleNamespace(
+        config={
+            "overtake_stat": True,
+            "lidar": {
+                "num_lasers": 10,
+                "distance": 75
+            }
+        },
+        lidar=SimpleNamespace(
+            get_surrounding_objects=surrounding_objects, get_surrounding_vehicles=Lidar.get_surrounding_vehicles
+        ),
+        navigation=SimpleNamespace(_target_checkpoints_index=[0, 1], checkpoints=["a", "b"]),
+        lane=StraightLane([0, 0], [100, 0]),
+        position=np.array([0, 0]),
+        front_vehicles=set(),
+        back_vehicles=set()
+    )
+    ego.get_overtake_num = lambda: BaseVehicle.get_overtake_num(ego)
+    assert BaseVehicle._update_overtake_stat(ego) == {"overtake_vehicle_num": 0}
+    assert not ego.front_vehicles
+
+    objects.update({other, off_route, object()})
+    assert BaseVehicle._update_overtake_stat(ego) == {"overtake_vehicle_num": 0}
+    assert ego.front_vehicles == {other}
+
+    ego.position = np.array([20, 0])
+    assert BaseVehicle._update_overtake_stat(ego) == {"overtake_vehicle_num": 1}
+    assert ego.back_vehicles == {other}
+
+    ego.position = np.array([0, 0])
+    assert BaseVehicle._update_overtake_stat(ego) == {"overtake_vehicle_num": 0}
+    assert not ego.back_vehicles
